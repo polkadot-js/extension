@@ -1,48 +1,105 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
-import { GlobalToken } from '@subwallet/react-ui/es/theme/interface';
+import { ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import defaultImagePlaceholder from '@subwallet/extension-koni-ui/assets/default-image-placeholder.png';
+import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
+import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
+import SwLogosMap from '@subwallet/extension-koni-ui/assets/subwallet';
+import { theme as SwReactUI } from '@subwallet/react-ui';
+import { ThemeConfig, Web3LogoMap } from '@subwallet/react-ui/es/config-provider/context';
+import { AliasToken, GlobalToken } from '@subwallet/react-ui/es/theme/interface';
+import logoMap from '@subwallet/react-ui/es/theme/themes/logoMap';
+
+export interface ExtraToken {
+  bodyBackgroundColor: string,
+  logo: string,
+  defaultImagePlaceholder: string
+  tokensScreenSuccessBackgroundColor: string,
+  tokensScreenDangerBackgroundColor: string,
+  tokensScreenInfoBackgroundColor: string,
+}
 
 export declare type Theme = {
-  id: string;
+  id: ThemeNames;
   name: string;
-  token: Partial<GlobalToken>;
+  token: GlobalToken;
 
   // todo: add extend token later
-  extendToken: {
-    bodyBackgroundColor: string,
-  };
+  extendToken: ExtraToken
 };
 
-export function chooseTheme (theme: ThemeTypes, token: GlobalToken): Theme {
-  const defaultTheme: Theme = {
-    id: 'dark',
-    name: 'Dark',
-    token: { ...token },
-    extendToken: {
-      bodyBackgroundColor: token.colorBgSecondary
-    }
+export interface SwThemeConfig extends ThemeConfig {
+  id: ThemeNames,
+  name: string;
+
+  generateExtraTokens: (token: AliasToken) => ExtraToken;
+
+  customTokens: (token: AliasToken) => AliasToken;
+  logoMap: Web3LogoMap
+}
+
+function genDefaultExtraTokens (token: AliasToken): ExtraToken {
+  return {
+    bodyBackgroundColor: token.colorBgSecondary,
+    logo: subWalletLogo,
+    defaultImagePlaceholder,
+    tokensScreenSuccessBackgroundColor: 'linear-gradient(180deg, rgba(76, 234, 172, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+    tokensScreenDangerBackgroundColor: 'linear-gradient(180deg, rgba(234, 76, 76, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+    tokensScreenInfoBackgroundColor: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)'
   };
+}
 
-  if (theme.valueOf() === ThemeTypes.LIGHT) {
-    return {
-      ...defaultTheme,
-      id: 'light',
-      name: 'Light',
-      extendToken: {
-        bodyBackgroundColor: '#fff'
-      }
-    };
+// todo: will standardized logoMap later
+const defaultLogoMap: Web3LogoMap = {
+  ...logoMap,
+  network: {
+    ...SwLogosMap,
+    ...LogosMap
+  },
+  symbol: {
+    ...SwLogosMap,
+    ...LogosMap
   }
+};
 
-  if (theme.valueOf() === ThemeTypes.SUBSPACE) {
-    return {
-      ...defaultTheme,
-      id: 'subspace',
-      name: 'Subspace'
-    };
-  }
+// Todo: i18n for theme name
+// Implement theme from @subwallet/react-ui
+export const SW_THEME_CONFIGS: Record<ThemeNames, SwThemeConfig> = {
+  [ThemeNames.DARK]: {
+    id: ThemeNames.DARK,
+    name: 'Dark',
+    algorithm: SwReactUI.darkAlgorithm,
+    customTokens: (token) => (token),
+    generateExtraTokens: (token) => {
+      return { ...genDefaultExtraTokens(token) };
+    },
+    logoMap: defaultLogoMap
+  },
+  [ThemeNames.LIGHT]: {
+    id: ThemeNames.LIGHT,
+    name: 'Light',
+    algorithm: SwReactUI.defaultAlgorithm,
+    customTokens: (token) => (token),
+    generateExtraTokens: (token) => {
+      return { ...genDefaultExtraTokens(token) };
+    },
+    logoMap: defaultLogoMap
+  },
+  [ThemeNames.SUBSPACE]: {} as SwThemeConfig
+};
 
-  return defaultTheme;
+// Todo: Replace tokens with Subspace color schema
+SW_THEME_CONFIGS[ThemeNames.SUBSPACE] = { ...SW_THEME_CONFIGS[ThemeNames.LIGHT] };
+
+export function generateTheme ({ customTokens,
+  generateExtraTokens,
+  id,
+  name }: SwThemeConfig, token: GlobalToken): Theme {
+  return {
+    id,
+    name,
+    token: customTokens(token),
+    extendToken: generateExtraTokens(token)
+  } as Theme;
 }

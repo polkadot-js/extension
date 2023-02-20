@@ -4,13 +4,19 @@
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { isAccountAll } from '@subwallet/extension-koni-base/utils';
 import { MODE_CAN_SIGN, SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import { AccountType } from '@subwallet/extension-koni-ui/types';
 import { getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util/index';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { AccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/types';
 
 import { decodeAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
+
+export function getAccountType (address: string): AccountType {
+  return isAccountAll(address) ? 'ALL' : isEthereumAddress(address) ? 'ETHEREUM' : 'SUBSTRATE';
+}
 
 export const getAccountInfoByNetwork = (networkMap: Record<string, NetworkJson>, address: string, network: NetworkJson): AccountInfoByNetwork => {
   const networkKey = getNetworkKeyByGenesisHash(networkMap, network.genesisHash) || '';

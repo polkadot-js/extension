@@ -195,7 +195,7 @@ export class RmrkNftApi extends BaseNftApi {
           image: this.parseUrl(item.image ? item.image : item.metadata.image ? item.metadata.image : item.metadata.animation_url as string),
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           description: item?.metadata?.description as string,
-          external_url: item?.external_url as string,
+          externalUrl: item?.external_url as string,
           rarity: item?.metadata_rarity as string,
           collectionId: item?.collectionId as string,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

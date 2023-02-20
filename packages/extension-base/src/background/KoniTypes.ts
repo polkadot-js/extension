@@ -3,7 +3,7 @@
 
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountAuthType, AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
+import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
@@ -163,11 +163,12 @@ export interface StakeUnlockingJson {
   details: UnlockingStakeInfo[]
 }
 
+// TODO: refactor this
 export interface PriceJson {
   ready?: boolean,
   currency: string,
   priceMap: Record<string, number>,
-  tokenPriceMap: Record<string, number>
+  price24hMap: Record<string, number>
 }
 
 export enum APIItemState {
@@ -204,13 +205,13 @@ export interface NftItem {
 
   name?: string;
   image?: string;
-  external_url?: string;
+  externalUrl?: string;
   rarity?: string;
   description?: string;
   properties?: Record<any, any> | null;
   type?: _AssetType.ERC721 | _AssetType.PSP34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
-  owner?: string;
+  owner: string;
   onChainOption?: any; // for sending PSP-34 tokens, should be done better
 }
 
@@ -222,6 +223,7 @@ export interface NftCollection {
   collectionName?: string;
   image?: string;
   itemCount?: number;
+  externalUrl?: string;
 }
 
 export interface NftJson {
@@ -448,17 +450,31 @@ export interface CurrentAccountInfo {
   allGenesisHash?: string;
 }
 
-export interface RequestSettingsType {
-  isShowBalance: boolean;
-  accountAllLogo: string;
-  theme: ThemeTypes;
+export type LanguageType = 'en'
+|'zh'
+|'fr'
+|'tr'
+|'pl'
+|'th'
+|'ur';
+
+export type LanguageOptionType = {
+  text: string;
+  value: LanguageType;
 }
 
+export type BrowserConfirmationType = 'extension'|'popup'|'window';
+
 export interface UiSettings {
+  // language: LanguageType,
+  browserConfirmationType: BrowserConfirmationType,
+  // isShowZeroBalance: boolean,
   isShowBalance: boolean;
   accountAllLogo: string;
-  theme: ThemeTypes;
+  theme: ThemeNames;
 }
+
+export type RequestSettingsType = UiSettings;
 
 export interface RandomTestRequest {
   start: number;
@@ -758,11 +774,12 @@ export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
 export type RequestSubscribeStakingReward = null
-export enum ThemeTypes {
+export enum ThemeNames {
   LIGHT = 'light',
   DARK = 'dark',
   SUBSPACE = 'subspace'
 }
+
 export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,
@@ -1117,10 +1134,8 @@ export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions
   payloadJson: string;
 }
 
-export interface ConfirmationResult<T> {
-  id: string;
+export interface ConfirmationResult<T> extends ConfirmationRequestBase {
   isApproved: boolean;
-  url?: string;
   payload?: T;
 }
 
@@ -1218,7 +1233,7 @@ export interface BondingOptionParams {
 
 export interface SingleModeJson {
   networkKeys: string[],
-  theme: ThemeTypes,
+  theme: ThemeNames,
   autoTriggerDomain: string // Regex for auto trigger single mode
 }
 
@@ -1670,6 +1685,7 @@ export interface KoniRequestSignatures {
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeChainStateMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeAssetRegistry)': [null, Record<string, any>, Record<string, any>];
+  'pri(chainService.subscribeMultiChainAssetMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.upsertCustomChain)': [Record<string, any>, boolean];
   'pri(chainService.enableChains)': [string[], boolean];
   'pri(chainService.disableChains)': [string[], boolean];
@@ -1738,7 +1754,7 @@ export interface KoniRequestSignatures {
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
   'pri(accounts.checkPublicAndSecretKey)': [RequestCheckPublicAndSecretKey, ResponseCheckPublicAndSecretKey];
-  'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
+  'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, AccountsWithCurrentAddress, AccountsWithCurrentAddress];
   'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
   'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
@@ -1750,7 +1766,8 @@ export interface KoniRequestSignatures {
   'pri(settings.changeBalancesVisibility)': [null, boolean, UiSettings];
   'pri(settings.subscribe)': [null, UiSettings, UiSettings];
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
-  'pri(settings.saveTheme)': [ThemeTypes, boolean, UiSettings];
+  'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
+  'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TxHistoryItem[], TxHistoryItem[]];

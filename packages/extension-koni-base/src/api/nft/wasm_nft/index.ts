@@ -121,7 +121,7 @@ export class WasmNftApi extends BaseNftApi {
   }
 
   private async processOnChainMetadata (contractPromise: ContractPromise, address: string, tokenIdObj: Record<string, string>, collectionAttributes: string[], isFeatured: boolean): Promise<NftItem> {
-    const nftItem: NftItem = { chain: '', collectionId: '', id: '' };
+    const nftItem: NftItem = { chain: '', collectionId: '', id: '', owner: '' };
     const _attributeValues = await contractPromise.query['psp34Traits::getAttributes'](address, { gasLimit: -1 }, tokenIdObj, collectionAttributes);
 
     if (_attributeValues.output) {
@@ -154,14 +154,14 @@ export class WasmNftApi extends BaseNftApi {
     }
 
     if (isFeatured) {
-      nftItem.external_url = ART_ZERO_EXTERNAL_URL;
+      nftItem.externalUrl = ART_ZERO_EXTERNAL_URL;
     }
 
     return nftItem;
   }
 
   private async processOffChainMetadata (contractPromise: ContractPromise, address: string, tokenId: string, isFeatured: boolean): Promise<NftItem> {
-    const nftItem: NftItem = { chain: '', collectionId: '', id: '', name: tokenId };
+    const nftItem: NftItem = { chain: '', collectionId: '', id: '', owner: '', name: tokenId };
 
     const _tokenUri = await contractPromise.query['psp34Traits::tokenUri'](address, { gasLimit: -1 }, tokenId);
 
@@ -195,13 +195,13 @@ export class WasmNftApi extends BaseNftApi {
 
       nftItem.name = itemDetail.name as string | undefined;
       nftItem.description = itemDetail.description as string | undefined;
-      nftItem.external_url = itemDetail.external_url as string | undefined;
+      nftItem.externalUrl = itemDetail.external_url as string | undefined;
 
       const rawImageSrc = itemDetail.image ? itemDetail.image as string : itemDetail.image_url as string;
 
       if (isFeatured) {
         nftItem.image = this.parseFeaturedNftImage(rawImageSrc);
-        nftItem.external_url = ART_ZERO_EXTERNAL_URL;
+        nftItem.externalUrl = ART_ZERO_EXTERNAL_URL;
       } else {
         nftItem.image = this.parseUrl(rawImageSrc);
       }

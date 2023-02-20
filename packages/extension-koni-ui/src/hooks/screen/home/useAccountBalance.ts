@@ -1,189 +1,269 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ChainRegistry, NetWorkGroup, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountBalanceType, CrowdloanContributeValueType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
-import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
+import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
+import { _getAssetDecimals, _getAssetOriginChain, _getAssetPriceId, _getAssetSymbol, _getChainName, _getMultiChainAssetPriceId, _getMultiChainAssetSymbol, _isAssetValuable } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { BN_ZERO, getBalances, parseBalancesInfo } from '@subwallet/extension-koni-ui/util';
-import { BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
+import { AssetRegistryStore, BalanceStore, ChainStore, PriceStore } from '@subwallet/extension-koni-ui/stores/types';
+import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
+import { AccountBalanceHookType } from '@subwallet/extension-koni-ui/types/hook';
 import BigN from 'bignumber.js';
 import { useSelector } from 'react-redux';
 
-function getCrowdloanChainRegistry (groups: NetWorkGroup[], chainRegistryMap: Record<string, ChainRegistry>): ChainRegistry | null {
-  if (groups.includes('POLKADOT_PARACHAIN') && chainRegistryMap.polkadot) {
-    return chainRegistryMap.polkadot;
-  }
+const BN_0 = new BigN(0);
+const BN_10 = new BigN(10);
+const BN_100 = new BigN(100);
 
-  if (groups.includes('KUSAMA_PARACHAIN') && chainRegistryMap.kusama) {
-    return chainRegistryMap.kusama;
-  }
-
-  return null;
+function getBalanceValue (balance: string, decimals: number): BigN {
+  return new BigN(balance).div(BN_10.pow(decimals));
 }
 
-function getGroupNetworkKey (groups: NetWorkGroup[]): string {
-  if (groups.includes('POLKADOT_PARACHAIN')) {
-    return 'polkadot';
+function getConvertedBalanceValue (balance: BigN, price: number): BigN {
+  return balance ? balance.multipliedBy(new BigN(price)) : BN_0;
+}
+
+function getDefaultBalanceItem (
+  slug: string,
+  symbol: string,
+  logoKey: string
+): TokenBalanceItemType {
+  return {
+    free: {
+      value: new BigN(0),
+      convertedValue: new BigN(0),
+      pastConvertedValue: new BigN(0)
+    },
+    locked: {
+      value: new BigN(0),
+      convertedValue: new BigN(0),
+      pastConvertedValue: new BigN(0)
+    },
+    total: {
+      value: new BigN(0),
+      convertedValue: new BigN(0),
+      pastConvertedValue: new BigN(0)
+    },
+    isReady: false,
+    isTestnet: false,
+    price24hValue: 0,
+    priceValue: 0,
+    logoKey,
+    slug,
+    symbol
+  };
+}
+
+function getDefaultTokenGroupBalance (
+  tokenGroupKey: string,
+  multiChainAsset?: _MultiChainAsset
+): TokenBalanceItemType {
+  let symbol: string;
+
+  // note: tokenGroupKey is either multiChainAsset or a custom key
+  // Thus, multiChainAsset may be undefined
+  if (multiChainAsset) {
+    symbol = _getMultiChainAssetSymbol(multiChainAsset);
+  } else {
+    symbol = tokenGroupKey.split('-')[0];
   }
 
-  if (groups.includes('KUSAMA_PARACHAIN')) {
-    return 'kusama';
-  }
-
-  return '';
+  return getDefaultBalanceItem(tokenGroupKey, symbol, symbol.toLowerCase());
 }
 
-function getMainTokenInfo (chainRegistry: ChainRegistry): TokenInfo {
-  // chainRegistryMap always has main token
-  return Object.values(chainRegistry.tokenMap).find((t) => t.isMainToken) as TokenInfo;
+function getDefaultTokenBalance (
+  tokenSlug: string,
+  assetRegistry: _ChainAsset
+): TokenBalanceItemType {
+  const symbol = _getAssetSymbol(assetRegistry);
+
+  return getDefaultBalanceItem(tokenSlug, symbol, symbol.toLowerCase());
 }
 
-function getTokenSymbols (chainRegistry: ChainRegistry): string [] {
-  const { tokenMap } = chainRegistry;
-  const result: string[] = [];
-
-  chainRegistry.chainTokens.forEach((t) => {
-    if (!tokenMap[t]) {
-      return;
+function getAccountBalance (
+  tokenGroupMap: Record<string, string[]>,
+  balanceMap: BalanceStore['balanceMap'],
+  priceMap: PriceStore['priceMap'],
+  price24hMap: PriceStore['price24hMap'],
+  assetRegistryMap: AssetRegistryStore['assetRegistry'],
+  multiChainAssetMap: AssetRegistryStore['multiChainAssetMap'],
+  chainInfoMap: ChainStore['chainInfoMap'],
+  isShowZeroBalance: boolean
+): AccountBalanceHookType {
+  const totalBalanceInfo: AccountBalanceHookType['totalBalanceInfo'] = {
+    convertedValue: new BigN(0),
+    converted24hValue: new BigN(0),
+    change: {
+      value: new BigN(0),
+      percent: new BigN(0)
     }
+  };
+  const tokenBalanceMap: Record<string, TokenBalanceItemType> = {};
+  const tokenGroupBalanceMap: Record<string, TokenBalanceItemType> = {};
 
-    result.push(tokenMap[t].symbolAlt || tokenMap[t].symbol);
-  });
+  Object.keys(tokenGroupMap).forEach((tokenGroupKey) => {
+    let isTokenGroupBalanceReady = false;
+    // note: multiChainAsset may be undefined due to tokenGroupKey may be a custom key
+    const multiChainAsset: _MultiChainAsset | undefined = multiChainAssetMap[tokenGroupKey];
+    const tokenGroupBalance = getDefaultTokenGroupBalance(tokenGroupKey, multiChainAsset);
 
-  return result;
-}
+    tokenGroupMap[tokenGroupKey].forEach((tokenSlug) => {
+      const assetRegistry = assetRegistryMap[tokenSlug];
+      const tokenBalance = getDefaultTokenBalance(tokenSlug, assetRegistry);
+      const originChain = _getAssetOriginChain(assetRegistry);
+      const balanceItem = balanceMap[tokenSlug];
+      const decimals = _getAssetDecimals(assetRegistry);
 
-export default function useAccountBalance (currentNetworkKey: string,
-  showedNetworks: string[],
-  crowdloanNetworks: string[]
-): AccountBalanceType {
-  const { balance: balanceReducer,
-    chainRegistry: chainRegistryMap,
-    crowdloan: crowdloanReducer,
-    networkMap,
-    price: priceReducer } = useSelector((state: RootState) => state);
+      const isTokenBalanceReady = !!balanceItem && (balanceItem.state === APIItemState.READY);
 
-  const networkMetadataMap = useGetNetworkMetadata();
+      if (!isShowZeroBalance && !isTokenBalanceReady) {
+        return;
+      }
 
-  const balanceMap = balanceReducer.details;
-  const crowdLoanMap = crowdloanReducer.details;
-  const { priceMap, tokenPriceMap } = priceReducer;
+      tokenBalance.isReady = isTokenBalanceReady;
+      isTokenGroupBalanceReady = isTokenBalanceReady;
 
-  let totalBalanceValue = new BigN(0);
-  const networkBalanceMaps: Record<string, BalanceInfo> = {};
-  const crowdloanContributeMap: Record<string, CrowdloanContributeValueType> = {};
+      tokenBalance.chain = originChain;
+      tokenBalance.chainDisplayName = _getChainName(chainInfoMap[originChain]);
+      tokenBalance.isTestnet = !_isAssetValuable(assetRegistry);
 
-  showedNetworks.forEach((networkKey) => {
-    const registry = chainRegistryMap[networkKey];
-    const balanceItem = balanceMap[networkKey];
+      if (isTokenBalanceReady) {
+        tokenBalance.free.value = tokenBalance.free.value.plus(getBalanceValue(balanceItem.free || '0', decimals));
+        tokenGroupBalance.free.value = tokenGroupBalance.free.value.plus(tokenBalance.free.value);
 
-    if (!registry) {
-      networkBalanceMaps[networkKey] = {
-        symbol: '...',
-        balanceValue: BN_ZERO,
-        convertedBalanceValue: BN_ZERO,
-        detailBalances: [],
-        childrenBalances: [],
-        isLoading: true
-      };
+        tokenBalance.locked.value = tokenBalance.locked.value.plus(getBalanceValue(balanceItem.locked || '0', decimals));
+        tokenGroupBalance.locked.value = tokenGroupBalance.locked.value.plus(tokenBalance.locked.value);
 
-      return;
-    }
+        tokenBalance.total.value = tokenBalance.free.value.plus(tokenBalance.locked.value);
 
-    const mainTokenInfo = getMainTokenInfo(registry);
-    let tokenDecimals, tokenSymbols;
+        if (!isShowZeroBalance && tokenBalance.total.value.eq(BN_0)) {
+          return;
+        }
 
-    if (['genshiro_testnet', 'genshiro', 'equilibrium_parachain'].includes(networkKey)) {
-      tokenDecimals = [mainTokenInfo.decimals];
-      tokenSymbols = [mainTokenInfo.symbolAlt || mainTokenInfo.symbol];
-    } else {
-      tokenDecimals = registry.chainDecimals;
-      tokenSymbols = getTokenSymbols(registry);
-    }
+        tokenGroupBalance.total.value = tokenGroupBalance.total.value.plus(tokenBalance.total.value);
+      }
 
-    if (!balanceItem) {
-      networkBalanceMaps[networkKey] = {
-        symbol: tokenSymbols.length ? tokenSymbols[0] : 'Unit',
-        balanceValue: BN_ZERO,
-        convertedBalanceValue: BN_ZERO,
-        detailBalances: [],
-        childrenBalances: [],
-        isLoading: true
-      };
+      const priceId = _getAssetPriceId(assetRegistry);
 
-      return;
-    }
+      // convert token value to real life currency value
+      if (priceId && !tokenBalance.isTestnet) {
+        const priceValue = priceMap[priceId] || 0;
+        const price24hValue = price24hMap[priceId] || 0;
 
-    if (balanceItem.state.valueOf() === APIItemState.NOT_SUPPORT.valueOf()) {
-      networkBalanceMaps[networkKey] = {
-        symbol: 'Unit',
-        balanceValue: BN_ZERO,
-        convertedBalanceValue: BN_ZERO,
-        detailBalances: [],
-        childrenBalances: []
-      };
+        tokenBalance.priceValue = priceValue;
+        tokenBalance.price24hValue = price24hValue;
 
-      return;
-    }
+        if (priceValue > price24hValue) {
+          tokenBalance.priceChangeStatus = 'increase';
+        } else if (priceValue < price24hValue) {
+          tokenBalance.priceChangeStatus = 'decrease';
+        }
 
-    const balanceInfo = parseBalancesInfo(priceMap, tokenPriceMap, {
-      networkKey,
-      tokenDecimals,
-      tokenSymbols,
-      balanceItem
-    }, registry.tokenMap, networkMap[networkKey]);
+        if (isTokenBalanceReady) {
+          tokenBalance.free.convertedValue = tokenBalance.free.convertedValue.plus(
+            getConvertedBalanceValue(tokenBalance.free.value, priceValue)
+          );
+          tokenGroupBalance.free.convertedValue = tokenGroupBalance.free.convertedValue.plus(tokenBalance.free.convertedValue);
+          tokenBalance.free.pastConvertedValue = tokenBalance.free.pastConvertedValue.plus(
+            getConvertedBalanceValue(tokenBalance.free.value, price24hValue)
+          );
+          tokenGroupBalance.free.pastConvertedValue = tokenGroupBalance.free.pastConvertedValue.plus(tokenBalance.free.pastConvertedValue);
 
-    networkBalanceMaps[networkKey] = balanceInfo;
-    totalBalanceValue = totalBalanceValue.plus(balanceInfo.convertedBalanceValue);
+          tokenBalance.locked.convertedValue = tokenBalance.locked.convertedValue.plus(
+            getConvertedBalanceValue(tokenBalance.locked.value, priceValue)
+          );
+          tokenGroupBalance.locked.convertedValue = tokenGroupBalance.locked.convertedValue.plus(tokenBalance.locked.convertedValue);
+          tokenBalance.locked.pastConvertedValue = tokenBalance.locked.pastConvertedValue.plus(
+            getConvertedBalanceValue(tokenBalance.locked.value, price24hValue)
+          );
+          tokenGroupBalance.locked.pastConvertedValue = tokenGroupBalance.locked.pastConvertedValue.plus(tokenBalance.locked.pastConvertedValue);
 
-    if (balanceInfo.childrenBalances && balanceInfo.childrenBalances.length) {
-      balanceInfo.childrenBalances.forEach((c) => {
-        totalBalanceValue = totalBalanceValue.plus(c.convertedBalanceValue);
-      });
-    }
-  });
+          tokenBalance.total.convertedValue = tokenBalance.total.convertedValue.plus(
+            getConvertedBalanceValue(tokenBalance.total.value, priceValue)
+          );
+          tokenGroupBalance.total.convertedValue = tokenGroupBalance.total.convertedValue.plus(tokenBalance.total.convertedValue);
+          totalBalanceInfo.convertedValue = totalBalanceInfo.convertedValue.plus(tokenGroupBalance.total.convertedValue);
 
-  crowdloanNetworks.forEach((networkKey) => {
-    const networkMetadata = networkMetadataMap[networkKey];
+          tokenBalance.total.pastConvertedValue = tokenBalance.total.pastConvertedValue.plus(
+            getConvertedBalanceValue(tokenBalance.total.value, price24hValue)
+          );
+          tokenGroupBalance.total.pastConvertedValue = tokenGroupBalance.total.pastConvertedValue.plus(tokenBalance.total.pastConvertedValue);
+          totalBalanceInfo.converted24hValue = totalBalanceInfo.converted24hValue.plus(tokenGroupBalance.total.pastConvertedValue);
+        }
+      }
 
-    if (!networkMetadata ||
-      !['POLKADOT_PARACHAIN', 'KUSAMA_PARACHAIN'].some((g) => networkMetadata.groups.includes(g as NetWorkGroup))) {
-      return;
-    }
-
-    const registry = getCrowdloanChainRegistry(networkMetadata.groups, chainRegistryMap);
-    const crowdLoanItem = crowdLoanMap[networkKey];
-
-    if (!registry ||
-        !crowdLoanItem ||
-        crowdLoanItem.state.valueOf() !== APIItemState.READY.valueOf()) {
-      return;
-    }
-
-    const groupNetworkKey = getGroupNetworkKey(networkMetadata.groups);
-    const price = groupNetworkKey ? priceMap[groupNetworkKey] : undefined;
-
-    const contributeInfo = getBalances({
-      balance: crowdLoanItem.contribute,
-      decimals: registry.chainDecimals[0],
-      symbol: registry.chainTokens[0],
-      price
+      tokenBalanceMap[tokenSlug] = tokenBalance;
     });
 
-    crowdloanContributeMap[networkKey] = {
-      paraState: crowdLoanItem.paraState,
-      contribute: contributeInfo
-    };
+    tokenGroupBalance.isReady = isTokenGroupBalanceReady;
 
-    if (['all', 'polkadot', 'kusama'].includes(currentNetworkKey)) {
-      totalBalanceValue = totalBalanceValue.plus(contributeInfo.convertedBalanceValue);
+    if (!isShowZeroBalance && (!isTokenGroupBalanceReady || tokenGroupBalance.total.value.eq(BN_0))) {
+      return;
     }
+
+    const tokenGroupPriceId = multiChainAsset ? _getMultiChainAssetPriceId(multiChainAsset) : '';
+
+    if (tokenGroupPriceId) {
+      const priceValue = priceMap[tokenGroupPriceId] || 0;
+      const price24hValue = price24hMap[tokenGroupPriceId] || 0;
+
+      tokenGroupBalance.priceValue = priceValue;
+      tokenGroupBalance.price24hValue = price24hValue;
+
+      if (priceValue > price24hValue) {
+        tokenGroupBalance.priceChangeStatus = 'increase';
+      } else if (priceValue < price24hValue) {
+        tokenGroupBalance.priceChangeStatus = 'decrease';
+      }
+    } else if (tokenGroupMap[tokenGroupKey].length === 1) {
+      // in this case token Group key is a custom key,
+      // we just have to get the price info from its only child
+
+      const tokenBalance = tokenBalanceMap[tokenGroupMap[tokenGroupKey][0]];
+
+      tokenGroupBalance.priceValue = tokenBalance.priceValue;
+      tokenGroupBalance.price24hValue = tokenBalance.price24hValue;
+      tokenGroupBalance.priceChangeStatus = tokenBalance.priceChangeStatus;
+    }
+
+    tokenGroupBalanceMap[tokenGroupKey] = tokenGroupBalance;
   });
 
+  // Compute total balance change
+  if (totalBalanceInfo.convertedValue.gt(totalBalanceInfo.converted24hValue)) {
+    totalBalanceInfo.change.value = totalBalanceInfo.convertedValue.minus(totalBalanceInfo.converted24hValue);
+    totalBalanceInfo.change.status = 'increase';
+  } else if (totalBalanceInfo.convertedValue.lt(totalBalanceInfo.converted24hValue)) {
+    totalBalanceInfo.change.value = totalBalanceInfo.converted24hValue.minus(totalBalanceInfo.convertedValue);
+    totalBalanceInfo.change.status = 'decrease';
+  }
+
+  totalBalanceInfo.change.percent = totalBalanceInfo.change.value.multipliedBy(BN_100).dividedBy(totalBalanceInfo.converted24hValue);
+
   return {
-    totalBalanceValue,
-    networkBalanceMaps,
-    crowdloanContributeMap
+    tokenBalanceMap,
+    tokenGroupBalanceMap,
+    totalBalanceInfo
   };
+}
+
+export default function useAccountBalance (tokenGroupMap: Record<string, string[]>): AccountBalanceHookType {
+  const balanceMap = useSelector((state: RootState) => state.balance.balanceMap);
+  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
+  const priceMap = useSelector((state: RootState) => state.price.priceMap);
+  const price24hMap = useSelector((state: RootState) => state.price.price24hMap);
+  const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
+  const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
+
+  return getAccountBalance(
+    tokenGroupMap,
+    balanceMap,
+    priceMap,
+    price24hMap,
+    assetRegistryMap,
+    multiChainAssetMap,
+    chainInfoMap,
+    isShowZeroBalance
+  );
 }

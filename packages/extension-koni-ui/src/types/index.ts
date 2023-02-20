@@ -7,6 +7,8 @@ import { Theme } from '../themes';
 
 export { Theme };
 
+export type AccountType = 'ALL' | 'ETHEREUM' | 'SUBSTRATE';
+
 export interface ThemeProps {
   theme: Theme;
   className?: string;

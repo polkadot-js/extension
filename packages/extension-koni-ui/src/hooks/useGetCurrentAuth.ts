@@ -2,23 +2,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
+import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/useGetCurrentTab';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-
-import { useGetCurrentTab } from './useGetCurrentTab';
 
 export const useGetCurrentAuth = () => {
   const currentTab = useGetCurrentTab();
   const currentUrl = currentTab?.url;
 
-  const { authUrl } = useSelector((state: RootState) => state);
+  const { authUrls } = useSelector((state: RootState) => state.settings);
 
   return useMemo((): AuthUrlInfo | undefined => {
     let rs: AuthUrlInfo | undefined;
 
     if (currentUrl) {
-      for (const auth of Object.values(authUrl)) {
+      for (const auth of Object.values(authUrls)) {
         if (currentUrl.includes(auth.id)) {
           rs = auth;
           break;
@@ -27,5 +26,5 @@ export const useGetCurrentAuth = () => {
     }
 
     return rs;
-  }, [currentUrl, authUrl]);
+  }, [currentUrl, authUrls]);
 };

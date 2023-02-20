@@ -194,7 +194,7 @@ export default class UniqueNftApi extends BaseNftApi {
               id: tokenId,
               name: tokenData.prefix + '#' + tokenId,
               image: this.parseUrl(imageUrl),
-              external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
+              externalUrl: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
               collectionId: collectionIdStr,
               properties: tokenData.properties,
               rarity: '',

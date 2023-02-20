@@ -3,11 +3,14 @@
 
 import Common from '@ethereumjs/common';
 import { ChainInfoMap } from '@subwallet/chain-list';
+import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 // eslint-disable-next-line camelcase
 import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, Resolver, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
@@ -22,6 +25,8 @@ import { KoniTransaction } from '@subwallet/extension-base/services/transaction-
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
+import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
+import { getId } from '@subwallet/extension-base/utils/getId';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -113,7 +118,6 @@ export default class KoniState {
   // private readonly customTokenStore = new CustomTokenStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
-  private readonly settingsStore = new SettingsStore();
   private readonly accountRefStore = new AccountRefStore();
   private readonly keyringStateSubject = new Subject<KeyringState>();
   private priceStoreReady = false;
@@ -758,25 +762,24 @@ export default class KoniState {
       });
   }
 
-  public getSettings (update: (value: RequestSettingsType) => void): void {
-    this.settingsStore.get('Settings', (value) => {
-      if (!value) {
-        update({ isShowBalance: false, accountAllLogo: '', theme: 'dark' });
-      } else {
-        update(value);
-      }
-    });
-  }
-
-  public setSettings (data: RequestSettingsType, callback?: () => void): void {
-    this.settingsStore.set('Settings', data, callback);
-  }
-
-  public setTheme (theme: ThemeTypes, callback?: (settingData: UiSettings) => void): void {
+  public setTheme (theme: ThemeNames, callback?: (settingData: UiSettings) => void): void {
     this.getSettings((settings) => {
       const newSettings = {
         ...settings,
         theme
+      };
+
+      this.setSettings(newSettings, () => {
+        callback && callback(newSettings);
+      });
+    });
+  }
+
+  public setBrowserConfirmationType (browserConfirmationType: BrowserConfirmationType, callback?: (settingData: UiSettings) => void): void {
+    this.getSettings((settings) => {
+      const newSettings = {
+        ...settings,
+        browserConfirmationType
       };
 
       this.setSettings(newSettings, () => {
@@ -1039,6 +1042,10 @@ export default class KoniState {
     return this.chainService.getAssetRegistry();
   }
 
+  public getMultiChainAssetMap () {
+    return this.chainService.getMultiChainAssetMap();
+  }
+
   public getAssetByChainAndAsset (chain: string, assetTypes: _AssetType[]) {
     return this.chainService.getAssetByChainAndType(chain, assetTypes);
   }
@@ -1061,6 +1068,10 @@ export default class KoniState {
 
   public subscribeAssetRegistry (): Subject<Record<string, _ChainAsset>> {
     return this.chainService.subscribeAssetRegistry();
+  }
+
+  public subscribeMultiChainAssetMap (): Subject<Record<string, _MultiChainAsset>> {
+    return this.chainService.subscribeMultiChainAssetMap();
   }
 
   public upsertCustomToken (data: _ChainAsset) {

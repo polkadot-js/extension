@@ -3,22 +3,30 @@
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { Home } from '@subwallet/extension-koni-ui/Popup/Home';
-import { Crowdloans } from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans';
-import { History } from '@subwallet/extension-koni-ui/Popup/Home/History';
-import { Nfts } from '@subwallet/extension-koni-ui/Popup/Home/Nfts';
-import { Staking } from '@subwallet/extension-koni-ui/Popup/Home/Staking';
-import { Tokens } from '@subwallet/extension-koni-ui/Popup/Home/Tokens';
-import PhishingDetected from '@subwallet/extension-koni-ui/Popup/PhishingDetected';
-import { initRootPromise, Root } from '@subwallet/extension-koni-ui/Popup/Root';
-import { Welcome } from '@subwallet/extension-koni-ui/Popup/Welcome';
+import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
-
-import PageWrapper from '../components/Layout/PageWrapper';
 import SendFund from './Transaction/SendFund';
+
+const SelectAccount = React.lazy(() => import('@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount'));
+const AddAccount = React.lazy(() => import('./Accounts/AddAccount'));
+const Login = React.lazy(() => import('./Login'));
+const PhishingDetected = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
+const PageWrapper = React.lazy(() => import('../components/Layout/PageWrapper'));
+const Welcome = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Welcome'));
+const Tokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens'));
+const Staking = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
+const NftItemDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftItemDetail'));
+const NftCollections = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollections'));
+const NftCollectionDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail'));
+const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/History'));
+const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
+const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
+const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
+const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
+
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -40,7 +48,7 @@ const ErrorFallback = () => {
 
   return (
     <div>
-      <h1>An Error Occured</h1>
+      <h1>An Error Occurred</h1>
       <p>Sorry, something went wrong. Please try again later.</p>
     </div>
   );
@@ -56,129 +64,149 @@ export function Example () {
 }
 
 // Todo: Create error page
-export const router = createHashRouter([{ path: '/',
+export const router = createHashRouter([{
+  path: '/',
   element: <Root />,
-  loader: initRootPromise,
   errorElement: <ErrorFallback />,
-  children: [{
-    path: '/welcome',
-    element: <Welcome title={'Welcome Content'} />
-  },
-  {
-    path: '/home',
-    element: <Home />,
-    children: [{
-      path: 'tokens',
-      element: <Tokens />
+  children: [
+    {
+      path: '/welcome',
+      element: <Welcome title={'Welcome Content'} />
     },
     {
-      path: 'nfts',
-      element: <Nfts />
+      path: '/login',
+      element: <Login />
     },
     {
-      path: 'crowdloans',
-      element: <Crowdloans />
-    },
-    {
-      path: 'staking',
-      element: <Staking />
-    },
-    {
-      path: 'history',
-      element: <History />
-    }]
-  },
-  {
-    path: '/transaction',
-    element: <Outlet />,
-    children: [{
-      path: 'send-fund',
-      element: <SendFund />
-    }, {
-      path: 'send-nft',
-      element: <Example />
-    }, {
-      path: 'stake',
-      element: <Example />
-    }, {
-      path: 'unstake',
-      element: <Example />
-    }, {
-      path: 'withdraw',
-      element: <Example />
-    }, {
-      path: 'claim-reward',
-      element: <Example />
-    }, {
-      path: 'compound',
-      element: <Example />
-    }]
-  },
-  {
-    path: '/account',
-    element: <Outlet />,
-    children: [{
-      path: 'account-list',
-      element: <Example />
-    }, {
-      path: 'add-account',
-      element: <Example />,
+      path: '/home',
+      element: <Home />,
       children: [{
-        path: 'from-seed',
+        path: 'tokens',
+        element: <Tokens />
+      },
+      {
+        path: 'nfts',
+        element: <Outlet />,
+        children: [
+          {
+            path: 'collections',
+            element: <NftCollections />
+          },
+          {
+            path: 'collection-detail',
+            element: <NftCollectionDetail />
+          },
+          {
+            path: 'item-detail',
+            element: <NftItemDetail />
+          }
+        ]
+      },
+      {
+        path: 'crowdloans',
+        element: <Crowdloans />
+      },
+      {
+        path: 'staking',
+        element: <Staking />
+      },
+      {
+        path: 'history',
+        element: <History />
+      }]
+    },
+    {
+      path: '/transaction',
+      element: <Outlet />,
+      children: [{
+        path: 'send-fund',
+        element: <SendFund />
+      }, {
+        path: 'send-nft',
         element: <Example />
       }, {
-        path: 'derive',
+        path: 'stake',
         element: <Example />
       }, {
-        path: 'from-json',
+        path: 'unstake',
         element: <Example />
       }, {
-        path: 'attach-readonly',
+        path: 'withdraw',
         element: <Example />
       }, {
-        path: 'attach-qr',
+        path: 'claim-reward',
         element: <Example />
       }, {
-        path: 'attach-ledger',
+        path: 'compound',
         element: <Example />
       }]
-    }, {
-      path: 'account-detail/:accountId',
-      element: <Example />,
+    },
+    {
+      path: '/account',
+      element: <Outlet />,
       children: [{
-        path: 'export',
+        path: 'account-list',
+        element: <SelectAccount />
+      }, {
+        path: 'add-account',
+        element: <AddAccount />,
+        children: [{
+          path: 'from-seed',
+          element: <Example />
+        }, {
+          path: 'derive',
+          element: <Example />
+        }, {
+          path: 'from-json',
+          element: <Example />
+        }, {
+          path: 'attach-readonly',
+          element: <Example />
+        }, {
+          path: 'attach-qr',
+          element: <Example />
+        }, {
+          path: 'attach-ledger',
+          element: <Example />
+        }]
+      }, {
+        path: 'account-detail/:accountId',
+        element: <Example />,
+        children: [{
+          path: 'export',
+          element: <Example />
+        }]
+      }]
+    }, {
+      path: '/settings',
+      element: <Outlet />,
+      children: [{
+        path: 'list',
+        element: <Settings />
+      }, {
+        path: 'general',
+        element: <GeneralSetting />
+      }, {
+        path: 'dapp-access',
+        element: <Example />
+      }, {
+        path: 'dapp-access-edit',
+        element: <Example />
+      }, {
+        path: 'network',
+        element: <Example />
+      }, {
+        path: 'network-edit',
+        element: <Example />
+      }, {
+        path: 'token',
+        element: <Example />
+      }, {
+        path: 'master-password',
         element: <Example />
       }]
     }]
-  }, {
-    path: '/setting',
-    element: <Outlet />,
-    children: [{
-      path: 'list',
-      element: <Example />
-    }, {
-      path: 'general',
-      element: <Example />
-    }, {
-      path: 'dapp-access',
-      element: <Example />
-    }, {
-      path: 'dapp-access-edit',
-      element: <Example />
-    }, {
-      path: 'network',
-      element: <Example />
-    }, {
-      path: 'network-edit',
-      element: <Example />
-    }, {
-      path: 'token',
-      element: <Example />
-    }, {
-      path: 'master-password',
-      element: <Example />
-    }]
-  }] },
+},
 { path: `${PHISHING_PAGE_REDIRECT}/website`, element: <PhishingDetected /> }
 ]);
 

@@ -1,13 +1,20 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Main } from '@subwallet/extension-koni-ui/components';
+import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button } from '@subwallet/react-ui';
+import { changeHeaderLogo } from '@subwallet/react-ui';
 import Bowser from 'bowser';
-import React, { useEffect, useState } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import React, { useContext, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+changeHeaderLogo(<Logo2D />);
 
 export function initRootPromise () {
   // Init Application with some default data if not existed
@@ -33,170 +40,53 @@ export function initRootPromise () {
     window.localStorage.setItem('osInfo', browser.getOS().name as string);
   }
 
-  // Todo: Fetching data and setup store here
-  // Todo: Loading all basic data for root with promise.all()
-  // Todo: Settings data
-  // Todo: Accounts data
   return true;
 }
 
-interface MenuProps {
-  className?: string,
-  isShow: boolean,
-}
-const _Menu = ({ className }: MenuProps) => (
-  <ul className={className}>
-    <li><Link to='/welcome'>Welcome</Link></li>
-    <li>
-      <Link to='/home'>Home</Link>
-      <ul>
-        <li><Link to='/home/tokens'>Tokens</Link></li>
-        <li><Link to='/home/nfts'>NFT</Link></li>
-        <li><Link to='/home/crowdloans'>Crowdloans</Link></li>
-        <li><Link to='/home/staking'>Staking</Link></li>
-        <li><Link to='/home/history'>History</Link></li>
-      </ul>
-    </li>
-    <li>
-      <Link to='/transaction'>Transaction</Link>
-      <ul>
-        <li><Link to='/transaction/send-fund'>Send Fund</Link></li>
-        <li><Link to='/transaction/send-nft'>Send NFT</Link></li>
-        <li><Link to='/transaction/stake'>Stake</Link></li>
-        <li><Link to='/transaction/unstake'>Unstake</Link></li>
-        <li><Link to='/transaction/withdraw'>Withdraw</Link></li>
-        <li><Link to='/transaction/claim-reward'>Claim Reward</Link></li>
-        <li><Link to='/transaction/compound'>Compound</Link></li>
-      </ul>
-    </li>
-    <li>
-      <Link to='/account'>Account</Link>
-      <ul>
-        <li><Link to='/account/account-list'>Account List</Link></li>
-        <li>
-          <Link to='/account/add-account'>Add Account</Link>
-          <ul>
-            <li><Link to='/account/add-account/from-seed'>From Seed</Link></li>
-            <li><Link to='/account/add-account/derive'>Derive</Link></li>
-            <li><Link to='/account/add-account/from-json'>From JSON</Link></li>
-            <li><Link to='/account/add-account/attach-readonly'>Attach Readonly</Link></li>
-            <li><Link to='/account/add-account/attach-qr'>Attach QR</Link></li>
-            <li><Link to='/account/add-account/attach-ledger'>Attach Ledger</Link></li>
-          </ul>
-        </li>
-        <li>
-          <Link to='/account/account-detail/:accountId'>Account Detail</Link>
-          <ul>
-            <li><Link to='/account/account-detail/:accountId/export'>Export</Link></li>
-          </ul>
-        </li>
-      </ul>
-    </li>
-    <li>
-      <Link to='/setting'>Setting</Link>
-      <ul>
-        <li><Link to='/setting/list'>List</Link></li>
-        <li><Link to='/setting/general'>General</Link></li>
-        <li><Link to='/setting/dapp-access'>DApp Access</Link></li>
-        <li><Link to='/setting/dapp-access-edit'>DApp Access Edit</Link></li>
-        <li><Link to='/setting/network'>Networks</Link></li>
-        <li><Link to='/setting/network-edit'>Network Edit</Link></li>
-        <li><Link to='/setting/token'>Token</Link></li>
-        <li><Link to='/setting/master-password'>Master Password</Link></li>
-      </ul>
-    </li>
-  </ul>);
-
-const Menu = styled(_Menu)<MenuProps>(({ isShow }) => {
-  return {
-    backgroundColor: '#333',
-    paddingTop: '16px',
-    paddingBottom: '16px',
-    paddingRight: '16px',
-    position: 'fixed',
-    zIndex: 3333,
-    top: 0,
-    margin: 0,
-    height: '100%',
-    width: '200px',
-    left: isShow ? 0 : '-100%',
-    overflow: 'auto',
-    transitionDuration: '0.3s',
-
-    '&, ul': {
-      paddingLeft: 16
-    },
-
-    li: {
-      listStyle: 'none'
-    },
-
-    a: {
-      color: '#fff'
-    }
-  };
-});
-
-const TmpHeader = styled.div(() => ({
-  display: 'flex',
-  padding: '8px 16px',
-
-  '.left-item': {
-    flex: '1 1 200px'
-  }
-}));
-
-function _Root ({ className }: ThemeProps): React.ReactElement {
+function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Todo: Remove these code in the future
-  const [isShowMenu, setIsShowMenu] = useState<boolean>(false);
-
-  function toggleMenu () {
-    setIsShowMenu((current) => !current);
-  }
-
-  useEffect(() => {
-    setIsShowMenu(false);
-  }, [location.pathname]);
+  const openPModal = usePredefinedModal();
+  const hasConfirmations = useSelector((state: RootState) => state.requestState.hasConfirmations);
 
   useEffect(() => {
     if (location.pathname === '/') {
-      // Todo: check conditional an navigate to default page
-      navigate('/home/tokens');
+      if (hasConfirmations) {
+        openPModal('confirmations');
+      } else {
+        // Todo: check conditional an navigate to default page
+        navigate('/home/tokens');
+      }
     }
   },
-  [location.pathname, navigate]
+  [hasConfirmations, location.pathname, navigate, openPModal]
   );
 
-  return (
-    <Main className={className}>
-      <TmpHeader>
-        <div className={'left-item'}>
-          <div><b>Current path:</b> {location.pathname} </div>
-          <div><b>Current state:</b> {JSON.stringify(location.state)}</div>
-        </div>
-        <div className={'right-item'}>
-          <Button
-            onClick={toggleMenu}
-            size={'xs'}
-          >Menu</Button>
-        </div>
-        <div className={'main-menu'}>
-          <Menu isShow={isShowMenu} />
-        </div>
-      </TmpHeader>
-
-      <div className='main-layout'>
-        <Outlet />
-      </div>
-    </Main>
-  );
+  return <>{children}</>;
 }
 
-export const Root = styled(_Root)(() => ({
-  '.main-layout': {
-    flex: 1
-  }
-}));
+const Main = styled.main`
+  display: flex;
+  height: 100%;
+  flex-direction: column
+`;
+
+function _Root ({ className }: ThemeProps): React.ReactElement {
+  const dataContext = useContext(DataContext);
+
+  // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
+  return <WalletModalContext>
+    <PageWrapper
+      animateOnce={true}
+      resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState'])}
+    >
+      <DefaultRoute>
+        <Main className={className}>
+          <Outlet />
+        </Main>
+      </DefaultRoute>
+    </PageWrapper>
+  </WalletModalContext>;
+}
+
+export const Root = styled(_Root)(() => ({}));

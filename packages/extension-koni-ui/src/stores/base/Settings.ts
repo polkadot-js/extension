@@ -3,7 +3,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { ThemeTypes, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AppSettings, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 import settings from '@polkadot/ui-settings';
@@ -12,8 +12,11 @@ import { SettingsStruct } from '@polkadot/ui-settings/types';
 const initialState = {
   // UI settings
   isShowBalance: false,
+  isShowZeroBalance: true,
   accountAllLogo: '',
-  theme: ThemeTypes.DARK,
+  theme: ThemeNames.DARK,
+  language: 'en',
+  browserConfirmationType: 'extension',
 
   // Polkadot settings
   ...settings.get(),
@@ -67,12 +70,32 @@ const settingsSlice = createSlice({
         reduxStatus: ReduxStatus.READY
       };
     },
-    updateTheme (state, action: PayloadAction<ThemeTypes>) {
+    updateTheme (state, action: PayloadAction<ThemeNames>) {
       const theme = action.payload;
 
       return {
         ...state,
         theme
+      };
+    },
+    updateShowZeroBalanceState (state, action: PayloadAction<boolean>) {
+      const isShowZeroBalance = action.payload;
+
+      return {
+        ...state,
+        isShowZeroBalance
+      };
+    },
+    updateLanguage (state, action: PayloadAction<AppSettings['language']>) {
+      return {
+        ...state,
+        language: action.payload
+      };
+    },
+    updateBrowserConfirmationType (state, action: PayloadAction<AppSettings['browserConfirmationType']>) {
+      return {
+        ...state,
+        browserConfirmationType: action.payload
       };
     }
   }

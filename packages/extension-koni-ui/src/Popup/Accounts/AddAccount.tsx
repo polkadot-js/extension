@@ -1,133 +1,113 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { Theme } from '@subwallet/extension-koni-ui/themes';
+import { BackgroundIcon, Button, SelectModal } from '@subwallet/react-ui';
+import Icon from '@subwallet/react-ui/es/icon';
+import { GlobalToken } from '@subwallet/react-ui/es/theme/interface';
+import { Info, Leaf, ShareNetwork } from 'phosphor-react';
+import React, { useCallback, useState } from 'react';
+import styled, { useTheme } from 'styled-components';
 
-import Button from '@subwallet/extension-koni-ui/components/Button';
-import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
-import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
-import Header from '@subwallet/extension-koni-ui/partials/Header';
-import React, { useCallback } from 'react';
-import styled from 'styled-components';
+interface Item {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}
 
-import { Link } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
 }
 
-const createAccountPath = '/account/create';
+const getAddAccountItems = (newSeedPhraseTitle: string, existingSeedPhrase: string, token: Partial<GlobalToken>): Item[] => {
+  return [
+    {
+      icon: <BackgroundIcon
+        backgroundColor={token['green-7']}
+        iconColor='#FFF'
+        phosphorIcon={Leaf}
+        size='sm'
+        weight='fill'
+      />,
+      label: newSeedPhraseTitle,
+      value: '1'
+    },
+    {
+      icon: <BackgroundIcon
+        backgroundColor={token['magenta-7']}
+        iconColor='#FFF'
+        phosphorIcon={ShareNetwork}
+        size='sm'
+        weight='fill'
+      />,
+      label: existingSeedPhrase,
+      value: '2'
+    }
+  ];
+};
 
-function AddAccount ({ className }: Props): React.ReactElement<Props> {
+function _AddAccount ({ className }: Props): React.ReactElement<Props> {
+  const [selected, setSelected] = useState<string>('');
+  const { token } = useTheme() as Theme;
   const { t } = useTranslation();
-  const isPopup = useIsPopup();
-  const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
-  const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
+  const _onSelect = useCallback((value: string) => {
+    setSelected(value);
+  }, []);
 
-  const _openCreateAccount = useCallback(
-    () => {
-      window.localStorage.setItem('popupNavigation', createAccountPath);
-      windowOpen(createAccountPath).catch((e) => console.log('error', e));
-    }, []
-  );
+  const renderItem = useCallback((item: Item, _selected: boolean) => {
+    return (
+      <SettingItemSelection
+        className={'add-account-item-wrapper'}
+        isSelected={_selected}
+        label={item.label}
+        leftItemIcon={item.icon}
+      />
+    );
+  }, []);
 
   return (
     <>
-      <Header
-        isNotHaveAccount
-        showAdd
-        showSettings
-        showSubHeader
-        subHeaderName={t<string>('Add Account')}
-      />
-      <div className={className}>
-        <div className='add-account-wrapper'>
-          <div className='no-accounts'>
-            <p>{t<string>("You currently don't have any accounts. Create your first account or import another account to get started.")}</p>
+      {/* @ts-ignore */}
+      <SelectModal
+        className={className}
+        id='add-account-modal'
+        itemKey='value'
+        items={getAddAccountItems(t('Create with new Seed Phrase'), t('Create with existing Seed Phrase'), token)}
+        onSelect={_onSelect}
+        renderItem={renderItem}
+        selected={selected}
+        title={
+          <div>
+            <div>{t('Create new account')}</div>
+            <Button
+              className={'add-account-modal-right-icon'}
+              icon={<Icon
+                phosphorIcon={Info}
+                size='sm'
+              />}
+              shape='circle'
+              size='xs'
+              type='ghost'
+            />
           </div>
-
-          <Button
-            className='add-account-btn create-account'
-            data-export-button
-          >
-            <Link
-              className='add-account-link__create-account'
-              onClick={isPopup && (isFirefox || isLinux) ? _openCreateAccount : undefined}
-              to={isPopup && (isFirefox || isLinux) ? undefined : createAccountPath}
-            >
-              {t<string>('Create new account')}
-            </Link>
-          </Button>
-
-          <Button
-            className='add-account-btn'
-            data-export-button
-          >
-            <Link
-              className='add-account-link'
-              to={'/account/import-seed'}
-            >
-              {t<string>('Import account from pre-existing seed')}
-            </Link>
-          </Button>
-        </div>
-      </div>
+        }
+      />
     </>
   );
 }
 
-export default React.memo(styled(AddAccount)(({ theme }: Props) => `
-  color: ${theme.textColor};
-  height: 100%;
+const AddAccount = styled(_AddAccount)<Props>(() => {
+  return ({
+    '&.ant-sw-modal': {
+      '.add-account-modal-right-icon': {
+        position: 'absolute',
+        insetInlineEnd: 8,
+        top: 10
+      }
+    }
+  });
+});
 
-  .add-account-wrapper {
-    margin: 0 40px;
-  }
-
-  .add-account-btn {
-    margin-bottom: 15px;
-  }
-
-  .create-account {
-    background-color: ${theme.buttonBackground2};
-    color: ${theme.buttonTextColor};
-  }
-
-  .add-account-link {
-    justify-content: center;
-    color: ${theme.buttonTextColor};
-    opacity: 1;
-  }
-
-  .add-account-link__create-account {
-    justify-content: center;
-    color: ${theme.buttonTextColor3};
-    opacity: 1;
-  }
-
-  h3 {
-    color: ${theme.textColor};
-    margin-top: 0;
-    font-weight: normal;
-    font-size: 24px;
-    line-height: 33px;
-    text-align: center;
-  }
-
-  > .image {
-    display: flex;
-    justify-content: center;
-  }
-
-  .no-accounts {
-    margin: 20px 0 50px;
-  }
-
-  .no-accounts p {
-    text-align: center;
-    font-size: 15px;
-    line-height: 24px;
-    color: ${theme.textColor};
-  }
-`));
+export default AddAccount;

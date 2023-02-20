@@ -1,149 +1,272 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import { ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import { languageOptions } from '@subwallet/extension-base/constants/i18n';
+import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { updateBrowserConfirmationType, updateLanguage, updateTheme } from '@subwallet/extension-koni-ui/stores/utils';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps, SwSubHeader } from '@subwallet/react-ui';
+import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout, MoonStars, Sun } from 'phosphor-react';
+import React, { useCallback, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import styled, { useTheme } from 'styled-components';
 
-import { ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
-import { saveTheme, setNotification } from '@subwallet/extension-koni-ui/messaging';
-import Header from '@subwallet/extension-koni-ui/partials/Header';
-import getLanguageOptions from '@subwallet/extension-koni-ui/util/getLanguageOptions';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
-import styled, { ThemeContext } from 'styled-components';
+type Props = ThemeProps;
 
-import settings from '@polkadot/ui-settings';
+type SelectionItemType = {
+  key: string,
+  leftIcon: SwIconProps['phosphorIcon'],
+  leftIconBgColor: string,
+  title: string,
+};
 
-import { Dropdown, getThemeOptions, MenuItem, ThemeSwitchContext } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { Theme } from '../../types';
-
-interface Props extends ThemeProps {
-  className?: string;
+function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
+  return (
+    <SettingItem
+      className={'__selection-item'}
+      key={item.key}
+      leftItemIcon={
+        <BackgroundIcon
+          backgroundColor={item.leftIconBgColor}
+          phosphorIcon={item.leftIcon}
+          size='sm'
+          type='phosphor'
+          weight='fill'
+        />
+      }
+      name={item.title}
+      rightItem={
+        _selected
+          ? <Icon
+            className='__right-icon'
+            customSize={'20px'}
+            phosphorIcon={CheckCircle}
+            type='phosphor'
+            weight='fill'
+          />
+          : null
+      }
+    />
+  );
 }
 
-const notificationOptions = ['Extension', 'PopUp', 'Window']
-  .map((item) => ({ text: item, value: item.toLowerCase() }));
-
-function GeneralSetting ({ className }: Props): React.ReactElement {
-  const { t } = useTranslation();
-  const [notification, updateNotification] = useState(settings.notification);
-  const [language, updateLanguage] = useState(settings.i18nLang === 'default' ? 'en' : settings.i18nLang);
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const setTheme = useContext(ThemeSwitchContext);
-  const languageOptions = useMemo(() => getLanguageOptions(), []);
-  const themeOptions = useMemo(() => getThemeOptions(), []);
-
-  const _onChangeNotification = useCallback(
-    (value: string): void => {
-      setNotification(value).catch(console.error);
-
-      updateNotification(value);
-      settings.set({ notification: value });
-    },
-    []
+function renderModalTrigger (item: SelectionItemType) {
+  return (
+    <SettingItem
+      className={'__trigger-item'}
+      key={item.key}
+      leftItemIcon={
+        <BackgroundIcon
+          backgroundColor={item.leftIconBgColor}
+          phosphorIcon={item.leftIcon}
+          size='sm'
+          type='phosphor'
+          weight='fill'
+        />
+      }
+      name={item.title}
+      rightItem={
+        <Icon
+          className='__right-icon'
+          customSize={'20px'}
+          phosphorIcon={CaretRight}
+          type='phosphor'
+        />
+      }
+    />
   );
+}
 
-  const _onChangeTheme = useCallback(
-    (theme: string): void => {
-      saveTheme(theme as ThemeTypes, () => {
-        setTheme(theme);
-      }).catch((e) => console.log('There is problem when saveTheme', e));
-    },
-    [setTheme]
-  );
+function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  const theme = useSelector((state: RootState) => state.settings.theme);
+  const language = useSelector((state: RootState) => state.settings.language);
+  const browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
 
-  const _onChangeLang = useCallback(
-    (value: string): void => {
-      updateLanguage(value);
-      settings.set({ i18nLang: value });
-    },
-    []
-  );
+  const navigate = useNavigate();
+  const { token } = useTheme() as Theme;
+
+  const onBack = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
+  const themeItems = useMemo<SelectionItemType[]>(() => {
+    return [
+      {
+        key: ThemeNames.DARK,
+        leftIcon: MoonStars,
+        leftIconBgColor: token.colorPrimary,
+        title: 'Dark theme' // todo: i18n this
+      },
+      {
+        key: ThemeNames.LIGHT,
+        leftIcon: Sun,
+        leftIconBgColor: token.colorPrimary,
+        title: 'Light theme (coming soon)' // todo: i18n this
+      }
+    ];
+  }, [token]);
+
+  const languageItems = useMemo<SelectionItemType[]>(() => {
+    return languageOptions.map((item) => ({
+      key: item.value,
+      leftIcon: GlobeHemisphereEast,
+      leftIconBgColor: token['green-6'],
+      title: item.text
+    }));
+  }, [token]);
+
+  const browserConfirmationItems = useMemo<SelectionItemType[]>(() => {
+    return [
+      {
+        key: 'extension',
+        leftIcon: Layout,
+        leftIconBgColor: token['volcano-6'],
+        title: 'Extension' // todo: i18n this
+      },
+      {
+        key: 'popup',
+        leftIcon: ArrowSquareUpRight,
+        leftIconBgColor: token['volcano-6'],
+        title: 'Popup' // todo: i18n this
+      },
+      {
+        key: 'window',
+        leftIcon: CornersOut,
+        leftIconBgColor: token['volcano-6'],
+        title: 'Window' // todo: i18n this
+      }
+    ];
+  }, [token]);
 
   return (
-    <>
-      <div className={className}>
-        <Header
-          showBackArrow
-          showSubHeader
-          subHeaderName={t<string>('General Setting')}
-          to='/account/settings'
+    <PageWrapper className={`general-setting ${className}`}>
+      <SwSubHeader
+        center
+        onBack={onBack}
+        paddingVertical
+        showBackButton
+        title={'General settings' } // todo: i18n this
+      />
+
+      <div className={'__scroll-container'}>
+        <SelectModal
+          background={'default'}
+          className={`__modal ${className}`}
+          customInput={renderModalTrigger({
+            key: 'wallet-theme-trigger',
+            leftIcon: Image,
+            leftIconBgColor: token.colorPrimary,
+            title: 'Wallet theme' // todo: i18n this
+          })}
+          id='wallet-theme-select-modal'
+          inputWidth={'100%'}
+          itemKey='key'
+          items={themeItems}
+          onSelect={updateTheme as unknown as (value: string) => void}
+          renderItem={renderSelectionItem}
+          selected={theme}
+          shape='round'
+          size='small'
+          title={'Wallet theme'} // todo: i18n this
         />
-        <MenuItem
-          className='setting'
-          title='Theme'
-        >
-          <Dropdown
-            className='dropdown'
-            label=''
-            onChange={_onChangeTheme}
-            options={themeOptions}
-            value={themeContext.id}
-          />
-        </MenuItem>
-        <MenuItem
-          className='setting'
-          title={t<string>('Language')}
-        >
-          <Dropdown
-            className='dropdown'
-            label=''
-            onChange={_onChangeLang}
-            options={languageOptions}
-            value={language}
-          />
-        </MenuItem>
-        <MenuItem
-          className='setting'
-          title={t<string>('Notifications')}
-        >
-          <Dropdown
-            className='dropdown'
-            label=''
-            onChange={_onChangeNotification}
-            options={notificationOptions}
-            value={notification}
-          />
-        </MenuItem>
+
+        <SelectModal
+          background={'default'}
+          className={`__modal ${className}`}
+          customInput={renderModalTrigger({
+            key: 'languages-trigger',
+            leftIcon: GlobeHemisphereEast,
+            leftIconBgColor: token['green-6'],
+            title: 'Languages' // todo: i18n this
+          })}
+          id='languages-select-modal'
+          inputWidth={'100%'}
+          itemKey='key'
+          items={languageItems}
+          onSelect={updateLanguage as unknown as (value: string) => void}
+          renderItem={renderSelectionItem}
+          selected={language}
+          shape='round'
+          size='small'
+          title={'Languages'} // todo: i18n this
+        />
+
+        <SelectModal
+          background={'default'}
+          className={`__modal ${className}`}
+          customInput={renderModalTrigger({
+            key: 'browser-confirmation-type-trigger',
+            leftIcon: BellSimpleRinging,
+            leftIconBgColor: token['volcano-6'],
+            title: 'Browser confirmation type' // todo: i18n this
+          })}
+          id='browser-confirmation-type-select-modal'
+          inputWidth={'100%'}
+          itemKey='key'
+          items={browserConfirmationItems}
+          onSelect={updateBrowserConfirmationType as unknown as (value: string) => void}
+          renderItem={renderSelectionItem}
+          selected={browserConfirmationType}
+          shape='round'
+          size='small'
+          title={'Browser confirmation type'} // todo: i18n this
+        />
       </div>
-    </>
+    </PageWrapper>
   );
 }
 
-export default styled(GeneralSetting)(({ theme }: Props) => `
-  margin-top: -25px;
-  padding-top: 25px;
+export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Props) => {
+  return ({
+    '.ant-web3-block-right-item': {
+      minWidth: 40,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: -token.marginXS
+    },
 
-  .settings__theme-setting {
-    padding-top: 14px;
-    .horizontal-label {
-      font-size: 18px;
-      line-height: 30px;
+    '&.general-setting': {
+      height: '100%',
+      backgroundColor: token.colorBgDefault,
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+
+      '.ant-sw-header-bg-default': {
+        // backgroundColor: 'transparent'
+      },
+
+      '.ant-select-modal-input-custom + .ant-select-modal-input-custom': {
+        marginTop: token.marginXS
+      },
+
+      '.__trigger-item .ant-web3-block-right-item': {
+        color: token.colorTextLight4
+      },
+
+      '.__trigger-item:hover .ant-web3-block-right-item': {
+        color: token.colorTextLight2
+      },
+
+      '.__scroll-container': {
+        overflow: 'auto',
+        paddingTop: token.padding,
+        paddingRight: token.padding,
+        paddingLeft: token.padding,
+        paddingBottom: token.paddingLG
+      }
+    },
+
+    '&.__modal': {
+      '.__selection-item .ant-web3-block-right-item': {
+        color: token.colorSuccess
+      }
     }
-  }
+  });
+});
 
-  .menu-items-wrapper {
-    display: flex;
-    align-items: center;
-  }
-
-  .settings-menu-divider {
-    padding-top: 0;
-  }
-
-  .manage-website-access, .setting__action-text {
-    > span {
-      font-size: 16px;
-      line-height: 26px;
-      color: ${theme.textColor2};
-      font-weight: 400;
-    }
-  }
-
-  .checkbox {
-    margin: 6px 0 14px 0;
-  }
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-`);
+export default GeneralSetting;

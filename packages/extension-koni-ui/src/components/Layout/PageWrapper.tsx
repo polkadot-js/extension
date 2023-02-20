@@ -1,45 +1,62 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useEffect, useState} from "react";
-import {Await, useLocation} from "react-router-dom";
-import {LoadingContainer} from "@subwallet/extension-koni-ui/components";
-import {CSSTransition} from "react-transition-group";
+import { LoadingContainer } from '@subwallet/extension-koni-ui/components';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useEffect, useState } from 'react';
+import { Await, useLocation } from 'react-router-dom';
+import { CSSTransition } from 'react-transition-group';
+import styled from 'styled-components';
 
-export interface PageWrapperProps {
-  className?: string;
+export interface PageWrapperProps extends ThemeProps{
   resolve?: Promise<any>;
-  children?: React.ReactElement;
+  children?: React.ReactNode;
+  animateOnce?: boolean;
 }
 
 const defaultResolver = Promise.resolve(true);
 
-// Todo: Create data loader wrapper
-// Todo: Create loading effect
-export default function PageWrapper ({ children, resolve, className }: PageWrapperProps) {
+function Component ({ animateOnce, children, className, resolve }: PageWrapperProps) {
   const nodeRef = React.useRef(null);
   const location = useLocation();
-  const [pathName, setPathName] = useState('');
+  const [pathName, setPathName] = useState<string | undefined>();
 
   useEffect(() => {
-    setPathName(location.pathname);
-  }, [location.pathname]);
+    setPathName((prevPathName) => {
+      if (animateOnce && prevPathName) {
+        return prevPathName;
+      }
 
-  return <div className={className}>
-    <React.Suspense fallback={<LoadingContainer />}>
-      <Await resolve={resolve || defaultResolver}>
-        <CSSTransition
-          classNames={'page'}
-          in={pathName === location.pathname}
-          nodeRef={nodeRef}
-          timeout={300}
-          unmountOnExit
+      return location.pathname;
+    });
+  }, [animateOnce, location.pathname]);
+
+  return <React.Suspense fallback={<LoadingContainer />}>
+    <Await resolve={resolve || defaultResolver}>
+      <CSSTransition
+        classNames={'page'}
+        in={!!(animateOnce && pathName) || pathName === location.pathname}
+        nodeRef={nodeRef}
+        timeout={300}
+        unmountOnExit
+      >
+        <div
+          className={className}
+          ref={nodeRef}
         >
-          <div ref={nodeRef}>
-            {children}
-          </div>
-        </CSSTransition>
-      </Await>
-    </React.Suspense>
-  </div>;
+          {children}
+        </div>
+      </CSSTransition>
+    </Await>
+  </React.Suspense>;
 }
+
+const PageWrapper = styled(Component)<PageWrapperProps>(({ theme }) => ({
+  height: '100%',
+
+  '&__inner': {
+    height: '100%'
+  }
+}));
+
+export default PageWrapper;

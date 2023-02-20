@@ -84,16 +84,22 @@ export type AccNetworkContext = {
   setNetwork: (network: CurrentNetworkInfo) => void;
 }
 
-export interface AuthorizeRequest {
+export interface ConfirmationRequestBase {
   id: string;
-  request: RequestAuthorizeTab;
   url: string;
 }
 
-export interface MetadataRequest {
-  id: string;
+export interface AuthorizeRequest extends ConfirmationRequestBase{
+  request: RequestAuthorizeTab;
+}
+
+export interface MetadataRequest extends ConfirmationRequestBase{
   request: MetadataDef;
-  url: string;
+}
+
+export interface SigningRequest extends ConfirmationRequestBase{
+  account: AccountJson;
+  request: RequestSign;
 }
 
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
@@ -108,7 +114,7 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(accounts.forget)': [RequestAccountForget, boolean];
   'pri(accounts.show)': [RequestAccountShow, boolean];
   'pri(accounts.tie)': [RequestAccountTie, boolean];
-  'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
+  'pri(accounts.subscribe)': [RequestAccountSubscribe, AccountJson[], AccountJson[]];
   'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(accounts.changePassword)': [RequestAccountChangePassword, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];

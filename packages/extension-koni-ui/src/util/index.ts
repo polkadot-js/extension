@@ -1,20 +1,20 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@subwallet/extension-base/background/types';
+import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
-import { NetworkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import { Recoded } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util/accountAll';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 
-import { decodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
+import { decodeAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 export * from './common';
-export * from './chainBalancesApi';
 export * from './accountAll';
 
 // todo: Refactor this file
@@ -45,11 +45,28 @@ export function getEthereumChains (networkMap: Record<string, NetworkJson>): str
   return result;
 }
 
-export function recodeAddress (address: string, accounts: AccountWithChildren[], networkInfo: NetworkJson | null, type?: KeypairType): Recoded {
+export const defaultRecoded: Recoded = { account: null, formatted: null, prefix: 42, isEthereum: false };
+
+export const accountAllRecoded: Recoded = {
+  account: {
+    address: ALL_ACCOUNT_KEY
+  },
+  formatted: ALL_ACCOUNT_KEY,
+  prefix: 42,
+  isEthereum: false
+};
+
+export function recodeAddress (address: string | undefined, accounts: AccountWithChildren[], networkInfo: _ChainInfo | null, type?: KeypairType): Recoded {
+  if (!address) {
+    return defaultRecoded;
+  } else if (isAccountAll(address)) {
+    return accountAllRecoded;
+  }
+
   const publicKey = decodeAddress(address);
   const account = findAccountByAddress(accounts, address) || findSubstrateAccount(accounts, publicKey);
-  const prefix = networkInfo ? networkInfo.ss58Format : 42;
-  const isEthereum = type === 'ethereum' || !!(networkInfo?.isEthereum);
+  const prefix = networkInfo && _getChainSubstrateAddressPrefix(networkInfo) !== -1 ? _getChainSubstrateAddressPrefix(networkInfo) : 42;
+  const isEthereum = type === 'ethereum' || (!!networkInfo && _isChainEvmCompatible(networkInfo));
 
   return {
     account,
@@ -61,76 +78,6 @@ export function recodeAddress (address: string, accounts: AccountWithChildren[],
   };
 }
 
-function analysisAccounts (accounts: AccountJson[]): [boolean, boolean] {
-  let substrateCounter = 0;
-  let etherumCounter = 0;
-
-  if (!accounts.length) {
-    return [false, false];
-  }
-
-  accounts.forEach((a) => {
-    if (isAccountAll(a.address)) {
-      return;
-    }
-
-    if (isEthereumAddress(a.address)) {
-      etherumCounter++;
-    } else {
-      substrateCounter++;
-    }
-  });
-
-  return [
-    etherumCounter === 0 && substrateCounter > 0,
-    etherumCounter > 0 && substrateCounter === 0
-  ];
-}
-
-export function getGenesisOptionsByAddressType (address: string | null | undefined, accounts: AccountJson[], genesisOptions: NetworkSelectOption[]): NetworkSelectOption[] {
-  if (!address || !accounts.length) {
-    return genesisOptions.filter((o) => !o.isEthereum);
-  }
-
-  const result: NetworkSelectOption[] = [];
-
-  if (isAccountAll(address)) {
-    const [isContainOnlySubstrate, isContainOnlyEtherum] = analysisAccounts(accounts);
-
-    if (isContainOnlySubstrate) {
-      genesisOptions.forEach((o) => {
-        if (!o.isEthereum) {
-          result.push(o);
-        }
-      });
-    } else if (isContainOnlyEtherum) {
-      genesisOptions.forEach((o) => {
-        if (o.isEthereum || o.networkKey === 'all') {
-          result.push(o);
-        }
-      });
-    } else {
-      return genesisOptions;
-    }
-  } else if (isEthereumAddress(address)) {
-    genesisOptions.forEach((o) => {
-      if (o.isEthereum || o.networkKey === 'all') {
-        result.push(o);
-      }
-    });
-  } else {
-    genesisOptions.forEach((o) => {
-      if (!o.isEthereum) {
-        result.push(o);
-      }
-    });
-  }
-
-  return result;
-}
-
-export const defaultRecoded: Recoded = { account: null, formatted: null, prefix: 42, isEthereum: false };
-
 export const NFT_DEFAULT_GRID_SIZE = 6;
 
 export const NFT_PREVIEW_HEIGHT = 184;
@@ -140,15 +87,6 @@ export const NFT_GRID_HEIGHT_THRESHOLD = 600;
 export const NFT_HEADER_HEIGHT = 202;
 
 export const NFT_PER_ROW = 3;
-
-export const accountAllRecoded: Recoded = {
-  account: {
-    address: ALL_ACCOUNT_KEY
-  },
-  formatted: ALL_ACCOUNT_KEY,
-  prefix: 42,
-  isEthereum: false
-};
 
 export function getLogoByNetworkKey (networkKey: string, defaultLogo = 'default'): string {
   return LogosMap[networkKey] || LogosMap[defaultLogo] || LogosMap.default;

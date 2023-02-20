@@ -1,14 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest } from '@subwallet/extension-base/background/types';
 import { AddNetworkRequestExternal, BalanceItem, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, NftCollection, NftItem, StakingItem, StakingRewardItem, TxHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, BalanceItem, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, PriceJson, StakingItem, StakingRewardItem, TxHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
+
+// todo: move this file to extension-koni-ui/src/types/
 
 export type CurrentAccountType = {
   account?: AccountJson | null;
@@ -74,20 +78,29 @@ export interface BaseReduxStore {
   reduxStatus: ReduxStatus
 }
 
-export interface AppSettings extends UiSettings, SettingsStruct, BaseReduxStore {
+// todo: merge with UiSettings later
+export interface LocalUiSettings {
+  language: LanguageType,
+  isShowZeroBalance: boolean,
+}
+
+export interface AppSettings extends LocalUiSettings, UiSettings, SettingsStruct, BaseReduxStore {
   authUrls: Record<string, AuthUrlInfo>,
   mediaAllowed: boolean
 }
 
 export interface AccountState extends AccountsContext, KeyringState, BaseReduxStore {
   currentAccount: AccountJson | null
+
+  isAllAccount: boolean
 }
 
-export interface RequestState extends BaseReduxStore {
-  authorizeRequest: AuthorizeRequest[],
-  metadataRequest: MetadataRequest[],
-  signingRequest: SigningRequest[],
-  confirmationQueue: ConfirmationsQueue
+export interface RequestState extends ConfirmationsQueue, BaseReduxStore {
+  authorizeRequest: Record<string, AuthorizeRequest>
+  metadataRequest: Record<string, MetadataRequest>
+  signingRequest: Record<string, SigningRequest>
+  hasConfirmations: boolean
+  numberOfConfirmations: number
 }
 
 export interface UpdateConfirmationsQueueRequest extends BaseReduxStore {
@@ -97,6 +110,7 @@ export interface UpdateConfirmationsQueueRequest extends BaseReduxStore {
 
 export interface AssetRegistryStore extends BaseReduxStore {
   assetRegistry: Record<string, _ChainAsset>;
+  multiChainAssetMap: Record<string, _MultiChainAsset>;
 }
 
 export interface ChainStore extends BaseReduxStore {
@@ -107,6 +121,8 @@ export interface ChainStore extends BaseReduxStore {
 export interface BalanceStore extends BaseReduxStore {
   balanceMap: Record<string, BalanceItem>
 }
+
+export type PriceStore = PriceJson
 
 export interface CrowdloanStore extends BaseReduxStore {
   crowdloanMap: Record<string, CrowdloanItem>

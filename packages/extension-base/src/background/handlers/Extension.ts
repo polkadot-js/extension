@@ -170,7 +170,7 @@ export default class Extension {
   }
 
   // FIXME This looks very much like what we have in Tabs
-  private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
+  private accountsSubscribe (id: string, port: chrome.runtime.Port): AccountJson[] {
     const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
       cb(transformAccounts(accounts))
@@ -181,7 +181,7 @@ export default class Extension {
       subscription.unsubscribe();
     });
 
-    return true;
+    return transformAccounts(accountsObservable.subject.getValue());
   }
 
   private authorizeApprove ({ id }: RequestAuthorizeApprove): boolean {
@@ -599,9 +599,6 @@ export default class Extension {
 
       case 'pri(seed.validate)':
         return this.seedValidate(request as RequestSeedValidate);
-
-      case 'pri(settings.notification)':
-        return this.#state.setNotification(request as string);
 
       case 'pri(signing.approve.password)':
         return this.signingApprovePassword(request as RequestSigningApprovePassword);

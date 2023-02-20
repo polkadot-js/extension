@@ -140,7 +140,7 @@ export class AcalaNftApi extends BaseNftApi {
           name: tokenInfo?.name,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
           description: tokenInfo && tokenInfo.description ? tokenInfo.description : collectionMeta?.description,
-          external_url: acalaExternalBaseUrl + parsedClassId,
+          externalUrl: acalaExternalBaseUrl + parsedClassId,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
           image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : collectionMeta?.image,
           collectionId: parsedClassId,

@@ -42,7 +42,7 @@ export const filterAuthorizeAccounts = (accounts: AccountJson[], accountAuthType
 function Component ({ className, request }: Props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  const {specVersion, tokenSymbol, tokenDecimals} = request.request;
+  const { specVersion, tokenDecimals, tokenSymbol } = request.request;
   // Handle buttons actions
 
   const onCancel = useCallback(() => {

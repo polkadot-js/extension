@@ -18,7 +18,7 @@ export default class RemoveWrongTransactionHistoriesFromStore extends BaseMigrat
 
       Object.entries(oldHistories).forEach(([hash, items]) => {
         // Remove wrong stored history (missing eventIdx)
-        const newItems = items.items.filter((item) => item.origin === 'app' || item.eventIdx);
+        const newItems = items.items.filter((item) => item.origin === 'app');
 
         newHistories[hash] = { items: newItems, total: newItems.length };
       });

@@ -17,27 +17,25 @@ import { buildHierarchy } from '@subwallet/extension-koni-ui/util/buildHierarchy
 
 // Base
 // AccountState store
-export const updateAccountData = (data: AccountsWithCurrentAddress | boolean) => {
-  if (typeof data !== 'boolean') {
-    let currentAccountJson: AccountJson = data.accounts[0];
-    const accounts = data.accounts;
+export const updateAccountData = (data: AccountsWithCurrentAddress) => {
+  let currentAccountJson: AccountJson = data.accounts[0];
+  const accounts = data.accounts;
 
-    accounts.forEach((accountJson) => {
-      if (accountJson.address === data.currentAddress) {
-        currentAccountJson = accountJson;
-      }
-    });
+  accounts.forEach((accountJson) => {
+    if (accountJson.address === data.currentAddress) {
+      currentAccountJson = accountJson;
+    }
+  });
 
-    const hierarchy = buildHierarchy(accounts);
-    const master = hierarchy.find(({ isExternal, type }) => !isExternal && canDerive(type));
+  const hierarchy = buildHierarchy(accounts);
+  const master = hierarchy.find(({ isExternal, type }) => !isExternal && canDerive(type));
 
-    updateCurrentAccountState(currentAccountJson);
-    updateAccountsContext({
-      accounts,
-      hierarchy,
-      master
-    } as AccountsContext);
-  }
+  updateCurrentAccountState(currentAccountJson);
+  updateAccountsContext({
+    accounts,
+    hierarchy,
+    master
+  } as AccountsContext);
 };
 
 export const updateCurrentAccountState = (currentAccountJson: AccountJson) => {

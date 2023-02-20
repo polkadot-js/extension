@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/AccountItemWithName';
+import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';

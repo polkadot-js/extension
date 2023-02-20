@@ -345,11 +345,11 @@ export async function rejectMetaRequest (id: string): Promise<boolean> {
   return sendMessage('pri(metadata.reject)', { id });
 }
 
-export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<boolean> {
+export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<AccountJson[]> {
   return sendMessage('pri(accounts.subscribe)', {}, cb);
 }
 
-export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<boolean> {
+export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<AccountsWithCurrentAddress> {
   return sendMessage('pri(accounts.subscribeWithCurrentAddress)', {}, cb);
 }
 

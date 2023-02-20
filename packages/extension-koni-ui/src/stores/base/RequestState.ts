@@ -3,7 +3,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
-import { AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
+import { AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { ReduxStatus, RequestState } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState: RequestState = {
@@ -26,7 +26,7 @@ const initialState: RequestState = {
   numberOfConfirmations: 0
 };
 
-const CONFIRMATIONS_FIELDS: Array<keyof RequestState> = [
+export const CONFIRMATIONS_FIELDS: Array<keyof RequestState> = [
   'authorizeRequest',
   'metadataRequest',
   'signingRequest',
@@ -38,6 +38,13 @@ const CONFIRMATIONS_FIELDS: Array<keyof RequestState> = [
   'evmSendTransactionRequest',
   'evmSendTransactionRequestExternal'
 ];
+
+export interface ConfirmationQueueItem {
+  type: ConfirmationType,
+  item: ConfirmationRequestBase
+}
+
+export type ConfirmationType = typeof CONFIRMATIONS_FIELDS[number];
 
 const readyMap = {
   updateAuthorizeRequests: false,

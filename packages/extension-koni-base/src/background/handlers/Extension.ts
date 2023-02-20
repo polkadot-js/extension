@@ -101,51 +101,52 @@ export default class KoniExtension extends Extension {
     return state.checkPublicAndSecretKey(request);
   }
 
-  private accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): boolean {
+  private async accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): Promise<AccountsWithCurrentAddress> {
     const cb = createSubscription<'pri(accounts.subscribeWithCurrentAddress)'>(id, port);
 
-    const subscription = accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {
-      const transformedAccounts = transformAccounts(storedAccounts);
+    return await new Promise<AccountsWithCurrentAddress>((resolve): void => {
+      const subscription = accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {
+        const transformedAccounts = transformAccounts(storedAccounts);
 
-      const accounts: AccountJson[] = transformedAccounts && transformedAccounts.length
-        ? [
-          {
-            ...ACCOUNT_ALL_JSON
-          },
-          ...transformedAccounts
-        ]
-        : [];
+        const accounts: AccountJson[] = transformedAccounts && transformedAccounts.length
+          ? [
+            {
+              ...ACCOUNT_ALL_JSON
+            },
+            ...transformedAccounts
+          ]
+          : [];
 
-      const accountsWithCurrentAddress: AccountsWithCurrentAddress = {
-        accounts
-      };
+        const accountsWithCurrentAddress: AccountsWithCurrentAddress = {
+          accounts
+        };
 
-      setTimeout(() => {
-        state.getCurrentAccount((accountInfo) => {
-          if (accountInfo) {
-            accountsWithCurrentAddress.currentAddress = accountInfo.address;
+        setTimeout(() => {
+          state.getCurrentAccount((accountInfo) => {
+            if (accountInfo) {
+              accountsWithCurrentAddress.currentAddress = accountInfo.address;
 
-            if (accountInfo.address === ALL_ACCOUNT_KEY) {
-              accountsWithCurrentAddress.currentGenesisHash = accountInfo.currentGenesisHash;
-            } else {
-              const acc = accounts.find((a) => (a.address === accountInfo.address));
+              if (accountInfo.address === ALL_ACCOUNT_KEY) {
+                accountsWithCurrentAddress.currentGenesisHash = accountInfo.currentGenesisHash;
+              } else {
+                const acc = accounts.find((a) => (a.address === accountInfo.address));
 
-              accountsWithCurrentAddress.currentGenesisHash = acc?.genesisHash || ALL_GENESIS_HASH;
+                accountsWithCurrentAddress.currentGenesisHash = acc?.genesisHash || ALL_GENESIS_HASH;
+              }
             }
-          }
 
-          cb(accountsWithCurrentAddress);
-        });
-      }, 100);
+            resolve(accountsWithCurrentAddress);
+            cb(accountsWithCurrentAddress);
+          });
+        }, 100);
+      });
+
+      this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+      port.onDisconnect.addListener((): void => {
+        this.cancelSubscription(id);
+      });
     });
-
-    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
-
-    port.onDisconnect.addListener((): void => {
-      this.cancelSubscription(id);
-    });
-
-    return true;
   }
 
   private accountsGetAll (id: string, port: chrome.runtime.Port): string {
@@ -3981,7 +3982,7 @@ export default class KoniExtension extends Extension {
       case 'pri(accounts.checkPublicAndSecretKey)':
         return this.checkPublicAndSecretKey(request as RequestCheckPublicAndSecretKey);
       case 'pri(accounts.subscribeWithCurrentAddress)':
-        return this.accountsGetAllWithCurrentAddress(id, port);
+        return await this.accountsGetAllWithCurrentAddress(id, port);
       case 'pri(accounts.subscribeAccountsInputAddress)':
         return this.accountsGetAll(id, port);
       case 'pri(accounts.saveRecent)':

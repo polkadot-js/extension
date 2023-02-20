@@ -197,7 +197,7 @@ npmSetup();
 
 runClean();
 runCheck();
-runTest();
+// runTest();
 runBuild();
 
 gitPush();

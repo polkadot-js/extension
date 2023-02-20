@@ -5,9 +5,10 @@ import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { ThemeProps } from '../types';
 
 import React from 'react';
-import styled from 'styled-components';
 
 import Icon from '@polkadot/react-identicon';
+
+import { styled } from '../styled';
 
 interface Props {
   className?: string;

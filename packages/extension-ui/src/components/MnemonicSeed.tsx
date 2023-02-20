@@ -5,9 +5,9 @@ import type { ThemeProps } from '../types';
 
 import { faCopy } from '@fortawesome/free-regular-svg-icons';
 import React, { MouseEventHandler } from 'react';
-import styled from 'styled-components';
 
 import useTranslation from '../hooks/useTranslation';
+import { styled } from '../styled';
 import ActionText from './ActionText';
 import TextAreaWithLabel from './TextAreaWithLabel';
 

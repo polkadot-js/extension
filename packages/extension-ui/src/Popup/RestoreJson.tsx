@@ -6,7 +6,6 @@ import type { KeyringPair$Json } from '@polkadot/keyring/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import styled from 'styled-components';
 
 import { u8aToString } from '@polkadot/util';
 
@@ -14,6 +13,7 @@ import { AccountContext, ActionContext, Address, Button, InputFileWithLabel, Inp
 import useTranslation from '../hooks/useTranslation';
 import { batchRestore, jsonGetAccountInfo, jsonRestore } from '../messaging';
 import { Header } from '../partials';
+import { styled } from '../styled';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import { isKeyringPairs$Json } from '../util/typeGuards';
 

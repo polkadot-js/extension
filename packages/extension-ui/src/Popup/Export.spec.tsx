@@ -3,10 +3,11 @@
 
 import '@polkadot/extension-mocks/chrome';
 
+import type { ReactWrapper } from 'enzyme';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
-import { configure, mount, ReactWrapper } from 'enzyme';
+import enzyme from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter, Route } from 'react-router';
@@ -16,6 +17,8 @@ import { Button, themes } from '../components';
 import * as messaging from '../messaging';
 import { flushAllPromises } from '../testHelpers';
 import Export from './Export';
+
+const { configure, mount } = enzyme;
 
 // NOTE Required for spyOn when using @swc/jest
 // https://github.com/swc-project/swc/issues/3843

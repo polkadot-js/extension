@@ -5,11 +5,11 @@ import type { ThemeProps } from '../types';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
-import styled from 'styled-components';
 
 import { AccountContext, Checkbox, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import AccountsTree from '../Popup/Accounts/AccountsTree';
+import { styled } from '../styled';
 
 interface Props extends ThemeProps {
   className?: string;

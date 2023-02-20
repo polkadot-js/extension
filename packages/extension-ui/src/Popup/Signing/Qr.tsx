@@ -5,13 +5,13 @@ import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
 import { wrapBytes } from '@polkadot/extension-dapp/wrapBytes';
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
 
 import { Button } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
+import { styled } from '../../styled';
 import { CMD_MORTAL, CMD_SIGN_MESSAGE } from './Request';
 
 interface Props {

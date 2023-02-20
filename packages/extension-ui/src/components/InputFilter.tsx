@@ -4,8 +4,8 @@
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useRef } from 'react';
-import styled from 'styled-components';
 
+import { styled } from '../styled';
 import { ThemeProps } from '../types';
 import { Input } from './TextInputs';
 

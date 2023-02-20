@@ -3,8 +3,10 @@
 
 import '@polkadot/extension-mocks/chrome';
 
+import type { ReactWrapper } from 'enzyme';
+
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
-import { configure, mount, ReactWrapper } from 'enzyme';
+import enzyme from 'enzyme';
 import React from 'react';
 import { MemoryRouter } from 'react-router';
 import { ThemeProvider } from 'styled-components';
@@ -12,6 +14,8 @@ import { ThemeProvider } from 'styled-components';
 import { themes } from '../components';
 import Header from './Header';
 import Settings from './MenuSettings';
+
+const { configure, mount } = enzyme;
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });

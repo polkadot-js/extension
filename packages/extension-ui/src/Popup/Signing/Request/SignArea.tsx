@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import styled from 'styled-components';
 
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
 
 import { ActionBar, ActionContext, Button, ButtonArea, Checkbox, Link } from '../../../components';
 import useTranslation from '../../../hooks/useTranslation';
 import { approveSignPassword, cancelSignRequest, isSignLocked } from '../../../messaging';
+import { styled } from '../../../styled';
 import Unlock from '../Unlock';
 
 interface Props {

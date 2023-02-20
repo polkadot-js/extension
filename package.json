@@ -32,13 +32,13 @@
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only",
     "start": "yarn watch",
-    "test": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env jest -- --detectOpenHandles",
-    "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env jest -- --detectOpenHandles",
+    "test": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env jest",
+    "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env jest",
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
-    "@polkadot/dev": "^0.68.38",
+    "@polkadot/dev": "^0.68.41",
     "@types/jest": "^29.4.0",
     "i18next-scanner": "^4.1.1",
     "sinon-chrome": "^3.0.1"

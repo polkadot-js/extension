@@ -5,12 +5,12 @@ import type { RequestAuthorizeTab } from '@polkadot/extension-base/background/ty
 import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext, useEffect } from 'react';
-import styled from 'styled-components';
 
 import { AccountContext, ActionBar, ActionContext, Button, Link } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { approveAuthRequest, deleteAuthRequest } from '../../messaging';
 import { AccountSelection } from '../../partials';
+import { styled } from '../../styled';
 import NoAccount from './NoAccount';
 
 interface Props extends ThemeProps {

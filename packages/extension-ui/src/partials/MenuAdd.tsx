@@ -7,13 +7,13 @@ import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCodeBranch, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext } from 'react';
-import styled from 'styled-components';
 
 import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import { useLedger } from '../hooks/useLedger';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
+import { styled } from '../styled';
 
 interface Props extends ThemeProps {
   className?: string;

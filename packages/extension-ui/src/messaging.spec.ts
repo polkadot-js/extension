@@ -4,12 +4,12 @@
 import '@polkadot/extension-mocks/chrome';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
-import { configure } from 'enzyme';
+import enzyme from 'enzyme';
 
 import { exportAccount } from './messaging';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
-configure({ adapter: new Adapter() });
+enzyme.configure({ adapter: new Adapter() });
 
 describe('messaging sends message to background via extension port for', () => {
   test('exportAccount', () => {

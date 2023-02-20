@@ -6,12 +6,12 @@ import type { ThemeProps } from '../types';
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
-import styled from 'styled-components';
 
 import { AccountContext, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccounts } from '../messaging';
 import { Header } from '../partials';
+import { styled } from '../styled';
 
 const MIN_LENGTH = 6;
 

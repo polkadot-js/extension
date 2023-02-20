@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
 
 import useTranslation from '../hooks/useTranslation';
+import { styled } from '../styled';
 import Label from './Label';
 import { Input } from './TextInputs';
 import Warning from './Warning';

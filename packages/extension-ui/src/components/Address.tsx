@@ -14,7 +14,6 @@ import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import styled from 'styled-components';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
@@ -24,6 +23,7 @@ import useOutsideClick from '../hooks/useOutsideClick';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { showAccount } from '../messaging';
+import { styled } from '../styled';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import getParentNameSuri from '../util/getParentNameSuri';
 import { AccountContext, SettingsContext } from './contexts';

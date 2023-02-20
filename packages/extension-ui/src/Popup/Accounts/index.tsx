@@ -4,7 +4,6 @@
 import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
 import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
@@ -12,6 +11,7 @@ import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
 import { AccountContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
+import { styled } from '../../styled';
 import AccountsTree from './AccountsTree';
 import AddAccount from './AddAccount';
 

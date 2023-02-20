@@ -4,11 +4,11 @@
 import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext } from 'react';
-import styled from 'styled-components';
 
 import { ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import Header from '../../partials/Header';
+import { styled } from '../../styled';
 import AddAccountImage from './AddAccountImage';
 
 interface Props extends ThemeProps {

@@ -6,8 +6,8 @@ import type { ThemeProps } from '../types';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
-import styled from 'styled-components';
 
+import { styled } from '../styled';
 import Button from './Button';
 
 interface Props {

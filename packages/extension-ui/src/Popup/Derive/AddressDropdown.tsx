@@ -4,11 +4,11 @@
 import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useRef, useState } from 'react';
-import styled from 'styled-components';
 
 import arrow from '../../assets/arrow-down.svg';
 import { Address } from '../../components';
 import useOutsideClick from '../../hooks/useOutsideClick';
+import { styled } from '../../styled';
 
 interface Props {
   allAddresses: [string, string | null][];

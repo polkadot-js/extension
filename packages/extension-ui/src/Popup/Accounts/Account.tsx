@@ -4,7 +4,6 @@
 import type { AccountJson } from '@polkadot/extension-base/background/types';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
 import { canDerive } from '@polkadot/extension-base/utils';
 import { ThemeProps } from '@polkadot/extension-ui/types';
@@ -14,6 +13,7 @@ import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 import { editAccount, tieAccount } from '../../messaging';
 import { Name } from '../../partials';
+import { styled } from '../../styled';
 
 interface Props extends AccountJson {
   className?: string;

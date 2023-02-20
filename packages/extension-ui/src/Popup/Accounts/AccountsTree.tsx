@@ -4,8 +4,8 @@
 import type { AccountWithChildren } from '@polkadot/extension-base/background/types';
 
 import React from 'react';
-import styled from 'styled-components';
 
+import { styled } from '../../styled';
 import Account from './Account';
 
 interface Props extends AccountWithChildren {

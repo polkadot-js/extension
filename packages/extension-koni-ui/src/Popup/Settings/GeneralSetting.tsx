@@ -1,15 +1,17 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import { BrowserConfirmationType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { languageOptions } from '@subwallet/extension-base/constants/i18n';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { saveBrowserConfirmationType } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateBrowserConfirmationType, updateLanguage, updateTheme } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps, SwSubHeader } from '@subwallet/react-ui';
+import i18next from 'i18next';
 import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout, MoonStars, Sun } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -80,10 +82,22 @@ function renderModalTrigger (item: SelectionItemType) {
   );
 }
 
+// todo: may update loading for theme
+type LoadingMap = {
+  language: boolean;
+  browserConfirmationType: boolean;
+};
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const theme = useSelector((state: RootState) => state.settings.theme);
-  const language = useSelector((state: RootState) => state.settings.language);
-  const browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
+  const _language = useSelector((state: RootState) => state.settings.language);
+  const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
+  const [language, setLanguage] = useState<LanguageType>(_language);
+  const [browserConfirmationType, setBrowserConfirmationType] = useState<BrowserConfirmationType>(_browserConfirmationType);
+  const [loadingMap, setLoadingMap] = useState<LoadingMap>({
+    browserConfirmationType: false,
+    language: false
+  });
 
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
@@ -141,6 +155,52 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     ];
   }, [token]);
 
+  const onSelectLanguage = useCallback((value: string) => {
+    setLanguage(value as LanguageType);
+    setLoadingMap((prev) => ({
+      ...prev,
+      language: true
+    }));
+    i18next.changeLanguage(value).then(() => {
+      updateLanguage(value as LanguageType);
+
+      setLoadingMap((prev) => ({
+        ...prev,
+        language: false
+      }));
+      setLanguage(value as LanguageType);
+    }).catch((e) => {
+      setLoadingMap((prev) => ({
+        ...prev,
+        language: false
+      }));
+      console.log('i18next.changeLanguage error', e);
+    });
+  }, []);
+
+  const onSelectBrowserConfirmationType = useCallback((value: string) => {
+    setBrowserConfirmationType(value as BrowserConfirmationType);
+    setLoadingMap((prev) => ({
+      ...prev,
+      browserConfirmationType: true
+    }));
+    saveBrowserConfirmationType(value as BrowserConfirmationType, (data) => {
+      updateBrowserConfirmationType(data.browserConfirmationType);
+
+      setLoadingMap((prev) => ({
+        ...prev,
+        browserConfirmationType: false
+      }));
+      setBrowserConfirmationType(data.browserConfirmationType);
+    }).catch((e) => {
+      setLoadingMap((prev) => ({
+        ...prev,
+        browserConfirmationType: false
+      }));
+      console.log('saveBrowserConfirmationType error', e);
+    });
+  }, []);
+
   return (
     <PageWrapper className={`general-setting ${className}`}>
       <SwSubHeader
@@ -182,11 +242,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             leftIconBgColor: token['green-6'],
             title: 'Languages' // todo: i18n this
           })}
+          disabled={loadingMap.language}
           id='languages-select-modal'
           inputWidth={'100%'}
           itemKey='key'
           items={languageItems}
-          onSelect={updateLanguage as unknown as (value: string) => void}
+          onSelect={onSelectLanguage}
           renderItem={renderSelectionItem}
           selected={language}
           shape='round'
@@ -203,11 +264,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             leftIconBgColor: token['volcano-6'],
             title: 'Browser confirmation type' // todo: i18n this
           })}
+          disabled={loadingMap.browserConfirmationType}
           id='browser-confirmation-type-select-modal'
           inputWidth={'100%'}
           itemKey='key'
           items={browserConfirmationItems}
-          onSelect={updateBrowserConfirmationType as unknown as (value: string) => void}
+          onSelect={onSelectBrowserConfirmationType}
           renderItem={renderSelectionItem}
           selected={browserConfirmationType}
           shape='round'

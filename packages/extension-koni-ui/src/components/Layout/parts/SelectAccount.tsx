@@ -4,6 +4,7 @@
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
 import AccountCardSelection from '@subwallet/extension-koni-ui/components/Account/AccountCardSelection';
 import AccountItemBriefInfo from '@subwallet/extension-koni-ui/components/Account/AccountItemBriefInfo';
+import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
@@ -14,7 +15,7 @@ import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui
 import { BackgroundIcon, Button, SelectModal } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import CN from 'classnames';
-import { CheckCircle, FileArrowDown, PlugsConnected, PlusCircle, Swatches } from 'phosphor-react';
+import { FileArrowDown, PlugsConnected, PlusCircle, Swatches } from 'phosphor-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -96,22 +97,14 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   }, [accounts]);
 
   const renderItem = useCallback((item: AccountJson, _selected: boolean) => {
-    const isAllAccount = isAccountAll(item.address);
+    const currentAccountIsAll = isAccountAll(item.address);
 
-    if (isAllAccount) {
+    if (currentAccountIsAll) {
       return (
-        <div className='all-account-item'>
-          <AccountItemBriefInfo account={item} />
-          {_selected && (
-            <Icon
-              className='selected'
-              phosphorIcon={CheckCircle}
-              size='sm'
-              type='phosphor'
-              weight='fill'
-            />
-          )}
-        </div>
+        <AccountItemWithName
+          address={item.address}
+          isSelected={isAllAccount}
+        />
       );
     }
 
@@ -124,7 +117,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         isSelected={_selected}
       />
     );
-  }, [className]);
+  }, [className, isAllAccount]);
 
   const renderSelectedItem = useCallback((item: AccountJson): React.ReactNode => {
     return (

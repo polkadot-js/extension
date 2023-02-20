@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { gql } from '@apollo/client';
-import { NetworkJson, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { NetworkJson, TxHistoryItem, TxHistoryType } from '@subwallet/extension-base/background/KoniTypes';
 // eslint-disable-next-line camelcase
 import { DotSamaHistory, DotSamaHistory_transfers, DotSamaHistoryVariables } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaHistory';
 import { newApolloClient } from '@subwallet/extension-koni-base/api/subquery/subquery';
@@ -95,9 +95,9 @@ export const DOTSAMA_SUBSQUID_HISTORY_QUERY = gql`
 `;
 
 // eslint-disable-next-line camelcase
-function getHistoryAction (address: string, addressFrom: string): 'send' | 'received' {
+function getHistoryAction (address: string, addressFrom: string): TxHistoryType {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  return address === addressFrom ? 'send' : 'received';
+  return address === addressFrom ? TxHistoryType.SEND : TxHistoryType.RECEIVED;
 }
 
 export const fetchDotSamaHistory = (address: string, networkMap: Record<string, NetworkJson>, callBack: (network: string, items: TxHistoryItem[]) => void) => {
@@ -144,9 +144,7 @@ export const fetchDotSamaHistory = (address: string, networkMap: Record<string, 
             networkKey,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
             time: (+n.timestamp) * 1000,
-            origin: 'network',
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-            eventIdx: n.transfer.eventIdx
+            origin: 'network'
           });
         });
 
@@ -194,9 +192,7 @@ export const fetchDotSamaHistory = (address: string, networkMap: Record<string, 
             networkKey,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
             time: n.timestamp,
-            origin: 'network',
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-            eventIdx: 1
+            origin: 'network'
           });
         });
 

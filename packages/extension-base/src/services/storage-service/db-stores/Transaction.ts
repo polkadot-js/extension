@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BaseStoreWithAddressAndChain from '@subwallet/extension-base/services/storage-service/db-stores/BaseStoreWithAddressAndChain';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 
 import { ITransactionHistoryItem } from '../databases';
 
 export default class TransactionStore extends BaseStoreWithAddressAndChain<ITransactionHistoryItem> {
   async getHistoryByAddressAsObject (address: string) {
-    if (address === ALL_ACCOUNT_KEY) {
+    if (address === 'ALL') { // Todo: Migrate to all account key
       return this.table.toArray();
     }
 

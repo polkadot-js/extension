@@ -179,8 +179,8 @@ function Component ({ className, request }: Props) {
           />
           <Button
             disabled={loading}
-            schema={'secondary'}
             onClick={onCancel}
+            schema={'secondary'}
           >
             {t('Cancel')}
           </Button>

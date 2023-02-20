@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
+import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { Form, Icon, Input } from '@subwallet/react-ui';
@@ -14,8 +13,6 @@ import { FileArrowDown, Info } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
-import { KeypairType } from '@polkadot/util-crypto/types';
 
 type Props = ThemeProps;
 
@@ -33,30 +30,31 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const timeOutRef = useRef<NodeJS.Timer>();
   const navigate = useNavigate();
 
-  const accountName = useGetDefaultAccountName();
-
-  const [keyTypes, setKeyTypes] = useState<KeypairType[]>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [validating, setValidating] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [changed, setChanged] = useState(false);
-  const [seedPhrase, setSeedPhrase] = useState('');
+  const [privateKey, setPrivateKey] = useState('');
+  const [autoCorrect, setAutoCorrect] = useState('');
+
+  const accountName = useGetDefaultAccountName();
 
   const onChange: ChangeEventHandler<HTMLTextAreaElement> = useCallback((event) => {
     setChanged(true);
+    setAutoCorrect('');
     const val = event.target.value;
 
-    setSeedPhrase(val);
+    setPrivateKey(val);
   }, []);
 
   const onSubmit = useCallback(() => {
-    if (seedPhrase) {
-      setSubmitting(true);
+    if (privateKey) {
+      setLoading(true);
       createAccountSuriV2({
         name: accountName,
-        suri: seedPhrase,
+        suri: privateKey,
         isAllowed: true,
-        types: keyTypes
+        types: [EVM_ACCOUNT_TYPE]
       })
         .then(() => {
           navigate('/home');
@@ -68,10 +66,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           });
         })
         .finally(() => {
-          setSubmitting(false);
+          setLoading(false);
         });
     }
-  }, [seedPhrase, accountName, keyTypes, navigate]);
+  }, [privateKey, accountName, navigate]);
 
   useEffect(() => {
     let amount = true;
@@ -81,7 +79,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
 
     if (amount) {
-      if (seedPhrase) {
+      if (privateKey) {
         setValidating(true);
         setValidateState({
           status: 'validating',
@@ -89,9 +87,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         });
 
         timeOutRef.current = setTimeout(() => {
-          validateSeedV2(seedPhrase, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
-            .then((res) => {
+          validateMetamaskPrivateKeyV2(privateKey, [EVM_ACCOUNT_TYPE])
+            .then(({ addressMap, autoAddPrefix }) => {
               if (amount) {
+                if (autoAddPrefix) {
+                  setAutoCorrect(`0x${privateKey}`);
+                }
+
                 setValidateState({});
               }
             })
@@ -122,7 +124,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     return () => {
       amount = false;
     };
-  }, [seedPhrase, changed]);
+  }, [privateKey, changed]);
 
   return (
     <Layout.Base
@@ -130,8 +132,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         children: validating ? t('Validating') : t('Import account'),
         icon: FooterIcon,
         onClick: onSubmit,
-        disabled: !seedPhrase || !!validateState.status,
-        loading: validating || submitting
+        disabled: !privateKey || !!validateState.status,
+        loading: validating || loading
       }}
       showBackButton={true}
       showSubHeader={true}
@@ -146,25 +148,19 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }
       ]}
       subHeaderPaddingVertical={true}
-      title={t<string>('Import from seed phrase')}
+      title={t<string>('Import via Private Key')}
     >
       <div className={className}>
         <div className='description'>
-          {t('To import an existing Polkdot wallet, please enter the recovery seed phrase here:')}
+          {t('To import an existing wallet, please enter the private key here')}
         </div>
         <Form className='form-container'>
           <Form.Item validateStatus={validateState.status}>
             <Input.TextArea
-              className='seed-phrase-input'
+              className='private-key-input'
               onChange={onChange}
-              placeholder={t('Secret phrase')}
-            />
-          </Form.Item>
-          <Form.Item>
-            <SelectAccountType
-              selectedItems={keyTypes}
-              setSelectedItems={setKeyTypes}
-              withLabel={true}
+              placeholder={t('Enter or paste private key')}
+              value={autoCorrect || privateKey || ''}
             />
           </Form.Item>
           <Form.Item
@@ -172,14 +168,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             validateStatus={validateState.status}
           />
         </Form>
-
-        {/* <Checkbox className='checkbox'>{t('Import multiple accounts from this seed phrase')}</Checkbox> */}
       </div>
     </Layout.Base>
   );
 };
 
-const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ImportPrivateKey = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     padding: token.padding,
 
@@ -195,7 +189,7 @@ const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) 
       marginTop: token.margin
     },
 
-    'private-key-input': {
+    '.private-key-input': {
 
       textarea: {
         resize: 'none',
@@ -205,4 +199,4 @@ const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) 
   };
 });
 
-export default ImportSeedPhrase;
+export default ImportPrivateKey;

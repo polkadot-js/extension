@@ -3,11 +3,11 @@
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
 import AccountCardSelection from '@subwallet/extension-koni-ui/components/Account/Card/AccountCardSelection';
-import AccountBriefInfo from '@subwallet/extension-koni-ui/components/Account/Info/AccountBriefInfo';
 import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
+import AccountBriefInfo from '@subwallet/extension-koni-ui/components/Account/Info/AccountBriefInfo';
+import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import SelectAccountFooter from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Footer';
 import { SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
@@ -16,9 +16,9 @@ import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account';
-import { BackgroundIcon, Icon, SelectModal } from '@subwallet/react-ui';
+import { BackgroundIcon, SelectModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, Icon as PhosphorIcon, Plug, Plugs, PlugsConnected } from 'phosphor-react';
+import { Icon as PhosphorIcon, Plug, Plugs, PlugsConnected } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';

@@ -24,6 +24,11 @@ const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'))
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
 const NewSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/NewSeedPhrase'));
 const ImportSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportSeedPhrase'));
+const ImportPrivateKey = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportPrivateKey'));
+const RestoreJson = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/RestoreJson'));
+const AttachReadOnly = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AttachReadOnly'));
+const ConnectParitySigner = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectParitySigner'));
+const ConnectKeystone = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -190,6 +195,26 @@ export const router = createHashRouter([{
         {
           path: 'import-seed-phrase',
           element: <ImportSeedPhrase />
+        },
+        {
+          path: 'import-private-key',
+          element: <ImportPrivateKey />
+        },
+        {
+          path: 'restore-json',
+          element: <RestoreJson />
+        },
+        {
+          path: 'attach-read-only',
+          element: <AttachReadOnly />
+        },
+        {
+          path: 'connect-parity-signer',
+          element: <ConnectParitySigner />
+        },
+        {
+          path: 'connect-keystone',
+          element: <ConnectKeystone />
         }
       ]
     }

@@ -46,32 +46,33 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     {
       backgroundColor: token['green-7'],
       icon: Leaf,
-      key: '1',
+      key: 'import-seed-phrase',
       label: 'Import from Seed Phrase',
       onClick: onClickItem('/accounts/import-seed-phrase')
     },
     {
       backgroundColor: token['orange-7'],
       icon: FileJs,
-      key: '2',
+      key: 'restore-json',
       label: 'Restore from Polkadot {js}',
       onClick: onClickItem('/accounts/restore-json')
     },
     {
       backgroundColor: token['gray-3'],
       icon: Wallet,
-      key: '3',
+      key: 'import-private-key',
       label: 'Import from MetaMask',
       onClick: onClickItem('/accounts/import-private-key')
     },
     {
       backgroundColor: token['blue-7'],
       icon: QrCode,
-      key: '3',
+      key: 'import-by-qr',
       label: 'Import by QR Code',
       onClick: onClickItem('/accounts/import-by-qr')
     }
   ], [onClickItem, token]);
+
   const renderIcon = useCallback((item: ImportAccountItem) => {
     return (
       <BackgroundIcon

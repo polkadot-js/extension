@@ -94,10 +94,10 @@ export const WalletModalContext = ({ children }: Props) => {
     >
       <Confirmations />
     </SwModal>
-    <CreateAccountModal />
-    <ImportAccountModal />
-    <AttachAccountModal />
-    <NewAccountModal />
-    <DeriveAccountModal />
+    {/* <CreateAccountModal /> */}
+    {/* <ImportAccountModal /> */}
+    {/* <AttachAccountModal /> */}
+    {/* <NewAccountModal /> */}
+    {/* <DeriveAccountModal /> */}
   </>;
 };

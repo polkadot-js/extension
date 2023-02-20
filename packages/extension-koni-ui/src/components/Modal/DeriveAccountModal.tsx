@@ -3,8 +3,8 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
-import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
+import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { DERIVE_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -21,6 +21,8 @@ type Props = ThemeProps;
 const modalId = DERIVE_ACCOUNT_MODAL;
 
 const renderEmpty = () => <EmptyAccount />;
+
+const t = (x: string) => x;
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();

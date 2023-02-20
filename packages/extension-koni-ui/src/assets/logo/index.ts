@@ -553,6 +553,12 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   tfa: require('./196.tfa.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  subwallet: require('./197.SubWallet.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  parity: require('./198.Parity.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  keystone: require('./199.Keystone.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

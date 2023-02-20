@@ -115,7 +115,8 @@ const SelectAccountType = styled(Component)<SelectAccountTypeProps>(({ theme: { 
       marginBottom: token.margin,
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
-      color: token.colorTextDescription
+      color: token.colorTextDescription,
+      textAlign: 'start'
     },
 
     '.items-container': {

@@ -40,6 +40,10 @@ const AccountBriefInfo = styled(Component)<Props>(({ theme: { token } }: Props) 
     alignItems: 'center',
     overflow: 'hidden',
 
+    '&.mr': {
+      marginRight: -1
+    },
+
     '.account-name': {
       fontWeight: token.headingFontWeight,
       fontSize: token.fontSizeHeading5,

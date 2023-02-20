@@ -78,7 +78,7 @@ const CreateAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
 
     '.icon-submit': {
       '--icon-color': token.colorTextBase
-    },
+    }
   };
 });
 

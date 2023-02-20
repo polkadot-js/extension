@@ -4,7 +4,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TxHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
@@ -112,11 +112,12 @@ export const updateBrowserConfirmationType = (action: PayloadAction<AppSettings[
   store.dispatch({ type: 'settings/updateBrowserConfirmationType', payload: action });
 };
 
-// export const updateUiSettings = (data: AccountJson) => {
-//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-// };
-//
-// export const subscribeUiSettings = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+export const updateUiSettings = (data: UiSettings) => {
+  store.dispatch({ type: 'accountState/updateUiSettings', payload: data });
+};
+
+export const subscribeUiSettings = lazySubscribeMessage('pri(settings.subscribe)', null, updateUiSettings, updateUiSettings);
+
 //
 // export const updateAppSettings = (data: AccountJson) => {
 //   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });

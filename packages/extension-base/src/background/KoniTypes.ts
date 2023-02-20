@@ -472,9 +472,9 @@ export type LanguageOptionType = {
 export type BrowserConfirmationType = 'extension'|'popup'|'window';
 
 export interface UiSettings {
-  language: LanguageType,
+  // language: LanguageType,
   browserConfirmationType: BrowserConfirmationType,
-  isShowZeroBalance: boolean,
+  // isShowZeroBalance: boolean,
   isShowBalance: boolean;
   accountAllLogo: string;
   theme: ThemeNames;

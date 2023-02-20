@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { AddNetworkRequestExternal, BalanceItem, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, NftCollection, NftItem, PriceJson, StakingItem, StakingRewardItem, TxHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, BalanceItem, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, PriceJson, StakingItem, StakingRewardItem, TxHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 
@@ -75,7 +75,13 @@ export interface BaseReduxStore {
   reduxStatus: ReduxStatus
 }
 
-export interface AppSettings extends UiSettings, SettingsStruct, BaseReduxStore {
+// todo: merge with UiSettings later
+export interface LocalUiSettings {
+  language: LanguageType,
+  isShowZeroBalance: boolean,
+}
+
+export interface AppSettings extends LocalUiSettings, UiSettings, SettingsStruct, BaseReduxStore {
   authUrls: Record<string, AuthUrlInfo>,
   mediaAllowed: boolean
 }

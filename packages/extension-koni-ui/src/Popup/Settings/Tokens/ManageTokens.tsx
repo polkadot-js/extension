@@ -1,17 +1,24 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
+import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
+import { _getAssetType, _isAssetFungibleToken, _isCustomAsset, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import useGetFungibleTokens from '@subwallet/extension-koni-ui/hooks/screen/settings/useGetFungibleTokens';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Button, ButtonProps, Switch, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Checkbox, Switch, SwList } from '@subwallet/react-ui';
+import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
 import Icon from '@subwallet/react-ui/es/icon';
+import PageIcon from '@subwallet/react-ui/es/page-icon';
+import SwModal from '@subwallet/react-ui/es/sw-modal';
+import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import TokenItem from '@subwallet/react-ui/es/web3-block/token-item';
-import { Coin, DotsThree, Plus } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import CN from 'classnames';
+import { Coin, DotsThree, FadersHorizontal, Plus } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -21,24 +28,90 @@ type Props = ThemeProps
 
 const TOKENS_PER_PAGE = 10;
 
+enum FilterValue {
+  ENABLED = 'enabled',
+  DISABLED = 'disabled',
+  PREDEFINED = 'predefined',
+  CUSTOM = 'custom',
+  NATIVE = 'native',
+  ERC20 = 'erc20'
+}
+
+const FILTER_OPTIONS = [
+  { label: 'Enabled tokens', value: FilterValue.ENABLED },
+  { label: 'Disabled tokens', value: FilterValue.DISABLED },
+  { label: 'Predefined tokens', value: FilterValue.PREDEFINED },
+  { label: 'Custom tokens', value: FilterValue.CUSTOM },
+  { label: 'Native tokens', value: FilterValue.NATIVE },
+  { label: 'ERC-20 tokens', value: FilterValue.ERC20 }
+];
+
+function filterFungibleTokens (assetRegistry: Record<string, _ChainAsset>, filters: FilterValue[]): _ChainAsset[] {
+  const filteredTokenList: _ChainAsset[] = [];
+
+  Object.values(assetRegistry).forEach((chainAsset) => {
+    let isValidationPassed = filters.length <= 0;
+
+    for (const filter of filters) {
+      switch (filter) { // TODO: add filter to ENABLED and DISABLED
+        case FilterValue.CUSTOM:
+          isValidationPassed = _isCustomAsset(chainAsset.slug);
+          break;
+        case FilterValue.ERC20:
+          isValidationPassed = _getAssetType(chainAsset) === _AssetType.ERC20;
+          break;
+        case FilterValue.NATIVE:
+          isValidationPassed = _isNativeToken(chainAsset);
+          break;
+        case FilterValue.PREDEFINED:
+          isValidationPassed = !_isCustomAsset(chainAsset.slug);
+          break;
+        default:
+          isValidationPassed = false;
+          break;
+      }
+
+      if (isValidationPassed) {
+        break; // only need to satisfy 1 filter (OR)
+      }
+    }
+
+    if (_isAssetFungibleToken(chainAsset) && isValidationPassed) {
+      filteredTokenList.push(chainAsset);
+    }
+  });
+
+  return filteredTokenList;
+}
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const allFungibleTokens = useGetFungibleTokens();
+  const [selectedFilters, setSelectedFilters] = useState<FilterValue[]>([]);
+  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const [fungibleTokenList, setFungibleTokenList] = useState<_ChainAsset[]>([]);
   const [page, setPage] = useState(1);
+  const [applyFilter, setApplyFilter] = useState(false);
+  const allFungibleTokens = useMemo(() => {
+    return filterFungibleTokens(assetRegistry, applyFilter ? selectedFilters : []);
+  }, [applyFilter, assetRegistry, selectedFilters]);
+
+  const hasMore = useMemo(() => {
+    return allFungibleTokens.length > fungibleTokenList.length;
+  }, [allFungibleTokens.length, fungibleTokenList.length]);
 
   useEffect(() => {
     setFungibleTokenList(allFungibleTokens.slice(0, TOKENS_PER_PAGE));
-    // eslint-disable-next-line
-  }, []);
+    setPage(1);
+  }, [allFungibleTokens]);
 
   const loadMoreTokens = useCallback(() => {
     setTimeout(() => { // delayed to avoid lagging on scroll
-      if (allFungibleTokens.length > fungibleTokenList.length) {
+      if (hasMore) {
         const nextPage = page + 1;
         const from = (nextPage - 1) * TOKENS_PER_PAGE;
         const to = from + TOKENS_PER_PAGE > allFungibleTokens.length ? allFungibleTokens.length : (from + TOKENS_PER_PAGE);
@@ -50,7 +123,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         setPage(nextPage);
       }
     }, 50);
-  }, [allFungibleTokens, fungibleTokenList, page]);
+  }, [allFungibleTokens, fungibleTokenList, hasMore, page]);
 
   const searchToken = useCallback((token: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -103,11 +176,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const emptyTokenList = useCallback(() => {
     return (
       <div className={'manage_tokens__empty_container'}>
-        <BackgroundIcon
-          backgroundColor={token['gray-3']}
-          iconColor={token['gray-4']}
-          phosphorIcon={Coin}
-        />
+        <div className={'manage_tokens__empty_icon_wrapper'}>
+          <PageIcon
+            color={token['gray-3']}
+            iconProps={{
+              phosphorIcon: Coin,
+              weight: 'fill'
+            }}
+          />
+        </div>
 
         <div className={'manage_tokens__empty_text_container'}>
           <div className={'manage_tokens__empty_title'}>{t<string>('No token')}</div>
@@ -117,22 +194,74 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [t, token]);
 
-  const subHeaderButton: ButtonProps[] = [
-    {
-      icon: <Icon
-        phosphorIcon={Plus}
-        size='sm'
-        type='phosphor'
-      />,
-      onClick: () => {
-        navigate('/settings/tokens/import', { state: { isExternalRequest: false } });
+  const subHeaderButton: ButtonProps[] = useMemo(() => {
+    return [
+      {
+        icon: <Icon
+          phosphorIcon={Plus}
+          size='sm'
+          type='phosphor'
+        />,
+        onClick: () => {
+          navigate('/settings/tokens/import', { state: { isExternalRequest: false } });
+        }
       }
-    }
-  ];
+    ];
+  }, [navigate]);
 
   const onBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
+
+  const openFilterModal = useCallback(() => {
+    activeModal('filterTokenModal');
+    setApplyFilter(false);
+  }, [activeModal]);
+
+  const closeFilterModal = useCallback(() => {
+    inactiveModal('filterTokenModal');
+  }, [inactiveModal]);
+
+  const onApplyFilter = useCallback(() => {
+    inactiveModal('filterTokenModal');
+    setApplyFilter(true);
+  }, [inactiveModal]);
+
+  const filterModalFooter = useCallback(() => {
+    return (
+      <Button
+        block={true}
+        icon={<Icon
+          customSize={'28px'}
+          phosphorIcon={FadersHorizontal}
+          type='phosphor'
+          weight={'bold'}
+        />}
+        onClick={onApplyFilter}
+      >
+        <span className={'manage_tokens__token_filter_button'}>{t('Apply filter')}</span>
+      </Button>
+    );
+  }, [t, onApplyFilter]);
+
+  const onChangeFilterOption = useCallback((e: CheckboxChangeEvent) => {
+    setApplyFilter(false);
+    const changedValue = e.target.value as FilterValue;
+
+    if (e.target.checked) {
+      setSelectedFilters([...selectedFilters, changedValue]);
+    } else {
+      const newSelectedFilters: FilterValue[] = [];
+
+      selectedFilters.forEach((filterValue) => {
+        if (filterValue !== changedValue) {
+          newSelectedFilters.push(filterValue);
+        }
+      });
+
+      setSelectedFilters(newSelectedFilters);
+    }
+  }, [selectedFilters]);
 
   return (
     <PageWrapper
@@ -149,6 +278,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderPaddingVertical={true}
         title={t<string>('Manage tokens')}
       >
+        <Button
+          icon={<Icon
+            phosphorIcon={FadersHorizontal}
+            size='sm'
+            type='phosphor'
+          />}
+          onClick={openFilterModal}
+        />
+
         <SwList.Section
           className={'manage_tokens__container'}
           enableSearchInput={true}
@@ -156,7 +294,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           list={fungibleTokenList}
           minColumnWidth={'172px'}
           pagination={{
-            hasMore: allFungibleTokens.length > fungibleTokenList.length,
+            hasMore,
             loadMore: loadMoreTokens
           }}
           renderItem={renderTokenItem}
@@ -165,6 +303,37 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           searchFunction={searchToken}
           searchPlaceholder={t<string>('Search token')}
         />
+
+        <SwModal
+          className={CN('manage_tokens__token_filter_modal')}
+          footer={filterModalFooter()}
+          id={'filterTokenModal'}
+          onCancel={closeFilterModal}
+          onOk={closeFilterModal}
+          title={t<string>('Filter')}
+          wrapClassName={className}
+        >
+          <div className={'manage_tokens__filter_option_wrapper'}>
+            {
+              FILTER_OPTIONS.map((filterOption) => {
+                return (
+                  <div
+                    className={'manage_tokens__filter_option'}
+                    key={filterOption.label}
+                  >
+                    <Checkbox
+                      checked={selectedFilters.includes(filterOption.value)}
+                      onChange={onChangeFilterOption}
+                      value={filterOption.value}
+                    >
+                      <span className={'manage_tokens__filter_option_label'}>{filterOption.label}</span>
+                    </Checkbox>
+                  </div>
+                );
+              })
+            }
+          </div>
+        </SwModal>
       </Layout.Base>
     </PageWrapper>
   );
@@ -219,9 +388,34 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
       color: token.colorTextTertiary
     },
 
-    '.': {
-
+    '.manage_tokens__empty_icon_wrapper': {
+      display: 'flex',
+      justifyContent: 'center'
     },
+
+    '.manage_tokens__token_filter_button': {
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      fontWeight: token.headingFontWeight
+    },
+
+    '.manage_tokens__filter_option_wrapper': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.marginLG
+    },
+
+    '.manage_tokens__filter_option': {
+      width: '100%'
+    },
+
+    '.manage_tokens__filter_option_label': {
+      color: token.colorTextLight1
+    },
+
+    '.ant-web3-block': {
+      cursor: 'default'
+    }
   });
 });
 

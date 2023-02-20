@@ -324,3 +324,7 @@ export function _isChainTestNet (chainInfo: _ChainInfo): boolean {
 export function _isAssetFungibleToken (chainAsset: _ChainAsset): boolean {
   return ![_AssetType.ERC721, _AssetType.PSP34, _AssetType.UNKNOWN].includes(chainAsset.assetType);
 }
+
+export function _getAssetType (chainAsset: _ChainAsset): _AssetType {
+  return chainAsset.assetType;
+}

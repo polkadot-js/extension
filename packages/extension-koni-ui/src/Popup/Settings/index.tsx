@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
-import { EXTENSION_VERSION } from '@subwallet/extension-koni-ui/constants/commont';
+import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/commont';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -52,6 +52,10 @@ function generateRightIcon (icon: SwIconProps['phosphorIcon']): React.ReactNode 
       type='phosphor'
     />
   );
+}
+
+function openInNewTab (url: string) {
+  window.open(url, '_blank');
 }
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
@@ -130,21 +134,30 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: TwitterLogo,
           leftIconBgColor: token['blue-6'],
           rightIcon: ArrowSquareOut,
-          title: 'Twitter'
+          title: 'Twitter',
+          onClick: () => {
+            openInNewTab(TWITTER_URL);
+          }
         },
         {
           key: 'discord',
           leftIcon: DiscordLogo,
           leftIconBgColor: token['geekblue-8'],
           rightIcon: ArrowSquareOut,
-          title: 'Discord'
+          title: 'Discord',
+          onClick: () => {
+            openInNewTab(DISCORD_URL);
+          }
         },
         {
           key: 'telegram',
           leftIcon: TelegramLogo,
           leftIconBgColor: token['blue-5'],
           rightIcon: ArrowSquareOut,
-          title: 'Telegram'
+          title: 'Telegram',
+          onClick: () => {
+            openInNewTab(TELEGRAM_URL);
+          }
         }
       ]
     },
@@ -157,28 +170,40 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: ShieldCheck,
           leftIconBgColor: token['red-6'],
           rightIcon: ArrowSquareOut,
-          title: 'Website'
+          title: 'Website',
+          onClick: () => {
+            openInNewTab(WEBSITE_URL);
+          }
         },
         {
           key: 'user-manual',
           leftIcon: Book,
           leftIconBgColor: token['green-6'],
           rightIcon: ArrowSquareOut,
-          title: 'User manual'
+          title: 'User manual',
+          onClick: () => {
+            openInNewTab(WIKI_URL);
+          }
         },
         {
           key: 'term-of-service',
           leftIcon: BookOpen,
           leftIconBgColor: token['volcano-7'],
           rightIcon: ArrowSquareOut,
-          title: 'Term of service'
+          title: 'Term of service',
+          onClick: () => {
+            openInNewTab(TERMS_OF_SERVICE_URL);
+          }
         },
         {
           key: 'privacy-policy',
           leftIcon: BookBookmark,
           leftIconBgColor: token['geekblue-6'],
           rightIcon: ArrowSquareOut,
-          title: 'Privacy policy'
+          title: 'Privacy policy',
+          onClick: () => {
+            openInNewTab(PRIVACY_AND_POLICY_URL);
+          }
         }
       ]
     }

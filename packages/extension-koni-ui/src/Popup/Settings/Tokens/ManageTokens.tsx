@@ -7,10 +7,10 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useGetFungibleTokens from '@subwallet/extension-koni-ui/hooks/screen/settings/useGetFungibleTokens';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, ButtonProps, Switch, SwList } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, ButtonProps, Switch, SwList } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import TokenItem from '@subwallet/react-ui/es/web3-block/token-item';
-import { Coin, Plus } from 'phosphor-react';
+import { Coin, DotsThree, Plus } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -61,32 +61,57 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
+  const renderTokenRightItem = useCallback((tokenInfo: _ChainAsset) => {
+    const onClick = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>) => {
+      navigate(`/settings/tokens/detail/${tokenInfo.slug}`);
+    };
+
+    return (
+      <div className={'manage_tokens__right_item_container'}>
+        <Switch />
+        <Button
+          icon={<Icon
+            phosphorIcon={DotsThree}
+            size='sm'
+            type='phosphor'
+          />}
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={onClick}
+          size={'xs'}
+          type={'ghost'}
+        />
+      </div>
+    );
+  }, [navigate]);
+
   const renderTokenItem = useCallback((tokenInfo: _ChainAsset) => {
-    return (<TokenItem
-      dividerPadding={58}
-      isShowSubLogo={true}
-      key={tokenInfo.slug}
-      name={tokenInfo.symbol}
-      networkKey={tokenInfo.originChain}
-      rightItem={<Switch />}
-      subName={tokenInfo.originChain}
-      subNetworkKey={tokenInfo.originChain}
-      withDivider={true}
-    />);
-  }, []);
+    return (
+      <TokenItem
+        dividerPadding={58}
+        isShowSubLogo={true}
+        key={tokenInfo.slug}
+        name={tokenInfo.symbol}
+        rightItem={renderTokenRightItem(tokenInfo)}
+        subName={tokenInfo.originChain}
+        subNetworkKey={tokenInfo.originChain}
+        symbol={tokenInfo.symbol.toLowerCase()}
+        withDivider={true}
+      />
+    );
+  }, [renderTokenRightItem]);
 
   const emptyTokenList = useCallback(() => {
     return (
-      <div className={'nft_empty__container'}>
+      <div className={'manage_tokens__empty_container'}>
         <BackgroundIcon
           backgroundColor={token['gray-3']}
           iconColor={token['gray-4']}
           phosphorIcon={Coin}
         />
 
-        <div className={'nft_empty__text__container'}>
-          <div className={'nft_empty__title'}>{t<string>('No NFT collectible')}</div>
-          <div className={'nft_empty__subtitle'}>{t<string>('Your NFT collectible will appear here!')}</div>
+        <div className={'manage_tokens__empty_text_container'}>
+          <div className={'manage_tokens__empty_title'}>{t<string>('No token')}</div>
+          <div className={'manage_tokens__empty_subtitle'}>{t<string>('Your token will appear here.')}</div>
         </div>
       </div>
     );
@@ -138,7 +163,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           renderOnScroll={false}
           renderWhenEmpty={emptyTokenList}
           searchFunction={searchToken}
-          searchPlaceholder={t<string>('Search collection name')}
+          searchPlaceholder={t<string>('Search token')}
         />
       </Layout.Base>
     </PageWrapper>
@@ -156,7 +181,47 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.manage_tokens__container': {
       paddingTop: 14,
       flex: 1
-    }
+    },
+
+    '.manage_tokens__right_item_container': {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+
+    '.manage_tokens__empty_container': {
+      marginTop: 44,
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: token.padding,
+      flexDirection: 'column',
+      alignContent: 'center'
+    },
+
+    '.manage_tokens__empty_text_container': {
+      display: 'flex',
+      flexDirection: 'column',
+      alignContent: 'center',
+      justifyContent: 'center',
+      flexWrap: 'wrap'
+    },
+
+    '.manage_tokens__empty_title': {
+      fontWeight: token.headingFontWeight,
+      textAlign: 'center',
+      fontSize: token.fontSizeLG,
+      color: token.colorText
+    },
+
+    '.manage_tokens__empty_subtitle': {
+      marginTop: 6,
+      textAlign: 'center',
+      color: token.colorTextTertiary
+    },
+
+    '.': {
+
+    },
   });
 });
 

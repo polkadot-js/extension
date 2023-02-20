@@ -197,6 +197,10 @@ export const router = createHashRouter([{
           {
             path: 'import',
             element: <FungibleTokenImport />
+          },
+          {
+            path: 'detail/:tokenSlug',
+            element: <Example />
           }
         ]
       }, {

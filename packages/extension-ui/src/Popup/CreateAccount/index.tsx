@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import styled from 'styled-components';
 
 import { ActionContext, Address, Dropdown, Loading } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
@@ -11,6 +10,7 @@ import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed, validateSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
+import { styled } from '../../styled';
 import { DEFAULT_TYPE } from '../../util/defaultType';
 import Mnemonic from './Mnemonic';
 

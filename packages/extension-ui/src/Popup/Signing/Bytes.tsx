@@ -4,11 +4,11 @@
 import type { ThemeProps } from '../../types';
 
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 
 import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
 
 import useTranslation from '../../hooks/useTranslation';
+import { styled } from '../../styled';
 
 interface Props {
   className?: string;

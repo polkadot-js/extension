@@ -6,7 +6,6 @@ import type { ThemeProps } from '../types';
 import { faArrowLeft, faCog, faPlusCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
 
 import logo from '../assets/pjs.svg';
 import { ActionContext } from '../components';
@@ -15,6 +14,7 @@ import Link from '../components/Link';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useTranslation from '../hooks/useTranslation';
 import { getConnectedTabsUrl } from '../messaging';
+import { styled } from '../styled';
 import MenuAdd from './MenuAdd';
 import MenuSettings from './MenuSettings';
 

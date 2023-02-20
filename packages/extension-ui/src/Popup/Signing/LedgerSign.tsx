@@ -7,11 +7,11 @@ import type { HexString } from '@polkadot/util/types';
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
 
 import { Button, Warning } from '../../components';
 import { useLedger } from '../../hooks/useLedger';
 import useTranslation from '../../hooks/useTranslation';
+import { styled } from '../../styled';
 
 interface Props {
   accountIndex?: number;

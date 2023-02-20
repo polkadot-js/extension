@@ -4,11 +4,11 @@
 import type { ThemeProps } from '../types';
 
 import React, { useCallback, useContext } from 'react';
-import styled from 'styled-components';
 
 import { ActionContext, Box, Button, ButtonArea, List, VerticalSpace } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { Header } from '../partials';
+import { styled } from '../styled';
 
 interface Props extends ThemeProps {
   className?: string;

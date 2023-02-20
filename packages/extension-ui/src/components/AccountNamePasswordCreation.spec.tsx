@@ -6,7 +6,7 @@ import '@polkadot/extension-mocks/chrome';
 import type { ReactWrapper } from 'enzyme';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
-import { configure, mount } from 'enzyme';
+import enzyme from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
@@ -16,6 +16,8 @@ import { AccountNamePasswordCreation, Input, InputWithLabel, NextStepButton } fr
 
 // For this file, there are a lot of them
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+
+const { configure, mount } = enzyme;
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });

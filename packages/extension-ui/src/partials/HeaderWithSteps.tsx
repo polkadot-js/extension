@@ -4,9 +4,9 @@
 import type { ThemeProps } from '../types';
 
 import React, { useCallback, useContext } from 'react';
-import styled from 'styled-components';
 
 import { ActionContext, ActionText } from '../components';
+import { styled } from '../styled';
 import Header from './Header';
 
 interface Props extends ThemeProps {

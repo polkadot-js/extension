@@ -5,12 +5,12 @@ import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useParams } from 'react-router';
-import styled from 'styled-components';
 
 import { AccountContext, ActionContext, Button } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { getAuthList, updateAuthorization } from '../../messaging';
 import { AccountSelection, Header } from '../../partials';
+import { styled } from '../../styled';
 
 interface Props extends ThemeProps {
   className?: string;

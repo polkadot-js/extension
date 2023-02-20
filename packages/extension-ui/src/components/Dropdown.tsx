@@ -4,9 +4,9 @@
 import type { ThemeProps } from '../types';
 
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 
 import arrow from '../assets/arrow-down.svg';
+import { styled } from '../styled';
 import Label from './Label';
 
 interface DropdownOption {

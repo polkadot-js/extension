@@ -4,7 +4,8 @@
 import type { ThemeProps } from '../types';
 
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
+
+import { styled } from '../styled';
 
 interface Props {
   checked: boolean;

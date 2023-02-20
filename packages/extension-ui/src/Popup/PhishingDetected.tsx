@@ -6,10 +6,10 @@ import type { ThemeProps } from '../types';
 import React from 'react';
 import { Trans } from 'react-i18next';
 import { useParams } from 'react-router';
-import styled from 'styled-components';
 
 import useTranslation from '../hooks/useTranslation';
 import { Header } from '../partials';
+import { styled } from '../styled';
 
 interface Props extends ThemeProps {
   className?: string;

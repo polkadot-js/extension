@@ -4,11 +4,11 @@
 import type { ThemeProps } from '../../types';
 
 import React, { useContext } from 'react';
-import styled from 'styled-components';
 
 import { AuthorizeReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
+import { styled } from '../../styled';
 import Request from './Request';
 
 interface Props extends ThemeProps {

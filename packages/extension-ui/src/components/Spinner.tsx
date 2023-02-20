@@ -4,9 +4,9 @@
 import type { ThemeProps } from '../types';
 
 import React from 'react';
-import styled from 'styled-components';
 
 import spinnerSrc from '../assets/spinner.png';
+import { styled } from '../styled';
 
 interface Props extends ThemeProps {
   className?: string;

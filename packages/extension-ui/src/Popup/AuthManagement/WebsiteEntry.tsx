@@ -5,11 +5,12 @@ import type { ThemeProps } from '../../types';
 
 import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 
 import { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
 import { RemoveAuth } from '@polkadot/extension-ui/components';
 import { useTranslation } from '@polkadot/extension-ui/components/translate';
+
+import { styled } from '../../styled';
 
 interface Props extends ThemeProps {
   className?: string;

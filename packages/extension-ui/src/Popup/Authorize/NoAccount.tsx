@@ -6,10 +6,11 @@ import type { ThemeProps } from '../../types';
 import { t } from 'i18next';
 import React, { useCallback } from 'react';
 import { Trans } from 'react-i18next';
-import styled from 'styled-components';
 
 import { Button, Warning } from '@polkadot/extension-ui/components';
 import { deleteAuthRequest } from '@polkadot/extension-ui/messaging';
+
+import { styled } from '../../styled';
 
 interface Props extends ThemeProps {
   authId: string;

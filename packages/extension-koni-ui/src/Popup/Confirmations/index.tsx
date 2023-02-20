@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AuthorizeRequest } from '@subwallet/extension-base/background/types';
+import { AuthorizeRequest, MetadataRequest } from '@subwallet/extension-base/background/types';
 import useConfirmationsInfo from '@subwallet/extension-koni-ui/hooks/screen/confirmation/useConfirmationInfo';
 import AuthorizeConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AuthorizeConfirmation';
+import MetadataConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/MetadataConfirmation';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -51,6 +52,8 @@ const Component = function ({ className }: Props) {
     />
     {confirmation?.type === 'authorizeRequest' &&
       <AuthorizeConfirmation request={confirmation.item as AuthorizeRequest} />}
+    {confirmation?.type === 'metadataRequest' &&
+      <MetadataConfirmation request={confirmation.item as MetadataRequest} />}
   </div>;
 };
 

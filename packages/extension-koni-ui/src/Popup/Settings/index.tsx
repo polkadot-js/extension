@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
-import { EXTENSION_VERSION } from '@subwallet/extension-koni-ui/constants/commont';
+import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/commont';
+import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
+import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
 import { ButtonProps } from '@subwallet/react-ui/es/button';
@@ -20,6 +22,7 @@ type SettingItemType = {
   rightIcon: SwIconProps['phosphorIcon'],
   title: string,
   onClick?: () => void,
+  isHidden?: boolean,
 };
 
 type SettingGroupItemType = {
@@ -51,9 +54,14 @@ function generateRightIcon (icon: SwIconProps['phosphorIcon']): React.ReactNode 
   );
 }
 
+function openInNewTab (url: string) {
+  window.open(url, '_blank');
+}
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
+  const isPopup = useIsPopup();
 
   // todo: i18n all titles, labels below
   const SettingGroupItemType: SettingGroupItemType[] = [
@@ -65,14 +73,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: FrameCorners,
           leftIconBgColor: token.colorPrimary,
           rightIcon: ArrowsOut,
-          title: 'Expand view'
+          title: 'Expand view',
+          onClick: () => {
+            windowOpen('/').catch(console.error);
+          },
+          isHidden: !isPopup
         },
         {
           key: 'general-settings',
           leftIcon: GlobeHemisphereEast,
           leftIconBgColor: token['magenta-6'],
           rightIcon: CaretRight,
-          title: 'General settings'
+          title: 'General settings',
+          onClick: () => {
+            navigate('/settings/general');
+          }
         },
         {
           key: 'security-settings',
@@ -122,21 +137,30 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: TwitterLogo,
           leftIconBgColor: token['blue-6'],
           rightIcon: ArrowSquareOut,
-          title: 'Twitter'
+          title: 'Twitter',
+          onClick: () => {
+            openInNewTab(TWITTER_URL);
+          }
         },
         {
           key: 'discord',
           leftIcon: DiscordLogo,
           leftIconBgColor: token['geekblue-8'],
           rightIcon: ArrowSquareOut,
-          title: 'Discord'
+          title: 'Discord',
+          onClick: () => {
+            openInNewTab(DISCORD_URL);
+          }
         },
         {
           key: 'telegram',
           leftIcon: TelegramLogo,
           leftIconBgColor: token['blue-5'],
           rightIcon: ArrowSquareOut,
-          title: 'Telegram'
+          title: 'Telegram',
+          onClick: () => {
+            openInNewTab(TELEGRAM_URL);
+          }
         }
       ]
     },
@@ -149,28 +173,40 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: ShieldCheck,
           leftIconBgColor: token['red-6'],
           rightIcon: ArrowSquareOut,
-          title: 'Website'
+          title: 'Website',
+          onClick: () => {
+            openInNewTab(WEBSITE_URL);
+          }
         },
         {
           key: 'user-manual',
           leftIcon: Book,
           leftIconBgColor: token['green-6'],
           rightIcon: ArrowSquareOut,
-          title: 'User manual'
+          title: 'User manual',
+          onClick: () => {
+            openInNewTab(WIKI_URL);
+          }
         },
         {
           key: 'term-of-service',
           leftIcon: BookOpen,
           leftIconBgColor: token['volcano-7'],
           rightIcon: ArrowSquareOut,
-          title: 'Term of service'
+          title: 'Term of service',
+          onClick: () => {
+            openInNewTab(TERMS_OF_SERVICE_URL);
+          }
         },
         {
           key: 'privacy-policy',
           leftIcon: BookBookmark,
           leftIconBgColor: token['geekblue-6'],
           rightIcon: ArrowSquareOut,
-          title: 'Privacy policy'
+          title: 'Privacy policy',
+          onClick: () => {
+            openInNewTab(PRIVACY_AND_POLICY_URL);
+          }
         }
       ]
     }
@@ -217,16 +253,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   {!!group.label && (<div className='__group-label'>{group.label}</div>)}
 
                   <div className={'__group-content'}>
-                    {group.items.map((item) => (
-                      <SettingItem
-                        className={'__setting-item'}
-                        key={item.key}
-                        leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
-                        name={item.title}
-                        onPressItem={item.onClick}
-                        rightItem={generateRightIcon(item.rightIcon)}
-                      />
-                    ))}
+                    {group.items.map((item) => item.isHidden
+                      ? null
+                      : (
+                        <SettingItem
+                          className={'__setting-item'}
+                          key={item.key}
+                          leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
+                          name={item.title}
+                          onPressItem={item.onClick}
+                          rightItem={generateRightIcon(item.rightIcon)}
+                        />
+                      ))}
                   </div>
                 </div>
               );
@@ -308,7 +346,7 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      marginRight: -token.marginSM,
+      marginRight: -token.marginXS,
       color: token.colorTextLight4
     },
 

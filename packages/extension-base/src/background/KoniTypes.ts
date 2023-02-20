@@ -461,17 +461,31 @@ export interface CurrentAccountInfo {
   allGenesisHash?: string;
 }
 
-export interface RequestSettingsType {
+export type LanguageType = 'en'
+|'zh'
+|'fr'
+|'tr'
+|'pl'
+|'th'
+|'ur';
+
+export type LanguageOptionType = {
+  text: string;
+  value: LanguageType;
+}
+
+export type BrowserConfirmationType = 'extension'|'popup'|'window';
+
+export interface UiSettings {
+  // language: LanguageType,
+  browserConfirmationType: BrowserConfirmationType,
+  // isShowZeroBalance: boolean,
   isShowBalance: boolean;
   accountAllLogo: string;
   theme: ThemeNames;
 }
 
-export interface UiSettings {
-  isShowBalance: boolean;
-  accountAllLogo: string;
-  theme: ThemeNames;
-}
+export type RequestSettingsType = UiSettings;
 
 export interface RandomTestRequest {
   start: number;
@@ -1762,6 +1776,7 @@ export interface KoniRequestSignatures {
   'pri(settings.subscribe)': [null, UiSettings, UiSettings];
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
+  'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TxHistoryItem[], TxHistoryItem[]];

@@ -11,7 +11,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, ShieldSlash, UserPlus, XCircle } from 'phosphor-react';
+import { ShieldSlash, UserPlus } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -179,17 +179,16 @@ function Component ({ className, request }: Props) {
           />
           <Button
             disabled={loading}
-            icon={<Icon phosphorIcon={XCircle} />}
+            schema={'secondary'}
             onClick={onCancel}
           >
             {t('Cancel')}
           </Button>
           <Button
-            icon={<Icon phosphorIcon={CheckCircle} />}
             loading={loading}
             onClick={onConfirm}
           >
-            {t('Confirm')}
+            {t('Connect')}
           </Button>
         </>}
         {visibleAccounts.length === 0 && <Button

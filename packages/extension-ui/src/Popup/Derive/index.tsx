@@ -4,7 +4,7 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 
-import { AccountContext, AccountNamePasswordCreation, ActionContext, Address } from '../../components';
+import { AccountContext, AccountNamePasswordCreation, ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { deriveAccount } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
@@ -36,9 +36,15 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
   const [account, setAccount] = useState<null | PathState>(null);
   const [name, setName] = useState<string | null>(null);
   const [parentPassword, setParentPassword] = useState<string | null>(null);
+  const [step, setStep] = useState(1);
 
   const parentGenesis = useMemo(
     () => accounts.find((a) => a.address === parentAddress)?.genesisHash || null,
+    [accounts, parentAddress]
+  );
+
+  const parentIsExternal = useMemo(
+    () => accounts.find((a) => a.address === parentAddress)?.isExternal || 'false',
     [accounts, parentAddress]
   );
 
@@ -64,44 +70,39 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
     setParentPassword(parentPassword);
   }, []);
 
-  const _onBackClick = useCallback(() => {
-    setAccount(null);
-  }, []);
+  const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
+
+  const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
 
   return (
     <>
       <HeaderWithSteps
-        step={account ? 2 : 1}
-        text={t<string>('Add new account')}
-        // TODO: PLACEHOLDER
+        step={step}
+        text={t<string>('Derive sub-account')}
         total={2}
         withBackArrow
       />
-      {!account && (
+      {!account && step === 1 && (
         <SelectParent
+          externalString={parentIsExternal}
           isLocked={isLocked}
           onDerivationConfirmed={_onDerivationConfirmed}
+          onNextStep={_onNextStep}
           parentAddress={parentAddress}
           parentGenesis={parentGenesis}
         />
       )}
-      {account && (
-        <>
-          <div>
-            <Address
-              address={account.address}
-              genesisHash={parentGenesis}
-              name={name}
-            />
-          </div>
-          <AccountNamePasswordCreation
-            buttonLabel={t<string>('Create derived account')}
-            isBusy={isBusy}
-            onBackClick={_onBackClick}
-            onCreate={_onCreate}
-            onNameChange={setName}
-          />
-        </>
+      {account && step === 2 && (
+        <AccountNamePasswordCreation
+          address={account.address}
+          buttonLabel={t<string>('Create')}
+          genesisHash={parentGenesis}
+          isBusy={isBusy}
+          isDeriving
+          onBackClick={goTo(`/account/edit-menu/${parentAddress}?isExternal=${parentIsExternal?.toString()}`)}
+          onCreate={_onCreate}
+          onNameChange={setName}
+        />
       )}
     </>
   );

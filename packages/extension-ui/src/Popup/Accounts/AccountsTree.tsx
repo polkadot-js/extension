@@ -52,6 +52,10 @@ function AccountsTree({
 }
 
 export default styled(AccountsTree)`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
   .accountWichCheckbox {
     display: flex;
     align-items: center;

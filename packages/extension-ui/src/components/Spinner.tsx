@@ -6,7 +6,7 @@ import type { ThemeProps } from '../types';
 import React from 'react';
 import styled from 'styled-components';
 
-import spinnerSrc from '../assets/spinner.png';
+import spinnerDotsSrc from '../assets/waiting.svg';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -17,7 +17,7 @@ function Spinner({ className = '', size = 'normal' }: Props): React.ReactElement
   return (
     <img
       className={`${className} ${size}Size`}
-      src={spinnerSrc}
+      src={spinnerDotsSrc}
     />
   );
 }

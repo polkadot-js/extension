@@ -28,6 +28,10 @@ const FooterWithoutMargin = styled(HelperFooter)`
   .icon-container {
     margin-top: 4px;
   }
+  
+  .text-container {
+    display: flex;
+  }
 `;
 
 function AddAccount({ className }: Props): React.ReactElement<Props> {

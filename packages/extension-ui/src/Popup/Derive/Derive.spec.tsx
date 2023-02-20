@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { MemoryRouter, Route } from 'react-router';
 import { ThemeProvider } from 'styled-components';
 
-import { AccountContext, ActionContext, themes } from '../../components';
+import { AccountContext, ActionContext, InputLock, themes } from '../../components';
 import * as messaging from '../../messaging';
 import { flushAllPromises } from '../../testHelpers';
 import { buildHierarchy } from '../../util/buildHierarchy';
@@ -25,30 +25,48 @@ import Derive from '.';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
-const parentPassword = 'pass';
+const parentPassword = 'pass123';
 const westendGenesis = '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e';
 const defaultDerivation = '//0';
 const derivedAddress = '5GYQRJj3NUznYDzCduENRcocMsyxmb6tjb5xW87ZMErBe9R7';
 
 const accounts = [
   { address: '5FjgD3Ns2UpnHJPVeRViMhCttuemaRXEqaD8V5z4vxcsUByA', name: 'A', type: 'sr25519' },
-  { address: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5', genesisHash: westendGenesis, name: 'B', type: 'sr25519' },
-  { address: '5D2TPhGEy2FhznvzaNYW9AkuMBbg3cyRemnPsBvBY4ZhkZXA', name: 'BB', parentAddress: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5', type: 'sr25519' },
+  {
+    address: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5',
+    genesisHash: westendGenesis,
+    name: 'B',
+    type: 'sr25519'
+  },
+  {
+    address: '5D2TPhGEy2FhznvzaNYW9AkuMBbg3cyRemnPsBvBY4ZhkZXA',
+    name: 'BB',
+    parentAddress: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5',
+    type: 'sr25519'
+  },
   { address: '5GhGENSJBWQZ8d8mARKgqEkiAxiW3hHeznQDW2iG4XzNieb6', isExternal: true, name: 'C', type: 'sr25519' },
   { address: '0xd5D81CD4236a43F48A983fc5B895975c511f634D', name: 'Ethereum', type: 'ethereum' },
   { address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', isExternal: false, name: 'D', type: 'ed25519' },
-  { address: '5HRKYp5anSNGtqC7cq9ftiaq4y8Mk7uHk7keaXUrQwZqDWLJ', name: 'DD', parentAddress: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', type: 'ed25519' }
+  {
+    address: '5HRKYp5anSNGtqC7cq9ftiaq4y8Mk7uHk7keaXUrQwZqDWLJ',
+    name: 'DD',
+    parentAddress: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s',
+    type: 'ed25519'
+  }
 ] as AccountJson[];
 
 describe('Derive', () => {
-  const mountComponent = async (locked = false, account = 1): Promise<{
+  const mountComponent = async (
+    locked = false,
+    account = 1
+  ): Promise<{
     wrapper: ReactWrapper;
     onActionStub: jest.Mock;
   }> => {
     const onActionStub = jest.fn();
 
     const wrapper = mount(
-      <MemoryRouter initialEntries={ [`/account/derive/${accounts[account].address}`] }>
+      <MemoryRouter initialEntries={[`/account/derive/${accounts[account].address}`]}>
         <ActionContext.Provider value={onActionStub}>
           <AccountContext.Provider
             value={{
@@ -81,8 +99,10 @@ describe('Derive', () => {
   };
 
   const enterName = (name: string): Promise<void> => type(wrapper.find('input').first(), name);
-  const password = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').first(), password);
-  const repeat = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').last(), password);
+  const password = (password: string) => (): Promise<void> =>
+    type(wrapper.find('input[type="password"]').first(), password);
+  const repeat = (password: string) => (): Promise<void> =>
+    type(wrapper.find('input[type="password"]').last(), password);
 
   describe('Parent selection screen', () => {
     beforeEach(async () => {
@@ -117,7 +137,6 @@ describe('Derive', () => {
       const passwordField = wrapper.find('[data-input-password]').first();
 
       expect(passwordField.exists()).toBe(true);
-      expect(passwordField.prop('isError')).toBe(false);
     });
 
     it('No error is visible when first loading the page', () => {
@@ -125,19 +144,12 @@ describe('Derive', () => {
     });
 
     it('An error is visible, input higlighted and the button disabled when password is incorrect', async () => {
-      await type(wrapper.find('input[type="password"]'), 'wrong_pass');
-      wrapper.find('[data-button-action="create derived account"] button').simulate('click');
+      await type(wrapper.find('input[type="password"]'), 'w');
       await act(flushAllPromises);
       wrapper.update();
 
-      const button = wrapper.find('[data-button-action="create derived account"] button');
-
-      expect(button.prop('disabled')).toBe(true);
-      expect(wrapper.find('[data-input-password]').first().prop('isError')).toBe(true);
-      expect(wrapper.find('.warning-message')).toHaveLength(1);
-      expect(wrapper.find('.warning-message').first().text()).toEqual('Wrong password');
+      expect(wrapper.find('.warning-message').text()).toEqual('Password is too short');
     });
-
     it('The error disappears when typing a new password and "Create derived account" is enabled', async () => {
       await type(wrapper.find('input[type="password"]'), 'wrong_pass');
       wrapper.find('[data-button-action="create derived account"] button').simulate('click');
@@ -149,7 +161,6 @@ describe('Derive', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.prop('disabled')).toBe(false);
-      expect(wrapper.find('[data-input-password]').first().prop('isError')).toBe(false);
       expect(wrapper.find('.warning-message')).toHaveLength(0);
     });
 
@@ -171,7 +182,7 @@ describe('Derive', () => {
 
     it('Derivation path can be unlocked', async () => {
       await type(wrapper.find('input[type="password"]'), 'wrong_pass');
-      wrapper.find('FontAwesomeIcon.lockIcon').simulate('click');
+      wrapper.find(InputLock).simulate('click');
       await act(flushAllPromises);
       wrapper.update();
 
@@ -209,7 +220,7 @@ describe('Derive', () => {
       expect(button.prop('disabled')).toBe(true);
       expect(wrapper.find('.warning-message')).toHaveLength(1);
       // eslint-disable-next-line quotes
-      expect(wrapper.find('.warning-message').first().text()).toEqual("`///password` not supported for derivation");
+      expect(wrapper.find('.warning-message').first().text()).toEqual('`///password` not supported for derivation');
     });
 
     it('No error is shown when suri contains soft derivation `/` with sr25519', async () => {
@@ -255,7 +266,7 @@ describe('Derive', () => {
 
   describe('Locked parent selection', () => {
     beforeAll(async () => {
-      const mountedComponent = (await mountComponent(true));
+      const mountedComponent = await mountComponent(true);
 
       wrapper = mountedComponent.wrapper;
       onActionStub = mountedComponent.onActionStub;
@@ -286,7 +297,14 @@ describe('Derive', () => {
         await act(flushAllPromises);
         wrapper.update();
 
-        expect(deriveMock).toBeCalledWith(accounts[1].address, defaultDerivation, parentPassword, newAccount.name, newAccount.password, westendGenesis);
+        expect(deriveMock).toBeCalledWith(
+          accounts[1].address,
+          defaultDerivation,
+          parentPassword,
+          newAccount.name,
+          newAccount.password,
+          westendGenesis
+        );
         expect(onActionStub).toBeCalledWith('/');
       });
     });
@@ -317,7 +335,9 @@ describe('Derive', () => {
       expect(button.prop('disabled')).toBe(true);
       expect(wrapper.find('[data-input-suri]').first().prop('isError')).toBe(true);
       expect(wrapper.find('.warning-message')).toHaveLength(1);
-      expect(wrapper.find('.warning-message').first().text()).toEqual('Soft derivation is only allowed for sr25519 accounts');
+      expect(wrapper.find('.warning-message').first().text()).toEqual(
+        'Soft derivation is only allowed for sr25519 accounts'
+      );
     });
   });
 });

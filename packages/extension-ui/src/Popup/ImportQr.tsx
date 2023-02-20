@@ -56,8 +56,8 @@ export default function ImportQr(): React.ReactElement {
   return (
     <>
       <Header
-        withBackArrow
         text={t<string>('Scan Address Qr')}
+        withBackArrow
       />
       {!account && (
         <div>

@@ -90,6 +90,7 @@ export default styled(Accounts)(
   ({ theme }: Props) => `
   height: calc(100vh - 2px);
   overflow-y: scroll;
+  overflow-x: hidden;
   margin-top: -25px;
   padding-top: 25px;
   scrollbar-width: none;

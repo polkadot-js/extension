@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import useIsMounted from '../hooks/useIsMounted';
+import { ThemeProps } from '../types';
 import { Result, Validator } from '../util/validators';
 import Warning from './Warning';
 
@@ -83,10 +84,15 @@ export default styled(ValidatedInput)`
 position: relative;
 
 .password-icon {
+  all: unset;
   position: absolute;
   top: 18px;
   right: 36px;
   cursor: pointer;
+}
+
+.password-icon:focus {
+  outline: ${({ theme }: ThemeProps): string => theme.boxBorderColor} 1px auto;
 }
 
 `;

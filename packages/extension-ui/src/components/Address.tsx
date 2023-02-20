@@ -15,6 +15,7 @@ import styled from 'styled-components';
 
 import details from '../assets/details.svg';
 import exportIcon from '../assets/export.svg';
+import subAccountIcon from '../assets/subAccount.svg';
 import viewOff from '../assets/viewOff.svg';
 import useMetadata from '../hooks/useMetadata';
 import useOutsideClick from '../hooks/useOutsideClick';
@@ -188,6 +189,10 @@ function Address({
                   data-field='parent'
                   title={parentNameSuri}
                 >
+                  <Svg
+                    className='subaccount-icon'
+                    src={subAccountIcon}
+                  />
                   {parentNameSuri}
                 </div>
               </div>
@@ -406,14 +411,35 @@ export default styled(Address)(
   }
 
   .parentName {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 2px 4px;
+    gap: 8px;
+    position: absolute;
+    height: 20px;
+    top: -6px;
     color: ${theme.labelColor};
     font-size: ${theme.inputLabelFontSize};
-    line-height: 14px;
     overflow: hidden;
-    padding: 0.25rem 0 0 0.8rem;
     text-overflow: ellipsis;
-    width: 270px;
     white-space: nowrap;
+    background: ${theme.menuBackground};
+    border: 1px solid ${theme.boxBorderColor};
+    border-radius: 2px;
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 130%;
+    align-items: center;
+    letter-spacing: 0.06em;
+
+    .subaccount-icon {
+      width: 14px;
+      height: 14px;
+      background: ${theme.iconNeutralColor};
+    }
   }
 
   .fullAddress {

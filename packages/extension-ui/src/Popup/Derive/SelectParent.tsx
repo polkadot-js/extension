@@ -1,42 +1,61 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { ThemeProps } from '../../types';
+
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import styled from 'styled-components';
 
 import { canDerive } from '@polkadot/extension-base/utils';
 
+import helpIcon from '../../assets/help.svg';
+import viewOff from '../../assets/viewOff.svg';
+import viewOn from '../../assets/viewOn.svg';
 import {
   AccountContext,
   ActionContext,
   Address,
+  Button,
   ButtonArea,
   InputWithLabel,
   Label,
-  NextStepButton,
+  Svg,
+  ValidatedInput,
   VerticalSpace,
   Warning
 } from '../../components';
+import HelperFooter from '../../components/HelperFooter';
 import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
+import { isNotShorterThan } from '../../util/validators';
 import AddressDropdown from './AddressDropdown';
 import DerivationPath from './DerivationPath';
 
-interface Props {
+interface Props extends ThemeProps {
   className?: string;
   isLocked?: boolean;
   parentAddress: string;
   parentGenesis: string | null;
   onDerivationConfirmed: (derivation: { account: { address: string; suri: string }; parentPassword: string }) => void;
+  onNextStep: () => void;
+  externalString: string;
 }
 
 // match any single slash
 const singleSlashRegex = /([^/]|^)\/([^/]|$)/;
 
-export default function SelectParent({
+const StyledFooter = styled(HelperFooter)`
+gap: 8px;`;
+
+const MIN_PASSWORD_LENGTH = 6;
+
+function SelectParent({
   className,
+  externalString,
   isLocked,
   onDerivationConfirmed,
+  onNextStep,
   parentAddress,
   parentGenesis
 }: Props): React.ReactElement<Props> {
@@ -104,6 +123,7 @@ export default function SelectParent({
           const account = await validateDerivationPath(parentAddress, suriPath, parentPassword);
 
           onDerivationConfirmed({ account, parentPassword });
+          onNextStep();
         } catch (error) {
           setIsBusy(false);
           setPathError(t('Invalid derivation path'));
@@ -114,7 +134,7 @@ export default function SelectParent({
         setIsProperParentPassword(false);
       }
     }
-  }, [parentAddress, parentPassword, onDerivationConfirmed, suriPath, t]);
+  }, [suriPath, parentAddress, parentPassword, onDerivationConfirmed, onNextStep, t]);
 
   useEffect(() => {
     setParentPassword('');
@@ -122,6 +142,29 @@ export default function SelectParent({
 
     passwordInputRef.current?.querySelector('input')?.focus();
   }, [_onParentPasswordEnter]);
+
+  const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
+
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const _handleInputTypeChange = useCallback(() => {
+    setIsPasswordVisible(!isPasswordVisible);
+  }, [isPasswordVisible]);
+
+  const isPasswordValid = useMemo(() => isNotShorterThan(MIN_PASSWORD_LENGTH, t<string>('Password is too short')), [t]);
+
+  const footer = (
+    <StyledFooter>
+      <Svg
+        className='icon'
+        src={helpIcon}
+      />
+      <span>
+        {t<string>('What is the difference between an\naccount and a sub-account?')}&nbsp;
+        <span className='link'>{t<string>('Learn more')}</span>
+      </span>
+    </StyledFooter>
+  );
 
   return (
     <>
@@ -142,14 +185,21 @@ export default function SelectParent({
           </Label>
         )}
         <div ref={passwordInputRef}>
-          <InputWithLabel
+          <ValidatedInput
+            component={InputWithLabel}
             data-input-password
-            isError={!!parentPassword && !isProperParentPassword}
-            isFocused
-            label={t<string>('enter the password for the account you want to derive from')}
-            onChange={_onParentPasswordEnter}
-            type='password'
-            value={parentPassword}
+            label={t<string>('Main account password')}
+            onValidatedChange={_onParentPasswordEnter}
+            showPasswordElement={
+              <button className='password-icon'>
+                <img
+                  onClick={_handleInputTypeChange}
+                  src={isPasswordVisible ? viewOn : viewOff}
+                />
+              </button>
+            }
+            type={isPasswordVisible ? 'text' : 'password'}
+            validator={isPasswordValid}
           />
           {!!parentPassword && !isProperParentPassword && (
             <Warning
@@ -182,16 +232,29 @@ export default function SelectParent({
         )}
       </div>
       <VerticalSpace />
-      <ButtonArea>
-        <NextStepButton
+      <ButtonArea footer={footer}>
+        <Button
+          isDisabled={isBusy}
+          onClick={goTo(`/account/edit-menu/${parentAddress}?isExternal=${externalString}`)}
+          secondary
+        >
+          {t<string>('Cancel')}
+        </Button>
+        <Button
           data-button-action='create derived account'
           isBusy={isBusy}
           isDisabled={!isProperParentPassword || !!pathError}
           onClick={_onSubmit}
         >
-          {t<string>('Create a derived account')}
-        </NextStepButton>
+          {t<string>('Next')}
+        </Button>
       </ButtonArea>
     </>
   );
 }
+
+export default React.memo(
+  styled(SelectParent)`
+    margin-top: 24px;
+`
+);

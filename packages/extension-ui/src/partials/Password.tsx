@@ -12,11 +12,12 @@ import { allOf, isNotShorterThan, isSameAs, Validator } from '../util/validators
 interface Props {
   isFocussed?: boolean;
   onChange: (password: string | null) => void;
+  label?: string;
 }
 
 const MIN_LENGTH = 6;
 
-export default function Password({ isFocussed, onChange }: Props): React.ReactElement<Props> {
+export default function Password({ isFocussed, label, onChange }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [pass1, setPass1] = useState<string | null>(null);
   const [pass2, setPass2] = useState<string | null>(null);
@@ -50,7 +51,7 @@ export default function Password({ isFocussed, onChange }: Props): React.ReactEl
         component={InputWithLabel}
         data-input-password
         isFocused={isFocussed}
-        label={t<string>('Set password')}
+        label={label || t<string>('Set password')}
         onValidatedChange={setPass1}
         showPasswordElement={
           <div className='password-icon'>

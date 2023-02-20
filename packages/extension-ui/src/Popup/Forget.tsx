@@ -89,7 +89,7 @@ function Forget({
       <ButtonArea footer={footer}>
         <Button
           isDisabled={isBusy}
-          onClick={_goTo(`/account/edit-menu/${address}`)}
+          onClick={_goTo(`/`)}
           secondary
         >
           {t<string>('Cancel')}

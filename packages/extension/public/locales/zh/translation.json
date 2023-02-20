@@ -138,7 +138,7 @@
   "Import": "",
   "Import successful": "",
   "Forget": "",
-  "Create a sub-account": "",
+  "Derive sub-account": "",
   "Visibility for apps": "",
   "Address": "",
   "Public address copied to your clipboard": "",
@@ -159,5 +159,7 @@
   "Import from JSON file": "",
   "Drag & drop JSON file here or": "",
   "browse": "",
-  "How to restore your account?": "" 
+  "How to restore your account?": "",
+  "What is the difference between an account and a sub-account?": "",
+  "Main account password": "" 
 }

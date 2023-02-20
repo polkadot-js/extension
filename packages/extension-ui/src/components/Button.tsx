@@ -7,6 +7,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import Spinner from './Spinner';
+import { Svg } from '.';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -57,7 +58,7 @@ function Button({
 }
 
 export default styled(Button)(
-  ({ isDanger, isSuccess, secondary, tertiary, theme }: Props) => `
+  ({ isBusy, isDanger, isSuccess, secondary, tertiary, theme }: Props) => `
   background: ${
     isDanger
       ? theme.buttonBackgroundDanger
@@ -93,6 +94,7 @@ export default styled(Button)(
   &:disabled {
     cursor: default;
     pointer-events: none;
+    color: ${isBusy ? 'transparent' : theme.disabledTextColor};
     background: ${
       isDanger
         ? theme.buttonBackgroundDangerDisabled
@@ -103,6 +105,10 @@ export default styled(Button)(
         : theme.buttonBackgroundDisabled
     };
     opacity: ${secondary || tertiary ? theme.buttonTertiaryDisabledOpacity : 1};
+
+    ${Svg} { 
+      background: ${isBusy ? 'transparent' : 'currentColor'};
+    }
   }
 
   &:focus {
@@ -148,7 +154,6 @@ export default styled(Button)(
   }
 
   .disabledOverlay {
-    background: rgba(96,96,96,0.15);
     border-radius: ${tertiary ? '2px' : theme.buttonBorderRadius};
     bottom: 0;
     left: 0;
@@ -170,7 +175,6 @@ export default styled(Button)(
   }
 
   &.isBusy {
-    background: rgba(96,96,96,0.15);
 
     .busyOverlay {
       visibility: visible;

@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 import helpIcon from '../assets/help.svg';
@@ -11,6 +11,7 @@ import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { Name, Password } from '../partials';
 import { ThemeProps } from '../types';
+import { AccountContext } from './contexts';
 import HelperFooter from './HelperFooter';
 
 interface Props {
@@ -24,6 +25,7 @@ interface Props {
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
   onNameChange: (name: string) => void;
   onPasswordChange?: (password: string) => void;
+  isDeriving?: boolean;
 }
 
 const CustomFooter = styled(HelperFooter)`
@@ -46,6 +48,7 @@ function AccountNamePasswordCreation({
   className,
   genesisHash,
   isBusy,
+  isDeriving = false,
   onBackClick,
   onCreate,
   onNameChange,
@@ -57,13 +60,15 @@ function AccountNamePasswordCreation({
   const { t } = useTranslation();
   const { show } = useToast();
   const options = useGenesisHashOptions();
+  const { master } = useContext(AccountContext);
 
   const _onCreate = useCallback(async () => {
     if (name && password) {
-      show(t('Import successful'), 'success');
+      show(t(isDeriving ? 'Creating a sub-account successfully!' : 'Import successful'), 'success');
+
       await onCreate(name, password);
     }
-  }, [show, t, name, password, onCreate]);
+  }, [name, password, isDeriving, onCreate, show, t]);
 
   const _onNameChange = useCallback(
     (name: string | null) => {
@@ -126,20 +131,34 @@ function AccountNamePasswordCreation({
             isFocused
             onChange={_onNameChange}
           />
-          <Password onChange={_onPasswordChange} />
-          <Dropdown
-            className={className}
-            label={t<string>('Show on network')}
-            onChange={_onChangeNetwork}
-            options={options}
-            value={genesisHash}
+          <Password
+            label={isDeriving ? t<string>('Set sub-account password') : undefined}
+            onChange={_onPasswordChange}
           />
+          {!isDeriving && (
+            <Dropdown
+              className={className}
+              label={t<string>('Show on network')}
+              onChange={_onChangeNetwork}
+              options={options}
+              value={genesisHash}
+            />
+          )}
         </div>
       </ScrollWrapper>
       <VerticalSpace />
       {onBackClick && buttonLabel && (
-        <ButtonArea footer={footer}>
-          <BackButton onClick={_onBackClick} />
+        <ButtonArea footer={!isDeriving && footer}>
+          {master && isDeriving ? (
+            <Button
+              onClick={_onBackClick}
+              secondary
+            >
+              {t<string>('Cancel')}
+            </Button>
+          ) : (
+            <BackButton onClick={_onBackClick} />
+          )}
           <Button
             data-button-action='add new root'
             isBusy={isBusy}

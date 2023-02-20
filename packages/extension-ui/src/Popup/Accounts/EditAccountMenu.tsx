@@ -8,6 +8,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
+import { canDerive } from '@polkadot/extension-base/utils';
 import { EditMenuCard, Identicon } from '@polkadot/extension-ui/components';
 import useMetadata from '@polkadot/extension-ui/hooks/useMetadata';
 import { IconTheme } from '@polkadot/react-identicon/types';
@@ -21,6 +22,7 @@ import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { showAccount } from '../../messaging';
 import Header from '../../partials/Header';
+import { DEFAULT_TYPE } from '../../util/defaultType';
 import { ellipsisName } from '../../util/ellipsisName';
 import { recodeAddress } from '../../util/recodeAddress';
 
@@ -37,7 +39,7 @@ function EditAccountMenu({
   }
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { accounts } = useContext(AccountContext);
+  const { accounts, master } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const { show } = useToast();
 
@@ -49,6 +51,8 @@ function EditAccountMenu({
   const [isHidden, setIsHidden] = useState(account?.isHidden);
 
   const chain = useMetadata(account?.genesisHash, true);
+
+  const type = chain && chain.definition.chainType === 'ethereum' ? 'ethereum' : DEFAULT_TYPE;
 
   const settings = useContext(SettingsContext);
 
@@ -129,18 +133,21 @@ function EditAccountMenu({
             </>
           }
         />
-        <EditMenuCard
-          description=''
-          extra='chevron'
-          position='both'
-          preIcon={
-            <Svg
-              className='icon'
-              src={subAccountIcon}
-            />
-          }
-          title={t<string>('Create a sub-account')}
-        />
+        {!!master && isExternal === 'false' && canDerive(type) && (
+          <EditMenuCard
+            description=''
+            extra='chevron'
+            onClick={goTo(`/account/derive/${master.address}/locked`)}
+            position='both'
+            preIcon={
+              <Svg
+                className='icon'
+                src={subAccountIcon}
+              />
+            }
+            title={t<string>('Derive sub-account')}
+          />
+        )}
         <EditMenuCard
           description=''
           extra='chevron'

@@ -32,19 +32,21 @@ function EditName({
 
   const account = accounts.find((account) => account.address === address);
 
+  const isExternal = account?.isExternal || 'false';
+
   const [editedName, setName] = useState<string | undefined | null>(account?.name);
 
   const _saveChanges = useCallback(async (): Promise<void> => {
     if (editedName) {
       try {
         await editAccount(address, editedName);
-        onAction(`/account/edit-menu/${address}`);
+        onAction(`/account/edit-menu/${address}?isExternal=${isExternal.toString()}`);
         show(t<string>('Account name changed successfully'), 'success');
       } catch (error) {
         console.error(error);
       }
     }
-  }, [editedName, address, show, t, onAction]);
+  }, [editedName, address, onAction, isExternal, show, t]);
 
   return (
     <>
@@ -66,7 +68,7 @@ function EditName({
       <VerticalSpace />
       <ButtonArea>
         <Button
-          onClick={_goTo(`/account/edit-menu/${address}`)}
+          onClick={_goTo(`/account/edit-menu/${address}?isExternal=${isExternal.toString()}`)}
           secondary
         >
           {t<string>('Cancel')}

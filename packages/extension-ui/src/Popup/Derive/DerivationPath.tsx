@@ -3,15 +3,13 @@
 
 import type { ThemeProps } from '../../types';
 
-import { faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { Button, InputWithLabel } from '../../components';
+import { InputLock, InputWithLabel } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
-interface Props extends ThemeProps{
+interface Props extends ThemeProps {
   className?: string;
   defaultPath: string;
   isError: boolean;
@@ -21,7 +19,24 @@ interface Props extends ThemeProps{
   withSoftPath: boolean;
 }
 
-function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPath }: Props): React.ReactElement<Props> {
+interface StyledInputWithLabelProps extends ThemeProps {
+  isLocked: boolean;
+}
+
+const StyledInputWithLabel = styled(InputWithLabel)`
+  max-width: 284px;
+  gap: 4px;
+  position: relative;
+  margin-bottom: 4px;
+
+  label {
+    color: ${({ isLocked, theme }: StyledInputWithLabelProps) =>
+      isLocked ? theme.disabledTextColor : theme.subTextColor};
+    opacity: 1;
+  }
+`;
+
+function DerivationPath({ className, defaultPath, isError, onChange, withSoftPath }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [path, setPath] = useState<string>(defaultPath);
   const [isDisabled, setIsDisabled] = useState(true);
@@ -30,49 +45,47 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
     setPath(defaultPath);
   }, [defaultPath]);
 
-  const _onExpand = useCallback(() => setIsDisabled(!isDisabled), [isDisabled]);
+  const _onChange = useCallback(
+    (newPath: string): void => {
+      setPath(newPath);
+      onChange(newPath);
+    },
+    [onChange]
+  );
 
-  const _onChange = useCallback((newPath: string): void => {
-    setPath(newPath);
-    onChange(newPath);
-  }, [onChange]);
+  const _toggleLocked = useCallback(() => {
+    setIsDisabled((prevState) => !prevState);
+  }, []);
 
   return (
     <div className={className}>
       <div className='container'>
-        <div className={`pathInput ${isDisabled ? 'locked' : ''}`}>
-          <InputWithLabel
+        <div className={`pathInput ${isDisabled ? 'locked' : ''} input-with-lock`}>
+          <StyledInputWithLabel
+            className='derivationPath'
             data-input-suri
             disabled={isDisabled}
             isError={isError || !path}
-            label={
-              isDisabled
-                ? t('Derivation Path (unlock to edit)')
-                : t('Derivation Path')
-            }
+            isFocused
+            isLocked={isDisabled}
+            label={t<string>('Sub-account derivation path')}
             onChange={_onChange}
-            placeholder={withSoftPath
-              ? t<string>('//hard/soft')
-              : t<string>('//hard')
-            }
-            value={path}
+            placeholder={withSoftPath ? t<string>('//hard/soft') : t<string>('//hard')}
+            value={path || ''}
+          />
+          <InputLock
+            isLocked={isDisabled}
+            onClick={_toggleLocked}
           />
         </div>
-        <Button
-          className='lockButton'
-          onClick={_onExpand}
-        >
-          <FontAwesomeIcon
-            className='lockIcon'
-            icon={isDisabled ? faLock : faLockOpen}
-          />
-        </Button>
       </div>
     </div>
   );
 }
 
-export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
+export default React.memo(
+  styled(DerivationPath)(
+    ({ theme }: Props) => `
   > .container {
     display: flex;
     flex-direction: row;
@@ -109,4 +122,21 @@ export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
       opacity: 50%;
     }
   }
-`));
+
+  .unlock-text {
+    padding-left: 16px;
+    color: ${theme.disabledTextColor};
+    opacity: 0.65;
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 130%;
+    letter-spacing: 0.06em;
+  }
+
+  .input-with-lock {
+    display: flex;
+    gap: 4px;
+  }
+`
+  )
+);

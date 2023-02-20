@@ -74,8 +74,6 @@ describe('Create Account', () => {
       wrapper.find(Button).at(1).simulate('click');
       wrapper.find(Button).first().simulate('click');
       wrapper.update();
-      console.log(wrapper.children().debug());
-      console.log(wrapper.find(Button));
 
       expect(wrapper.find(SafetyFirst).exists()).toBe(true);
     });

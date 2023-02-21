@@ -13,7 +13,7 @@ const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
   height: 621,
   type: 'popup',
   url: NOTIFICATION_URL,
-  width: 460
+  width: 390
 };
 
 const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {

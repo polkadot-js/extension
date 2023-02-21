@@ -2,11 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import React, { useContext, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
 
 const SelectAccount = React.lazy(() => import('@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount'));
@@ -17,27 +14,20 @@ const PageWrapper = React.lazy(() => import('../components/Layout/PageWrapper'))
 const Welcome = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Welcome'));
 const Tokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens'));
 const Staking = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
+
 const NftItemDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftItemDetail'));
 const NftCollections = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollections'));
 const NftCollectionDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail'));
+const NftImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftImport'));
+
 const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
+
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
+const ManageTokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/ManageTokens'));
+const FungibleTokenImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/FungibleTokenImport'));
 const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
-
-export function Crypto () {
-  const dataContext = useContext(DataContext);
-  const store = useSelector((state: RootState) => state);
-
-  useEffect(() => {
-    console.log('store', store);
-  }, [store]);
-
-  return <PageWrapper resolve={dataContext.awaitStores(['price', 'chainStore'])}>
-    <div>Crypto</div>
-  </PageWrapper>;
-}
 
 const ErrorFallback = () => {
   const error = useRouteError();
@@ -97,6 +87,10 @@ export const router = createHashRouter([{
           {
             path: 'item-detail',
             element: <NftItemDetail />
+          },
+          {
+            path: 'import-collection',
+            element: <NftImport />
           }
         ]
       },
@@ -175,7 +169,8 @@ export const router = createHashRouter([{
           element: <Example />
         }]
       }]
-    }, {
+    },
+    {
       path: '/settings',
       element: <Outlet />,
       children: [{
@@ -197,8 +192,18 @@ export const router = createHashRouter([{
         path: 'network-edit',
         element: <Example />
       }, {
-        path: 'token',
-        element: <Example />
+        path: 'tokens',
+        element: <ManageTokens />,
+        children: [
+          {
+            path: 'import',
+            element: <FungibleTokenImport />
+          },
+          {
+            path: 'detail/:tokenSlug',
+            element: <Example />
+          }
+        ]
       }, {
         path: 'master-password',
         element: <Example />

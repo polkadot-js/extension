@@ -134,7 +134,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const renderTokenRightItem = useCallback((tokenInfo: _ChainAsset) => {
     const onClick = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>) => {
-      navigate(`/settings/tokens/detail/${tokenInfo.slug}`);
+      navigate('/settings/tokens/detail', { state: tokenInfo });
     };
 
     return (

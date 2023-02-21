@@ -132,7 +132,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     } else {
       setLoading(false);
     }
-  }, [reformatAddress, accountName, isEthereum]);
+  }, [reformatAddress, accountName, isEthereum, navigate]);
 
   return (
     <Layout.Base

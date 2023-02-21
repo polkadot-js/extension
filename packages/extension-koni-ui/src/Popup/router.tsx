@@ -9,7 +9,6 @@ import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
 
-const Login = React.lazy(() => import('./Login'));
 const PhishingDetected = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
 const PageWrapper = React.lazy(() => import('../components/Layout/PageWrapper'));
 const Welcome = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Welcome'));
@@ -29,6 +28,8 @@ const RestoreJson = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/
 const AttachReadOnly = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AttachReadOnly'));
 const ConnectParitySigner = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectParitySigner'));
 const ConnectKeystone = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
+const Login = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/Login'));
+const CreatePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/CreatePassword'));
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -74,10 +75,6 @@ export const router = createHashRouter([{
     {
       path: '/welcome',
       element: <Welcome title={'Welcome Content'} />
-    },
-    {
-      path: '/login',
-      element: <Login />
     },
     {
       path: '/home',
@@ -150,6 +147,20 @@ export const router = createHashRouter([{
         {
           path: 'compound',
           element: <Example />
+        }
+      ]
+    },
+    {
+      path: '/keyring',
+      element: <Outlet />,
+      children: [
+        {
+          path: 'login',
+          element: <Login />
+        },
+        {
+          path: 'create-password',
+          element: <CreatePassword />
         }
       ]
     },

@@ -1,16 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import LoginBg from '@subwallet/extension-koni-ui/assets/Login_BG.png';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
-import { Button, Form, Icon, Input } from '@subwallet/react-ui';
+import { Button, Form, Input } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import CN from 'classnames';
-import { Question } from 'phosphor-react';
 import { Callbacks } from 'rc-field-form/lib/interface';
 import React, { ChangeEventHandler, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -63,16 +63,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <Layout.Base
       className={CN(className)}
-      showSubHeader={true}
-      subHeaderBackground='transparent'
-      subHeaderCenter={false}
-      subHeaderIcons={[{ icon: <Icon
-        phosphorIcon={Question}
-        type='phosphor'
-      /> }]}
-      subHeaderPaddingVertical={true}
-      title={t('SubWallet.App')}
-      withDivider={true}
     >
       <div className='body-container'>
         <div className='logo-container'>
@@ -96,6 +86,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             <Input.Password
               containerClassName='password-input'
               onChange={onPasswordChange}
+              placeholder={t('Password')}
             />
           </Form.Item>
           <Form.Item>
@@ -123,12 +114,17 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
   const { token } = theme;
 
   return {
+    background: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
+      backgroundImage: `url(${LoginBg})`,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'top',
 
       '.logo-container': {
-        paddingTop: token.paddingXL * 2,
+        paddingTop: 106,
         color: token.colorTextBase
       },
 
@@ -137,7 +133,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         fontWeight: token.fontWeightStrong,
         fontSize: token.fontSizeHeading3,
         lineHeight: token.lineHeightHeading3,
-        color: token.colorTextLight2
+        color: token.colorTextBase
       },
 
       '.sub-title': {

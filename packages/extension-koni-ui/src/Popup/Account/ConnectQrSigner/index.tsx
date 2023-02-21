@@ -1,4 +1,4 @@
-// [object Object]
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
@@ -13,7 +13,7 @@ import { qrSignerScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
 import { Form, Icon, Image, SwQrScanner } from '@subwallet/react-ui';
 import { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 import CN from 'classnames';
-import { QrCode, Info } from 'phosphor-react';
+import { Info, QrCode } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -29,6 +29,7 @@ const FooterIcon = (
     weight='fill'
   />
 );
+
 interface Props extends ThemeProps {
   title: string;
   subTitle: string;
@@ -48,7 +49,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [account, setAccount] = useState<QrAccount | null>(null)
+  const [account, setAccount] = useState<QrAccount | null>(null);
 
   const handleResult = useCallback((val: string): QrAccount | null => {
     const result = qrSignerScan(val);
@@ -102,7 +103,7 @@ const Component: React.FC<Props> = (props: Props) => {
     } else {
       setLoading(false);
     }
-  }, [accountName, account]);
+  }, [accountName, account, navigate]);
 
   const openCamera = useCallback(() => {
     setVisible(true);

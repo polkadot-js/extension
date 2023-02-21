@@ -22,8 +22,6 @@ const modalId = DERIVE_ACCOUNT_MODAL;
 
 const renderEmpty = () => <EmptyAccount />;
 
-const t = (x: string) => x;
-
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;

@@ -35,3 +35,17 @@ export const passwordValidateLength = (validator?: PasswordLengthValidator): ((v
     }
   };
 };
+
+export const confirmPasswordValidate = (expect: string): ((value: string) => null | ValidateState) => {
+  return (value: string) => {
+    if (value !== expect) {
+      return {
+        status: 'error',
+        message: 'Passwords do not match',
+        tooltip: 'Passwords do not match'
+      };
+    } else {
+      return null;
+    }
+  };
+};

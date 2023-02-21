@@ -32,16 +32,8 @@ export default class PopupHandler {
   }
 
   public updateIconV2 (shouldClose?: boolean): void {
-    const authCount = this.#requestService.numAuthRequests;
-    const requestCount = this.#requestService.numAllRequests;
-    const metaCount = this.#requestService.numMetaRequests;
-    const text = (
-      authCount
-        ? 'Auth'
-        : metaCount
-          ? 'Meta'
-          : requestCount > 0 ? requestCount.toString() : ''
-    );
+    const numRequests = this.#requestService.numRequests;
+    const text = numRequests > 0 ? numRequests.toString() : '';
 
     withErrorLog(() => chrome.browserAction.setBadgeText({ text }));
 

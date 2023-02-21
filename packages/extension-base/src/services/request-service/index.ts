@@ -32,6 +32,9 @@ export default class RequestService {
     this.#authRequestHandler = new AuthRequestHandler(this, this.#chainService);
     this.#substrateRequestHandler = new SubstrateRequestHandler(this);
     this.#evmRequestHandler = new EvmRequestHandler(this);
+
+    // Reset icon on start service
+    this.updateIconV2();
   }
 
   public get numAllRequests () {
@@ -151,6 +154,10 @@ export default class RequestService {
     return this.#substrateRequestHandler.getSignRequest(id);
   }
 
+  public get numSubstrateRequests (): number {
+    return this.#substrateRequestHandler.numSubstrateRequests;
+  }
+
   public addFromTransaction (transaction: KoniTransaction): void {
     this.#substrateRequestHandler.addFromTransaction(transaction);
   }
@@ -177,5 +184,10 @@ export default class RequestService {
 
   public completeConfirmation (request: RequestConfirmationComplete): boolean {
     return this.#evmRequestHandler.completeConfirmation(request);
+  }
+
+  // General methods
+  public get numRequests (): number {
+    return this.numMetaRequests + this.numAuthRequests + this.numSubstrateRequests + this.numEvmRequests;
   }
 }

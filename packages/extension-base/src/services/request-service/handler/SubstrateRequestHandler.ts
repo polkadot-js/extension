@@ -59,6 +59,10 @@ export default class SubstrateRequestHandler {
     };
   };
 
+  public get numSubstrateRequests (): number {
+    return Object.keys(this.#substrateRequests).length;
+  }
+
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
     const id = getId();
 

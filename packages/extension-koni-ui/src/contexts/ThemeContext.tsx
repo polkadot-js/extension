@@ -31,6 +31,10 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       color: token.colorText,
       fontWeight: token.bodyFontWeight
     },
+    pre: {
+      fontFamily: 'inherit',
+      whiteSpace: 'pre-wrap'
+    },
     '.text-secondary': {
       color: token.colorTextSecondary
     },

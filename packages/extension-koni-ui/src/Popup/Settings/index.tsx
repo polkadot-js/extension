@@ -121,7 +121,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: Coin,
           leftIconBgColor: token['gold-6'],
           rightIcon: CaretRight,
-          title: 'Manage tokens'
+          title: 'Manage tokens',
+          onClick: () => {
+            navigate('/settings/tokens');
+          }
         }
       ]
     },

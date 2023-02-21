@@ -18,7 +18,7 @@ import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { CheckCircle, QrCode } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -79,7 +79,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [symbol, setSymbol] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
-  const nftTypeOptions = getNftTypeSupported(chainInfoMap[selectedChain]);
+  const nftTypeOptions = useMemo(() => {
+    return getNftTypeSupported(chainInfoMap[selectedChain]);
+  }, [chainInfoMap, selectedChain]);
 
   const onBack = useCallback(() => {
     navigate(-1);
@@ -266,7 +268,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             if (validationResult.isExist) {
               setContractValidation({
                 status: 'error',
-                message: t('Existed contract address')
+                message: t('Existed NFT')
               });
               resolve();
             }
@@ -290,9 +292,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           })
           .catch(() => {
             setLoading(false);
-            reject(t('Error validating this NFT'));
+            setContractValidation({
+              status: 'error',
+              message: t('Error validating this NFT')
+            });
+            resolve();
           });
       } else {
+        setContractValidation({
+          status: 'error'
+        });
         reject(t('Invalid contract address'));
       }
     });

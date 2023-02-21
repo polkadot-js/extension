@@ -193,8 +193,12 @@ export const router = createHashRouter([{
         element: <Example />
       }, {
         path: 'tokens',
-        element: <ManageTokens />,
+        element: <Outlet />,
         children: [
+          {
+            path: 'manage',
+            element: <ManageTokens />
+          },
           {
             path: 'import',
             element: <FungibleTokenImport />

@@ -92,38 +92,36 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const [selectedFilters, setSelectedFilters] = useState<FilterValue[]>([]);
+  const [changeFilters, setChangeFilters] = useState<FilterValue[]>(selectedFilters);
+
   const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const [fungibleTokenList, setFungibleTokenList] = useState<_ChainAsset[]>([]);
-  const [page, setPage] = useState(1);
-  const [applyFilter, setApplyFilter] = useState(false);
   const allFungibleTokens = useMemo(() => {
-    return filterFungibleTokens(assetRegistry, applyFilter ? selectedFilters : []);
-  }, [applyFilter, assetRegistry, selectedFilters]);
+    return filterFungibleTokens(assetRegistry, selectedFilters);
+  }, [assetRegistry, selectedFilters]);
+
+  const [paging, setPaging] = useState(TOKENS_PER_PAGE);
+
+  useEffect(() => {
+    setFungibleTokenList(allFungibleTokens.slice(0, TOKENS_PER_PAGE));
+    setPaging(TOKENS_PER_PAGE);
+  }, [allFungibleTokens]);
 
   const hasMore = useMemo(() => {
     return allFungibleTokens.length > fungibleTokenList.length;
   }, [allFungibleTokens.length, fungibleTokenList.length]);
 
-  useEffect(() => {
-    setFungibleTokenList(allFungibleTokens.slice(0, TOKENS_PER_PAGE));
-    setPage(1);
-  }, [allFungibleTokens]);
-
   const loadMoreTokens = useCallback(() => {
     setTimeout(() => { // delayed to avoid lagging on scroll
       if (hasMore) {
-        const nextPage = page + 1;
-        const from = (nextPage - 1) * TOKENS_PER_PAGE;
-        const to = from + TOKENS_PER_PAGE > allFungibleTokens.length ? allFungibleTokens.length : (from + TOKENS_PER_PAGE);
+        const nextPaging = paging + TOKENS_PER_PAGE;
+        const to = nextPaging > allFungibleTokens.length ? allFungibleTokens.length : nextPaging;
 
-        setFungibleTokenList([
-          ...fungibleTokenList,
-          ...allFungibleTokens.slice(from, to)
-        ]);
-        setPage(nextPage);
+        setFungibleTokenList(allFungibleTokens.slice(0, to));
+        setPaging(nextPaging);
       }
     }, 50);
-  }, [allFungibleTokens, fungibleTokenList, hasMore, page]);
+  }, [allFungibleTokens, hasMore, paging]);
 
   const searchToken = useCallback((token: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -215,7 +213,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const openFilterModal = useCallback(() => {
     activeModal('filterTokenModal');
-    setApplyFilter(false);
   }, [activeModal]);
 
   const closeFilterModal = useCallback(() => {
@@ -224,8 +221,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const onApplyFilter = useCallback(() => {
     inactiveModal('filterTokenModal');
-    setApplyFilter(true);
-  }, [inactiveModal]);
+    setSelectedFilters(changeFilters);
+  }, [changeFilters, inactiveModal]);
 
   const filterModalFooter = useCallback(() => {
     return (
@@ -245,23 +242,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [t, onApplyFilter]);
 
   const onChangeFilterOption = useCallback((e: CheckboxChangeEvent) => {
-    setApplyFilter(false);
     const changedValue = e.target.value as FilterValue;
 
     if (e.target.checked) {
-      setSelectedFilters([...selectedFilters, changedValue]);
+      setChangeFilters([...changeFilters, changedValue]);
     } else {
       const newSelectedFilters: FilterValue[] = [];
 
-      selectedFilters.forEach((filterValue) => {
+      changeFilters.forEach((filterValue) => {
         if (filterValue !== changedValue) {
           newSelectedFilters.push(filterValue);
         }
       });
 
-      setSelectedFilters(newSelectedFilters);
+      setChangeFilters(newSelectedFilters);
     }
-  }, [selectedFilters]);
+  }, [changeFilters]);
 
   return (
     <PageWrapper
@@ -322,7 +318,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     key={filterOption.label}
                   >
                     <Checkbox
-                      checked={selectedFilters.includes(filterOption.value)}
+                      checked={changeFilters.includes(filterOption.value)}
                       onChange={onChangeFilterOption}
                       value={filterOption.value}
                     >

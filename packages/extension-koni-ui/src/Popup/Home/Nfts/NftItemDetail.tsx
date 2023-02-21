@@ -88,9 +88,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return (
       <Image
         height={token.fontSizeXL}
+        shape={'circle'}
         src={LogosMap[nftItem.chain]}
         width={token.fontSizeXL}
-        shape={'circle'}
       />
     );
   }, [nftItem.chain, token.fontSizeXL]);

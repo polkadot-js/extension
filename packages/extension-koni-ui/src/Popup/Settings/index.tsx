@@ -123,7 +123,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightIcon: CaretRight,
           title: 'Manage tokens',
           onClick: () => {
-            navigate('/settings/tokens');
+            navigate('/settings/tokens/manage');
           }
         }
       ]

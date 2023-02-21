@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.8.1 (Koni)
+Build date: Feb 03, 2022.
+
+Update:
+- Update RMRK NFT endpoints (#963)
+- Add support send EQ token (#984)
+
+Bug fixes:
+- Fix duplicate crowdloan problems (#991)
+- Fix the staking validator's expected return for relaychain (#997)
+- Fix bug can not connect to AstarEVM (#1001)
+
 ## 0.7.9 (Koni)
 Build date: Jan 30, 2022.
 

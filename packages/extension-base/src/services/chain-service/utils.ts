@@ -1,22 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  _AssetRef,
-  _AssetRefPath,
-  _AssetType,
-  _ChainAsset,
-  _ChainInfo,
-  _MultiChainAsset,
-  _SubstrateChainType
-} from '@subwallet/chain-list/types';
-import {
-  _ChainState,
-  _CUSTOM_PREFIX,
-  _SMART_CONTRACT_STANDARDS
-} from '@subwallet/extension-base/services/chain-service/types';
+import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset, _SubstrateChainType } from '@subwallet/chain-list/types';
+import { _ChainState, _CUSTOM_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
 
-import {isEthereumAddress} from '@polkadot/util-crypto';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export function _isCustomNetwork (slug: string) {
   if (slug.length === 0) {

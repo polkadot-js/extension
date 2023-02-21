@@ -34,6 +34,10 @@ const MENU_DATA: MenuItem[] = [
           {
             url: '/keyring/create-password',
             name: 'create password'
+          },
+          {
+            url: '/keyring/change-password',
+            name: 'change password'
           }
         ]
       },

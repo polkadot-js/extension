@@ -30,6 +30,7 @@ const ConnectParitySigner = React.lazy(() => import('@subwallet/extension-koni-u
 const ConnectKeystone = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
 const Login = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/Login'));
 const CreatePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/CreatePassword'));
+const ChangePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ChangePassword'));
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -161,6 +162,10 @@ export const router = createHashRouter([{
         {
           path: 'create-password',
           element: <CreatePassword />
+        },
+        {
+          path: 'change-password',
+          element: <ChangePassword />
         }
       ]
     },

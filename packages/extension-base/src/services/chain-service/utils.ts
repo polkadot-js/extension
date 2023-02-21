@@ -173,6 +173,28 @@ export function _getNftTypesSupportedByChain (chainInfo: _ChainInfo): _AssetType
   return result;
 }
 
+export function _getTokenTypesSupportedByChain (chainInfo: _ChainInfo): _AssetType[] {
+  const result: _AssetType[] = [];
+
+  if (chainInfo.substrateInfo && chainInfo.substrateInfo.supportSmartContract) {
+    chainInfo.substrateInfo.supportSmartContract.forEach((assetType) => {
+      if ([_AssetType.PSP22].includes(assetType)) {
+        result.push(assetType);
+      }
+    });
+  }
+
+  if (chainInfo.evmInfo && chainInfo.evmInfo.supportSmartContract) {
+    chainInfo.evmInfo.supportSmartContract.forEach((assetType) => {
+      if ([_AssetType.ERC20].includes(assetType)) {
+        result.push(assetType);
+      }
+    });
+  }
+
+  return result;
+}
+
 export function _getChainNativeTokenBasicInfo (chainInfo: _ChainInfo) {
   if (chainInfo.substrateInfo !== null) { // substrate by default
     return {

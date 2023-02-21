@@ -81,8 +81,6 @@ function Component (
 }
 
 export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  console.log('token----', token);
-
   return ({
     padding: '36px 8px 24px 8px',
     display: 'flex',

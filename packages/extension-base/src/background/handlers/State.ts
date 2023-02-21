@@ -5,12 +5,13 @@ import type { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/type
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 import type { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
 
+import { RequestSettingsType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@subwallet/extension-chains';
 import { BehaviorSubject } from 'rxjs';
 
 import { knownGenesis } from '@polkadot/networks/defaults';
-import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import { MetadataStore } from '../../stores';
@@ -130,12 +131,12 @@ export default class State {
 
   readonly #metaStore = new MetadataStore();
 
+  protected readonly settingsStore = new SettingsStore();
+
   // Map of providers currently injected in tabs
   readonly #injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
 
   readonly #metaRequests: Record<string, MetaRequest> = {};
-
-  #notification = settings.notification;
 
   // Map of all providers exposed by the extension, they are retrievable by key
   readonly #providers: Providers;
@@ -211,33 +212,58 @@ export default class State {
     this.#windows = [];
   }
 
-  protected popupOpen (): void {
-    if (this.#notification !== 'extension') {
-      if (this.#notification === 'window') {
-        chrome.windows.create(NORMAL_WINDOW_OPTS, (window): void => {
-          if (window) {
-            this.#windows.push(window.id || 0);
+  public getSettings (update: (value: RequestSettingsType) => void): void {
+    this.settingsStore.get('Settings', (value) => {
+      if (!value) {
+        update(
+          {
+          // language: 'en',
+            browserConfirmationType: 'extension',
+            // isShowZeroBalance: true,
+            isShowBalance: false,
+            accountAllLogo: '',
+            theme: ThemeNames.DARK
           }
-        });
+        );
+      } else {
+        update(value);
       }
+    });
+  }
 
-      chrome.windows.getCurrent((win) => {
-        const popupOptions = { ...POPUP_WINDOW_OPTS };
+  public setSettings (data: RequestSettingsType, callback?: () => void): void {
+    this.settingsStore.set('Settings', data, callback);
+  }
 
-        if (win) {
-          popupOptions.left = (win.left || 0) + (win.width || 0) - (POPUP_WINDOW_OPTS.width || 0) - 20;
-          popupOptions.top = (win.top || 0) + 80;
-        }
-
-        chrome.windows.create(popupOptions
-          , (window): void => {
+  protected popupOpen (): void {
+    this.getSettings(({ browserConfirmationType }) => {
+      if (browserConfirmationType !== 'extension') {
+        if (browserConfirmationType === 'window') {
+          chrome.windows.create(NORMAL_WINDOW_OPTS, (window): void => {
             if (window) {
               this.#windows.push(window.id || 0);
             }
+          });
+        }
+
+        chrome.windows.getCurrent((win) => {
+          const popupOptions = { ...POPUP_WINDOW_OPTS };
+
+          if (win) {
+            popupOptions.left = (win.left || 0) + (win.width || 0) - (POPUP_WINDOW_OPTS.width || 0) - 20;
+            popupOptions.top = (win.top || 0) + 80;
           }
-        );
-      });
-    }
+
+          chrome.windows.create(popupOptions
+            , (window): void => {
+              if (window) {
+                this.#windows.push(window.id || 0);
+              }
+            }
+          );
+        });
+      }
+    });
   }
 
   private authComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
@@ -506,12 +532,6 @@ export default class State {
     this.#metaStore.set(meta.genesisHash, meta);
 
     addMetadata(meta);
-  }
-
-  public setNotification (notification: string): boolean {
-    this.#notification = notification;
-
-    return true;
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {

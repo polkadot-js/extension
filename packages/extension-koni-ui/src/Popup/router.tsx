@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { i18nPromise } from '@subwallet/extension-koni-ui/util/i18n';
-import React, { useContext, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
 
 const PhishingDetected = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
@@ -15,13 +12,21 @@ const PageWrapper = React.lazy(() => import('../components/Layout/PageWrapper'))
 const Welcome = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Welcome'));
 const Tokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens'));
 const Staking = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
+
 const NftItemDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftItemDetail'));
 const NftCollections = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollections'));
 const NftCollectionDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail'));
+const NftImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftImport'));
+
 const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
+
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
+const ManageTokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/ManageTokens'));
+const FungibleTokenImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/FungibleTokenImport'));
+const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
+
 const NewSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/NewSeedPhrase'));
 const ImportSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportSeedPhrase'));
 const ImportPrivateKey = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportPrivateKey'));
@@ -29,23 +34,11 @@ const RestoreJson = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/
 const AttachReadOnly = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AttachReadOnly'));
 const ConnectParitySigner = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectParitySigner'));
 const ConnectKeystone = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
+
 const Login = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/Login'));
 const CreatePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/CreatePassword'));
 const ChangePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ChangePassword'));
 const ApplyMasterPassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword'));
-
-export function Crypto () {
-  const dataContext = useContext(DataContext);
-  const store = useSelector((state: RootState) => state);
-
-  useEffect(() => {
-    console.log('store', store);
-  }, [store]);
-
-  return <PageWrapper resolve={dataContext.awaitStores(['price', 'chainStore'])}>
-    <div>Crypto</div>
-  </PageWrapper>;
-}
 
 const ErrorFallback = () => {
   const error = useRouteError();
@@ -103,6 +96,10 @@ export const router = createHashRouter([{
             {
               path: 'item-detail',
               element: <NftItemDetail />
+            },
+            {
+              path: 'import-collection',
+              element: <NftImport />
             }
           ]
         },
@@ -177,7 +174,7 @@ export const router = createHashRouter([{
       ]
     },
     {
-      path: '/setting',
+      path: '/settings',
       element: <Outlet />,
       children: [
         {
@@ -185,7 +182,7 @@ export const router = createHashRouter([{
           element: <Settings />
         }, {
           path: 'general',
-          element: <Example />
+          element: <GeneralSetting />
         }, {
           path: 'dapp-access',
           element: <Example />
@@ -199,8 +196,22 @@ export const router = createHashRouter([{
           path: 'network-edit',
           element: <Example />
         }, {
-          path: 'token',
-          element: <Example />
+          path: 'tokens',
+          element: <Outlet />,
+          children: [
+            {
+              path: 'manage',
+              element: <ManageTokens />
+            },
+            {
+              path: 'import',
+              element: <FungibleTokenImport />
+            },
+            {
+              path: 'detail/:tokenSlug',
+              element: <Example />
+            }
+          ]
         }, {
           path: 'master-password',
           element: <Example />

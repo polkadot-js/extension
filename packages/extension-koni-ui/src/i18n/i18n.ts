@@ -1,10 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
-
-import uiSettings from '@polkadot/ui-settings';
 
 import Backend from './Backend';
 
@@ -19,7 +18,7 @@ i18next
       escapeValue: false
     },
     keySeparator: false,
-    lng: uiSettings.i18nLang,
+    lng: localStorage.getItem(LANGUAGE) || 'en',
     load: 'languageOnly',
     nsSeparator: false,
     returnEmptyString: false,
@@ -28,10 +27,5 @@ i18next
   .catch((error: Error): void =>
     console.log('i18n: failure', error)
   );
-
-uiSettings.on('change', (settings): void => {
-  i18next.changeLanguage(settings.i18nLang
-  ).catch(console.error);
-});
 
 export default i18next;

@@ -4,7 +4,7 @@
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
-import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _EvmApi, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
@@ -456,17 +456,31 @@ export interface CurrentAccountInfo {
   allGenesisHash?: string;
 }
 
-export interface RequestSettingsType {
+export type LanguageType = 'en'
+|'zh'
+|'fr'
+|'tr'
+|'pl'
+|'th'
+|'ur';
+
+export type LanguageOptionType = {
+  text: string;
+  value: LanguageType;
+}
+
+export type BrowserConfirmationType = 'extension'|'popup'|'window';
+
+export interface UiSettings {
+  // language: LanguageType,
+  browserConfirmationType: BrowserConfirmationType,
+  // isShowZeroBalance: boolean,
   isShowBalance: boolean;
   accountAllLogo: string;
   theme: ThemeNames;
 }
 
-export interface UiSettings {
-  isShowBalance: boolean;
-  accountAllLogo: string;
-  theme: ThemeNames;
-}
+export type RequestSettingsType = UiSettings;
 
 export interface RandomTestRequest {
   start: number;
@@ -1684,7 +1698,7 @@ export interface KoniRequestSignatures {
   'pri(chainService.removeChain)': [string, boolean];
   'pri(chainService.deleteCustomTokens)': [string[], boolean];
   'pri(chainService.upsertCustomToken)': [Record<string, any>, boolean];
-  'pri(chainService.validateCustomToken)': [Record<string, any>, Record<string, any>];
+  'pri(chainService.validateCustomToken)': [_ValidateCustomTokenRequest, _ValidateCustomTokenResponse];
   'pri(chainService.resetDefaultChains)': [null, boolean];
   'pri(chainService.getSupportedContractTypes)': [null, string[]];
 
@@ -1757,6 +1771,7 @@ export interface KoniRequestSignatures {
   'pri(settings.subscribe)': [null, UiSettings, UiSettings];
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
+  'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TxHistoryItem[], TxHistoryItem[]];

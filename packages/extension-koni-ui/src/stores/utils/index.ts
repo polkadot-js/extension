@@ -3,12 +3,14 @@
 
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TxHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
+import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
+import { AppSettings } from '@subwallet/extension-koni-ui/stores/types';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/util/buildHierarchy';
 
 // Setup redux stores
@@ -102,11 +104,21 @@ export const updateShowZeroBalanceState = (isShow: boolean) => {
   store.dispatch({ type: 'settings/updateShowZeroBalanceState', payload: isShow });
 };
 
-// export const updateUiSettings = (data: AccountJson) => {
-//   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });
-// };
-//
-// export const subscribeUiSettings = lazySubscribeMessage('pri(accounts.subscribeWithCurrentAddress)', {}, updateCurrentAccountState, updateCurrentAccountState);
+export const updateLanguage = (lang: AppSettings['language']) => {
+  localStorage.setItem(LANGUAGE, lang); // cache language;
+  store.dispatch({ type: 'settings/updateLanguage', payload: lang });
+};
+
+export const updateBrowserConfirmationType = (type: AppSettings['browserConfirmationType']) => {
+  store.dispatch({ type: 'settings/updateBrowserConfirmationType', payload: type });
+};
+
+export const updateUiSettings = (data: UiSettings) => {
+  store.dispatch({ type: 'accountState/updateUiSettings', payload: data });
+};
+
+export const subscribeUiSettings = lazySubscribeMessage('pri(settings.subscribe)', null, updateUiSettings, updateUiSettings);
+
 //
 // export const updateAppSettings = (data: AccountJson) => {
 //   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: data });

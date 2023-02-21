@@ -151,6 +151,50 @@ export function _isChainSupportWasmNft (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP34) || false;
 }
 
+export function _getNftTypesSupportedByChain (chainInfo: _ChainInfo): _AssetType[] {
+  const result: _AssetType[] = [];
+
+  if (chainInfo.substrateInfo && chainInfo.substrateInfo.supportSmartContract) {
+    chainInfo.substrateInfo.supportSmartContract.forEach((assetType) => {
+      if ([_AssetType.PSP34].includes(assetType)) {
+        result.push(assetType);
+      }
+    });
+  }
+
+  if (chainInfo.evmInfo && chainInfo.evmInfo.supportSmartContract) {
+    chainInfo.evmInfo.supportSmartContract.forEach((assetType) => {
+      if ([_AssetType.ERC721].includes(assetType)) {
+        result.push(assetType);
+      }
+    });
+  }
+
+  return result;
+}
+
+export function _getTokenTypesSupportedByChain (chainInfo: _ChainInfo): _AssetType[] {
+  const result: _AssetType[] = [];
+
+  if (chainInfo.substrateInfo && chainInfo.substrateInfo.supportSmartContract) {
+    chainInfo.substrateInfo.supportSmartContract.forEach((assetType) => {
+      if ([_AssetType.PSP22].includes(assetType)) {
+        result.push(assetType);
+      }
+    });
+  }
+
+  if (chainInfo.evmInfo && chainInfo.evmInfo.supportSmartContract) {
+    chainInfo.evmInfo.supportSmartContract.forEach((assetType) => {
+      if ([_AssetType.ERC20].includes(assetType)) {
+        result.push(assetType);
+      }
+    });
+  }
+
+  return result;
+}
+
 export function _getChainNativeTokenBasicInfo (chainInfo: _ChainInfo) {
   if (chainInfo.substrateInfo !== null) { // substrate by default
     return {
@@ -275,4 +319,22 @@ export function _getBlockExplorerFromChain (chainInfo: _ChainInfo): string {
   }
 
   return chainInfo?.substrateInfo?.blockExplorer || '';
+}
+
+export function _parseMetadataForSmartContractAsset (contractAddress: string): Record<string, string> {
+  return {
+    contractAddress
+  };
+}
+
+export function _isChainTestNet (chainInfo: _ChainInfo): boolean {
+  return chainInfo.isTestnet || false;
+}
+
+export function _isAssetFungibleToken (chainAsset: _ChainAsset): boolean {
+  return ![_AssetType.ERC721, _AssetType.PSP34, _AssetType.UNKNOWN].includes(chainAsset.assetType);
+}
+
+export function _getAssetType (chainAsset: _ChainAsset): _AssetType {
+  return chainAsset.assetType;
 }

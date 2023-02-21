@@ -8,7 +8,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/useConfirmModal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
-import { INftCollectionDetail, INftItemDetail, nftPerPage } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { INftCollectionDetail, INftItemDetail, NFT_PER_PAGE } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
@@ -50,7 +50,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     // init NftCollections_
-    setNftList_(nftList.slice(0, nftPerPage));
+    setNftList_(nftList.slice(0, NFT_PER_PAGE));
   }, [nftList]);
 
   const searchNft = useCallback((nftItem: NftItem, searchText: string) => {
@@ -84,8 +84,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setTimeout(() => { // delayed to avoid lagging on scroll
       if (nftList.length > nftList_.length) {
         const nextPage = page + 1;
-        const from = (nextPage - 1) * nftPerPage;
-        const to = from + nftPerPage > nftList.length ? nftList.length : (from + nftPerPage);
+        const from = (nextPage - 1) * NFT_PER_PAGE;
+        const to = from + NFT_PER_PAGE > nftList.length ? nftList.length : (from + NFT_PER_PAGE);
 
         setNftList_([
           ...nftList_,

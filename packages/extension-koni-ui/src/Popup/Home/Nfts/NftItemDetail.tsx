@@ -84,6 +84,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const originChainLogo = useCallback(() => {
     return (
       <Image
+        height={token.fontSizeXL}
+        shape={'circle'}
         src={LogosMap[nftItem.chain]}
         width={token.fontSizeXL}
       />
@@ -273,9 +275,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 weight={'fill'}
               />
             </div>
-            <div>
+            <div className={'nft_item_detail_description_modal_container'}>
               <div className={'nft_item_detail__description_modal_title'}>{nftItem.name || nftItem.id}</div>
-              <div className={'nft_item_detail__description_modal_detail'}>{nftItem.description}</div>
+              <div className={'nft_item_detail__description_modal_detail'}>
+                <pre>{nftItem.description}</pre>
+              </div>
             </div>
 
           </div>
@@ -343,7 +347,8 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       color: token.colorTextDescription,
       fontSize: token.fontSize,
       fontWeight: token.bodyFontWeight,
-      lineHeight: token.lineHeight
+      lineHeight: token.lineHeight,
+      wordBreak: 'break-all'
     },
 
     '.nft_item_detail__description_title': {
@@ -375,14 +380,16 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       fontSize: token.fontSizeLG,
       lineHeight: token.lineHeightLG,
       fontWeight: token.bodyFontWeight,
-      color: token.colorTextLight1
+      color: token.colorTextLight1,
+      wordBreak: 'break-all'
     },
 
     '.nft_item_detail__description_modal_detail': {
       textAlign: 'justify',
       fontWeight: token.bodyFontWeight,
       fontSize: token.fontSizeHeading6,
-      color: token.colorTextTertiary
+      color: token.colorTextTertiary,
+      wordBreak: 'break-all'
     },
 
     '.nft_item_detail__nft_image': {

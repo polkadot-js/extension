@@ -15,6 +15,8 @@ const initialState = {
   isShowZeroBalance: true,
   accountAllLogo: '',
   theme: ThemeNames.DARK,
+  language: 'en',
+  browserConfirmationType: 'extension',
 
   // Polkadot settings
   ...settings.get(),
@@ -37,7 +39,10 @@ const settingsSlice = createSlice({
 
       return {
         ...state,
-        ...payload,
+        // todo: will save language, theme, isShowZeroBalance in background
+        browserConfirmationType: payload.browserConfirmationType,
+        isShowBalance: payload.isShowBalance,
+        accountAllLogo: payload.accountAllLogo,
         reduxStatus: ReduxStatus.READY
       };
     },
@@ -82,6 +87,18 @@ const settingsSlice = createSlice({
       return {
         ...state,
         isShowZeroBalance
+      };
+    },
+    updateLanguage (state, action: PayloadAction<AppSettings['language']>) {
+      return {
+        ...state,
+        language: action.payload
+      };
+    },
+    updateBrowserConfirmationType (state, action: PayloadAction<AppSettings['browserConfirmationType']>) {
+      return {
+        ...state,
+        browserConfirmationType: action.payload
       };
     }
   }

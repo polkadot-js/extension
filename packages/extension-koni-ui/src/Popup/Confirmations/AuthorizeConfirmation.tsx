@@ -4,14 +4,14 @@
 import { AccountAuthType, AccountJson, AuthorizeRequest } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
+import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
 import { approveAuthRequestV2, cancelAuthRequestV2, rejectAuthRequestV2 } from '@subwallet/extension-koni-ui/messaging';
-import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/Popup/Confirmations/ConfirmationGeneralInfo';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, ShieldSlash, UserPlus, XCircle } from 'phosphor-react';
+import { ShieldSlash, UserPlus } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -161,6 +161,7 @@ function Component ({ className, request }: Props) {
               isSelected={selectedMap[item.address]}
               key={item.address}
               onClick={onAccountSelect(item.address)}
+              showUnselectIcon
             />
           ))}
           <Typography.Paragraph className='text-tertiary text-center'>
@@ -179,17 +180,16 @@ function Component ({ className, request }: Props) {
           />
           <Button
             disabled={loading}
-            icon={<Icon phosphorIcon={XCircle} />}
             onClick={onCancel}
+            schema={'secondary'}
           >
             {t('Cancel')}
           </Button>
           <Button
-            icon={<Icon phosphorIcon={CheckCircle} />}
             loading={loading}
             onClick={onConfirm}
           >
-            {t('Confirm')}
+            {t('Connect')}
           </Button>
         </>}
         {visibleAccounts.length === 0 && <Button

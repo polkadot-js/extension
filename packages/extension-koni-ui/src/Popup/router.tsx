@@ -5,6 +5,7 @@ import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { i18nPromise } from '@subwallet/extension-koni-ui/util/i18n';
 import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
@@ -31,6 +32,7 @@ const ConnectKeystone = React.lazy(() => import('@subwallet/extension-koni-ui/Po
 const Login = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/Login'));
 const CreatePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/CreatePassword'));
 const ChangePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ChangePassword'));
+const ApplyMasterPassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword'));
 
 export function Crypto () {
   const dataContext = useContext(DataContext);
@@ -70,6 +72,7 @@ export function Example () {
 // Todo: Create error page
 export const router = createHashRouter([{
   path: '/',
+  loader: () => i18nPromise,
   element: <Root />,
   errorElement: <ErrorFallback />,
   children: [
@@ -166,6 +169,10 @@ export const router = createHashRouter([{
         {
           path: 'change-password',
           element: <ChangePassword />
+        },
+        {
+          path: 'migrate-password',
+          element: <ApplyMasterPassword />
         }
       ]
     },

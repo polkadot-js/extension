@@ -75,18 +75,20 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
   const dataContext = useContext(DataContext);
 
   // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
-  return <WalletModalContext>
-    <PageWrapper
-      animateOnce={true}
-      resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings'])}
-    >
-      <DefaultRoute>
-        <Main className={className}>
-          <Outlet />
-        </Main>
-      </DefaultRoute>
-    </PageWrapper>
-  </WalletModalContext>;
+  return (
+    <WalletModalContext>
+      <PageWrapper
+        animateOnce={true}
+        resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings'])}
+      >
+        <DefaultRoute>
+          <Main className={className}>
+            <Outlet />
+          </Main>
+        </DefaultRoute>
+      </PageWrapper>
+    </WalletModalContext>
+  );
 }
 
 export const Root = styled(_Root)(() => ({}));

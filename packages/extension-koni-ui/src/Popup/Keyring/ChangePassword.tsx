@@ -9,7 +9,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Form, Icon, Input } from '@subwallet/react-ui';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import CN from 'classnames';
-import { Question, ShieldCheck } from 'phosphor-react';
+import { Info, ShieldCheck } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -103,7 +103,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         {
           icon: (
             <Icon
-              phosphorIcon={Question}
+              phosphorIcon={Info}
               type='phosphor'
             />
           )

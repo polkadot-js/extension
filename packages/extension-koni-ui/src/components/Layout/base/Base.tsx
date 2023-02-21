@@ -11,7 +11,7 @@ import { Aperture, Database, Globe, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-interface Props extends Omit<
+export interface LayoutBaseProps extends Omit<
 SwScreenLayoutProps,
 'tabBarItems' | 'footer' | 'headerContent' | 'selectedTabBarItem'
 > {
@@ -72,7 +72,7 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
   }
 ];
 
-const Base = ({ children, headerIcons, onBack, showFooter, ...props }: Props) => {
+const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBaseProps) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 

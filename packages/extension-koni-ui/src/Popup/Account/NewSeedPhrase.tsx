@@ -80,26 +80,28 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
     setLoading(true);
 
-    createAccountSuriV2({
-      name: accountName,
-      suri: seedPhrase,
-      types: accountTypes,
-      isAllowed: true
-    })
-      .then(() => {
-        // window.localStorage.setItem('popupNavigation', '/');
-        navigate('/home');
+    setTimeout(() => {
+      createAccountSuriV2({
+        name: accountName,
+        suri: seedPhrase,
+        types: accountTypes,
+        isAllowed: true
       })
-      .catch((error: Error): void => {
-        // setIsBusy(false);
-        notify({
-          message: error.message,
-          type: 'error'
+        .then(() => {
+          // window.localStorage.setItem('popupNavigation', '/');
+          navigate('/home');
+        })
+        .catch((error: Error): void => {
+          // setIsBusy(false);
+          notify({
+            message: error.message,
+            type: 'error'
+          });
+        })
+        .finally(() => {
+          setLoading(false);
         });
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    }, 500);
   }, [accountName, seedPhrase, accountTypes, navigate, notify]);
 
   useEffect((): void => {

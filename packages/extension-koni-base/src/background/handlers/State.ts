@@ -4,30 +4,24 @@
 import Common from '@ethereumjs/common';
 import { ChainInfoMap } from '@subwallet/chain-list';
 import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
-import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-// eslint-disable-next-line camelcase
 import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
-import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, Resolver, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
+import { _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeTypes, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainNativeTokenSlug, _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
+import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { KoniTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
-import { getId } from '@subwallet/extension-base/utils/getId';
-import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/external/shared';
@@ -165,17 +159,18 @@ export default class KoniState {
   private subscription: KoniSubscription;
   private logger: Logger;
   private ready = false;
+  readonly #settingService: SettingService;
   readonly #requestService: RequestService;
   readonly #transactionService: TransactionService;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor (providers: Providers = {}) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     this.#providers = providers;
 
     this.dbService = new DatabaseService();
 
     this.chainService = new ChainService(this.dbService);
+    this.#settingService = new SettingService();
     this.#requestService = new RequestService(this.chainService);
     this.#transactionService = new TransactionService(this.dbService, this.#requestService);
     this.subscription = new KoniSubscription(this, this.dbService);
@@ -283,18 +278,8 @@ export default class KoniState {
     return this.#requestService.sign(url, request, account);
   }
 
-  ///
-
-  public get metaSubject () {
-    return this.#requestService.metaSubject;
-  }
-
   public get authSubjectV2 () {
     return this.#requestService.authSubjectV2;
-  }
-
-  public get signSubject () {
-    return this.#requestService.signSubject;
   }
 
   public generateDefaultBalanceMap () {
@@ -762,34 +747,50 @@ export default class KoniState {
       });
   }
 
+  public get metaSubject () {
+    return this.#requestService.metaSubject;
+  }
+
+  public get signSubject () {
+    return this.#requestService.signSubject;
+  }
+
+  public getSettings (callback: (settings: UiSettings) => void): void {
+    this.#settingService.getSettings(callback);
+  }
+
+  public setSettings (settings: UiSettings, callback?: () => void): void {
+    this.#settingService.setSettings(settings, callback);
+  }
+
   public setTheme (theme: ThemeNames, callback?: (settingData: UiSettings) => void): void {
-    this.getSettings((settings) => {
+    this.#settingService.getSettings((settings) => {
       const newSettings = {
         ...settings,
         theme
       };
 
-      this.setSettings(newSettings, () => {
+      this.#settingService.setSettings(newSettings, () => {
         callback && callback(newSettings);
       });
     });
   }
 
   public setBrowserConfirmationType (browserConfirmationType: BrowserConfirmationType, callback?: (settingData: UiSettings) => void): void {
-    this.getSettings((settings) => {
+    this.#settingService.getSettings((settings) => {
       const newSettings = {
         ...settings,
         browserConfirmationType
       };
 
-      this.setSettings(newSettings, () => {
+      this.#settingService.setSettings(newSettings, () => {
         callback && callback(newSettings);
       });
     });
   }
 
   public subscribeSettingsSubject (): Subject<RequestSettingsType> {
-    return this.settingsStore.getSubject();
+    return this.#settingService.getSubject();
   }
 
   public subscribeCurrentAccount (): Subject<CurrentAccountInfo> {

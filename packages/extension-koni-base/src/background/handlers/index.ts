@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SubWalletProviderError } from '@subwallet/extension-base/background/errors/SubWalletProviderError';
 import { MessageTypes, TransportRequestMessage } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
-import { SubWalletProviderError } from '@subwallet/extension-base/background/errors/SubWalletProviderError';
 import { NftHandler } from '@subwallet/extension-koni-base/api/nft';
 import KoniExtension from '@subwallet/extension-koni-base/background/handlers/Extension';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';

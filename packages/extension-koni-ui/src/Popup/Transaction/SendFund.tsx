@@ -13,11 +13,12 @@ import styled from 'styled-components';
 
 const createMasterPassword = () => {
   void keyringChangeMasterPassword({ newPassword: '100299', createNew: true }).then(console.log);
-}
+};
 
 const migrate = () => {
   void keyringMigrateMasterPassword({ password: '100299', address: '5DnokDpMdNEH8cApsZoWQnjsggADXQmGWUb6q8ZhHeEwvncL' }).then(console.log);
-}
+};
+
 const unlock = () => {
   void keyringUnlock({ password: '100299' }).then(console.log);
 };
@@ -27,8 +28,8 @@ const signTransaction = (request?: SigningRequest) => {
     if (request) {
       void approveSignPasswordV2({ id: request.id }).then(console.log);
     }
-  }
-}
+  };
+};
 
 const sendFund = () => {
   void makeTransfer({
@@ -41,12 +42,11 @@ const sendFund = () => {
 };
 
 const _SendFund: React.FC = () => {
-
   const requests = useSelector((state: RootState) => state.requestState.signingRequest);
   const request = requests[0];
 
   return (
-    <div style={{display: 'flex', flexDirection: 'column', gap: 8,}}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <Button onClick={createMasterPassword}>Create Password</Button>
       <Button onClick={migrate}>Migrate</Button>
       <Button onClick={unlock}>Unlock</Button>

@@ -4,7 +4,7 @@
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
-import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _EvmApi, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
@@ -247,21 +247,32 @@ export interface TokenBalanceRaw {
   free: BN
 }
 
-export interface BalanceChildItem {
-  reserved: string,
-  frozen: string,
-  free: string,
-  decimals: number
+// deprecated
+// export interface BalanceChildItem {
+//   reserved: string,
+//   frozen: string,
+//   free: string,
+//   decimals: number
+// }
+
+export interface SubstrateBalance {
+  reserved?: string,
+  miscFrozen?: string,
+  feeFrozen?: string
 }
 
 export interface BalanceItem {
+  // metadata
+  tokenSlug: string,
   state: APIItemState,
-  free?: string,
-  reserved?: string,
-  miscFrozen?: string,
-  feeFrozen?: string,
-  children?: Record<string, BalanceChildItem>,
   timestamp?: number
+
+  // must-have, total = free + locked
+  free: string,
+  locked: string,
+
+  // substrate fields
+  substrateInfo?: SubstrateBalance
 }
 
 export interface BalanceJson {
@@ -1694,7 +1705,7 @@ export interface KoniRequestSignatures {
   'pri(chainService.removeChain)': [string, boolean];
   'pri(chainService.deleteCustomTokens)': [string[], boolean];
   'pri(chainService.upsertCustomToken)': [Record<string, any>, boolean];
-  'pri(chainService.validateCustomToken)': [Record<string, any>, Record<string, any>];
+  'pri(chainService.validateCustomToken)': [_ValidateCustomTokenRequest, _ValidateCustomTokenResponse];
   'pri(chainService.resetDefaultChains)': [null, boolean];
   'pri(chainService.getSupportedContractTypes)': [null, string[]];
 

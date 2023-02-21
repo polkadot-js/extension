@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import type { AccountsContext, AuthorizeRequest, MetadataRequest } from '@subwallet/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
+import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import React from 'react';
 
 import settings from '@polkadot/ui-settings';

@@ -2,22 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
-import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
-import Extension, { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
-import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, BalanceJson, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BasicTxWarning, BasicTxWarningCode, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, ChainBondingBasics, CheckExistingTuringCompoundParams, CreateDeriveAccountInfo, CrowdloanJson, CurrentAccountInfo, DelegationItem, DeriveAccountInfo, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PrepareExternalRequest, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestChangeMasterPassword, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestClaimRewardExternal, RequestConfirmationComplete, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveValidateV2, RequestEvmNftSubmitTransaction, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TransferErrorCode, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TxHistoryItem, TxHistoryType, UnbondingSubmitParams, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, BalanceJson, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BasicTxWarning, BasicTxWarningCode, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, BrowserConfirmationType, ChainBondingBasics, CheckExistingTuringCompoundParams, CreateDeriveAccountInfo, CrowdloanJson, CurrentAccountInfo, DelegationItem, DeriveAccountInfo, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PrepareExternalRequest, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestChangeMasterPassword, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestClaimRewardExternal, RequestConfirmationComplete, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveValidateV2, RequestEvmNftSubmitTransaction, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeNames, TransferErrorCode, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TxHistoryItem, TxHistoryType, UnbondingSubmitParams, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeCancel, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApproveSignature, RequestSigningCancel, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseType } from '@subwallet/extension-base/background/types';
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, BalanceJson, BasicTxError, BasicTxErrorCode, BasicTxInfo, BasicTxResponse, BasicTxWarning, BasicTxWarningCode, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, BrowserConfirmationType, ChainBondingBasics, CheckExistingTuringCompoundParams, CreateDeriveAccountInfo, CrowdloanJson, CurrentAccountInfo, DelegationItem, DeriveAccountInfo, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PrepareExternalRequest, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountIsLocked, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestChangeMasterPassword, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestClaimRewardExternal, RequestConfirmationComplete, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveValidateV2, RequestEvmNftSubmitTransaction, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeNames, TransferErrorCode, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TxHistoryItem, TxHistoryType, UnbondingSubmitParams, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAccountTie, RequestAuthorizeCancel, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { AuthUrls, SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isChainEvmCompatible, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
+import { AuthUrls, SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import { getTransactionId } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { KoniTransaction, PrepareInternalRequest } from '@subwallet/extension-base/services/transaction-service/types';
 import { SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
@@ -37,7 +32,7 @@ import { makeNftTransferExternal } from '@subwallet/extension-koni-base/api/dots
 import { makeCrossChainTransferExternal } from '@subwallet/extension-koni-base/api/dotsama/external/transfer/xcm';
 import { parseSubstrateTransaction } from '@subwallet/extension-koni-base/api/dotsama/parseTransaction';
 import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
-import { checkReferenceCount, checkSupportTransfer, estimateFee, makeTransfer, makeTransferV2 } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { checkReferenceCount, checkSupportTransfer, estimateFee, makeTransferV2 } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { makeERC20TransferQr, makeEVMTransferQr } from '@subwallet/extension-koni-base/api/evm/external/transfer/balance';
 import { handleTransferNftQr } from '@subwallet/extension-koni-base/api/evm/external/transfer/nft';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
@@ -423,10 +418,10 @@ export default class KoniExtension {
           accounts
         };
 
-      setTimeout(() => {
-        this.#koniState.getCurrentAccount((accountInfo) => {
-          if (accountInfo) {
-            accountsWithCurrentAddress.currentAddress = accountInfo.address;
+        setTimeout(() => {
+          this.#koniState.getCurrentAccount((accountInfo) => {
+            if (accountInfo) {
+              accountsWithCurrentAddress.currentAddress = accountInfo.address;
 
               if (accountInfo.address === ALL_ACCOUNT_KEY) {
                 accountsWithCurrentAddress.currentGenesisHash = accountInfo.currentGenesisHash;
@@ -754,10 +749,10 @@ export default class KoniExtension {
     return true;
   }
 
-  private getSettings (): Promise<RequestSettingsType> {
-    return new Promise<RequestSettingsType>((resolve, reject) => {
-      this.#koniState.getSettings((rs) => {
-        resolve(rs);
+  private async getSettings (): Promise<RequestSettingsType> {
+    return await new Promise((resolve) => {
+      this.#koniState.getSettings((value) => {
+        resolve(value);
       });
     });
   }
@@ -821,7 +816,7 @@ export default class KoniExtension {
   private saveBrowserConfirmationType (data: BrowserConfirmationType, id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(settings.saveBrowserConfirmationType)'>(id, port);
 
-    state.setBrowserConfirmationType(data, cb);
+    this.#koniState.setBrowserConfirmationType(data, cb);
 
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
@@ -1758,6 +1753,7 @@ export default class KoniExtension {
 
   private prepareInternalTransaction (network: string, address: string): PrepareInternalRequest {
     const id: string = getTransactionId(network, address);
+
     const addTransaction = (transaction: KoniTransaction) => {
       this.#koniState.addTransaction(transaction);
     };
@@ -1831,7 +1827,8 @@ export default class KoniExtension {
         }
       } else {
         const substrateApiMap = this.#koniState.getSubstrateApiMap();
-        const { id: transactionId, addTransaction, convertToRequest } = this.prepareInternalTransaction(networkKey, from);
+        const { addTransaction, convertToRequest, id: transactionId } = this.prepareInternalTransaction(networkKey, from);
+
         // Make transfer with Dotsama API
         transferProm = makeTransferV2({
           networkKey: networkKey,
@@ -4221,7 +4218,7 @@ export default class KoniExtension {
 
   private subscribeMultiChainAssetMap (id: string, port: chrome.runtime.Port): Record<string, _MultiChainAsset> {
     const cb = createSubscription<'pri(chainService.subscribeMultiChainAssetMap)'>(id, port);
-    const multiChainAssetSubscription = state.subscribeMultiChainAssetMap().subscribe({
+    const multiChainAssetSubscription = this.#koniState.subscribeMultiChainAssetMap().subscribe({
       next: (rs) => {
         cb(rs);
       }
@@ -4233,7 +4230,7 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return state.getMultiChainAssetMap();
+    return this.#koniState.getMultiChainAssetMap();
   }
 
   private getSupportedSmartContractTypes () {

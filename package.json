@@ -1,13 +1,13 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
-  "bugs": "https://github.com/polkadot-js/extension/issues",
-  "homepage": "https://github.com/polkadot-js/extension#readme",
+  "bugs": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension/issues",
+  "homepage": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension#readme",
   "license": "Apache-2.0",
   "packageManager": "yarn@3.2.0",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/polkadot-js/extension.git"
+    "url": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension.git"
   },
   "sideEffects": false,
   "version": "0.44.8",

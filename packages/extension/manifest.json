@@ -1,9 +1,9 @@
 {
-  "author": "polkadot.{js}",
+  "author": "Aleph Zero",
   "description": "Manage your Polkadot accounts outside of dapps. Injects the accounts and allows signing transactions for a specific account.",
-  "homepage_url": "https://github.com/polkadot-js/extension",
-  "name": "polkadot{.js} extension",
-  "short_name": "polkadot{.js}",
+  "homepage_url": "https://alephzero.org/",
+  "name": "Aleph Zero Signer",
+  "short_name": "Aleph Zero Signer",
   "manifest_version": 2,
   "permissions": ["storage", "tabs"],
   "background": {
@@ -11,7 +11,7 @@
     "persistent": true
   },
   "browser_action": {
-    "default_title": "polkadot{.js}",
+    "default_title": "Aleph Zero Signer",
     "default_popup": "index.html"
   },
   "content_scripts": [{

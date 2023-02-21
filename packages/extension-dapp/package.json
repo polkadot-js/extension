@@ -1,16 +1,16 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
-  "bugs": "https://github.com/polkadot-js/extension/issues",
+  "bugs": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension/issues",
   "contributors": [],
   "description": "Provides an interfaces around the injected globals for ease of access by dapp developers.",
-  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-dapp#readme",
+  "homepage": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension/tree/master/packages/extension-dapp#readme",
   "license": "Apache-2.0",
   "maintainers": [],
   "name": "@polkadot/extension-dapp",
   "repository": {
     "directory": "packages/extension-dapp",
     "type": "git",
-    "url": "https://github.com/polkadot-js/extension.git"
+    "url": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension.git"
   },
   "sideEffects": [
     "./detectPackage.js",

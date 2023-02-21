@@ -46,6 +46,10 @@ export default styled(InputLock)(
     width: 24px;
     height: 24px;
     cursor: pointer;
+    
+    :hover {
+      background: ${theme.headerIconBackgroundHover};
+    }
   }
 
   `

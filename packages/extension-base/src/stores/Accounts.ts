@@ -9,7 +9,7 @@ import BaseStore from './Base';
 export default class AccountsStore extends BaseStore<KeyringJson> implements KeyringStore {
   constructor () {
     super(
-      EXTENSION_PREFIX && EXTENSION_PREFIX !== 'polkadot{.js}'
+      EXTENSION_PREFIX && EXTENSION_PREFIX !== 'Aleph Zero Signer'
         ? `${EXTENSION_PREFIX}accounts`
         : null
     );

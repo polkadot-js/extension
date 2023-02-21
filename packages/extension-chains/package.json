@@ -1,16 +1,16 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
-  "bugs": "https://github.com/polkadot-js/extension/issues",
+  "bugs": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension/issues",
   "contributors": [],
   "description": "Definitions for all known chains as exposed by the extension.",
-  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-chains#readme",
+  "homepage": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension/tree/master/packages/extension-chains#readme",
   "license": "Apache-2.0",
   "maintainers": [],
   "name": "@polkadot/extension-chains",
   "repository": {
     "directory": "packages/extension-chains",
     "type": "git",
-    "url": "https://github.com/polkadot-js/extension.git"
+    "url": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension.git"
   },
   "sideEffects": [
     "./detectPackage.js",

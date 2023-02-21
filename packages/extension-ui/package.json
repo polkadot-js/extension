@@ -1,16 +1,16 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
-  "bugs": "https://github.com/polkadot-js/extension/issues",
+  "bugs": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension/issues",
   "contributors": [],
   "description": "A sample signer extension for the @polkadot/api",
-  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-ui#readme",
+  "homepage": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension/tree/master/packages/extension-ui#readme",
   "license": "Apache-2.0",
   "maintainers": [],
   "name": "@polkadot/extension-ui",
   "repository": {
     "directory": "packages/extension-ui",
     "type": "git",
-    "url": "https://github.com/polkadot-js/extension.git"
+    "url": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension.git"
   },
   "sideEffects": true,
   "type": "commonjs",

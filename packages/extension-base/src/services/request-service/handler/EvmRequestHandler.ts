@@ -1,19 +1,20 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import Common from '@ethereumjs/common';
 import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
 import { Resolver } from '@subwallet/extension-base/background/types';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import keyring from '@subwallet/ui-keyring';
-import { Transaction } from 'ethereumjs-tx';
+import {Transaction, TxData} from 'ethereumjs-tx';
 import { BehaviorSubject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
-import { logger as createLogger } from '@polkadot/util';
+import {logger as createLogger} from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
+import {toBuffer} from "ethereumjs-util";
+import Common from "@ethereumjs/common";
 
 export default class EvmRequestHandler {
   readonly #requestService: RequestService;
@@ -120,6 +121,21 @@ export default class EvmRequestHandler {
     }
   }
 
+  configToTransaction(config: TransactionConfig): Transaction {
+    const txData: TxData = {
+      nonce: toBuffer(anyNumberToBN(config.nonce).toNumber()),
+      gasPrice: toBuffer(anyNumberToBN(config.gasPrice).toNumber()),
+      gasLimit: toBuffer(anyNumberToBN(config.gas).toNumber()),
+      to: config.to ? toBuffer(config.to) : undefined,
+      value: toBuffer(anyNumberToBN(config.value).toNumber()),
+      data: config.data ? toBuffer(config.data) : undefined
+    };
+
+    const common = Common.custom( {chainId: config.chainId})
+    // @ts-ignore
+    return new Transaction(txData, {common});
+  }
+
   private async signTransaction (confirmation: ConfirmationDefinitions['evmSendTransactionRequest'][0]): Promise<string> {
     const transaction = confirmation.payload;
     const { estimateGas, from, gasPrice } = transaction;
@@ -133,20 +149,13 @@ export default class EvmRequestHandler {
       // nonce: await web3.eth.getTransactionCount(from) // Todo: fill this value from transaction service
     } as TransactionConfig;
 
-    // @ts-ignore
-    params.estimateGas && delete params.estimateGas;
-    // @ts-ignore
-    params.hasPayload && delete params.hasPayload;
+    const tx = this.configToTransaction(params);
 
-    const common = Common.custom({
-      networkId: params.chainId,
-      chainId: params.chainId
-    });
-
-    // @ts-ignore
-    const tx = new Transaction(params, { common });
-
-    return Promise.resolve(pair.evmSigner.signTransaction(tx));
+    await Promise.resolve();
+    if (pair.isLocked) {
+      keyring.unlockPair(pair.address);
+    }
+    return pair.evmSigner.signTransaction(tx);
   }
 
   private async decorateResult<T extends ConfirmationType> (t: T, request: ConfirmationDefinitions[T][0], result: ConfirmationDefinitions[T][1]) {

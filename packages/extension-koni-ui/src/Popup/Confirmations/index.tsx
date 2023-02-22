@@ -13,6 +13,8 @@ import styled from 'styled-components';
 
 import ConfirmationHeader from './ConfirmationHeader';
 import SignConfirmation from "@subwallet/extension-koni-ui/Popup/Confirmations/SignConfirmation";
+import { ConfirmationDefinitions } from "@subwallet/extension-base/background/KoniTypes";
+import EvmSignConfirmation from "@subwallet/extension-koni-ui/Popup/Confirmations/EvmSignConfirmation";
 
 type Props = ThemeProps
 
@@ -27,12 +29,12 @@ const Component = function ({ className }: Props) {
     metadataRequest: t('Update Metadata'),
     signingRequest: t('Signing Request'),
     addNetworkRequest: t('Add Network Request'),
-    addTokenRequest: t('Metadata Request'),
-    switchNetworkRequest: t('Metadata Request'),
-    evmSignatureRequest: t('Metadata Request'),
-    evmSignatureRequestExternal: t('Metadata Request'),
-    evmSendTransactionRequest: t('Metadata Request'),
-    evmSendTransactionRequestExternal: t('Metadata Request')
+    addTokenRequest: t('Add Token Request'),
+    switchNetworkRequest: t('Add Network Request'),
+    evmSignatureRequest: t('Signing Request'),
+    evmSignatureRequestExternal: t('Signing Request'),
+    evmSendTransactionRequest: t('Transaction Request'),
+    evmSendTransactionRequestExternal: t('Transaction Request')
   } as Record<ConfirmationType, string>), [t]);
 
   const nextConfirmation = useCallback(() => {
@@ -57,6 +59,8 @@ const Component = function ({ className }: Props) {
       <MetadataConfirmation request={confirmation.item as MetadataRequest} />}
     {confirmation?.type === 'signingRequest' &&
       <SignConfirmation request={confirmation.item as SigningRequest} />}
+    {confirmation?.type === 'evmSendTransactionRequest' &&
+      <EvmSignConfirmation request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]} />}
   </div>;
 };
 

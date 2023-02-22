@@ -3,11 +3,10 @@
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
+import SendFund from '@subwallet/extension-koni-ui/Popup/Transaction/SendFund';
 import { i18nPromise } from '@subwallet/extension-koni-ui/util/i18n';
 import React from 'react';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
-
-import SendFund from './Transaction/SendFund';
 
 const PhishingDetected = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
 const PageWrapper = React.lazy(() => import('../components/Layout/PageWrapper'));

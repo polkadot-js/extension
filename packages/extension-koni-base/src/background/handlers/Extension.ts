@@ -53,7 +53,17 @@ import { Transaction } from 'ethereumjs-tx';
 import { TransactionConfig } from 'web3-core';
 
 import { TypeRegistry } from '@polkadot/types';
-import { assert, BN, BN_ZERO, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
+import {
+  assert,
+  BN,
+  BN_ZERO,
+  hexStripPrefix,
+  hexToU8a,
+  isAscii,
+  isHex,
+  u8aToHex,
+  u8aToString
+} from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
@@ -1748,9 +1758,9 @@ export default class KoniExtension {
     };
   }
 
-  private async makeTransferNew (id: string, port: chrome.runtime.Port, request: RequestTransfer): Promise<BasicTxResponse> {
+  private async makeTransfer (id: string, port: chrome.runtime.Port, request: RequestTransfer): Promise<BasicTxResponse> {
     const { from, networkKey, to, tokenSlug, transferAll, value } = request;
-    const [errors, fromKeyPair, , tokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
+    const [errors, , , tokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
     const txState: BasicTxResponse = { errors: [] };
     const isTransferAll = !!transferAll;
     const transferVal = value || '0';
@@ -1762,8 +1772,8 @@ export default class KoniExtension {
         this.cancelSubscription(id);
       }, 500);
 
-      // todo: add condition to lock KeyPair (for example: not remember password)
-      fromKeyPair && fromKeyPair.lock();
+      // Remove fromKeyPair lock because migrate to master password
+      // fromKeyPair && fromKeyPair.lock();
 
       return txState;
     }
@@ -1777,6 +1787,7 @@ export default class KoniExtension {
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
       // Make transfer with EVM API
       const chainInfo = this.#koniState.getChainInfo(networkKey);
+      const chainId = chainInfo?.evmInfo?.evmChainId || 1;
       const evmApiMap = this.#koniState.getEvmApiMap();
 
       swTransactionInput.chainType = 'ethereum';
@@ -1785,10 +1796,24 @@ export default class KoniExtension {
         swTransactionInput.extrinsicType = 'ethereum:erc20:transfer';
         const assetAddress = _getContractAddressOfToken(tokenInfo);
 
-        swTransactionInput.transaction = (await getERC20TransactionObject(assetAddress, chainInfo, from, to, transferVal, isTransferAll, evmApiMap))[0];
+        const [transaction, , estimateFee] = await getERC20TransactionObject(assetAddress, chainInfo, from, to, transferVal, isTransferAll, evmApiMap);
+        swTransactionInput.transaction = {
+          ...transaction,
+          chainId,
+          estimateGas: estimateFee,
+          hashPayload: '',
+        }
       } else {
         swTransactionInput.extrinsicType = 'ethereum:balance:transfer';
-        swTransactionInput.transaction = (await getEVMTransactionObject(chainInfo, to, transferVal, isTransferAll, evmApiMap))[0];
+
+        const [transaction, , estimateFee] = await getEVMTransactionObject(chainInfo, to, transferVal, isTransferAll, evmApiMap);
+        swTransactionInput.transaction = {
+          ...transaction,
+          from: from,
+          chainId,
+          estimateGas: estimateFee,
+          hashPayload: ''
+        }
       }
     } else {
       const substrateApi = this.#koniState.getSubstrateApi(networkKey);
@@ -1819,100 +1844,6 @@ export default class KoniExtension {
         message: 'Unsupported transfer'
       });
     }
-
-    return txState;
-  }
-
-  // Internal transaction account
-  private makeTransfer (id: string, port: chrome.runtime.Port, { from,
-    networkKey,
-    to,
-    tokenSlug,
-    transferAll,
-    value }: RequestTransfer): BasicTxResponse {
-    const txState: BasicTxResponse = {};
-
-    const [errors, fromKeyPair, , tokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
-
-    if (errors.length) {
-      txState.txError = true;
-      txState.errors = errors;
-      setTimeout(() => {
-        this.cancelSubscription(id);
-      }, 500);
-
-      // todo: add condition to lock KeyPair (for example: not remember password)
-      fromKeyPair && fromKeyPair.lock();
-
-      return txState;
-    }
-
-    if (fromKeyPair) {
-      const cb = createSubscription<'pri(accounts.transfer)'>(id, port);
-      const callback = this.makeTransferCallback(from, to, networkKey, tokenSlug, cb);
-
-      let transferProm: Promise<void> | undefined;
-
-      if (isEthereumAddress(from) && isEthereumAddress(to)) {
-        // Make transfer with EVM API
-        const chainInfo = this.#koniState.getChainInfo(networkKey);
-        const evmApiMap = this.#koniState.getEvmApiMap();
-
-        if (_isTokenEvmSmartContract(tokenInfo)) {
-          transferProm = makeERC20Transfer({
-            assetAddress: _getContractAddressOfToken(tokenInfo),
-            callback: callback,
-            from: from,
-            chainInfo: chainInfo,
-            to: to,
-            transferAll: !!transferAll,
-            value: value || '0',
-            evmApiMap: evmApiMap
-          });
-        } else {
-          transferProm = makeEVMTransfer({
-            callback: callback,
-            from: from,
-            chainInfo: chainInfo,
-            to: to,
-            transferAll: !!transferAll,
-            value: value || '0',
-            evmApiMap: evmApiMap
-          });
-        }
-      } else {
-        const substrateApiMap = this.#koniState.getSubstrateApiMap();
-
-        // Make transfer with Dotsama API
-        transferProm = makeTransferV2({
-          networkKey: networkKey,
-          tokenInfo: tokenInfo,
-          value: value || '0',
-          to: to,
-          substrateApiMap: substrateApiMap,
-          transferAll: !!transferAll,
-          callback: callback,
-          from: fromKeyPair.address
-        });
-      }
-
-      transferProm.then(() => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Start transfer ${transferAll ? 'all' : value} from ${from} to ${to}`);
-      })
-        .catch((e) => {
-          // eslint-disable-next-line node/no-callback-literal
-          cb({ txError: true, status: false, errors: [({ code: TransferErrorCode.TRANSFER_ERROR, message: (e as Error).message })] });
-          console.error('Transfer error', e);
-          setTimeout(() => {
-            this.cancelSubscription(id);
-          }, 500);
-        });
-    }
-
-    port.onDisconnect.addListener((): void => {
-      this.cancelSubscription(id);
-    });
 
     return txState;
   }
@@ -3437,8 +3368,8 @@ export default class KoniExtension {
     return this.#koniState.getConfirmationsQueueSubject().getValue();
   }
 
-  private completeConfirmation (request: RequestConfirmationComplete) {
-    return this.#koniState.completeConfirmation(request);
+  private async completeConfirmation (request: RequestConfirmationComplete) {
+    return await this.#koniState.completeConfirmation(request);
   }
 
   /// Sign Qr
@@ -4559,7 +4490,7 @@ export default class KoniExtension {
       case 'pri(accounts.checkTransfer)':
         return await this.checkTransfer(request as RequestCheckTransfer);
       case 'pri(accounts.transfer)':
-        return await this.makeTransferNew(id, port, request as RequestTransfer);
+        return await this.makeTransfer(id, port, request as RequestTransfer);
       case 'pri(accounts.checkCrossChainTransfer)':
         return await this.checkCrossChainTransfer(request as RequestCheckCrossChainTransfer);
       case 'pri(accounts.crossChainTransfer)':
@@ -4628,7 +4559,7 @@ export default class KoniExtension {
       case 'pri(confirmations.subscribe)':
         return this.subscribeConfirmations(id, port);
       case 'pri(confirmations.complete)':
-        return this.completeConfirmation(request as RequestConfirmationComplete);
+        return await this.completeConfirmation(request as RequestConfirmationComplete);
 
       /// Stake
       case 'pri(bonding.getBondingOptions)':

@@ -569,8 +569,8 @@ export async function checkCrossChainTransfer (request: RequestCheckCrossChainTr
   return sendMessage('pri(accounts.checkCrossChainTransfer)', request);
 }
 
-export async function makeTransfer (request: RequestTransfer, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(accounts.transfer)', request, callback);
+export async function makeTransfer (request: RequestTransfer): Promise<BasicTxResponse> {
+  return sendMessage('pri(accounts.transfer)', request);
 }
 
 export async function makeCrossChainTransfer (request: RequestCrossChainTransfer, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {

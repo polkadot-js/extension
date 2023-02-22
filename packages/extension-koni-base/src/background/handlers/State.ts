@@ -162,7 +162,7 @@ export default class KoniState {
     this.chainService = new ChainService(this.dbService);
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService);
-    this.transactionService = new TransactionService(this, this.dbService, this.requestService);
+    this.transactionService = new TransactionService(this.chainService, this.dbService, this.requestService);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');
@@ -1704,9 +1704,8 @@ export default class KoniState {
   public getConfirmationsQueueSubject (): BehaviorSubject<ConfirmationsQueue> {
     return this.requestService.confirmationsQueueSubject;
   }
-
-  public completeConfirmation (request: RequestConfirmationComplete) {
-    return this.requestService.completeConfirmation(request);
+  public async completeConfirmation (request: RequestConfirmationComplete) {
+    return await this.requestService.completeConfirmation(request);
   }
 
   public onInstall () {

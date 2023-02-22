@@ -7,13 +7,14 @@ import DatabaseService from '@subwallet/extension-base/services/storage-service/
 import { KoniTransactionStatus, SendTransactionEvents, SWTransaction, SWTransactionInput, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import EventEmitter from 'eventemitter3';
 import { BehaviorSubject } from 'rxjs';
-import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import {Signer, SignerResult} from '@polkadot/api/types';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
+import {EvmSendTransactionRequest} from "@subwallet/extension-base/background/KoniTypes";
+import {EXTENSION_REQUEST_URL} from "@subwallet/extension-base/services/request-service/constants";
 
 export default class TransactionService {
   private readonly chainService: ChainService;
@@ -41,6 +42,10 @@ export default class TransactionService {
 
   private get pendingTransactions (): SWTransaction[] {
     return this.allTransactions.filter((t) => t.status === 'PENDING');
+  }
+
+  private getTransaction(id: string) {
+    return this.transactions[id];
   }
 
   private validateTransaction (transaction: SWTransaction): boolean {
@@ -82,6 +87,7 @@ export default class TransactionService {
     this.transactions[transaction.id] = transaction;
     this.transactionSubject.next({ ...this.transactions });
 
+    // Send transaction
     this.sendTransaction(transaction).catch(console.error);
 
     return transaction.id;
@@ -89,28 +95,26 @@ export default class TransactionService {
 
   public async sendTransaction (transaction: SWTransaction): Promise<void> {
     // Send Transaction
-    const emitter = transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : this.signAndSendEvmTransaction(transaction);
+    try {
+      const emitter = transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : (await this.signAndSendEvmTransaction(transaction));
 
-    emitter.on('extrinsicHash', (data: TransactionEventResponse) => {
-      this.onHasTransactionHash(data);
-      // Todo: Create transaction history
-    });
+      emitter.on('extrinsicHash', (data: TransactionEventResponse) => {
+        this.onHasTransactionHash(data);
+      });
 
-    emitter.on('success', (data: TransactionEventResponse) => {
-      // Todo: Write success transaction history
-      this.onSuccess(data);
-    });
+      emitter.on('success', (data: TransactionEventResponse) => {
+        this.onSuccess(data);
+      });
 
-    emitter.on('error', (data: TransactionEventResponse) => {
-      this.onFailed(data.error || new Error('Unknown error'));
-      // Todo: Write failed transaction history
-    });
+      emitter.on('error', (data: TransactionEventResponse) => {
+        this.onFailed({...data, error: data.error || new Error('Unknown error')});
+      });
 
-    // setTimeout(() => {
-    //   emitter.emit('error', { id: transaction.id, error: new Error('Timeout') });
-    // }, 120000);
-
-    await Promise.resolve();
+      await Promise.resolve();
+    } catch (error) {
+      this.removeTransaction(transaction.id);
+      await Promise.reject();
+    }
   }
 
   public removeTransaction (id: string): void {
@@ -120,36 +124,69 @@ export default class TransactionService {
     }
   }
 
+  public updateTransaction (id: string, data: Partial<Omit<SWTransaction, 'id'>>): void {
+    const transaction = this.transactions[id];
+    if (transaction) {
+      this.transactions[id] = {
+        ...transaction,
+        ...data
+      }
+    }
+  }
+
   private onHasTransactionHash ({ extrinsicHash, id }: TransactionEventResponse) {
-    console.log(id, extrinsicHash);
+    // Todo: Write pending transaction history
+    this.updateTransaction(id, { extrinsicHash: extrinsicHash });
+    console.log('GetTransaction Hash', id, extrinsicHash);
   }
 
   private onSuccess ({ extrinsicHash, id }: TransactionEventResponse) {
-    console.log(id, extrinsicHash);
+    // Todo: Write success transaction history
+    const transaction = this.getTransaction(id)
+    this.updateTransaction(id, { status: KoniTransactionStatus.COMPLETED });
+    console.log('Success', id, transaction.extrinsicHash);
   }
 
-  private onFailed (error: Error) {
-    console.log(error);
+  private onFailed ({error, id}: TransactionEventResponse) {
+    // Todo: Write failed transaction history
+    const transaction = this.getTransaction(id)
+    if (transaction) {
+      this.updateTransaction(id, { status: KoniTransactionStatus.FAILED });
+      console.log('Failed', id, transaction.extrinsicHash);
+    }
+    console.error(error);
   }
 
-  private signAndSendEvmTransaction ({ chain, id, transaction }: SWTransaction): EventEmitter<SendTransactionEvents, TransactionEventResponse> {
-    const payload = (transaction as TransactionConfig);
-    // Todo: Write interface for requestService
-    const signedTransaction = '0x';
+  private async signAndSendEvmTransaction ({ address, chain, id, transaction }: SWTransaction): EventEmitter<SendTransactionEvents, TransactionEventResponse> {
+    const payload = (transaction as EvmSendTransactionRequest);
+
+    // Set unique nonce to avoid transaction errors
+    if (!payload.nonce) {
+      const evmApi = this.chainService.getEvmApi(chain);
+      payload.nonce = await evmApi.api.eth.getTransactionCount(address);
+    }
 
     const emitter = new EventEmitter<SendTransactionEvents, TransactionEventResponse>();
-
-    this.chainService.getEvmApi(chain).api.eth.sendSignedTransaction(signedTransaction)
-      .once('transactionHash', (hash) => {
-        emitter.emit('extrinsicHash', { id, extrinsicHash: hash });
+    this.requestService.addConfirmation(id, EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
+      .then(({payload, isApproved}) => {
+        if (isApproved) {
+          payload && this.chainService.getEvmApi(chain).api.eth.sendSignedTransaction(payload)
+            .once('transactionHash', (hash) => {
+              emitter.emit('extrinsicHash', { id, extrinsicHash: hash });
+            })
+            .once('receipt', (rs) => {
+              emitter.emit('success', { id, transactionHash: rs.transactionHash });
+            })
+            .once('error', (e) => {
+              emitter.emit('error', { id, error: e });
+            })
+        } else {
+          this.removeTransaction(id);
+          emitter.emit('error', new Error('User Rejected'))
+        }
       })
-      .once('receipt', (rs) => {
-        // Todo: Set success and handler more info to save transaction history
-        emitter.emit('success', { id, transactionHash: rs.transactionHash });
-      })
-      .once('error', (e) => {
-        emitter.emit('error', { id, error: e });
-      }).catch((e) => {
+      .catch((e) => {
+        this.removeTransaction(id);
         emitter.emit('error', { id, error: e as Error });
       });
 

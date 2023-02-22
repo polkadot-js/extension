@@ -32,13 +32,13 @@ const signTransaction = (request?: SigningRequest) => {
 };
 
 const sendFund = () => {
-  void makeTransfer({
-    from: '5CXCbp6HeFDGeNZpgP6LmQdxxGaM7DosN9bNmVj72nQ3hU3G',
-    networkKey: 'polkadot',
-    to: '5EhSb8uHkbPRF869wynQ4gh5V7B62YgkEQvMdk6tzHD9bK7b',
-    tokenSlug: 'polkadot-NATIVE-DOT',
-    value: '1000000000000'
-  }, console.log);
+  makeTransfer({
+    from: '0x40a207109cf531024B55010A1e760199Df0d3a13',
+    networkKey: 'moonbeam',
+    to: '0x2D3051BC4Ed05aE74AcB53Bff8034252C3F43755',
+    tokenSlug: 'moonbeam-NATIVE-GLMR',
+    value: '0'
+  }).then(console.log).catch(console.error);
 };
 
 const _SendFund: React.FC = () => {

@@ -9,7 +9,7 @@ import EvmRequestHandler from '@subwallet/extension-base/services/request-servic
 import MetadataRequestHandler from '@subwallet/extension-base/services/request-service/handler/MetadataRequestHandler';
 import PopupHandler from '@subwallet/extension-base/services/request-service/handler/PopupHandler';
 import SubstrateRequestHandler from '@subwallet/extension-base/services/request-service/handler/SubstrateRequestHandler';
-import { AuthUrls, MetaRequest, SigningRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
+import { AuthUrls, MetaRequest, SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -182,8 +182,8 @@ export default class RequestService {
     return this.#evmRequestHandler.addConfirmation(id, url, type, payload, options, validator);
   }
 
-  public completeConfirmation (request: RequestConfirmationComplete): boolean {
-    return this.#evmRequestHandler.completeConfirmation(request);
+  public async completeConfirmation (request: RequestConfirmationComplete): Promise<boolean> {
+    return await this.#evmRequestHandler.completeConfirmation(request);
   }
 
   // General methods

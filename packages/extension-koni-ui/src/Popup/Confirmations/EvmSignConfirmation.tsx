@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SigningRequest } from '@subwallet/extension-base/background/types';
 import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
-import { approveSignPasswordV2, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
+import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -11,23 +10,24 @@ import { CheckCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import {ConfirmationDefinitions, ConfirmationResult} from "@subwallet/extension-base/background/KoniTypes";
 
 interface Props extends ThemeProps {
-  request: SigningRequest
+  request: ConfirmationDefinitions['evmSendTransactionRequest'][0]
 }
 
-async function handleConfirm ({ id }: SigningRequest) {
-  return await approveSignPasswordV2({ id });
+async function handleConfirm (id: string, payload: string) {
+  return await completeConfirmation('evmSendTransactionRequest', {id, isApproved: true, payload} as ConfirmationResult<string>);
 }
 
-async function handleCancel ({ id }: SigningRequest) {
-  return await cancelSignRequest(id);
+async function handleCancel ({ id }: ConfirmationDefinitions['evmSendTransactionRequest'][0]) {
+  return await completeConfirmation('evmSendTransactionRequest', {id, isApproved: false} as ConfirmationResult<string>);
 }
 
 function Component ({ className, request }: Props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  const { payload } = request.request;
+  const {} = request;
   // Handle buttons actions
 
   const onCancel = useCallback(() => {
@@ -39,8 +39,7 @@ function Component ({ className, request }: Props) {
 
   const onConfirm = useCallback(() => {
     setLoading(true);
-
-    handleConfirm(request).finally(() => {
+    handleConfirm(request.id, '').finally(() => {
       setLoading(false);
     });
   }, [request]);
@@ -54,7 +53,7 @@ function Component ({ className, request }: Props) {
             {t('Signing....')}
           </Typography.Title>
           <Typography.Paragraph className='text-tertiary'>
-            {JSON.stringify(payload)}
+            {JSON.stringify(request.payload)}
           </Typography.Paragraph>
         </div>
       </div>
@@ -79,7 +78,7 @@ function Component ({ className, request }: Props) {
   );
 }
 
-const SignConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => ({
+const EvmSignConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => ({
   '.account-list': {
     '.__prop-label': {
       marginRight: token.marginMD,
@@ -89,4 +88,4 @@ const SignConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemePr
   }
 }));
 
-export default SignConfirmation;
+export default EvmSignConfirmation;

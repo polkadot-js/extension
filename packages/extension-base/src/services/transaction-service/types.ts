@@ -1,14 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExternalRequestPromise } from '@subwallet/extension-base/background/KoniTypes';
-import { ResponseSigning } from '@subwallet/extension-base/background/types';
-
-import { SignerPayloadJSON } from '@polkadot/types/types';
+import {EvmSendTransactionRequest} from '@subwallet/extension-base/background/KoniTypes';
 import {SubmittableExtrinsic} from "@polkadot/api/promise/types";
-import { Transaction } from 'ethereumjs-tx';
-import {ChainType} from "@polkadot/types/interfaces";
-import {TransactionConfig} from "web3-core";
 
 export enum KoniTransactionStatus {
   PENDING = 'PENDING',
@@ -29,7 +23,7 @@ export interface SWTransaction {
   createdAt: Date;
   updatedAt: Date;
   errors?: string[];
-  transaction: SubmittableExtrinsic | TransactionConfig;
+  transaction: SubmittableExtrinsic | EvmSendTransactionRequest;
 }
 
 export type SWTransactionInput = Pick<SWTransaction, 'address' | 'transaction' | 'data' | 'extrinsicType' | 'chain' | 'chainType'>

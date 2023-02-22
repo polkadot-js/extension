@@ -60,7 +60,9 @@ const Component = function ({ className }: Props) {
     {confirmation?.type === 'signingRequest' &&
       <SignConfirmation request={confirmation.item as SigningRequest} />}
     {confirmation?.type === 'evmSendTransactionRequest' &&
-      <EvmSignConfirmation request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]} />}
+      <EvmSignConfirmation type={confirmation.type} request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]} />}
+    {confirmation?.type === 'evmSignatureRequest' &&
+      <EvmSignConfirmation type={confirmation.type} request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]} />}
   </div>;
 };
 

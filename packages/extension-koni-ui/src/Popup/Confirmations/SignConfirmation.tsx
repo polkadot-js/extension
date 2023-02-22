@@ -28,8 +28,8 @@ function Component ({ className, request }: Props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const { payload } = request.request;
-  // Handle buttons actions
 
+  // Handle buttons actions
   const onCancel = useCallback(() => {
     setLoading(true);
     handleCancel(request).finally(() => {

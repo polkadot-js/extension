@@ -12,34 +12,36 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {ConfirmationDefinitions, ConfirmationResult} from "@subwallet/extension-base/background/KoniTypes";
 
+type SupportConfirmationType = 'evmSendTransactionRequest' | 'evmSignatureRequest';
 interface Props extends ThemeProps {
-  request: ConfirmationDefinitions['evmSendTransactionRequest'][0]
+  type: SupportConfirmationType
+  request: ConfirmationDefinitions['evmSendTransactionRequest'][0] | ConfirmationDefinitions['evmSignatureRequest'][0]
 }
 
-async function handleConfirm (id: string, payload: string) {
-  return await completeConfirmation('evmSendTransactionRequest', {id, isApproved: true, payload} as ConfirmationResult<string>);
+async function handleConfirm (type: SupportConfirmationType, id: string, payload: string) {
+  return await completeConfirmation(type, {id, isApproved: true, payload} as ConfirmationResult<string>);
 }
 
-async function handleCancel ({ id }: ConfirmationDefinitions['evmSendTransactionRequest'][0]) {
-  return await completeConfirmation('evmSendTransactionRequest', {id, isApproved: false} as ConfirmationResult<string>);
+async function handleCancel (type: SupportConfirmationType, { id }: ConfirmationDefinitions[typeof type][0]) {
+  return await completeConfirmation(type, {id, isApproved: false} as ConfirmationResult<string>);
 }
 
-function Component ({ className, request }: Props) {
+function Component ({type, className, request }: Props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const {} = request;
-  // Handle buttons actions
 
+  // Handle buttons actions
   const onCancel = useCallback(() => {
     setLoading(true);
-    handleCancel(request).finally(() => {
+    handleCancel(type, request).finally(() => {
       setLoading(false);
     });
   }, [request]);
 
   const onConfirm = useCallback(() => {
     setLoading(true);
-    handleConfirm(request.id, '').finally(() => {
+    handleConfirm(type, request.id, '').finally(() => {
       setLoading(false);
     });
   }, [request]);

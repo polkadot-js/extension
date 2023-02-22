@@ -107,6 +107,9 @@ export default class EvmRequestHandler {
   private async signMessage (confirmation: ConfirmationDefinitions['evmSignatureRequest'][0]): Promise<string> {
     const { address, payload, type } = confirmation.payload;
     const pair = keyring.getPair(address);
+    if (pair.isLocked) {
+      keyring.unlockPair(pair.address)
+    }
 
     switch (type) {
       case 'eth_sign':
@@ -139,9 +142,7 @@ export default class EvmRequestHandler {
   private async signTransaction (confirmation: ConfirmationDefinitions['evmSendTransactionRequest'][0]): Promise<string> {
     const transaction = confirmation.payload;
     const { estimateGas, from, gasPrice } = transaction;
-
     const pair = keyring.getPair(from as string);
-
     const params = {
       ...transaction,
       gasPrice: anyNumberToBN(gasPrice).toNumber(),

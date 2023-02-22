@@ -16,7 +16,7 @@ const createMasterPassword = () => {
 };
 
 const migrate = () => {
-  void keyringMigrateMasterPassword({ password: '100299', address: '5DnokDpMdNEH8cApsZoWQnjsggADXQmGWUb6q8ZhHeEwvncL' }).then(console.log);
+  void keyringMigrateMasterPassword({ password: '123123', address: '5CXCbp6HeFDGeNZpgP6LmQdxxGaM7DosN9bNmVj72nQ3hU3G' }).then(console.log);
 };
 
 const unlock = () => {
@@ -33,10 +33,10 @@ const signTransaction = (request?: SigningRequest) => {
 
 const sendFund = () => {
   void makeTransfer({
-    from: '5DnokDpMdNEH8cApsZoWQnjsggADXQmGWUb6q8ZhHeEwvncL',
-    networkKey: 'alephZeroTest',
+    from: '5CXCbp6HeFDGeNZpgP6LmQdxxGaM7DosN9bNmVj72nQ3hU3G',
+    networkKey: 'polkadot',
     to: '5EhSb8uHkbPRF869wynQ4gh5V7B62YgkEQvMdk6tzHD9bK7b',
-    tokenSlug: 'alephZeroTest-NATIVE-TZERO',
+    tokenSlug: 'polkadot-NATIVE-DOT',
     value: '1000000000000'
   }, console.log);
 };

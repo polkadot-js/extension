@@ -7,7 +7,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
+import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-base/utils';
 
 import { BN } from '@polkadot/util';
 

@@ -10,10 +10,10 @@ import MetadataRequestHandler from '@subwallet/extension-base/services/request-s
 import PopupHandler from '@subwallet/extension-base/services/request-service/handler/PopupHandler';
 import SubstrateRequestHandler from '@subwallet/extension-base/services/request-service/handler/SubstrateRequestHandler';
 import { AuthUrls, MetaRequest, SigningRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
-import { KoniTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject, Subject } from 'rxjs';
+import {SignerPayloadJSON} from "@polkadot/types/types/extrinsic";
 
 export default class RequestService {
   // Common
@@ -150,16 +150,8 @@ export default class RequestService {
     return this.#substrateRequestHandler.sign(url, request, account);
   }
 
-  public getSignRequest (id: string): SignRequest {
-    return this.#substrateRequestHandler.getSignRequest(id);
-  }
-
   public get numSubstrateRequests (): number {
     return this.#substrateRequestHandler.numSubstrateRequests;
-  }
-
-  public addFromTransaction (transaction: KoniTransaction): void {
-    this.#substrateRequestHandler.addFromTransaction(transaction);
   }
 
   // Evm requests
@@ -169,6 +161,14 @@ export default class RequestService {
 
   public get confirmationsQueueSubject (): BehaviorSubject<ConfirmationsQueue> {
     return this.#evmRequestHandler.getConfirmationsQueueSubject();
+  }
+
+  public getSignRequest (id: string) {
+    return this.#substrateRequestHandler.getSignRequest(id);
+  }
+
+  public async signInternalTransaction (id: string, address: string, payload: SignerPayloadJSON): Promise<ResponseSigning> {
+    return this.#substrateRequestHandler.signInternalTransaction(id, address, payload);
   }
 
   public addConfirmation<CT extends ConfirmationType> (

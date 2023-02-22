@@ -5,6 +5,10 @@ import { ExternalRequestPromise } from '@subwallet/extension-base/background/Kon
 import { ResponseSigning } from '@subwallet/extension-base/background/types';
 
 import { SignerPayloadJSON } from '@polkadot/types/types';
+import {SubmittableExtrinsic} from "@polkadot/api/promise/types";
+import { Transaction } from 'ethereumjs-tx';
+import {ChainType} from "@polkadot/types/interfaces";
+import {TransactionConfig} from "web3-core";
 
 export enum KoniTransactionStatus {
   PENDING = 'PENDING',
@@ -13,28 +17,33 @@ export enum KoniTransactionStatus {
   COMPLETED = 'COMPLETED'
 }
 
-export interface KoniSigningTransaction {
+export interface SWTransaction {
   id: string;
-  network: string;
+  chain: string;
+  chainType: 'substrate' | 'ethereum';
   address: string;
   data: any;
-  payload: SignerPayloadJSON;
   status: KoniTransactionStatus;
   extrinsicHash: string;
+  extrinsicType: string;
   createdAt: Date;
   updatedAt: Date;
+  errors?: string[];
+  transaction: SubmittableExtrinsic | TransactionConfig;
 }
 
-export interface KoniTransaction extends KoniSigningTransaction {
-  reject?: (error: Error) => void;
-  resolve?: (result: ResponseSigning) => void;
-  doStart?: () => void;
-  sendRequest?: () => void;
-  convertToRequest?: () => void;
+export type SWTransactionInput = Pick<SWTransaction, 'address' | 'transaction' | 'data' | 'extrinsicType' | 'chain' | 'chainType'>
+
+export type SendTransactionEvents = 'extrinsicHash' | 'error' | 'success';
+
+export interface TransactionEventResponse {
+  id: string,
+  extrinsicHash?: string,
+  error?: Error
 }
 
 export interface PrepareInternalRequest {
   id: string;
-  addTransaction: (transaction: KoniTransaction) => void;
+  addTransaction: (transaction: SWTransaction) => void;
   convertToRequest: () => void;
 }

@@ -560,17 +560,15 @@ export async function makeTransfer ({ callback,
   });
 }
 
-export async function makeTransferV2 ({ addTransaction,
+export async function makeTransferV2 ({
   callback,
-  convertToRequest,
   from,
-  id,
   networkKey,
   substrateApiMap,
   to,
   tokenInfo,
   transferAll,
-  value }: MakeTransferProps & PrepareInternalRequest): Promise<void> {
+  value }: MakeTransferProps): Promise<void> {
   const txState: BasicTxResponse = {};
   const substrateApi = await substrateApiMap[networkKey].isReady;
 
@@ -595,10 +593,7 @@ export async function makeTransferV2 ({ addTransaction,
   };
 
   convertToTransaction({
-    addTransaction: addTransaction,
-    convertToRequest: convertToRequest,
     data: undefined,
-    id: id,
     network: networkKey,
     substrateApi: substrateApi,
     callback: callback,

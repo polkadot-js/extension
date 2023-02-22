@@ -6,11 +6,11 @@ import { AccountJson, RequestSign, Resolver, ResponseSigning } from '@subwallet/
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { SigningRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
-import { KoniTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import keyring from '@subwallet/ui-keyring';
 import { BehaviorSubject } from 'rxjs';
 
+import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 
@@ -25,14 +25,14 @@ export default class SubstrateRequestHandler {
     this.#logger = createLogger('SubstrateRequestHandler');
   }
 
+  public getSignRequest (id: string): SignRequest | undefined {
+    return this.#substrateRequests[id];
+  }
+
   public get allSubstrateRequests (): SigningRequest[] {
     return Object
       .values(this.#substrateRequests)
       .map(({ account, id, request, url }): SigningRequest => ({ account, id, request, url }));
-  }
-
-  public getSignRequest (id: string): SignRequest {
-    return this.#substrateRequests[id];
   }
 
   private updateIconSign (shouldClose?: boolean): void {
@@ -80,33 +80,21 @@ export default class SubstrateRequestHandler {
     });
   }
 
-  public addFromTransaction (transaction: KoniTransaction): void {
-    const id = transaction.id;
+  public signInternalTransaction (id: string, address: string, payload: SignerPayloadJSON): Promise<ResponseSigning> {
+    return new Promise((resolve, reject): void => {
+      const pair = keyring.getPair(address);
+      const account: AccountJson = { address: pair.address, ...pair.meta };
 
-    if (!transaction.resolve && !transaction.reject) {
-      throw new Error('Invalid transaction');
-    }
+      this.#substrateRequests[id] = {
+        ...this.signComplete(id, resolve, reject),
+        account,
+        id,
+        request: new RequestExtrinsicSign(payload),
+        url: EXTENSION_REQUEST_URL
+      };
 
-    const resolve = (result: ResponseSigning): void => {
-      transaction.resolve?.(result);
-    };
-
-    const reject = (error: Error): void => {
-      transaction.reject?.(error);
-    };
-
-    const pair = keyring.getPair(transaction.address);
-    const account: AccountJson = { address: pair.address, ...pair.meta };
-
-    this.#substrateRequests[id] = {
-      ...this.signComplete(id, resolve, reject),
-      account,
-      id,
-      request: new RequestExtrinsicSign(transaction.payload),
-      url: EXTENSION_REQUEST_URL
-    };
-
-    this.updateIconSign();
-    this.#requestService.popupOpen();
+      this.updateIconSign();
+      this.#requestService.popupOpen();
+    });
   }
 }

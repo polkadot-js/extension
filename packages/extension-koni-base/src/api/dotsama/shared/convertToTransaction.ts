@@ -3,7 +3,7 @@
 
 import { BasicTxErrorCode, BasicTxResponse, HandleBasicTx } from '@subwallet/extension-base/background/KoniTypes';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { KoniTransaction, KoniTransactionStatus, PrepareInternalRequest } from '@subwallet/extension-base/services/transaction-service/types';
+import { KoniTransactionStatus, PrepareInternalRequest, SWTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 import ExtensionSigner from '@subwallet/extension-base/signers/substrates/ExtensionSigner';
 import { sendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/sendExtrinsic';
 import { noop } from 'rxjs';
@@ -37,7 +37,7 @@ export const convertToTransaction = ({ addTransaction,
   txState,
   updateResponseTxResult }: ConvertToTransactionProps) => {
   if (extrinsic !== null) {
-    const transaction: KoniTransaction = {
+    const transaction: SWTransaction = {
       id: id,
       createdAt: new Date(),
       status: KoniTransactionStatus.PENDING,
@@ -50,7 +50,7 @@ export const convertToTransaction = ({ addTransaction,
       data,
 
       extrinsicHash: ''
-    } as unknown as KoniTransaction;
+    } as unknown as SWTransaction;
 
     transaction.convertToRequest = convertToRequest;
 

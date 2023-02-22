@@ -3,7 +3,7 @@
 
 import { ResponseParseTransactionSubstrate, ResponseQrParseRLP, SignerDataType } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEnabled } from '@subwallet/extension-base/services/chain-service/utils';
-import { createTransactionFromRLP, Transaction } from '@subwallet/extension-koni-base/utils/eth';
+import { createTransactionFromRLP, Transaction } from '@subwallet/extension-base/utils/eth';
 import { SCANNER_QR_STEP } from '@subwallet/extension-koni-ui/constants/qr';
 import { parseEVMTransaction, parseSubstrateTransaction, qrSignEvm, qrSignSubstrate } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';

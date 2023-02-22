@@ -13,9 +13,9 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _ChainState, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isChainEvmCompatible, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 import { AuthUrls, SigningRequest } from '@subwallet/extension-base/services/request-service/types';
-import { getTransactionId } from '@subwallet/extension-base/services/transaction-service/helpers';
-import { KoniTransaction, PrepareInternalRequest } from '@subwallet/extension-base/services/transaction-service/types';
+import { SWTransactionInput } from '@subwallet/extension-base/services/transaction-service/types';
 import { SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
+import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { CHAIN_TYPES, getBondingExtrinsic, getBondingTxInfo, getChainBondingBasics, getClaimRewardExtrinsic, getClaimRewardTxInfo, getDelegationInfo, getUnbondingExtrinsic, getUnbondingTxInfo, getValidatorsInfo, getWithdrawalExtrinsic, getWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/bonding';
@@ -32,7 +32,7 @@ import { makeNftTransferExternal } from '@subwallet/extension-koni-base/api/dots
 import { makeCrossChainTransferExternal } from '@subwallet/extension-koni-base/api/dotsama/external/transfer/xcm';
 import { parseSubstrateTransaction } from '@subwallet/extension-koni-base/api/dotsama/parseTransaction';
 import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
-import { checkReferenceCount, checkSupportTransfer, estimateFee, makeTransferV2 } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic, estimateFee, makeTransferV2 } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { makeERC20TransferQr, makeEVMTransferQr } from '@subwallet/extension-koni-base/api/evm/external/transfer/balance';
 import { handleTransferNftQr } from '@subwallet/extension-koni-base/api/evm/external/transfer/nft';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
@@ -43,7 +43,6 @@ import { getPSP34Transaction, getPSP34TransferExtrinsic } from '@subwallet/exten
 import { estimateCrossChainFee, makeCrossChainTransfer } from '@subwallet/extension-koni-base/api/xcm';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
 import { createPair } from '@subwallet/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
@@ -1749,26 +1748,82 @@ export default class KoniExtension {
     };
   }
 
-  /// Internal transaction account
+  private async makeTransferNew (id: string, port: chrome.runtime.Port, request: RequestTransfer): Promise<BasicTxResponse> {
+    const { from, networkKey, to, tokenSlug, transferAll, value } = request;
+    const [errors, fromKeyPair, , tokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
+    const txState: BasicTxResponse = { errors: [] };
+    const isTransferAll = !!transferAll;
+    const transferVal = value || '0';
 
-  private prepareInternalTransaction (network: string, address: string): PrepareInternalRequest {
-    const id: string = getTransactionId(network, address);
+    if (errors.length) {
+      txState.txError = true;
+      txState.errors = errors;
+      setTimeout(() => {
+        this.cancelSubscription(id);
+      }, 500);
 
-    const addTransaction = (transaction: KoniTransaction) => {
-      this.#koniState.addTransaction(transaction);
-    };
+      // todo: add condition to lock KeyPair (for example: not remember password)
+      fromKeyPair && fromKeyPair.lock();
 
-    const convertToRequest = () => {
-      this.#koniState.sendTransactionRequest(id);
-    };
+      return txState;
+    }
 
-    return {
-      id,
-      addTransaction,
-      convertToRequest
-    };
+    const swTransactionInput = {
+      data: request,
+      address: from,
+      chain: networkKey
+    } as SWTransactionInput;
+
+    if (isEthereumAddress(from) && isEthereumAddress(to)) {
+      // Make transfer with EVM API
+      const chainInfo = this.#koniState.getChainInfo(networkKey);
+      const evmApiMap = this.#koniState.getEvmApiMap();
+
+      swTransactionInput.chainType = 'ethereum';
+
+      if (_isTokenEvmSmartContract(tokenInfo)) {
+        swTransactionInput.extrinsicType = 'ethereum:erc20:transfer';
+        const assetAddress = _getContractAddressOfToken(tokenInfo);
+
+        swTransactionInput.transaction = (await getERC20TransactionObject(assetAddress, chainInfo, from, to, transferVal, isTransferAll, evmApiMap))[0];
+      } else {
+        swTransactionInput.extrinsicType = 'ethereum:balance:transfer';
+        swTransactionInput.transaction = (await getEVMTransactionObject(chainInfo, to, transferVal, isTransferAll, evmApiMap))[0];
+      }
+    } else {
+      const substrateApi = this.#koniState.getSubstrateApi(networkKey);
+
+      // Make transfer with Dotsama API
+      const [transaction] = await createTransferExtrinsic({
+        transferAll: isTransferAll,
+        value: transferVal,
+        from: from,
+        networkKey: networkKey,
+        tokenInfo: tokenInfo,
+        to: to,
+        substrateApi
+      });
+
+      if (transaction) {
+        swTransactionInput.extrinsicType = 'substrate::transfer';
+        swTransactionInput.chainType = 'substrate';
+        swTransactionInput.transaction = transaction;
+      }
+    }
+
+    if (swTransactionInput.transaction) {
+      this.#koniState.addTransaction(swTransactionInput);
+    } else {
+      txState.errors?.push({
+        code: TransferErrorCode.UNSUPPORTED,
+        message: 'Unsupported transfer'
+      });
+    }
+
+    return txState;
   }
 
+  // Internal transaction account
   private makeTransfer (id: string, port: chrome.runtime.Port, { from,
     networkKey,
     to,
@@ -1827,7 +1882,6 @@ export default class KoniExtension {
         }
       } else {
         const substrateApiMap = this.#koniState.getSubstrateApiMap();
-        const { addTransaction, convertToRequest, id: transactionId } = this.prepareInternalTransaction(networkKey, from);
 
         // Make transfer with Dotsama API
         transferProm = makeTransferV2({
@@ -1838,10 +1892,7 @@ export default class KoniExtension {
           substrateApiMap: substrateApiMap,
           transferAll: !!transferAll,
           callback: callback,
-          from: fromKeyPair.address,
-          convertToRequest: convertToRequest,
-          addTransaction: addTransaction,
-          id: transactionId
+          from: fromKeyPair.address
         });
       }
 
@@ -4508,7 +4559,7 @@ export default class KoniExtension {
       case 'pri(accounts.checkTransfer)':
         return await this.checkTransfer(request as RequestCheckTransfer);
       case 'pri(accounts.transfer)':
-        return this.makeTransfer(id, port, request as RequestTransfer);
+        return await this.makeTransferNew(id, port, request as RequestTransfer);
       case 'pri(accounts.checkCrossChainTransfer)':
         return await this.checkCrossChainTransfer(request as RequestCheckCrossChainTransfer);
       case 'pri(accounts.crossChainTransfer)':

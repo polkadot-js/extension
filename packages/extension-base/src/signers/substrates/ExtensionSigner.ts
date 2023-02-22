@@ -5,16 +5,16 @@ import type { Signer, SignerResult } from '@polkadot/api/types';
 import type { SignerPayloadJSON } from '@polkadot/types/types';
 
 import { ResponseSigning } from '@subwallet/extension-base/background/types';
-import { KoniTransaction } from '@subwallet/extension-base/services/transaction-service/types';
+import { SWTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 
 interface KeyringSignerProps {
-  transaction: KoniTransaction;
+  transaction: SWTransaction;
 }
 
 let id = 1;
 
 export default class ExtensionSigner implements Signer {
-  readonly #transaction: KoniTransaction;
+  readonly #transaction: SWTransaction;
 
   constructor ({ transaction }: KeyringSignerProps) {
     this.#transaction = transaction;

@@ -1,11 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Common from '@ethereumjs/common';
 import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
 import { Resolver } from '@subwallet/extension-base/background/types';
 import RequestService from '@subwallet/extension-base/services/request-service';
+import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
+import keyring from '@subwallet/ui-keyring';
+import { Transaction } from 'ethereumjs-tx';
 import { BehaviorSubject } from 'rxjs';
+import { TransactionConfig } from 'web3-core';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
@@ -98,17 +103,80 @@ export default class EvmRequestHandler {
     return promise;
   }
 
-  public completeConfirmation (request: RequestConfirmationComplete): boolean {
+  private async signMessage (confirmation: ConfirmationDefinitions['evmSignatureRequest'][0]): Promise<string> {
+    const { address, payload, type } = confirmation.payload;
+    const pair = keyring.getPair(address);
+
+    switch (type) {
+      case 'eth_sign':
+      case 'personal_sign':
+      case 'eth_signTypedData':
+      case 'eth_signTypedData_v1':
+      case 'eth_signTypedData_v3':
+      case 'eth_signTypedData_v4':
+        return await pair.evmSigner.signMessage(payload, type);
+      default:
+        throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
+    }
+  }
+
+  private async signTransaction (confirmation: ConfirmationDefinitions['evmSendTransactionRequest'][0]): Promise<string> {
+    const transaction = confirmation.payload;
+    const { estimateGas, from, gasPrice } = transaction;
+
+    const pair = keyring.getPair(from as string);
+
+    const params = {
+      ...transaction,
+      gasPrice: anyNumberToBN(gasPrice).toNumber(),
+      gasLimit: anyNumberToBN(estimateGas).toNumber()
+      // nonce: await web3.eth.getTransactionCount(from) // Todo: fill this value from transaction service
+    } as TransactionConfig;
+
+    // @ts-ignore
+    params.estimateGas && delete params.estimateGas;
+    // @ts-ignore
+    params.hasPayload && delete params.hasPayload;
+
+    const common = Common.custom({
+      networkId: params.chainId,
+      chainId: params.chainId
+    });
+
+    // @ts-ignore
+    const tx = new Transaction(params, { common });
+
+    return Promise.resolve(pair.evmSigner.signTransaction(tx));
+  }
+
+  private async decorateResult<T extends ConfirmationType> (t: T, request: ConfirmationDefinitions[T][0], result: ConfirmationDefinitions[T][1]) {
+    if (result.payload === '') {
+      if (t === 'evmSignatureRequest') {
+        result.payload = await this.signMessage(request as ConfirmationDefinitions['evmSignatureRequest'][0]);
+      } else if (t === 'evmSendTransactionRequest') {
+        result.payload = await this.signTransaction(request as ConfirmationDefinitions['evmSendTransactionRequest'][0]);
+      }
+    }
+  }
+
+  public async completeConfirmation (request: RequestConfirmationComplete): Promise<boolean> {
     const confirmations = this.confirmationsQueueSubject.getValue();
 
-    const _completeConfirmation = <T extends ConfirmationType> (type: T, result: ConfirmationDefinitions[T][1]) => {
+    for (const ct in request) {
+      const t = ct as ConfirmationType;
+      const result = request[t] as ConfirmationDefinitions[typeof t][1];
+
       const { id } = result;
       const { resolver, validator } = this.confirmationsPromiseMap[id];
+      const confirmation = confirmations[t][id];
 
-      if (!resolver || !(confirmations[type][id])) {
-        this.#logger.error('Not found confirmation', type, id);
+      if (!resolver || !confirmation) {
+        this.#logger.error('Not found confirmation', t, id);
         throw new Error('Not found promise for confirmation');
       }
+
+      // Fill signature for some special type
+      await this.decorateResult(t, confirmation, result);
 
       // Validate response from confirmation popup some info like password, response format....
       const error = validator && validator(result);
@@ -119,31 +187,13 @@ export default class EvmRequestHandler {
 
       // Delete confirmations from queue
       delete this.confirmationsPromiseMap[id];
-      delete confirmations[type][id];
+      delete confirmations[t][id];
       this.confirmationsQueueSubject.next(confirmations);
 
       // Update icon, and close queue
       this.#requestService.updateIconV2(this.#requestService.numAllRequests === 0);
       resolver.resolve(result);
-    };
-
-    Object.entries(request).forEach(([type, result]) => {
-      if (type === 'addNetworkRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['addNetworkRequest'][1]);
-      } else if (type === 'addTokenRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['addTokenRequest'][1]);
-      } else if (type === 'switchNetworkRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['switchNetworkRequest'][1]);
-      } else if (type === 'evmSignatureRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequest'][1]);
-      } else if (type === 'evmSignatureRequestExternal') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequestExternal'][1]);
-      } else if (type === 'evmSendTransactionRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequest'][1]);
-      } else if (type === 'evmSendTransactionRequestExternal') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequestExternal'][1]);
-      }
-    });
+    }
 
     return true;
   }

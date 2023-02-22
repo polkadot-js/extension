@@ -9,7 +9,7 @@ import { _isChainEvmCompatible, _isChainSupportSubstrateStaking } from '@subwall
 import { getAmplitudeStakingOnChain, getAstarStakingOnChain, getParaStakingOnChain } from '@subwallet/extension-koni-base/api/staking/paraChain';
 import { getNominationPoolReward, getRelayPoolingOnchain, getRelayStakingOnChain } from '@subwallet/extension-koni-base/api/staking/relayChain';
 import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
-import { categoryAddresses } from '@subwallet/extension-koni-base/utils';
+import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 interface PromiseMapping {
   api: _SubstrateApi,

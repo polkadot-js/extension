@@ -1,101 +1,189 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import { KoniSigningTransaction, KoniTransaction, KoniTransactionStatus } from '@subwallet/extension-base/services/transaction-service/types';
+import { KoniTransactionStatus, SendTransactionEvents, SWTransaction, SWTransactionInput, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import EventEmitter from 'eventemitter3';
 import { BehaviorSubject } from 'rxjs';
+import { TransactionConfig } from 'web3-core';
 
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import {Signer, SignerResult} from '@polkadot/api/types';
+import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 
-const convertToBrief = ({ address,
-  createdAt,
-  data,
-  extrinsicHash,
-  id,
-  network,
-  payload,
-  status,
-  updatedAt }: KoniTransaction): KoniSigningTransaction => {
-  return {
-    address,
-    createdAt,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    data,
-    extrinsicHash,
-    id,
-    network,
-    payload,
-    status,
-    updatedAt
-  };
-};
-
 export default class TransactionService {
-  readonly #dbService: DatabaseService;
-  readonly #requestService: RequestService;
-  readonly #logger: Logger;
-  readonly #transactions: Record<string, KoniTransaction> = {};
-  public readonly transactionSubject: BehaviorSubject<KoniSigningTransaction[]> = new BehaviorSubject<KoniSigningTransaction[]>([]);
+  private readonly chainService: ChainService;
+  private readonly dbService: DatabaseService;
+  private readonly requestService: RequestService;
+  private readonly logger: Logger;
 
-  constructor (dbService: DatabaseService, requestService: RequestService) {
-    this.#dbService = dbService;
-    this.#requestService = requestService;
+  public readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
 
-    this.#logger = createLogger('TransactionService');
+  private get transactions (): Record<string, SWTransaction> {
+    return this.transactionSubject.getValue();
   }
 
-  private get allTransactions (): KoniSigningTransaction[] {
-    return Object.values(this.#transactions).map(convertToBrief);
+  constructor (chainService: ChainService, dbService: DatabaseService, requestService: RequestService) {
+    this.chainService = chainService;
+    this.dbService = dbService;
+    this.requestService = requestService;
+
+    this.logger = createLogger('TransactionService');
   }
 
-  private validTransaction (transaction: KoniTransaction): boolean {
-    const transactions = this.allTransactions;
-    const filtered = transactions
-      .filter((item) => item.address === transaction.address && item.network === transaction.network);
+  private get allTransactions (): SWTransaction[] {
+    return Object.values(this.transactions);
+  }
 
-    return !filtered.some((item) => item.status === KoniTransactionStatus.PENDING);
+  private get pendingTransactions (): SWTransaction[] {
+    return this.allTransactions.filter((t) => t.status === 'PENDING');
+  }
+
+  private validateTransaction (transaction: SWTransaction): boolean {
+    // Check duplicated transaction
+    const existed = this.pendingTransactions
+      .filter((item) => item.address === transaction.address && item.chain === transaction.chain);
+
+    return !(existed.length > 0);
   }
 
   public notice (message: string): void {
-    this.#logger.log(message);
+    this.logger.log(message);
   }
 
-  public addTransaction (transaction: KoniTransaction): void {
-    const idValid = this.validTransaction(transaction);
+  fillTransactionDefaultInfo (transaction: SWTransactionInput): SWTransaction {
+    return {
+      ...transaction,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      status: KoniTransactionStatus.PENDING,
+      id: '0x' + Math.random().toString(36).substr(2, 9),
+      extrinsicHash: ''
+    } as SWTransaction;
+  }
+
+  public addTransaction (inputTransaction: SWTransactionInput): string {
+    // Fill transaction default info
+    const transaction = this.fillTransactionDefaultInfo(inputTransaction);
+
+    // Validate Transaction
+    const idValid = this.validateTransaction(transaction);
 
     if (!idValid) {
-      this.#logger.log('Invalid transaction');
+      this.logger.log('Invalid transaction');
       throw new Error('Invalid transaction');
     }
 
-    this.#transactions[transaction.id] = transaction;
+    // Add Transaction
+    this.transactions[transaction.id] = transaction;
+    this.transactionSubject.next({ ...this.transactions });
+
+    this.sendTransaction(transaction).catch(console.error);
+
+    return transaction.id;
   }
 
-  public sendTransactionRequest (id: string): void {
-    const transaction = this.#transactions[id];
+  public async sendTransaction (transaction: SWTransaction): Promise<void> {
+    // Send Transaction
+    const emitter = transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : this.signAndSendEvmTransaction(transaction);
 
-    if (!transaction.resolve || !transaction.reject) {
-      this.#logger.log('Invalid transaction');
-      throw new Error('Invalid transaction');
+    emitter.on('extrinsicHash', (data: TransactionEventResponse) => {
+      this.onHasTransactionHash(data);
+      // Todo: Create transaction history
+    });
+
+    emitter.on('success', (data: TransactionEventResponse) => {
+      // Todo: Write success transaction history
+      this.onSuccess(data);
+    });
+
+    emitter.on('error', (data: TransactionEventResponse) => {
+      this.onFailed(data.error || new Error('Unknown error'));
+      // Todo: Write failed transaction history
+    });
+
+    // setTimeout(() => {
+    //   emitter.emit('error', { id: transaction.id, error: new Error('Timeout') });
+    // }, 120000);
+
+    await Promise.resolve();
+  }
+
+  public removeTransaction (id: string): void {
+    if (this.transactions[id]) {
+      delete this.transactions[id];
+      this.transactionSubject.next({ ...this.transactions });
     }
-
-    this.#requestService.addFromTransaction(transaction);
   }
 
-  public resendTransaction (id: string): void {
-    const transaction = this.#transactions[id];
-
-    if (!transaction.sendRequest) {
-      this.#logger.log('Invalid transaction');
-      throw new Error('Invalid transaction');
-    }
-
-    transaction.sendRequest();
+  private onHasTransactionHash ({ extrinsicHash, id }: TransactionEventResponse) {
+    console.log(id, extrinsicHash);
   }
 
-  public getTransaction (id: string): KoniSigningTransaction {
-    return convertToBrief(this.#transactions[id]);
+  private onSuccess ({ extrinsicHash, id }: TransactionEventResponse) {
+    console.log(id, extrinsicHash);
+  }
+
+  private onFailed (error: Error) {
+    console.log(error);
+  }
+
+  private signAndSendEvmTransaction ({ chain, id, transaction }: SWTransaction): EventEmitter<SendTransactionEvents, TransactionEventResponse> {
+    const payload = (transaction as TransactionConfig);
+    // Todo: Write interface for requestService
+    const signedTransaction = '0x';
+
+    const emitter = new EventEmitter<SendTransactionEvents, TransactionEventResponse>();
+
+    this.chainService.getEvmApi(chain).api.eth.sendSignedTransaction(signedTransaction)
+      .once('transactionHash', (hash) => {
+        emitter.emit('extrinsicHash', { id, extrinsicHash: hash });
+      })
+      .once('receipt', (rs) => {
+        // Todo: Set success and handler more info to save transaction history
+        emitter.emit('success', { id, transactionHash: rs.transactionHash });
+      })
+      .once('error', (e) => {
+        emitter.emit('error', { id, error: e });
+      }).catch((e) => {
+        emitter.emit('error', { id, error: e as Error });
+      });
+
+    return emitter;
+  }
+
+  private signAndSendSubstrateTransaction ({ address, id, transaction }: SWTransaction): EventEmitter<SendTransactionEvents, TransactionEventResponse> {
+    const emitter = new EventEmitter<SendTransactionEvents, TransactionEventResponse>();
+
+    (transaction as SubmittableExtrinsic).signAsync(address, {
+      signer: {
+        signPayload: async (payload: SignerPayloadJSON) => {
+          const signing = await this.requestService.signInternalTransaction(id, address, payload);
+
+          return {
+            id: (new Date()).getTime(),
+            signature: signing.signature
+          } as SignerResult;
+        }
+      } as Signer
+    }).then((rs) => {
+      // Todo: Handle and emit event from runningTransaction
+      rs.send().then((result) => {
+        emitter.emit('extrinsicHash', { id, extrinsicHash: result.toHex() });
+      }).then(() => {
+        emitter.emit('success', { id });
+      }).catch((e: Error) => {
+        emitter.emit('error', { id, error: e });
+      });
+    }).catch((e: Error) => {
+      this.removeTransaction(id);
+      emitter.emit('error', { id, error: e });
+    });
+
+    return emitter;
   }
 }

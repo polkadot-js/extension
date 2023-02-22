@@ -1149,13 +1149,13 @@ export interface ConfirmationResult<T> extends ConfirmationRequestBase {
   isApproved: boolean;
   payload?: T;
 }
-
 export interface ConfirmationResultExternal<T> extends ConfirmationResult<T>{
   signature: `0x${string}`;
 }
 
 export interface EvmSendTransactionRequest extends TransactionConfig {
   estimateGas: string;
+  hashPayload: string;
 }
 
 export interface EvmRequestExternal {
@@ -1191,21 +1191,21 @@ export interface ConfirmationDefinitions {
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
   evmSignatureRequestExternal: [ConfirmationsQueueItem<EvmSignatureRequestExternal>, ConfirmationResultExternal<string>],
-  evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<boolean>]
-  evmSendTransactionRequestExternal: [ConfirmationsQueueItem<EvmSendTransactionRequestExternal>, ConfirmationResultExternal<boolean>]
+  evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<string>]
+  evmSendTransactionRequestExternal: [ConfirmationsQueueItem<EvmSendTransactionRequestExternal>, ConfirmationResultExternal<string>]
 }
 
 export type ConfirmationType = keyof ConfirmationDefinitions;
 
 export type ConfirmationsQueue = {
-  [ConfirmationType in keyof ConfirmationDefinitions]: Record<string, ConfirmationDefinitions[ConfirmationType][0]>;
+  [CT in ConfirmationType]: Record<string, ConfirmationDefinitions[CT][0]>;
 }
 
 export type RequestConfirmationsSubscribe = null;
 
 // Design to use only one confirmation
 export type RequestConfirmationComplete = {
-  [ConfirmationType in keyof ConfirmationDefinitions]?: ConfirmationDefinitions[ConfirmationType][1];
+  [CT in ConfirmationType]?: ConfirmationDefinitions[CT][1];
 }
 
 export interface ValidatorInfo {
@@ -1595,7 +1595,6 @@ export enum ChainEditStandard {
 }
 
 // ChainService
-
 // for custom network
 export type ChainEditInfo = { // only support pure substrate or EVM network
   slug: string;

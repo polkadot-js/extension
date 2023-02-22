@@ -4,7 +4,7 @@
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
-import { isUrl } from '@subwallet/extension-koni-base/utils';
+import { isUrl } from '@subwallet/extension-base/utils';
 
 export interface HandleNftParams {
   updateItem: (chain: string, data: NftItem, owner: string) => void,

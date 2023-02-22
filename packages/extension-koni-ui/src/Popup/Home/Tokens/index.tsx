@@ -7,11 +7,14 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/UpperBlock';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
+import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { Button } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import classNames from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -31,6 +34,7 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
 
 function Component (): React.ReactElement {
   const [isShrink, setIsShrink] = useState<boolean>(false);
+  const navigate = useNavigate();
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
 
@@ -43,6 +47,15 @@ function Component (): React.ReactElement {
   }, []);
 
   const isTotalBalanceDecrease = totalBalanceInfo.change.status === 'decrease';
+
+  const onClickItem = useCallback((item: TokenBalanceItemType) => {
+    return () => {
+      navigate('/home/token-detail-list', { state: {
+        symbol: item.symbol,
+        tokenGroup: item.slug
+      } as TokenDetailParam });
+    };
+  }, [navigate]);
 
   return (
     <>
@@ -74,14 +87,17 @@ function Component (): React.ReactElement {
       >
         {
           sortedTokenGroups.map((tokenGroupKey) => {
-            if (!tokenGroupBalanceMap[tokenGroupKey]) {
+            const item = tokenGroupBalanceMap[tokenGroupKey];
+
+            if (!item) {
               return null;
             }
 
             return (
               <TokenGroupBalanceItem
-                key={tokenGroupBalanceMap[tokenGroupKey].slug}
-                {...tokenGroupBalanceMap[tokenGroupKey]}
+                key={item.slug}
+                {...item}
+                onPressItem={onClickItem(item)}
               />
             );
           })

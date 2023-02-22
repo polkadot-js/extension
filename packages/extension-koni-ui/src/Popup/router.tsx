@@ -28,6 +28,7 @@ const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Set
 const ManageTokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/ManageTokens'));
 const FungibleTokenImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/FungibleTokenImport'));
 const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
+const TokenDetailList = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailList'));
 
 const ErrorFallback = () => {
   const error = useRouteError();
@@ -68,44 +69,49 @@ export const router = createHashRouter([{
     {
       path: '/home',
       element: <Home />,
-      children: [{
-        path: 'tokens',
-        element: <Tokens />
-      },
-      {
-        path: 'nfts',
-        element: <Outlet />,
-        children: [
-          {
-            path: 'collections',
-            element: <NftCollections />
-          },
-          {
-            path: 'collection-detail',
-            element: <NftCollectionDetail />
-          },
-          {
-            path: 'item-detail',
-            element: <NftItemDetail />
-          },
-          {
-            path: 'import-collection',
-            element: <NftImport />
-          }
-        ]
-      },
-      {
-        path: 'crowdloans',
-        element: <Crowdloans />
-      },
-      {
-        path: 'staking',
-        element: <Staking />
-      },
-      {
-        path: 'history',
-        element: <History />
-      }]
+      children: [
+        {
+          path: 'tokens',
+          element: <Tokens />
+        },
+        {
+          path: 'token-detail-list',
+          element: <TokenDetailList />
+        },
+        {
+          path: 'nfts',
+          element: <Outlet />,
+          children: [
+            {
+              path: 'collections',
+              element: <NftCollections />
+            },
+            {
+              path: 'collection-detail',
+              element: <NftCollectionDetail />
+            },
+            {
+              path: 'item-detail',
+              element: <NftItemDetail />
+            },
+            {
+              path: 'import-collection',
+              element: <NftImport />
+            }
+          ]
+        },
+        {
+          path: 'crowdloans',
+          element: <Crowdloans />
+        },
+        {
+          path: 'staking',
+          element: <Staking />
+        },
+        {
+          path: 'history',
+          element: <History />
+        }]
     },
     {
       path: '/transaction',

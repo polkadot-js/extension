@@ -5,9 +5,11 @@ import { TokenBalanceSelectionItem } from '@subwallet/extension-koni-ui/componen
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { AccountBalanceHookType, TokenGroupHookType } from '@subwallet/extension-koni-ui/types/hook';
+import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { SwList } from '@subwallet/react-ui';
 import SwModal from '@subwallet/react-ui/es/sw-modal';
 import React, { useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -32,9 +34,20 @@ function getTokenBalances (
 }
 
 function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalanceMap }: Props): React.ReactElement<Props> {
+  const navigate = useNavigate();
   const tokenBalances = useMemo<TokenBalanceItemType[]>(() => {
     return getTokenBalances(tokenBalanceMap, sortedTokenSlugs);
   }, [tokenBalanceMap, sortedTokenSlugs]);
+
+  const onClickItem = useCallback((item: TokenBalanceItemType) => {
+    return () => {
+      navigate('/home/token-detail-list', { state: {
+        symbol: item.symbol,
+        tokenSlug: item.slug
+      } as TokenDetailParam });
+      onCancel();
+    };
+  }, [navigate, onCancel]);
 
   // todo: auto clear search when closing modal, may need update reactUI swList component
 
@@ -44,10 +57,11 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
         <TokenBalanceSelectionItem
           key={tokenBalance.slug}
           {...tokenBalance}
+          onPressItem={onClickItem(tokenBalance)}
         />
       );
     },
-    []
+    [onClickItem]
   );
 
   const searchFunc = useCallback((item: TokenBalanceItemType, searchText: string) => {

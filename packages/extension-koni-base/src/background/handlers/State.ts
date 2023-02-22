@@ -1197,10 +1197,12 @@ export default class KoniState extends State {
 
   public upsertCustomToken (data: _ChainAsset) {
     this.chainService.upsertCustomToken(data);
+    this.updateServiceInfo();
   }
 
   public deleteCustomAssets (targetTokens: string[]) {
     this.chainService.deleteCustomAssets(targetTokens);
+    this.updateServiceInfo();
   }
 
   public async validateCustomChain (provider: string, existedChainSlug?: string) {
@@ -1222,7 +1224,11 @@ export default class KoniState extends State {
   }
 
   public upsertChainInfo (data: Record<string, any>): boolean {
-    return this.chainService.upsertChainInfo(data);
+    const result = this.chainService.upsertChainInfo(data);
+
+    this.updateServiceInfo();
+
+    return result;
   }
 
   public removeChain (networkKey: string): boolean {

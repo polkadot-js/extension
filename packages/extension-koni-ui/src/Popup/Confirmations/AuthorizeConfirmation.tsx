@@ -4,8 +4,8 @@
 import { AccountAuthType, AccountJson, AuthorizeRequest } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
+import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
 import { approveAuthRequestV2, cancelAuthRequestV2, rejectAuthRequestV2 } from '@subwallet/extension-koni-ui/messaging';
-import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/Popup/Confirmations/ConfirmationGeneralInfo';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
@@ -161,6 +161,7 @@ function Component ({ className, request }: Props) {
               isSelected={selectedMap[item.address]}
               key={item.address}
               onClick={onAccountSelect(item.address)}
+              showUnselectIcon
             />
           ))}
           <Typography.Paragraph className='text-tertiary text-center'>

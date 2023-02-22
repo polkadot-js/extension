@@ -1,14 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
 import useAccountRecoded from '@subwallet/extension-koni-ui/hooks/account/useAccountRecoded';
-import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountSignModeByAddress';
-import { Button, SwIconProps } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
+import { Button, Icon, SwIconProps } from '@subwallet/react-ui';
 import AccountCard, { AccountCardProps } from '@subwallet/react-ui/es/web3-block/account-card';
 import { DotsThree, Eye, QrCode, Swatches } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
@@ -57,15 +54,10 @@ function AccountCardBase (props: Partial<_AccountCardProps>): React.ReactElement
     onPressMoreBtn && onPressMoreBtn();
   }, [onPressMoreBtn]);
 
-  return (
-    <AccountCard
-      {...props}
-      accountName={accountName || ''}
-      address={address || ''}
-      avatarIdentPrefix={prefix || 42}
-      avatarTheme={avatarTheme}
-      className={className}
-      rightItem={<>
+  const renderRightItem = useCallback((x: React.ReactNode): React.ReactNode => {
+    return (
+      <>
+        {x}
         {iconProps && (
           <Button
             icon={
@@ -90,7 +82,19 @@ function AccountCardBase (props: Partial<_AccountCardProps>): React.ReactElement
           size='xs'
           type='ghost'
         />}
-      </>}
+      </>
+    );
+  }, [_onClickMore, iconProps, showMoreBtn]);
+
+  return (
+    <AccountCard
+      {...props}
+      accountName={accountName || ''}
+      address={address || ''}
+      avatarIdentPrefix={prefix || 42}
+      avatarTheme={avatarTheme}
+      className={className}
+      renderRightItem={renderRightItem}
     />
   );
 }

@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountJson } from '@subwallet/extension-base/background/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
@@ -11,19 +10,28 @@ import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-type Props = ThemeProps;
+import { KeypairType } from '@polkadot/util-crypto/types';
+
+interface BaseAccountInfo {
+  address: string;
+  name?: string;
+  type?: KeypairType;
+}
+
+interface Props extends ThemeProps {
+  accounts?: Array<BaseAccountInfo>;
+}
 
 const sizeAva = {
   default: 20,
   large: 24
 };
 
-const Component: React.FC<Props> = ({ className }: Props) => {
+const Component: React.FC<Props> = ({ accounts: _accounts, className }: Props) => {
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
-
-  const noAllAccount: AccountJson[] = useMemo((): AccountJson[] => {
-    return accounts.filter((account) => !isAccountAll(account.address));
-  }, [accounts]);
+  const noAllAccount: BaseAccountInfo[] = useMemo((): BaseAccountInfo[] => {
+    return (_accounts || accounts).filter((account) => !isAccountAll(account.address));
+  }, [accounts, _accounts]);
 
   const showCount: number = useMemo((): number => {
     return noAllAccount.length > 2 ? 3 : 2;
@@ -101,6 +109,10 @@ const AvatarGroup = styled(Component)<Props>(({ theme }: Props) => {
     '.avatar-content:first-child': {
       marginLeft: '0 !important',
       opacity: 0.5
+    },
+
+    '.avatar-content:last-child': {
+      opacity: 1
     },
 
     '.avatar-blur': {

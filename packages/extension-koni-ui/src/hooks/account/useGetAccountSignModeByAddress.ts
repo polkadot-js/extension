@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
-import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/useGetAccountByAddress';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import { getSignMode } from '@subwallet/extension-koni-ui/util/account';
 import { useMemo } from 'react';
 

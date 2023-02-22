@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/AvatarGroup';
+import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
@@ -32,13 +32,17 @@ const Component: React.FC<Props> = ({ account, className }: Props) => {
   );
 };
 
-const AccountItemBriefInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const AccountBriefInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     display: 'flex',
     flexDirection: 'row',
     gap: token.sizeXS,
     alignItems: 'center',
     overflow: 'hidden',
+
+    '&.mr': {
+      marginRight: -1
+    },
 
     '.account-name': {
       fontWeight: token.headingFontWeight,
@@ -55,4 +59,4 @@ const AccountItemBriefInfo = styled(Component)<Props>(({ theme: { token } }: Pro
   };
 });
 
-export default AccountItemBriefInfo;
+export default AccountBriefInfo;

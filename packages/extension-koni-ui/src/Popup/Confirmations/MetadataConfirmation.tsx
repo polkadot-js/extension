@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountAuthType, AccountJson, MetadataRequest } from '@subwallet/extension-base/background/types';
+import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
 import { approveMetaRequest, rejectMetaRequest } from '@subwallet/extension-koni-ui/messaging';
-import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/Popup/Confirmations/ConfirmationGeneralInfo';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, Typography } from '@subwallet/react-ui';

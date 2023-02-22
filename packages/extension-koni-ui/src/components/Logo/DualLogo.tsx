@@ -26,7 +26,7 @@ const defaultLogo = <Logo2D />;
 
 const Component = ({ className, leftLogo = defaultLogo, rightLogo = defaultLogo, linkIcon = defaultLinkIcon }: Props) => {
   return (
-    <div className={CN(className)}>
+    <div className={CN(className, 'dual-logo-container')}>
       <LogoWithSquircleBorder>
         {leftLogo}
       </LogoWithSquircleBorder>

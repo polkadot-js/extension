@@ -9,7 +9,7 @@ import useTokenGroup from '@subwallet/extension-koni-ui/hooks/screen/home/useTok
 import { CustomizeModal } from '@subwallet/extension-koni-ui/Popup/Home/modal/CustomizeModal';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/Popup/Home/modal/GlobalSearchTokenModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
 import { Outlet } from 'react-router';
 import styled from 'styled-components';

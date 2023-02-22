@@ -11,7 +11,7 @@ export const useGetCurrentAuth = () => {
   const currentTab = useGetCurrentTab();
   const currentUrl = currentTab?.url;
 
-  const { authUrls } = useSelector((state: RootState) => state.settings);
+  const authUrls = useSelector((state: RootState) => state.settings.authUrls);
 
   return useMemo((): AuthUrlInfo | undefined => {
     let rs: AuthUrlInfo | undefined;

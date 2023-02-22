@@ -7,9 +7,13 @@ import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import SwLogosMap from '@subwallet/extension-koni-ui/assets/subwallet';
 import { theme as SwReactUI } from '@subwallet/react-ui';
-import { ThemeConfig, Web3LogoMap } from '@subwallet/react-ui/es/config-provider/context';
-import { AliasToken, GlobalToken } from '@subwallet/react-ui/es/theme/interface';
+import { ThemeConfig as _ThemeConfig, Web3LogoMap } from '@subwallet/react-ui/es/config-provider/context';
+import { AliasToken as _AliasToken, GlobalToken as _GlobalToken } from '@subwallet/react-ui/es/theme/interface';
 import logoMap from '@subwallet/react-ui/es/theme/themes/logoMap';
+
+export type ThemeConfig = _ThemeConfig;
+export type AliasToken = _AliasToken;
+export type GlobalToken = _GlobalToken;
 
 export interface ExtraToken {
   bodyBackgroundColor: string,

@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Theme } from '@subwallet/extension-koni-ui/themes';
-import { SettingItem } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { Icon, SettingItem } from '@subwallet/react-ui';
 import { CheckCircle } from 'phosphor-react';
 import React from 'react';
 import styled, { useTheme } from 'styled-components';

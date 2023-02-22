@@ -7,7 +7,7 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
@@ -17,6 +17,7 @@ import DatabaseService from '@subwallet/extension-base/services/storage-service/
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
+import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
 import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -89,6 +90,7 @@ export default class KoniState extends State {
 
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
+  private assetSettingStore = new AssetSettingStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly accountRefStore = new AccountRefStore();
@@ -188,9 +190,34 @@ export default class KoniState extends State {
     return balanceMap;
   }
 
+  private initAssetSetting () {
+    this.assetSettingStore.get('AssetSetting', (storedAssetSettings) => {
+      const activeChainSlugs = this.chainService.getActiveChainSlugs();
+      const assetRegistry = this.chainService.getAssetRegistry();
+
+      const assetSettings: Record<string, AssetSetting> = storedAssetSettings || {};
+
+      Object.values(assetRegistry).forEach((assetInfo) => {
+        const isSettingExisted = assetInfo.slug in assetSettings;
+
+        // Set visible for every enabled chains
+        if (activeChainSlugs.includes(assetInfo.originChain) && !isSettingExisted) {
+          // Setting only exist when set either by chain settings or user
+          assetSettings[assetInfo.slug] = {
+            visible: true
+          };
+        }
+      });
+
+      this.setAssetSettings(assetSettings);
+      this.logger.log('Done init asset settings');
+    });
+  }
+
   public init () {
     this.chainService.init(() => {
       this.onReady(); // TODO: do better than a callback
+      this.initAssetSetting();
       this.updateServiceInfo();
       this.logger.log('Done init state');
     });
@@ -1135,6 +1162,20 @@ export default class KoniState extends State {
 
   public subscribePrice () {
     return this.priceStore.getSubject();
+  }
+
+  public setAssetSettings (assetSettings: Record<string, AssetSetting>): void {
+    this.assetSettingStore.set('AssetSetting', assetSettings);
+  }
+
+  public getAssetSettings (update: (value: Record<string, AssetSetting>) => void) {
+    this.assetSettingStore.get('AssetSetting', (rs) => {
+      update(rs);
+    });
+  }
+
+  public subscribeAssetSettings () {
+    return this.assetSettingStore.getSubject();
   }
 
   public getSmartContractNfts () {

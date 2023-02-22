@@ -94,7 +94,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [selectedFilters, setSelectedFilters] = useState<FilterValue[]>([]);
   const [changeFilters, setChangeFilters] = useState<FilterValue[]>(selectedFilters);
 
-  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const {assetRegistry, assetSettingMap} = useSelector((state: RootState) => state.assetRegistry);
+
+  console.log('assetSettingMap', assetSettingMap);
   const [fungibleTokenList, setFungibleTokenList] = useState<_ChainAsset[]>([]);
   const allFungibleTokens = useMemo(() => {
     return filterFungibleTokens(assetRegistry, selectedFilters);

@@ -187,6 +187,20 @@ export class ChainService {
     return result;
   }
 
+  public getActiveChainSlugs () {
+    const result: string[] = [];
+
+    Object.values(this.getChainInfoMap()).forEach((chainInfo) => {
+      const chainState = this.getChainStateByKey(chainInfo.slug);
+
+      if (_isChainEnabled(chainState)) {
+        result.push(chainInfo.slug);
+      }
+    });
+
+    return result;
+  }
+
   public getChainInfoByKey (key: string): _ChainInfo {
     return this.dataMap.chainInfoMap[key];
   }

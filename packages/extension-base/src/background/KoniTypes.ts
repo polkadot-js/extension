@@ -15,9 +15,6 @@ import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
-import { ApiPromise } from '@polkadot/api';
-import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { Registry } from '@polkadot/types/types';
 import { SignerResult } from '@polkadot/types/types/extrinsic';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -28,6 +25,11 @@ export interface ServiceInfo {
   chainApiMap: ApiMap;
   currentAccountInfo: CurrentAccountInfo;
   assetRegistry: Record<string, _ChainAsset>;
+}
+
+export interface AssetSetting {
+  visible: boolean,
+  // restrictions on assets can be implemented later
 }
 
 /// Request Auth
@@ -244,14 +246,6 @@ export interface TokenBalanceRaw {
   free: BN
 }
 
-// deprecated
-// export interface BalanceChildItem {
-//   reserved: string,
-//   frozen: string,
-//   free: string,
-//   decimals: number
-// }
-
 export interface SubstrateBalance {
   reserved?: string,
   miscFrozen?: string,
@@ -286,48 +280,6 @@ export interface CrowdloanItem {
 export interface CrowdloanJson {
   reset?: boolean,
   details: Record<string, CrowdloanItem>
-}
-
-export interface ChainRegistry {
-  chainDecimals: number[];
-  chainTokens: string[];
-  tokenMap: Record<string, TokenInfo>
-}
-
-export interface DefaultFormatBalance {
-  decimals?: number[] | number;
-  unit?: string[] | string;
-}
-
-export interface ApiState {
-  apiDefaultTx: SubmittableExtrinsicFunction;
-  apiDefaultTxSudo: SubmittableExtrinsicFunction;
-  isApiInitialized: boolean;
-  isApiReady: boolean;
-  isDevelopment?: boolean;
-  isEthereum?: boolean;
-  specName: string;
-  specVersion: string;
-  systemChain: string;
-  systemName: string;
-  systemVersion: string;
-  registry: Registry;
-  defaultFormatBalance: DefaultFormatBalance;
-}
-
-export interface ApiProps extends ApiState {
-  api: ApiPromise;
-  apiError?: string;
-  apiUrl: string;
-  isNotSupport?: boolean;
-  isApiConnected: boolean;
-  isEthereum: boolean;
-  isEthereumOnly: boolean;
-  isApiInitialized: boolean;
-  isReady: Promise<ApiProps>;
-  apiRetry?: number;
-  recoverConnect?: () => void;
-  useEvmAddress?: boolean
 }
 
 export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN' | 'KUSAMA_PARACHAIN' | 'MAIN_NET' | 'TEST_NET' | 'UNKNOWN';
@@ -390,19 +342,9 @@ export interface DonateInfo {
   link: string;
 }
 
-export interface DropdownOptionType {
-  text: string;
-  value: string;
-}
-
 export interface DropdownTransformOptionType {
   label: string;
   value: string;
-}
-
-export interface DropdownTransformGroupOptionType {
-  label: string;
-  options: DropdownTransformOptionType[];
 }
 
 export interface NetWorkMetadataDef extends MetadataDefBase {
@@ -422,21 +364,6 @@ export type CurrentNetworkInfo = {
   genesisHash: string;
   isEthereum: boolean;
   isReady?: boolean; // check if current network info is lifted from initial state
-}
-
-export type TokenInfo = {
-  isMainToken: boolean,
-  symbol: string,
-  symbolAlt?: string, // Alternate display for symbol
-  contractAddress?: string,
-  type?: CustomTokenType, // to differentiate custom tokens from native tokens
-  decimals: number,
-  name: string,
-  coinGeckoKey?: string,
-  // TODO: unify specialOption, assetId, assetIndex
-  specialOption?: object,
-  assetId?: string, // for moon assets
-  assetIndex?: number | string,
 }
 
 // all Accounts and the address of the current Account
@@ -516,24 +443,10 @@ export interface TransactionHistoryItemJson {
   total: number
 }
 
-export interface RequestTransactionHistoryGet {
-  address: string;
-  networkKey: string;
-}
-
-export interface RequestTransactionHistoryGetByMultiNetworks {
-  address: string;
-  networkKeys: string[];
-}
-
 export interface RequestTransactionHistoryAdd {
   address: string;
   networkKey: string;
   item: TxHistoryItem;
-}
-
-export interface RequestApi {
-  networkKey: string;
 }
 
 /// Manage account
@@ -953,54 +866,6 @@ export interface DisableNetworkResponse {
   activeNetworkCount?: number
 }
 
-export enum CustomTokenType {
-  erc20 = 'erc20',
-  erc721 = 'erc721',
-  psp22 = 'psp22',
-  psp34 = 'psp34'
-}
-
-export interface CustomToken { // general interface for all kinds of tokens
-  contractAddress: string,
-  chain: string,
-  type: CustomTokenType,
-
-  name?: string,
-  symbol?: string,
-  decimals?: number,
-  isCustom?: boolean,
-  isDeleted?: boolean,
-  image?: string
-}
-
-export interface CustomTokenJson {
-  [CustomTokenType.erc20]: CustomToken[],
-  [CustomTokenType.erc721]: CustomToken[],
-  [CustomTokenType.psp22]: CustomToken[],
-  [CustomTokenType.psp34]: CustomToken[]
-}
-
-export interface DeleteCustomTokenParams {
-  smartContract: string,
-  chain: string,
-  type: CustomTokenType
-}
-
-export interface ValidateCustomTokenRequest {
-  smartContract: string,
-  chain: string,
-  type: CustomTokenType,
-  contractCaller?: string
-}
-
-export interface ValidateCustomTokenResponse {
-  name: string,
-  symbol: string,
-  decimals?: number,
-  isExist: boolean,
-  contractError: boolean
-}
-
 export interface SupportTransferResponse {
   supportTransfer: boolean;
   supportTransferAll: boolean;
@@ -1044,20 +909,6 @@ export interface SubstrateNftSubmitTransaction extends BaseRequestSign {
 
 export type RequestSubstrateNftSubmitTransaction = InternalRequestSign<SubstrateNftSubmitTransaction>
 export type RequestEvmNftSubmitTransaction = InternalRequestSign<EvmNftSubmitTransaction>
-
-export type ChainRelationType = 'p' | 'r'; // parachain | relaychain
-
-export interface ChainRelationInfo {
-  type: ChainRelationType;
-  isEthereum: boolean;
-  supportedToken: string[];
-}
-
-export interface CrossChainRelation {
-  type: ChainRelationType;
-  isEthereum: boolean;
-  relationMap: Record<string, ChainRelationInfo>;
-}
 
 export interface RequestAccountMeta{
   address: string | Uint8Array;
@@ -1675,19 +1526,7 @@ export interface KoniRequestSignatures {
   'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>, Record<string, ChainBondingBasics>];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
 
-  // Network, APIs, Custom tokens functions
-  'pri(networkMap.recoverDotSama)': [string, boolean];
-  'pri(networkMap.disableAll)': [null, boolean];
-  'pri(networkMap.enableAll)': [null, boolean];
-
-  // deprecated
-  'pri(customTokenState.getCustomTokenState)': [null, CustomTokenJson];
-  'pri(customTokenState.getSubscription)': [null, CustomTokenJson, CustomTokenJson];
-  'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
-  'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
-  'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
-
-  // ChainService
+  // Chains, assets functions
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeChainStateMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeAssetRegistry)': [null, Record<string, any>, Record<string, any>];
@@ -1703,6 +1542,10 @@ export interface KoniRequestSignatures {
   'pri(chainService.validateCustomAsset)': [_ValidateCustomAssetRequest, _ValidateCustomAssetResponse];
   'pri(chainService.resetDefaultChains)': [null, boolean];
   'pri(chainService.getSupportedContractTypes)': [null, string[]];
+  'pri(chainService.validateCustomChain)': [ValidateNetworkRequest, ValidateNetworkResponse];
+  'pri(chainService.recoverSubstrateApi)': [string, boolean];
+  'pri(chainService.disableAllChains)': [null, boolean];
+  'pri(assetSetting.getSubscription)': [null, Record<string, AssetSetting>, Record<string, AssetSetting>]
 
   // NFT functions
   'pri(evmNft.submitTransaction)': [RequestEvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];

@@ -39,7 +39,10 @@ const settingsSlice = createSlice({
 
       return {
         ...state,
-        ...payload,
+        // todo: will save language, theme, isShowZeroBalance in background
+        browserConfirmationType: payload.browserConfirmationType,
+        isShowBalance: payload.isShowBalance,
+        accountAllLogo: payload.accountAllLogo,
         reduxStatus: ReduxStatus.READY
       };
     },

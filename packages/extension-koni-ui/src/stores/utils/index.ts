@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PayloadAction } from '@reduxjs/toolkit';
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { AccountsWithCurrentAddress, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TxHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
+import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { AppSettings } from '@subwallet/extension-koni-ui/stores/types';
@@ -104,12 +104,13 @@ export const updateShowZeroBalanceState = (isShow: boolean) => {
   store.dispatch({ type: 'settings/updateShowZeroBalanceState', payload: isShow });
 };
 
-export const updateLanguage = (action: PayloadAction<AppSettings['language']>) => {
-  store.dispatch({ type: 'settings/updateLanguage', payload: action });
+export const updateLanguage = (lang: AppSettings['language']) => {
+  localStorage.setItem(LANGUAGE, lang); // cache language;
+  store.dispatch({ type: 'settings/updateLanguage', payload: lang });
 };
 
-export const updateBrowserConfirmationType = (action: PayloadAction<AppSettings['browserConfirmationType']>) => {
-  store.dispatch({ type: 'settings/updateBrowserConfirmationType', payload: action });
+export const updateBrowserConfirmationType = (type: AppSettings['browserConfirmationType']) => {
+  store.dispatch({ type: 'settings/updateBrowserConfirmationType', payload: type });
 };
 
 export const updateUiSettings = (data: UiSettings) => {

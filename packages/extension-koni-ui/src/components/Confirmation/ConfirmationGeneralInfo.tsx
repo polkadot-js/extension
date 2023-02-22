@@ -5,26 +5,27 @@ import { ConfirmationRequestBase } from '@subwallet/extension-base/background/ty
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Image, Logo, Typography } from '@subwallet/react-ui';
+import CN from 'classnames';
 import React from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
-  request: ConfirmationRequestBase
+  request: ConfirmationRequestBase;
+  linkIcon?: React.ReactNode;
+  linkIconBg?: string;
 }
 
 // Get domain from full url
 function getDomain (url: string): string {
-  const domain = url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
-
-  return domain;
+  return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
 }
 
-function Component ({ className, request }: Props) {
+function Component ({ className, linkIcon, linkIconBg, request }: Props) {
   const domain = getDomain(request.url);
   const leftLogoUrl = `https://icons.duckduckgo.com/ip2/${domain}.ico`;
 
   return (
-    <div className={className}>
+    <div className={CN(className, 'confirmation-general-info-container')}>
       <DualLogo
         leftLogo={<Image
           height={56}
@@ -32,13 +33,15 @@ function Component ({ className, request }: Props) {
           src={leftLogoUrl}
           width={56}
         />}
+        linkIcon={linkIcon}
+        linkIconBg={linkIconBg}
         rightLogo={<Logo
           network={'subwallet'}
           shape='squircle'
           size={56}
         />}
       />
-      <Typography.Paragraph className={'text-tertiary'}>
+      <Typography.Paragraph className={'text-tertiary __domain'}>
         {domain}
       </Typography.Paragraph>
     </div>

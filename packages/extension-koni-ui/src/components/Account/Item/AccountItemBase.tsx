@@ -3,10 +3,12 @@
 
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
 import useAccountRecoded from '@subwallet/extension-koni-ui/hooks/account/useAccountRecoded';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Icon } from '@subwallet/react-ui';
 import AccountItem, { AccountItemProps } from '@subwallet/react-ui/es/web3-block/account-item';
+import { CheckCircle } from 'phosphor-react';
 import React from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -14,12 +16,14 @@ export interface AccountItemBaseProps extends Omit<AccountItemProps, 'avatarIden
   genesisHash?: string | null;
   type?: KeypairType;
   accountName?: string;
+  showUnselectIcon?: boolean;
 }
 
 const Component: React.FC<AccountItemBaseProps> = (props: AccountItemBaseProps) => {
-  const { address, genesisHash, onClick, type: givenType } = props;
+  const { address, genesisHash, isSelected, onClick, showUnselectIcon, type: givenType } = props;
   const { formatted, prefix } = useAccountRecoded(address || '', genesisHash, givenType);
   const avatarTheme = useAccountAvatarTheme(address || '');
+  const { token } = useTheme() as Theme;
 
   return (
     <div className={props.className}>
@@ -29,6 +33,20 @@ const Component: React.FC<AccountItemBaseProps> = (props: AccountItemBaseProps) 
         avatarIdentPrefix={prefix || 42}
         avatarTheme={avatarTheme}
         onPressItem={onClick}
+        rightItem={<>
+          {(showUnselectIcon || isSelected) && (
+            <div className={'ant-account-item-icon'}>
+              <Icon
+                iconColor={isSelected ? token.colorSuccess : token.colorTextLight4}
+                phosphorIcon={CheckCircle}
+                size='sm'
+                type='phosphor'
+                weight='fill'
+              />
+            </div>
+          )}
+        </>
+        }
       />
     </div>
   );

@@ -11,7 +11,7 @@ import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APII
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
-import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainConnectionStatus, _ChainState, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenSlug, _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
@@ -628,6 +628,10 @@ export default class KoniState extends State {
     return this.dbService.removeNfts(chain, address, collectionId, nftIds);
   }
 
+  public deleteNftCollection (chain: string, collectionId: string) {
+    return this.dbService.deleteNftCollection(chain, collectionId);
+  }
+
   public updateCollectionIds (chain: string, address: string, collectionIds: string[] = []): void {
     this.dbService.deleteNftsFromRemovedCollection(chain, address, collectionIds);
   }
@@ -1195,8 +1199,8 @@ export default class KoniState extends State {
     this.chainService.upsertCustomToken(data);
   }
 
-  public deleteCustomTokens (targetTokens: string[]) {
-    this.chainService.deleteCustomTokens(targetTokens);
+  public deleteCustomAssets (targetTokens: string[]) {
+    this.chainService.deleteCustomAssets(targetTokens);
   }
 
   public async validateCustomChain (provider: string, existedChainSlug?: string) {
@@ -1207,7 +1211,7 @@ export default class KoniState extends State {
     return this.chainService.getSupportedSmartContractTypes();
   }
 
-  public async validateCustomToken (data: _ValidateCustomTokenRequest) {
+  public async validateCustomAsset (data: _ValidateCustomAssetRequest) {
     return await this.chainService.validateCustomToken(data);
   }
 

@@ -117,7 +117,7 @@ export type _NetworkUpsertParams = {
 
 export const _CUSTOM_PREFIX = 'custom-';
 
-export interface _ValidateCustomTokenRequest {
+export interface _ValidateCustomAssetRequest {
   contractAddress: string,
   originChain: string,
   type: _AssetType,
@@ -131,7 +131,7 @@ export interface _SmartContractTokenInfo {
   contractError: boolean
 }
 
-export interface _ValidateCustomTokenResponse extends _SmartContractTokenInfo {
+export interface _ValidateCustomAssetResponse extends _SmartContractTokenInfo {
   isExist: boolean
 }
 

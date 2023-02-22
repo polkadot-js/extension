@@ -219,19 +219,15 @@ export function _getChainNativeTokenSlug (chainInfo: _ChainInfo) {
 }
 
 export function _isTokenEvmSmartContract (tokenInfo: _ChainAsset) {
-  if ([_AssetType.ERC721, _AssetType.ERC20].includes(tokenInfo.assetType)) {
-    return true;
-  }
-
-  return false;
+  return [_AssetType.ERC721, _AssetType.ERC20].includes(tokenInfo.assetType);
 }
 
 export function _isTokenWasmSmartContract (tokenInfo: _ChainAsset) {
-  if ([_AssetType.PSP22, _AssetType.PSP34].includes(tokenInfo.assetType)) {
-    return true;
-  }
+  return [_AssetType.PSP22, _AssetType.PSP34].includes(tokenInfo.assetType);
+}
 
-  return false;
+export function _isAssetSmartContractNft (assetInfo: _ChainAsset) {
+  return [_AssetType.PSP34, _AssetType.ERC721].includes(assetInfo.assetType);
 }
 
 export function _parseAssetRefKey (originTokenSlug: string, destinationTokenSlug: string) {

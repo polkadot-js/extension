@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useGetChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainAssetInfo';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/useConfirmModal';
+import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { deleteCustomAssets } from '@subwallet/extension-koni-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail, INftItemDetail, NFT_PER_PAGE } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -33,6 +37,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const location = useLocation();
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
+  const showNotification = useNotification();
 
   const { handleSimpleConfirmModal } = useConfirmModal({
     title: t<string>('Delete NFT'),
@@ -45,6 +50,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   });
 
   const { collectionInfo, nftList } = location.state as INftCollectionDetail;
+  const originAssetInfo = useGetChainAssetInfo(collectionInfo.originAsset);
 
   const [page, setPage] = useState(1);
   const [nftList_, setNftList_] = useState<NftItem[]>([]);
@@ -136,14 +142,34 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const handleDeleteNftCollection = useCallback(() => {
     handleSimpleConfirmModal().then(() => {
-      navigate(-1);
+      if (collectionInfo.originAsset) {
+        deleteCustomAssets(collectionInfo.originAsset)
+          .then((result) => {
+            if (result) {
+              navigate(-1);
+              showNotification({
+                message: t('Deleted NFT collection successfully')
+              });
+            } else {
+              showNotification({
+                message: t('Deleted NFT collection unsuccessfully')
+              });
+            }
+          })
+          .catch(() => {
+            showNotification({
+              message: t('Deleted NFT collection unsuccessfully')
+            });
+          });
+      }
     }).catch(console.log);
-  }, [handleSimpleConfirmModal, navigate]);
+  }, [collectionInfo.originAsset, handleSimpleConfirmModal, navigate, showNotification, t]);
 
   const subHeaderButton: ButtonProps[] = [
     {
       icon: subHeaderRightButton,
-      onClick: handleDeleteNftCollection
+      onClick: handleDeleteNftCollection,
+      disabled: !(originAssetInfo && _isSmartContractToken(originAssetInfo) && _isCustomAsset(originAssetInfo.slug))
     }
   ];
 

@@ -223,10 +223,10 @@ export class WasmNftApi extends BaseNftApi {
     return nftItem;
   }
 
-  private async getItemsByCollection (contractPromise: ContractPromise, collectionAttributes: string[], isMetadataOnchain: boolean, smartContract: string, collectionName: string | undefined, nftParams: HandleNftParams) {
+  private async getItemsByCollection (contractPromise: ContractPromise, collectionAttributes: string[], isMetadataOnchain: boolean, tokenInfo: _ChainAsset, collectionName: string | undefined, nftParams: HandleNftParams) {
     let ownItem = false;
-
     let collectionImage: string | undefined;
+    const smartContract = _getContractAddressOfToken(tokenInfo);
 
     const isFeatured = ART_ZERO_CONTRACTS.includes(smartContract);
 
@@ -278,6 +278,7 @@ export class WasmNftApi extends BaseNftApi {
             nftItem.id = tokenId;
             nftItem.owner = address;
             nftItem.onChainOption = tokenIdObj;
+            nftItem.originAsset = tokenInfo.slug;
 
             nftParams.updateItem(this.chain, nftItem, address);
             ownItem = true;
@@ -307,7 +308,8 @@ export class WasmNftApi extends BaseNftApi {
         collectionId: smartContract,
         collectionName,
         image: collectionImage || undefined,
-        chain: this.chain
+        chain: this.chain,
+        originAsset: tokenInfo.slug
       } as NftCollection;
 
       nftParams.updateCollection(this.chain, nftCollection);
@@ -338,7 +340,7 @@ export class WasmNftApi extends BaseNftApi {
 
       const { attributeList, storedOnChain } = await this.getCollectionAttributes(contractPromise);
 
-      return await this.getItemsByCollection(contractPromise, attributeList, storedOnChain, _getContractAddressOfToken(tokenInfo), tokenInfo.name, params);
+      return await this.getItemsByCollection(contractPromise, attributeList, storedOnChain, tokenInfo, tokenInfo.name, params);
     }));
   }
 }

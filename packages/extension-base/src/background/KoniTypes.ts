@@ -4,7 +4,7 @@
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
-import { _ChainState, _EvmApi, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _EvmApi, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
@@ -202,6 +202,7 @@ export interface NftItem {
   id: string;
   chain: string;
   collectionId: string;
+  originAsset?: string;
 
   name?: string;
   image?: string;
@@ -219,6 +220,7 @@ export interface NftCollection {
   // must-have
   collectionId: string;
   chain: string;
+  originAsset?: string;
 
   collectionName?: string;
   image?: string;
@@ -1696,9 +1698,9 @@ export interface KoniRequestSignatures {
   'pri(chainService.enableChain)': [string, boolean];
   'pri(chainService.disableChain)': [string, DisableNetworkResponse];
   'pri(chainService.removeChain)': [string, boolean];
-  'pri(chainService.deleteCustomTokens)': [string[], boolean];
-  'pri(chainService.upsertCustomToken)': [Record<string, any>, boolean];
-  'pri(chainService.validateCustomToken)': [_ValidateCustomTokenRequest, _ValidateCustomTokenResponse];
+  'pri(chainService.deleteCustomAsset)': [string, boolean];
+  'pri(chainService.upsertCustomAsset)': [Record<string, any>, boolean];
+  'pri(chainService.validateCustomAsset)': [_ValidateCustomAssetRequest, _ValidateCustomAssetResponse];
   'pri(chainService.resetDefaultChains)': [null, boolean];
   'pri(chainService.getSupportedContractTypes)': [null, string[]];
 

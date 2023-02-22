@@ -18,4 +18,11 @@ export default class NftCollectionStore extends BaseStoreWithChain<NftCollection
 
     return this.table.toArray();
   }
+
+  removeCollection (chain: string, collectionId: string) {
+    return this.table.where({
+      chain,
+      collectionId
+    }).delete();
+  }
 }

@@ -5,13 +5,16 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getContractAddressOfToken, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/useConfirmModal';
+import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { deleteCustomAssets } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import {Button, ButtonProps, Col, Field, Logo, Row} from '@subwallet/react-ui';
+import { Button, ButtonProps, Col, Field, Logo, Row, Tooltip } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import {Copy, Info, Trash} from 'phosphor-react';
+import { Copy, Trash } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -19,8 +22,6 @@ import styled, { useTheme } from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import Layout from '../../../components/Layout';
-import useNotification from "@subwallet/extension-koni-ui/hooks/useNotification";
-import useFetchChainInfo from "@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo";
 
 type Props = ThemeProps
 
@@ -54,9 +55,26 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const handleDeleteToken = useCallback(() => {
     handleSimpleConfirmModal().then(() => {
-      navigate(-1);
+      deleteCustomAssets(tokenInfo.slug)
+        .then((result) => {
+          if (result) {
+            navigate(-1);
+            showNotification({
+              message: t('Deleted token successfully')
+            });
+          } else {
+            showNotification({
+              message: t('Deleted token unsuccessfully')
+            });
+          }
+        })
+        .catch(() => {
+          showNotification({
+            message: t('Deleted token unsuccessfully')
+          });
+        });
     }).catch(console.log);
-  }, [handleSimpleConfirmModal, navigate]);
+  }, [handleSimpleConfirmModal, navigate, showNotification, t, tokenInfo.slug]);
 
   const subHeaderButton: ButtonProps[] = [
     {
@@ -66,7 +84,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         type='phosphor'
         weight={'light'}
       />,
-      onClick: handleDeleteToken
+      onClick: handleDeleteToken,
+      disabled: !_isSmartContractToken(tokenInfo)
     }
   ];
 
@@ -113,8 +132,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           weight={'light'}
         />}
         onClick={handleCopyContractAddress}
-        type={'ghost'}
         size={'xs'}
+        type={'ghost'}
       />
     );
   }, [handleCopyContractAddress, token.colorIcon]);
@@ -168,20 +187,34 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
             <Row gutter={token.marginSM}>
               <Col span={12}>
-                <Field
-                  content={tokenInfo.symbol}
-                  placeholder={t<string>('Symbol')}
-                  prefix={<Logo
-                    network={tokenInfo.symbol}
-                    size={20}
-                  />}
-                />
+                <Tooltip
+                  placement={'topLeft'}
+                  title={t('Symbol')}
+                >
+                  <div>
+                    <Field
+                      content={tokenInfo.symbol}
+                      placeholder={t<string>('Symbol')}
+                      prefix={<Logo
+                        network={tokenInfo.symbol}
+                        size={20}
+                      />}
+                    />
+                  </div>
+                </Tooltip>
               </Col>
               <Col span={12}>
-                <Field
-                  content={tokenInfo.decimals}
-                  placeholder={t<string>('Decimals')}
-                />
+                <Tooltip
+                  placement={'topLeft'}
+                  title={t('Decimals')}
+                >
+                  <div>
+                    <Field
+                      content={tokenInfo.decimals}
+                      placeholder={t<string>('Decimals')}
+                    />
+                  </div>
+                </Tooltip>
               </Col>
             </Row>
           </div>

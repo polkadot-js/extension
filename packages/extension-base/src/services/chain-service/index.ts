@@ -7,7 +7,7 @@ import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -351,7 +351,9 @@ export class ChainService {
 
   public upsertCustomToken (token: _ChainAsset) {
     if (token.slug.length === 0) { // new token
-      token.slug = this.generateSlugForSmartContractAsset(token.originChain, token.assetType, token.symbol, token.metadata?.contractAddress as string);
+      const defaultSlug = this.generateSlugForSmartContractAsset(token.originChain, token.assetType, token.symbol, token.metadata?.contractAddress as string);
+
+      token.slug = `${_CUSTOM_PREFIX}${defaultSlug}`;
     }
 
     const assetRegistry = this.getAssetRegistry();
@@ -363,14 +365,14 @@ export class ChainService {
     this.assetRegistrySubject.next(assetRegistry);
   }
 
-  public deleteCustomTokens (targetTokens: string[]) {
+  public deleteCustomAssets (targetAssets: string[]) {
     const assetRegistry = this.getAssetRegistry();
 
-    targetTokens.forEach((targetToken) => {
+    targetAssets.forEach((targetToken) => {
       delete assetRegistry[targetToken];
     });
 
-    this.dbService.removeFromAssetStore(targetTokens).catch((e) => this.logger.error(e));
+    this.dbService.removeFromAssetStore(targetAssets).catch((e) => this.logger.error(e));
 
     this.assetRegistrySubject.next(assetRegistry);
   }
@@ -924,7 +926,7 @@ export class ChainService {
     };
   }
 
-  public async validateCustomToken (data: _ValidateCustomTokenRequest): Promise<_ValidateCustomTokenResponse> {
+  public async validateCustomToken (data: _ValidateCustomAssetRequest): Promise<_ValidateCustomAssetResponse> {
     const assetRegistry = this.getSmartContractTokens();
     let isExist = false;
 

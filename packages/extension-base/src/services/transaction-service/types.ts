@@ -3,6 +3,7 @@
 
 import {EvmSendTransactionRequest} from '@subwallet/extension-base/background/KoniTypes';
 import {SubmittableExtrinsic} from "@polkadot/api/promise/types";
+import EventEmitter from "eventemitter3";
 
 export enum KoniTransactionStatus {
   PENDING = 'PENDING',
@@ -13,6 +14,8 @@ export enum KoniTransactionStatus {
 
 export interface SWTransaction {
   id: string;
+  url?: string;
+  isInternal: boolean,
   chain: string;
   chainType: 'substrate' | 'ethereum';
   address: string;
@@ -26,9 +29,11 @@ export interface SWTransaction {
   transaction: SubmittableExtrinsic | EvmSendTransactionRequest;
 }
 
-export type SWTransactionInput = Pick<SWTransaction, 'address' | 'transaction' | 'data' | 'extrinsicType' | 'chain' | 'chainType'>
+export type SWTransactionInput = Pick<SWTransaction, 'address' | 'url' | 'transaction' | 'data' | 'extrinsicType' | 'chain' | 'chainType'>
 
 export type SendTransactionEvents = 'extrinsicHash' | 'error' | 'success';
+
+export type TransactionEmitter = EventEmitter<SendTransactionEvents, TransactionEventResponse>;
 
 export interface TransactionEventResponse {
   id: string,

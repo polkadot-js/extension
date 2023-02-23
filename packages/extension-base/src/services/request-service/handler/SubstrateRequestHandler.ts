@@ -4,7 +4,6 @@
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
 import { AccountJson, RequestSign, Resolver, ResponseSigning } from '@subwallet/extension-base/background/types';
 import RequestService from '@subwallet/extension-base/services/request-service';
-import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { SigningRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import keyring from '@subwallet/ui-keyring';
@@ -80,7 +79,7 @@ export default class SubstrateRequestHandler {
     });
   }
 
-  public signInternalTransaction (id: string, address: string, payload: SignerPayloadJSON): Promise<ResponseSigning> {
+  public signTransaction (id: string, address: string, url: string, payload: SignerPayloadJSON): Promise<ResponseSigning> {
     return new Promise((resolve, reject): void => {
       const pair = keyring.getPair(address);
       const account: AccountJson = { address: pair.address, ...pair.meta };
@@ -90,7 +89,7 @@ export default class SubstrateRequestHandler {
         account,
         id,
         request: new RequestExtrinsicSign(payload),
-        url: EXTENSION_REQUEST_URL
+        url: url
       };
 
       this.updateIconSign();

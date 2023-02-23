@@ -4,7 +4,14 @@
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import { KoniTransactionStatus, SendTransactionEvents, SWTransaction, SWTransactionInput, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import {
+  KoniTransactionStatus,
+  SendTransactionEvents,
+  SWTransaction,
+  SWTransactionInput,
+  TransactionEmitter,
+  TransactionEventResponse
+} from '@subwallet/extension-base/services/transaction-service/types';
 import EventEmitter from 'eventemitter3';
 import { BehaviorSubject } from 'rxjs';
 
@@ -15,6 +22,10 @@ import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 import {EvmSendTransactionRequest} from "@subwallet/extension-base/background/KoniTypes";
 import {EXTENSION_REQUEST_URL} from "@subwallet/extension-base/services/request-service/constants";
+import {getTransactionId} from "@subwallet/extension-base/services/transaction-service/helpers";
+import {EvmRpcError} from "@subwallet/extension-base/background/errors/EvmRpcError";
+import {TransactionConfig} from "web3-core";
+import BN from 'bn.js';
 
 export default class TransactionService {
   private readonly chainService: ChainService;
@@ -65,13 +76,15 @@ export default class TransactionService {
       ...transaction,
       createdAt: new Date(),
       updatedAt: new Date(),
+      url: transaction.url || EXTENSION_REQUEST_URL,
       status: KoniTransactionStatus.PENDING,
-      id: '0x' + Math.random().toString(36).substr(2, 9),
+      isInternal: !!transaction.url,
+      id: getTransactionId(transaction.chainType, transaction.chain, !!transaction.url),
       extrinsicHash: ''
     } as SWTransaction;
   }
 
-  public addTransaction (inputTransaction: SWTransactionInput): string {
+  public async addTransaction (inputTransaction: SWTransactionInput): Promise<TransactionEmitter> {
     // Fill transaction default info
     const transaction = this.fillTransactionDefaultInfo(inputTransaction);
 
@@ -88,33 +101,26 @@ export default class TransactionService {
     this.transactionSubject.next({ ...this.transactions });
 
     // Send transaction
-    this.sendTransaction(transaction).catch(console.error);
-
-    return transaction.id;
+    return await this.sendTransaction(transaction);
   }
 
-  public async sendTransaction (transaction: SWTransaction): Promise<void> {
+  public async sendTransaction (transaction: SWTransaction): Promise<TransactionEmitter> {
     // Send Transaction
-    try {
-      const emitter = transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : (await this.signAndSendEvmTransaction(transaction));
+    const emitter = transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : (await this.signAndSendEvmTransaction(transaction));
 
-      emitter.on('extrinsicHash', (data: TransactionEventResponse) => {
-        this.onHasTransactionHash(data);
-      });
+    emitter.on('extrinsicHash', (data: TransactionEventResponse) => {
+      this.onHasTransactionHash(data);
+    });
 
-      emitter.on('success', (data: TransactionEventResponse) => {
-        this.onSuccess(data);
-      });
+    emitter.on('success', (data: TransactionEventResponse) => {
+      this.onSuccess(data);
+    });
 
-      emitter.on('error', (data: TransactionEventResponse) => {
-        this.onFailed({...data, error: data.error || new Error('Unknown error')});
-      });
+    emitter.on('error', (data: TransactionEventResponse) => {
+      this.onFailed({...data, error: data.error || new Error('Unknown error')});
+    });
 
-      await Promise.resolve();
-    } catch (error) {
-      this.removeTransaction(transaction.id);
-      await Promise.reject();
-    }
+    return emitter;
   }
 
   public removeTransaction (id: string): void {
@@ -157,7 +163,7 @@ export default class TransactionService {
     console.error(error);
   }
 
-  private async signAndSendEvmTransaction ({ address, chain, id, transaction }: SWTransaction): EventEmitter<SendTransactionEvents, TransactionEventResponse> {
+  private async signAndSendEvmTransaction ({ address, chain, url, id, transaction }: SWTransaction): Promise<TransactionEmitter> {
     const payload = (transaction as EvmSendTransactionRequest);
 
     // Set unique nonce to avoid transaction errors
@@ -166,8 +172,19 @@ export default class TransactionService {
       payload.nonce = await evmApi.api.eth.getTransactionCount(address);
     }
 
+    if (!payload.chainId) {
+      const chainInfo = this.chainService.getChainInfoByKey(chain)
+      payload.chainId = chainInfo.evmInfo?.evmChainId ?? 1;
+    }
+
+    // Auto fill from
+    if (!payload.from) {
+      payload.from = address;
+    }
+
     const emitter = new EventEmitter<SendTransactionEvents, TransactionEventResponse>();
-    this.requestService.addConfirmation(id, EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
+
+    this.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
       .then(({payload, isApproved}) => {
         if (isApproved) {
           payload && this.chainService.getEvmApi(chain).api.eth.sendSignedTransaction(payload)
@@ -180,9 +197,13 @@ export default class TransactionService {
             .once('error', (e) => {
               emitter.emit('error', { id, error: e });
             })
+            .catch((e) => {
+              console.error(e);
+              emitter.emit('error', { id, error: e });
+            })
         } else {
           this.removeTransaction(id);
-          emitter.emit('error', new Error('User Rejected'))
+          emitter.emit('error', new EvmRpcError("USER_REJECTED_REQUEST", 'User Rejected'))
         }
       })
       .catch((e) => {
@@ -193,13 +214,13 @@ export default class TransactionService {
     return emitter;
   }
 
-  private signAndSendSubstrateTransaction ({ address, id, transaction }: SWTransaction): EventEmitter<SendTransactionEvents, TransactionEventResponse> {
+  private signAndSendSubstrateTransaction ({ address, id, url, transaction }: SWTransaction): TransactionEmitter {
     const emitter = new EventEmitter<SendTransactionEvents, TransactionEventResponse>();
 
     (transaction as SubmittableExtrinsic).signAsync(address, {
       signer: {
         signPayload: async (payload: SignerPayloadJSON) => {
-          const signing = await this.requestService.signInternalTransaction(id, address, payload);
+          const signing = await this.requestService.signInternalTransaction(id, url || EXTENSION_REQUEST_URL, address, payload);
 
           return {
             id: (new Date()).getTime(),

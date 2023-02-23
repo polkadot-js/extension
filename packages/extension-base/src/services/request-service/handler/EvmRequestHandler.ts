@@ -15,6 +15,7 @@ import {logger as createLogger} from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 import {toBuffer} from "ethereumjs-util";
 import Common from "@ethereumjs/common";
+import BN from "bn.js";
 
 export default class EvmRequestHandler {
   readonly #requestService: RequestService;
@@ -125,13 +126,27 @@ export default class EvmRequestHandler {
   }
 
   configToTransaction(config: TransactionConfig): Transaction {
-    const txData: TxData = {
-      nonce: toBuffer(anyNumberToBN(config.nonce).toNumber()),
-      gasPrice: toBuffer(anyNumberToBN(config.gasPrice).toNumber()),
-      gasLimit: toBuffer(anyNumberToBN(config.gas).toNumber()),
-      to: config.to ? toBuffer(config.to) : undefined,
-      value: toBuffer(anyNumberToBN(config.value).toNumber()),
-      data: config.data ? toBuffer(config.data) : undefined
+    function formatField (input: string | number | undefined | BN): BN | number | string | undefined {
+      if (typeof input === "string") {
+        if (input.startsWith('0x')) {
+          return input;
+        } else {
+          return new BN(input);
+        }
+      }
+
+      return input;
+    }
+
+    // Convert any string, number to number with BigN exclude hex string
+    const txData = {
+      from: config.from,
+      nonce: formatField(config.nonce),
+      gasPrice: formatField(config.gasPrice),
+      gasLimit: formatField(config.gas),
+      to: config.to,
+      value: formatField(config.value),
+      data: toBuffer(config.data)
     };
 
     const common = Common.custom( {chainId: config.chainId})
@@ -149,7 +164,6 @@ export default class EvmRequestHandler {
       gasLimit: anyNumberToBN(estimateGas).toNumber()
       // nonce: await web3.eth.getTransactionCount(from) // Todo: fill this value from transaction service
     } as TransactionConfig;
-
     const tx = this.configToTransaction(params);
 
     await Promise.resolve();

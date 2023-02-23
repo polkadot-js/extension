@@ -32,13 +32,13 @@ import { makeNftTransferExternal } from '@subwallet/extension-koni-base/api/dots
 import { makeCrossChainTransferExternal } from '@subwallet/extension-koni-base/api/dotsama/external/transfer/xcm';
 import { parseSubstrateTransaction } from '@subwallet/extension-koni-base/api/dotsama/parseTransaction';
 import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
-import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic, estimateFee, makeTransferV2 } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic, estimateFee } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { makeERC20TransferQr, makeEVMTransferQr } from '@subwallet/extension-koni-base/api/evm/external/transfer/balance';
 import { handleTransferNftQr } from '@subwallet/extension-koni-base/api/evm/external/transfer/nft';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 import { acalaTransferHandler, getNftTransferExtrinsic, isRecipientSelf, quartzTransferHandler, rmrkTransferHandler, statemineTransferHandler, uniqueTransferHandler } from '@subwallet/extension-koni-base/api/nft/transfer';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-koni-base/api/tokens/evm/parseTransaction';
-import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
+import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
 import { getPSP34Transaction, getPSP34TransferExtrinsic } from '@subwallet/extension-koni-base/api/tokens/wasm';
 import { estimateCrossChainFee, makeCrossChainTransfer } from '@subwallet/extension-koni-base/api/xcm';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
@@ -1758,9 +1758,9 @@ export default class KoniExtension {
     };
   }
 
-  private async makeTransfer (id: string, port: chrome.runtime.Port, request: RequestTransfer): Promise<BasicTxResponse> {
+  private async makeTransfer (request: RequestTransfer): Promise<BasicTxResponse> {
     const { from, networkKey, to, tokenSlug, transferAll, value } = request;
-    const [errors, , , tokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
+    const [errors, fromPair, , tokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
     const txState: BasicTxResponse = { errors: [] };
     const isTransferAll = !!transferAll;
     const transferVal = value || '0';
@@ -1768,10 +1768,6 @@ export default class KoniExtension {
     if (errors.length) {
       txState.txError = true;
       txState.errors = errors;
-      setTimeout(() => {
-        this.cancelSubscription(id);
-      }, 500);
-
       // Remove fromKeyPair lock because migrate to master password
       // fromKeyPair && fromKeyPair.lock();
 
@@ -1787,8 +1783,8 @@ export default class KoniExtension {
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
       // Make transfer with EVM API
       const chainInfo = this.#koniState.getChainInfo(networkKey);
-      const chainId = chainInfo?.evmInfo?.evmChainId || 1;
       const evmApiMap = this.#koniState.getEvmApiMap();
+      const chainId = chainInfo?.evmInfo?.evmChainId || 1;
 
       swTransactionInput.chainType = 'ethereum';
 
@@ -1801,7 +1797,7 @@ export default class KoniExtension {
           ...transaction,
           chainId,
           estimateGas: estimateFee,
-          hashPayload: '',
+          hashPayload: fromPair?.meta?.external ? this.#koniState.generateHashPayload(networkKey, transaction) : ''
         }
       } else {
         swTransactionInput.extrinsicType = 'ethereum:balance:transfer';
@@ -1809,10 +1805,10 @@ export default class KoniExtension {
         const [transaction, , estimateFee] = await getEVMTransactionObject(chainInfo, to, transferVal, isTransferAll, evmApiMap);
         swTransactionInput.transaction = {
           ...transaction,
-          from: from,
           chainId,
+          from: from,
           estimateGas: estimateFee,
-          hashPayload: ''
+          hashPayload: fromPair?.meta?.external ? this.#koniState.generateHashPayload(networkKey, transaction) : ''
         }
       }
     } else {
@@ -1837,7 +1833,7 @@ export default class KoniExtension {
     }
 
     if (swTransactionInput.transaction) {
-      this.#koniState.addTransaction(swTransactionInput);
+      await this.#koniState.addTransaction(swTransactionInput);
     } else {
       txState.errors?.push({
         code: TransferErrorCode.UNSUPPORTED,
@@ -4490,7 +4486,7 @@ export default class KoniExtension {
       case 'pri(accounts.checkTransfer)':
         return await this.checkTransfer(request as RequestCheckTransfer);
       case 'pri(accounts.transfer)':
-        return await this.makeTransfer(id, port, request as RequestTransfer);
+        return await this.makeTransfer(request as RequestTransfer);
       case 'pri(accounts.checkCrossChainTransfer)':
         return await this.checkCrossChainTransfer(request as RequestCheckCrossChainTransfer);
       case 'pri(accounts.crossChainTransfer)':

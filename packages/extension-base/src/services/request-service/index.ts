@@ -167,8 +167,8 @@ export default class RequestService {
     return this.#substrateRequestHandler.getSignRequest(id);
   }
 
-  public async signInternalTransaction (id: string, address: string, payload: SignerPayloadJSON): Promise<ResponseSigning> {
-    return this.#substrateRequestHandler.signInternalTransaction(id, address, payload);
+  public async signInternalTransaction (id: string, address: string, url: string, payload: SignerPayloadJSON): Promise<ResponseSigning> {
+    return this.#substrateRequestHandler.signTransaction(id, address, url, payload);
   }
 
   public addConfirmation<CT extends ConfirmationType> (

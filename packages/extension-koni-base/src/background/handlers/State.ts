@@ -6,7 +6,7 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
@@ -32,11 +32,11 @@ import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import SimpleKeyring from 'eth-simple-keyring';
 import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { TransactionConfig, TransactionReceipt } from 'web3-core';
+import { TransactionConfig } from 'web3-core';
 
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
-import { Logger } from '@polkadot/util/types';
+import {HexString, Logger} from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -182,7 +182,7 @@ export default class KoniState {
     return this.requestService.getMetaRequest(id);
   }
 
-  public getSignRequest (id: string): SignRequest {
+  public getSignRequest (id: string): SignRequest | undefined {
     return this.requestService.getSignRequest(id);
   }
 
@@ -1532,8 +1532,39 @@ export default class KoniState {
     }
   }
 
+  public generateHashPayload(networkKey: string, transaction: TransactionConfig): HexString {
+    const chainInfo = this.getChainInfo(networkKey);
+
+      const txObject: Web3Transaction = {
+        nonce: transaction.nonce || 1,
+        from: transaction.from as string,
+        gasPrice: anyNumberToBN(transaction.gasPrice).toNumber(),
+        gasLimit: anyNumberToBN(transaction.gas).toNumber(),
+        to: transaction.to !== undefined ? transaction.to : '',
+        value: anyNumberToBN(transaction.value).toNumber(),
+        data: transaction.data ? transaction.data : '',
+        chainId: _getEvmChainId(chainInfo)
+      };
+
+      const data: Input = [
+        txObject.nonce,
+        txObject.gasPrice,
+        txObject.gasLimit,
+        txObject.to,
+        txObject.value,
+        txObject.data,
+        txObject.chainId,
+        new Uint8Array([0x00]),
+        new Uint8Array([0x00])
+      ];
+
+      const encoded = RLP.encode(data);
+
+      return u8aToHex(encoded);
+  }
+
   public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
-    const evmApi = this.getEvmApiMap()[networkKey];
+    const evmApi = this.getEvmApi(networkKey);
     const web3 = evmApi.api;
 
     const autoFormatNumber = (val?: string | number): string | undefined => {
@@ -1570,6 +1601,7 @@ export default class KoniState {
     }
 
     const gasPrice = await web3.eth.getGasPrice();
+    transaction.gasPrice = gasPrice
 
     const estimateGas = new BN(gasPrice.toString()).mul(new BN(transaction.gas)).toString();
 
@@ -1596,109 +1628,32 @@ export default class KoniState {
 
     // Validate balance
     const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
-
     if (balance.lt(new BN(gasPrice.toString()).mul(new BN(transaction.gas)).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
       throw new EvmRpcError('INVALID_PARAMS', 'Balance can be not enough to send transaction');
     }
-
-    const validateConfirmationResponsePayload = createValidateConfirmationResponsePayload<'evmSendTransactionRequest'>(fromAddress);
-
-    let hashPayload = '';
-
-    if (meta.external) {
-      const chainInfo = this.getChainInfo(networkKey);
-      const nonce = await web3.eth.getTransactionCount(fromAddress);
-
-      const txObject: Web3Transaction = {
-        nonce: nonce,
-        from: fromAddress,
-        gasPrice: anyNumberToBN(gasPrice).toNumber(),
-        gasLimit: anyNumberToBN(transaction.gas).toNumber(),
-        to: transaction.to !== undefined ? transaction.to : '',
-        value: anyNumberToBN(transaction.value).toNumber(),
-        data: transaction.data ? transaction.data : '',
-        chainId: _getEvmChainId(chainInfo)
-      };
-
-      const data: Input = [
-        txObject.nonce,
-        txObject.gasPrice,
-        txObject.gasLimit,
-        txObject.to,
-        txObject.value,
-        txObject.data,
-        txObject.chainId,
-        new Uint8Array([0x00]),
-        new Uint8Array([0x00])
-      ];
-
-      const encoded = RLP.encode(data);
-
-      hashPayload = u8aToHex(encoded);
-    }
+    const hashPayload = meta.external ? this.generateHashPayload(networkKey, transaction) : '';
 
     const requestPayload = { ...transaction, estimateGas, hashPayload };
+    const transactionEmitter = await this.transactionService.addTransaction({
+      transaction: requestPayload,
+      address: requestPayload.from as string,
+      chain: networkKey,
+      url,
+      data: {...transaction},
+      extrinsicType: 'evm:extrinsic:external',
+      chainType: 'ethereum'
+    })
 
-    const setTransactionHistory = (receipt: TransactionReceipt) => {
-      const nativeTokenInfo = this.chainService.getNativeTokenInfo(networkKey);
-
-      this.setHistory(fromAddress, networkKey, {
-        isSuccess: true,
-        time: Date.now(),
-        networkKey,
-        change: transaction.value?.toString() || '0',
-        changeSymbol: undefined,
-        fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString(),
-        feeSymbol: nativeTokenInfo.symbol,
-        action: TxHistoryType.SEND,
-        extrinsicHash: receipt.transactionHash
-      });
-    };
-
-    const setFailedHistory = (transactionHash: string) => {
-      const nativeTokenInfo = this.chainService.getNativeTokenInfo(networkKey);
-
-      this.setHistory(fromAddress, networkKey, {
-        isSuccess: false,
-        time: Date.now(),
-        networkKey,
-        change: transaction.value?.toString() || '0',
-        changeSymbol: undefined,
-        fee: undefined,
-        feeSymbol: nativeTokenInfo.symbol,
-        action: TxHistoryType.SEND,
-        extrinsicHash: transactionHash
-      });
-    };
-
-    return this.requestService.addConfirmation(id, url, 'evmSendTransactionRequest', requestPayload, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
-      .then(async ({ isApproved, payload }) => {
-        if (isApproved) {
-          const callHash = payload || '';
-          let transactionHash = '';
-
-          return new Promise<string>((resolve, reject) => {
-            web3.eth.sendSignedTransaction(callHash)
-              .once('transactionHash', (hash) => {
-                transactionHash = hash;
-                resolve(hash);
-              })
-              .once('receipt', setTransactionHistory)
-              .once('error', (e) => {
-                console.error(e);
-                setFailedHistory(transactionHash);
-                reject(e);
-              })
-              .catch((e) => {
-                console.error(e);
-                setFailedHistory(transactionHash);
-                reject(e);
-              });
-          });
-        } else {
-          return Promise.reject(new EvmRpcError('USER_REJECTED_REQUEST'));
-        }
-      });
+    // Wait extrinsic hash
+    return new Promise((resolve, reject) => {
+      transactionEmitter.on('extrinsicHash', (rs) => {
+        resolve(rs.extrinsicHash)
+      })
+      transactionEmitter.on('error', (rs) => {
+        // Todo: return code with error
+        reject(rs.error)
+      })
+    })
   }
 
   public getConfirmationsQueueSubject (): BehaviorSubject<ConfirmationsQueue> {
@@ -1792,7 +1747,7 @@ export default class KoniState {
   }
 
   // New Transaction Handler
-  public addTransaction (transaction: SWTransactionInput) {
-    this.transactionService.addTransaction(transaction);
+  public async addTransaction (transaction: SWTransactionInput) {
+    return await this.transactionService.addTransaction(transaction);
   }
 }

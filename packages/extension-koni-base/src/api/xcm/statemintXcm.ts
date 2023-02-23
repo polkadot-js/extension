@@ -5,7 +5,7 @@ import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT } from '@subwallet/extension-koni-base/api/xcm/utils';
-import { parseNumberToDisplay } from '@subwallet/extension-koni-base/utils';
+import { parseNumberToDisplay } from '@subwallet/extension-base/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
 import { ApiPromise } from '@polkadot/api';

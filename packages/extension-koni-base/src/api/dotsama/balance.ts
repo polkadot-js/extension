@@ -12,7 +12,7 @@ import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
 import { state } from '@subwallet/extension-koni-base/background/handlers';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, SUB_TOKEN_REFRESH_BALANCE_INTERVAL, SUBSCRIBE_BALANCE_FAST_INTERVAL } from '@subwallet/extension-koni-base/constants';
-import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils';
+import { categoryAddresses, sumBN } from '@subwallet/extension-base/utils';
 import { Contract } from 'web3-eth-contract';
 
 import { ApiPromise } from '@polkadot/api';

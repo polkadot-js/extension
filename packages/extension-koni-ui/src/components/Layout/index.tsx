@@ -3,15 +3,18 @@
 
 import Base from './base/Base';
 import { Home } from './base/Home';
+import { WithSubHeaderOnly } from './base/WithSubHeaderOnly';
 
 type CompoundedComponent = {
   Home: typeof Home;
   Base: typeof Base;
+  WithSubHeaderOnly: typeof WithSubHeaderOnly;
 };
 
 const Layout: CompoundedComponent = {
   Home: Home,
-  Base: Base
+  Base: Base,
+  WithSubHeaderOnly: WithSubHeaderOnly
 };
 
 export default Layout;

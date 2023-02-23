@@ -5,7 +5,7 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
-import { isUrl } from '@subwallet/extension-koni-base/utils';
+import { isUrl } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
 interface AssetId {

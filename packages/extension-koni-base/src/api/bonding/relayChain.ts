@@ -8,7 +8,7 @@ import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-koni-base/utils';
+import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-base/utils';
 
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
 

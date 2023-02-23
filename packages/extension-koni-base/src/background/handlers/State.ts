@@ -1,42 +1,45 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import Common from '@ethereumjs/common';
 import { ChainInfoMap } from '@subwallet/chain-list';
 import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
-import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSendTransactionRequestExternal, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ResultResolver, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, TxHistoryType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
-import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomTokenRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug, _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isChainEvmCompatible, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenSlug, _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
+import RequestService from '@subwallet/extension-base/services/request-service';
+import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
+import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
+import TransactionService from '@subwallet/extension-base/services/transaction-service';
+import {
+  SWTransactionInput,
+  TransactionEventResponse
+} from '@subwallet/extension-base/services/transaction-service/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
-import { getId } from '@subwallet/extension-base/utils/getId';
+import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
+import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
-import { parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/external/shared';
-// eslint-disable-next-line camelcase
-import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
 import { decodePair } from '@subwallet/keyring/pair/decode';
 import { KeyringPair$Meta } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import SimpleKeyring from 'eth-simple-keyring';
-import { Transaction } from 'ethereumjs-tx';
 import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { TransactionConfig, TransactionReceipt } from 'web3-core';
+import { TransactionConfig } from 'web3-core';
 
+import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
-import { Logger } from '@polkadot/util/types';
+import { HexString, Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -45,13 +48,22 @@ import { KoniSubscription } from '../subscription';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
-function getSuri (seed: string, type?: KeypairType): string {
+// List of providers passed into constructor. This is the list of providers
+// exposed by the extension.
+type Providers = Record<string, {
+  meta: ProviderMeta;
+  // The provider is not running at init, calling this will instantiate the
+  // provider.
+  start: () => ProviderInterface;
+}>
+
+const getSuri = (seed: string, type?: KeypairType): string => {
   return type === 'ethereum'
     ? `${seed}${ETH_DERIVE_DEFAULT}`
     : seed;
-}
+};
 
-function generateDefaultCrowdloanMap () {
+const generateDefaultCrowdloanMap = (): Record<string, CrowdloanItem> => {
   const crowdloanMap: Record<string, CrowdloanItem> = {};
 
   Object.entries(ChainInfoMap).forEach(([networkKey, chainInfo]) => {
@@ -64,7 +76,7 @@ function generateDefaultCrowdloanMap () {
   });
 
   return crowdloanMap;
-}
+};
 
 const createValidateConfirmationResponsePayload = <CT extends ConfirmationType>(fromAddress: string): (result: ConfirmationDefinitions[CT][1]) => Error | undefined => {
   return (result: ConfirmationDefinitions[CT][1]) => {
@@ -84,21 +96,17 @@ const createValidateConfirmationResponsePayload = <CT extends ConfirmationType>(
   };
 };
 
-export default class KoniState extends State {
+export default class KoniState {
+  private injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
+  private readonly providers: Providers;
   private readonly unsubscriptionMap: Record<string, () => void> = {};
 
-  public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
-
+  // private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
+  // private readonly customTokenStore = new CustomTokenStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly accountRefStore = new AccountRefStore();
-  private readonly authorizeStore = new AuthorizeStore();
-  readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
-  private readonly evmChainSubject = new Subject<AuthUrls>();
-  private readonly authorizeUrlSubject = new Subject<AuthUrls>();
   private readonly keyringStateSubject = new Subject<KeyringState>();
-  private authorizeCached: AuthUrls | undefined = undefined;
-
   private priceStoreReady = false;
   private externalRequest: Record<string, ExternalRequestPromise> = {};
 
@@ -108,21 +116,8 @@ export default class KoniState extends State {
     hasMasterPassword: false
   };
 
-  private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
-    addNetworkRequest: {},
-    addTokenRequest: {},
-    switchNetworkRequest: {},
-    evmSignatureRequest: {},
-    evmSignatureRequestExternal: {},
-    evmSendTransactionRequest: {},
-    evmSendTransactionRequestExternal: {}
-  });
-
-  private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};
-
   private serviceInfoSubject = new Subject<ServiceInfo>();
 
-  // TODO: refactor this
   private balanceMap: Record<string, BalanceItem> = this.generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
 
@@ -157,18 +152,127 @@ export default class KoniState extends State {
   private subscription: KoniSubscription;
   private logger: Logger;
   private ready = false;
+  private readonly settingService: SettingService;
+  private readonly requestService: RequestService;
+  private readonly transactionService: TransactionService;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor (...args: any) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    super(args);
+  constructor (providers: Providers = {}) {
+    this.providers = providers;
+
     this.dbService = new DatabaseService();
 
     this.chainService = new ChainService(this.dbService);
+    this.settingService = new SettingService();
+    this.requestService = new RequestService(this.chainService);
+    this.transactionService = new TransactionService(this.chainService, this.dbService, this.requestService);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');
     this.init();
+  }
+
+  // Clone from polkadot.js
+  public get knownMetadata (): MetadataDef[] {
+    return this.requestService.knownMetadata;
+  }
+
+  public injectMetadata (url: string, request: MetadataDef): Promise<boolean> {
+    return this.requestService.injectMetadata(url, request);
+  }
+
+  public getMetaRequest (id: string): MetaRequest {
+    return this.requestService.getMetaRequest(id);
+  }
+
+  public getSignRequest (id: string): SignRequest | undefined {
+    return this.requestService.getSignRequest(id);
+  }
+
+  // List all providers the extension is exposing
+  public rpcListProviders (): Promise<ResponseRpcListProviders> {
+    return Promise.resolve(Object.keys(this.providers).reduce((acc, key) => {
+      acc[key] = this.providers[key].meta;
+
+      return acc;
+    }, {} as ResponseRpcListProviders));
+  }
+
+  public rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
+    const provider = this.injectedProviders.get(port);
+
+    assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
+
+    return provider.send(request.method, request.params);
+  }
+
+  // Start a provider, return its meta
+  public rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
+    assert(Object.keys(this.providers).includes(key), `Provider ${key} is not exposed by extension`);
+
+    if (this.injectedProviders.get(port)) {
+      return Promise.resolve(this.providers[key].meta);
+    }
+
+    // Instantiate the provider
+    this.injectedProviders.set(port, this.providers[key].start());
+
+    // Close provider connection when page is closed
+    port.onDisconnect.addListener((): void => {
+      const provider = this.injectedProviders.get(port);
+
+      if (provider) {
+        withErrorLog(() => provider.disconnect());
+      }
+
+      this.injectedProviders.delete(port);
+    });
+
+    return Promise.resolve(this.providers[key].meta);
+  }
+
+  public rpcSubscribe ({ method, params, type }: RequestRpcSubscribe, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): Promise<number | string> {
+    const provider = this.injectedProviders.get(port);
+
+    assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
+
+    return provider.subscribe(type, method, params, cb);
+  }
+
+  public rpcSubscribeConnected (_request: null, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): void {
+    const provider = this.injectedProviders.get(port);
+
+    assert(provider, 'Cannot call pub(rpc.subscribeConnected) before provider is set');
+
+    cb(null, provider.isConnected); // Immediately send back current isConnected
+    provider.on('connected', () => cb(null, true));
+    provider.on('disconnected', () => cb(null, false));
+  }
+
+  public rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
+    const provider = this.injectedProviders.get(port);
+
+    assert(provider, 'Cannot call pub(rpc.unsubscribe) before provider is set');
+
+    return provider.unsubscribe(request.type, request.method, request.subscriptionId);
+  }
+
+  public saveMetadata (meta: MetadataDef): void {
+    this.requestService.saveMetadata(meta);
+  }
+
+  public setNotification (notification: string): boolean {
+    this.requestService.setNotification(notification);
+
+    return true;
+  }
+
+  public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
+    return this.requestService.sign(url, request, account);
+  }
+
+  public get authSubjectV2 () {
+    return this.requestService.authSubjectV2;
   }
 
   public generateDefaultBalanceMap () {
@@ -192,7 +296,7 @@ export default class KoniState extends State {
     this.chainService.init(() => {
       this.onReady(); // TODO: do better than a callback
       this.updateServiceInfo();
-      this.logger.log('Done init state');
+      console.log('done init state');
     });
   }
 
@@ -238,70 +342,27 @@ export default class KoniState extends State {
   };
 
   public getAuthRequestV2 (id: string): AuthRequestV2 {
-    return this.#authRequestsV2[id];
-  }
-
-  public get numAuthRequestsV2 (): number {
-    return Object.keys(this.#authRequestsV2).length;
-  }
-
-  public get allAuthRequestsV2 (): AuthorizeRequest[] {
-    return Object
-      .values(this.#authRequestsV2)
-      .map(({ id, request, url }): AuthorizeRequest => ({ id, request, url }));
+    return this.requestService.getAuthRequestV2(id);
   }
 
   public setAuthorize (data: AuthUrls, callback?: () => void): void {
-    this.authorizeStore.set('authUrls', data, () => {
-      this.authorizeCached = data;
-      this.evmChainSubject.next(this.authorizeCached);
-      this.authorizeUrlSubject.next(this.authorizeCached);
-      callback && callback();
-    });
+    this.requestService.setAuthorize(data, callback);
   }
 
   public getAuthorize (update: (value: AuthUrls) => void): void {
-    // This action can be use many by DApp interaction => caching it in memory
-    if (this.authorizeCached) {
-      update(this.authorizeCached);
-    } else {
-      this.authorizeStore.get('authUrls', (data) => {
-        this.authorizeCached = data;
-        update(this.authorizeCached);
-      });
-    }
+    this.requestService.getAuthorize(update);
   }
 
   public subscribeEvmChainChange (): Subject<AuthUrls> {
-    return this.evmChainSubject;
+    return this.requestService.subscribeEvmChainChange;
   }
 
   public subscribeAuthorizeUrlSubject (): Subject<AuthUrls> {
-    return this.authorizeUrlSubject;
-  }
-
-  private updateIconV2 (shouldClose?: boolean): void {
-    const authCount = this.numAuthRequestsV2;
-    const confirmCount = this.countConfirmationNumber();
-    const text = (
-      authCount
-        ? 'Auth'
-        : confirmCount > 0 ? confirmCount.toString() : ''
-    );
-
-    withErrorLog(() => chrome.browserAction.setBadgeText({ text }));
-
-    if (shouldClose && text === '') {
-      this.popupClose();
-    }
+    return this.requestService.subscribeAuthorizeUrlSubject;
   }
 
   public getAuthList (): Promise<AuthUrls> {
-    return new Promise<AuthUrls>((resolve, reject) => {
-      this.getAuthorize((rs: AuthUrls) => {
-        resolve(rs);
-      });
-    });
+    return this.requestService.getAuthList();
   }
 
   getAddressList (value = false): Record<string, boolean> {
@@ -310,181 +371,8 @@ export default class KoniState extends State {
     return addressList.reduce((addressList, v) => ({ ...addressList, [v]: value }), {});
   }
 
-  private updateIconAuthV2 (shouldClose?: boolean): void {
-    this.authSubjectV2.next(this.allAuthRequestsV2);
-    this.updateIconV2(shouldClose);
-  }
-
-  private authCompleteV2 = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<ResultResolver> => {
-    const isAllowedMap = this.getAddressList();
-
-    const complete = (result: boolean | Error, cb: () => void, accounts?: string[]) => {
-      const isAllowed = result === true;
-      let isCancelled = false;
-
-      if (!isAllowed && typeof result === 'object' && result.message === 'Cancelled') {
-        isCancelled = true;
-      }
-
-      if (accounts && accounts.length) {
-        accounts.forEach((acc) => {
-          isAllowedMap[acc] = true;
-        });
-      } else {
-        // eslint-disable-next-line no-return-assign
-        Object.keys(isAllowedMap).forEach((address) => isAllowedMap[address] = false);
-      }
-
-      const { accountAuthType, idStr, request: { allowedAccounts, origin }, url } = this.#authRequestsV2[id];
-
-      if (accountAuthType !== 'both') {
-        const isEvmType = accountAuthType === 'evm';
-
-        const backupAllowed = [...(allowedAccounts || [])].filter((a) => {
-          const isEth = isEthereumAddress(a);
-
-          return isEvmType ? !isEth : isEth;
-        });
-
-        backupAllowed.forEach((acc) => {
-          isAllowedMap[acc] = true;
-        });
-      }
-
-      let defaultEvmNetworkKey: string | undefined;
-
-      if (accountAuthType === 'both' || accountAuthType === 'evm') {
-        const defaultChain = Object.values(this.chainService.getChainInfoMap()).find((chainInfo) => {
-          const chainState = this.chainService.getChainStateByKey(chainInfo.slug);
-
-          return _isChainEvmCompatible(chainInfo) && _isChainEnabled(chainState);
-        });
-
-        if (defaultChain) {
-          defaultEvmNetworkKey = defaultChain.slug;
-        }
-      }
-
-      this.getAuthorize((value) => {
-        let authorizeList = {} as AuthUrls;
-
-        if (value) {
-          authorizeList = value;
-        }
-
-        const existed = authorizeList[this.stripUrl(url)];
-
-        // On cancel don't save anything
-        if (isCancelled) {
-          delete this.#authRequestsV2[id];
-          this.updateIconAuthV2(true);
-          cb();
-
-          return;
-        }
-
-        authorizeList[this.stripUrl(url)] = {
-          count: 0,
-          id: idStr,
-          isAllowed,
-          isAllowedMap,
-          origin,
-          url,
-          accountAuthType: (existed && existed.accountAuthType !== accountAuthType) ? 'both' : accountAuthType,
-          currentEvmNetworkKey: existed ? existed.currentEvmNetworkKey : defaultEvmNetworkKey
-        };
-
-        this.setAuthorize(authorizeList, () => {
-          cb();
-          delete this.#authRequestsV2[id];
-          this.updateIconAuthV2(true);
-        });
-      });
-    };
-
-    return {
-      reject: (error: Error): void => {
-        complete(error, () => {
-          reject(error);
-        });
-      },
-      resolve: ({ accounts, result }: ResultResolver): void => {
-        complete(result, () => {
-          resolve(result);
-        }, accounts);
-      }
-    };
-  };
-
   public async authorizeUrlV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
-    let authList = await this.getAuthList();
-    const accountAuthType = request.accountAuthType || 'substrate';
-
-    request.accountAuthType = accountAuthType;
-
-    if (!authList) {
-      authList = {};
-    }
-
-    const idStr = this.stripUrl(url);
-    // Do not enqueue duplicate authorization requests.
-    const isDuplicate = Object.values(this.#authRequestsV2)
-      .some((request) => request.idStr === idStr);
-
-    assert(!isDuplicate, `The source ${url} has a pending authorization request`);
-
-    const existedAuth = authList[idStr];
-    const existedAccountAuthType = existedAuth?.accountAuthType;
-    const confirmAnotherType = existedAccountAuthType !== 'both' && existedAccountAuthType !== request.accountAuthType;
-
-    if (request.reConfirm && existedAuth) {
-      request.origin = existedAuth.origin;
-    }
-
-    // Reconfirm if check auth for empty list
-    if (existedAuth) {
-      const inBlackList = existedAuth && !existedAuth.isAllowed;
-
-      if (inBlackList) {
-        throw new Error(`The source ${url} is not allowed to interact with this extension`);
-      }
-
-      request.allowedAccounts = Object.entries(existedAuth.isAllowedMap)
-        .map(([address, allowed]) => (allowed ? address : ''))
-        .filter((item) => (item !== ''));
-
-      let allowedListByRequestType = [...request.allowedAccounts];
-
-      if (accountAuthType === 'evm') {
-        allowedListByRequestType = allowedListByRequestType.filter((a) => isEthereumAddress(a));
-      } else if (accountAuthType === 'substrate') {
-        allowedListByRequestType = allowedListByRequestType.filter((a) => !isEthereumAddress(a));
-      }
-
-      if (!confirmAnotherType && !request.reConfirm && allowedListByRequestType.length !== 0) {
-        // Prevent appear confirmation popup
-        return false;
-      }
-    }
-
-    return new Promise((resolve, reject): void => {
-      const id = getId();
-
-      this.#authRequestsV2[id] = {
-        ...this.authCompleteV2(id, resolve, reject),
-        id,
-        idStr,
-        request,
-        url,
-        accountAuthType: accountAuthType
-      };
-
-      this.updateIconAuthV2();
-
-      if (Object.keys(this.#authRequestsV2).length < 2) {
-        this.popupOpen();
-      }
-    });
+    return this.requestService.authorizeUrlV2(url, request);
   }
 
   public getNativeTokenInfo (networkKey: string) {
@@ -536,30 +424,7 @@ export default class KoniState extends State {
   }
 
   public ensureUrlAuthorizedV2 (url: string): Promise<boolean> {
-    const idStr = this.stripUrl(url);
-
-    return new Promise((resolve, reject) => {
-      this.getAuthorize((value) => {
-        if (!value) {
-          value = {};
-        }
-
-        const entry = Object.keys(value).includes(idStr);
-
-        if (!entry) {
-          reject(new Error(`The source ${url} has not been enabled yet`));
-        }
-
-        const isConnected = value[idStr] && Object.keys(value[idStr].isAllowedMap)
-          .some((address) => value[idStr].isAllowedMap[address]);
-
-        if (!isConnected) {
-          reject(new Error(`The source ${url} is not allowed to interact with this extension`));
-        }
-
-        resolve(true);
-      });
-    });
+    return this.requestService.ensureUrlAuthorizedV2(url);
   }
 
   public setStakingItem (networkKey: string, item: StakingItem): void {
@@ -834,7 +699,7 @@ export default class KoniState extends State {
       this.getCurrentAccount(resolve);
     });
 
-    return this.addConfirmation(id, url, 'switchNetworkRequest', { networkKey, address: changeAddress }, { address: changeAddress })
+    return this.requestService.addConfirmation(id, url, 'switchNetworkRequest', { networkKey, address: changeAddress }, { address: changeAddress })
       .then(({ isApproved }) => {
         if (isApproved) {
           const useAddress = changeAddress || address;
@@ -866,47 +731,63 @@ export default class KoniState extends State {
   public async addNetworkConfirm (id: string, url: string, networkData: AddNetworkRequestExternal) {
     networkData.requestId = id;
 
-    return this.addConfirmation(id, url, 'addNetworkRequest', networkData)
+    return this.requestService.addConfirmation(id, url, 'addNetworkRequest', networkData)
       .then(({ isApproved }) => {
         return isApproved;
       });
   }
 
   public async addTokenConfirm (id: string, url: string, tokenInfo: AddTokenRequestExternal) {
-    return this.addConfirmation(id, url, 'addTokenRequest', tokenInfo)
+    return this.requestService.addConfirmation(id, url, 'addTokenRequest', tokenInfo)
       .then(({ isApproved }) => {
         return isApproved;
       });
   }
 
+  public get metaSubject () {
+    return this.requestService.metaSubject;
+  }
+
+  public get signSubject () {
+    return this.requestService.signSubject;
+  }
+
+  public getSettings (callback: (settings: UiSettings) => void): void {
+    this.settingService.getSettings(callback);
+  }
+
+  public setSettings (settings: UiSettings, callback?: () => void): void {
+    this.settingService.setSettings(settings, callback);
+  }
+
   public setTheme (theme: ThemeNames, callback?: (settingData: UiSettings) => void): void {
-    this.getSettings((settings) => {
+    this.settingService.getSettings((settings) => {
       const newSettings = {
         ...settings,
         theme
       };
 
-      this.setSettings(newSettings, () => {
+      this.settingService.setSettings(newSettings, () => {
         callback && callback(newSettings);
       });
     });
   }
 
   public setBrowserConfirmationType (browserConfirmationType: BrowserConfirmationType, callback?: (settingData: UiSettings) => void): void {
-    this.getSettings((settings) => {
+    this.settingService.getSettings((settings) => {
       const newSettings = {
         ...settings,
         browserConfirmationType
       };
 
-      this.setSettings(newSettings, () => {
+      this.settingService.setSettings(newSettings, () => {
         callback && callback(newSettings);
       });
     });
   }
 
   public subscribeSettingsSubject (): Subject<RequestSettingsType> {
-    return this.settingsStore.getSubject();
+    return this.settingService.getSubject();
   }
 
   public subscribeCurrentAccount (): Subject<CurrentAccountInfo> {
@@ -1608,7 +1489,7 @@ export default class KoniState extends State {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const signPayload = { address, type: method, payload };
 
-      return this.addConfirmation(id, url, 'evmSignatureRequest', signPayload, { requiredPassword: true, address }, validateConfirmationResponsePayload)
+      return this.requestService.addConfirmation(id, url, 'evmSignatureRequest', signPayload, { requiredPassword: false, address }, validateConfirmationResponsePayload)
         .then(async ({ isApproved }) => {
           if (isApproved) {
             const pair = keyring.getPair(address);
@@ -1643,7 +1524,7 @@ export default class KoniState extends State {
 
       const signPayload: EvmSignatureRequestExternal = { address, type: method, payload: payload as unknown, hashPayload: qrPayload, canSign: canSign };
 
-      return this.addConfirmation(id, url, 'evmSignatureRequestExternal', signPayload, { requiredPassword: false, address })
+      return this.requestService.addConfirmation(id, url, 'evmSignatureRequestExternal', signPayload, { requiredPassword: false, address })
         .then(({ isApproved, signature }) => {
           if (isApproved) {
             return signature;
@@ -1654,8 +1535,39 @@ export default class KoniState extends State {
     }
   }
 
+  public generateHashPayload (networkKey: string, transaction: TransactionConfig): HexString {
+    const chainInfo = this.getChainInfo(networkKey);
+
+    const txObject: Web3Transaction = {
+      nonce: transaction.nonce || 1,
+      from: transaction.from as string,
+      gasPrice: anyNumberToBN(transaction.gasPrice).toNumber(),
+      gasLimit: anyNumberToBN(transaction.gas).toNumber(),
+      to: transaction.to !== undefined ? transaction.to : '',
+      value: anyNumberToBN(transaction.value).toNumber(),
+      data: transaction.data ? transaction.data : '',
+      chainId: _getEvmChainId(chainInfo)
+    };
+
+    const data: Input = [
+      txObject.nonce,
+      txObject.gasPrice,
+      txObject.gasLimit,
+      txObject.to,
+      txObject.value,
+      txObject.data,
+      txObject.chainId,
+      new Uint8Array([0x00]),
+      new Uint8Array([0x00])
+    ];
+
+    const encoded = RLP.encode(data);
+
+    return u8aToHex(encoded);
+  }
+
   public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
-    const evmApi = this.getEvmApiMap()[networkKey];
+    const evmApi = this.getEvmApi(networkKey);
     const web3 = evmApi.api;
 
     const autoFormatNumber = (val?: string | number): string | undefined => {
@@ -1693,6 +1605,8 @@ export default class KoniState extends State {
 
     const gasPrice = await web3.eth.getGasPrice();
 
+    transaction.gasPrice = gasPrice;
+
     const estimateGas = new BN(gasPrice.toString()).mul(new BN(transaction.gas)).toString();
 
     // Address is validated in before step
@@ -1723,277 +1637,37 @@ export default class KoniState extends State {
       throw new EvmRpcError('INVALID_PARAMS', 'Balance can be not enough to send transaction');
     }
 
-    const validateConfirmationResponsePayload = createValidateConfirmationResponsePayload<'evmSendTransactionRequest'>(fromAddress);
+    const hashPayload = meta.external ? this.generateHashPayload(networkKey, transaction) : '';
 
-    const requestPayload = { ...transaction, estimateGas };
-
-    const setTransactionHistory = (receipt: TransactionReceipt) => {
-      const nativeTokenInfo = this.chainService.getNativeTokenInfo(networkKey);
-
-      this.setHistory(fromAddress, networkKey, {
-        isSuccess: true,
-        time: Date.now(),
-        networkKey,
-        change: transaction.value?.toString() || '0',
-        changeSymbol: undefined,
-        fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString(),
-        feeSymbol: nativeTokenInfo.symbol,
-        action: TxHistoryType.SEND,
-        extrinsicHash: receipt.transactionHash
-      });
-    };
-
-    const setFailedHistory = (transactionHash: string) => {
-      const nativeTokenInfo = this.chainService.getNativeTokenInfo(networkKey);
-
-      this.setHistory(fromAddress, networkKey, {
-        isSuccess: false,
-        time: Date.now(),
-        networkKey,
-        change: transaction.value?.toString() || '0',
-        changeSymbol: undefined,
-        fee: undefined,
-        feeSymbol: nativeTokenInfo.symbol,
-        action: TxHistoryType.SEND,
-        extrinsicHash: transactionHash
-      });
-    };
-
-    if (!meta.isExternal) {
-      return this.addConfirmation(id, url, 'evmSendTransactionRequest', requestPayload, { requiredPassword: true, address: fromAddress, networkKey }, validateConfirmationResponsePayload)
-        .then(async ({ isApproved }) => {
-          if (isApproved) {
-            const pair = keyring.getPair(fromAddress);
-
-            const params = {
-              ...transaction,
-              gasPrice: anyNumberToBN(gasPrice).toNumber(),
-              gasLimit: anyNumberToBN(estimateGas).toNumber(),
-              nonce: await web3.eth.getTransactionCount(fromAddress)
-            };
-
-            console.log(params);
-
-            const chainInfo = this.getChainInfo(networkKey);
-
-            const common = Common.forCustomChain('mainnet', {
-              name: networkKey,
-              networkId: _getEvmChainId(chainInfo),
-              chainId: _getEvmChainId(chainInfo)
-            }, 'petersburg');
-
-            // @ts-ignore
-            const tx = new Transaction(params, { common });
-
-            const callHash = pair.evmSigner.signTransaction(tx);
-            let transactionHash = '';
-
-            return new Promise<string>((resolve, reject) => {
-              web3.eth.sendSignedTransaction(callHash)
-                .once('transactionHash', (hash) => {
-                  transactionHash = hash;
-                  resolve(hash);
-                })
-                .once('receipt', setTransactionHistory)
-                .once('error', (e) => {
-                  console.error(e);
-                  setFailedHistory(transactionHash);
-                  reject(e);
-                })
-                .catch((e) => {
-                  console.error(e);
-                  setFailedHistory(transactionHash);
-                  reject(e);
-                });
-            });
-          } else {
-            return Promise.reject(new EvmRpcError('USER_REJECTED_REQUEST'));
-          }
-        });
-    } else {
-      const chainInfo = this.getChainInfo(networkKey);
-      const nonce = await web3.eth.getTransactionCount(fromAddress);
-
-      const txObject: Web3Transaction = {
-        nonce: nonce,
-        from: fromAddress,
-        gasPrice: anyNumberToBN(gasPrice).toNumber(),
-        gasLimit: anyNumberToBN(transaction.gas).toNumber(),
-        to: transaction.to !== undefined ? transaction.to : '',
-        value: anyNumberToBN(transaction.value).toNumber(),
-        data: transaction.data ? transaction.data : '',
-        chainId: _getEvmChainId(chainInfo)
-      };
-
-      const data: Input = [
-        txObject.nonce,
-        txObject.gasPrice,
-        txObject.gasLimit,
-        txObject.to,
-        txObject.value,
-        txObject.data,
-        txObject.chainId,
-        new Uint8Array([0x00]),
-        new Uint8Array([0x00])
-      ];
-
-      const encoded = RLP.encode(data);
-
-      const requestPayload: EvmSendTransactionRequestExternal = {
-        ...transaction,
-        estimateGas,
-        hashPayload: u8aToHex(encoded),
-        canSign: true
-      };
-
-      return this.addConfirmation(id, url, 'evmSendTransactionRequestExternal', requestPayload, { requiredPassword: false, address: fromAddress, networkKey })
-        .then(async ({ isApproved, signature }) => {
-          if (isApproved) {
-            let transactionHash = '';
-
-            const signed = parseTxAndSignature(txObject, signature);
-
-            const recover = web3.eth.accounts.recoverTransaction(signed);
-
-            if (recover.toLowerCase() !== fromAddress.toLowerCase()) {
-              return Promise.reject(new EvmRpcError('UNAUTHORIZED', 'Bad signature'));
-            }
-
-            return new Promise<string>((resolve, reject) => {
-              web3.eth.sendSignedTransaction(signed)
-                .once('transactionHash', (hash) => {
-                  transactionHash = hash;
-                  resolve(hash);
-                })
-                .once('receipt', setTransactionHistory)
-                .once('error', (e) => {
-                  setFailedHistory(transactionHash);
-                  reject(e);
-                }).catch((e) => {
-                  setFailedHistory(transactionHash);
-                  reject(e);
-                });
-            });
-          } else {
-            return Promise.reject(new EvmRpcError('USER_REJECTED_REQUEST'));
-          }
-        });
-    }
-  }
-
-  public getConfirmationsQueueSubject () {
-    return this.confirmationsQueueSubject;
-  }
-
-  public countConfirmationNumber () {
-    let count = 0;
-
-    count += this.allAuthRequests.length;
-    count += this.allMetaRequests.length;
-    count += this.allSignRequests.length;
-    count += this.allAuthRequestsV2.length;
-    Object.values(this.confirmationsQueueSubject.getValue()).forEach((x) => {
-      count += Object.keys(x).length;
-    });
-
-    return count;
-  }
-
-  public addConfirmation<CT extends ConfirmationType> (id: string, url: string, type: CT, payload: ConfirmationDefinitions[CT][0]['payload'], options: ConfirmationsQueueItemOptions = {}, validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined) {
-    const confirmations = this.confirmationsQueueSubject.getValue();
-    const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
-    const payloadJson = JSON.stringify(payload);
-
-    // Check duplicate request
-    const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));
-
-    if (duplicated) {
-      throw new EvmRpcError('INVALID_PARAMS', 'Duplicate request information');
-    }
-
-    confirmationType[id] = {
-      id,
+    const requestPayload = { ...transaction, estimateGas, hashPayload };
+    const transactionEmitter = await this.transactionService.addTransaction({
+      transaction: requestPayload,
+      address: requestPayload.from as string,
+      chain: networkKey,
       url,
-      payload,
-      payloadJson,
-      ...options
-    } as ConfirmationDefinitions[CT][0];
-
-    const promise = new Promise<ConfirmationDefinitions[CT][1]>((resolve, reject) => {
-      this.confirmationsPromiseMap[id] = {
-        validator: validator,
-        resolver: {
-          resolve: resolve,
-          reject: reject
-        }
-      };
+      data: { ...transaction },
+      extrinsicType: 'evm:extrinsic:external',
+      chainType: 'ethereum'
     });
 
-    this.confirmationsQueueSubject.next(confirmations);
-
-    // Not open new popup and use existed
-    const popupList = this.getPopup();
-
-    if (this.getPopup().length > 0) {
-      // eslint-disable-next-line no-void
-      void chrome.windows.update(popupList[0], { focused: true });
-    } else {
-      this.popupOpen();
-    }
-
-    this.updateIconV2();
-
-    return promise;
+    // Wait extrinsic hash
+    return new Promise((resolve, reject) => {
+      transactionEmitter.on('extrinsicHash', (rs: TransactionEventResponse) => {
+        resolve(rs.extrinsicHash);
+      });
+      transactionEmitter.on('error', (rs: TransactionEventResponse) => {
+        // Todo: return code with error
+        reject(rs.error);
+      });
+    });
   }
 
-  public completeConfirmation (request: RequestConfirmationComplete) {
-    const confirmations = this.confirmationsQueueSubject.getValue();
+  public getConfirmationsQueueSubject (): BehaviorSubject<ConfirmationsQueue> {
+    return this.requestService.confirmationsQueueSubject;
+  }
 
-    const _completeConfirmation = <T extends ConfirmationType> (type: T, result: ConfirmationDefinitions[T][1]) => {
-      const { id } = result;
-      const { resolver, validator } = this.confirmationsPromiseMap[id];
-
-      if (!resolver || !(confirmations[type][id])) {
-        this.logger.error('Not found confirmation', type, id);
-        throw new Error('Not found promise for confirmation');
-      }
-
-      // Validate response from confirmation popup some info like password, response format....
-      const error = validator && validator(result);
-
-      if (error) {
-        resolver.reject(error);
-      }
-
-      // Delete confirmations from queue
-      delete this.confirmationsPromiseMap[id];
-      delete confirmations[type][id];
-      this.confirmationsQueueSubject.next(confirmations);
-
-      // Update icon, and close queue
-      this.updateIconV2(this.countConfirmationNumber() === 0);
-      resolver.resolve(result);
-    };
-
-    Object.entries(request).forEach(([type, result]) => {
-      if (type === 'addNetworkRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['addNetworkRequest'][1]);
-      } else if (type === 'addTokenRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['addTokenRequest'][1]);
-      } else if (type === 'switchNetworkRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['switchNetworkRequest'][1]);
-      } else if (type === 'evmSignatureRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequest'][1]);
-      } else if (type === 'evmSignatureRequestExternal') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSignatureRequestExternal'][1]);
-      } else if (type === 'evmSendTransactionRequest') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequest'][1]);
-      } else if (type === 'evmSendTransactionRequestExternal') {
-        _completeConfirmation(type, result as ConfirmationDefinitions['evmSendTransactionRequestExternal'][1]);
-      }
-    });
-
-    return true;
+  public async completeConfirmation (request: RequestConfirmationComplete) {
+    return await this.requestService.completeConfirmation(request);
   }
 
   public onInstall () {
@@ -2077,5 +1751,10 @@ export default class KoniState extends State {
 
   public async getExtraDelegationInfo (networkKey: string, address: string) {
     return await this.dbService.getExtraDelegationInfo(networkKey, address);
+  }
+
+  // New Transaction Handler
+  public async addTransaction (transaction: SWTransactionInput) {
+    return await this.transactionService.addTransaction(transaction);
   }
 }

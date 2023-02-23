@@ -22,3 +22,7 @@ export const waitForElement = (selector: string, callback: (element: Element) =>
     }
   }, 100);
 };
+
+export const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text).then().catch(console.log);
+};

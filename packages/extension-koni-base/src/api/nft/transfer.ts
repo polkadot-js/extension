@@ -7,7 +7,7 @@ import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
-import { parseNumberToDisplay, reformatAddress } from '@subwallet/extension-koni-base/utils';
+import { parseNumberToDisplay, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { BN } from '@polkadot/util';
 

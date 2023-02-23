@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
-import { createTransactionFromRLP } from '@subwallet/extension-koni-base/utils/eth';
+import { createTransactionFromRLP } from '@subwallet/extension-base/utils/eth';
 import { EthereumParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateMultiParsedData } from '@subwallet/extension-koni-ui/types/scanner';
 import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
 import { findNetworkJsonByGenesisHash, getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';

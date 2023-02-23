@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/AvatarGroup';
+import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import AccountItemBase, { AccountItemBaseProps } from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemBase';
 import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
 import CN from 'classnames';

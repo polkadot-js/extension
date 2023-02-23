@@ -10,11 +10,8 @@ import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Button, ButtonProps, Field, Image } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import SwModal from '@subwallet/react-ui/es/sw-modal';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
 import { CaretLeft, Info, PaperPlaneTilt } from 'phosphor-react';

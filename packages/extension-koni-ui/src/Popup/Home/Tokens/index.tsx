@@ -56,6 +56,10 @@ function Component (): React.ReactElement {
     };
   }, [navigate]);
 
+  const onClickManageToken = useCallback(() => {
+    navigate('/settings/tokens/manage');
+  }, [navigate]);
+
   return (
     <>
       <div className={classNames('__upper-block-wrapper', {
@@ -104,6 +108,7 @@ function Component (): React.ReactElement {
         <div className={'__scroll-footer'}>
           <Button
             icon={<Icon phosphorIcon={FadersHorizontal} />}
+            onClick={onClickManageToken}
             size={'xs'}
             type={'ghost'}
           >

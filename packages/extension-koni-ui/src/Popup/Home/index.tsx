@@ -21,9 +21,7 @@ const CustomizeModalId = 'customizeModalId';
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  // todo: Must check if current account exists before processing to this component
-  // todo: Must get current account address then get its type.
-  const chainsByAccountType = useChainsByAccountType('ALL');
+  const chainsByAccountType = useChainsByAccountType();
   const tokenGroupStructure = useTokenGroup(chainsByAccountType);
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
 

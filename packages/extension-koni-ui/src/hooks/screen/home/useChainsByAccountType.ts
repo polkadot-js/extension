@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ChainStore } from '@subwallet/extension-koni-ui/stores/types';
 import { AccountType } from '@subwallet/extension-koni-ui/types';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-function getChainsAccountType (accountType: AccountType, chainInfoMap: ChainStore['chainInfoMap']): string[] {
+function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<string, _ChainInfo>): string[] {
   const result: string[] = [];
 
   Object.keys(chainInfoMap).forEach((chain) => {
@@ -28,8 +28,17 @@ function getChainsAccountType (accountType: AccountType, chainInfoMap: ChainStor
   return result;
 }
 
-export function useChainsByAccountType (accountType: AccountType): string[] {
+export function useChainsByAccountType (): string[] {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
+  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+
+  let accountType: AccountType = 'ALL';
+
+  if (currentAccount?.type === 'ethereum') {
+    accountType = 'ETHEREUM';
+  } else if (currentAccount?.type === 'sr25519') {
+    accountType = 'SUBSTRATE';
+  }
 
   return useMemo<string[]>(() => {
     return getChainsAccountType(accountType, chainInfoMap);

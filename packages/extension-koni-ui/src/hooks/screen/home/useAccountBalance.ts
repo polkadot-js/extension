@@ -73,9 +73,9 @@ function getDefaultTokenGroupBalance (
 
 function getDefaultTokenBalance (
   tokenSlug: string,
-  assetRegistry: _ChainAsset
+  chainAsset: _ChainAsset
 ): TokenBalanceItemType {
-  const symbol = _getAssetSymbol(assetRegistry);
+  const symbol = _getAssetSymbol(chainAsset);
 
   return getDefaultBalanceItem(tokenSlug, symbol, symbol.toLowerCase());
 }
@@ -108,11 +108,11 @@ function getAccountBalance (
     const tokenGroupBalance = getDefaultTokenGroupBalance(tokenGroupKey, multiChainAsset);
 
     tokenGroupMap[tokenGroupKey].forEach((tokenSlug) => {
-      const assetRegistry = assetRegistryMap[tokenSlug];
-      const tokenBalance = getDefaultTokenBalance(tokenSlug, assetRegistry);
-      const originChain = _getAssetOriginChain(assetRegistry);
+      const chainAsset = assetRegistryMap[tokenSlug];
+      const tokenBalance = getDefaultTokenBalance(tokenSlug, chainAsset);
+      const originChain = _getAssetOriginChain(chainAsset);
       const balanceItem = balanceMap[tokenSlug];
-      const decimals = _getAssetDecimals(assetRegistry);
+      const decimals = _getAssetDecimals(chainAsset);
 
       const isTokenBalanceReady = !!balanceItem && (balanceItem.state === APIItemState.READY);
 
@@ -125,7 +125,7 @@ function getAccountBalance (
 
       tokenBalance.chain = originChain;
       tokenBalance.chainDisplayName = _getChainName(chainInfoMap[originChain]);
-      tokenBalance.isTestnet = !_isAssetValuable(assetRegistry);
+      tokenBalance.isTestnet = !_isAssetValuable(chainAsset);
 
       if (isTokenBalanceReady) {
         tokenBalance.free.value = tokenBalance.free.value.plus(getBalanceValue(balanceItem.free || '0', decimals));
@@ -143,7 +143,7 @@ function getAccountBalance (
         tokenGroupBalance.total.value = tokenGroupBalance.total.value.plus(tokenBalance.total.value);
       }
 
-      const priceId = _getAssetPriceId(assetRegistry);
+      const priceId = _getAssetPriceId(chainAsset);
 
       // convert token value to real life currency value
       if (priceId && !tokenBalance.isTestnet) {

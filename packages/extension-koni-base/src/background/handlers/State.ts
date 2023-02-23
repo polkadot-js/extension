@@ -1174,6 +1174,15 @@ export default class KoniState extends State {
     });
   }
 
+  public updateAssetSetting (assetSlug: string, assetSetting: AssetSetting) {
+    this.assetSettingStore.get('AssetSetting', (currentAssetSettings) => {
+      this.assetSettingStore.set('AssetSetting', {
+        ...currentAssetSettings,
+        [assetSlug]: assetSetting
+      });
+    });
+  }
+
   public subscribeAssetSettings () {
     return this.assetSettingStore.getSubject();
   }

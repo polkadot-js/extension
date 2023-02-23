@@ -1506,6 +1506,12 @@ export interface ResponseKeyringExportMnemonic {
 export interface RequestSigningApprovePasswordV2 {
   id: string;
 }
+
+export interface AssetSettingUpdateReq {
+  tokenSlug: string,
+  assetSetting: AssetSetting
+}
+
 export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, BasicTxResponse, BasicTxResponse];
@@ -1546,6 +1552,7 @@ export interface KoniRequestSignatures {
   'pri(chainService.recoverSubstrateApi)': [string, boolean];
   'pri(chainService.disableAllChains)': [null, boolean];
   'pri(assetSetting.getSubscription)': [null, Record<string, AssetSetting>, Record<string, AssetSetting>]
+  'pri(assetSetting.update)': [AssetSettingUpdateReq, boolean];
 
   // NFT functions
   'pri(evmNft.submitTransaction)': [RequestEvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];

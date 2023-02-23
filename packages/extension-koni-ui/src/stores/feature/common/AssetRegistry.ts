@@ -3,8 +3,8 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AssetRegistryStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
-import {AssetSetting} from "@subwallet/extension-base/background/KoniTypes";
 
 const initialState: AssetRegistryStore = {
   assetRegistry: {},
@@ -50,5 +50,5 @@ const assetRegistrySlice = createSlice({
   }
 });
 
-export const { updateAssetRegistry, updateMultiChainAssetMap, updateAssetSettingMap } = assetRegistrySlice.actions;
+export const { updateAssetRegistry, updateAssetSettingMap, updateMultiChainAssetMap } = assetRegistrySlice.actions;
 export default assetRegistrySlice.reducer;

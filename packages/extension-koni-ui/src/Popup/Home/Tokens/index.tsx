@@ -9,8 +9,7 @@ import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Upper
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { Button } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { Button, Icon } from '@subwallet/react-ui';
 import classNames from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';

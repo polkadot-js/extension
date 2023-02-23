@@ -3,7 +3,7 @@
 
 import type { MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, RequestTypes, ResponseTypes, SubscriptionMessageTypes, TransportRequestMessage, TransportResponseMessage } from '../background/types';
 
-import { SubWalletProviderError } from '@subwallet/extension-base/errors/SubWalletProviderError';
+import { SubWalletProviderError } from '@subwallet/extension-base/background/errors/SubWalletProviderError';
 
 import { MESSAGE_ORIGIN_PAGE } from '../defaults';
 import { getId } from '../utils/getId';

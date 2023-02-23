@@ -1,11 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountAuthType, AccountJson, MetadataRequest } from '@subwallet/extension-base/background/types';
+import { MetadataRequest } from '@subwallet/extension-base/background/types';
 import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
 import { approveMetaRequest, rejectMetaRequest } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, XCircle } from 'phosphor-react';
@@ -24,20 +23,6 @@ async function handleConfirm ({ id }: MetadataRequest) {
 async function handleCancel ({ id }: MetadataRequest) {
   return await rejectMetaRequest(id);
 }
-
-export const filterAuthorizeAccounts = (accounts: AccountJson[], accountAuthType: AccountAuthType) => {
-  let rs = [...accounts];
-
-  rs = rs.filter((acc) => acc.isReadOnly !== true);
-
-  if (accountAuthType === 'evm') {
-    rs = rs.filter((acc) => (isAccountAll(acc.address) || acc.type === 'ethereum'));
-  } else {
-    rs = rs.filter((acc) => (isAccountAll(acc.address) || acc.type !== 'ethereum'));
-  }
-
-  return rs;
-};
 
 function Component ({ className, request }: Props) {
   const { t } = useTranslation();

@@ -4,9 +4,9 @@
 import { BasicTxResponse, ExternalRequestPromiseStatus, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
 import { QrState, Web3Transaction } from '@subwallet/extension-base/signers/types';
 import QrSigner from '@subwallet/extension-base/signers/web3/QrSigner';
+import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { EvmExternalProps, parseTxAndSignature } from '@subwallet/extension-koni-base/api/evm/external/shared';
 import { getERC20TransactionObject, getEVMTransactionObject, handleTransferBalanceResult } from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
-import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 interface TransferQrArg extends EvmExternalProps {

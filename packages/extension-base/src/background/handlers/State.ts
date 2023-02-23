@@ -3,9 +3,10 @@
 
 import type { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import type { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
+import type { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '../types';
 
 import { RequestSettingsType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@subwallet/extension-chains';

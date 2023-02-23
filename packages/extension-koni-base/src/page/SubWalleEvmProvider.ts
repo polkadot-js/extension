@@ -4,8 +4,8 @@
 import type { EvmProvider } from '@subwallet/extension-inject/types';
 
 import SafeEventEmitter from '@metamask/safe-event-emitter';
+import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { SendRequest } from '@subwallet/extension-base/page/types';
-import { EvmRpcError } from '@subwallet/extension-koni-base/background/errors/EvmRpcError';
 import { JsonRpcRequest, JsonRpcResponse, JsonRpcSuccess } from 'json-rpc-engine';
 import { RequestArguments } from 'web3-core';
 

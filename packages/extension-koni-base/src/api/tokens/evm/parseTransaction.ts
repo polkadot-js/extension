@@ -6,8 +6,8 @@ import { EVMTransactionArg, NestedArray, ParseEVMTransactionData, ResponseParseE
 import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmAbiExplorer, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { createTransactionFromRLP, Transaction as QrTransaction } from '@subwallet/extension-koni-base/utils/eth';
-import { InputDataDecoder } from '@subwallet/extension-koni-base/utils/eth/parseTransactionData';
+import { createTransactionFromRLP, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
+import { InputDataDecoder } from '@subwallet/extension-base/utils/eth/parseTransactionData';
 import axios from 'axios';
 import BigN from 'bignumber.js';
 

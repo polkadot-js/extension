@@ -4,8 +4,8 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { reformatAddress } from '@subwallet/extension-base/utils';
 import { INDEXER_SUPPORTED_STAKING_CHAINS, SUBSQUID_ENDPOINTS } from '@subwallet/extension-koni-base/api/staking/config';
-import { reformatAddress } from '@subwallet/extension-koni-base/utils';
 import axios from 'axios';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
-import { parseRawNumber } from '@subwallet/extension-koni-base/utils';
+import { parseRawNumber } from '@subwallet/extension-base/utils';
 
 import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND } from '@polkadot/util';
 

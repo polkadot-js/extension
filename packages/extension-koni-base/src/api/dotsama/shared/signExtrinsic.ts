@@ -7,7 +7,7 @@ import KeyringSigner from '@subwallet/extension-base/signers/substrates/KeyringS
 import LedgerSigner from '@subwallet/extension-base/signers/substrates/LedgerSigner';
 import QrSigner from '@subwallet/extension-base/signers/substrates/QrSigner';
 import { LedgerState, QrState, SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
-import { unlockAccount } from '@subwallet/extension-koni-base/utils/keyring';
+import { unlockAccount } from '@subwallet/extension-base/utils/keyring';
 import { keyring } from '@subwallet/ui-keyring';
 
 import { Signer, SubmittableExtrinsic } from '@polkadot/api/types';

@@ -6,6 +6,7 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import { _NFT_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportWasmNft } from '@subwallet/extension-base/services/chain-service/utils';
+import { categoryAddresses } from '@subwallet/extension-base/utils';
 import { AcalaNftApi } from '@subwallet/extension-koni-base/api/nft/acala_nft';
 import { BitCountryNftApi } from '@subwallet/extension-koni-base/api/nft/bit.country';
 import { EvmNftApi } from '@subwallet/extension-koni-base/api/nft/evm_nft';
@@ -15,7 +16,6 @@ import { RmrkNftApi } from '@subwallet/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@subwallet/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@subwallet/extension-koni-base/api/nft/unique_nft';
 import { WasmNftApi } from '@subwallet/extension-koni-base/api/nft/wasm_nft';
-import { categoryAddresses } from '@subwallet/extension-koni-base/utils';
 
 function createSubstrateNftApi (chain: string, substrateApi: _SubstrateApi | null, addresses: string[]): BaseNftApi | null {
   const [substrateAddresses] = categoryAddresses(addresses);

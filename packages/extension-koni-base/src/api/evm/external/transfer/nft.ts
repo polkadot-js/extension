@@ -4,7 +4,7 @@
 import { BasicTxResponse, ExternalRequestPromiseStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { QrState, Web3Transaction } from '@subwallet/extension-base/signers/types';
 import QrSigner from '@subwallet/extension-base/signers/web3/QrSigner';
-import { anyNumberToBN } from '@subwallet/extension-koni-base/utils/eth';
+import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { TransactionReceipt } from 'web3-core';
 
 import { EvmExternalProps, parseTxAndSignature } from '../shared';

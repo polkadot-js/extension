@@ -53,17 +53,7 @@ import { Transaction } from 'ethereumjs-tx';
 import { TransactionConfig } from 'web3-core';
 
 import { TypeRegistry } from '@polkadot/types';
-import {
-  assert,
-  BN,
-  BN_ZERO,
-  hexStripPrefix,
-  hexToU8a,
-  isAscii,
-  isHex,
-  u8aToHex,
-  u8aToString
-} from '@polkadot/util';
+import { assert, BN, BN_ZERO, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
@@ -1793,23 +1783,25 @@ export default class KoniExtension {
         const assetAddress = _getContractAddressOfToken(tokenInfo);
 
         const [transaction, , estimateFee] = await getERC20TransactionObject(assetAddress, chainInfo, from, to, transferVal, isTransferAll, evmApiMap);
+
         swTransactionInput.transaction = {
           ...transaction,
           chainId,
           estimateGas: estimateFee,
           hashPayload: fromPair?.meta?.external ? this.#koniState.generateHashPayload(networkKey, transaction) : ''
-        }
+        };
       } else {
         swTransactionInput.extrinsicType = 'ethereum:balance:transfer';
 
         const [transaction, , estimateFee] = await getEVMTransactionObject(chainInfo, to, transferVal, isTransferAll, evmApiMap);
+
         swTransactionInput.transaction = {
           ...transaction,
           chainId,
           from: from,
           estimateGas: estimateFee,
           hashPayload: fromPair?.meta?.external ? this.#koniState.generateHashPayload(networkKey, transaction) : ''
-        }
+        };
       }
     } else {
       const substrateApi = this.#koniState.getSubstrateApi(networkKey);

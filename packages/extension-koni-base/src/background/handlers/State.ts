@@ -17,14 +17,17 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
-import { SWTransactionInput } from '@subwallet/extension-base/services/transaction-service/types';
+import {
+  SWTransactionInput,
+  TransactionEventResponse
+} from '@subwallet/extension-base/services/transaction-service/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
+import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-koni-base/constants';
-import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { decodePair } from '@subwallet/keyring/pair/decode';
 import { KeyringPair$Meta } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
@@ -36,7 +39,7 @@ import { TransactionConfig } from 'web3-core';
 
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
-import {HexString, Logger} from '@polkadot/util/types';
+import { HexString, Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -1532,35 +1535,35 @@ export default class KoniState {
     }
   }
 
-  public generateHashPayload(networkKey: string, transaction: TransactionConfig): HexString {
+  public generateHashPayload (networkKey: string, transaction: TransactionConfig): HexString {
     const chainInfo = this.getChainInfo(networkKey);
 
-      const txObject: Web3Transaction = {
-        nonce: transaction.nonce || 1,
-        from: transaction.from as string,
-        gasPrice: anyNumberToBN(transaction.gasPrice).toNumber(),
-        gasLimit: anyNumberToBN(transaction.gas).toNumber(),
-        to: transaction.to !== undefined ? transaction.to : '',
-        value: anyNumberToBN(transaction.value).toNumber(),
-        data: transaction.data ? transaction.data : '',
-        chainId: _getEvmChainId(chainInfo)
-      };
+    const txObject: Web3Transaction = {
+      nonce: transaction.nonce || 1,
+      from: transaction.from as string,
+      gasPrice: anyNumberToBN(transaction.gasPrice).toNumber(),
+      gasLimit: anyNumberToBN(transaction.gas).toNumber(),
+      to: transaction.to !== undefined ? transaction.to : '',
+      value: anyNumberToBN(transaction.value).toNumber(),
+      data: transaction.data ? transaction.data : '',
+      chainId: _getEvmChainId(chainInfo)
+    };
 
-      const data: Input = [
-        txObject.nonce,
-        txObject.gasPrice,
-        txObject.gasLimit,
-        txObject.to,
-        txObject.value,
-        txObject.data,
-        txObject.chainId,
-        new Uint8Array([0x00]),
-        new Uint8Array([0x00])
-      ];
+    const data: Input = [
+      txObject.nonce,
+      txObject.gasPrice,
+      txObject.gasLimit,
+      txObject.to,
+      txObject.value,
+      txObject.data,
+      txObject.chainId,
+      new Uint8Array([0x00]),
+      new Uint8Array([0x00])
+    ];
 
-      const encoded = RLP.encode(data);
+    const encoded = RLP.encode(data);
 
-      return u8aToHex(encoded);
+    return u8aToHex(encoded);
   }
 
   public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
@@ -1601,7 +1604,8 @@ export default class KoniState {
     }
 
     const gasPrice = await web3.eth.getGasPrice();
-    transaction.gasPrice = gasPrice
+
+    transaction.gasPrice = gasPrice;
 
     const estimateGas = new BN(gasPrice.toString()).mul(new BN(transaction.gas)).toString();
 
@@ -1628,9 +1632,11 @@ export default class KoniState {
 
     // Validate balance
     const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
+
     if (balance.lt(new BN(gasPrice.toString()).mul(new BN(transaction.gas)).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
       throw new EvmRpcError('INVALID_PARAMS', 'Balance can be not enough to send transaction');
     }
+
     const hashPayload = meta.external ? this.generateHashPayload(networkKey, transaction) : '';
 
     const requestPayload = { ...transaction, estimateGas, hashPayload };
@@ -1639,26 +1645,27 @@ export default class KoniState {
       address: requestPayload.from as string,
       chain: networkKey,
       url,
-      data: {...transaction},
+      data: { ...transaction },
       extrinsicType: 'evm:extrinsic:external',
       chainType: 'ethereum'
-    })
+    });
 
     // Wait extrinsic hash
     return new Promise((resolve, reject) => {
-      transactionEmitter.on('extrinsicHash', (rs) => {
-        resolve(rs.extrinsicHash)
-      })
-      transactionEmitter.on('error', (rs) => {
+      transactionEmitter.on('extrinsicHash', (rs: TransactionEventResponse) => {
+        resolve(rs.extrinsicHash);
+      });
+      transactionEmitter.on('error', (rs: TransactionEventResponse) => {
         // Todo: return code with error
-        reject(rs.error)
-      })
-    })
+        reject(rs.error);
+      });
+    });
   }
 
   public getConfirmationsQueueSubject (): BehaviorSubject<ConfirmationsQueue> {
     return this.requestService.confirmationsQueueSubject;
   }
+
   public async completeConfirmation (request: RequestConfirmationComplete) {
     return await this.requestService.completeConfirmation(request);
   }

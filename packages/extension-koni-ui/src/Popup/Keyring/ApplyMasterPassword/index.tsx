@@ -150,7 +150,7 @@ const Component: React.FC<Props> = (props: Props) => {
         return {
           children: t('Finish'),
           onClick: () => {
-            navigate('/home');
+            navigate('/');
           },
           icon: finishIcon
         };

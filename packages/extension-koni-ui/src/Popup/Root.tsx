@@ -7,6 +7,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { changeHeaderLogo } from '@subwallet/react-ui';
 import Bowser from 'bowser';
 import React, { useContext, useEffect } from 'react';
@@ -48,10 +49,19 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const navigate = useNavigate();
   const openPModal = usePredefinedModal();
   const hasConfirmations = useSelector((state: RootState) => state.requestState.hasConfirmations);
+  const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
   useEffect(() => {
+    console.debug(isNoAccount(accounts), hasMasterPassword, location.pathname);
+
     if (location.pathname === '/') {
-      if (hasConfirmations) {
+      if (isNoAccount(accounts)) {
+        navigate('/welcome');
+      } else if (!hasMasterPassword) {
+        navigate('/keyring/create-password');
+      } else if (isLocked) {
+        navigate('/keyring/login');
+      } else if (hasConfirmations) {
         openPModal('confirmations');
       } else {
         // Todo: check conditional an navigate to default page
@@ -59,7 +69,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       }
     }
   },
-  [hasConfirmations, location.pathname, navigate, openPModal]
+  [accounts, hasConfirmations, hasMasterPassword, isLocked, location.pathname, navigate, openPModal]
   );
 
   return <>{children}</>;

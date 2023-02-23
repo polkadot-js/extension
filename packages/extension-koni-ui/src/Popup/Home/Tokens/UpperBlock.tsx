@@ -4,7 +4,8 @@
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
 import { ArrowFatLinesDown, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -22,6 +23,14 @@ function Component (
     totalChangePercent,
     totalChangeValue,
     totalValue }: Props): React.ReactElement<Props> {
+  const navigate = useNavigate();
+  const openSendFund = useCallback(() => {
+    console.log('Running....');
+    navigate('/transaction/send-fund');
+  },
+  [navigate]
+  );
+
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
       <Number
@@ -66,6 +75,7 @@ function Component (
         <div className={'__button-space'} />
         <Button
           icon={<Icon phosphorIcon={PaperPlaneTilt} />}
+          onClick={openSendFund}
           shape='squircle'
           size={isShrink ? 'xs' : undefined}
         />

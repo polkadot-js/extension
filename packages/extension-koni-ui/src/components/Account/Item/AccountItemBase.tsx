@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import useAccountAvatarInfo from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarInfo';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
-import useAccountRecoded from '@subwallet/extension-koni-ui/hooks/account/useAccountRecoded';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon } from '@subwallet/react-ui';
 import AccountItem, { AccountItemProps } from '@subwallet/react-ui/es/web3-block/account-item';
@@ -17,11 +17,12 @@ export interface AccountItemBaseProps extends Omit<AccountItemProps, 'avatarIden
   type?: KeypairType;
   accountName?: string;
   showUnselectIcon?: boolean;
+  preventPrefix?: boolean;
 }
 
 const Component: React.FC<AccountItemBaseProps> = (props: AccountItemBaseProps) => {
-  const { address, genesisHash, isSelected, onClick, showUnselectIcon, type: givenType } = props;
-  const { formatted, prefix } = useAccountRecoded(address || '', genesisHash, givenType);
+  const { address, genesisHash, isSelected, onClick, preventPrefix, showUnselectIcon, type: givenType } = props;
+  const { address: avatarAddress, prefix } = useAccountAvatarInfo(address ?? '', preventPrefix, genesisHash, givenType);
   const avatarTheme = useAccountAvatarTheme(address || '');
   const { token } = useTheme() as Theme;
 
@@ -29,8 +30,8 @@ const Component: React.FC<AccountItemBaseProps> = (props: AccountItemBaseProps) 
     <div className={props.className}>
       <AccountItem
         {...props}
-        address={formatted || ''}
-        avatarIdentPrefix={prefix || 42}
+        address={avatarAddress ?? ''}
+        avatarIdentPrefix={prefix ?? 42}
         avatarTheme={avatarTheme}
         onPressItem={onClick}
         rightItem={<>

@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
@@ -57,7 +58,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         types: [EVM_ACCOUNT_TYPE]
       })
         .then(() => {
-          navigate('/home');
+          navigate(DEFAULT_ROUTER_PATH);
         })
         .catch((error: Error): void => {
           setValidateState({

@@ -3,9 +3,11 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
+import useChainInfo from '@subwallet/extension-koni-ui/hooks/useChainInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { formatAccountAddress } from '@subwallet/extension-koni-ui/util/account';
 import { Typography } from '@subwallet/react-ui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -17,6 +19,8 @@ interface Props extends ThemeProps {
 const Component: React.FC<Props> = ({ account, className }: Props) => {
   const { t } = useTranslation();
   const isAll = useMemo((): boolean => isAccountAll(account.address), [account.address]);
+  const networkInfo = useChainInfo(undefined, account?.originGenesisHash ?? account?.genesisHash);
+  const address = useMemo((): string => formatAccountAddress(account, networkInfo), [account, networkInfo]);
 
   return (
     <div className={className}>
@@ -27,7 +31,7 @@ const Component: React.FC<Props> = ({ account, className }: Props) => {
       >
         { isAll ? t('All accounts') : account.name}
       </Typography.Text>
-      {!isAll && <div className='account-address'>(...{account.address.slice(-3)})</div>}
+      {!isAll && <div className='account-address'>(...{address.slice(-3)})</div>}
     </div>
   );
 };

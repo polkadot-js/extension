@@ -6,3 +6,8 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 export interface NewSeedPhraseState {
   accountTypes: KeypairType[];
 }
+
+export interface WordItem {
+  index: number;
+  label: string;
+}

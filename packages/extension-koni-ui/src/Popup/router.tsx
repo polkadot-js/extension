@@ -40,6 +40,9 @@ const CreatePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Pop
 const ChangePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ChangePassword'));
 const ApplyMasterPassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword'));
 
+const AccountDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AccountDetail'));
+const AccountExport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AccountExport'));
+
 const ErrorFallback = () => {
   const error = useRouteError();
 
@@ -249,6 +252,14 @@ export const router = createHashRouter([{
         {
           path: 'connect-keystone',
           element: <ConnectKeystone />
+        },
+        {
+          path: 'detail/:accountAddress',
+          element: <AccountDetail />
+        },
+        {
+          path: 'export/:accountAddress',
+          element: <AccountExport />
         }
       ]
     }

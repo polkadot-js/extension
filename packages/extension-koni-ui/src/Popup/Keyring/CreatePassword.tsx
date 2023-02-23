@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
@@ -65,7 +66,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (!res.status) {
           setSubmitError(res.errors[0]);
         } else {
-          navigate('/home');
+          navigate(DEFAULT_ROUTER_PATH);
         }
       }).catch((e: Error) => {
         setSubmitError(e.message);
@@ -122,7 +123,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           icon: (
             <Icon
               phosphorIcon={Info}
-              type='phosphor'
+              size='sm'
             />
           ),
           onClick: openModal
@@ -192,7 +193,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             <Icon
               phosphorIcon={CaretLeft}
               size='sm'
-              type='phosphor'
             />
           )}
           id={modalId}
@@ -202,7 +202,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               <Icon
                 phosphorIcon={Info}
                 size='sm'
-                type='phosphor'
               />
             )
           }}

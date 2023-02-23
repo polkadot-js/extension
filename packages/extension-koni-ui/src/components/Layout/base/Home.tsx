@@ -23,7 +23,6 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon }: Props) => {
           <Icon
             phosphorIcon={FadersHorizontal}
             size='sm'
-            type='phosphor'
           />
         ),
         onClick: onClickFilterIcon
@@ -33,7 +32,6 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon }: Props) => {
           <Icon
             phosphorIcon={MagnifyingGlass}
             size='sm'
-            type='phosphor'
           />
         ),
         onClick: onClickSearchIcon

@@ -76,6 +76,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const SelectAccountFooter = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     display: 'flex',
+    marginBottom: token.margin,
 
     '.btn-min-width': {
       minWidth: token.controlHeightLG + token.sizeSM

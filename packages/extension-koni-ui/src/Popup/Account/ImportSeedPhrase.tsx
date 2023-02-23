@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 
 type Props = ThemeProps;
 
@@ -59,7 +60,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         types: keyTypes
       })
         .then(() => {
-          navigate('/home');
+          navigate(DEFAULT_ROUTER_PATH);
         })
         .catch((error: Error): void => {
           setValidateState({
@@ -195,8 +196,7 @@ const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) 
       marginTop: token.margin
     },
 
-    'private-key-input': {
-
+    '.seed-phrase-input': {
       textarea: {
         resize: 'none',
         height: `${token.sizeLG * 6}px !important`

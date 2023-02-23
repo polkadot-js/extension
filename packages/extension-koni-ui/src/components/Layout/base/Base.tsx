@@ -10,6 +10,7 @@ import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import { Aperture, Database, Globe, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 
 export interface LayoutBaseProps extends Omit<
 SwScreenLayoutProps,
@@ -97,7 +98,7 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
   );
 
   const defaultOnBack = useCallback(() => {
-    navigate('/home');
+    navigate(DEFAULT_ROUTER_PATH);
   }, [navigate]);
 
   return (

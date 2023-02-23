@@ -6,9 +6,9 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, CrowdloanItem, CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix, _getSubstrateParaId, _getSubstrateRelayParent, _isChainEvmCompatible, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
+import { categoryAddresses, reformatAddress } from '@subwallet/extension-base/utils';
 import registry from '@subwallet/extension-koni-base/api/dotsama/typeRegistry';
 import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@subwallet/extension-koni-base/constants';
-import { categoryAddresses, reformatAddress } from '@subwallet/extension-base/utils';
 import axios from 'axios';
 
 import { ApiPromise } from '@polkadot/api';

@@ -3,10 +3,10 @@
 
 import { gql } from '@apollo/client';
 import { NetworkJson, TxHistoryItem, TxHistoryType } from '@subwallet/extension-base/background/KoniTypes';
+import { isAccountAll, reformatAddress } from '@subwallet/extension-base/utils';
 // eslint-disable-next-line camelcase
 import { DotSamaHistory, DotSamaHistory_transfers, DotSamaHistoryVariables } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaHistory';
 import { newApolloClient } from '@subwallet/extension-koni-base/api/subquery/subquery';
-import { isAccountAll, reformatAddress } from '@subwallet/extension-base/utils';
 
 export const HistoryApiMapSubsquid: Record<string, string> = {
   // polkadot: 'https://squid.subsquid.io/polkadot-explorer/graphql',

@@ -5,9 +5,9 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { parseNumberToDisplay, reformatAddress } from '@subwallet/extension-base/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
-import { parseNumberToDisplay, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { BN } from '@polkadot/util';
 

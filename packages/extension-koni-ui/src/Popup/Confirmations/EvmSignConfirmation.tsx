@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ConfirmationDefinitions, ConfirmationResult } from '@subwallet/extension-base/background/KoniTypes';
 import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -10,7 +11,6 @@ import { CheckCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {ConfirmationDefinitions, ConfirmationResult} from "@subwallet/extension-base/background/KoniTypes";
 
 type SupportConfirmationType = 'evmSendTransactionRequest' | 'evmSignatureRequest';
 interface Props extends ThemeProps {
@@ -19,17 +19,16 @@ interface Props extends ThemeProps {
 }
 
 async function handleConfirm (type: SupportConfirmationType, id: string, payload: string) {
-  return await completeConfirmation(type, {id, isApproved: true, payload} as ConfirmationResult<string>);
+  return await completeConfirmation(type, { id, isApproved: true, payload } as ConfirmationResult<string>);
 }
 
 async function handleCancel (type: SupportConfirmationType, { id }: ConfirmationDefinitions[typeof type][0]) {
-  return await completeConfirmation(type, {id, isApproved: false} as ConfirmationResult<string>);
+  return await completeConfirmation(type, { id, isApproved: false } as ConfirmationResult<string>);
 }
 
-function Component ({type, className, request }: Props) {
+function Component ({ className, request, type }: Props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-  const {} = request;
 
   // Handle buttons actions
   const onCancel = useCallback(() => {
@@ -37,14 +36,14 @@ function Component ({type, className, request }: Props) {
     handleCancel(type, request).finally(() => {
       setLoading(false);
     });
-  }, [request]);
+  }, [request, type]);
 
   const onConfirm = useCallback(() => {
     setLoading(true);
     handleConfirm(type, request.id, '').finally(() => {
       setLoading(false);
     });
-  }, [request]);
+  }, [request.id, type]);
 
   return (
     <>

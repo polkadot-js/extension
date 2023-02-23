@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {EvmSendTransactionRequest} from '@subwallet/extension-base/background/KoniTypes';
-import {SubmittableExtrinsic} from "@polkadot/api/promise/types";
-import EventEmitter from "eventemitter3";
+import { EvmSendTransactionRequest } from '@subwallet/extension-base/background/KoniTypes';
+import EventEmitter from 'eventemitter3';
+
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
 export enum KoniTransactionStatus {
   PENDING = 'PENDING',

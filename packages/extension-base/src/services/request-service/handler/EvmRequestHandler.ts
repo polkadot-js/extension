@@ -1,21 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Common from '@ethereumjs/common';
 import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
 import { Resolver } from '@subwallet/extension-base/background/types';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import keyring from '@subwallet/ui-keyring';
-import {Transaction, TxData} from 'ethereumjs-tx';
+import BN from 'bn.js';
+import { Transaction, TxData } from 'ethereumjs-tx';
+import { toBuffer } from 'ethereumjs-util';
 import { BehaviorSubject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
-import {logger as createLogger} from '@polkadot/util';
+import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
-import {toBuffer} from "ethereumjs-util";
-import Common from "@ethereumjs/common";
-import BN from "bn.js";
 
 export default class EvmRequestHandler {
   readonly #requestService: RequestService;
@@ -108,8 +108,9 @@ export default class EvmRequestHandler {
   private async signMessage (confirmation: ConfirmationDefinitions['evmSignatureRequest'][0]): Promise<string> {
     const { address, payload, type } = confirmation.payload;
     const pair = keyring.getPair(address);
+
     if (pair.isLocked) {
-      keyring.unlockPair(pair.address)
+      keyring.unlockPair(pair.address);
     }
 
     switch (type) {
@@ -125,9 +126,9 @@ export default class EvmRequestHandler {
     }
   }
 
-  configToTransaction(config: TransactionConfig): Transaction {
+  configToTransaction (config: TransactionConfig): Transaction {
     function formatField (input: string | number | undefined | BN): BN | number | string | undefined {
-      if (typeof input === "string") {
+      if (typeof input === 'string') {
         if (input.startsWith('0x')) {
           return input;
         } else {
@@ -149,9 +150,10 @@ export default class EvmRequestHandler {
       data: toBuffer(config.data)
     };
 
-    const common = Common.custom( {chainId: config.chainId})
+    const common = Common.custom({ chainId: config.chainId });
+
     // @ts-ignore
-    return new Transaction(txData, {common});
+    return new Transaction(txData, { common });
   }
 
   private async signTransaction (confirmation: ConfirmationDefinitions['evmSendTransactionRequest'][0]): Promise<string> {
@@ -167,9 +169,11 @@ export default class EvmRequestHandler {
     const tx = this.configToTransaction(params);
 
     await Promise.resolve();
+
     if (pair.isLocked) {
       keyring.unlockPair(pair.address);
     }
+
     return pair.evmSigner.signTransaction(tx);
   }
 

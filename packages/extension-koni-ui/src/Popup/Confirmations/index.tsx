@@ -1,10 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {AuthorizeRequest, MetadataRequest, SigningRequest} from '@subwallet/extension-base/background/types';
+import { ConfirmationDefinitions } from '@subwallet/extension-base/background/KoniTypes';
+import { AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import useConfirmationsInfo from '@subwallet/extension-koni-ui/hooks/screen/confirmation/useConfirmationInfo';
 import AuthorizeConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AuthorizeConfirmation';
+import EvmSignConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/EvmSignConfirmation';
 import MetadataConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/MetadataConfirmation';
+import SignConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/SignConfirmation';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -12,9 +15,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import ConfirmationHeader from './ConfirmationHeader';
-import SignConfirmation from "@subwallet/extension-koni-ui/Popup/Confirmations/SignConfirmation";
-import { ConfirmationDefinitions } from "@subwallet/extension-base/background/KoniTypes";
-import EvmSignConfirmation from "@subwallet/extension-koni-ui/Popup/Confirmations/EvmSignConfirmation";
 
 type Props = ThemeProps
 
@@ -60,9 +60,15 @@ const Component = function ({ className }: Props) {
     {confirmation?.type === 'signingRequest' &&
       <SignConfirmation request={confirmation.item as SigningRequest} />}
     {confirmation?.type === 'evmSendTransactionRequest' &&
-      <EvmSignConfirmation type={confirmation.type} request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]} />}
+      <EvmSignConfirmation
+        request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]}
+        type={confirmation.type}
+      />}
     {confirmation?.type === 'evmSignatureRequest' &&
-      <EvmSignConfirmation type={confirmation.type} request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]} />}
+      <EvmSignConfirmation
+        request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]}
+        type={confirmation.type}
+      />}
   </div>;
 };
 

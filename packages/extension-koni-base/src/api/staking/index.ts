@@ -6,10 +6,10 @@ import { StakingItem, StakingRewardItem } from '@subwallet/extension-base/backgr
 import { _PURE_EVM_CHAINS, _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
+import { categoryAddresses } from '@subwallet/extension-base/utils';
 import { getAmplitudeStakingOnChain, getAstarStakingOnChain, getParaStakingOnChain } from '@subwallet/extension-koni-base/api/staking/paraChain';
 import { getNominationPoolReward, getRelayPoolingOnchain, getRelayStakingOnChain } from '@subwallet/extension-koni-base/api/staking/relayChain';
 import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
-import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 interface PromiseMapping {
   api: _SubstrateApi,

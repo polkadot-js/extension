@@ -6,8 +6,8 @@ import { SubstrateNftTransaction } from '@subwallet/extension-base/background/Ko
 import { _PSP22_ABI, _PSP34_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseNumberToDisplay } from '@subwallet/extension-base/utils';
+import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';

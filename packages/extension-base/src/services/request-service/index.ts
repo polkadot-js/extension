@@ -13,7 +13,8 @@ import { AuthUrls, MetaRequest, SigningRequest } from '@subwallet/extension-base
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject, Subject } from 'rxjs';
-import {SignerPayloadJSON} from "@polkadot/types/types/extrinsic";
+
+import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 
 export default class RequestService {
   // Common

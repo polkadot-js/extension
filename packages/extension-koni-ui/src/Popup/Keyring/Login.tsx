@@ -14,6 +14,7 @@ import CN from 'classnames';
 import { Callbacks } from 'rc-field-form/lib/interface';
 import React, { ChangeEventHandler, useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
+import {useNavigate} from "react-router-dom";
 
 type Props = ThemeProps
 
@@ -27,7 +28,7 @@ interface LoginFormState {
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
-
+  const navigate = useNavigate();
   const formRef = useRef<FormInstance<LoginFormState>>(null);
   const [passwordValidateState, setPasswordValidateState] = useState<ValidateState | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       .then((data) => {
         if (data.status) {
           console.log('Success');
+          navigate('/');
         } else {
           setPasswordValidateState({
             status: 'error'

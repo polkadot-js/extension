@@ -6,10 +6,12 @@
   "short_name": "SubWallet",
   "manifest_version": 2,
   "permissions": [
+    "notifications",
     "storage",
     "activeTab",
     "webRequest"
   ],
+  "minimum_chrome_version": "66",
   "background": {
     "page": "background.html",
     "persistent": true

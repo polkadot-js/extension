@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import LogosMap from '../../../assets/logo';
+import useAutoNavigateToCreatePassword from "@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword";
 
 const FooterIcon = (
   <Icon
@@ -40,8 +41,9 @@ interface Props extends ThemeProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, description, instructionUrl, logoUrl, subTitle, title } = props;
+  useAutoNavigateToCreatePassword();
 
+  const { className, description, instructionUrl, logoUrl, subTitle, title } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
 

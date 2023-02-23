@@ -616,6 +616,10 @@ export interface CreateDeriveAccountInfo {
   suri: string;
 }
 
+export interface RequestDeriveCreateV3 {
+  address: string;
+}
+
 export interface RequestDeriveCreateMultiple {
   parentAddress: string;
   isAllowed: boolean;
@@ -1863,7 +1867,7 @@ export interface KoniRequestSignatures {
   'pri(derivation.validateV2)': [RequestDeriveValidateV2, ResponseDeriveValidateV2];
   'pri(derivation.getList)': [RequestGetDeriveAccounts, ResponseGetDeriveAccounts];
   'pri(derivation.create.multiple)': [RequestDeriveCreateMultiple, boolean];
-
+  'pri(derivation.createV3)': [RequestDeriveCreateV3, boolean];
 }
 
 export interface ApplicationMetadataType {

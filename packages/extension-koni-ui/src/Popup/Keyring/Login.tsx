@@ -4,6 +4,7 @@
 import LoginBg from '@subwallet/extension-koni-ui/assets/Login_BG.png';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,8 +14,8 @@ import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import CN from 'classnames';
 import { Callbacks } from 'rc-field-form/lib/interface';
 import React, { ChangeEventHandler, useCallback, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import {useNavigate} from "react-router-dom";
 
 type Props = ThemeProps
 
@@ -41,7 +42,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       .then((data) => {
         if (data.status) {
           console.log('Success');
-          navigate('/');
+          navigate(DEFAULT_ROUTER_PATH);
         } else {
           setPasswordValidateState({
             status: 'error'
@@ -56,7 +57,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [navigate]);
 
   const onPasswordChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     setPasswordValidateState(null);

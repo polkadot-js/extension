@@ -7,7 +7,7 @@ import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/rout
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
-import { forgetAccount } from '@subwallet/extension-koni-ui/messaging';
+import { deriveAccountV3, forgetAccount } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { copyToClipboard } from '@subwallet/extension-koni-ui/util/dom';
@@ -33,7 +33,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const account = useGetAccountByAddress(accountAddress);
   const deleteAccountAction = useDeleteAccount();
 
-  const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deriving, setDeriving] = useState(false);
 
   const canDerive = useMemo((): boolean => {
     if (account) {
@@ -55,7 +56,7 @@ const Component: React.FC<Props> = (props: Props) => {
     if (account?.address) {
       deleteAccountAction()
         .then(() => {
-          setLoading(true);
+          setDeleting(true);
           forgetAccount(account.address)
             .then()
             .catch((e: Error) => {
@@ -65,7 +66,7 @@ const Component: React.FC<Props> = (props: Props) => {
               });
             })
             .finally(() => {
-              setLoading(false);
+              setDeleting(false);
             });
         })
         .catch((e: Error) => {
@@ -78,6 +79,29 @@ const Component: React.FC<Props> = (props: Props) => {
         });
     }
   }, [account?.address, deleteAccountAction, notify]);
+
+  const onDerive = useCallback(() => {
+    if (!account?.address) {
+      return;
+    }
+
+    setDeriving(true);
+
+    setTimeout(() => {
+      deriveAccountV3({
+        address: account.address
+      }).then(() => {
+        navigate(DEFAULT_ROUTER_PATH);
+      }).catch((e: Error) => {
+        notify({
+          message: e.message,
+          type: 'error'
+        });
+      }).finally(() => {
+        setDeriving(false);
+      });
+    }, 500);
+  }, [account?.address, navigate, notify]);
 
   const onExport = useCallback(() => {
     if (account?.address) {
@@ -176,6 +200,8 @@ const Component: React.FC<Props> = (props: Props) => {
               weight='fill'
             />
           )}
+          loading={deriving}
+          onClick={onDerive}
           schema='secondary'
         >
           {t('Derive account')}
@@ -210,7 +236,7 @@ const Component: React.FC<Props> = (props: Props) => {
               weight='fill'
             />
           )}
-          loading={loading}
+          loading={deleting}
           onClick={onDelete}
           schema='secondary'
         >

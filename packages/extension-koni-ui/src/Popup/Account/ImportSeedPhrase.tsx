@@ -4,6 +4,7 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -17,7 +18,6 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 
 type Props = ThemeProps;
 

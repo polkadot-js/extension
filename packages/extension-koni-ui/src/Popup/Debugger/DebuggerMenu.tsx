@@ -24,8 +24,26 @@ const MENU_DATA: MenuItem[] = [
         name: 'welcome'
       },
       {
-        url: '/login',
-        name: 'Login'
+        url: '/keyring',
+        name: 'keyring',
+        subItems: [
+          {
+            url: '/keyring/login',
+            name: 'login'
+          },
+          {
+            url: '/keyring/create-password',
+            name: 'create password'
+          },
+          {
+            url: '/keyring/change-password',
+            name: 'change password'
+          },
+          {
+            url: '/keyring/migrate-password',
+            name: 'migrate password'
+          }
+        ]
       },
       {
         url: '/home',

@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Number, Tag } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
-import { SwNumberProps } from '@subwallet/react-ui/es/number';
+import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
 import { ArrowFatLinesDown, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';

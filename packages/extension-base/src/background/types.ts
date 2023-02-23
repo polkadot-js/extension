@@ -458,3 +458,8 @@ export interface ResponseJsonGetAccountInfo {
 export interface ResponseAuthorizeList {
   list: AuthUrls;
 }
+
+export interface Resolver<T> {
+  reject: (error: Error) => void;
+  resolve: (result: T) => void;
+}

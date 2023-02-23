@@ -23,8 +23,9 @@ import {
   UnlockingStakeInfo,
   ValidatorInfo
 } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
+import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 

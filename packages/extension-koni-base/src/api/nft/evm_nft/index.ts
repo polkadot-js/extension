@@ -6,9 +6,9 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { isUrl } from '@subwallet/extension-base/utils';
 import { getRandomIpfsGateway } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-koni-base/api/nft/nft';
-import { isUrl } from '@subwallet/extension-koni-base/utils';
 import fetch from 'cross-fetch';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';

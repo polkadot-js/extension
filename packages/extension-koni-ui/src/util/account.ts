@@ -3,8 +3,8 @@
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { isAccountAll } from '@subwallet/extension-base/utils';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import { isAccountAll } from '@subwallet/extension-koni-base/utils';
 import { MODE_CAN_SIGN, SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { AccountType } from '@subwallet/extension-koni-ui/types';
 import { getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
@@ -82,4 +82,8 @@ export const filterNotReadOnlyAccount = (accounts: AccountJson[]): AccountJson[]
 
 export const isNoAccount = (accounts: AccountJson[] | null): boolean => {
   return accounts ? !accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY).length : false;
+};
+
+export const searchAccountFunction = (item: AccountJson, searchText: string): boolean => {
+  return item.address.toLowerCase().includes(searchText.toLowerCase()) || (item.name || '').toLowerCase().includes(searchText.toLowerCase());
 };

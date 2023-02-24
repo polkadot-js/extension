@@ -4,6 +4,7 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -26,6 +27,8 @@ const FooterIcon = (
 );
 
 const Component: React.FC<Props> = ({ className }: Props) => {
+  useAutoNavigateToCreatePassword();
+
   const { t } = useTranslation();
   const timeOutRef = useRef<NodeJS.Timer>();
   const navigate = useNavigate();
@@ -57,7 +60,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         types: [EVM_ACCOUNT_TYPE]
       })
         .then(() => {
-          navigate('/home');
+          navigate('/');
         })
         .catch((error: Error): void => {
           setValidateState({

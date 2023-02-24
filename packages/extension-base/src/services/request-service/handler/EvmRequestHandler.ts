@@ -9,7 +9,7 @@ import RequestService from '@subwallet/extension-base/services/request-service';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import keyring from '@subwallet/ui-keyring';
 import BN from 'bn.js';
-import { Transaction, TxData } from 'ethereumjs-tx';
+import { Transaction } from 'ethereumjs-tx';
 import { toBuffer } from 'ethereumjs-util';
 import { BehaviorSubject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';

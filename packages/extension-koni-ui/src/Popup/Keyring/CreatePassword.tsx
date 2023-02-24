@@ -65,7 +65,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (!res.status) {
           setSubmitError(res.errors[0]);
         } else {
-          navigate('/home');
+          navigate(-2);
         }
       }).catch((e: Error) => {
         setSubmitError(e.message);

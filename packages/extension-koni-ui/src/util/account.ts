@@ -3,8 +3,8 @@
 
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { isAccountAll } from '@subwallet/extension-base/utils';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { MODE_CAN_SIGN, SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { AccountType } from '@subwallet/extension-koni-ui/types';
 import { getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';

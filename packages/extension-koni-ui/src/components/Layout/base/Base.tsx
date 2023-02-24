@@ -97,7 +97,7 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
   );
 
   const defaultOnBack = useCallback(() => {
-    navigate('/home');
+    navigate('/');
   }, [navigate]);
 
   return (

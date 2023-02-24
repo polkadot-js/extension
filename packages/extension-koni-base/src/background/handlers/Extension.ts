@@ -616,13 +616,35 @@ export default class KoniExtension {
     return true;
   }
 
+  private getNonReadonlyAccounts (): string[] {
+    const storedAccounts = accountsObservable.subject.getValue();
+    const transformedAccounts = transformAccounts(storedAccounts);
+
+    return transformedAccounts.filter((a) => !a.isReadOnly).map((a) => a.address);
+  }
+
+  private filterAccountsByAccountAuthType (accounts: string[], accountAuthType?: AccountAuthType): string[] {
+    if (accountAuthType === 'substrate') {
+      return accounts.filter((address) => !isEthereumAddress(address));
+    } else if (accountAuthType === 'evm') {
+      return accounts.filter((address) => isEthereumAddress(address));
+    } else {
+      return accounts;
+    }
+  }
+
   private _changeAuthorizationAll (connectValue: boolean, callBack?: (value: AuthUrls) => void) {
     this.#koniState.getAuthorize((value) => {
       assert(value, 'The source is not known');
 
+      const nonReadonlyAccounts = this.getNonReadonlyAccounts();
+
       Object.keys(value).forEach((url) => {
-        // eslint-disable-next-line no-return-assign
-        Object.keys(value[url].isAllowedMap).forEach((address) => value[url].isAllowedMap[address] = connectValue);
+        const targetAccounts = this.filterAccountsByAccountAuthType(nonReadonlyAccounts, value[url].accountAuthType);
+
+        targetAccounts.forEach((address) => {
+          value[url].isAllowedMap[address] = connectValue;
+        });
       });
       this.#koniState.setAuthorize(value, () => {
         callBack && callBack(value);
@@ -648,8 +670,12 @@ export default class KoniExtension {
     this.#koniState.getAuthorize((value) => {
       assert(value[url], 'The source is not known');
 
-      // eslint-disable-next-line no-return-assign
-      Object.keys(value[url].isAllowedMap).forEach((address) => value[url].isAllowedMap[address] = connectValue);
+      const nonReadonlyAccounts = this.getNonReadonlyAccounts();
+      const targetAccounts = this.filterAccountsByAccountAuthType(nonReadonlyAccounts, value[url].accountAuthType);
+
+      targetAccounts.forEach((address) => {
+        value[url].isAllowedMap[address] = connectValue;
+      });
       this.#koniState.setAuthorize(value, () => {
         callBack && callBack(value);
       });

@@ -65,7 +65,8 @@ const AccountItemWithName = styled(Component)<Props>(({ theme: { token } }: Prop
     },
 
     '.account-item-address-wrapper': {
-      color: token.colorTextDescription
+      color: token.colorTextDescription,
+      whiteSpace: 'nowrap'
     },
 
     '.ant-account-item-icon': {

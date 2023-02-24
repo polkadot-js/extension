@@ -398,7 +398,7 @@ export async function changeAuthorization (connectValue: boolean, url: string, c
   return sendMessage('pri(authorize.changeSite)', { url, connectValue }, callback);
 }
 
-export async function changeAuthorizationPerAcc (address: string, connectValue: boolean, url: string, callback: (data: AuthUrls) => void): Promise<boolean> {
+export async function changeAuthorizationPerAccount (address: string, connectValue: boolean, url: string, callback: (data: AuthUrls) => void): Promise<boolean> {
   return sendMessage('pri(authorize.changeSitePerAccount)', { address, url, connectValue }, callback);
 }
 

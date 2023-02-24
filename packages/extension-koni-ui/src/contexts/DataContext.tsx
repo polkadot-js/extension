@@ -177,7 +177,6 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   // Common
   _DataContext.addHandler({ ...subscribeAccountsData, name: 'subscribeAccountsData', relatedStores: ['accountState'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeKeyringState, name: 'subscribeCurrentAccount', relatedStores: ['accountState'], isStartImmediately: true });
-  _DataContext.addHandler({ ...subscribeAuthUrls, name: 'subscribeAuthUrls', relatedStores: ['settings'], isStartImmediately: true });
 
   _DataContext.addHandler({ ...subscribeChainStateMap, name: 'subscribeChainStateMap', relatedStores: ['chainStore'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeChainInfoMap, name: 'subscribeChainInfoMap', relatedStores: ['chainStore'], isStartImmediately: true });
@@ -187,6 +186,7 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
   // Settings
   _DataContext.addHandler({ ...subscribeUiSettings, name: 'subscribeUiSettings', relatedStores: ['settings'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeAuthUrls, name: 'subscribeAuthUrls', relatedStores: ['settings'], isStartImmediately: true });
 
   // Confirmations
   _DataContext.addHandler({ ...subscribeAuthorizeRequests, name: 'subscribeAuthorizeRequests', relatedStores: ['requestState'], isStartImmediately: true });

@@ -1138,9 +1138,7 @@ export interface ConfirmationsQueueItemOptions {
   networkKey?: string;
 }
 
-export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions{
-  id: string;
-  url: string;
+export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions, ConfirmationRequestBase{
   payload: T;
   payloadJson: string;
 }

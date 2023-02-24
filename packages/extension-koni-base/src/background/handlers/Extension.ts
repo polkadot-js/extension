@@ -14,7 +14,7 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _ChainState, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isChainEvmCompatible, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 import { AuthUrls, SigningRequest } from '@subwallet/extension-base/services/request-service/types';
-import { SWTransactionInput } from '@subwallet/extension-base/services/transaction-service/types';
+import { SWTransactionInput, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { SignerExternal, SignerType } from '@subwallet/extension-base/signers/types';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -1825,15 +1825,29 @@ export default class KoniExtension {
     }
 
     if (swTransactionInput.transaction) {
-      await this.#koniState.addTransaction(swTransactionInput);
+      const events = await this.#koniState.addTransaction(swTransactionInput);
+
+      return await new Promise<BasicTxResponse>((resolve, reject) => {
+        events.on('extrinsicHash', ({ extrinsicHash, id }: TransactionEventResponse) => {
+          txState.extrinsicHash = extrinsicHash;
+          resolve(txState);
+        });
+        events.on('error', ({ error }: TransactionEventResponse) => {
+          txState.errors?.push({
+            code: TransferErrorCode.TRANSFER_ERROR,
+            message: error?.message || 'Unknown error'
+          });
+          resolve(txState);
+        });
+      });
     } else {
       txState.errors?.push({
         code: TransferErrorCode.UNSUPPORTED,
         message: 'Unsupported transfer'
       });
-    }
 
-    return txState;
+      return txState;
+    }
   }
 
   private makeCrossChainTransfer (id: string, port: chrome.runtime.Port,

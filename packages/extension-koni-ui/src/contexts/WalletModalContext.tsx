@@ -20,9 +20,13 @@ type PredefinedModalName = typeof PREDEFINED_MODAL_NAMES[number];
 export const usePredefinedModal = () => {
   const [, setSearchParams] = useSearchParams();
 
-  return useCallback((name: PredefinedModalName) => {
+  return useCallback((name: PredefinedModalName | null) => {
     setSearchParams((prev) => {
-      prev.set('popup', name);
+      if (name) {
+        prev.set('popup', name);
+      } else {
+        prev.delete('popup');
+      }
 
       return prev;
     });

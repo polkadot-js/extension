@@ -48,26 +48,31 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const location = useLocation();
   const navigate = useNavigate();
   const openPModal = usePredefinedModal();
-  const hasConfirmations = useSelector((state: RootState) => state.requestState.hasConfirmations);
+  const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
   useEffect(() => {
     if (location.pathname === '/') {
       if (isNoAccount(accounts)) {
+        console.log(0);
         navigate('/welcome');
       } else if (!hasMasterPassword) {
+        console.log(1);
         navigate('/keyring/create-password');
       } else if (isLocked) {
+        console.log(2);
         navigate('/keyring/login');
       } else if (hasConfirmations) {
+        console.log(3);
         openPModal('confirmations');
       } else {
-        // Todo: check conditional an navigate to default page
         navigate('/home/tokens');
       }
+    } else if (hasInternalConfirmations) {
+      openPModal('confirmations');
     }
   },
-  [accounts, hasConfirmations, hasMasterPassword, isLocked, location.pathname, navigate, openPModal]
+  [accounts, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, location.pathname, navigate, openPModal]
   );
 
   return <>{children}</>;

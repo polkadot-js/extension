@@ -52,10 +52,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           icon={(
             <Icon
               className={'icon-submit'}
-              customSize={'28px'}
               iconColor='var(--icon-color)'
               phosphorIcon={CheckCircle}
-              size='sm'
               weight='fill'
             />
           )}

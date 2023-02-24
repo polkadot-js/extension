@@ -301,7 +301,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             block
             icon={
               <Icon
-                customSize={'28px'}
                 phosphorIcon={Lock}
                 type='phosphor'
                 weight={'fill'}

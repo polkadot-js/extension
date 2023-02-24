@@ -25,9 +25,7 @@ import LogosMap from '../../../assets/logo';
 
 const FooterIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={QrCode}
-    size='sm'
     weight='fill'
   />
 );

@@ -28,9 +28,7 @@ type Props = ThemeProps;
 
 const FooterIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={FileArrowDown}
-    size='sm'
     weight='fill'
   />
 );
@@ -130,6 +128,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   status: 'error',
                   message: e.message
                 });
+                setValidating(false);
               });
           }
         } catch (e) {
@@ -334,14 +333,6 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
       marginTop: token.margin
     },
 
-    '.private-key-input': {
-
-      textarea: {
-        resize: 'none',
-        height: `${token.sizeLG * 6}px !important`
-      }
-    },
-
     '.input-label': {
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
@@ -359,6 +350,10 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-web3-block': {
       display: 'flex !important'
+    },
+
+    '.ant-sw-modal-body': {
+      padding: `0 0 ${token.padding}px`
     }
   };
 });

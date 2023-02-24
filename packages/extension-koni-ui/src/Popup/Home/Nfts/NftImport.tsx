@@ -333,7 +333,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           block: true,
           disabled: isSubmitDisabled(),
           icon: <Icon
-            customSize={'28px'}
             phosphorIcon={CheckCircle}
             type='phosphor'
             weight={'fill'}

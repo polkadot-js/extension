@@ -24,9 +24,7 @@ type Props = ThemeProps;
 
 const FooterIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={CheckCircle}
-    size='sm'
     weight='fill'
   />
 );

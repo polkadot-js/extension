@@ -38,7 +38,6 @@ interface MigratePasswordFormState {
 
 const nextIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={ArrowCircleRight}
     weight='fill'
   />
@@ -46,7 +45,6 @@ const nextIcon = (
 
 const finishIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={CheckCircle}
     weight='fill'
   />
@@ -54,7 +52,6 @@ const finishIcon = (
 
 const removeIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={Trash}
   />
 );

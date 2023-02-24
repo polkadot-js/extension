@@ -68,9 +68,7 @@ const onExportJson = (jsonData: KeyringPair$Json, address: string): (() => void)
 
 const FinishIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={CheckCircle}
-    size='sm'
     weight='fill'
   />
 );

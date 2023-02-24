@@ -53,7 +53,6 @@ const Component: React.FC<Props> = (props: Props) => {
           block={true}
           icon={(
             <Icon
-              customSize={'28px'}
               phosphorIcon={ShieldPlus}
               weight='fill'
             />

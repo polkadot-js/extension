@@ -20,10 +20,6 @@ export const renderBasePasswordRules = (fieldName: string): Rule[] => {
 
 export const renderBaseConfirmPasswordRules = (passwordFieldName: string): Rule[] => {
   return [
-    {
-      message: 'Confirm password is required',
-      required: true
-    },
     ({ getFieldValue }) => ({
       validator: (_, value) => {
         const password = getFieldValue(passwordFieldName) as string;

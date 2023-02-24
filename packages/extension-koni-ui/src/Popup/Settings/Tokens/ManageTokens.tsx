@@ -229,7 +229,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Button
         block={true}
         icon={<Icon
-          customSize={'28px'}
           phosphorIcon={FadersHorizontal}
           type='phosphor'
           weight={'bold'}

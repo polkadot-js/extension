@@ -31,9 +31,7 @@ interface CreatePasswordFormState {
 
 const FooterIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={CheckCircle}
-    size='sm'
     weight='fill'
   />
 );
@@ -88,12 +86,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, []);
 
   const onChangePassword = useCallback(() => {
-    const confirmPassword = form.getFieldValue(FormFieldName.CONFIRM_PASSWORD) as string;
-
-    if (confirmPassword) {
-      // eslint-disable-next-line no-void
-      void form.validateFields([FormFieldName.CONFIRM_PASSWORD]);
-    }
+    form.setFields([{ name: FormFieldName.CONFIRM_PASSWORD, value: '', errors: [] }]);
   }, [form]);
 
   const openModal = useCallback(() => {

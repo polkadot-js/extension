@@ -18,9 +18,7 @@ import LogosMap from '../../assets/logo';
 
 const FooterIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={Swatches}
-    size='sm'
     weight='fill'
   />
 );

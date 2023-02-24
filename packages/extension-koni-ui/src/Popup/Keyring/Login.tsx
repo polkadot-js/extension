@@ -8,12 +8,11 @@ import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/rout
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
+import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/form';
 import { Button, Form, Input } from '@subwallet/react-ui';
-import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import CN from 'classnames';
-import { Callbacks } from 'rc-field-form/lib/interface';
-import React, { ChangeEventHandler, useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -30,38 +29,41 @@ interface LoginFormState {
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const formRef = useRef<FormInstance<LoginFormState>>(null);
-  const [passwordValidateState, setPasswordValidateState] = useState<ValidateState | null>(null);
+  const [form] = Form.useForm<LoginFormState>();
   const [loading, setLoading] = useState(false);
+  const [isDisable, setIsDisable] = useState(true);
 
-  const onSubmit: Callbacks<LoginFormState>['onFinish'] = useCallback((values: LoginFormState) => {
-    setLoading(true);
-    keyringUnlock({
-      password: values[FormFieldName.PASSWORD]
-    })
-      .then((data) => {
-        if (data.status) {
-          console.log('Success');
-          navigate(DEFAULT_ROUTER_PATH);
-        } else {
-          setPasswordValidateState({
-            status: 'error'
-          });
-        }
-      })
-      .catch((e: Error) => {
-        setPasswordValidateState({
-          status: 'error'
-        });
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [navigate]);
+  const onUpdate: FormCallbacks<LoginFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+    const { empty, error } = simpleCheckForm(changedFields, allFields);
 
-  const onPasswordChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
-    setPasswordValidateState(null);
+    setIsDisable(error || empty);
   }, []);
+
+  const onError = useCallback((error: string) => {
+    form.setFields([{ name: FormFieldName.PASSWORD, errors: [error] }]);
+  }, [form]);
+
+  const onSubmit: FormCallbacks<LoginFormState>['onFinish'] = useCallback((values: LoginFormState) => {
+    setLoading(true);
+    setTimeout(() => {
+      keyringUnlock({
+        password: values[FormFieldName.PASSWORD]
+      })
+        .then((data) => {
+          if (data.status) {
+            navigate(DEFAULT_ROUTER_PATH);
+          } else {
+            onError(data.errors[0]);
+          }
+        })
+        .catch((e: Error) => {
+          onError(e.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }, 500);
+  }, [navigate, onError]);
 
   return (
     <Layout.Base
@@ -78,24 +80,30 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           {t('Enter your password to unlock account')}
         </div>
         <Form
+          form={form}
           initialValues={{ [FormFieldName.PASSWORD]: '' }}
+          onFieldsChange={onUpdate}
           onFinish={onSubmit}
-          ref={formRef}
         >
           <Form.Item
+            className='form-item-no-error'
             name={FormFieldName.PASSWORD}
-            validateStatus={passwordValidateState?.status}
+            rules={[
+              {
+                message: 'Password is required',
+                required: true
+              }
+            ]}
           >
             <Input.Password
               containerClassName='password-input'
-              onChange={onPasswordChange}
               placeholder={t('Password')}
             />
           </Form.Item>
           <Form.Item>
             <Button
               block={true}
-              disabled={!!passwordValidateState}
+              disabled={isDisable}
               htmlType='submit'
               loading={loading}
             >
@@ -127,7 +135,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       backgroundPosition: 'top',
 
       '.logo-container': {
-        paddingTop: 106,
+        paddingTop: token.paddingXL * 3.25,
         color: token.colorTextBase
       },
 
@@ -144,6 +152,12 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
         color: token.colorTextLight3
+      },
+
+      '.form-item-no-error': {
+        '.ant-form-item-explain': {
+          display: 'none'
+        }
       },
 
       '.password-input': {

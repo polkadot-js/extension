@@ -24,9 +24,7 @@ type Props = ThemeProps
 
 const FooterIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={Eye}
-    size='sm'
     weight='fill'
   />
 );

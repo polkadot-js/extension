@@ -30,44 +30,6 @@ type EqBalanceV0 = {
   }
 }
 
-// deprecated
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// @ts-ignore
-// function subscribeWithDerive (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
-//   const freeMap: Record<string, BN> = {};
-//   const reservedMap: Record<string, BN> = {};
-//   const miscFrozenMap: Record<string, BN> = {};
-//   const feeFrozenMap: Record<string, BN> = {};
-//
-//   const unsubProms = addresses.map((address) => {
-//     return networkAPI.api.derive.balances?.all(address, (balance: DeriveBalancesAll) => {
-//       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-//       freeMap[address] = balance.freeBalance?.toBn() || new BN(0);
-//       reservedMap[address] = balance.reservedBalance?.toBn() || new BN(0);
-//       miscFrozenMap[address] = balance.frozenMisc?.toBn() || new BN(0);
-//       feeFrozenMap[address] = balance.frozenFee?.toBn() || new BN(0);
-//
-//       const balanceItem = {
-//         state: APIItemState.READY,
-//         free: sumBN(Object.values(freeMap)).toString(),
-//         reserved: sumBN(Object.values(reservedMap)).toString(),
-//         miscFrozen: sumBN(Object.values(miscFrozenMap)).toString(),
-//         feeFrozen: sumBN(Object.values(feeFrozenMap)).toString()
-//       } as BalanceItem;
-//
-//       callback(networkKey, balanceItem);
-//     });
-//   });
-//
-//   return () => {
-//     Promise.all(unsubProms).then((unsubs) => {
-//       unsubs.forEach((unsub) => {
-//         unsub && unsub();
-//       });
-//     }).catch(console.error);
-//   };
-// }
-
 // main subscription
 export function subscribeBalance (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem) => void) {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);

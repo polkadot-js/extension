@@ -34,7 +34,7 @@ function Component ({ actions, className = '', id, onCancel, title }: Props): Re
         {
           actions.map((item) => (
             <SettingItem
-              className={'__action-item'}
+              className={`__action-item ${item.key}`}
               key={item.key}
               leftItemIcon={(
                 <BackgroundIcon

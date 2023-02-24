@@ -28,6 +28,8 @@ const ManageTokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup
 const FungibleTokenImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/FungibleTokenImport'));
 const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
 const TokenDetailList = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailList'));
+const ManageWebsiteAccess = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/ManageWebsiteAccess'));
+const ManageWebsiteAccessDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/ManageWebsiteAccess/Detail'));
 
 const NewSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/NewSeedPhrase'));
 const ImportSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportSeedPhrase'));
@@ -190,10 +192,10 @@ export const router = createHashRouter([{
           element: <GeneralSetting />
         }, {
           path: 'dapp-access',
-          element: <Example />
+          element: <ManageWebsiteAccess />
         }, {
           path: 'dapp-access-edit',
-          element: <Example />
+          element: <ManageWebsiteAccessDetail />
         }, {
           path: 'network',
           element: <Example />

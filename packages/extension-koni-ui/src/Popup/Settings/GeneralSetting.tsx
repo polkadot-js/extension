@@ -204,6 +204,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   return (
     <PageWrapper className={`general-setting ${className}`}>
       <SwSubHeader
+        background={'transparent'}
         center
         onBack={onBack}
         paddingVertical

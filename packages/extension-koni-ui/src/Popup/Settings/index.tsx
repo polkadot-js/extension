@@ -94,7 +94,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: ShieldCheck,
           leftIconBgColor: token['green-6'],
           rightIcon: CaretRight,
-          title: 'Security settings'
+          title: 'Security settings',
+          onClick: () => {
+            // todo: make Security settings screen, them change this navigation
+            navigate('/settings/dapp-access');
+          }
         },
         {
           key: 'manage-address-book',

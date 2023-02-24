@@ -41,6 +41,17 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
 
     '.text-tertiary': {
       color: token.colorTextTertiary
+    },
+
+    '.common-text': {
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight
+    },
+
+    '.h5-text': {
+      fontWeight: token.headingFontWeight,
+      fontSize: token.fontSizeHeading5,
+      lineHeight: token.lineHeightHeading5
     }
   });
 });

@@ -20,10 +20,25 @@ export interface AccountItemBaseProps extends Omit<AccountItemProps, 'avatarIden
 }
 
 const Component: React.FC<AccountItemBaseProps> = (props: AccountItemBaseProps) => {
-  const { address, genesisHash, isSelected, onClick, showUnselectIcon, type: givenType } = props;
+  const { address, genesisHash, isSelected, onClick, rightItem, showUnselectIcon, type: givenType } = props;
   const { formatted, prefix } = useAccountRecoded(address || '', genesisHash, givenType);
   const avatarTheme = useAccountAvatarTheme(address || '');
   const { token } = useTheme() as Theme;
+
+  const _rightItem = rightItem || (
+    <>
+      {(showUnselectIcon || isSelected) && (
+        <div className={'ant-account-item-icon'}>
+          <Icon
+            iconColor={isSelected ? token.colorSuccess : token.colorTextLight4}
+            phosphorIcon={CheckCircle}
+            size='sm'
+            type='phosphor'
+            weight='fill'
+          />
+        </div>
+      )}
+    </>);
 
   return (
     <div className={props.className}>
@@ -33,20 +48,7 @@ const Component: React.FC<AccountItemBaseProps> = (props: AccountItemBaseProps) 
         avatarIdentPrefix={prefix || 42}
         avatarTheme={avatarTheme}
         onPressItem={onClick}
-        rightItem={<>
-          {(showUnselectIcon || isSelected) && (
-            <div className={'ant-account-item-icon'}>
-              <Icon
-                iconColor={isSelected ? token.colorSuccess : token.colorTextLight4}
-                phosphorIcon={CheckCircle}
-                size='sm'
-                type='phosphor'
-                weight='fill'
-              />
-            </div>
-          )}
-        </>
-        }
+        rightItem={_rightItem}
       />
     </div>
   );
@@ -54,7 +56,29 @@ const Component: React.FC<AccountItemBaseProps> = (props: AccountItemBaseProps) 
 
 const AccountItemBase = styled(Component)<AccountItemBaseProps>(({ theme: { token } }: AccountItemBaseProps) => {
   return {
+    '.ant-account-item': {
+      minHeight: 52,
+      paddingTop: 0,
+      paddingBottom: 0,
+      alignItems: 'center'
+    },
 
+    '.ant-web3-block-middle-item': {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      overflow: 'hidden'
+    },
+
+    '.account-item-content-wrapper': {
+      overflow: 'hidden',
+      paddingRight: token.sizeXS
+    },
+
+    '.account-item-name': {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
+    }
   };
 });
 

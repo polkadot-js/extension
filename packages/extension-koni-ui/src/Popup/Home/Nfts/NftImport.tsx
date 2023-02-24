@@ -24,7 +24,7 @@ import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import LogosMap from '../../../assets/logo';
+import ChainLogoMap from '../../../assets/logo';
 
 type Props = ThemeProps
 
@@ -234,7 +234,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Image
         height={token.fontSizeXL}
         shape={'circle'}
-        src={LogosMap[selectedChain]}
+        src={ChainLogoMap[selectedChain]}
         width={token.fontSizeXL}
       />
     );

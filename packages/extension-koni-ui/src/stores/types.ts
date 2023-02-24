@@ -98,6 +98,7 @@ export interface RequestState extends ConfirmationsQueue, BaseReduxStore {
   metadataRequest: Record<string, MetadataRequest>
   signingRequest: Record<string, SigningRequest>
   hasConfirmations: boolean
+  hasInternalConfirmations: boolean
   numberOfConfirmations: number
 }
 

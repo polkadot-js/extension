@@ -21,7 +21,7 @@ export interface AccountItemBaseProps extends Omit<AccountItemProps, 'avatarIden
 }
 
 const Component: React.FC<AccountItemBaseProps> = (props: AccountItemBaseProps) => {
-  const { address, genesisHash, isSelected, onClick, rightItem, preventPrefix, showUnselectIcon, type: givenType } = props;
+  const { address, genesisHash, isSelected, onClick, preventPrefix, rightItem, showUnselectIcon, type: givenType } = props;
   const { address: avatarAddress, prefix } = useAccountAvatarInfo(address ?? '', preventPrefix, genesisHash, givenType);
   const avatarTheme = useAccountAvatarTheme(address || '');
   const { token } = useTheme() as Theme;

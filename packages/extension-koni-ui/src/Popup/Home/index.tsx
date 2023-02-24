@@ -8,13 +8,13 @@ import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeCo
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { useChainsByAccountType } from '@subwallet/extension-koni-ui/hooks/screen/home/useChainsByAccountType';
 import useTokenGroup from '@subwallet/extension-koni-ui/hooks/screen/home/useTokenGroup';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
+import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router';
 import styled from 'styled-components';
-import {useSelector} from "react-redux";
-import {RootState} from "@subwallet/extension-koni-ui/stores";
 
 type Props = ThemeProps;
 
@@ -28,6 +28,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
 
   const balanceMap = useSelector((state: RootState) => state.balance.balanceMap);
+
   console.log('balanceMap', balanceMap);
 
   const onOpenCustomizeModal = useCallback(() => {

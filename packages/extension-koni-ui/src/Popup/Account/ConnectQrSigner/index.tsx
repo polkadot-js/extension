@@ -21,7 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import LogosMap from '../../../assets/logo';
+import ChainLogoMap from '../../../assets/logo';
 
 const FooterIcon = (
   <Icon
@@ -164,7 +164,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <Image
                 height={56}
                 shape='squircle'
-                src={LogosMap.subwallet}
+                src={ChainLogoMap.subwallet}
                 width={56}
               />
             )}

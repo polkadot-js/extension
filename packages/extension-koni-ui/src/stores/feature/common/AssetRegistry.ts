@@ -3,11 +3,13 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AssetRegistryStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState: AssetRegistryStore = {
   assetRegistry: {},
   multiChainAssetMap: {},
+  assetSettingMap: {},
   reduxStatus: ReduxStatus.INIT
 };
 
@@ -20,6 +22,7 @@ const assetRegistrySlice = createSlice({
 
       return {
         multiChainAssetMap: state.multiChainAssetMap,
+        assetSettingMap: state.assetSettingMap,
         assetRegistry: payload,
         reduxStatus: ReduxStatus.READY
       };
@@ -29,12 +32,23 @@ const assetRegistrySlice = createSlice({
 
       return {
         assetRegistry: state.assetRegistry,
+        assetSettingMap: state.assetSettingMap,
         multiChainAssetMap: payload,
+        reduxStatus: ReduxStatus.READY
+      };
+    },
+    updateAssetSettingMap (state, action: PayloadAction<Record<string, AssetSetting>>) {
+      const { payload } = action;
+
+      return {
+        assetRegistry: state.assetRegistry,
+        multiChainAssetMap: state.multiChainAssetMap,
+        assetSettingMap: payload,
         reduxStatus: ReduxStatus.READY
       };
     }
   }
 });
 
-export const { updateAssetRegistry, updateMultiChainAssetMap } = assetRegistrySlice.actions;
+export const { updateAssetRegistry, updateAssetSettingMap, updateMultiChainAssetMap } = assetRegistrySlice.actions;
 export default assetRegistrySlice.reducer;

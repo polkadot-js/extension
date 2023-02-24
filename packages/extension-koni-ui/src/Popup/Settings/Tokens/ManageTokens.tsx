@@ -6,9 +6,10 @@ import { _getAssetType, _isAssetFungibleToken, _isCustomAsset, _isNativeToken } 
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import TokenItemFooter from '@subwallet/extension-koni-ui/Popup/Settings/Tokens/component/TokenItemFooter';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Checkbox, Switch, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Checkbox, SwList } from '@subwallet/react-ui';
 import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
 import Icon from '@subwallet/react-ui/es/icon';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
@@ -16,7 +17,7 @@ import SwModal from '@subwallet/react-ui/es/sw-modal';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import TokenItem from '@subwallet/react-ui/es/web3-block/token-item';
 import CN from 'classnames';
-import { Coin, DotsThree, FadersHorizontal, Plus } from 'phosphor-react';
+import { Coin, FadersHorizontal, Plus } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -94,7 +95,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [selectedFilters, setSelectedFilters] = useState<FilterValue[]>([]);
   const [changeFilters, setChangeFilters] = useState<FilterValue[]>(selectedFilters);
 
-  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const { assetRegistry, assetSettingMap } = useSelector((state: RootState) => state.assetRegistry);
+
   const [fungibleTokenList, setFungibleTokenList] = useState<_ChainAsset[]>([]);
   const allFungibleTokens = useMemo(() => {
     return filterFungibleTokens(assetRegistry, selectedFilters);
@@ -133,27 +135,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const renderTokenRightItem = useCallback((tokenInfo: _ChainAsset) => {
-    const onClick = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>) => {
-      navigate(`/settings/tokens/detail/${tokenInfo.slug}`);
-    };
+    const assetSetting = assetSettingMap[tokenInfo.slug];
 
     return (
-      <div className={'manage_tokens__right_item_container'}>
-        <Switch />
-        <Button
-          icon={<Icon
-            phosphorIcon={DotsThree}
-            size='sm'
-            type='phosphor'
-          />}
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={onClick}
-          size={'xs'}
-          type={'ghost'}
-        />
-      </div>
+      <TokenItemFooter
+        assetSetting={assetSetting}
+        navigate={navigate}
+        tokenInfo={tokenInfo}
+      />
     );
-  }, [navigate]);
+  }, [assetSettingMap, navigate]);
 
   const renderTokenItem = useCallback((tokenInfo: _ChainAsset) => {
     return (
@@ -347,12 +338,6 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flex: 1
     },
 
-    '.manage_tokens__right_item_container': {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-
     '.manage_tokens__empty_container': {
       marginTop: 44,
       display: 'flex',
@@ -410,6 +395,12 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-web3-block': {
       cursor: 'default'
+    },
+
+    '.manage_tokens__right_item_container': {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
     }
   });
 });

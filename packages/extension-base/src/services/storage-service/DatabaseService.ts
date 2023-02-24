@@ -106,6 +106,11 @@ export default class DatabaseService {
     return this.stores.nftCollection.upsert(collection);
   }
 
+  async deleteNftCollection (chain: string, collectionId: string) {
+    await this.stores.nftCollection.removeCollection(chain, collectionId);
+    await this.stores.nft.deleteNftsByCollection(chain, collectionId);
+  }
+
   getAllNftCollection (chainHashes?: string[]) {
     return this.stores.nftCollection.getNftCollection(chainHashes);
   }
@@ -141,10 +146,6 @@ export default class DatabaseService {
 
   deleteNftsFromRemovedCollection (chainHash: string, address: string, collectionIds: string[]) {
     return this.stores.nft.deleteNftsFromRemovedCollection(chainHash, address, collectionIds);
-  }
-
-  deleteNftsByCustomToken (chainHash: string, tokenId: string) {
-    return this.stores.nft.deleteNftsByCollection(chainHash, tokenId);
   }
 
   removeNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {

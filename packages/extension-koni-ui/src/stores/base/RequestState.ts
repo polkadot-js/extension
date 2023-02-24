@@ -23,6 +23,7 @@ const initialState: RequestState = {
   // Summary Info
   reduxStatus: ReduxStatus.INIT,
   hasConfirmations: false,
+  hasInternalConfirmations: false,
   numberOfConfirmations: 0
 };
 
@@ -54,10 +55,17 @@ const readyMap = {
 };
 
 function computeStateSummary (state: RequestState) {
-  const numberOfConfirmations = CONFIRMATIONS_FIELDS.reduce((prev: number, field) => {
-    prev += Object.keys(state[field]).length;
+  let numberOfConfirmations = 0;
 
-    return prev;
+  state.hasInternalConfirmations = false;
+  CONFIRMATIONS_FIELDS.forEach((field) => {
+    const confirmationList = Object.values(state[field]);
+
+    numberOfConfirmations += confirmationList.length;
+
+    if (!state.hasInternalConfirmations && confirmationList.some((x: ConfirmationRequestBase) => x.isInternal)) {
+      state.hasInternalConfirmations = true;
+    }
   }, 0);
 
   state.numberOfConfirmations = numberOfConfirmations;

@@ -31,7 +31,7 @@ export const _BALANCE_CHAIN_GROUP = {
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
   bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry'],
-  statemine: ['statemine', 'astar', 'shiden', 'statemint'],
+  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver'], // moonbeam uses the same pallet for local assets but different for native tokens
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'] // perhaps there are some runtime updates
 };
 
@@ -200,7 +200,7 @@ export const _XCM_CHAIN_GROUP = {
   astarEvm: ['astarEvm', 'shidenEvm']
 };
 
-export const _XCM_CHAIN_USE_LIMITED_WIGHT = ['acala', 'karura', 'statemint'];
+export const _XCM_CHAIN_USE_LIMITED_WEIGHT = ['acala', 'karura', 'statemint'];
 
 export const _XCM_TYPE = {
   RP: `${_SubstrateChainType.RELAYCHAIN}-${_SubstrateChainType.PARACHAIN}`,
@@ -210,8 +210,10 @@ export const _XCM_TYPE = {
 
 export const _DEFAULT_ACTIVE_CHAINS = [
   ..._DEFAULT_CHAINS,
-  'ethereum',
   'acala',
   'moonbeam',
-  'alephZeroTest'
+  'alephTest',
+  'astar',
+  'astarEvm',
+  'bitcountry'
 ];

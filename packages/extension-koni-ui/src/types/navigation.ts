@@ -8,3 +8,11 @@ export type TokenDetailParam = {
   tokenGroup?: string,
   tokenSlug?: string,
 };
+
+// manage website access
+
+export type ManageWebsiteAccessDetailParam = {
+  siteName: string,
+  origin: string,
+  accountAuthType: string,
+};

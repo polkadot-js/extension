@@ -11,9 +11,10 @@ type Props = {
   children?: React.ReactNode;
   onClickFilterIcon?: () => void;
   onClickSearchIcon?: () => void;
+  showTabBar?: boolean
 };
 
-const Home = ({ children, onClickFilterIcon, onClickSearchIcon }: Props) => {
+const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showTabBar }: Props) => {
   const navigate = useNavigate();
 
   const headerIcons = useMemo<ButtonProps[]>(() => {
@@ -52,7 +53,7 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon }: Props) => {
       headerPaddingVertical={true}
       showHeader={true}
       showLeftButton={true}
-      showTabBar={true}
+      showTabBar={showTabBar ?? true}
     >
       {children}
     </Layout.Base>

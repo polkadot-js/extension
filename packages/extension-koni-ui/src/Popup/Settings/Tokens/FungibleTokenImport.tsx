@@ -25,7 +25,7 @@ import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import LogosMap from '../../../assets/logo';
+import ChainLogoMap from '../../../assets/logo';
 import Layout from '../../../components/Layout';
 
 type Props = ThemeProps
@@ -212,7 +212,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Image
         height={token.fontSizeXL}
         shape={'circle'}
-        src={LogosMap[selectedChain]}
+        src={ChainLogoMap[selectedChain]}
         width={token.fontSizeXL}
       />
     );
@@ -486,7 +486,7 @@ const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Prop
     },
 
     '.import_token__header_container': {
-      marginTop: 33,
+      marginTop: 30,
       display: 'flex',
       flexWrap: 'wrap',
       gap: token.padding,

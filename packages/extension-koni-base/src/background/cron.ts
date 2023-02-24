@@ -128,6 +128,7 @@ export class KoniCron {
 
     this.serviceSubscription = this.state.subscribeServiceInfo().subscribe({
       next: (serviceInfo) => {
+        this.logger.log('ServiceInfo updated, restarting...');
         const { address } = serviceInfo.currentAccountInfo;
 
         this.resetStakingReward();

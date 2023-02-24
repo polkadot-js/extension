@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TxHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, AssetSetting, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TxHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
@@ -161,6 +161,12 @@ export const updateMultiChainAssetRegistry = (data: Record<string, _MultiChainAs
 };
 
 export const subscribeMultiChainAssetMap = lazySubscribeMessage('pri(chainService.subscribeMultiChainAssetMap)', null, updateMultiChainAssetRegistry, updateMultiChainAssetRegistry);
+
+export const updateAssetSettingMap = (data: Record<string, AssetSetting>) => {
+  store.dispatch({ type: 'assetRegistry/updateAssetSettingMap', payload: data });
+};
+
+export const subscribeAssetSettings = lazySubscribeMessage('pri(assetSetting.getSubscription)', null, updateAssetSettingMap, updateAssetSettingMap);
 
 // Features
 export const updatePrice = (data: PriceJson) => {

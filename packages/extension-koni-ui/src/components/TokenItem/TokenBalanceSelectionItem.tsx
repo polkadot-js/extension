@@ -92,7 +92,7 @@ function Component (
             </>
           )
         }
-        subSymbol={chain}
+        subNetworkKey={chain}
         symbol={logoKey}
       />
     </div>

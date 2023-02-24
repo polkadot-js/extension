@@ -5,6 +5,7 @@ import { Layout } from '@subwallet/extension-koni-ui/components';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/QrScanner/ErrorNotice';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
@@ -20,7 +21,6 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import LogosMap from '../../../assets/logo';
-import useAutoNavigateToCreatePassword from "@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword";
 
 const FooterIcon = (
   <Icon

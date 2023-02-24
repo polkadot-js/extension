@@ -13,8 +13,8 @@ import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import CN from 'classnames';
 import { Callbacks } from 'rc-field-form/lib/interface';
 import React, { ChangeEventHandler, useCallback, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import {useNavigate} from "react-router-dom";
 
 type Props = ThemeProps
 
@@ -56,7 +56,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [navigate]);
 
   const onPasswordChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     setPasswordValidateState(null);

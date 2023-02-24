@@ -8,7 +8,7 @@ import { EvmChainHandler } from '@subwallet/extension-base/services/chain-servic
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainEnabled, _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Subject } from 'rxjs';
@@ -136,6 +136,7 @@ export class ChainService {
 
   public getNativeTokenInfo (chainSlug: string) {
     let nativeTokenInfo: _ChainAsset = {
+      logo: null,
       assetType: _AssetType.NATIVE,
       decimals: 0,
       metadata: null,
@@ -179,7 +180,9 @@ export class ChainService {
     const result: Record<string, _ChainInfo> = {};
 
     Object.values(this.getChainInfoMap()).forEach((chainInfo) => {
-      if (_isChainEnabled(this.getChainStateByKey(chainInfo.slug))) {
+      const chainState = this.getChainStateByKey(chainInfo.slug);
+
+      if (_isChainEnabled(chainState)) {
         result[chainInfo.slug] = chainInfo;
       }
     });
@@ -219,6 +222,18 @@ export class ChainService {
 
   public getAssetBySlug (slug: string) {
     return this.getAssetRegistry()[slug];
+  }
+
+  public getTokensByChain (chainSlug: string): Record<string, _ChainAsset> {
+    const result: Record<string, _ChainAsset> = {};
+
+    Object.values(this.getAssetRegistry()).forEach((chainAsset) => {
+      if (chainAsset.originChain === chainSlug && _isAssetFungibleToken(chainAsset)) {
+        result[chainAsset.slug] = chainAsset;
+      }
+    });
+
+    return result;
   }
 
   public getXcmEqualAssetByChain (destinationChainSlug: string, originTokenSlug: string) {
@@ -719,7 +734,8 @@ export class ChainService {
         priceId: null,
         slug: '',
         symbol: params.chainEditInfo.symbol,
-        hasValue: true
+        hasValue: true,
+        logo: null
       });
 
       chainStateMap[newSlug] = {

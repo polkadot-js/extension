@@ -115,7 +115,7 @@ export default class KoniState {
 
   private serviceInfoSubject = new Subject<ServiceInfo>();
 
-  private balanceMap: Record<string, BalanceItem> = this.generateDefaultBalanceMap();
+  private balanceMap: Record<string, BalanceItem> = {};
   private balanceSubject = new Subject<BalanceJson>();
 
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
@@ -274,16 +274,19 @@ export default class KoniState {
 
   public generateDefaultBalanceMap () {
     const balanceMap: Record<string, BalanceItem> = {};
+    const activeChains = this.chainService.getActiveChainInfoMap();
 
-    Object.values(ChainInfoMap).forEach((chainInfo) => {
-      const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
+    Object.values(activeChains).forEach((chainInfo) => {
+      const chainAssetMap = this.chainService.getTokensByChain(chainInfo.slug);
 
-      balanceMap[nativeTokenSlug] = {
-        tokenSlug: nativeTokenSlug,
-        free: '',
-        locked: '',
-        state: APIItemState.PENDING
-      };
+      Object.keys(chainAssetMap).forEach((assetSlug) => {
+        balanceMap[assetSlug] = {
+          tokenSlug: assetSlug,
+          free: '',
+          locked: '',
+          state: APIItemState.PENDING
+        };
+      });
     });
 
     return balanceMap;

@@ -200,7 +200,7 @@ export const _XCM_CHAIN_GROUP = {
   astarEvm: ['astarEvm', 'shidenEvm']
 };
 
-export const _XCM_CHAIN_USE_LIMITED_WIGHT = ['acala', 'karura', 'statemint'];
+export const _XCM_CHAIN_USE_LIMITED_WEIGHT = ['acala', 'karura', 'statemint'];
 
 export const _XCM_TYPE = {
   RP: `${_SubstrateChainType.RELAYCHAIN}-${_SubstrateChainType.PARACHAIN}`,
@@ -213,9 +213,7 @@ export const _DEFAULT_ACTIVE_CHAINS = [
   'acala',
   'moonbeam',
   'alephTest',
-  'westend',
-  'rococo',
-  'shibuya',
-  'shibuyaEvm',
+  'astar',
+  'astarEvm',
   'bitcountry'
 ];

@@ -140,7 +140,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <Layout.Base
-      footerButton={{
+      rightFooterButton={{
         children: t('Attach read-only account'),
         icon: FooterIcon,
         disabled: !reformatAddress || !!validateState.status,

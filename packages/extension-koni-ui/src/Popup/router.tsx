@@ -36,6 +36,7 @@ const RestoreJson = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/
 const AttachReadOnly = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AttachReadOnly'));
 const ConnectParitySigner = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectParitySigner'));
 const ConnectKeystone = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
+const ConnectLedger = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectLedger'));
 
 const Login = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/Login'));
 const CreatePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/CreatePassword'));
@@ -257,6 +258,10 @@ export const router = createHashRouter([{
         {
           path: 'connect-keystone',
           element: <ConnectKeystone />
+        },
+        {
+          path: 'connect-ledger',
+          element: <ConnectLedger />
         },
         {
           path: 'detail/:accountAddress',

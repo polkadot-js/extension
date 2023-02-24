@@ -294,7 +294,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <Layout.WithSubHeaderOnly
       className={CN(className)}
-      footerButton={{
+      rightFooterButton={{
         children: firstStep ? t('Confirm') : t('Finish'),
         icon: firstStep ? undefined : FinishIcon,
         disabled: isDisabled || !exportTypes.length,

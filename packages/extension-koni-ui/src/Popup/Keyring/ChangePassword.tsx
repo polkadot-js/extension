@@ -90,7 +90,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <Layout.Base
       className={CN(className)}
-      footerButton={{
+      rightFooterButton={{
         children: t('Save'),
         onClick: form.submit,
         loading: loading,

@@ -240,7 +240,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <Layout.WithSubHeaderOnly
       className={CN(className)}
-      footerButton={{
+      rightFooterButton={{
         ...footerButton,
         disabled: step === 'Migrate' && isDisabled && deleting,
         loading: step === 'Migrate' && loading

@@ -88,7 +88,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <Layout.Base
-      footerButton={{
+      rightFooterButton={{
         children: t('I have saved it somewhere safe'),
         icon: FooterIcon,
         onClick: _onCreate,

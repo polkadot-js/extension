@@ -210,7 +210,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <Layout.Base
-      footerButton={{
+      rightFooterButton={{
         children: t('Import from Json'),
         icon: FooterIcon,
         onClick: onSubmit,

@@ -72,7 +72,7 @@
     "@polkadot/util-crypto": "^10.2.1",
     "@polkadot/x-fetch": "^10.2.1",
     "@subwallet/chain-list": "^0.0.6",
-    "@subwallet/keyring": "^0.0.3",
+    "@subwallet/keyring": "^0.0.4",
     "@subwallet/ui-keyring": "^0.0.3",
     "babel-core": "^7.0.0-bridge.0",
     "rxjs": "^7.8.0",

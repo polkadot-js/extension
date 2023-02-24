@@ -559,6 +559,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   keystone: require('./199.Keystone.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ledger: require('./200.Ledger.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

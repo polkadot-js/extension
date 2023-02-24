@@ -351,7 +351,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['nft'])}
     >
       <Layout.Base
-        footerButton={{
+        rightFooterButton={{
           block: true,
           disabled: isSubmitDisabled(),
           icon: <Icon

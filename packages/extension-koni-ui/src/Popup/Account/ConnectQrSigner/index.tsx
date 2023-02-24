@@ -135,7 +135,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <Layout.Base
-      footerButton={{
+      rightFooterButton={{
         children: loading ? t('Creating') : t('Scan the QR code'),
         icon: FooterIcon,
         onClick: openCamera,

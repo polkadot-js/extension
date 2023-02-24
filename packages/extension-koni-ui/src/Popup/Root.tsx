@@ -52,8 +52,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
   useEffect(() => {
-    console.debug(isNoAccount(accounts), hasMasterPassword, location.pathname);
-
     if (location.pathname === '/') {
       if (isNoAccount(accounts)) {
         navigate('/welcome');

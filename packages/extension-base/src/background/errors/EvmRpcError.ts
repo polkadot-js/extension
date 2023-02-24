@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EvmProviderRpcErrorInterface, EvmRpcErrorHelperMap } from '@subwallet/extension-base/background/KoniTypes';
-import { EVM_PROVIDER_RPC_ERRORS_MAP } from '@subwallet/extension-koni-base/constants';
+import { EVM_PROVIDER_RPC_ERRORS_MAP } from '@subwallet/extension-base/constants/ethereum';
 
 export class EvmRpcError extends Error implements EvmProviderRpcErrorInterface {
   code: number;

@@ -89,20 +89,26 @@ function getTokenGroup (assetRegistryMap: AssetRegistryStore['assetRegistry'], f
 export default function useTokenGroup (filteredChains?: string[]): TokenGroupHookType {
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const assetSettingMap = useSelector((state: RootState) => state.assetRegistry.assetSettingMap);
+  const chainStateMap = useSelector((state: RootState) => state.chainStore.chainStateMap);
 
+  // only get fungible tokens of active chains which has visibility = 0
   const filteredAssetRegistryMap = useMemo(() => {
     const filteredAssetRegistryMap: Record<string, _ChainAsset> = {};
 
     Object.values(assetRegistryMap).forEach((chainAsset) => {
       const assetSetting = assetSettingMap[chainAsset.slug];
 
-      if (assetSetting && assetSetting.visible && _isAssetFungibleToken(chainAsset)) {
+      const isAssetVisible = assetSetting && assetSetting.visible;
+      const isAssetFungible = _isAssetFungibleToken(chainAsset);
+      const isAssetActive = chainStateMap[chainAsset.originChain].active;
+
+      if (isAssetActive && isAssetFungible && isAssetVisible) {
         filteredAssetRegistryMap[chainAsset.slug] = chainAsset;
       }
     });
 
     return filteredAssetRegistryMap;
-  }, [assetRegistryMap, assetSettingMap]);
+  }, [assetRegistryMap, assetSettingMap, chainStateMap]);
 
   return useMemo<TokenGroupHookType>(() => {
     return getTokenGroup(filteredAssetRegistryMap, filteredChains);

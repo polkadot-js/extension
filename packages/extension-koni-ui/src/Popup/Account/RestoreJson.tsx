@@ -69,10 +69,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
     uploadFile.originFileObj?.arrayBuffer()
       .then((bytes) => {
-      // setFileError(false);
-      // setIsPasswordError(false);
-      // setPassword('');
-      // setAccountsInfo(() => []);
         let json: KeyringPair$Json | KeyringPairs$Json | undefined;
 
         try {
@@ -83,6 +79,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
             return;
           } else {
+            setAccountsInfo([]);
             setPassword('');
             setJsonFile(json);
           }
@@ -94,13 +91,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             message: error.message
           });
           setValidating(false);
+          setRequirePassword(false);
 
           return;
         }
 
         try {
-          setRequirePassword(true);
-          setPassword('');
           setSubmitValidateState({});
 
           if (isKeyringPairs$Json(json)) {
@@ -112,18 +108,20 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               } as ResponseJsonGetAccountInfo;
             });
 
+            setRequirePassword(true);
             setAccountsInfo(accounts);
-
             setFileValidateState({});
             setValidating(false);
           } else {
             jsonGetAccountInfo(json)
               .then((accountInfo) => {
+                setRequirePassword(true);
                 setAccountsInfo([accountInfo]);
                 setFileValidateState({});
                 setValidating(false);
               })
               .catch((e: Error) => {
+                setRequirePassword(false);
                 setFileValidateState({
                   status: 'error',
                   message: e.message
@@ -137,6 +135,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             message: t<string>('Invalid Json file')
           });
           setValidating(false);
+          setRequirePassword(false);
         }
       })
       .catch((e: Error) => {
@@ -213,7 +212,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         children: t('Import from Json'),
         icon: FooterIcon,
         onClick: onSubmit,
-        disabled: !!fileValidateState.status || !!fileValidateState.status,
+        disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
         loading: validating || loading
       }}
       showBackButton={true}
@@ -242,7 +241,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             validateStatus={fileValidateState.status}
           >
             <Upload.SingleFileDragger
-              accept={'application/JSON'}
+              accept={'application/json'}
               disabled={validating}
               hint={t('Please drag an drop the .json file you exported from Polkadot.js')}
               onChange={onChange}
@@ -267,7 +266,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               </Form.Item>
             )
           }
-
           {
             requirePassword && (
               <Form.Item

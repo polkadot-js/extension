@@ -237,12 +237,12 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <Layout.WithSubHeaderOnly
       className={CN(className)}
+      onBack={onBack}
       rightFooterButton={{
         ...footerButton,
         disabled: step === 'Migrate' && isDisabled && deleting,
         loading: step === 'Migrate' && loading
       }}
-      onBack={onBack}
       showBackButton={step !== 'Introduction'}
       subHeaderIcons={[
         {

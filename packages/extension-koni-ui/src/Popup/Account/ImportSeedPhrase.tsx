@@ -132,7 +132,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         children: validating ? t('Validating') : t('Import account'),
         icon: FooterIcon,
         onClick: onSubmit,
-        disabled: !seedPhrase || !!validateState.status,
+        disabled: !seedPhrase || !!validateState.status || !keyTypes.length,
         loading: validating || submitting
       }}
       showBackButton={true}

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import LoginBg from '@subwallet/extension-koni-ui/assets/Login_BG.png';
+import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
@@ -69,6 +69,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     <Layout.Base
       className={CN(className)}
     >
+      <div className='bg-gradient' />
+      <div className='bg-image' />
       <div className='body-container'>
         <div className='logo-container'>
           <Logo3D />
@@ -125,14 +127,33 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
   const { token } = theme;
 
   return {
-    background: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+    position: 'relative',
+
+    '.bg-gradient': {
+      backgroundImage: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+      height: '100%',
+      width: '100%',
+      position: 'absolute',
+      left: 0,
+      top: 0
+    },
+
+    '.bg-image': {
+      backgroundImage: `url(${LoginBg})`,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'top',
+      backgroundSize: 'contain',
+      height: '100%',
+      position: 'absolute',
+      width: '100%',
+      left: 0,
+      top: 0,
+      opacity: 0.1
+    },
 
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
-      backgroundImage: `url(${LoginBg})`,
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'top',
 
       '.logo-container': {
         paddingTop: token.paddingXL * 3.25,

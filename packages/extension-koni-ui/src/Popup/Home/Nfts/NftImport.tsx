@@ -329,19 +329,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['nft'])}
     >
       <Layout.Base
+        onBack={onBack}
         rightFooterButton={{
           block: true,
           disabled: isSubmitDisabled(),
-          icon: <Icon
-            phosphorIcon={CheckCircle}
-            type='phosphor'
-            weight={'fill'}
-          />,
+          icon: (
+            <Icon
+              phosphorIcon={CheckCircle}
+              type='phosphor'
+              weight={'fill'}
+            />
+          ),
           loading: loading,
           onClick: onSubmit,
           children: 'Save'
         }}
-        onBack={onBack}
         showBackButton={true}
         showSubHeader={true}
         subHeaderBackground={'transparent'}

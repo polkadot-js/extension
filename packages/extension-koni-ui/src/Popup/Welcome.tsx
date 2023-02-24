@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import LoginBg from '@subwallet/extension-koni-ui/assets/Login_BG.png';
+import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
@@ -62,6 +62,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     <Layout.Base
       className={CN(className)}
     >
+      <div className='bg-gradient' />
+      <div className='bg-image' />
       <div className='body-container'>
         <div className='logo-container'>
           <Logo3D />
@@ -99,7 +101,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             ))
           }
         </div>
-
       </div>
     </Layout.Base>
   );
@@ -107,14 +108,33 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
 const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    background: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+    position: 'relative',
+
+    '.bg-gradient': {
+      backgroundImage: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+      height: '100%',
+      width: '100%',
+      position: 'absolute',
+      left: 0,
+      top: 0
+    },
+
+    '.bg-image': {
+      backgroundImage: `url(${LoginBg})`,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'top',
+      backgroundSize: 'contain',
+      height: '100%',
+      position: 'absolute',
+      width: '100%',
+      left: 0,
+      top: 0,
+      opacity: 0.1
+    },
 
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
-      backgroundImage: `url(${LoginBg})`,
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'top',
 
       '.logo-container': {
         marginTop: token.sizeLG * 3,

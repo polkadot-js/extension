@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountWithChildren } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 
 import React from 'react';
 import styled from 'styled-components';
@@ -11,6 +11,7 @@ import Account from './Account';
 interface Props extends AccountWithChildren {
   className?: string;
   parentName?: string;
+  childrenAccounts?: AccountJson[];
   withCheckbox?: boolean;
   withMenu?: boolean;
   showHidden?: boolean;
@@ -37,16 +38,6 @@ function AccountsTree({
           withMenu={withMenu}
         />
       )}
-      {account?.children?.map((child, index) => (
-        <AccountsTree
-          key={`${index}:${child.address}`}
-          {...child}
-          parentName={account.name}
-          showHidden={showHidden}
-          withCheckbox={withCheckbox}
-          withMenu={withMenu}
-        />
-      ))}
     </div>
   );
 }

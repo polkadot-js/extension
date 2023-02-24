@@ -17,7 +17,7 @@ interface Props {
   onClick?: () => void;
 }
 
-function Checkbox ({ checked, className, indeterminate, label, onChange, onClick }: Props): React.ReactElement<Props> {
+function Checkbox({ checked, className, indeterminate, label, onChange, onClick }: Props): React.ReactElement<Props> {
   const checkboxRef = React.useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -31,10 +31,7 @@ function Checkbox ({ checked, className, indeterminate, label, onChange, onClick
     [onChange]
   );
 
-  const _onClick = useCallback(
-    () => onClick && onClick(),
-    [onClick]
-  );
+  const _onClick = useCallback(() => onClick && onClick(), [onClick]);
 
   return (
     <div className={className}>
@@ -53,19 +50,25 @@ function Checkbox ({ checked, className, indeterminate, label, onChange, onClick
   );
 }
 
-export default styled(Checkbox)(({ theme }: ThemeProps) => `
+export default styled(Checkbox)(
+  ({ theme }: ThemeProps) => `
   margin: ${theme.boxMargin};
+  box-sizing: border-box;
 
   label {
     display: block;
     position: relative;
     cursor: pointer;
     user-select: none;
-    padding-left: 24px;
+    padding-left: 26px;
     padding-top: 1px;
     color: ${theme.subTextColor};
     font-size: ${theme.fontSize};
     line-height: ${theme.lineHeight};
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 145%;
+    letter-spacing: 0.07em;
 
     & input {
       position: absolute;
@@ -77,14 +80,14 @@ export default styled(Checkbox)(({ theme }: ThemeProps) => `
 
     & span {
       position: absolute;
-      top: 4px;
+      top: 2px;
       left: 0;
       height: 16px;
       width: 16px;
-      border-radius: ${theme.borderRadius};
-      background-color: ${theme.readonlyInputBackground};
-      border: 1px solid ${theme.inputBorderColor};
-      border: 1px solid ${theme.inputBorderColor};
+      border-radius: 4px;
+      background-color: ${theme.inputBackground};
+      border: 1px solid ${theme.inputBackground};
+      outline: 1px solid ${theme.boxBorderColor};
       &:after {
         content: '';
         display: none;
@@ -95,20 +98,24 @@ export default styled(Checkbox)(({ theme }: ThemeProps) => `
         top: 2px;
         mask: url(${Checkmark});
         mask-size: cover;
-        background: ${theme.primaryColor};
+        background: ${theme.boxBackground};
       }
-    }
-
-    &:hover input ~ span {
-      background-color: ${theme.inputBackground};
     }
 
     input:checked ~ span:after {
       display: block;
+      background: ${theme.boxBackground};
+    }
+
+    input:checked ~ span {
+      background: ${theme.primaryColor};
+      border: 1px solid black;
+      border-radius: 4px;
     }
 
     input:indeterminate ~ span {
       background: ${theme.primaryColor}
     }
   }
-`);
+`
+);

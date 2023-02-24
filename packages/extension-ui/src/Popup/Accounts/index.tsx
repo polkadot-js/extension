@@ -9,9 +9,10 @@ import styled from 'styled-components';
 import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
 
-import { AccountContext, AddButton } from '../../components';
+import { AccountContext, AddButton, ButtonArea, ScrollWrapper, VerticalSpace } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
+import { createGroupedAccountData } from '../../util/createGroupedAccountData';
 import AccountsTree from './AccountsTree';
 import AddAccount from './AddAccount';
 
@@ -25,6 +26,8 @@ function Accounts({ className }: Props): React.ReactElement {
   const [filteredAccount, setFilteredAccount] = useState<AccountWithChildren[]>([]);
   const { hierarchy } = useContext(AccountContext);
   const networkMap = useMemo(() => getNetworkMap(), []);
+  const defaultNetwork = 'any';
+  const { filterChildren, getParentName, groupedParents } = createGroupedAccountData(filteredAccount);
 
   useEffect(() => {
     setFilteredAccount(
@@ -55,31 +58,32 @@ function Accounts({ className }: Props): React.ReactElement {
             withHelp
             withSettings
           />
-          <div className={className}>
-            {filteredAccount.map(
-              (json, index): React.ReactNode => (
-                <AccountsTree
-                  {...json}
-                  key={`${index}:${json.address}`}
-                />
-              )
-            )}
-            {/* TODO: Out of scope */}
-            {/* <div className='bordered mt-20'>
-              <MenuCard
-                description='Send, Stake and more...'
-                extra={
-                  <img
-                    // eslint-disable-next-line react/jsx-no-bind
-                    onClick={_handleMenuCardClick}
-                    src={ExternalLinkIcon}
-                  />
-                }
-                title='Go to Web Wallet'
-              />
-            </div> */}
+          <ScrollWrapper>
+            <div className={className}>
+              {Object.entries(groupedParents).map(([networkName, details]) => (
+                <div key={networkName}>
+                  {networkName !== defaultNetwork && <span className='network-heading'>{networkName}</span>}
+                  {details.map((json) => (
+                    <AccountsTree
+                      {...json}
+                      key={json.address}
+                    />
+                  ))}
+                  {filterChildren(networkName, defaultNetwork, details).map((json) => (
+                    <AccountsTree
+                      {...json}
+                      key={json.address}
+                      parentName={getParentName(json)}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </ScrollWrapper>
+          <VerticalSpace />
+          <ButtonArea>
             <AddButton />
-          </div>
+          </ButtonArea>
         </>
       )}
     </>
@@ -89,23 +93,27 @@ function Accounts({ className }: Props): React.ReactElement {
 export default styled(Accounts)(
   ({ theme }: Props) => `
   height: calc(100vh - 2px);
-  overflow-y: scroll;
-  overflow-x: hidden;
-  margin-top: -25px;
-  padding-top: 25px;
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
     display: none;
   }
 
-  .bordered {
-    border: 1px solid ${theme.warningColor};
-    padding: 20px 10px;
-  }
-
-  .mt-20{
-    margin-top: 20px;
+  .network-heading {
+    display: flex;
+    align-items: center;
+    font-family: ${theme.secondaryFontFamily};
+    font-style: normal;
+    font-weight: 300;
+    font-size: 11px;
+    line-height: 120%;
+    text-align: right;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: ${theme.subTextColor};
+    padding: 8px 0 8px 8px;
+    margin: 24px 0 16px 0;
+    border-bottom: 1px solid ${theme.boxBorderColor};
   }
 `
 );

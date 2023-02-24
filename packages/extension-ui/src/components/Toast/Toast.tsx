@@ -78,6 +78,11 @@ export default styled(Toast)(
     letter-spacing: 0.07em;
   }
 
+  .snackbar-icon {
+    width: 20px;
+    height: 20px;
+  }
+
   && {
     border-radius: 4px;
     background: ${

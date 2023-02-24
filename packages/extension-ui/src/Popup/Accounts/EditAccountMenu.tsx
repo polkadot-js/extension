@@ -67,10 +67,11 @@ function EditAccountMenu({
       showAccount(address, isHidden || false)
         .then(() => {
           setIsHidden(!isHidden);
+          show(t<string>('Visibility for apps changed successfully'), 'success');
         })
         .catch(console.error);
     }
-  }, [address, isHidden]);
+  }, [address, isHidden, show, t]);
 
   const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
 
@@ -113,8 +114,9 @@ function EditAccountMenu({
           />
         </CopyToClipboard>
         <EditMenuCard
-          description={chain?.genesisHash ? 'testnet' : 'Mainnet'}
+          description={chain?.name.replace(' Relay Chain', '') || t<string>('Any chain')}
           extra='chevron'
+          onClick={goTo(`/account/edit-network/${address}`)}
           position='middle'
           title={t<string>('Network')}
         />

@@ -172,7 +172,7 @@ function Account({
 export default styled(Account)(
   ({ theme }: ThemeProps) => `
   .address {
-    margin-bottom: 8px;
+    margin-bottom: 16px;
   }
 
   .editName {

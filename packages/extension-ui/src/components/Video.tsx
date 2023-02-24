@@ -37,6 +37,7 @@ export default React.memo(
   styled(Video)<VideoProps>(
     () => `
     padding: 0;
+    width:100%;
   `
   )
 );

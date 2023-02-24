@@ -39,6 +39,7 @@ import AddAccountMenu from './Accounts/AddAccountMenu';
 import CreateAccountMenu from './Accounts/CreateAccountMenu';
 import EditAccountMenu from './Accounts/EditAccountMenu';
 import EditName from './Accounts/EditName';
+import EditNetwork from './Accounts/EditNetwork';
 import AccountManagement from './AuthManagement/AccountManagement';
 import RestoreJson from './Restore/RestoreJson';
 import About from './About';
@@ -197,6 +198,9 @@ export default function Popup(): React.ReactElement {
                             </Route>
                             <Route path='/account/edit-name/:address'>
                               {wrapWithErrorBoundary(<EditName />, 'edit-name')}
+                            </Route>
+                            <Route path='/account/edit-network/:address'>
+                              {wrapWithErrorBoundary(<EditNetwork />, 'edit-network')}
                             </Route>
                             <Route path='/account/forget/:address'>
                               {wrapWithErrorBoundary(<Forget />, 'forget-address')}

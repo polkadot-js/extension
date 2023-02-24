@@ -28,11 +28,9 @@ const AddButton: React.FC<Props> = function ({ className }: Props) {
 
 export default styled(AddButton)(
   ({ theme }: ThemeProps) => `
-  position: absolute;
-  bottom:16px;
+
   display: flex;
-  left:0px;
-  right:0px;
+
   margin-left:auto;
   margin-right:auto;
   flex-direction: row;

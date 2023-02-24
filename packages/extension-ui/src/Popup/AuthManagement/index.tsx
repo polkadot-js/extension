@@ -44,9 +44,9 @@ function AuthManagement({ className }: Props): React.ReactElement<Props> {
   return (
     <>
       <Header
-        withBackArrow
         smallMargin
         text={t<string>('Manage Website Access')}
+        withBackArrow
       />
       <div className={className}>
         <InputFilter

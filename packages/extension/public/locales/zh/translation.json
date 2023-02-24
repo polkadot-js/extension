@@ -162,6 +162,11 @@
   "How to restore your account?": "",
   "What is the difference between an account and a sub-account?": "",
   "Main account password": "",
+  "Creating a sub-account successfully!": "",
+  "Account network": "",
+  "Visibility for apps changed successfully": "",
+  "Change": "",
+  "Account network changed successfully!": "",
   "Trusted Apps": "",
   "About Aleph Zero Signer": "",
   "Help & Support": "",
@@ -170,5 +175,7 @@
   "Visit Website": "",
   "Aleph Zero Signer": "",
   "Version": "",
-  "version-number": "1.0.0.0" 
+  "version-number": "1.0.0.0",
+  "Show test networks": "",
+  "Any chain": ""
 }

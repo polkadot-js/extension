@@ -43,9 +43,9 @@ function AccountManagement({ className }: Props): React.ReactElement<Props> {
   return (
     <>
       <Header
-        withBackArrow
         smallMargin={true}
         text={t<string>('Accounts connected to {{url}}', { replace: { url } })}
+        withBackArrow
       />
       <div className={className}>
         <AccountSelection

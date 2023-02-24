@@ -76,7 +76,6 @@ describe('AccountNamePasswordCreation', () => {
   });
 
   it('next step button has the correct label', () => {
-    console.log(wrapper.children().debug());
     expect(wrapper.find(Button).last().text()).toBe('Create');
   });
 

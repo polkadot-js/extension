@@ -22,10 +22,7 @@ configure({ adapter: new Adapter() });
 
 const oneRequest = [{ id: '1', request: { origin: '???' }, url: 'http://polkadot.org' }];
 
-const twoRequests = [
-  ...oneRequest,
-  { id: '2', request: { origin: 'abc' }, url: 'http://polkadot.pl' }
-];
+const twoRequests = [...oneRequest, { id: '2', request: { origin: 'abc' }, url: 'http://polkadot.pl' }];
 
 const oneAccount = [
   { address: '5FjgD3Ns2UpnHJPVeRViMhCttuemaRXEqaD8V5z4vxcsUByA', name: 'A', type: 'sr25519' }
@@ -38,24 +35,34 @@ const twoAccountsOnehidden = [
 
 const threeAccountsOnehidden = [
   ...twoAccountsOnehidden,
-  { address: '5D2TPhGEy2FhznvzaNYW9AkuMBbg3cyRemnPsBvBY4ZhkZXA', name: 'BB', parentAddress: twoAccountsOnehidden[1].address, type: 'sr25519' }
+  {
+    address: '5D2TPhGEy2FhznvzaNYW9AkuMBbg3cyRemnPsBvBY4ZhkZXA',
+    name: 'BB',
+    parentAddress: twoAccountsOnehidden[1].address,
+    type: 'sr25519'
+  }
 ] as AccountJson[];
 
 describe('Authorize', () => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  const mountAuthorize = (authorizeRequests: AuthorizeRequest[] = [], accounts: AccountJson[] = oneAccount): ReactWrapper => mount(
-    <AuthorizeReqContext.Provider value={authorizeRequests}>
-      <AccountContext.Provider
-        value={{
-          accounts,
-          hierarchy: accounts ? buildHierarchy(accounts) : []
-        }}
-      >
-        <ThemeProvider theme={themes.dark}>
-          <Authorize />
-        </ThemeProvider>
-      </AccountContext.Provider>
-    </AuthorizeReqContext.Provider>);
+  const mountAuthorize = (
+    authorizeRequests: AuthorizeRequest[] = [],
+    accounts: AccountJson[] = oneAccount
+  ): ReactWrapper =>
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    mount(
+      <AuthorizeReqContext.Provider value={authorizeRequests}>
+        <AccountContext.Provider
+          value={{
+            accounts,
+            hierarchy: accounts ? buildHierarchy(accounts) : []
+          }}
+        >
+          <ThemeProvider theme={themes.dark}>
+            <Authorize />
+          </ThemeProvider>
+        </AccountContext.Provider>
+      </AuthorizeReqContext.Provider>
+    );
 
   it('render component', () => {
     const wrapper = mountAuthorize();
@@ -68,7 +75,9 @@ describe('Authorize', () => {
     const wrapper = mountAuthorize(oneRequest);
 
     expect(wrapper.find(Request).length).toBe(1);
-    expect(wrapper.find(Request).find('.warning-message').text()).toBe('An application, self-identifying as ??? is requesting access from http://polkadot.org');
+    expect(wrapper.find(Request).find('.warning-message').text()).toBe(
+      'An application, self-identifying as ??? is requesting access from http://polkadot.org'
+    );
   });
 
   it('render more request but just one accept button', () => {
@@ -76,7 +85,9 @@ describe('Authorize', () => {
 
     expect(wrapper.find(Request).length).toBe(2);
     expect(wrapper.find(Warning).length).toBe(2);
-    expect(wrapper.find(Request).at(1).find('.warning-message').text()).toBe('An application, self-identifying as abc is requesting access from http://polkadot.pl');
+    expect(wrapper.find(Request).at(1).find('.warning-message').text()).toBe(
+      'An application, self-identifying as abc is requesting access from http://polkadot.pl'
+    );
     expect(wrapper.find('button.acceptButton').length).toBe(1);
   });
 
@@ -84,7 +95,9 @@ describe('Authorize', () => {
     const wrapper = mountAuthorize(oneRequest, []);
 
     expect(wrapper.find(Request).length).toBe(1);
-    expect(wrapper.find(Request).find('.warning-message').text()).toBe("You do not have any account. Please create an account and refresh the application's page.");
+    expect(wrapper.find(Request).find('.warning-message').text()).toBe(
+      "You do not have any account. Please create an account and refresh the application's page."
+    );
     expect(wrapper.find('button.acceptButton').length).toBe(1);
   });
 
@@ -107,6 +120,6 @@ describe('Authorize', () => {
     const wrapper = mountAuthorize(oneRequest, threeAccountsOnehidden);
 
     expect(wrapper.find(Request).length).toBe(1);
-    expect(wrapper.find(Account).length).toBe(2);
+    expect(wrapper.find(Account).length).toBe(1);
   });
 });

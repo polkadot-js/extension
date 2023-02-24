@@ -397,7 +397,9 @@ const LoadLogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   '198.Parity.png': require('./198.Parity.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  '199.Keystone.png': require('./199.Keystone.png')
+  '199.Keystone.png': require('./199.Keystone.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  '200.Ledger.png': require('./200.Ledger.png')
 };
 
 export const ChainLogoMap: Record<string, string> = {
@@ -680,6 +682,7 @@ export const TokenLogoMap: Record<string, string> = {
   subwallet: LoadLogosMap['197.SubWallet.png'],
   parity: LoadLogosMap['198.Parity.png'],
   keystone: LoadLogosMap['199.Keystone.png'],
+  ledger: LoadLogosMap['200.Ledger.png'],
   default: LoadLogosMap['73.Default.png'],
   wnd: LoadLogosMap['107.Westend.png'],
   roc: LoadLogosMap['95.Rococo.png'],

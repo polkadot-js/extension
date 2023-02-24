@@ -61,20 +61,20 @@ function Component (
         <Button
           icon={<Icon phosphorIcon={ArrowFatLinesDown} />}
           shape='squircle'
-          size={isShrink ? 'xs' : undefined}
+          size={isShrink ? 'xs' : 'md'}
         />
         <div className={'__button-space'} />
         <Button
           icon={<Icon phosphorIcon={PaperPlaneTilt} />}
           onClick={openSendFund}
           shape='squircle'
-          size={isShrink ? 'xs' : undefined}
+          size={isShrink ? 'xs' : 'md'}
         />
         <div className={'__button-space'} />
         <Button
           icon={<Icon phosphorIcon={ShoppingCartSimple} />}
           shape='squircle'
-          size={isShrink ? 'xs' : undefined}
+          size={isShrink ? 'xs' : 'md'}
         />
       </div>
     </div>

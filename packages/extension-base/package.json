@@ -81,7 +81,7 @@
     "@subwallet/extension-inject": "^0.8.1",
     "@subwallet/extension-koni-base": "^0.8.1",
     "@subwallet/keyring": "^0.0.3",
-    "@subwallet/react-ui": "^5.1.2-b11",
+    "@subwallet/react-ui": "5.1.2-b11",
     "@subwallet/ui-keyring": "^0.0.3",
     "@unique-nft/types": "^0.6.0-4",
     "@zeitgeistpm/type-defs": "^0.10.0",

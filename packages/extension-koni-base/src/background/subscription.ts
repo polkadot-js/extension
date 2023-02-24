@@ -88,6 +88,7 @@ export class KoniSubscription {
     !this.serviceSubscription &&
       (this.serviceSubscription = this.state.subscribeServiceInfo().subscribe({
         next: (serviceInfo) => {
+          this.logger.log('ServiceInfo updated, restarting...');
           const { address } = serviceInfo.currentAccountInfo;
 
           this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);

@@ -485,7 +485,7 @@ const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Prop
     },
 
     '.import_token__header_container': {
-      marginTop: 33,
+      marginTop: 30,
       display: 'flex',
       flexWrap: 'wrap',
       gap: token.padding,

@@ -26,6 +26,7 @@ const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'))
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
 const ManageTokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/ManageTokens'));
 const FungibleTokenImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/FungibleTokenImport'));
+const TokenDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/TokenDetail'));
 const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
 const TokenDetailList = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailList'));
 
@@ -213,8 +214,8 @@ export const router = createHashRouter([{
               element: <FungibleTokenImport />
             },
             {
-              path: 'detail/:tokenSlug',
-              element: <Example />
+              path: 'detail',
+              element: <TokenDetail />
             }
           ]
         }, {

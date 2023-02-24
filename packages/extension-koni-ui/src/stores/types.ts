@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { AddNetworkRequestExternal, BalanceItem, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, PriceJson, StakingItem, StakingRewardItem, TxHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AssetSetting, BalanceItem, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, PriceJson, StakingItem, StakingRewardItem, TxHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
@@ -110,6 +110,7 @@ export interface UpdateConfirmationsQueueRequest extends BaseReduxStore {
 export interface AssetRegistryStore extends BaseReduxStore {
   assetRegistry: Record<string, _ChainAsset>;
   multiChainAssetMap: Record<string, _MultiChainAsset>;
+  assetSettingMap: Record<string, AssetSetting>;
 }
 
 export interface ChainStore extends BaseReduxStore {

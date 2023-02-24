@@ -79,10 +79,12 @@ export class EvmNftApi extends BaseNftApi {
     } as NftItem;
   }
 
-  private async getItemsByCollection (smartContract: string, collectionName: string | undefined, nftParams: HandleNftParams) {
+  private async getItemsByCollection (tokenInfo: _ChainAsset, collectionName: string | undefined, nftParams: HandleNftParams) {
     if (!this.evmApi) {
       return;
     }
+
+    const smartContract = _getContractAddressOfToken(tokenInfo);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
     const contract = new this.evmApi.api.eth.Contract(_ERC721_ABI, smartContract);
@@ -143,6 +145,7 @@ export class EvmNftApi extends BaseNftApi {
               parsedItem.id = nftId;
               parsedItem.owner = address;
               parsedItem.type = _AssetType.ERC721;
+              parsedItem.originAsset = tokenInfo.slug;
 
               if (parsedItem) {
                 if (parsedItem.image) {
@@ -169,7 +172,8 @@ export class EvmNftApi extends BaseNftApi {
         collectionId: smartContract,
         collectionName,
         image: collectionImage || undefined,
-        chain: this.chain
+        chain: this.chain,
+        originAsset: tokenInfo.slug
       } as NftCollection;
 
       nftParams.updateCollection(this.chain, nftCollection);
@@ -183,7 +187,7 @@ export class EvmNftApi extends BaseNftApi {
     }
 
     await Promise.all(this.evmContracts.map(async (tokenInfo) => {
-      return await this.getItemsByCollection(_getContractAddressOfToken(tokenInfo), tokenInfo.name, params);
+      return await this.getItemsByCollection(tokenInfo, tokenInfo.name, params);
     }));
   }
 

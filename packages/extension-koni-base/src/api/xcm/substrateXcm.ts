@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { _XCM_CHAIN_GROUP, _XCM_CHAIN_USE_LIMITED_WIGHT } from '@subwallet/extension-base/services/chain-service/constants';
+import { _XCM_CHAIN_GROUP, _XCM_CHAIN_USE_LIMITED_WEIGHT } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay } from '@subwallet/extension-base/utils';
@@ -53,7 +53,7 @@ export async function substrateEstimateCrossChainFee (
   const { decimals, symbol } = _getChainNativeTokenBasicInfo(originChainInfo);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const tokenIdentity = _getXcmAssetMultilocation(originTokenInfo);
-  const weightParam = _XCM_CHAIN_USE_LIMITED_WIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
+  const weightParam = _XCM_CHAIN_USE_LIMITED_WEIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
 
   try {
     if (_isSubstrateParaChain(originChainInfo)) {

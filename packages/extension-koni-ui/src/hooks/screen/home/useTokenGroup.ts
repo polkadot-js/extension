@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _getAssetSymbol, _getMultiChainAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { _getAssetSymbol, _getMultiChainAsset, _isAssetFungibleToken, _isNativeTokenBySlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AssetRegistryStore } from '@subwallet/extension-koni-ui/stores/types';
 import { TokenGroupHookType } from '@subwallet/extension-koni-ui/types/hook';
@@ -10,8 +11,8 @@ import { useSelector } from 'react-redux';
 
 function sortTokenSlugs (tokenSlugs: string[]) {
   tokenSlugs.sort((a, b) => {
-    const hasNativeA = a.includes('NATIVE');
-    const hasNativeB = b.includes('NATIVE');
+    const hasNativeA = _isNativeTokenBySlug(a);
+    const hasNativeB = _isNativeTokenBySlug(b);
 
     if (hasNativeA && !hasNativeB) {
       return -1; // if only element a has "NATIVE", a comes before b
@@ -87,8 +88,29 @@ function getTokenGroup (assetRegistryMap: AssetRegistryStore['assetRegistry'], f
 
 export default function useTokenGroup (filteredChains?: string[]): TokenGroupHookType {
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const assetSettingMap = useSelector((state: RootState) => state.assetRegistry.assetSettingMap);
+  const chainStateMap = useSelector((state: RootState) => state.chainStore.chainStateMap);
+
+  // only get fungible tokens of active chains which has visibility = 0
+  const filteredAssetRegistryMap = useMemo(() => {
+    const filteredAssetRegistryMap: Record<string, _ChainAsset> = {};
+
+    Object.values(assetRegistryMap).forEach((chainAsset) => {
+      const assetSetting = assetSettingMap[chainAsset.slug];
+
+      const isAssetVisible = assetSetting && assetSetting.visible;
+      const isAssetFungible = _isAssetFungibleToken(chainAsset);
+      const isAssetActive = chainStateMap[chainAsset.originChain].active;
+
+      if (isAssetActive && isAssetFungible && isAssetVisible) {
+        filteredAssetRegistryMap[chainAsset.slug] = chainAsset;
+      }
+    });
+
+    return filteredAssetRegistryMap;
+  }, [assetRegistryMap, assetSettingMap, chainStateMap]);
 
   return useMemo<TokenGroupHookType>(() => {
-    return getTokenGroup(assetRegistryMap, filteredChains);
-  }, [assetRegistryMap, filteredChains]);
+    return getTokenGroup(filteredAssetRegistryMap, filteredChains);
+  }, [filteredAssetRegistryMap, filteredChains]);
 }

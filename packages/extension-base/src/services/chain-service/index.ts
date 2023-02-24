@@ -7,8 +7,8 @@ import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomTokenRequest, _ValidateCustomTokenResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainEnabled, _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Subject } from 'rxjs';
@@ -136,6 +136,7 @@ export class ChainService {
 
   public getNativeTokenInfo (chainSlug: string) {
     let nativeTokenInfo: _ChainAsset = {
+      logo: null,
       assetType: _AssetType.NATIVE,
       decimals: 0,
       metadata: null,
@@ -179,8 +180,24 @@ export class ChainService {
     const result: Record<string, _ChainInfo> = {};
 
     Object.values(this.getChainInfoMap()).forEach((chainInfo) => {
-      if (_isChainEnabled(this.getChainStateByKey(chainInfo.slug))) {
+      const chainState = this.getChainStateByKey(chainInfo.slug);
+
+      if (_isChainEnabled(chainState)) {
         result[chainInfo.slug] = chainInfo;
+      }
+    });
+
+    return result;
+  }
+
+  public getActiveChainSlugs () {
+    const result: string[] = [];
+
+    Object.values(this.getChainInfoMap()).forEach((chainInfo) => {
+      const chainState = this.getChainStateByKey(chainInfo.slug);
+
+      if (_isChainEnabled(chainState)) {
+        result.push(chainInfo.slug);
       }
     });
 
@@ -205,6 +222,18 @@ export class ChainService {
 
   public getAssetBySlug (slug: string) {
     return this.getAssetRegistry()[slug];
+  }
+
+  public getTokensByChain (chainSlug: string): Record<string, _ChainAsset> {
+    const result: Record<string, _ChainAsset> = {};
+
+    Object.values(this.getAssetRegistry()).forEach((chainAsset) => {
+      if (chainAsset.originChain === chainSlug && _isAssetFungibleToken(chainAsset)) {
+        result[chainAsset.slug] = chainAsset;
+      }
+    });
+
+    return result;
   }
 
   public getXcmEqualAssetByChain (destinationChainSlug: string, originTokenSlug: string) {
@@ -351,7 +380,9 @@ export class ChainService {
 
   public upsertCustomToken (token: _ChainAsset) {
     if (token.slug.length === 0) { // new token
-      token.slug = this.generateSlugForSmartContractAsset(token.originChain, token.assetType, token.symbol, token.metadata?.contractAddress as string);
+      const defaultSlug = this.generateSlugForSmartContractAsset(token.originChain, token.assetType, token.symbol, token.metadata?.contractAddress as string);
+
+      token.slug = `${_CUSTOM_PREFIX}${defaultSlug}`;
     }
 
     const assetRegistry = this.getAssetRegistry();
@@ -363,14 +394,14 @@ export class ChainService {
     this.assetRegistrySubject.next(assetRegistry);
   }
 
-  public deleteCustomTokens (targetTokens: string[]) {
+  public deleteCustomAssets (targetAssets: string[]) {
     const assetRegistry = this.getAssetRegistry();
 
-    targetTokens.forEach((targetToken) => {
+    targetAssets.forEach((targetToken) => {
       delete assetRegistry[targetToken];
     });
 
-    this.dbService.removeFromAssetStore(targetTokens).catch((e) => this.logger.error(e));
+    this.dbService.removeFromAssetStore(targetAssets).catch((e) => this.logger.error(e));
 
     this.assetRegistrySubject.next(assetRegistry);
   }
@@ -703,7 +734,8 @@ export class ChainService {
         priceId: null,
         slug: '',
         symbol: params.chainEditInfo.symbol,
-        hasValue: true
+        hasValue: true,
+        logo: null
       });
 
       chainStateMap[newSlug] = {
@@ -924,7 +956,7 @@ export class ChainService {
     };
   }
 
-  public async validateCustomToken (data: _ValidateCustomTokenRequest): Promise<_ValidateCustomTokenResponse> {
+  public async validateCustomToken (data: _ValidateCustomAssetRequest): Promise<_ValidateCustomAssetResponse> {
     const assetRegistry = this.getSmartContractTokens();
     let isExist = false;
 

@@ -4,6 +4,7 @@
 import { ResponseJsonGetAccountInfo } from '@subwallet/extension-base/background/types';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
+import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -36,6 +37,8 @@ const FooterIcon = (
 const modalId = 'account-json-modal';
 
 const Component: React.FC<Props> = ({ className }: Props) => {
+  useAutoNavigateToCreatePassword();
+
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -167,7 +170,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           withMasterPassword: true
         }))
         .then(() => {
-          navigate('/home');
+          navigate('/');
         })
         .catch((e: Error) => {
           setSubmitValidateState({

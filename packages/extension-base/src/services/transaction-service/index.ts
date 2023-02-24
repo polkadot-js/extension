@@ -7,7 +7,6 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
-import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { getTransactionId } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { KoniTransactionStatus, SendTransactionEvents, SWTransaction, SWTransactionInput, TransactionEmitter, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import EventEmitter from 'eventemitter3';
@@ -21,7 +20,6 @@ import { Logger } from '@polkadot/util/types';
 
 export default class TransactionService {
   private readonly chainService: ChainService;
-  private readonly dbService: DatabaseService;
   private readonly requestService: RequestService;
   private readonly logger: Logger;
 
@@ -31,9 +29,8 @@ export default class TransactionService {
     return this.transactionSubject.getValue();
   }
 
-  constructor (chainService: ChainService, dbService: DatabaseService, requestService: RequestService) {
+  constructor (chainService: ChainService, requestService: RequestService) {
     this.chainService = chainService;
-    this.dbService = dbService;
     this.requestService = requestService;
 
     this.logger = createLogger('TransactionService');

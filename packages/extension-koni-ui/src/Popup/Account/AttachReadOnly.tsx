@@ -4,6 +4,7 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/QrScanner/ErrorNotice';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
@@ -30,6 +31,8 @@ const FooterIcon = (
 );
 
 const Component: React.FC<Props> = ({ className }: Props) => {
+  useAutoNavigateToCreatePassword();
+
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -117,7 +120,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             });
           } else {
             setValidateState({});
-            navigate('/home');
+            navigate('/');
           }
         })
         .catch((error: Error) => {

@@ -73,6 +73,7 @@ export const WalletModalContext = ({ children }: Props) => {
     <DebugTrigger>
       <Button
         block
+        size='md'
         icon={DebugIcon}
         onClick={openDebugger}
         shape='round'

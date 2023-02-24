@@ -86,6 +86,7 @@ export type AccNetworkContext = {
 export interface ConfirmationRequestBase {
   id: string;
   url: string;
+  isInternal?: boolean;
 }
 
 export interface AuthorizeRequest extends ConfirmationRequestBase{

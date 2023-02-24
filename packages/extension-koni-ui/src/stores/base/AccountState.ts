@@ -53,7 +53,7 @@ const accountStateSlice = createSlice({
       return {
         ...state,
         currentAccount: payload,
-        isAllAccount: isAccountAll(payload.address),
+        isAllAccount: isAccountAll(payload?.address),
         reduxStatus: ReduxStatus.READY
       };
     }

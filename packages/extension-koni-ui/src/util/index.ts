@@ -4,9 +4,9 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@subwallet/extension-base/background/types';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
-import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
+import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
 import { Recoded } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util/accountAll';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
@@ -89,7 +89,7 @@ export const NFT_HEADER_HEIGHT = 202;
 export const NFT_PER_ROW = 3;
 
 export function getLogoByNetworkKey (networkKey: string, defaultLogo = 'default'): string {
-  return LogosMap[networkKey] || LogosMap[defaultLogo] || LogosMap.default;
+  return ChainLogoMap[networkKey] || ChainLogoMap[defaultLogo] || ChainLogoMap.default;
 }
 
 export const subscanByNetworkKey: Record<string, string> = {

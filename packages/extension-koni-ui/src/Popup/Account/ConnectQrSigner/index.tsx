@@ -5,6 +5,7 @@ import { Layout } from '@subwallet/extension-koni-ui/components';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/QrScanner/ErrorNotice';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
@@ -19,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import LogosMap from '../../../assets/logo';
+import ChainLogoMap from '../../../assets/logo';
 
 const FooterIcon = (
   <Icon
@@ -39,8 +40,9 @@ interface Props extends ThemeProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, description, instructionUrl, logoUrl, subTitle, title } = props;
+  useAutoNavigateToCreatePassword();
 
+  const { className, description, instructionUrl, logoUrl, subTitle, title } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -88,7 +90,7 @@ const Component: React.FC<Props> = (props: Props) => {
           } else {
             setVisible(false);
             setValidateState({});
-            navigate('/home');
+            navigate('/');
           }
         })
         .catch((error: Error) => {
@@ -163,7 +165,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <Image
                 height={56}
                 shape='squircle'
-                src={LogosMap.subwallet}
+                src={ChainLogoMap.subwallet}
                 width={56}
               />
             )}

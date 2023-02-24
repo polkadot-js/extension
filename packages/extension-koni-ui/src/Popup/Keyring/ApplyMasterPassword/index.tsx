@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import MigrateDone from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword/Done';
@@ -150,7 +150,7 @@ const Component: React.FC<Props> = (props: Props) => {
         return {
           children: t('Finish'),
           onClick: () => {
-            navigate('/home');
+            navigate('/');
           },
           icon: finishIcon
         };

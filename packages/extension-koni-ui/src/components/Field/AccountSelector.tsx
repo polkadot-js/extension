@@ -85,7 +85,7 @@ function Component ({ className = '', id, label, onSelectItem, selectedItem }: P
       placeholder={t('Select account')}
       prefix={
         <Avatar
-          size={24}
+          size={20}
           theme={selectedAddress ? isEthereumAddress(selectedAddress) ? 'ethereum' : 'polkadot' : undefined}
           value={selectedAddress}
         />

@@ -7,6 +7,8 @@ import CN from 'classnames';
 import React from 'react';
 import styled, { useTheme } from 'styled-components';
 
+import { isAddress } from '@polkadot/util-crypto';
+
 type Props = ThemeProps & Omit<SwAvatarProps, 'value'> & {
   value?: string | null,
 };
@@ -21,7 +23,7 @@ function Component ({ className = '', size = 40, value = null, ...restProps }: P
       style={{ width: size, height: size }}
     >
       {
-        !value && (
+        (!value || !isAddress(value)) && (
           <img
             alt='logo'
             height={size * 0.7}

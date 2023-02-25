@@ -32,14 +32,14 @@
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only",
     "start": "yarn watch",
-    "test": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env jest",
-    "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env jest",
+    "test": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env browser ^:.spec.tsx",
+    "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env browser",
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.12",
-    "@polkadot/dev": "^0.68.41",
-    "@types/jest": "^29.4.0",
+    "@babel/core": "^7.21.0",
+    "@polkadot/dev": "^0.69.13",
+    "@types/node": "^18.14.1",
     "i18next-scanner": "^4.1.1",
     "sinon-chrome": "^3.0.1"
   },

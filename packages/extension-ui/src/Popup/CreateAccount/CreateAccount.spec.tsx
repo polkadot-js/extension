@@ -1,6 +1,9 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="@polkadot/dev/node/test/node" />
+
 import '@polkadot/extension-mocks/chrome';
 
 import type { ReactWrapper } from 'enzyme';
@@ -19,12 +22,12 @@ import CreateAccount from '.';
 
 const { configure, mount } = enzyme;
 
-// NOTE Required for spyOn when using @swc/jest
-// https://github.com/swc-project/swc/issues/3843
-jest.mock('../../messaging', (): Record<string, unknown> => ({
-  __esModule: true,
-  ...jest.requireActual('../../messaging')
-}));
+// // NOTE Required for spyOn when using @swc/jest
+// // https://github.com/swc-project/swc/issues/3843
+// jest.mock('../../messaging', (): Record<string, unknown> => ({
+//   __esModule: true,
+//   ...jest.requireActual('../../messaging')
+// }));
 
 // For this file, there are a lot of them
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -34,7 +37,7 @@ configure({ adapter: new Adapter() });
 
 describe('Create Account', () => {
   let wrapper: ReactWrapper;
-  let onActionStub: jest.Mock;
+  let onActionStub: ReturnType<typeof jest.fn>;
   const exampleAccount = {
     address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5',
     seed: 'horse battery staple correct'
@@ -62,8 +65,8 @@ describe('Create Account', () => {
 
   beforeEach(async () => {
     onActionStub = jest.fn();
-    jest.spyOn(messaging, 'createSeed').mockResolvedValue(exampleAccount);
-    jest.spyOn(messaging, 'createAccountSuri').mockResolvedValue(true);
+    jest.spyOn(messaging, 'createSeed').mockImplementation(() => Promise.resolve(exampleAccount));
+    jest.spyOn(messaging, 'createAccountSuri').mockImplementation(() => Promise.resolve(true));
     wrapper = mountComponent();
     await act(flushAllPromises);
     wrapper.update();
@@ -84,7 +87,7 @@ describe('Create Account', () => {
 
     it('clicking "Cancel" redirects to main screen', () => {
       wrapper.find(Header).find(ActionText).simulate('click');
-      expect(onActionStub).toBeCalledWith('/');
+      expect(onActionStub).toHaveBeenCalledWith('/');
     });
 
     it('checking the checkbox enables the Next button', () => {
@@ -119,8 +122,8 @@ describe('Create Account', () => {
       wrapper.find('[data-button-action="add new root"] button').simulate('click');
       await act(flushAllPromises);
 
-      expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed, 'sr25519', kusamaGenesis);
-      expect(onActionStub).toBeCalledWith('/');
+      expect(messaging.createAccountSuri).toHaveBeenCalledWith('abc', 'abcdef', exampleAccount.seed, 'sr25519', kusamaGenesis);
+      expect(onActionStub).toHaveBeenCalledWith('/');
     });
   });
 });

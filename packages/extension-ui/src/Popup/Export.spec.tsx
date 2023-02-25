@@ -1,6 +1,9 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="@polkadot/dev/node/test/node" />
+
 import '@polkadot/extension-mocks/chrome';
 
 import type { ReactWrapper } from 'enzyme';
@@ -20,12 +23,12 @@ import Export from './Export';
 
 const { configure, mount } = enzyme;
 
-// NOTE Required for spyOn when using @swc/jest
-// https://github.com/swc-project/swc/issues/3843
-jest.mock('../messaging', (): Record<string, unknown> => ({
-  __esModule: true,
-  ...jest.requireActual('../messaging')
-}));
+// // NOTE Required for spyOn when using @swc/jest
+// // https://github.com/swc-project/swc/issues/3843
+// jest.mock('../messaging', (): Record<string, unknown> => ({
+//   __esModule: true,
+//   ...jest.requireActual('../messaging')
+// }));
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
@@ -39,7 +42,7 @@ describe('Export component', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: { meta: { name: 'account_name' } } as unknown as KeyringPair$Json });
+    jest.spyOn(messaging, 'exportAccount').mockImplementation(() => Promise.resolve({ exportedJson: { meta: { name: 'account_name' } } as unknown as KeyringPair$Json }));
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     wrapper = mount(

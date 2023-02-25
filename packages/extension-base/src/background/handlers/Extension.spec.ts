@@ -1,6 +1,9 @@
 // Copyright 2019-2023 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="@polkadot/dev/node/test/node" />
+
 import '@polkadot/extension-mocks/chrome';
 
 import type { ResponseSigning } from '@polkadot/extension-base/background/types';
@@ -28,23 +31,29 @@ describe('Extension', () => {
   const address = '5FbSap4BsWfjyRhCchoVdZHkDnmDm3NEgLZ25mesq4aw2WvX';
 
   async function createExtension (): Promise<Extension> {
-    await cryptoWaitReady();
+    try {
+      await cryptoWaitReady();
 
-    keyring.loadAll({ store: new AccountsStore() });
-    const authUrls: AuthUrls = {};
+      keyring.loadAll({ store: new AccountsStore() });
+      const authUrls: AuthUrls = {};
 
-    authUrls['localhost:3000'] = {
-      authorizedAccounts: [address],
-      count: 0,
-      id: '11',
-      origin: 'example.com',
-      url: 'http://localhost:3000'
-    };
-    localStorage.setItem('authUrls', JSON.stringify(authUrls));
-    state = new State();
-    tabs = new Tabs(state);
+      authUrls['localhost:3000'] = {
+        authorizedAccounts: [address],
+        count: 0,
+        id: '11',
+        origin: 'example.com',
+        url: 'http://localhost:3000'
+      };
+      localStorage.setItem('authUrls', JSON.stringify(authUrls));
+      state = new State();
+      tabs = new Tabs(state);
 
-    return new Extension(state);
+      return new Extension(state);
+    } catch (e) {
+      console.error(e);
+
+      throw e;
+    }
   }
 
   const createAccount = async (type?: KeypairType): Promise<string> => {
@@ -76,7 +85,7 @@ describe('Extension', () => {
     extension = await createExtension();
   });
 
-  test('exports account from keyring', async () => {
+  it('exports account from keyring', async () => {
     const { pair: { address } } = keyring.addUri(suri, password);
     const result = await extension.handle('id', 'pri(accounts.export)', {
       address,
@@ -94,36 +103,36 @@ describe('Extension', () => {
       address = await createAccount();
     });
 
-    test('pri(derivation.validate) passes for valid suri', async () => {
+    it('pri(derivation.validate) passes for valid suri', async () => {
       const result = await extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
         parentPassword: password,
         suri: '//path'
       }, {} as chrome.runtime.Port);
 
-      expect(result).toStrictEqual({
+      expect(result).toEqual({
         address: '5FP3TT3EruYBNh8YM8yoxsreMx7uZv1J1zNX7fFhoC5enwmN',
         suri: '//path'
       });
     });
 
-    test('pri(derivation.validate) throws for invalid suri', async () => {
+    it('pri(derivation.validate) throws for invalid suri', async () => {
       await expect(extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
         parentPassword: password,
         suri: 'invalid-path'
-      }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('"invalid-path" is not a valid derivation path'));
+      }, {} as chrome.runtime.Port)).rejects.toThrow(/is not a valid derivation path/);
     });
 
-    test('pri(derivation.validate) throws for invalid password', async () => {
+    it('pri(derivation.validate) throws for invalid password', async () => {
       await expect(extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
         parentPassword: 'invalid-password',
         suri: '//path'
-      }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('invalid password'));
+      }, {} as chrome.runtime.Port)).rejects.toThrow(/invalid password/);
     });
 
-    test('pri(derivation.create) adds a derived account', async () => {
+    it('pri(derivation.create) adds a derived account', async () => {
       await extension.handle('id', 'pri(derivation.create)', {
         name: 'child',
         parentAddress: address,
@@ -134,7 +143,7 @@ describe('Extension', () => {
       expect(keyring.getAccounts()).toHaveLength(2);
     });
 
-    test('pri(derivation.create) saves parent address in meta', async () => {
+    it('pri(derivation.create) saves parent address in meta', async () => {
       await extension.handle('id', 'pri(derivation.create)', {
         name: 'child',
         parentAddress: address,
@@ -153,7 +162,7 @@ describe('Extension', () => {
       address = await createAccount();
     });
 
-    test('pri(accounts.changePassword) changes account password', async () => {
+    it('pri(accounts.changePassword) changes account password', async () => {
       const newPass = 'pa55word';
       const wrongPass = 'ZZzzZZzz';
 
@@ -161,13 +170,15 @@ describe('Extension', () => {
         address,
         newPass,
         oldPass: wrongPass
-      }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('oldPass is invalid'));
+      }, {} as chrome.runtime.Port)).rejects.toThrow(/oldPass is invalid/);
 
-      await expect(extension.handle('id', 'pri(accounts.changePassword)', {
+      const res = await extension.handle('id', 'pri(accounts.changePassword)', {
         address,
         newPass,
         oldPass: password
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+      }, {} as chrome.runtime.Port);
+
+      expect(res).toEqual(true);
 
       const pair = keyring.getPair(address);
 
@@ -175,7 +186,7 @@ describe('Extension', () => {
 
       expect(() => {
         pair.decodePkcs8(password);
-      }).toThrowError('Unable to decode using the supplied passphrase');
+      }).toThrow(/Unable to decode using the supplied passphrase/);
     });
   });
 
@@ -202,7 +213,7 @@ describe('Extension', () => {
       };
     });
 
-    test('signs with default signed extensions', async () => {
+    it('signs with default signed extensions', async () => {
       const registry = new TypeRegistry();
 
       registry.setSignedExtensions(payload.signedExtensions);
@@ -215,14 +226,16 @@ describe('Extension', () => {
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
-      await expect(extension.handle('1615192072290.7', 'pri(signing.approve.password)', {
+      const res = await extension.handle('1615192072290.7', 'pri(signing.approve.password)', {
         id: state.allSignRequests[0].id,
         password,
         savePass: false
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+      }, {} as chrome.runtime.Port);
+
+      expect(res).toEqual(true);
     });
 
-    test('signs with default signed extensions - ethereum', async () => {
+    it('signs with default signed extensions - ethereum', async () => {
       const ethAddress = await createAccount('ethereum');
       const ethPair = keyring.getPair(ethAddress);
 
@@ -261,14 +274,16 @@ describe('Extension', () => {
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
-      await expect(extension.handle('1615192072290.7', 'pri(signing.approve.password)', {
+      const res = await extension.handle('1615192072290.7', 'pri(signing.approve.password)', {
         id: state.allSignRequests[0].id,
         password,
         savePass: false
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+      }, {} as chrome.runtime.Port);
+
+      expect(res).toEqual(true);
     });
 
-    test('signs with user extensions, known types', async () => {
+    it('signs with user extensions, known types', async () => {
       const types = {} as unknown as Record<string, string>;
 
       const userExtensions = {
@@ -323,14 +338,16 @@ describe('Extension', () => {
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
-      await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
+      const res = await extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
         id: state.allSignRequests[0].id,
         password,
         savePass: false
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+      }, {} as chrome.runtime.Port);
+
+      expect(res).toEqual(true);
     });
 
-    test('override default signed extension', async () => {
+    it('override default signed extension', async () => {
       const types = {
         FeeExchangeV1: {
           assetId: 'Compact<AssetId>',
@@ -379,14 +396,16 @@ describe('Extension', () => {
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
-      await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
+      const res = await extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
         id: state.allSignRequests[0].id,
         password,
         savePass: false
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+      }, {} as chrome.runtime.Port);
+
+      expect(res).toEqual(true);
     });
 
-    test('signs with user extensions, additional types', async () => {
+    it('signs with user extensions, additional types', async () => {
       const types = {
         myCustomType: {
           feeExchange: 'Compact<AssetId>',
@@ -446,11 +465,13 @@ describe('Extension', () => {
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
-      await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
+      const res = await extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
         id: state.allSignRequests[0].id,
         password,
         savePass: false
-      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+      }, {} as chrome.runtime.Port);
+
+      expect(res).toEqual(true);
     });
   });
 });

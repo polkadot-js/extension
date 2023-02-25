@@ -1,6 +1,9 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="@polkadot/dev/node/test/node" />
+
 import '@polkadot/extension-mocks/chrome';
 
 import type { ReactWrapper } from 'enzyme';
@@ -26,15 +29,15 @@ const { configure, mount } = enzyme;
 
 // NOTE Required for spyOn when using @swc/jest
 // https://github.com/swc-project/swc/issues/3843
-jest.mock('../messaging', (): Record<string, unknown> => ({
-  __esModule: true,
-  ...jest.requireActual('../messaging')
-}));
+// jest.mock('../messaging', (): Record<string, unknown> => ({
+//   __esModule: true,
+//   ...jest.requireActual('../messaging')
+// }));
 
-jest.mock('../MetadataCache', (): Record<string, unknown> => ({
-  __esModule: true,
-  ...jest.requireActual('../MetadataCache')
-}));
+// jest.mock('../MetadataCache', (): Record<string, unknown> => ({
+//   __esModule: true,
+//   ...jest.requireActual('../MetadataCache')
+// }));
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
@@ -182,7 +185,7 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
     });
 
     it('can hide the account', () => {
-      jest.spyOn(messaging, 'showAccount').mockResolvedValue(false);
+      jest.spyOn(messaging, 'showAccount').mockImplementation(() => Promise.resolve(false));
 
       const visibleIcon = wrapper.find('FontAwesomeIcon.visibleIcon');
       const hiddenIcon = wrapper.find('FontAwesomeIcon.hiddenIcon');
@@ -191,7 +194,7 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
       expect(hiddenIcon.exists()).toBe(false);
 
       visibleIcon.simulate('click');
-      expect(messaging.showAccount).toBeCalledWith(address, false);
+      expect(messaging.showAccount).toHaveBeenCalledWith(address, false);
     });
 
     it('can show the account if hidden', async () => {
@@ -203,7 +206,7 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
 
       const wrapperHidden = mountedHiddenComponent.wrapper;
 
-      jest.spyOn(messaging, 'showAccount').mockResolvedValue(true);
+      jest.spyOn(messaging, 'showAccount').mockImplementation(() => Promise.resolve(true));
 
       const visibleIcon = wrapperHidden.find('FontAwesomeIcon.visibleIcon');
       const hiddenIcon = wrapperHidden.find('FontAwesomeIcon.hiddenIcon');
@@ -212,7 +215,7 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
       expect(hiddenIcon.exists()).toBe(true);
 
       hiddenIcon.simulate('click');
-      expect(messaging.showAccount).toBeCalledWith(address, true);
+      expect(messaging.showAccount).toHaveBeenCalledWith(address, true);
     });
 
     it('has settings button', () => {
@@ -302,7 +305,7 @@ describe('Address', () => {
     let wrapper: ReactWrapper;
 
     beforeAll(async () => {
-      jest.spyOn(MetadataCache, 'getSavedMeta').mockResolvedValue(westendMetadata);
+      jest.spyOn(MetadataCache, 'getSavedMeta').mockImplementation(() => Promise.resolve(westendMetadata));
 
       wrapper = await getWrapper(westEndAccount, [], false);
     });

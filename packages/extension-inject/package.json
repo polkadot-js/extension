@@ -17,7 +17,7 @@
   "version": "0.44.10-0-x",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.20.13",
+    "@babel/runtime": "^7.21.0",
     "@polkadot/rpc-provider": "^9.14.2",
     "@polkadot/types": "^9.14.2",
     "@polkadot/util": "^10.4.2",
@@ -25,7 +25,7 @@
     "@polkadot/x-global": "^10.4.2"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.216",
+    "@types/chrome": "^0.0.217",
     "@types/firefox-webext-browser": "^109.0.0"
   },
   "peerDependencies": {

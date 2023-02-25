@@ -103,10 +103,6 @@ export const router = createHashRouter([{
             {
               path: 'item-detail',
               element: <NftItemDetail />
-            },
-            {
-              path: 'import-collection',
-              element: <NftImport />
             }
           ]
         },
@@ -210,12 +206,16 @@ export const router = createHashRouter([{
               element: <ManageTokens />
             },
             {
-              path: 'import',
+              path: 'import-token',
               element: <FungibleTokenImport />
             },
             {
               path: 'detail',
               element: <TokenDetail />
+            },
+            {
+              path: 'import-nft',
+              element: <NftImport />
             }
           ]
         }, {

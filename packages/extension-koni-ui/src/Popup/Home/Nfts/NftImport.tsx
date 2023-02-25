@@ -104,7 +104,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       assetType: formValues.type,
       metadata: _parseMetadataForSmartContractAsset(formValues.contractAddress),
       multiChainAsset: null,
-      hasValue: _isChainTestNet(chainInfoMap[formValues.chain])
+      hasValue: _isChainTestNet(chainInfoMap[formValues.chain]),
+      logo: ''
     })
       .then((result) => {
         setLoading(false);
@@ -329,7 +330,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['nft'])}
     >
       <Layout.Base
-        footerButton={{
+        onBack={onBack}
+        rightFooterButton={{
           block: true,
           disabled: isSubmitDisabled(),
           icon: <Icon
@@ -342,9 +344,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onClick: onSubmit,
           children: 'Save'
         }}
-        onBack={onBack}
         showBackButton={true}
         showSubHeader={true}
+        showTabBar={false}
         subHeaderBackground={'transparent'}
         subHeaderCenter={true}
         subHeaderPaddingVertical={true}

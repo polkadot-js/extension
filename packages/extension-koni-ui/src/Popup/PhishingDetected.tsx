@@ -12,6 +12,7 @@ import { Theme } from '@subwallet/extension-koni-ui/themes';
 import classNames from 'classnames';
 import { ButtonProps, Icon, PageIcon, Typography } from '@subwallet/react-ui';
 import { ShieldSlash, XCircle } from 'phosphor-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   className?: string;
@@ -19,6 +20,7 @@ interface Props {
 
 function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const website = useParams<{ website: string }>().website || '';
   const decodedWebsite = decodeURIComponent(website);
@@ -26,7 +28,7 @@ function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
   const footerBtn: ButtonProps = {
     children: t('Get me out of here'),
     icon: <Icon phosphorIcon={XCircle} weight='fill' />,
-    onClick: () => console.log('go back home'),
+    onClick: () => navigate('/home/tokens'),
   }
 
   return (

@@ -306,5 +306,5 @@ export const router = createHashRouter([{
     }
   ]
 },
-{ path: `${PHISHING_PAGE_REDIRECT}/website`, element: <PhishingDetected /> }
+{ path: `${PHISHING_PAGE_REDIRECT}/:website`, element: <PhishingDetected /> }
 ]);

@@ -25,6 +25,7 @@ import CN from 'classnames';
 import { Plug, Plugs, PlugsConnected } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -51,10 +52,15 @@ const ConnectWebsiteId = 'connectWebsiteId';
 
 const renderEmpty = () => <EmptyAccount />;
 
+const modalId = SELECT_ACCOUNT_MODAL;
+
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const navigate = useNavigate();
+
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+
   const [connected, setConnected] = useState(0);
   const [canConnect, setCanConnect] = useState(0);
   const [connectionState, setConnectionState] = useState<ConnectionStatement>(ConnectionStatement.NOT_CONNECTED);
@@ -85,6 +91,13 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     }
   }, [accounts]);
 
+  const onClickDetailAccount = useCallback((address: string) => {
+    return () => {
+      inactiveModal(modalId);
+      navigate(`/accounts/detail/${address}`);
+    };
+  }, [navigate, inactiveModal]);
+
   const renderItem = useCallback((item: AccountJson, _selected: boolean) => {
     const currentAccountIsAll = isAccountAll(item.address);
 
@@ -99,14 +112,15 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
     return (
       <AccountCardSelection
-        accountName={item.name}
+        accountName={item.name || ''}
         address={item.address}
         className={className}
         genesisHash={item.genesisHash}
         isSelected={_selected}
+        onPressMoreBtn={onClickDetailAccount(item.address)}
       />
     );
-  }, [className]);
+  }, [className, onClickDetailAccount]);
 
   const renderSelectedItem = useCallback((item: AccountJson): React.ReactNode => {
     return (
@@ -250,7 +264,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         background={'default'}
         className={className}
         footer={<SelectAccountFooter />}
-        id={SELECT_ACCOUNT_MODAL}
+        id={modalId}
         inputWidth={'100%'}
         itemKey='address'
         items={accounts}
@@ -323,6 +337,10 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
 
       '.ant-input-container .ant-input': {
         color: token.colorTextLight1
+      },
+
+      '.ant-sw-list-section': {
+        paddingBottom: token.padding
       }
     },
 

@@ -57,6 +57,7 @@ const readyMap = {
 function computeStateSummary (state: RequestState) {
   let numberOfConfirmations = 0;
 
+  state.hasInternalConfirmations = false;
   CONFIRMATIONS_FIELDS.forEach((field) => {
     const confirmationList = Object.values(state[field]);
 

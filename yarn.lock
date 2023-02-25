@@ -5946,7 +5946,7 @@ __metadata:
     "@subwallet/extension-inject": ^0.8.1
     "@subwallet/extension-koni-base": ^0.8.1
     "@subwallet/extension-mocks": ^0.8.1
-    "@subwallet/keyring": ^0.0.3
+    "@subwallet/keyring": ^0.0.4
     "@subwallet/react-ui": 5.1.2-b11
     "@subwallet/ui-keyring": ^0.0.3
     "@unique-nft/types": ^0.6.0-4
@@ -6120,7 +6120,7 @@ __metadata:
     "@subwallet/extension-dapp": ^0.8.1
     "@subwallet/extension-inject": ^0.8.1
     "@subwallet/extension-mocks": ^0.8.1
-    "@subwallet/keyring": ^0.0.3
+    "@subwallet/keyring": ^0.0.4
     "@subwallet/ui-keyring": ^0.0.3
     "@unique-nft/types": ^0.6.0-4
     "@zeitgeistpm/type-defs": ^0.10.0
@@ -6183,7 +6183,7 @@ __metadata:
     "@subwallet/extension-inject": ^0.8.1
     "@subwallet/extension-koni-base": ^0.8.1
     "@subwallet/extension-mocks": ^0.8.1
-    "@subwallet/keyring": ^0.0.3
+    "@subwallet/keyring": ^0.0.4
     "@subwallet/react-ui": 5.1.2-b11
     "@subwallet/ui-keyring": ^0.0.3
     "@types/bn.js": ^5.1.1
@@ -6281,9 +6281,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/keyring@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "@subwallet/keyring@npm:0.0.3"
+"@subwallet/keyring@npm:^0.0.4":
+  version: 0.0.4
+  resolution: "@subwallet/keyring@npm:0.0.4"
   dependencies:
     "@polkadot/util": ^10.1.7
     "@polkadot/util-crypto": ^10.1.7
@@ -6292,7 +6292,7 @@ __metadata:
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rxjs: ^7.5.6
-  checksum: 213dddb90399e257fb258ff5322c2cb7490bfa8ca31ec15c3ef49f7f4e448a31f89bc357fd96f58cebac397604f0ccad2ed3511b5f446376c11128129f78a953
+  checksum: 58b33c7e67925a150e7c62747dbe204851b8cb4874c27f1489bfbf05c6f4c2afe3efde46301085d64d09f44749a17f9063885357a090f436302b62cb62946224
   languageName: node
   linkType: hard
 

@@ -12,7 +12,7 @@ const useGetDefaultAccountName = () => {
   return useMemo(() => {
     const filtered = accounts.filter((account) => !isAccountAll(account.address));
 
-    return `Account ${filtered.length}`;
+    return `Account ${filtered.length || 1}`;
   }, [accounts]);
 };
 

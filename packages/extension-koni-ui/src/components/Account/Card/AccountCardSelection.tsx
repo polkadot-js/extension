@@ -3,16 +3,22 @@
 
 import AccountCardBase, { _AccountCardProps } from '@subwallet/extension-koni-ui/components/Account/Card/AccountCardBase';
 import React from 'react';
+import styled from 'styled-components';
 
-function AccountCardSelection (props: Partial<_AccountCardProps>): React.ReactElement<Partial<_AccountCardProps>> {
+function Component (props: _AccountCardProps): React.ReactElement<_AccountCardProps> {
   return (
     <AccountCardBase
       {...props}
       addressPreLength={9}
       addressSufLength={9}
+      preventPrefix
       showMoreBtn
     />
   );
 }
+
+const AccountCardSelection = styled(Component)<_AccountCardProps>(({ theme: { token } }: _AccountCardProps) => {
+  return {};
+});
 
 export default AccountCardSelection;

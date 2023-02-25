@@ -394,7 +394,7 @@ export const ConnectWebsiteModal = styled(Component)<Props>(({ theme: { token } 
       marginBottom: token.margin,
 
       '.ant-btn + .ant-btn.ant-btn': {
-        marginInlineStart: token.margin
+        marginInlineStart: token.sizeSM
       }
     }
   });

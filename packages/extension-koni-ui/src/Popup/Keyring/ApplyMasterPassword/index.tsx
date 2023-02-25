@@ -4,7 +4,10 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
+import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
+import { forgetAccount, keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import MigrateDone from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword/Done';
 import IntroductionMigratePassword from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword/Introduction';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -35,7 +38,6 @@ interface MigratePasswordFormState {
 
 const nextIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={ArrowCircleRight}
     weight='fill'
   />
@@ -43,7 +45,6 @@ const nextIcon = (
 
 const finishIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={CheckCircle}
     weight='fill'
   />
@@ -51,7 +52,6 @@ const finishIcon = (
 
 const removeIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={Trash}
   />
 );
@@ -60,7 +60,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const notify = useNotification();
   const { token } = useTheme() as Theme;
+
+  const deleteAccountAction = useDeleteAccount();
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
   const [step, setStep] = useState<PageStep>('Introduction');
@@ -69,6 +72,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [isDisabled, setIsDisable] = useState(true);
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const canMigrate = useMemo(
     () => accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal)
@@ -108,7 +112,6 @@ const Component: React.FC<Props> = (props: Props) => {
             form.setFields([{ name: FormFieldName.PASSWORD, errors: [res.errors[0]] }]);
             setIsError(true);
           } else {
-            form.resetFields();
             setIsError(false);
           }
         }).catch((e: Error) => {
@@ -140,7 +143,7 @@ const Component: React.FC<Props> = (props: Props) => {
     switch (step) {
       case 'Introduction':
         return {
-          children: t('Next'),
+          children: t('Apply master password now'),
           onClick: () => {
             setStep(needMigrate.length ? 'Migrate' : 'Done');
           },
@@ -150,7 +153,7 @@ const Component: React.FC<Props> = (props: Props) => {
         return {
           children: t('Finish'),
           onClick: () => {
-            navigate('/');
+            navigate(DEFAULT_ROUTER_PATH);
           },
           icon: finishIcon
         };
@@ -165,6 +168,38 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [form, navigate, needMigrate.length, step, t]);
 
+  const onDelete = useCallback(() => {
+    if (currentAccount?.address) {
+      deleteAccountAction()
+        .then(() => {
+          setDeleting(true);
+          setTimeout(() => {
+            forgetAccount(currentAccount.address)
+              .then(() => {
+                setIsError(false);
+              })
+              .catch((e: Error) => {
+                notify({
+                  message: e.message,
+                  type: 'error'
+                });
+              })
+              .finally(() => {
+                setDeleting(false);
+              });
+          }, 500);
+        })
+        .catch((e: Error) => {
+          if (e) {
+            notify({
+              message: e.message,
+              type: 'error'
+            });
+          }
+        });
+    }
+  }, [currentAccount?.address, deleteAccountAction, notify]);
+
   useEffect(() => {
     setStep((prevState) => {
       if (prevState !== 'Introduction') {
@@ -173,11 +208,17 @@ const Component: React.FC<Props> = (props: Props) => {
         return 'Introduction';
       }
     });
-  }, [needMigrate.length]);
+  }, [needMigrate.length, deleting]);
 
   useEffect(() => {
     setCurrentAccount((prevState) => {
+      if (deleting) {
+        return prevState;
+      }
+
       if (!prevState) {
+        form.resetFields();
+
         return needMigrate[0];
       } else {
         const exists = needMigrate.find((acc) => acc.address === prevState.address);
@@ -185,28 +226,30 @@ const Component: React.FC<Props> = (props: Props) => {
         if (exists) {
           return prevState;
         } else {
+          form.resetFields();
+
           return needMigrate[0];
         }
       }
     });
-  }, [needMigrate]);
+  }, [form, needMigrate, deleting]);
 
   return (
     <Layout.WithSubHeaderOnly
       className={CN(className)}
-      footerButton={{
+      onBack={onBack}
+      rightFooterButton={{
         ...footerButton,
-        disabled: step === 'Migrate' && isDisabled,
+        disabled: step === 'Migrate' && isDisabled && deleting,
         loading: step === 'Migrate' && loading
       }}
-      onBack={onBack}
       showBackButton={step !== 'Introduction'}
       subHeaderIcons={[
         {
           icon: (
             <Icon
               phosphorIcon={Info}
-              type='phosphor'
+              size='sm'
             />
           )
         }
@@ -270,6 +313,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 >
                   <Button
                     icon={removeIcon}
+                    loading={deleting}
+                    onClick={onDelete}
                     type='ghost'
                   >
                     {t('Remove this account')}
@@ -314,6 +359,8 @@ const ApplyMasterPassword = styled(Component)<Props>(({ theme: { token } }: Prop
       },
 
       '.form-item-button': {
+        marginBottom: 0,
+
         '.ant-form-item-control-input-content': {
           display: 'flex',
           flexDirection: 'row',

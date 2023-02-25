@@ -105,7 +105,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       metadata: _parseMetadataForSmartContractAsset(formValues.contractAddress),
       multiChainAsset: null,
       hasValue: _isChainTestNet(chainInfoMap[formValues.chain]),
-      logo: ''
+      logo: null
     })
       .then((result) => {
         setLoading(false);
@@ -334,12 +334,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         rightFooterButton={{
           block: true,
           disabled: isSubmitDisabled(),
-          icon: <Icon
-            customSize={'28px'}
-            phosphorIcon={CheckCircle}
-            type='phosphor'
-            weight={'fill'}
-          />,
+          icon: (
+            <Icon
+              phosphorIcon={CheckCircle}
+              type='phosphor'
+              weight={'fill'}
+            />
+          ),
           loading: loading,
           onClick: onSubmit,
           children: 'Save'

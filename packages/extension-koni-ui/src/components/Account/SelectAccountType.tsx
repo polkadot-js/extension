@@ -86,7 +86,7 @@ const Component: React.FC<SelectAccountTypeProps> = (props: SelectAccountTypePro
                 leftItemIcon={(
                   <Logo
                     shape='circle'
-                    size={20}
+                    size={28}
                     token={item.icon}
                   />
                 )}

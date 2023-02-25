@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
@@ -30,9 +31,7 @@ interface CreatePasswordFormState {
 
 const FooterIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={CheckCircle}
-    size='sm'
     weight='fill'
   />
 );
@@ -65,7 +64,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (!res.status) {
           setSubmitError(res.errors[0]);
         } else {
-          navigate(-2);
+          navigate(DEFAULT_ROUTER_PATH);
         }
       }).catch((e: Error) => {
         setSubmitError(e.message);
@@ -87,12 +86,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, []);
 
   const onChangePassword = useCallback(() => {
-    const confirmPassword = form.getFieldValue(FormFieldName.CONFIRM_PASSWORD) as string;
-
-    if (confirmPassword) {
-      // eslint-disable-next-line no-void
-      void form.validateFields([FormFieldName.CONFIRM_PASSWORD]);
-    }
+    form.setFields([{ name: FormFieldName.CONFIRM_PASSWORD, value: '', errors: [] }]);
   }, [form]);
 
   const openModal = useCallback(() => {
@@ -106,7 +100,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <Layout.Base
       className={CN(className)}
-      footerButton={{
+      rightFooterButton={{
         children: t('Continue'),
         onClick: form.submit,
         loading: loading,
@@ -122,7 +116,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           icon: (
             <Icon
               phosphorIcon={Info}
-              type='phosphor'
+              size='sm'
             />
           ),
           onClick: openModal
@@ -192,7 +186,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             <Icon
               phosphorIcon={CaretLeft}
               size='sm'
-              type='phosphor'
             />
           )}
           id={modalId}
@@ -202,7 +195,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               <Icon
                 phosphorIcon={Info}
                 size='sm'
-                type='phosphor'
               />
             )
           }}

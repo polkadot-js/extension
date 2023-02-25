@@ -1,8 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -10,7 +12,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { changeHeaderLogo } from '@subwallet/react-ui';
 import Bowser from 'bowser';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -48,26 +50,45 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const location = useLocation();
   const navigate = useNavigate();
   const openPModal = usePredefinedModal();
-  const hasConfirmations = useSelector((state: RootState) => state.requestState.hasConfirmations);
+  const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
+  const needMigrate = useMemo(
+    () => !!accounts
+      .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal)
+      .filter((acc) => !acc.isMasterPassword)
+      .length
+    , [accounts]
+  );
+
   useEffect(() => {
-    if (location.pathname === '/') {
+    const pathName = location.pathname;
+
+    if (pathName === '/') {
       if (isNoAccount(accounts)) {
+        console.log(0);
         navigate('/welcome');
       } else if (!hasMasterPassword) {
+        console.log(1);
         navigate('/keyring/create-password');
       } else if (isLocked) {
+        console.log(2);
         navigate('/keyring/login');
+      } else if (needMigrate) {
+        navigate('/keyring/migrate-password');
       } else if (hasConfirmations) {
+        console.log(3);
         openPModal('confirmations');
       } else {
-        // Todo: check conditional an navigate to default page
         navigate('/home/tokens');
       }
+    } else if (pathName === '/keyring/login' && !isLocked) {
+      navigate(DEFAULT_ROUTER_PATH);
+    } else if (hasInternalConfirmations) {
+      openPModal('confirmations');
     }
   },
-  [accounts, hasConfirmations, hasMasterPassword, isLocked, location.pathname, navigate, openPModal]
+  [accounts, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, location.pathname, navigate, needMigrate, openPModal]
   );
 
   return <>{children}</>;

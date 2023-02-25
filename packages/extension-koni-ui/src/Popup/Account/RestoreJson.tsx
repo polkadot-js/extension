@@ -4,6 +4,7 @@
 import { ResponseJsonGetAccountInfo } from '@subwallet/extension-base/background/types';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '@subwallet/extension-koni-ui/messaging';
@@ -27,9 +28,7 @@ type Props = ThemeProps;
 
 const FooterIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={FileArrowDown}
-    size='sm'
     weight='fill'
   />
 );
@@ -70,10 +69,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
     uploadFile.originFileObj?.arrayBuffer()
       .then((bytes) => {
-      // setFileError(false);
-      // setIsPasswordError(false);
-      // setPassword('');
-      // setAccountsInfo(() => []);
         let json: KeyringPair$Json | KeyringPairs$Json | undefined;
 
         try {
@@ -84,6 +79,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
             return;
           } else {
+            setAccountsInfo([]);
             setPassword('');
             setJsonFile(json);
           }
@@ -95,13 +91,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             message: error.message
           });
           setValidating(false);
+          setRequirePassword(false);
 
           return;
         }
 
         try {
-          setRequirePassword(true);
-          setPassword('');
           setSubmitValidateState({});
 
           if (isKeyringPairs$Json(json)) {
@@ -113,22 +108,25 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               } as ResponseJsonGetAccountInfo;
             });
 
+            setRequirePassword(true);
             setAccountsInfo(accounts);
-
             setFileValidateState({});
             setValidating(false);
           } else {
             jsonGetAccountInfo(json)
               .then((accountInfo) => {
+                setRequirePassword(true);
                 setAccountsInfo([accountInfo]);
                 setFileValidateState({});
                 setValidating(false);
               })
               .catch((e: Error) => {
+                setRequirePassword(false);
                 setFileValidateState({
                   status: 'error',
                   message: e.message
                 });
+                setValidating(false);
               });
           }
         } catch (e) {
@@ -137,6 +135,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             message: t<string>('Invalid Json file')
           });
           setValidating(false);
+          setRequirePassword(false);
         }
       })
       .catch((e: Error) => {
@@ -170,7 +169,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           withMasterPassword: true
         }))
         .then(() => {
-          navigate('/');
+          navigate(DEFAULT_ROUTER_PATH);
         })
         .catch((e: Error) => {
           setSubmitValidateState({
@@ -209,11 +208,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <Layout.Base
-      footerButton={{
+      rightFooterButton={{
         children: t('Import from Json'),
         icon: FooterIcon,
         onClick: onSubmit,
-        disabled: !!fileValidateState.status || !!fileValidateState.status,
+        disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
         loading: validating || loading
       }}
       showBackButton={true}
@@ -242,7 +241,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             validateStatus={fileValidateState.status}
           >
             <Upload.SingleFileDragger
-              accept={'application/JSON'}
+              accept={'application/json'}
               disabled={validating}
               hint={t('Please drag an drop the .json file you exported from Polkadot.js')}
               onChange={onChange}
@@ -267,7 +266,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               </Form.Item>
             )
           }
-
           {
             requirePassword && (
               <Form.Item
@@ -333,14 +331,6 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
       marginTop: token.margin
     },
 
-    '.private-key-input': {
-
-      textarea: {
-        resize: 'none',
-        height: `${token.sizeLG * 6}px !important`
-      }
-    },
-
     '.input-label': {
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
@@ -358,6 +348,10 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-web3-block': {
       display: 'flex !important'
+    },
+
+    '.ant-sw-modal-body': {
+      padding: `0 0 ${token.padding}px`
     }
   };
 });

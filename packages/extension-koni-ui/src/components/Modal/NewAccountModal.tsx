@@ -49,13 +49,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         />
         <Button
           block={true}
+          disabled={!selectedItems.length}
           icon={(
             <Icon
               className={'icon-submit'}
-              customSize={'28px'}
               iconColor='var(--icon-color)'
               phosphorIcon={CheckCircle}
-              size='sm'
               weight='fill'
             />
           )}

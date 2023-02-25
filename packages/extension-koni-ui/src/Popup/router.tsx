@@ -29,6 +29,8 @@ const FungibleTokenImport = React.lazy(() => import('@subwallet/extension-koni-u
 const TokenDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/TokenDetail'));
 const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
 const TokenDetailList = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailList'));
+const ManageWebsiteAccess = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/ManageWebsiteAccess'));
+const ManageWebsiteAccessDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/ManageWebsiteAccess/Detail'));
 
 const NewSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/NewSeedPhrase'));
 const ImportSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportSeedPhrase'));
@@ -37,11 +39,15 @@ const RestoreJson = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/
 const AttachReadOnly = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AttachReadOnly'));
 const ConnectParitySigner = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectParitySigner'));
 const ConnectKeystone = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
+const ConnectLedger = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectLedger'));
 
 const Login = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/Login'));
 const CreatePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/CreatePassword'));
 const ChangePassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ChangePassword'));
 const ApplyMasterPassword = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword'));
+
+const AccountDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AccountDetail'));
+const AccountExport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AccountExport'));
 
 const ErrorFallback = () => {
   const error = useRouteError();
@@ -187,10 +193,10 @@ export const router = createHashRouter([{
           element: <GeneralSetting />
         }, {
           path: 'dapp-access',
-          element: <Example />
+          element: <ManageWebsiteAccess />
         }, {
           path: 'dapp-access-edit',
-          element: <Example />
+          element: <ManageWebsiteAccessDetail />
         }, {
           path: 'network',
           element: <Example />
@@ -255,6 +261,18 @@ export const router = createHashRouter([{
         {
           path: 'connect-keystone',
           element: <ConnectKeystone />
+        },
+        {
+          path: 'connect-ledger',
+          element: <ConnectLedger />
+        },
+        {
+          path: 'detail/:accountAddress',
+          element: <AccountDetail />
+        },
+        {
+          path: 'export/:accountAddress',
+          element: <AccountExport />
         }
       ]
     }

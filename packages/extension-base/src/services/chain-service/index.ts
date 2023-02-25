@@ -220,7 +220,7 @@ export class ChainService {
     return result;
   }
 
-  public getAssetBySlug (slug: string) {
+  public getAssetBySlug (slug: string): _ChainAsset {
     return this.getAssetRegistry()[slug];
   }
 

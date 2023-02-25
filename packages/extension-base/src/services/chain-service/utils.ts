@@ -140,7 +140,7 @@ export function _isSubstrateParachain (chainInfo: _ChainInfo) {
 }
 
 export function _getChainSubstrateAddressPrefix (chainInfo: _ChainInfo) {
-  return chainInfo.substrateInfo?.addressPrefix || -1;
+  return chainInfo.substrateInfo?.addressPrefix ?? -1;
 }
 
 export function _isChainSupportNativeNft (chainInfo: _ChainInfo) {

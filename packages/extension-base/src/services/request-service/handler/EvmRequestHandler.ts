@@ -6,6 +6,7 @@ import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcE
 import { ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
 import { Resolver } from '@subwallet/extension-base/background/types';
 import RequestService from '@subwallet/extension-base/services/request-service';
+import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import keyring from '@subwallet/ui-keyring';
 import BN from 'bn.js';
@@ -62,6 +63,7 @@ export default class EvmRequestHandler {
     const confirmations = this.confirmationsQueueSubject.getValue();
     const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
     const payloadJson = JSON.stringify(payload);
+    const isInternal = url === EXTENSION_REQUEST_URL;
 
     // Check duplicate request
     const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));
@@ -73,6 +75,7 @@ export default class EvmRequestHandler {
     confirmationType[id] = {
       id,
       url,
+      isInternal,
       payload,
       payloadJson,
       ...options
@@ -90,14 +93,16 @@ export default class EvmRequestHandler {
 
     this.confirmationsQueueSubject.next(confirmations);
 
-    // Not open new popup and use existed
-    const popupList = this.#requestService.popup;
+    if (!isInternal) {
+      // Not open new popup and use existed
+      const popupList = this.#requestService.popup;
 
-    if (this.#requestService.popup.length > 0) {
+      if (this.#requestService.popup.length > 0) {
       // eslint-disable-next-line no-void
-      void chrome.windows.update(popupList[0], { focused: true });
-    } else {
-      this.#requestService.popupOpen();
+        void chrome.windows.update(popupList[0], { focused: true });
+      } else {
+        this.#requestService.popupOpen();
+      }
     }
 
     this.#requestService.updateIconV2();

@@ -5,6 +5,7 @@ import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
 import Footer from '@subwallet/extension-koni-ui/components/Layout/parts/Footer';
 import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import { Aperture, Database, Globe, Rocket, Wallet } from 'phosphor-react';
@@ -97,7 +98,7 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
   );
 
   const defaultOnBack = useCallback(() => {
-    navigate('/');
+    navigate(DEFAULT_ROUTER_PATH);
   }, [navigate]);
 
   return (

@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, SwHeader, Typography } from '@subwallet/react-ui';
+import { Icon, SwSubHeader } from '@subwallet/react-ui';
 import { ButtonProps } from '@subwallet/react-ui/es/button';
 import CN from 'classnames';
-import { CaretLeft, CaretRight } from 'phosphor-react';
+import { CaretRight } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -18,55 +18,32 @@ interface Props extends ThemeProps {
 }
 
 function Component ({ className, index, numberOfConfirmations, onClickNext, onClickPrev, title }: Props) {
-  const leftButton = (<Button
-    className={CN('__left-block', { hidden: index === 0 })}
-    disabled={index === 0}
-    icon={<Icon
-      phosphorIcon={CaretLeft}
-      size='md'
-    />}
-    onClick={onClickPrev}
-    size={'xs'}
-    type={'text'}
-  />);
-
-  const rightButtons = ([{
+  const rightButtons: ButtonProps[] = ([{
     className: CN('__right-block', { hidden: index === (numberOfConfirmations - 1) }),
-    disabled: index === (numberOfConfirmations - 1),
     onClick: onClickNext,
     size: 'xs',
     icon: (<Icon
       phosphorIcon={CaretRight}
-      size='md'
-    />),
-    type: 'text'
-  }] as ButtonProps[]);
+      size='sm'
+    />)
+  }]);
 
   return (
-    <SwHeader
-      className={CN('confirmation-header', className)}
-      left={leftButton}
+    <SwSubHeader
+      background='transparent'
+      center={true}
+      className={CN(className)}
+      onBack={onClickPrev}
+      paddingVertical={true}
       rightButtons={rightButtons}
-      showLeftButton={true}
-    >
-      <Typography.Title
-        className={'__middle-block'}
-        level={4}
-      >
-        {title}
-      </Typography.Title>
-    </SwHeader>
+      showBackButton={index > 0}
+      title={title}
+    />
   );
 }
 
-const ConfirmationHeader = styled(Component)<Props>(({ theme }) => ({
-  display: 'flex',
-
-  '.__middle-block': {
-    flex: '1 1 auto',
-    textAlign: 'center',
-    alignSelf: 'center'
-  }
-}));
+const ConfirmationHeader = styled(Component)<Props>(({ theme }: ThemeProps) => {
+  return {};
+});
 
 export default ConfirmationHeader;

@@ -181,7 +181,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   </div>
                   <div className={'nft_item_detail__description_title'}>
                     <Icon
-                      customSize={'28px'}
                       iconColor={token.colorIcon}
                       phosphorIcon={Info}
                       type='phosphor'
@@ -240,7 +239,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           <Button
             block
             icon={<Icon
-              customSize={'28px'}
               phosphorIcon={PaperPlaneTilt}
               type='phosphor'
               weight={'fill'}

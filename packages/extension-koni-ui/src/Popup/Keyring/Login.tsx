@@ -1,18 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import LoginBg from '@subwallet/extension-koni-ui/assets/Login_BG.png';
+import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
+import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/form';
 import { Button, Form, Input } from '@subwallet/react-ui';
-import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import CN from 'classnames';
-import { Callbacks } from 'rc-field-form/lib/interface';
-import React, { ChangeEventHandler, useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -29,43 +29,48 @@ interface LoginFormState {
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const formRef = useRef<FormInstance<LoginFormState>>(null);
-  const [passwordValidateState, setPasswordValidateState] = useState<ValidateState | null>(null);
+  const [form] = Form.useForm<LoginFormState>();
   const [loading, setLoading] = useState(false);
+  const [isDisable, setIsDisable] = useState(true);
 
-  const onSubmit: Callbacks<LoginFormState>['onFinish'] = useCallback((values: LoginFormState) => {
-    setLoading(true);
-    keyringUnlock({
-      password: values[FormFieldName.PASSWORD]
-    })
-      .then((data) => {
-        if (data.status) {
-          console.log('Success');
-          navigate('/');
-        } else {
-          setPasswordValidateState({
-            status: 'error'
-          });
-        }
-      })
-      .catch((e: Error) => {
-        setPasswordValidateState({
-          status: 'error'
-        });
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [navigate]);
+  const onUpdate: FormCallbacks<LoginFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+    const { empty, error } = simpleCheckForm(changedFields, allFields);
 
-  const onPasswordChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
-    setPasswordValidateState(null);
+    setIsDisable(error || empty);
   }, []);
+
+  const onError = useCallback((error: string) => {
+    form.setFields([{ name: FormFieldName.PASSWORD, errors: [error] }]);
+  }, [form]);
+
+  const onSubmit: FormCallbacks<LoginFormState>['onFinish'] = useCallback((values: LoginFormState) => {
+    setLoading(true);
+    setTimeout(() => {
+      keyringUnlock({
+        password: values[FormFieldName.PASSWORD]
+      })
+        .then((data) => {
+          if (data.status) {
+            navigate(DEFAULT_ROUTER_PATH);
+          } else {
+            onError(data.errors[0]);
+          }
+        })
+        .catch((e: Error) => {
+          onError(e.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }, 500);
+  }, [navigate, onError]);
 
   return (
     <Layout.Base
       className={CN(className)}
     >
+      <div className='bg-gradient' />
+      <div className='bg-image' />
       <div className='body-container'>
         <div className='logo-container'>
           <Logo3D />
@@ -77,24 +82,30 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           {t('Enter your password to unlock account')}
         </div>
         <Form
+          form={form}
           initialValues={{ [FormFieldName.PASSWORD]: '' }}
+          onFieldsChange={onUpdate}
           onFinish={onSubmit}
-          ref={formRef}
         >
           <Form.Item
+            className='form-item-no-error'
             name={FormFieldName.PASSWORD}
-            validateStatus={passwordValidateState?.status}
+            rules={[
+              {
+                message: 'Password is required',
+                required: true
+              }
+            ]}
           >
             <Input.Password
               containerClassName='password-input'
-              onChange={onPasswordChange}
               placeholder={t('Password')}
             />
           </Form.Item>
           <Form.Item>
             <Button
               block={true}
-              disabled={!!passwordValidateState}
+              disabled={isDisable}
               htmlType='submit'
               loading={loading}
             >
@@ -116,17 +127,36 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
   const { token } = theme;
 
   return {
-    background: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+    position: 'relative',
+
+    '.bg-gradient': {
+      backgroundImage: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+      height: '100%',
+      width: '100%',
+      position: 'absolute',
+      left: 0,
+      top: 0
+    },
+
+    '.bg-image': {
+      backgroundImage: `url(${LoginBg})`,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'top',
+      backgroundSize: 'contain',
+      height: '100%',
+      position: 'absolute',
+      width: '100%',
+      left: 0,
+      top: 0,
+      opacity: 0.1
+    },
 
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
-      backgroundImage: `url(${LoginBg})`,
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'top',
 
       '.logo-container': {
-        paddingTop: 106,
+        paddingTop: token.paddingXL * 3.25,
         color: token.colorTextBase
       },
 
@@ -143,6 +173,12 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
         color: token.colorTextLight3
+      },
+
+      '.form-item-no-error': {
+        '.ant-form-item-explain': {
+          display: 'none'
+        }
       },
 
       '.password-input': {

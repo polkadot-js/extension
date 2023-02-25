@@ -3,13 +3,15 @@
 
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/commont';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
-import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
+import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
 import { ButtonProps } from '@subwallet/react-ui/es/button';
 import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -62,6 +64,29 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const isPopup = useIsPopup();
+  const notify = useNotification();
+
+  const [locking, setLocking] = useState(false);
+
+  const onLock = useCallback(() => {
+    setLocking(true);
+
+    setTimeout(() => {
+      keyringLock()
+        .then(() => {
+          navigate(DEFAULT_ROUTER_PATH);
+        })
+        .catch((e: Error) => {
+          notify({
+            message: e.message,
+            type: 'error'
+          });
+        })
+        .finally(() => {
+          setLocking(false);
+        });
+    }, 100);
+  }, [navigate, notify]);
 
   // todo: i18n all titles, labels below
   const SettingGroupItemType: SettingGroupItemType[] = [
@@ -94,7 +119,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: ShieldCheck,
           leftIconBgColor: token['green-6'],
           rightIcon: CaretRight,
-          title: 'Security settings'
+          title: 'Security settings',
+          onClick: () => {
+            // todo: make Security settings screen, them change this navigation
+            navigate('/settings/dapp-access');
+          }
         },
         {
           key: 'manage-address-book',
@@ -276,14 +305,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             block
             icon={
               <Icon
-                customSize={'28px'}
                 phosphorIcon={Lock}
                 type='phosphor'
                 weight={'fill'}
               />
             }
+            loading={locking}
+            onClick={onLock}
             schema={'secondary'}
-          >Lock</Button>
+          >
+            Lock
+          </Button>
 
           <div className={'__version'}>
           SubWallet v {EXTENSION_VERSION}

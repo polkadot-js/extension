@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
@@ -56,7 +57,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (!res.status) {
           setSubmitError(res.errors[0]);
         } else {
-          navigate('/');
+          navigate(DEFAULT_ROUTER_PATH);
         }
       }).catch((e: Error) => {
         setSubmitError(e.message);
@@ -89,7 +90,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <Layout.Base
       className={CN(className)}
-      footerButton={{
+      rightFooterButton={{
         children: t('Save'),
         onClick: form.submit,
         loading: loading,
@@ -104,7 +105,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           icon: (
             <Icon
               phosphorIcon={Info}
-              type='phosphor'
+              size='sm'
             />
           )
         }

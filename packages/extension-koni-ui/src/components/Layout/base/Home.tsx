@@ -24,7 +24,6 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showTabBar }: Pr
           <Icon
             phosphorIcon={FadersHorizontal}
             size='sm'
-            type='phosphor'
           />
         ),
         onClick: onClickFilterIcon
@@ -34,7 +33,6 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showTabBar }: Pr
           <Icon
             phosphorIcon={MagnifyingGlass}
             size='sm'
-            type='phosphor'
           />
         ),
         onClick: onClickSearchIcon

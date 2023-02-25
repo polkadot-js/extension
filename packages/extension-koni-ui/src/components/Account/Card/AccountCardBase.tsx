@@ -2,27 +2,30 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import useAccountAvatarInfo from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarInfo';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
-import useAccountRecoded from '@subwallet/extension-koni-ui/hooks/account/useAccountRecoded';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, SwIconProps } from '@subwallet/react-ui';
 import AccountCard, { AccountCardProps } from '@subwallet/react-ui/es/web3-block/account-card';
 import { DotsThree, Eye, QrCode, Swatches } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-export interface _AccountCardProps extends AccountCardProps {
+export interface _AccountCardProps extends Omit<AccountCardProps, 'avatarIdentPrefix'>, ThemeProps {
   className?: string;
   genesisHash?: string | null;
   type?: KeypairType;
   showMoreBtn?: boolean;
   onPressMoreBtn?: () => void;
+  preventPrefix?: boolean;
 }
 
-function AccountCardBase (props: Partial<_AccountCardProps>): React.ReactElement<Partial<_AccountCardProps>> {
-  const { accountName, address, className, genesisHash, onPressMoreBtn, showMoreBtn, type: givenType } = props;
-  const { prefix } = useAccountRecoded(address || '', genesisHash, givenType);
+function Component (props: _AccountCardProps): React.ReactElement<_AccountCardProps> {
+  const { accountName, address, className, genesisHash, onPressMoreBtn, preventPrefix, showMoreBtn, type: givenType } = props;
+  const { address: avatarAddress, prefix } = useAccountAvatarInfo(address ?? '', preventPrefix, genesisHash, givenType);
   const avatarTheme = useAccountAvatarTheme(address || '');
 
   const signMode = useGetAccountSignModeByAddress(address);
@@ -60,6 +63,7 @@ function AccountCardBase (props: Partial<_AccountCardProps>): React.ReactElement
         {x}
         {iconProps && (
           <Button
+            className='account-type-icon'
             icon={
               <Icon
                 { ...iconProps}
@@ -87,16 +91,26 @@ function AccountCardBase (props: Partial<_AccountCardProps>): React.ReactElement
   }, [_onClickMore, iconProps, showMoreBtn]);
 
   return (
-    <AccountCard
-      {...props}
-      accountName={accountName || ''}
-      address={address || ''}
-      avatarIdentPrefix={prefix || 42}
-      avatarTheme={avatarTheme}
-      className={className}
-      renderRightItem={renderRightItem}
-    />
+    <div className={props.className}>
+      <AccountCard
+        {...props}
+        accountName={accountName || ''}
+        address={avatarAddress}
+        avatarIdentPrefix={prefix}
+        avatarTheme={avatarTheme}
+        className={className}
+        renderRightItem={renderRightItem}
+      />
+    </div>
   );
 }
+
+const AccountCardBase = styled(Component)<_AccountCardProps>(({ theme: { token } }: _AccountCardProps) => {
+  return {
+    '.account-type-icon': {
+      color: `${token['gray-4']} !important`
+    }
+  };
+});
 
 export default AccountCardBase;

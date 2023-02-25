@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -19,9 +20,7 @@ type Props = ThemeProps;
 
 const FooterIcon = (
   <Icon
-    customSize={'28px'}
     phosphorIcon={FileArrowDown}
-    size='sm'
     weight='fill'
   />
 );
@@ -60,7 +59,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         types: [EVM_ACCOUNT_TYPE]
       })
         .then(() => {
-          navigate('/');
+          navigate(DEFAULT_ROUTER_PATH);
         })
         .catch((error: Error): void => {
           setValidateState({
@@ -131,7 +130,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <Layout.Base
-      footerButton={{
+      rightFooterButton={{
         children: validating ? t('Validating') : t('Import account'),
         icon: FooterIcon,
         onClick: onSubmit,

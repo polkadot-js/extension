@@ -32,13 +32,17 @@ export function useChainsByAccountType (): string[] {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
 
-  let accountType: AccountType = 'ALL';
+  const accountType = useMemo(() => {
+    let accountType: AccountType = 'ALL';
 
-  if (currentAccount?.type === 'ethereum') {
-    accountType = 'ETHEREUM';
-  } else if (currentAccount?.type === 'sr25519') {
-    accountType = 'SUBSTRATE';
-  }
+    if (currentAccount?.type === 'ethereum') {
+      accountType = 'ETHEREUM';
+    } else if (currentAccount?.type === 'sr25519') {
+      accountType = 'SUBSTRATE';
+    }
+
+    return accountType;
+  }, [currentAccount?.type]);
 
   return useMemo<string[]>(() => {
     return getChainsAccountType(accountType, chainInfoMap);

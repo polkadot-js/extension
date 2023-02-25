@@ -25,7 +25,9 @@ const SwLogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subwallet_512: require('./512.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  subwallet: require('./256.png')
+  subwallet: require('./256.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  avatar_placeholder: require('./avatar_placeholder.png')
 };
 
 export default SwLogosMap;

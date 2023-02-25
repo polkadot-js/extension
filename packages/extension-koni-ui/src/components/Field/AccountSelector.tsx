@@ -4,14 +4,14 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
+import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { SelectModal } from '@subwallet/react-ui';
 import { SelectModalProps } from '@subwallet/react-ui/es/select-modal/SelectModal';
-import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -31,15 +31,11 @@ interface Props extends ThemeProps {
 
 function Component ({ className = '', id, label, onSelectItem, selectedItem }: Props): React.ReactElement<Props> {
   const items = useSelector((state: RootState) => state.accountState.accounts).filter((a) => !isAccountAll(a.address));
+  const [selectedAddress, setSelectedAddress] = useState<string | undefined>(undefined);
   const { t } = useTranslation();
   const renderChainSelected = useCallback((item: AccountJson) => {
     return (
       <div className={'__selected-item'}>
-        <SwAvatar
-          size={24}
-          theme={isEthereumAddress(item.address) ? 'ethereum' : 'polkadot'}
-          value={item.address}
-        />
         <div className={'__selected-item-name common-text'}>
           {item.name}
         </div>
@@ -50,6 +46,11 @@ function Component ({ className = '', id, label, onSelectItem, selectedItem }: P
       </div>
     );
   }, []);
+
+  const _onSelectItem = useCallback((value: string) => {
+    setSelectedAddress(value);
+    onSelectItem(value);
+  }, [onSelectItem]);
 
   const searchFunction = useCallback((item: AccountJson, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -80,8 +81,15 @@ function Component ({ className = '', id, label, onSelectItem, selectedItem }: P
       itemKey={'address'}
       items={items}
       label={label}
-      onSelect={onSelectItem}
+      onSelect={_onSelectItem}
       placeholder={t('Select account')}
+      prefix={
+        <Avatar
+          size={24}
+          theme={selectedAddress ? isEthereumAddress(selectedAddress) ? 'ethereum' : 'polkadot' : undefined}
+          value={selectedAddress}
+        />
+      }
       renderItem={renderItem}
       renderSelected={renderChainSelected}
       searchFunction={searchFunction}
@@ -104,8 +112,7 @@ export const AccountSelector = styled(Component)<Props>(({ theme: { token } }: P
       '.__selected-item-name': {
         textOverflow: 'ellipsis',
         fontWeight: token.headingFontWeight,
-        overflow: 'hidden',
-        paddingLeft: token.sizeXS
+        overflow: 'hidden'
       },
       '.__selected-item-address': {
         color: token.colorTextLight4,

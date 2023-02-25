@@ -1,6 +1,9 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="@polkadot/dev/node/test/node" />
+
 import '@polkadot/extension-mocks/chrome';
 
 import type { ReactWrapper } from 'enzyme';
@@ -41,12 +44,12 @@ interface QrScanAddressProps {
   style?: React.CSSProperties;
 }
 
-// NOTE Required for spyOn when using @swc/jest
-// https://github.com/swc-project/swc/issues/3843
-jest.mock('../messaging', (): Record<string, unknown> => ({
-  __esModule: true,
-  ...jest.requireActual('../messaging')
-}));
+// // NOTE Required for spyOn when using @swc/jest
+// // https://github.com/swc-project/swc/issues/3843
+// jest.mock('../messaging', (): Record<string, unknown> => ({
+//   __esModule: true,
+//   ...jest.requireActual('../messaging')
+// }));
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
@@ -57,14 +60,14 @@ const typeName = async (wrapper: ReactWrapper, value: string) => {
   wrapper.update();
 };
 
-jest.mock('@polkadot/react-qr', () => {
-  return {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    QrScanAddress: ({ onScan }: QrScanAddressProps): null => {
-      return null;
-    }
-  };
-});
+// jest.mock('@polkadot/react-qr', () => {
+//   return {
+//     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//     QrScanAddress: ({ onScan }: QrScanAddressProps): null => {
+//       return null;
+//     }
+//   };
+// });
 
 describe('ImportQr component', () => {
   let wrapper: ReactWrapper;
@@ -131,7 +134,7 @@ describe('ImportQr component', () => {
   });
 
   it('creates the external account', async () => {
-    jest.spyOn(messaging, 'createAccountExternal').mockResolvedValue(false);
+    jest.spyOn(messaging, 'createAccountExternal').mockImplementation(() => Promise.resolve(false));
     wrapper.find(Button).simulate('click');
     await act(flushAllPromises);
 

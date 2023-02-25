@@ -1,6 +1,9 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="@polkadot/dev/node/test/node" />
+
 import '@polkadot/extension-mocks/chrome';
 
 import type { ReactWrapper } from 'enzyme';
@@ -151,7 +154,7 @@ describe('AccountNamePasswordCreation', () => {
     wrapper.find('[data-button-action="add new root"] button').simulate('click');
     await act(flushAllPromises);
 
-    expect(onCreate).toBeCalledWith(account.name, account.password);
+    expect(onCreate).toHaveBeenCalledWith(account.name, account.password);
   });
 
   describe('All fields are filled correctly, but then', () => {

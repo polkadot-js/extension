@@ -29,6 +29,6 @@ const messagingFake = new MessagingFake();
 chrome.runtime.connect.returns(messagingFake);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
-(window as any).chrome = chrome;
+(window as any).chrome = (globalThis as any).chrome = chrome;
 
 export default chrome;

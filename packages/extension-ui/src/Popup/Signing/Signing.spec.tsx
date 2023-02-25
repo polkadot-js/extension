@@ -1,6 +1,9 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="@polkadot/dev/node/test/node" />
+
 import '@polkadot/extension-mocks/chrome';
 
 import type { ReactWrapper } from 'enzyme';
@@ -26,17 +29,17 @@ import Signing from '.';
 
 const { configure, mount } = enzyme;
 
-// NOTE Required for spyOn when using @swc/jest
-// https://github.com/swc-project/swc/issues/3843
-jest.mock('../../messaging', (): Record<string, unknown> => ({
-  __esModule: true,
-  ...jest.requireActual('../../messaging')
-}));
+// // NOTE Required for spyOn when using @swc/jest
+// // https://github.com/swc-project/swc/issues/3843
+// jest.mock('../../messaging', (): Record<string, unknown> => ({
+//   __esModule: true,
+//   ...jest.requireActual('../../messaging')
+// }));
 
-jest.mock('../../MetadataCache', (): Record<string, unknown> => ({
-  __esModule: true,
-  ...jest.requireActual('../../MetadataCache')
-}));
+// jest.mock('../../MetadataCache', (): Record<string, unknown> => ({
+//   __esModule: true,
+//   ...jest.requireActual('../../MetadataCache')
+// }));
 
 // For this file, there are a lot of them
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -46,7 +49,7 @@ configure({ adapter: new Adapter() });
 
 describe('Signing requests', () => {
   let wrapper: ReactWrapper;
-  let onActionStub: jest.Mock;
+  let onActionStub: ReturnType<typeof jest.fn>;
   let signRequests: SigningRequest[] = [];
 
   const emitter = new EventEmitter();
@@ -79,10 +82,10 @@ describe('Signing requests', () => {
   const check = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: true } });
 
   beforeEach(async () => {
-    jest.spyOn(messaging, 'cancelSignRequest').mockResolvedValue(true);
-    jest.spyOn(messaging, 'approveSignPassword').mockResolvedValue(true);
-    jest.spyOn(messaging, 'isSignLocked').mockResolvedValue({ isLocked: true, remainingTime: 0 });
-    jest.spyOn(MetadataCache, 'getSavedMeta').mockResolvedValue(westendMetadata);
+    jest.spyOn(messaging, 'cancelSignRequest').mockImplementation(() => Promise.resolve(true));
+    jest.spyOn(messaging, 'approveSignPassword').mockImplementation(() => Promise.resolve(true));
+    jest.spyOn(messaging, 'isSignLocked').mockImplementation(() => Promise.resolve({ isLocked: true, remainingTime: 0 }));
+    jest.spyOn(MetadataCache, 'getSavedMeta').mockImplementation(() => Promise.resolve(westendMetadata));
 
     signRequests = [
       {
@@ -297,7 +300,7 @@ describe('Signing requests', () => {
       wrapper.find('.cancelButton').find('a').simulate('click');
       await act(flushAllPromises);
 
-      expect(messaging.cancelSignRequest).toBeCalledWith(signRequests[0].id);
+      expect(messaging.cancelSignRequest).toHaveBeenCalledWith(signRequests[0].id);
     });
 
     it('passes request id and password to approve call', async () => {
@@ -308,7 +311,7 @@ describe('Signing requests', () => {
       await act(flushAllPromises);
       wrapper.update();
 
-      expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, false, 'hunter1');
+      expect(messaging.approveSignPassword).toHaveBeenCalledWith(signRequests[0].id, false, 'hunter1');
     });
 
     it('asks the background to cache the password when the relevant checkbox is checked', async () => {
@@ -322,7 +325,7 @@ describe('Signing requests', () => {
       await act(flushAllPromises);
       wrapper.update();
 
-      expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, true, 'hunter1');
+      expect(messaging.approveSignPassword).toHaveBeenCalledWith(signRequests[0].id, true, 'hunter1');
     });
 
     it('shows an error when the password is wrong', async () => {

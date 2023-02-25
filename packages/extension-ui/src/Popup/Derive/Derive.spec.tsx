@@ -1,6 +1,9 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="@polkadot/dev/node/test/node" />
+
 import '@polkadot/extension-mocks/chrome';
 
 import type { ReactWrapper } from 'enzyme';
@@ -22,12 +25,12 @@ import Derive from '.';
 
 const { configure, mount } = enzyme;
 
-// NOTE Required for spyOn when using @swc/jest
-// https://github.com/swc-project/swc/issues/3843
-jest.mock('../../messaging', (): Record<string, unknown> => ({
-  __esModule: true,
-  ...jest.requireActual('../../messaging')
-}));
+// // NOTE Required for spyOn when using @swc/jest
+// // https://github.com/swc-project/swc/issues/3843
+// jest.mock('../../messaging', (): Record<string, unknown> => ({
+//   __esModule: true,
+//   ...jest.requireActual('../../messaging')
+// }));
 
 // For this file, there are a lot of them
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -53,7 +56,7 @@ const accounts = [
 describe('Derive', () => {
   const mountComponent = async (locked = false, account = 1): Promise<{
     wrapper: ReactWrapper;
-    onActionStub: jest.Mock;
+    onActionStub: ReturnType<typeof jest.fn>;
   }> => {
     const onActionStub = jest.fn();
 
@@ -82,7 +85,7 @@ describe('Derive', () => {
   };
 
   let wrapper: ReactWrapper;
-  let onActionStub: jest.Mock;
+  let onActionStub: ReturnType<typeof jest.fn>;
 
   const type = async (input: ReactWrapper, value: string): Promise<void> => {
     input.simulate('change', { target: { value } });
@@ -103,7 +106,7 @@ describe('Derive', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    jest.spyOn(messaging, 'validateAccount').mockImplementation(async (_, pass: string) => pass === parentPassword);
+    jest.spyOn(messaging, 'validateAccount').mockImplementation(async (_, pass) => pass === parentPassword);
     // silencing the following expected console.error
     console.error = jest.fn();
     // eslint-disable-next-line @typescript-eslint/require-await
@@ -259,7 +262,7 @@ describe('Derive', () => {
     it('redirects to derive from next account when other option is selected', () => {
       wrapper.find('[data-parent-option]').first().simulate('click');
 
-      expect(onActionStub).toBeCalledWith(`/account/derive/${accounts[0].address}`);
+      expect(onActionStub).toHaveBeenCalledWith(`/account/derive/${accounts[0].address}`);
     });
   });
 
@@ -296,8 +299,8 @@ describe('Derive', () => {
         await act(flushAllPromises);
         wrapper.update();
 
-        expect(deriveMock).toBeCalledWith(accounts[1].address, defaultDerivation, parentPassword, newAccount.name, newAccount.password, westendGenesis);
-        expect(onActionStub).toBeCalledWith('/');
+        expect(deriveMock).toHaveBeenCalledWith(accounts[1].address, defaultDerivation, parentPassword, newAccount.name, newAccount.password, westendGenesis);
+        expect(onActionStub).toHaveBeenCalledWith('/');
       });
     });
   });

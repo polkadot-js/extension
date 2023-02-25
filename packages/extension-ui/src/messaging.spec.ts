@@ -1,6 +1,9 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="@polkadot/dev/node/test/node" />
+
 import '@polkadot/extension-mocks/chrome';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
@@ -12,7 +15,7 @@ import { exportAccount } from './messaging';
 enzyme.configure({ adapter: new Adapter() });
 
 describe('messaging sends message to background via extension port for', () => {
-  test('exportAccount', () => {
+  it('exportAccount', () => {
     const callback = jest.fn();
 
     chrome.runtime.connect().onMessage.addListener(callback);

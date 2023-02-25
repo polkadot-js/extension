@@ -1,6 +1,9 @@
 // Copyright 2019-2023 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="@polkadot/dev/node/test/node" />
+
 import { u8aConcat, u8aEq, u8aToString } from '@polkadot/util';
 
 import { ETHEREUM, POSTFIX, PREFIX, unwrapBytes, wrapBytes } from './wrapBytes';

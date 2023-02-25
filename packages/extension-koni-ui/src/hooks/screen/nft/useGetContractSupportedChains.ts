@@ -4,11 +4,11 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { _isChainSupportEvmNft, _isChainSupportWasmNft } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-export default function useGetContractSupportedChains (): Record<string, _ChainInfo> {
+function filterContractTypes (chainInfoMap: Record<string, _ChainInfo>) {
   const filteredChainInfoMap: Record<string, _ChainInfo> = {};
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
 
   Object.values(chainInfoMap).forEach((chainInfo) => {
     if (_isChainSupportEvmNft(chainInfo) || _isChainSupportWasmNft(chainInfo)) {
@@ -17,4 +17,12 @@ export default function useGetContractSupportedChains (): Record<string, _ChainI
   });
 
   return filteredChainInfoMap;
+}
+
+export default function useGetContractSupportedChains (): Record<string, _ChainInfo> {
+  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
+
+  return useMemo(() => {
+    return filterContractTypes(chainInfoMap);
+  }, [chainInfoMap]);
 }

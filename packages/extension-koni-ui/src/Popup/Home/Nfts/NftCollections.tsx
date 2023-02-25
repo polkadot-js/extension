@@ -5,16 +5,15 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useGetNftByAccount from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetNftByAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail, NFT_PER_PAGE } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import { Image, Plus } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -32,7 +31,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
 
-  const { nftCollections, nftItems } = useSelector((state: RootState) => state.nft);
+  const { nftCollections, nftItems } = useGetNftByAccount();
   const [page, setPage] = useState(1);
   const [nftCollections_, setNftCollections_] = useState<NftCollection[]>([]);
 
@@ -48,8 +47,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useEffect(() => {
     // init NftCollections_
     setNftCollections_(nftCollections.slice(0, NFT_PER_PAGE));
-    // eslint-disable-next-line
-  }, []);
+  }, [nftCollections]);
 
   const searchCollection = useCallback((collection: NftCollection, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();

@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
-import { _getAssetType, _isAssetFungibleToken, _isCustomAsset, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
+import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -24,7 +25,6 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import Layout from '../../../components/Layout';
-import {AssetSetting} from "@subwallet/extension-base/background/KoniTypes";
 
 type Props = ThemeProps
 
@@ -92,7 +92,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [fungibleTokenList, setFungibleTokenList] = useState<_ChainAsset[]>([]);
   const allFungibleTokens = useMemo(() => {
     return filterFungibleTokens(assetRegistry, assetSettingMap, selectedFilters);
-  }, [assetRegistry, selectedFilters]);
+  }, [assetRegistry, assetSettingMap, selectedFilters]);
 
   const [paging, setPaging] = useState(TOKENS_PER_PAGE);
 

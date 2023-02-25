@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
+import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/CustomizeModal';
+import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { useChainsByAccountType } from '@subwallet/extension-koni-ui/hooks/screen/home/useChainsByAccountType';
 import useTokenGroup from '@subwallet/extension-koni-ui/hooks/screen/home/useTokenGroup';
-import { CustomizeModal } from '@subwallet/extension-koni-ui/Popup/Home/modal/CustomizeModal';
-import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/Popup/Home/modal/GlobalSearchTokenModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';

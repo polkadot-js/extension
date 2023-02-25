@@ -872,11 +872,6 @@ export interface ApiMap {
   evm: Record<string, _EvmApi>;
 }
 
-export interface DisableNetworkResponse {
-  success: boolean,
-  activeNetworkCount?: number
-}
-
 export interface SupportTransferResponse {
   supportTransfer: boolean;
   supportTransferAll: boolean;
@@ -1549,7 +1544,7 @@ export interface KoniRequestSignatures {
   'pri(chainService.enableChains)': [string[], boolean];
   'pri(chainService.disableChains)': [string[], boolean];
   'pri(chainService.enableChain)': [string, boolean];
-  'pri(chainService.disableChain)': [string, DisableNetworkResponse];
+  'pri(chainService.disableChain)': [string, boolean];
   'pri(chainService.removeChain)': [string, boolean];
   'pri(chainService.deleteCustomAsset)': [string, boolean];
   'pri(chainService.upsertCustomAsset)': [Record<string, any>, boolean];

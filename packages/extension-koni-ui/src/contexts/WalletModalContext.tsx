@@ -6,7 +6,7 @@ import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { Debugger } from '@subwallet/extension-koni-ui/Popup/Debugger';
 import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
 import { Bug } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -39,15 +39,17 @@ const DebugIcon = <Icon
 />;
 
 const DebugTrigger = styled.div(({ theme }) => ({
-  position: 'fixed',
+  position: 'absolute',
   right: 16,
   bottom: 90
 }));
 
 export const WalletModalContext = ({ children }: Props) => {
-  const { activeModal, inactiveModals } = useContext(ModalContext);
+  const { activeList, activeModal, inactiveModals, scannerOpen } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const openPModal = usePredefinedModal();
+
+  const hasActiveModal = useMemo(() => !!activeList.length, [activeList.length]);
 
   useEffect(() => {
     const confirmID = searchParams.get('popup');
@@ -73,6 +75,10 @@ export const WalletModalContext = ({ children }: Props) => {
   }, [openPModal]);
 
   return <>
+    <div
+      id='popup-container'
+      style={{ zIndex: hasActiveModal || scannerOpen ? undefined : -1 }}
+    />
     {children}
     <DebugTrigger>
       <Button

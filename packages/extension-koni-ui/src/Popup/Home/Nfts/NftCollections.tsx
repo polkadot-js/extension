@@ -130,7 +130,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const loadMoreCollections = useCallback(() => {
     setTimeout(() => { // delayed to avoid lagging on scroll
       if (hasMore) {
-        console.log('loadingMore', hasMore);
         const nextPaging = paging + NFT_PER_PAGE;
         const to = nextPaging > nftCollections.length ? nftCollections.length : nextPaging;
 
@@ -139,9 +138,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }
     }, 50);
   }, [hasMore, nftCollections, paging]);
-
-  console.log('nftCollections_', nftCollections_);
-  console.log('paging', paging);
 
   return (
     <PageWrapper
@@ -171,6 +167,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           renderOnScroll={false}
           renderWhenEmpty={emptyNft}
           searchFunction={searchCollection}
+          searchMinCharactersCount={1}
           searchPlaceholder={t<string>('Search collection name')}
         />
       </Layout.Base>

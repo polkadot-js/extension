@@ -2306,9 +2306,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.69.13":
-  version: 0.69.13
-  resolution: "@polkadot/dev@npm:0.69.13"
+"@polkadot/dev@npm:^0.69.14":
+  version: 0.69.14
+  resolution: "@polkadot/dev@npm:0.69.14"
   dependencies:
     "@babel/cli": ^7.21.0
     "@babel/core": ^7.21.0
@@ -2403,7 +2403,7 @@ __metadata:
     polkadot-exec-swc: scripts/polkadot-exec-swc.mjs
     polkadot-exec-tsc: scripts/polkadot-exec-tsc.mjs
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.mjs
-  checksum: 977d971f69eb302c8ff0e204fc0f57847809a0509d7aad10c4c30af15f5dd099f286e1182c86a42b36293701118da00546da163be5eb050bc605b338e3b266e8
+  checksum: c4ed2f0ff26c4b28852e502a1851ed142452273fc9db735f8840eb4e6c42ceeef2cb50012886ebabc4ccc2db3ec485766f0f7e6207e03365e920f9c849e3986d
   languageName: node
   linkType: hard
 
@@ -2559,7 +2559,7 @@ __metadata:
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
     "@babel/runtime": ^7.21.0
-    "@polkadot/dev": ^0.69.13
+    "@polkadot/dev": ^0.69.14
     "@polkadot/extension-base": ^0.44.10-0-x
     "@polkadot/extension-inject": ^0.44.10-0-x
     "@polkadot/extension-ui": ^0.44.10-0-x
@@ -14679,7 +14679,7 @@ fsevents@~2.3.2:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@babel/core": ^7.21.0
-    "@polkadot/dev": ^0.69.13
+    "@polkadot/dev": ^0.69.14
     "@types/node": ^18.14.1
     i18next-scanner: ^4.1.1
     sinon-chrome: ^3.0.1

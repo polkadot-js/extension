@@ -5,7 +5,7 @@ import type { Theme, ThemeProps } from '../types';
 
 import { faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import styled, { ThemeContext } from 'styled-components';
+import { ThemeContext } from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
@@ -13,6 +13,7 @@ import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuI
 import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
 import { setNotification, windowOpen } from '../messaging';
+import { styled } from '../styled';
 import getLanguageOptions from '../util/getLanguageOptions';
 
 interface Option {

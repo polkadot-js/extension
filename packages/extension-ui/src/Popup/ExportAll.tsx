@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import { saveAs } from 'file-saver';
+import fileSaver from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
@@ -47,7 +47,8 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
         .then(({ exportedJson }) => {
           const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
 
-          saveAs(blob, `batch_exported_account_${Date.now()}.json`);
+          // eslint-disable-next-line deprecation/deprecation
+          fileSaver.saveAs(blob, `batch_exported_account_${Date.now()}.json`);
 
           onAction('/');
         })

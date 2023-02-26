@@ -1,4 +1,4 @@
-     586	Jaco                          	Bump dev deps (#1215)
+     587	Jaco                          	Add empty loader for image files (#1216)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

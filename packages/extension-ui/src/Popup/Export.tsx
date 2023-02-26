@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import { saveAs } from 'file-saver';
+import fileSaver from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
@@ -46,7 +46,8 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
         .then(({ exportedJson }) => {
           const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
 
-          saveAs(blob, `${address}.json`);
+          // eslint-disable-next-line deprecation/deprecation
+          fileSaver.saveAs(blob, `${address}.json`);
 
           onAction('/');
         })

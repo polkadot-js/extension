@@ -3,7 +3,9 @@
 
 import type { ThemeProps } from '../types';
 
-import styled, { css } from 'styled-components';
+import { css } from 'styled-components';
+
+import { styled } from '../styled';
 
 interface Props extends ThemeProps {
   withError?: boolean;

@@ -2,15 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { NetworkItem, SwList } from '@subwallet/react-ui';
+import { Icon, NetworkItem, SwList } from '@subwallet/react-ui';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import CN from 'classnames';
-import { MagnifyingGlass } from 'phosphor-react';
+import { MagnifyingGlass, WifiHigh, WifiSlash } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -40,6 +41,26 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [chainStateMap]);
 
+  const renderChainConnectionStatus = useCallback((chainInfo: _ChainInfo) => {
+    const chainState = chainStateMap[chainInfo.slug];
+
+    if (chainState.connectionStatus === _ChainConnectionStatus.CONNECTED) {
+      return (
+        <Icon
+          phosphorIcon={WifiHigh}
+          weight='fill'
+        />
+      );
+    }
+
+    return (
+      <Icon
+        phosphorIcon={WifiSlash}
+        weight='fill'
+      />
+    );
+  }, [chainStateMap]);
+
   const renderChainItem = useCallback((chainInfo: _ChainInfo) => {
     const { symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
@@ -50,10 +71,11 @@ const Component: React.FC<Props> = (props: Props) => {
         key={chainInfo.slug}
         name={chainInfo.name}
         rightItem={renderNetworkItem(chainInfo)}
+        subIcon={renderChainConnectionStatus(chainInfo)}
         symbol={symbol.toLowerCase()}
       />
     );
-  }, [renderNetworkItem]);
+  }, [renderChainConnectionStatus, renderNetworkItem]);
 
   const chainSearchFunc = useCallback((item: _ChainInfo, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();

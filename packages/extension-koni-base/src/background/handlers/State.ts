@@ -1199,7 +1199,7 @@ export default class KoniState {
     return result;
   };
 
-  public enableChain (networkKey: string) {
+  public enableChain (networkKey: string): boolean {
     return this.chainService.setChainActiveStatus(networkKey, true);
   }
 

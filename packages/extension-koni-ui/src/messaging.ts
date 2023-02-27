@@ -599,7 +599,7 @@ export async function removeChain (networkKey: string): Promise<boolean> {
   return sendMessage('pri(chainService.removeChain)', networkKey);
 }
 
-export async function changeChainActiveState (chain: string, active: boolean): Promise<boolean> {
+export async function updateChainActiveState (chain: string, active: boolean): Promise<boolean> {
   if (active) {
     return await enableChain(chain);
   } else {

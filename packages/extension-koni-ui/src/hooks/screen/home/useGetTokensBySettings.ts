@@ -3,16 +3,16 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _isAssetFungibleToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { useChainsByAccountType } from '@subwallet/extension-koni-ui/hooks/screen/home/useChainsByAccountType';
+import { useGetChainSlugsByAccountType } from '@subwallet/extension-koni-ui/hooks/screen/home/useGetChainSlugsByAccountType';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 
 // Get all fungible tokens by active chains, visible tokens and current account
-export default function useGetTokensBySettings (): Record<string, _ChainAsset> {
+export default function useGetTokensBySettings (address?: string): Record<string, _ChainAsset> {
   const chainStateMap = useSelector((state: RootState) => state.chainStore.chainStateMap);
   const chainAssetMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const assetSettingMap = useSelector((state: RootState) => state.assetRegistry.assetSettingMap);
-  const filteredChainSlugs = useChainsByAccountType();
+  const filteredChainSlugs = useGetChainSlugsByAccountType(address);
 
   const filteredChainAssetMap: Record<string, _ChainAsset> = {};
 

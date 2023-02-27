@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
-import { _getAssetType, _isAssetFungibleToken, _isCustomAsset, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
+import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -32,22 +33,16 @@ const TOKENS_PER_PAGE = 10;
 enum FilterValue {
   ENABLED = 'enabled',
   DISABLED = 'disabled',
-  PREDEFINED = 'predefined',
-  CUSTOM = 'custom',
-  NATIVE = 'native',
-  ERC20 = 'erc20'
+  CUSTOM = 'custom'
 }
 
 const FILTER_OPTIONS = [
   { label: 'Enabled tokens', value: FilterValue.ENABLED },
   { label: 'Disabled tokens', value: FilterValue.DISABLED },
-  { label: 'Predefined tokens', value: FilterValue.PREDEFINED },
-  { label: 'Custom tokens', value: FilterValue.CUSTOM },
-  { label: 'Native tokens', value: FilterValue.NATIVE },
-  { label: 'ERC-20 tokens', value: FilterValue.ERC20 }
+  { label: 'Custom tokens', value: FilterValue.CUSTOM }
 ];
 
-function filterFungibleTokens (assetRegistry: Record<string, _ChainAsset>, filters: FilterValue[]): _ChainAsset[] {
+function filterFungibleTokens (assetRegistry: Record<string, _ChainAsset>, assetSettingMap: Record<string, AssetSetting>, filters: FilterValue[]): _ChainAsset[] {
   const filteredTokenList: _ChainAsset[] = [];
 
   Object.values(assetRegistry).forEach((chainAsset) => {
@@ -58,14 +53,11 @@ function filterFungibleTokens (assetRegistry: Record<string, _ChainAsset>, filte
         case FilterValue.CUSTOM:
           isValidationPassed = _isCustomAsset(chainAsset.slug);
           break;
-        case FilterValue.ERC20:
-          isValidationPassed = _getAssetType(chainAsset) === _AssetType.ERC20;
+        case FilterValue.ENABLED:
+          isValidationPassed = assetSettingMap[chainAsset.slug] && assetSettingMap[chainAsset.slug].visible;
           break;
-        case FilterValue.NATIVE:
-          isValidationPassed = _isNativeToken(chainAsset);
-          break;
-        case FilterValue.PREDEFINED:
-          isValidationPassed = !_isCustomAsset(chainAsset.slug);
+        case FilterValue.DISABLED:
+          isValidationPassed = !assetSettingMap[chainAsset.slug] || !assetSettingMap[chainAsset.slug].visible;
           break;
         default:
           isValidationPassed = false;
@@ -99,8 +91,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const [fungibleTokenList, setFungibleTokenList] = useState<_ChainAsset[]>([]);
   const allFungibleTokens = useMemo(() => {
-    return filterFungibleTokens(assetRegistry, selectedFilters);
-  }, [assetRegistry, selectedFilters]);
+    return filterFungibleTokens(assetRegistry, assetSettingMap, selectedFilters);
+  }, [assetRegistry, assetSettingMap, selectedFilters]);
 
   const [paging, setPaging] = useState(TOKENS_PER_PAGE);
 
@@ -149,7 +141,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const renderTokenItem = useCallback((tokenInfo: _ChainAsset) => {
     return (
       <TokenItem
-        dividerPadding={58}
         isShowSubLogo={true}
         key={tokenInfo.slug}
         name={tokenInfo.symbol}
@@ -264,21 +255,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderPaddingVertical={true}
         title={t<string>('Manage tokens')}
       >
-        <Button
-          icon={<Icon
+        <SwList.Section
+          actionBtnIcon={<Icon
+            customSize={'20px'}
             phosphorIcon={FadersHorizontal}
             size='sm'
             type='phosphor'
+            weight={'fill'}
           />}
-          onClick={openFilterModal}
-        />
-
-        <SwList.Section
           className={'manage_tokens__container'}
           enableSearchInput={true}
           gridGap={'14px'}
           list={fungibleTokenList}
           minColumnWidth={'172px'}
+          onClickActionBtn={openFilterModal}
           pagination={{
             hasMore,
             loadMore: loadMoreTokens
@@ -288,6 +278,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           renderWhenEmpty={emptyTokenList}
           searchFunction={searchToken}
           searchPlaceholder={t<string>('Search token')}
+          showActionBtn={true}
         />
 
         <SwModal

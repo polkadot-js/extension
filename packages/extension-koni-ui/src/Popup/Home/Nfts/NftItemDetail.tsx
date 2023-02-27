@@ -144,10 +144,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     inactiveModal('nftItemDescription');
   }, [inactiveModal]);
 
-  const onError = useCallback(() => {
-    console.log('error', nftItem.image);
-  }, [nftItem.image]);
-
   return (
     <PageWrapper
       className={`${className}`}
@@ -167,7 +163,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           <div className={'nft_item_detail__nft_image'}>
             <Image
               height={358}
-              onError={onError}
               src={nftItem.image}
             />
           </div>

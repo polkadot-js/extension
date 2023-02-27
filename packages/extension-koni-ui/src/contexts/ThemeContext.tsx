@@ -76,12 +76,17 @@ export interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
+const getPopupContainer = () => document.getElementById('popup-container') || document.body;
+
 export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactElement<ThemeProviderProps> {
   const themeName = useSelector((state: RootState) => state.settings.theme);
   const themeConfig = SW_THEME_CONFIGS[themeName];
 
   return (
-    <ConfigProvider theme={themeConfig}>
+    <ConfigProvider
+      getPopupContainer={getPopupContainer}
+      theme={themeConfig}
+    >
       <ThemeGenerator themeConfig={themeConfig}>
         {children}
       </ThemeGenerator>

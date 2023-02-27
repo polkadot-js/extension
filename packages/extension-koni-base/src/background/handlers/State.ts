@@ -12,7 +12,7 @@ import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/con
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug, _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
@@ -277,7 +277,7 @@ export default class KoniState {
     const activeChains = this.chainService.getActiveChainInfoMap();
 
     Object.values(activeChains).forEach((chainInfo) => {
-      const chainAssetMap = this.chainService.getTokensByChain(chainInfo.slug);
+      const chainAssetMap = this.chainService.getFungibleTokensByChain(chainInfo.slug);
 
       Object.keys(chainAssetMap).forEach((assetSlug) => {
         balanceMap[assetSlug] = {
@@ -1199,8 +1199,29 @@ export default class KoniState {
     return result;
   };
 
-  public enableChain (networkKey: string) {
-    return this.chainService.setChainActiveStatus(networkKey, true);
+  public updateAssetSettingByChain (chainSlug: string, visible: boolean) {
+    this.assetSettingStore.get('AssetSetting', (storedAssetSettings) => {
+      const assetsByChain = this.chainService.getFungibleTokensByChain(chainSlug);
+      const assetSettings: Record<string, AssetSetting> = storedAssetSettings || {};
+
+      Object.values(assetsByChain).forEach((assetInfo) => {
+        assetSettings[assetInfo.slug] = { visible };
+      });
+
+      this.setAssetSettings(assetSettings);
+    });
+  }
+
+  public enableChain (chainSlug: string, enableTokens?: boolean): boolean {
+    if (enableTokens) {
+      this.updateAssetSettingByChain(chainSlug, true);
+    }
+
+    const result = this.chainService.enableChain(chainSlug);
+
+    this.updateServiceInfo();
+
+    return result;
   }
 
   public resetDefaultChains () {

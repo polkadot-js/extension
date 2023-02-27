@@ -224,7 +224,7 @@ export class ChainService {
     return this.getAssetRegistry()[slug];
   }
 
-  public getTokensByChain (chainSlug: string): Record<string, _ChainAsset> {
+  public getFungibleTokensByChain (chainSlug: string): Record<string, _ChainAsset> {
     const result: Record<string, _ChainAsset> = {};
 
     Object.values(this.getAssetRegistry()).forEach((chainAsset) => {
@@ -427,23 +427,25 @@ export class ChainService {
   private initApis () { // TODO: this might be async
     Object.entries(this.getChainInfoMap()).forEach(([slug, chainInfo]) => {
       if (this.getChainStateByKey(slug).active) {
-        const { endpoint, providerName } = this.getChainCurrentProviderByKey(slug);
-
-        if (chainInfo.substrateInfo !== null) {
-          const chainApi = this.initApi(slug, endpoint, 'substrate', providerName);
-
-          this.substrateChainHandler.setSubstrateApi(slug, chainApi as _SubstrateApi);
-          this.setChainConnectionStatus(slug, _ChainConnectionStatus.CONNECTED); // TODO: might not be needed, can be updated by cron
-        }
-
-        if (chainInfo.evmInfo !== null) {
-          const chainApi = this.initApi(slug, endpoint, 'evm', providerName);
-
-          this.evmChainHandler.setEvmApi(slug, chainApi as _EvmApi);
-          this.setChainConnectionStatus(slug, _ChainConnectionStatus.CONNECTED);
-        }
+        this.initApiForChain(chainInfo);
       }
     });
+  }
+
+  private initApiForChain (chainInfo: _ChainInfo) {
+    const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
+
+    if (chainInfo.substrateInfo !== null) {
+      const chainApi = this.initApi(chainInfo.slug, endpoint, 'substrate', providerName);
+
+      this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as _SubstrateApi);
+    }
+
+    if (chainInfo.evmInfo !== null) {
+      const chainApi = this.initApi(chainInfo.slug, endpoint, 'evm', providerName);
+
+      this.evmChainHandler.setEvmApi(chainInfo.slug, chainApi as _EvmApi);
+    }
   }
 
   private initApi (slug: string, endpoint: string, type = 'substrate', providerName?: string): _ChainBaseApi {
@@ -453,6 +455,27 @@ export class ChainService {
       default: // substrate by default
         return this.substrateChainHandler.initApi(slug, endpoint, providerName);
     }
+  }
+
+  public enableChain (chainSlug: string): boolean {
+    const chainInfo = this.getChainInfoByKey(chainSlug);
+    const chainStateMap = this.getChainStateMap();
+
+    if (chainStateMap[chainSlug].active || this.lockChainInfoMap) {
+      return false;
+    }
+
+    this.lockChainInfoMap = true;
+    chainStateMap[chainSlug].active = true;
+    this.initApiForChain(chainInfo);
+
+    this.dbService.updateChainStore({
+      ...chainInfo,
+      active: true,
+      currentProvider: chainStateMap[chainSlug].currentProvider
+    }).catch(console.error);
+
+    return true;
   }
 
   private checkExistedPredefinedChain (genesisHash?: string, evmChainId?: number) {

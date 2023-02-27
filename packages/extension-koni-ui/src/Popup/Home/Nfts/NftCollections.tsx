@@ -5,16 +5,15 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useGetNftByAccount from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetNftByAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail, NFT_PER_PAGE } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import { Image, Plus } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -32,15 +31,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
 
-  const { nftCollections, nftItems } = useSelector((state: RootState) => state.nft);
-  const [page, setPage] = useState(1);
+  const { nftCollections, nftItems } = useGetNftByAccount();
+
+  const [paging, setPaging] = useState(NFT_PER_PAGE);
   const [nftCollections_, setNftCollections_] = useState<NftCollection[]>([]);
+  const hasMore = useMemo(() => {
+    return nftCollections.length > nftCollections_.length;
+  }, [nftCollections.length, nftCollections_.length]);
 
   const subHeaderButton: ButtonProps[] = [
     {
       icon: rightIcon,
       onClick: () => {
-        navigate('/home/nfts/import-collection', { state: { isExternalRequest: false } });
+        navigate('/settings/tokens/import-nft', { state: { isExternalRequest: false } });
       }
     }
   ];
@@ -48,8 +51,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useEffect(() => {
     // init NftCollections_
     setNftCollections_(nftCollections.slice(0, NFT_PER_PAGE));
-    // eslint-disable-next-line
-  }, []);
+    setPaging(NFT_PER_PAGE);
+  }, [nftCollections]);
 
   const searchCollection = useCallback((collection: NftCollection, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -126,19 +129,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const loadMoreCollections = useCallback(() => {
     setTimeout(() => { // delayed to avoid lagging on scroll
-      if (nftCollections.length > nftCollections_.length) {
-        const nextPage = page + 1;
-        const from = (nextPage - 1) * NFT_PER_PAGE;
-        const to = from + NFT_PER_PAGE > nftCollections.length ? nftCollections.length : (from + NFT_PER_PAGE);
+      if (hasMore) {
+        const nextPaging = paging + NFT_PER_PAGE;
+        const to = nextPaging > nftCollections.length ? nftCollections.length : nextPaging;
 
-        setNftCollections_([
-          ...nftCollections_,
-          ...nftCollections.slice(from, to)
-        ]);
-        setPage(nextPage);
+        setNftCollections_(nftCollections.slice(0, to));
+        setPaging(nextPaging);
       }
     }, 50);
-  }, [nftCollections, nftCollections_, page]);
+  }, [hasMore, nftCollections, paging]);
 
   return (
     <PageWrapper
@@ -161,13 +160,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           list={nftCollections_}
           minColumnWidth={'172px'}
           pagination={{
-            hasMore: nftCollections.length > nftCollections_.length,
+            hasMore,
             loadMore: loadMoreCollections
           }}
           renderItem={renderNftCollection}
           renderOnScroll={false}
           renderWhenEmpty={emptyNft}
           searchFunction={searchCollection}
+          searchMinCharactersCount={1}
           searchPlaceholder={t<string>('Search collection name')}
         />
       </Layout.Base>
@@ -189,6 +189,10 @@ const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) =>
     '.nft_collection_list__container': {
       paddingTop: 14,
       flex: 1
+    },
+
+    '.ant-sw-list-wrapper .-render-default': {
+      overflow: 'hidden'
     },
 
     '.nft_empty__container': {

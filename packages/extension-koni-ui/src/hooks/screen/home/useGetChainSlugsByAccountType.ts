@@ -7,6 +7,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType } from '@subwallet/extension-koni-ui/types';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import {isEthereumAddress} from "@polkadot/util-crypto";
 
 function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<string, _ChainInfo>): string[] {
   const result: string[] = [];
@@ -28,17 +29,29 @@ function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<st
   return result;
 }
 
-export function useChainsByAccountType (): string[] {
+export function useGetChainSlugsByAccountType (address?: string): string[] {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
 
-  let accountType: AccountType = 'ALL';
+  const accountType = useMemo(() => {
+    let accountType: AccountType = 'ALL';
 
-  if (currentAccount?.type === 'ethereum') {
-    accountType = 'ETHEREUM';
-  } else if (currentAccount?.type === 'sr25519') {
-    accountType = 'SUBSTRATE';
-  }
+    if (address) {
+      if (isEthereumAddress(address)) {
+        accountType = 'ETHEREUM';
+      } else {
+        accountType = 'SUBSTRATE';
+      }
+    } else {
+      if (currentAccount?.type === 'ethereum') {
+        accountType = 'ETHEREUM';
+      } else if (currentAccount?.type === 'sr25519') {
+        accountType = 'SUBSTRATE';
+      }
+    }
+
+    return accountType;
+  }, [address, currentAccount?.type]);
 
   return useMemo<string[]>(() => {
     return getChainsAccountType(accountType, chainInfoMap);

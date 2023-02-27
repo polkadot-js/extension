@@ -347,6 +347,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }}
         showBackButton={true}
         showSubHeader={true}
+        showTabBar={false}
         subHeaderBackground={'transparent'}
         subHeaderCenter={true}
         subHeaderPaddingVertical={true}

@@ -299,27 +299,40 @@ mark {
   background-color: #feffe6;
 }
 
-*::-webkit-scrollbar-track {
-  background-color: transparent;
-}
-
-*::-webkit-scrollbar {
+/* width */
+::-webkit-scrollbar {
   width: 4px;
-  height: 4px;
+  width: 4px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  border-radius: 2px;
+  width: 0;
   background-color: transparent;
-  border-radius: 0;
 }
 
-*::-webkit-scrollbar-thumb {
-  border-radius: 4px;
-  background-color: rgba(128, 128, 128, 0.5);
+/* Handle */
+::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  background-color: rgba(128, 128, 128, 0.18);
 }
 
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(128, 128, 128, 0.5) transparent;
-  scrollbar-gutter: auto;
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(128, 128, 128, 0.27);
 }
+
+/**::-webkit-scrollbar-thumb {*/
+/*  border-radius: 4px;*/
+/*  background-color: rgba(128, 128, 128, 0.5);*/
+/*}*/
+
+/** {*/
+/*  scrollbar-width: thin;*/
+/*  scrollbar-color: rgba(128, 128, 128, 0.5) transparent;*/
+/*  scrollbar-gutter: auto;*/
+/*}*/
 
 /*SubWallet main css*/
 *, :after, :before {
@@ -339,27 +352,6 @@ body ::-webkit-scrollbar {
   -webkit-appearance: none;
   width: 6px;
   height: 6px
-}
-
-body ::-webkit-scrollbar-track {
-  /*background: rgba(0, 0, 0, .1);*/
-  border-radius: 0
-}
-
-body ::-webkit-scrollbar-thumb {
-  cursor: pointer;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, .25);
-  -webkit-transition: color .2s ease;
-  transition: color .2s ease
-}
-
-body ::-webkit-scrollbar-thumb:window-inactive {
-  background: rgba(0, 0, 0, .15)
-}
-
-body ::-webkit-scrollbar-thumb:hover {
-  background: rgba(128, 135, 139, .8)
 }
 
 a {

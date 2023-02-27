@@ -18,7 +18,7 @@ interface Props extends ThemeProps, BasicInputWrapper {
   items: ChainItemType[]
 }
 
-function Component ({ className = '', id = 'address-input', items, label, placeholder, onChange, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ className = '', id = 'address-input', items, label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 

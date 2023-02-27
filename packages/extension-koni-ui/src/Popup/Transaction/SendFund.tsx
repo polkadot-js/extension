@@ -4,19 +4,19 @@
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import { ChainItemType, ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
+import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import { checkTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
 import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import {Button, Form, Input } from '@subwallet/react-ui';
+import { Button, Form, Input } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import FreeBalance from "@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance";
-import {TokenItemType, TokenSelector} from "@subwallet/extension-koni-ui/components/Field/TokenSelector";
 
 interface TransferFromProps extends TransactionFormBaseProps {
   to: string
@@ -46,7 +46,7 @@ const _SendFund: React.FC = () => {
   ), [chainInfoMap]);
 
   const tokenList = useMemo<TokenItemType[]>(() => (
-    Object.values(assetRegistry).map(({name, slug, originChain, symbol}) => ({name, slug, originChain, symbol}))
+    Object.values(assetRegistry).map(({ name, originChain, slug, symbol }) => ({ name, slug, originChain, symbol }))
   ), [assetRegistry]);
 
   console.log(assetRegistry);

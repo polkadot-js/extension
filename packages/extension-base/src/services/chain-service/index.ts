@@ -448,6 +448,16 @@ export class ChainService {
     }
   }
 
+  private async destroyApiForChain (chainInfo: _ChainInfo) {
+    if (chainInfo.substrateInfo !== null) {
+      await this.substrateChainHandler.destroySubstrateApi(chainInfo.slug);
+    }
+
+    if (chainInfo.evmInfo !== null) {
+      this.evmChainHandler.destroyEvmApi(chainInfo.slug);
+    }
+  }
+
   private initApi (slug: string, endpoint: string, type = 'substrate', providerName?: string): _ChainBaseApi {
     switch (type) {
       case 'evm':
@@ -474,6 +484,33 @@ export class ChainService {
       active: true,
       currentProvider: chainStateMap[chainSlug].currentProvider
     }).catch(console.error);
+
+    this.chainStateMapSubject.next(this.dataMap.chainStateMap);
+    this.lockChainInfoMap = false;
+
+    return true;
+  }
+
+  public async disableChain (chainSlug: string): Promise<boolean> {
+    const chainInfo = this.getChainInfoByKey(chainSlug);
+    const chainStateMap = this.getChainStateMap();
+
+    if (!chainStateMap[chainSlug].active || this.lockChainInfoMap) {
+      return false;
+    }
+
+    this.lockChainInfoMap = true;
+    chainStateMap[chainSlug].active = false;
+    await this.destroyApiForChain(chainInfo);
+
+    this.dbService.updateChainStore({
+      ...chainInfo,
+      active: false,
+      currentProvider: chainStateMap[chainSlug].currentProvider
+    }).catch(console.error);
+
+    this.chainStateMapSubject.next(this.dataMap.chainStateMap);
+    this.lockChainInfoMap = false;
 
     return true;
   }
@@ -532,18 +569,18 @@ export class ChainService {
       const mergedChainInfoMap: Record<string, _ChainInfo> = ChainInfoMap;
 
       for (const [storedSlug, storedChainInfo] of Object.entries(storedChainSettingMap)) {
-        if (storedSlug in ChainInfoMap) { // check predefined chains first, update providers, active and currentProvider
+        if (storedSlug in ChainInfoMap) { // check predefined chains first, update providers and currentProvider
           mergedChainInfoMap[storedSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[storedSlug].providers };
           this.dataMap.chainStateMap[storedSlug] = {
             currentProvider: storedChainInfo.currentProvider,
             slug: storedSlug,
             connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-            active: _DEFAULT_ACTIVE_CHAINS.includes(storedSlug) || storedChainInfo.active
+            active: storedChainInfo.active
           };
 
           newStorageData.push({
             ...mergedChainInfoMap[storedSlug],
-            active: _DEFAULT_ACTIVE_CHAINS.includes(storedSlug),
+            active: storedChainInfo.active,
             currentProvider: storedChainInfo.currentProvider
           });
         } else { // only custom chains are left
@@ -556,12 +593,12 @@ export class ChainService {
               currentProvider: storedChainInfo.currentProvider,
               slug: duplicatedDefaultSlug,
               connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-              active: _DEFAULT_ACTIVE_CHAINS.includes(duplicatedDefaultSlug) || storedChainInfo.active
+              active: storedChainInfo.active
             };
 
             newStorageData.push({
               ...mergedChainInfoMap[duplicatedDefaultSlug],
-              active: _DEFAULT_ACTIVE_CHAINS.includes(duplicatedDefaultSlug) || storedChainInfo.active,
+              active: storedChainInfo.active,
               currentProvider: storedChainInfo.currentProvider
             });
 
@@ -583,12 +620,12 @@ export class ChainService {
               currentProvider: storedChainInfo.currentProvider,
               slug: storedSlug,
               connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-              active: _DEFAULT_ACTIVE_CHAINS.includes(storedSlug) || storedChainInfo.active
+              active: storedChainInfo.active
             };
 
             newStorageData.push({
               ...mergedChainInfoMap[storedSlug],
-              active: _DEFAULT_ACTIVE_CHAINS.includes(storedSlug) || storedChainInfo.active,
+              active: storedChainInfo.active,
               currentProvider: storedChainInfo.currentProvider
             });
           }

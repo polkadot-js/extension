@@ -2080,8 +2080,8 @@ export default class KoniExtension {
     return this.#koniState.removeChain(networkKey);
   }
 
-  private disableChain (networkKey: string): boolean {
-    return this.#koniState.disableChain(networkKey);
+  private async disableChain (networkKey: string): Promise<boolean> {
+    return await this.#koniState.disableChain(networkKey);
   }
 
   private enableChain (networkKey: string): boolean {
@@ -4539,7 +4539,7 @@ export default class KoniExtension {
       case 'pri(chainService.enableChain)':
         return this.enableChain(request as string);
       case 'pri(chainService.disableChain)':
-        return this.disableChain(request as string);
+        return await this.disableChain(request as string);
       case 'pri(chainService.removeChain)':
         return this.removeNetworkMap(request as string);
       case 'pri(chainService.validateCustomChain)':

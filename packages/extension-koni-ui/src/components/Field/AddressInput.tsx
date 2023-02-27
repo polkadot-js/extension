@@ -2,32 +2,29 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
+import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import { Button, Icon, Input, SwQrScanner } from '@subwallet/react-ui';
+import { Button, Icon, Input, InputRef, SwQrScanner } from '@subwallet/react-ui';
 import { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
-import React, { ChangeEventHandler, useCallback, useState } from 'react';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
-type Props = ThemeProps & {
-  value?: string,
-  onChange: (value: string) => void,
-  placeholder?: string
-}
+type Props = ThemeProps & BasicInputWrapper;
 
-function Component ({ className = '', onChange, placeholder, value }: Props): React.ReactElement<Props> {
+function Component ({ className = '', label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isScannerOpen, setScannerOpen] = useState(false);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     const val = event.target.value;
 
-    onChange(val);
+    onChange && onChange({ target: { value: val } });
   }, [onChange]);
 
   const onOpenScanner = useCallback(() => {
@@ -44,7 +41,7 @@ function Component ({ className = '', onChange, placeholder, value }: Props): Re
 
   const onSuccess = useCallback((result: ScannerResult) => {
     setScannerOpen(false);
-    onChange(result.text);
+    onChange && onChange({ target: { value: result.text } });
   }, [onChange]);
 
   // todo: Will work with "Manage address book" feature later
@@ -54,7 +51,7 @@ function Component ({ className = '', onChange, placeholder, value }: Props): Re
         className={CN('address-input', className, {
           '-is-valid-address': isAddress(value)
         })}
-        label={t('Account address')}
+        label={label || t('Account address')}
         onChange={_onChange}
         placeholder={placeholder || t('Please type or paste an address')}
         prefix={
@@ -119,7 +116,7 @@ function Component ({ className = '', onChange, placeholder, value }: Props): Re
   );
 }
 
-export const AddressInput = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const AddressInput = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return ({
     '.__overlay': {
       position: 'absolute',

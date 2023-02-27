@@ -30,6 +30,8 @@ export interface SWTransaction {
   transaction: SubmittableExtrinsic | EvmSendTransactionRequest;
 }
 
+export type SWTransactionResult = Omit<SWTransaction, 'transaction' | 'data'>
+
 export type SWTransactionInput = Pick<SWTransaction, 'address' | 'url' | 'transaction' | 'data' | 'extrinsicType' | 'chain' | 'chainType'>
 
 export type SendTransactionEvents = 'extrinsicHash' | 'error' | 'success';

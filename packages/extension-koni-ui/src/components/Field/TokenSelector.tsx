@@ -4,27 +4,30 @@
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, InputRef, Logo, NetworkItem, SelectModal } from '@subwallet/react-ui';
+import { Icon, InputRef, Logo, SelectModal } from '@subwallet/react-ui';
+import TokenItem from '@subwallet/react-ui/es/web3-block/token-item';
 import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
-export type ChainItemType = {
+export type TokenItemType = {
   name: string,
   slug: string,
+  symbol: string,
+  originChain: string,
 };
 
 interface Props extends ThemeProps, BasicInputWrapper {
-  items: ChainItemType[]
+  items: TokenItemType[]
 }
 
-function Component ({ className = '', id = 'address-input', items, label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ className = '', id = 'token-select', items, label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 
-  const renderChainSelected = useCallback((item: ChainItemType) => {
+  const renderTokenSelected = useCallback((item: TokenItemType) => {
     return (
-      <div className={'__selected-item'}>{item.name}</div>
+      <div className={'__selected-item'}>{item.symbol} ({item.originChain})</div>
     );
   }, []);
 
@@ -35,28 +38,30 @@ function Component ({ className = '', id = 'address-input', items, label, onChan
     [onChange]
   );
 
-  const searchFunction = useCallback((item: ChainItemType, searchText: string) => {
+  const searchFunction = useCallback((item: TokenItemType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
     return (
-      item.name.toLowerCase().includes(searchTextLowerCase)
+      item.symbol.toLowerCase().includes(searchTextLowerCase)
     );
   }, []);
 
   const chainLogo = useMemo(() => {
-    return (
-      <Logo
-        network={value}
-        size={token.controlHeightSM}
-      />
-    );
-  }, [value, token.controlHeightSM]);
+    const tokenInfo = items.find((x) => x.slug === value);
 
-  const renderItem = useCallback((item: ChainItemType, selected: boolean) => {
+    return tokenInfo && <Logo
+      isShowSubLogo={true}
+      size={token.controlHeightSM}
+      subNetwork={tokenInfo.originChain}
+      token={tokenInfo.symbol.toLowerCase()}
+    />;
+  }, [items, token.controlHeightSM, value]);
+
+  const renderItem = useCallback((item: TokenItemType, selected: boolean) => {
     return (
-      <NetworkItem
-        name={item.name}
-        networkKey={item.slug}
+      <TokenItem
+        isShowSubLogo={true}
+        name={item.symbol}
         networkMainLogoShape={'circle'}
         networkMainLogoSize={28}
         rightItem={selected && <Icon
@@ -66,6 +71,9 @@ function Component ({ className = '', id = 'address-input', items, label, onChan
           type='phosphor'
           weight={'fill'}
         />}
+        subName={item.originChain}
+        subNetworkKey={item.originChain}
+        symbol={item.symbol.toLowerCase()}
       />
     );
   }, [token]);
@@ -79,10 +87,10 @@ function Component ({ className = '', id = 'address-input', items, label, onChan
       items={items}
       label={label}
       onSelect={_onChange}
-      placeholder={placeholder || t('Select chain')}
+      placeholder={placeholder || t('Select token')}
       prefix={value !== '' && chainLogo}
       renderItem={renderItem}
-      renderSelected={renderChainSelected}
+      renderSelected={renderTokenSelected}
       searchFunction={searchFunction}
       searchPlaceholder={t('Search chain')}
       searchableMinCharactersCount={2}
@@ -91,7 +99,7 @@ function Component ({ className = '', id = 'address-input', items, label, onChan
   );
 }
 
-export const ChainSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
+export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return ({
     '&.chain-selector-input .__selected-item': {
       color: token.colorText

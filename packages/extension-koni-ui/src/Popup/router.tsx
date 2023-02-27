@@ -49,6 +49,9 @@ const ApplyMasterPassword = React.lazy(() => import('@subwallet/extension-koni-u
 const AccountDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AccountDetail'));
 const AccountExport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AccountExport'));
 
+const Transaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Transaction'));
+const TransactionDone = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Transaction/TransactionDone'));
+
 const ErrorFallback = () => {
   const error = useRouteError();
 
@@ -127,7 +130,7 @@ export const router = createHashRouter([{
     },
     {
       path: '/transaction',
-      element: <Outlet />,
+      element: <Transaction />,
       children: [
         {
           path: 'send-fund',
@@ -156,6 +159,10 @@ export const router = createHashRouter([{
         {
           path: 'compound',
           element: <Example />
+        },
+        {
+          path: 'done/:chainType/:chain/:extrinsicHash',
+          element: <TransactionDone />
         }
       ]
     },

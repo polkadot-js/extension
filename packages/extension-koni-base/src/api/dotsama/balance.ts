@@ -620,11 +620,16 @@ export async function getFreeBalance (chain: string, address: string, substrateA
 }
 
 export async function subscribeFreeBalance (chain: string, address: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, token: string | undefined, update: (balance: string) => void): Promise<() => void> {
-  const apiProps = await substrateApiMap[chain].isReady;
-  const api = apiProps.api;
+  const apiProps = substrateApiMap[chain] ? await substrateApiMap[chain].isReady : null;
+  const api = apiProps?.api;
   const web3Api = evmApiMap[chain];
   const tokenInfo = token ? state.getAssetBySlug(token) : state.getNativeTokenInfo(chain);
   const chainInfo = state.getChainInfo(chain);
+
+  if (!chainInfo) {
+    throw new Error('Not found chain ' + chain);
+  }
+
   const isNativeToken = _isNativeToken(tokenInfo);
 
   // Only EVM Address use with EVM network

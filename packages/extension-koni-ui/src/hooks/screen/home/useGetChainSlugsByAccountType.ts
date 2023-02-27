@@ -7,7 +7,8 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType } from '@subwallet/extension-koni-ui/types';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import {isEthereumAddress} from "@polkadot/util-crypto";
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<string, _ChainInfo>): string[] {
   const result: string[] = [];

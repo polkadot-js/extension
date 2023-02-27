@@ -30,7 +30,8 @@ export declare type Theme = {
   token: GlobalToken;
 
   // todo: add extend token later
-  extendToken: ExtraToken
+  extendToken: ExtraToken,
+  logoMap: Web3LogoMap,
 };
 
 export interface SwThemeConfig extends ThemeConfig {
@@ -99,11 +100,13 @@ SW_THEME_CONFIGS[ThemeNames.SUBSPACE] = { ...SW_THEME_CONFIGS[ThemeNames.LIGHT] 
 export function generateTheme ({ customTokens,
   generateExtraTokens,
   id,
+  logoMap,
   name }: SwThemeConfig, token: GlobalToken): Theme {
   return {
     id,
     name,
     token: customTokens(token),
-    extendToken: generateExtraTokens(token)
+    extendToken: generateExtraTokens(token),
+    logoMap
   } as Theme;
 }

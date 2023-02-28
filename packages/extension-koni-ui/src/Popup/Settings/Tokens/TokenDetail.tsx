@@ -5,6 +5,7 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getContractAddressOfToken, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/useConfirmModal';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
@@ -16,7 +17,7 @@ import Icon from '@subwallet/react-ui/es/icon';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { Copy, Trash } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -27,9 +28,9 @@ type Props = ThemeProps
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
+  const goBack = useDefaultNavigate().goBack;
   const location = useLocation();
   const showNotification = useNotification();
 
@@ -49,16 +50,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     okText: t<string>('Remove')
   });
 
-  const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
-
   const handleDeleteToken = useCallback(() => {
     handleSimpleConfirmModal().then(() => {
       deleteCustomAssets(tokenInfo.slug)
         .then((result) => {
           if (result) {
-            navigate(-1);
+            goBack();
             showNotification({
               message: t('Deleted token successfully')
             });
@@ -74,7 +71,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           });
         });
     }).catch(console.log);
-  }, [handleSimpleConfirmModal, navigate, showNotification, t, tokenInfo.slug]);
+  }, [goBack, handleSimpleConfirmModal, showNotification, t, tokenInfo.slug]);
 
   const subHeaderButton: ButtonProps[] = [
     {
@@ -144,7 +141,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['assetRegistry'])}
     >
       <Layout.Base
-        onBack={onBack}
+        onBack={goBack}
         showBackButton={true}
         showSubHeader={true}
         subHeaderBackground={'transparent'}

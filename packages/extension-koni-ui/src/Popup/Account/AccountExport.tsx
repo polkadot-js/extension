@@ -4,8 +4,8 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useCopy from '@subwallet/extension-koni-ui/hooks/useCopy';
 import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -78,6 +78,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const goHome = useDefaultNavigate().goHome;
   const { accountAddress } = useParams();
 
   const account = useGetAccountByAddress(accountAddress);
@@ -240,10 +241,6 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [form]);
 
-  const onFinish = useCallback(() => {
-    navigate(DEFAULT_ROUTER_PATH);
-  }, [navigate]);
-
   const items = useMemo((): ExportItem[] => {
     return [
       {
@@ -275,9 +272,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     if (!account) {
-      navigate(DEFAULT_ROUTER_PATH);
+      goHome();
     }
-  }, [account, navigate]);
+  }, [account, goHome, navigate]);
 
   useEffect(() => {
     if (account?.address) {
@@ -297,7 +294,7 @@ const Component: React.FC<Props> = (props: Props) => {
         icon: firstStep ? undefined : FinishIcon,
         disabled: isDisabled || !exportTypes.length,
         loading: loading,
-        onClick: firstStep ? form.submit : onFinish
+        onClick: firstStep ? form.submit : goHome
       }}
       title={
         firstStep

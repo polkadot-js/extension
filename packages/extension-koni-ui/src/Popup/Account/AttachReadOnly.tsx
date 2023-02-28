@@ -3,9 +3,9 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/QrScanner/ErrorNotice';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
@@ -17,7 +17,6 @@ import CN from 'classnames';
 import { Eye, Info, QrCode } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -33,7 +32,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const goHome = useDefaultNavigate().goHome;
 
   const [address, setAddress] = useState('');
   const [reformatAddress, setReformatAddress] = useState('');
@@ -119,7 +118,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             });
           } else {
             setValidateState({});
-            navigate(DEFAULT_ROUTER_PATH);
+            goHome();
           }
         })
         .catch((error: Error) => {
@@ -134,7 +133,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     } else {
       setLoading(false);
     }
-  }, [reformatAddress, accountName, isEthereum, navigate]);
+  }, [reformatAddress, accountName, isEthereum, goHome]);
 
   return (
     <Layout.Base

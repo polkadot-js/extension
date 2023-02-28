@@ -3,9 +3,9 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import { deriveAccountV3, forgetAccount } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -26,6 +26,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const goHome = useDefaultNavigate().goHome;
   const notify = useNotification();
   const { token } = useTheme() as Theme;
   const { accountAddress } = useParams();
@@ -91,7 +92,7 @@ const Component: React.FC<Props> = (props: Props) => {
       deriveAccountV3({
         address: account.address
       }).then(() => {
-        navigate(DEFAULT_ROUTER_PATH);
+        goHome();
       }).catch((e: Error) => {
         notify({
           message: e.message,
@@ -118,9 +119,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     if (!account) {
-      navigate(DEFAULT_ROUTER_PATH);
+      goHome();
     }
-  }, [account, navigate]);
+  }, [account, goHome, navigate]);
 
   if (!account) {
     return null;

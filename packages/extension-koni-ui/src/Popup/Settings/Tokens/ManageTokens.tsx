@@ -25,6 +25,7 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import Layout from '../../../components/Layout';
+import useDefaultNavigate from "@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate";
 
 type Props = ThemeProps
 
@@ -80,6 +81,7 @@ function filterFungibleTokens (assetRegistry: Record<string, _ChainAsset>, asset
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const goBack = useDefaultNavigate().goBack;
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -189,10 +191,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     ];
   }, [navigate]);
 
-  const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
-
   const openFilterModal = useCallback(() => {
     activeModal('filterTokenModal');
   }, [activeModal]);
@@ -246,7 +244,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['assetRegistry'])}
     >
       <Layout.Base
-        onBack={onBack}
+        onBack={goBack}
         showBackButton={true}
         showSubHeader={true}
         subHeaderBackground={'transparent'}

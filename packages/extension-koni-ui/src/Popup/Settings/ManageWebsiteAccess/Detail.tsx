@@ -18,15 +18,15 @@ import { GearSix, Plugs, PlugsConnected, ShieldCheck, ShieldSlash, X } from 'pho
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { NavigateFunction } from 'react-router/dist/lib/hooks';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import useDefaultNavigate from "@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate";
 
 type Props = ThemeProps & ManageWebsiteAccessDetailParam & {
   authInfo: AuthUrlInfo;
-  navigate: NavigateFunction;
+  goBack: () => void
 };
 
 type WrapperProps = ThemeProps;
@@ -34,7 +34,7 @@ type WrapperProps = ThemeProps;
 const ActionModalId = 'actionModalId';
 // const FilterModalId = 'filterModalId';
 
-function Component ({ accountAuthType, authInfo, className = '', navigate, origin, siteName }: Props): React.ReactElement<Props> {
+function Component ({ accountAuthType, authInfo, className = '', goBack, origin, siteName }: Props): React.ReactElement<Props> {
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const [pendingMap, setPendingMap] = useState<Record<string, boolean>>({});
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -51,10 +51,6 @@ function Component ({ accountAuthType, authInfo, className = '', navigate, origi
       return accountListWithoutAll;
     }
   }, [accountAuthType, accounts]);
-
-  const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
 
   const onOpenActionModal = useCallback(() => {
     activeModal(ActionModalId);
@@ -189,7 +185,7 @@ function Component ({ accountAuthType, authInfo, className = '', navigate, origi
       <SwSubHeader
         background={'transparent'}
         center
-        onBack={onBack}
+        onBack={goBack}
         paddingVertical
         rightButtons={[
           {
@@ -234,13 +230,13 @@ function WrapperComponent (props: WrapperProps) {
   const location = useLocation();
   const { accountAuthType, origin, siteName } = location.state as ManageWebsiteAccessDetailParam;
   const authInfo: undefined | AuthUrlInfo = useSelector((state: RootState) => state.settings.authUrls[origin]);
-  const navigate = useNavigate();
+  const goBack = useDefaultNavigate().goBack;
 
   useEffect(() => {
     if (!authInfo) {
-      navigate(-1);
+      goBack();
     }
-  }, [navigate, authInfo]);
+  }, [goBack, authInfo]);
 
   return (
     <>
@@ -249,7 +245,7 @@ function WrapperComponent (props: WrapperProps) {
           {...props}
           accountAuthType={accountAuthType}
           authInfo={authInfo}
-          navigate={navigate}
+          goBack={goBack}
           origin={origin}
           siteName={siteName}
         />)}

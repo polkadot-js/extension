@@ -5,6 +5,7 @@ import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrap
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { DetailModal } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailUpperBlock';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -14,7 +15,7 @@ import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import classNames from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -41,7 +42,7 @@ const TokenDetailModalId = 'tokenDetailModalId';
 
 function Component (): React.ReactElement {
   const [isShrink, setIsShrink] = useState<boolean>(false);
-  const navigate = useNavigate();
+  const goBack = useDefaultNavigate().goBack;
   const location = useLocation();
   const { symbol,
     tokenGroup: currentTokenGroup,
@@ -82,10 +83,6 @@ function Component (): React.ReactElement {
     }
   }, []);
 
-  const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
-
   const [currentTokenInfo, setCurrentTokenInfo] = useState<CurrentSelectToken| undefined>(undefined);
 
   const onCloseDetail = useCallback(() => {
@@ -120,14 +117,14 @@ function Component (): React.ReactElement {
           balanceValue={tokenBalanceValue}
           className={'__static-block'}
           isShrink={false}
-          onClickBack={onBack}
+          onClickBack={goBack}
           symbol={symbol}
         />
         <DetailUpperBlock
           balanceValue={tokenBalanceValue}
           className={'__scrolling-block'}
           isShrink={true}
-          onClickBack={onBack}
+          onClickBack={goBack}
           symbol={symbol}
         />
       </div>

@@ -4,9 +4,9 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -14,7 +14,6 @@ import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { Form, Icon, Input } from '@subwallet/react-ui';
 import { FileArrowDown, Info } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -33,7 +32,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const { t } = useTranslation();
   const timeOutRef = useRef<NodeJS.Timer>();
-  const navigate = useNavigate();
+  const goHome = useDefaultNavigate().goHome;
 
   const accountName = useGetDefaultAccountName();
 
@@ -61,7 +60,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         types: keyTypes
       })
         .then(() => {
-          navigate(DEFAULT_ROUTER_PATH);
+          goHome();
         })
         .catch((error: Error): void => {
           setValidateState({
@@ -73,7 +72,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setSubmitting(false);
         });
     }
-  }, [seedPhrase, accountName, keyTypes, navigate]);
+  }, [seedPhrase, accountName, keyTypes, goHome]);
 
   useEffect(() => {
     let amount = true;

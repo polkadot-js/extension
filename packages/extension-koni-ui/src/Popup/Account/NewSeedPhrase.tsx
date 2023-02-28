@@ -4,9 +4,9 @@
 import { Layout, LoadingContainer } from '@subwallet/extension-koni-ui/components';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { createAccountSuriV2, createSeedV2 } from '@subwallet/extension-koni-ui/messaging';
@@ -36,6 +36,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const location = useLocation();
   const notify = useNotification();
   const navigate = useNavigate();
+  const goHome = useDefaultNavigate().goHome;
   const [accountTypes] = useState<KeypairType[]>((location.state as NewSeedPhraseState)?.accountTypes || []);
 
   const accountName = useGetDefaultAccountName();
@@ -59,7 +60,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       })
         .then(() => {
           // window.localStorage.setItem('popupNavigation', '/');
-          navigate(DEFAULT_ROUTER_PATH);
+          goHome();
         })
         .catch((error: Error): void => {
           // setIsBusy(false);

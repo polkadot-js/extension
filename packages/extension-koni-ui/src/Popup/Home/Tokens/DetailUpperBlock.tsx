@@ -25,7 +25,6 @@ function Component (
     symbol }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const openSendFund = useCallback(() => {
-    console.log('Running....');
     navigate('/transaction/send-fund');
   },
   [navigate]

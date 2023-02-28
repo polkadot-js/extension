@@ -4,6 +4,7 @@
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetAccountInfoByAddress from '@subwallet/extension-koni-ui/hooks/screen/common/useGetAccountInfoByAddress';
 import useGetChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
 import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl';
@@ -39,6 +40,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const location = useLocation();
   const navigate = useNavigate();
+  const goBack = useDefaultNavigate().goBack;
   const { token } = useTheme() as Theme;
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
@@ -46,10 +48,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const originChainInfo = useGetChainInfo(nftItem.chain);
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem.owner || '');
   const accountExternalUrl = useScanExplorerAddressUrl(nftItem.chain, nftItem.owner);
-
-  const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
 
   const onClickSend = useCallback(() => {
     navigate('/transaction/send-nft', { state: nftItem });
@@ -150,7 +148,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['nft', 'accountState', 'chainStore'])}
     >
       <Layout.Base
-        onBack={onBack}
+        onBack={goBack}
         showBackButton={true}
         showSubHeader={true}
         subHeaderBackground={'transparent'}

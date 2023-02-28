@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { subscribeFreeBalance } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -63,6 +64,7 @@ function Component ({ className }: Props) {
   const titleMap = useMemo<Record<string, string>>(() => ({
     transfer: t('Transfer')
   }), [t]);
+  const { goBack } = useDefaultNavigate();
 
   useEffect(() => {
     let cancel = false;
@@ -79,14 +81,6 @@ function Component ({ className }: Props) {
       cancel = true;
     };
   }, [from, chain]);
-
-  // Navigate go back
-  const onBack = useCallback(
-    () => {
-      navigate('/home/tokens');
-    },
-    [navigate]
-  );
 
   // Navigate to finish page
   const onDone = useCallback(
@@ -107,7 +101,7 @@ function Component ({ className }: Props) {
               background={'transparent'}
               center
               className={'transaction-header'}
-              onBack={onBack}
+              onBack={goBack}
               showBackButton
               title={titleMap[transactionType]}
             />

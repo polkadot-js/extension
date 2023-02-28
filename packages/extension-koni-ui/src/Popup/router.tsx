@@ -204,13 +204,22 @@ export const router = createHashRouter([{
         }, {
           path: 'dapp-access-edit',
           element: <ManageWebsiteAccessDetail />
-        }, {
-          path: 'network',
-          element: <Example />
-        }, {
-          path: 'network-edit',
-          element: <Example />
-        }, {
+        },
+        {
+          path: 'networks',
+          element: <Outlet />,
+          children: [
+            {
+              path: 'manage',
+              element: <Example />
+            },
+            {
+              path: 'import-chain',
+              element: <Example />
+            }
+          ]
+        },
+        {
           path: 'tokens',
           element: <Outlet />,
           children: [
@@ -231,7 +240,8 @@ export const router = createHashRouter([{
               element: <NftImport />
             }
           ]
-        }, {
+        },
+        {
           path: 'master-password',
           element: <Example />
         }

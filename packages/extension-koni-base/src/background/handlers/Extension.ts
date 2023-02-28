@@ -2261,11 +2261,11 @@ export default class KoniExtension {
     return true;
   }
 
-  private disableChains (targetKeys: string[]) {
+  private async disableChains (targetKeys: string[]) {
     try {
-      for (const key of targetKeys) {
-        this.disableChain(key);
-      }
+      await Promise.all(targetKeys.map(async (key) => {
+        return await this.disableChain(key);
+      }));
     } catch (e) {
       return false;
     }
@@ -4551,7 +4551,7 @@ export default class KoniExtension {
       case 'pri(chainService.enableChains)':
         return this.enableChains(request as string[]);
       case 'pri(chainService.disableChains)':
-        return this.disableChains(request as string[]);
+        return await this.disableChains(request as string[]);
       case 'pri(chainService.subscribeAssetRegistry)':
         return this.subscribeAssetRegistry(id, port);
       case 'pri(chainService.subscribeMultiChainAssetMap)':

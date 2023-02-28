@@ -6,7 +6,7 @@ import { _ChainState, _CUSTOM_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwall
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-export function _isCustomNetwork (slug: string) {
+export function _isCustomChain (slug: string) {
   if (slug.length === 0) {
     return true;
   }
@@ -109,6 +109,10 @@ export function _isSmartContractToken (tokenInfo: _ChainAsset) {
 
 export function _isEvmChain (chainInfo: _ChainInfo) {
   return !!chainInfo.evmInfo; // fallback to Ethereum
+}
+
+export function _isSubstrateChain (chainInfo: _ChainInfo) {
+  return !!chainInfo.substrateInfo; // fallback to Ethereum
 }
 
 export function _getEvmChainId (chainInfo: _ChainInfo) {

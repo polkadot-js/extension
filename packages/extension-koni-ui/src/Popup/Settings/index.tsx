@@ -136,14 +136,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     },
     {
       key: 'networks-&-tokens',
-      label: 'Networks & tokens',
+      label: 'Chains & tokens',
       items: [
         {
           key: 'manage-networks',
           leftIcon: ShareNetwork,
           leftIconBgColor: token['purple-7'],
           rightIcon: CaretRight,
-          title: 'Manage networks'
+          title: 'Manage Chains',
+          onClick: () => {
+            navigate('/settings/chains/manage');
+          }
         },
         {
           key: 'manage-tokens',

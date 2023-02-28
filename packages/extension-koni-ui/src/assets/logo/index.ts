@@ -549,7 +549,7 @@ export const ChainLogoMap: Record<string, string> = {
   subwallet: LoadLogosMap['197.SubWallet.png'],
   parity: LoadLogosMap['198.Parity.png'],
   keystone: LoadLogosMap['199.Keystone.png'],
-  ledger: LoadLogosMap['200.Ledger.png'],
+  ledger: LoadLogosMap['200.Ledger.png']
 };
 
 export const TokenLogoMap: Record<string, string> = {

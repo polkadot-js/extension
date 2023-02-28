@@ -49,21 +49,23 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
     if (password && oldPassword) {
       setLoading(true);
-      keyringChangeMasterPassword({
-        createNew: true,
-        newPassword: password,
-        oldPassword: oldPassword
-      }).then((res) => {
-        if (!res.status) {
-          setSubmitError(res.errors[0]);
-        } else {
-          navigate(DEFAULT_ROUTER_PATH);
-        }
-      }).catch((e: Error) => {
-        setSubmitError(e.message);
-      }).finally(() => {
-        setLoading(false);
-      });
+      setTimeout(() => {
+        keyringChangeMasterPassword({
+          createNew: false,
+          newPassword: password,
+          oldPassword: oldPassword
+        }).then((res) => {
+          if (!res.status) {
+            setSubmitError(res.errors[0]);
+          } else {
+            navigate(DEFAULT_ROUTER_PATH);
+          }
+        }).catch((e: Error) => {
+          setSubmitError(e.message);
+        }).finally(() => {
+          setLoading(false);
+        });
+      }, 1000);
     }
   }, [navigate]);
 
@@ -79,12 +81,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, []);
 
   const onChangePassword = useCallback(() => {
-    const confirmPassword = form.getFieldValue(FormFieldName.CONFIRM_PASSWORD) as string;
-
-    if (confirmPassword) {
-      // eslint-disable-next-line no-void
-      void form.validateFields([FormFieldName.CONFIRM_PASSWORD]);
-    }
+    form.resetFields([FormFieldName.CONFIRM_PASSWORD]);
   }, [form]);
 
   return (
@@ -138,7 +135,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           onFinish={onSubmit}
         >
           <Form.Item
-            className='form-item-no-error'
+            hideError={true}
             name={FormFieldName.OLD_PASSWORD}
             rules={[
               {
@@ -148,27 +145,30 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             ]}
           >
             <Input
+              disabled={loading}
               placeholder={t('Current password')}
               type='password'
             />
           </Form.Item>
           <Form.Item
-            className='form-item-no-error'
+            hideError={true}
             name={FormFieldName.PASSWORD}
             rules={newPasswordRules}
           >
             <Input
+              disabled={loading}
               onChange={onChangePassword}
               placeholder={t('New password')}
               type='password'
             />
           </Form.Item>
           <Form.Item
-            className='form-item-no-error'
+            hideError={true}
             name={FormFieldName.CONFIRM_PASSWORD}
             rules={confirmPasswordRules}
           >
             <Input
+              disabled={loading}
               placeholder={t('Confirm new password')}
               type='password'
             />
@@ -203,12 +203,6 @@ const ChangePassword = styled(Component)<Props>(({ theme: { token } }: Props) =>
         fontSize: token.fontSizeHeading3,
         lineHeight: token.lineHeightHeading3,
         color: token.colorTextBase
-      },
-
-      '.form-item-no-error': {
-        '.ant-form-item-explain': {
-          display: 'none'
-        }
       }
     }
   };

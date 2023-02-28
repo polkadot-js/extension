@@ -3,17 +3,20 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import { REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { Form, Icon, Input, ModalContext, SwModal } from '@subwallet/react-ui';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import CN from 'classnames';
 import { CaretLeft, CheckCircle, Info, ShieldPlus } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -46,6 +49,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
 
+  const { accounts } = useSelector((state: RootState) => state.accountState);
+
+  const [noAccount] = useState(isNoAccount(accounts));
+
   const [form] = Form.useForm<CreatePasswordFormState>();
   const [isDisabled, setIsDisable] = useState(true);
   const [submitError, setSubmitError] = useState('');
@@ -64,7 +71,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (!res.status) {
           setSubmitError(res.errors[0]);
         } else {
-          navigate(DEFAULT_ROUTER_PATH);
+          navigate(-2);
         }
       }).catch((e: Error) => {
         setSubmitError(e.message);
@@ -96,6 +103,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const closeModal = useCallback(() => {
     inactiveModal(modalId);
   }, [inactiveModal]);
+
+  useEffect(() => {
+    if (!noAccount) {
+      activeModal(REQUEST_CREATE_PASSWORD_MODAL);
+    }
+  }, [activeModal, noAccount]);
 
   return (
     <Layout.Base

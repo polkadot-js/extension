@@ -217,6 +217,7 @@ const Component: React.FC<Props> = (props: Props) => {
       }
 
       if (!prevState) {
+        setIsDisable(true);
         form.resetFields();
 
         return needMigrate[0];
@@ -226,6 +227,7 @@ const Component: React.FC<Props> = (props: Props) => {
         if (exists) {
           return prevState;
         } else {
+          setIsDisable(true);
           form.resetFields();
 
           return needMigrate[0];

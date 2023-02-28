@@ -76,7 +76,7 @@ const generateDefaultCrowdloanMap = (): Record<string, CrowdloanItem> => {
   return crowdloanMap;
 };
 
-const createValidateConfirmationResponsePayload = <CT extends ConfirmationType>(fromAddress: string): (result: ConfirmationDefinitions[CT][1]) => Error | undefined => {
+const createValidateConfirmationResponsePayload = <CT extends ConfirmationType> (fromAddress: string): (result: ConfirmationDefinitions[CT][1]) => Error | undefined => {
   return (result: ConfirmationDefinitions[CT][1]) => {
     if (result.isApproved) {
       const pair = keyring.getPair(fromAddress);
@@ -132,7 +132,11 @@ export default class KoniState {
   private stakingSubject = new Subject<StakingJson>();
 
   private stakingRewardSubject = new Subject<StakingRewardJson>();
-  private stakingRewardState: StakingRewardJson = { ready: false, slowInterval: [], fastInterval: [] } as StakingRewardJson;
+  private stakingRewardState: StakingRewardJson = {
+    ready: false,
+    slowInterval: [],
+    fastInterval: []
+  } as StakingRewardJson;
 
   private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
   private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: [] };
@@ -228,7 +232,9 @@ export default class KoniState {
     return Promise.resolve(this.providers[key].meta);
   }
 
-  public rpcSubscribe ({ method, params, type }: RequestRpcSubscribe, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): Promise<number | string> {
+  public rpcSubscribe ({ method,
+    params,
+    type }: RequestRpcSubscribe, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): Promise<number | string> {
     const provider = this.injectedProviders.get(port);
 
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
@@ -492,7 +498,10 @@ export default class KoniState {
   }
 
   public async resetNft (newAddress: string): Promise<void> {
-    this.getNft().then((data) => this.nftSubject.next(data || { nftList: [], total: 0 })).catch((e) => this.logger.warn(e));
+    this.getNft().then((data) => this.nftSubject.next(data || {
+      nftList: [],
+      total: 0
+    })).catch((e) => this.logger.warn(e));
 
     const addresses = await this.getDecodedAddresses(newAddress);
 
@@ -673,11 +682,23 @@ export default class KoniState {
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     const { address, currentGenesisHash } = data;
 
+    const result: CurrentAccountInfo = { ...data };
+
     if (address === ALL_ACCOUNT_KEY) {
-      data.allGenesisHash = currentGenesisHash || undefined;
+      const pairs = keyring.getPairs();
+      const pair = pairs[0];
+      const pairGenesisHash = pair.meta.genesisHash as string;
+
+      if (pairs.length > 1 || !pair) {
+        result.allGenesisHash = currentGenesisHash || undefined;
+      } else {
+        result.address = pair.address;
+        result.currentGenesisHash = pairGenesisHash || '';
+        result.allGenesisHash = pairGenesisHash || undefined;
+      }
     }
 
-    this.currentAccountStore.set('CurrentAccountInfo', data, () => {
+    this.currentAccountStore.set('CurrentAccountInfo', result, () => {
       this.updateServiceInfo();
       callback && callback();
     });
@@ -728,7 +749,10 @@ export default class KoniState {
       this.getCurrentAccount(resolve);
     });
 
-    return this.requestService.addConfirmation(id, url, 'switchNetworkRequest', { networkKey, address: changeAddress }, { address: changeAddress })
+    return this.requestService.addConfirmation(id, url, 'switchNetworkRequest', {
+      networkKey,
+      address: changeAddress
+    }, { address: changeAddress })
       .then(({ isApproved }) => {
         if (isApproved) {
           const useAddress = changeAddress || address;
@@ -1452,7 +1476,8 @@ export default class KoniState {
     return (Object.values(_PREDEFINED_SINGLE_MODES)).find((item) => (item.networkKeys.includes(networkKey)));
   }
 
-  public accountExportPrivateKey ({ address, password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
+  public accountExportPrivateKey ({ address,
+    password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const exportedJson = keyring.backupAccount(keyring.getPair(address), password);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -1464,7 +1489,8 @@ export default class KoniState {
     };
   }
 
-  public checkPublicAndSecretKey ({ publicKey, secretKey }: RequestCheckPublicAndSecretKey): ResponseCheckPublicAndSecretKey {
+  public checkPublicAndSecretKey ({ publicKey,
+    secretKey }: RequestCheckPublicAndSecretKey): ResponseCheckPublicAndSecretKey {
     try {
       const _secret = hexStripPrefix(secretKey);
 
@@ -1568,7 +1594,10 @@ export default class KoniState {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const signPayload = { address, type: method, payload };
 
-      return this.requestService.addConfirmation(id, url, 'evmSignatureRequest', signPayload, { requiredPassword: false, address }, validateConfirmationResponsePayload)
+      return this.requestService.addConfirmation(id, url, 'evmSignatureRequest', signPayload, {
+        requiredPassword: false,
+        address
+      }, validateConfirmationResponsePayload)
         .then(async ({ isApproved }) => {
           if (isApproved) {
             const pair = keyring.getPair(address);
@@ -1601,9 +1630,18 @@ export default class KoniState {
           break;
       }
 
-      const signPayload: EvmSignatureRequestExternal = { address, type: method, payload: payload as unknown, hashPayload: qrPayload, canSign: canSign };
+      const signPayload: EvmSignatureRequestExternal = {
+        address,
+        type: method,
+        payload: payload as unknown,
+        hashPayload: qrPayload,
+        canSign: canSign
+      };
 
-      return this.requestService.addConfirmation(id, url, 'evmSignatureRequestExternal', signPayload, { requiredPassword: false, address })
+      return this.requestService.addConfirmation(id, url, 'evmSignatureRequestExternal', signPayload, {
+        requiredPassword: false,
+        address
+      })
         .then(({ isApproved, signature }) => {
           if (isApproved) {
             return signature;
@@ -1760,7 +1798,10 @@ export default class KoniState {
       const chainInfo = this.chainService.getChainInfoByKey(networkKeys[0]);
       const genesisHash = _getSubstrateGenesisHash(chainInfo);
 
-      this.setCurrentAccount({ address: ALL_ACCOUNT_KEY, currentGenesisHash: genesisHash.length > 0 ? genesisHash : null });
+      this.setCurrentAccount({
+        address: ALL_ACCOUNT_KEY,
+        currentGenesisHash: genesisHash.length > 0 ? genesisHash : null
+      });
       this.setTheme(theme);
     };
 

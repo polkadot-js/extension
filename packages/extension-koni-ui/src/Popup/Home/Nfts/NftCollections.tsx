@@ -8,12 +8,12 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useGetNftByAccount from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetNftByAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
-import { INftCollectionDetail, NFT_PER_PAGE } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { INftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import { Image, Plus } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -30,14 +30,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
-
   const { nftCollections, nftItems } = useGetNftByAccount();
-
-  const [paging, setPaging] = useState(NFT_PER_PAGE);
-  const [nftCollections_, setNftCollections_] = useState<NftCollection[]>([]);
-  const hasMore = useMemo(() => {
-    return nftCollections.length > nftCollections_.length;
-  }, [nftCollections.length, nftCollections_.length]);
 
   const subHeaderButton: ButtonProps[] = [
     {
@@ -47,12 +40,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }
     }
   ];
-
-  useEffect(() => {
-    // init NftCollections_
-    setNftCollections_(nftCollections.slice(0, NFT_PER_PAGE));
-    setPaging(NFT_PER_PAGE);
-  }, [nftCollections]);
 
   const searchCollection = useCallback((collection: NftCollection, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -127,18 +114,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [t, token]);
 
-  const loadMoreCollections = useCallback(() => {
-    setTimeout(() => { // delayed to avoid lagging on scroll
-      if (hasMore) {
-        const nextPaging = paging + NFT_PER_PAGE;
-        const to = nextPaging > nftCollections.length ? nftCollections.length : nextPaging;
-
-        setNftCollections_(nftCollections.slice(0, to));
-        setPaging(nextPaging);
-      }
-    }, 50);
-  }, [hasMore, nftCollections, paging]);
-
   return (
     <PageWrapper
       className={`nft_container ${className}`}
@@ -157,14 +132,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           displayGrid={true}
           enableSearchInput={true}
           gridGap={'14px'}
-          list={nftCollections_}
-          minColumnWidth={'172px'}
-          pagination={{
-            hasMore,
-            loadMore: loadMoreCollections
-          }}
+          ignoreScrollbar={nftCollections.length > 2}
+          list={nftCollections}
+          minColumnWidth={'160px'}
           renderItem={renderNftCollection}
-          renderOnScroll={false}
+          renderOnScroll={true}
           renderWhenEmpty={emptyNft}
           searchFunction={searchCollection}
           searchMinCharactersCount={1}
@@ -182,17 +154,12 @@ const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
     '&__inner': {
       display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
+      flexDirection: 'column'
     },
 
     '.nft_collection_list__container': {
-      paddingTop: 14,
+      height: '100%',
       flex: 1
-    },
-
-    '.ant-sw-list-wrapper .-render-default': {
-      overflow: 'hidden'
     },
 
     '.nft_empty__container': {

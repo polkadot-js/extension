@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - koni-dev
+      - upgrade-ui
 
 jobs:
   master:

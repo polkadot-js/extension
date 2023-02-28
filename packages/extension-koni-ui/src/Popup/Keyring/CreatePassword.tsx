@@ -14,6 +14,7 @@ import CN from 'classnames';
 import { CaretLeft, CheckCircle, Info, ShieldPlus } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -43,7 +44,9 @@ const modalId = 'create-password-instruction-modal';
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const navigate = useNavigate();
   const goHome = useDefaultNavigate().goHome;
+  const previousInfo = useLocation().state as {prevPathname: string, prevState: any};
 
   const [form] = Form.useForm<CreatePasswordFormState>();
   const [isDisabled, setIsDisable] = useState(true);
@@ -63,7 +66,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (!res.status) {
           setSubmitError(res.errors[0]);
         } else {
-          goHome();
+          if (previousInfo?.prevPathname) {
+            navigate(previousInfo.prevPathname, { state: previousInfo.prevState as unknown });
+          } else {
+            goHome();
+          }
         }
       }).catch((e: Error) => {
         setSubmitError(e.message);
@@ -71,7 +78,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         setLoading(false);
       });
     }
-  }, [goHome]);
+  }, [goHome, navigate, previousInfo.prevPathname, previousInfo.prevState]);
 
   const onUpdate: Callbacks<CreatePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
     const error = allFields.map((data) => data.errors || [])

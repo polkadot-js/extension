@@ -4,15 +4,16 @@
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function useAutoNavigateToCreatePassword () {
   const navigate = useNavigate();
   const hasMasterPassword = useSelector((state: RootState) => state.accountState.hasMasterPassword);
+  const location = useLocation();
 
   useEffect(() => {
     if (!hasMasterPassword) {
-      navigate('/keyring/create-password');
+      navigate('/keyring/create-password', { state: { prevPathname: location.pathname, prevState: location.state as unknown } });
     }
-  }, [navigate, hasMasterPassword]);
+  }, [navigate, hasMasterPassword, location.pathname, location.state]);
 }

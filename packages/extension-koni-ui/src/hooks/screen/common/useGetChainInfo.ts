@@ -3,9 +3,10 @@
 
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
+import { useMemo } from 'react';
 
 export default function useFetchChainInfo (key: string) {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
 
-  return chainInfoMap[key];
+  return useMemo(() => chainInfoMap[key], [key]);
 }

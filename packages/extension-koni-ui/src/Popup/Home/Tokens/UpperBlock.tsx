@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
 import { ArrowFatLinesDown, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 
 type Props = ThemeProps & {
   totalValue: SwNumberProps['value'];
@@ -23,6 +26,8 @@ function Component (
     totalChangePercent,
     totalChangeValue,
     totalValue }: Props): React.ReactElement<Props> {
+  const { activeModal } = useContext(ModalContext);
+  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const navigate = useNavigate();
   const openSendFund = useCallback(() => {
     console.log('Running....');
@@ -30,6 +35,14 @@ function Component (
   },
   [navigate]
   );
+
+  const openReceive = () => {
+    if (currentAccount && isAccountAll(currentAccount.address)) {
+      activeModal('receive-account-selector');
+    } else {
+      activeModal('receive-token-selector');
+    }
+  };
 
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
@@ -71,6 +84,7 @@ function Component (
           icon={<Icon phosphorIcon={ArrowFatLinesDown} />}
           shape='squircle'
           size={isShrink ? 'xs' : 'md'}
+          onClick={openReceive}
         />
         <div className={'__button-space'} />
         <Button

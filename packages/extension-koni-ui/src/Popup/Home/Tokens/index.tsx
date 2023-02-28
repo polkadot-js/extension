@@ -9,14 +9,25 @@ import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Upper
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import classNames from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import CN from 'classnames';
+import { TokensSelector } from '@subwallet/extension-koni-ui/components/Field/TokensSelector';
+import { ReceiveAccountSelector } from '@subwallet/extension-koni-ui/components/SelectModal/ReceiveAccountSelector';
+import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveQrModal';
+import { useSelector } from 'react-redux';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 
 type Props = ThemeProps;
+
+type ReceiveSelectedResult = {
+  selectedAcc?: string;
+  selectedNetwork?: string;
+};
 
 function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
@@ -33,9 +44,12 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
 
 function Component (): React.ReactElement {
   const [isShrink, setIsShrink] = useState<boolean>(false);
+  const { activeModal } = useContext(ModalContext);
   const navigate = useNavigate();
+  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
+  const [{ selectedAcc, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>({});
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     if (event.currentTarget.scrollTop > 80) {
@@ -68,17 +82,14 @@ function Component (): React.ReactElement {
       })}
       >
         <UpperBlock
-          className={'__static-block'}
+          className={CN(
+            {
+              '__static-block' : !isShrink,
+              '__scrolling-block' : isShrink
+            }
+          )}
           isPriceDecrease={isTotalBalanceDecrease}
-          isShrink={false}
-          totalChangePercent={totalBalanceInfo.change.percent}
-          totalChangeValue={totalBalanceInfo.change.value}
-          totalValue={totalBalanceInfo.convertedValue}
-        />
-        <UpperBlock
-          className={'__scrolling-block'}
-          isPriceDecrease={isTotalBalanceDecrease}
-          isShrink={true}
+          isShrink={isShrink}
           totalChangePercent={totalBalanceInfo.change.percent}
           totalChangeValue={totalBalanceInfo.change.value}
           totalValue={totalBalanceInfo.convertedValue}
@@ -117,6 +128,24 @@ function Component (): React.ReactElement {
           </Button>
         </div>
       </div>
+      <ReceiveAccountSelector
+        className='token-account-selector'
+        id='receive-account-selector'
+        onSelectItem={(address: string) => {
+          setReceiveSelectedResult({ selectedAcc: address })
+          activeModal('receive-token-selector')
+        }}
+        selectedItem=''
+      />
+
+      <TokensSelector
+        id='receive-token-selector'
+        className='receive-token-selector'
+        address={selectedAcc || currentAccount?.address}
+        onChangeSelectedNetwork={(value) => setReceiveSelectedResult(prevState => ({ ...prevState, selectedNetwork: value }))}
+      />
+
+      <ReceiveQrModal address={selectedAcc} selectedNetwork={selectedNetwork} />
     </>
   );
 }
@@ -186,8 +215,12 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
 
       '.__scrolling-block': {
         display: 'flex'
-      }
-    }
+      },
+    },
+
+    '.token-account-selector, .receive-token-selector' : {
+      display: 'none'
+    },
   });
 });
 

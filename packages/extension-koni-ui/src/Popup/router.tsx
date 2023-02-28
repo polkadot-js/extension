@@ -24,6 +24,8 @@ const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/H
 const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
 
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
+const ManageChains = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ManageChains'));
+const ChainDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ChainDetail'));
 const ManageTokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/ManageTokens'));
 const FungibleTokenImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/FungibleTokenImport'));
 const TokenDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/TokenDetail'));
@@ -206,16 +208,20 @@ export const router = createHashRouter([{
           element: <ManageWebsiteAccessDetail />
         },
         {
-          path: 'networks',
+          path: 'chains',
           element: <Outlet />,
           children: [
             {
               path: 'manage',
+              element: <ManageChains />
+            },
+            {
+              path: 'import',
               element: <Example />
             },
             {
-              path: 'import-chain',
-              element: <Example />
+              path: 'detail',
+              element: <ChainDetail />
             }
           ]
         },

@@ -1,37 +1,31 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_ChainAsset, _ChainInfo} from '@subwallet/chain-list/types';
-import {
-  _isAssetFungibleToken,
-  _isCustomChain, _isEvmChain, _isSubstrateChain
-} from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { _isCustomChain, _isEvmChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import TokenItemFooter from '@subwallet/extension-koni-ui/Popup/Settings/Tokens/component/TokenItemFooter';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Checkbox, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Checkbox, NetworkItem, SwList } from '@subwallet/react-ui';
 import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
 import Icon from '@subwallet/react-ui/es/icon';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import SwModal from '@subwallet/react-ui/es/sw-modal';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
-import TokenItem from '@subwallet/react-ui/es/web3-block/token-item';
 import CN from 'classnames';
-import { Coin, FadersHorizontal, Plus } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { FadersHorizontal, ListChecks, Plus } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import Layout from '../../../components/Layout';
-import {_ChainState} from "@subwallet/extension-base/services/chain-service/types";
 
 type Props = ThemeProps
-
-const TOKENS_PER_PAGE = 10;
 
 enum FilterValue {
   ENABLED = 'enabled',
@@ -102,69 +96,43 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const { chainInfoMap, chainStateMap } = useSelector((state: RootState) => state.chainStore);
 
-  const [fungibleTokenList, setFungibleTokenList] = useState<_ChainAsset[]>([]);
-  const allFungibleTokens = useMemo(() => {
-    return filterChains(assetRegistry, assetSettingMap, selectedFilters);
-  }, [assetRegistry, assetSettingMap, selectedFilters]);
+  const allChains = useMemo(() => {
+    return filterChains(chainInfoMap, chainStateMap, selectedFilters);
+  }, [chainInfoMap, chainStateMap, selectedFilters]);
 
-  const [paging, setPaging] = useState(TOKENS_PER_PAGE);
-
-  useEffect(() => {
-    setFungibleTokenList(allFungibleTokens.slice(0, TOKENS_PER_PAGE));
-    setPaging(TOKENS_PER_PAGE);
-  }, [allFungibleTokens]);
-
-  const hasMore = useMemo(() => {
-    return allFungibleTokens.length > fungibleTokenList.length;
-  }, [allFungibleTokens.length, fungibleTokenList.length]);
-
-  const loadMoreTokens = useCallback(() => {
-    setTimeout(() => { // delayed to avoid lagging on scroll
-      if (hasMore) {
-        const nextPaging = paging + TOKENS_PER_PAGE;
-        const to = nextPaging > allFungibleTokens.length ? allFungibleTokens.length : nextPaging;
-
-        setFungibleTokenList(allFungibleTokens.slice(0, to));
-        setPaging(nextPaging);
-      }
-    }, 50);
-  }, [allFungibleTokens, hasMore, paging]);
-
-  const searchToken = useCallback((token: _ChainAsset, searchText: string) => {
+  const searchToken = useCallback((chainInfo: _ChainInfo, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
     return (
-      token.name.toLowerCase().includes(searchTextLowerCase) ||
-      token.symbol.toLowerCase().includes(searchTextLowerCase)
+      chainInfo.name.toLowerCase().includes(searchTextLowerCase)
     );
   }, []);
 
-  const renderTokenRightItem = useCallback((tokenInfo: _ChainAsset) => {
-    const assetSetting = assetSettingMap[tokenInfo.slug];
+  const renderNetworkRightItem = useCallback((chainInfo: _ChainInfo) => {
+    const chainState = chainStateMap[chainInfo.slug];
 
     return (
-      <TokenItemFooter
-        assetSetting={assetSetting}
+      <ChainItemFooter
+        chainInfo={chainInfo}
+        chainState={chainState}
         navigate={navigate}
-        tokenInfo={tokenInfo}
+        showDetailNavigation={true}
       />
     );
-  }, [assetSettingMap, navigate]);
+  }, [chainStateMap, navigate]);
 
-  const renderTokenItem = useCallback((tokenInfo: _ChainAsset) => {
+  const renderChainItem = useCallback((chainInfo: _ChainInfo) => {
     return (
-      <TokenItem
+      <NetworkItem
         isShowSubLogo={true}
-        key={tokenInfo.slug}
-        name={tokenInfo.symbol}
-        rightItem={renderTokenRightItem(tokenInfo)}
-        subName={tokenInfo.originChain}
-        subNetworkKey={tokenInfo.originChain}
-        symbol={tokenInfo.symbol.toLowerCase()}
+        key={chainInfo.slug}
+        name={chainInfo.name}
+        networkKey={chainInfo.slug}
+        rightItem={renderNetworkRightItem(chainInfo)}
         withDivider={true}
       />
     );
-  }, [renderTokenRightItem]);
+  }, [renderNetworkRightItem]);
 
   const emptyTokenList = useCallback(() => {
     return (
@@ -173,15 +141,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           <PageIcon
             color={token['gray-3']}
             iconProps={{
-              phosphorIcon: Coin,
+              phosphorIcon: ListChecks,
               weight: 'fill'
             }}
           />
         </div>
 
         <div className={'manage_chains__empty_text_container'}>
-          <div className={'manage_chains__empty_title'}>{t<string>('No token')}</div>
-          <div className={'manage_chains__empty_subtitle'}>{t<string>('Your token will appear here.')}</div>
+          <div className={'manage_chains__empty_title'}>{t<string>('No chain found')}</div>
+          <div className={'manage_chains__empty_subtitle'}>{t<string>('Your chain will appear here.')}</div>
         </div>
       </div>
     );
@@ -196,7 +164,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           type='phosphor'
         />,
         onClick: () => {
-          navigate('/settings/tokens/import', { state: { isExternalRequest: false } });
+          navigate('/settings/chains/import', { state: { isExternalRequest: false } });
         }
       }
     ];
@@ -256,7 +224,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   return (
     <PageWrapper
       className={`manage_chains ${className}`}
-      resolve={dataContext.awaitStores(['assetRegistry'])}
+      resolve={dataContext.awaitStores(['chainStore'])}
     >
       <Layout.Base
         onBack={onBack}
@@ -266,7 +234,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderCenter={true}
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
-        title={t<string>('Manage tokens')}
+        title={t<string>('Manage chains')}
       >
         <SwList.Section
           actionBtnIcon={<Icon
@@ -278,19 +246,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           />}
           className={'manage_chains__container'}
           enableSearchInput={true}
-          gridGap={'14px'}
-          list={fungibleTokenList}
-          minColumnWidth={'172px'}
+          ignoreScrollbar={allChains.length > 2}
+          list={allChains}
+          mode={'boxed'}
           onClickActionBtn={openFilterModal}
-          pagination={{
-            hasMore,
-            loadMore: loadMoreTokens
-          }}
-          renderItem={renderTokenItem}
-          renderOnScroll={false}
+          renderItem={renderChainItem}
+          renderOnScroll={true}
           renderWhenEmpty={emptyTokenList}
           searchFunction={searchToken}
-          searchPlaceholder={t<string>('Search token')}
+          searchMinCharactersCount={1}
+          searchPlaceholder={t<string>('Search chain')}
           showActionBtn={true}
         />
 

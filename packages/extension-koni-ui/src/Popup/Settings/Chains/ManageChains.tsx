@@ -3,7 +3,7 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
-import { _isCustomChain, _isEvmChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainEvmCompatible, _isCustomChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -64,7 +64,7 @@ function filterChains (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: 
           isValidationPassed = _isSubstrateChain(chainInfo);
           break;
         case FilterValue.EVM:
-          isValidationPassed = _isEvmChain(chainInfo);
+          isValidationPassed = _isChainEvmCompatible(chainInfo);
           break;
         default:
           isValidationPassed = false;

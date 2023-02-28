@@ -1,28 +1,32 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  _getChainNativeTokenBasicInfo,
-  _getSubstrateParaId,
-  _isCustomChain
-} from '@subwallet/extension-base/services/chain-service/utils';
+import { _getBlockExplorerFromChain, _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix, _getCrowdloanUrlFromChain, _getSubstrateParaId, _isChainEvmCompatible, _isCustomChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useGetChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainAssetInfo';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ChainDetail } from '@subwallet/extension-koni-ui/Popup/Settings/Chains/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Col, Field, Row } from '@subwallet/react-ui';
+import { Button, ButtonProps, Col, Field, Form, Input, Row } from '@subwallet/react-ui';
+import { useForm } from '@subwallet/react-ui/es/form/Form';
 import Icon from '@subwallet/react-ui/es/icon';
-import {Globe, Plus, ShareNetwork, Trash} from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import { FloppyDiskBack, Globe, Plus, ShareNetwork, Trash } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import Layout from '../../../components/Layout';
 
 type Props = ThemeProps
+
+interface ChainDetailForm {
+  currentProvider: string,
+  priceId: string,
+  blockExplorer: string,
+  crowdloanUrl: string
+}
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -31,12 +35,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const location = useLocation();
   const showNotification = useNotification();
+  const [form] = useForm<ChainDetailForm>();
+
+  const isChanged = useRef(false);
+  const [loading, setLoading] = useState(false);
 
   const { chainInfo, chainState } = useMemo(() => {
     return location.state as ChainDetail;
   }, [location.state]);
 
-  const {decimals, symbol} = useMemo(() => {
+  const nativeTokenInfo = useGetChainAssetInfo(_getChainNativeTokenSlug(chainInfo));
+
+  const { decimals, symbol } = useMemo(() => {
     return _getChainNativeTokenBasicInfo(chainInfo);
   }, [chainInfo]);
 
@@ -48,7 +58,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return _getSubstrateParaId(chainInfo);
   }, [chainInfo]);
 
-  const
+  const addressPrefix = useMemo(() => {
+    return _getChainSubstrateAddressPrefix(chainInfo);
+  }, [chainInfo]);
 
   const onBack = useCallback(() => {
     navigate(-1);
@@ -59,6 +71,38 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       message: t('delete custom chain')
     });
   }, [showNotification, t]);
+
+  const chainTypeString = useCallback(() => {
+    let result = '';
+    const types: string[] = [];
+
+    if (_isSubstrateChain(chainInfo)) {
+      types.push('Substrate');
+    }
+
+    if (_isChainEvmCompatible(chainInfo)) {
+      types.push('EVM');
+    }
+
+    for (let i = 0; i < types.length; i++) {
+      result = result.concat(types[i]);
+
+      if (i !== types.length - 1) {
+        result = result.concat(', ');
+      }
+    }
+
+    return result;
+  }, [chainInfo]);
+
+  const formInitValues = useMemo(() => {
+    return {
+      currentProvider: currentProviderUrl,
+      priceId: nativeTokenInfo?.priceId || '',
+      blockExplorer: _getBlockExplorerFromChain(chainInfo),
+      crowdloanUrl: _getCrowdloanUrlFromChain(chainInfo)
+    } as ChainDetailForm;
+  }, [chainInfo, currentProviderUrl, nativeTokenInfo?.priceId]);
 
   const subHeaderButton: ButtonProps[] = [
     {
@@ -75,6 +119,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const handleClickProviderSuffix = useCallback(() => {
     console.log('click suffix');
+  }, []);
+
+  const onSubmit = useCallback(() => {
+    setLoading(true);
+    console.log('submit');
   }, []);
 
   const providerFieldSuffix = useCallback(() => {
@@ -94,6 +143,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [handleClickProviderSuffix]);
 
+  const onFormValuesChange = useCallback(({ blockExplorer, crowdloanUrl, currentProvider, priceId }: Partial<ChainDetailForm>, values: ChainDetailForm) => {
+    console.log('form changed', blockExplorer, crowdloanUrl, priceId);
+  }, []);
+
   return (
     <PageWrapper
       className={`chain_detail ${className}`}
@@ -101,6 +154,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     >
       <Layout.Base
         onBack={onBack}
+        rightFooterButton={{
+          block: true,
+          disabled: !isChanged.current,
+          icon: (
+            <Icon
+              phosphorIcon={FloppyDiskBack}
+              type='phosphor'
+              weight={'fill'}
+            />
+          ),
+          loading: loading,
+          onClick: onSubmit,
+          children: 'Save'
+        }}
         showBackButton={true}
         showSubHeader={true}
         subHeaderBackground={'transparent'}
@@ -110,73 +177,106 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t<string>('Chain detail')}
       >
         <div className={'chain_detail__container'}>
-          <Field
-            content={currentProviderUrl}
-            placeholder={t('Provider URL')}
-            prefix={<Icon
-              customSize={'24px'}
-              iconColor={token['gray-4']}
-              phosphorIcon={ShareNetwork}
-              type={'phosphor'}
-              weight={'bold'}
-            />}
-            suffix={providerFieldSuffix()}
-          />
+          <Form
+            form={form}
+            initialValues={formInitValues}
+            onValuesChange={onFormValuesChange}
+          >
+            <div className={'chain_detail__attributes_container'}>
+              <Form.Item
+                name={'currentProvider'}
+                noStyle={true}
+              >
+                <Field
+                  content={currentProviderUrl}
+                  placeholder={t('Provider URL')}
+                  prefix={<Icon
+                    customSize={'24px'}
+                    iconColor={token['gray-4']}
+                    phosphorIcon={ShareNetwork}
+                    type={'phosphor'}
+                    weight={'bold'}
+                  />}
+                  suffix={providerFieldSuffix()}
+                />
+              </Form.Item>
 
-          <Row gutter={token.paddingSM}>
-            <Col span={16}>
+              <Row gutter={token.paddingSM}>
+                <Col span={16}>
+                  <Field
+                    content={chainInfo.name}
+                    placeholder={t('Chain name')}
+                    prefix={<Icon
+                      customSize={'24px'}
+                      iconColor={token['gray-4']}
+                      phosphorIcon={Globe}
+                      type={'phosphor'}
+                      weight={'bold'}
+                    />}
+                  />
+                </Col>
+                <Col span={8}>
+                  <Field
+                    content={symbol}
+                    placeholder={t('Symbol')}
+                  />
+                </Col>
+              </Row>
+
+              <Row gutter={token.paddingSM}>
+                <Col span={12}>
+                  <Field
+                    content={decimals}
+                    placeholder={t('Decimals')}
+                  />
+                </Col>
+                <Col span={12}>
+                  <Field
+                    content={paraId > -1 ? paraId : 'None'}
+                    placeholder={t('ParaId')}
+                  />
+                </Col>
+              </Row>
+
               <Field
-                content={chainInfo.name}
-                placeholder={t('Chain name')}
-                prefix={<Icon
-                  customSize={'24px'}
-                  iconColor={token['gray-4']}
-                  phosphorIcon={Globe}
-                  type={'phosphor'}
-                  weight={'bold'}
-                />}
+                content={addressPrefix.toString()}
+                placeholder={t('Address prefix')}
               />
-            </Col>
-            <Col span={8}>
-              <Field
-                content={symbol}
-                placeholder={t('Symbol')}
-              />
-            </Col>
-          </Row>
 
-          <Row gutter={token.paddingSM}>
-            <Col span={12}>
-              <Field
-                content={decimals}
-                placeholder={t('Decimals')}
-              />
-            </Col>
-            <Col span={12}>
-              <Field
-                content={paraId > -1 ? paraId : 'None'}
-                placeholder={t('ParaId')}
-              />
-            </Col>
-          </Row>
+              <Row gutter={token.paddingSM}>
+                <Col span={12}>
+                  <Form.Item
+                    name={'priceId'}
+                    noStyle={true}
+                  >
+                    <Input
+                      placeholder={t('Price Id (from CoinGecko)')}
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Field
+                    content={chainTypeString()}
+                    placeholder={t('Chain type')}
+                  />
+                </Col>
+              </Row>
 
-          <Field
-            content={}
-            placeholder={t('Address prefix')}
-          />
+              <Form.Item
+                name={'blockExplorer'}
+                noStyle={true}
+              >
+                <Input placeholder={t('Block explorer')} />
+              </Form.Item>
 
-          <Row gutter={token.paddingSM}>
-            <Col span={12}>
-              <Field content={'PriceId'} />
-            </Col>
-            <Col span={12}>
-              <Field content={'Chain type'} />
-            </Col>
-          </Row>
-
-          <Field content={'Block explorer'} />
-
-          <Field content={'Crowdloan Url'} />
+              <Form.Item
+                name={'crowdloanUrl'}
+                noStyle={true}
+              >
+                <Input placeholder={t('Crowdloan URL')} />
+              </Form.Item>
+            </div>
+          </Form>
         </div>
       </Layout.Base>
     </PageWrapper>
@@ -186,8 +286,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 const TokenDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.chain_detail__container': {
+      marginTop: 22,
       marginRight: token.margin,
-      marginLeft: token.margin,
+      marginLeft: token.margin
+    },
+
+    '.chain_detail__attributes_container': {
       display: 'flex',
       flexDirection: 'column',
       gap: token.marginSM

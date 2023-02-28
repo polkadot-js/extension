@@ -304,7 +304,6 @@ const Component: React.FC<Props> = (props: Props) => {
             >
               <Input
                 label={t('Current password')}
-                placeholder={t('Current password')}
                 type='password'
               />
             </Form.Item>

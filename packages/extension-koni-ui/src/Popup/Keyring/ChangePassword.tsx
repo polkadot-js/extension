@@ -84,9 +84,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     form.resetFields([FormFieldName.CONFIRM_PASSWORD]);
   }, [form]);
 
+  const goBack = useCallback(() => {
+    navigate(DEFAULT_ROUTER_PATH);
+  }, [navigate]);
+
   return (
     <Layout.Base
       className={CN(className)}
+      leftFooterButton={{
+        children: t('Cancel'),
+        onClick: goBack,
+        disabled: loading
+      }}
       rightFooterButton={{
         children: t('Save'),
         onClick: form.submit,
@@ -130,7 +139,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             [FormFieldName.PASSWORD]: '',
             [FormFieldName.CONFIRM_PASSWORD]: ''
           }}
-          name='create-password-form'
+          name='change-password-form'
           onFieldsChange={onUpdate}
           onFinish={onSubmit}
         >

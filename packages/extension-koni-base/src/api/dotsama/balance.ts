@@ -676,7 +676,7 @@ export async function subscribeFreeBalance (chain: string, address: string, subs
 
       return responseIntervalSubscription(getERC20FreeBalance);
     }
-  } else {
+  } else if (api) {
     // Handle WASM tokens
     if (token) {
       if (_isSmartContractToken(tokenInfo)) {
@@ -788,7 +788,7 @@ export async function subscribeFreeBalance (chain: string, address: string, subs
       };
     }
 
-    const unsub = await api.derive.balances?.all(address, (balance: DeriveBalancesAll) => {
+    const unsub = api && await api.derive.balances?.all(address, (balance: DeriveBalancesAll) => {
       update(balance.availableBalance?.toBn()?.toString() || '0');
     });
 
@@ -796,4 +796,7 @@ export async function subscribeFreeBalance (chain: string, address: string, subs
       unsub && unsub();
     };
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  return () => {};
 }

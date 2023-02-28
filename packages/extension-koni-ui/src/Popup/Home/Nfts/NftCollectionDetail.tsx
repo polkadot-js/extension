@@ -12,12 +12,12 @@ import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification'
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { deleteCustomAssets } from '@subwallet/extension-koni-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
-import { INftCollectionDetail, INftItemDetail, NFT_PER_PAGE } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { INftCollectionDetail, INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import { Image, Trash } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -51,14 +51,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { collectionInfo, nftList } = location.state as INftCollectionDetail;
   const originAssetInfo = useGetChainAssetInfo(collectionInfo.originAsset);
 
-  const [page, setPage] = useState(1);
-  const [nftList_, setNftList_] = useState<NftItem[]>([]);
-
-  useEffect(() => {
-    // init NftCollections_
-    setNftList_(nftList.slice(0, NFT_PER_PAGE));
-  }, [nftList]);
-
   const searchNft = useCallback((nftItem: NftItem, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
@@ -85,22 +77,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       title={nftItem.name || nftItem.id}
     />);
   }, [collectionInfo, handleOnClickNft, nftList.length]);
-
-  const loadMoreNfts = useCallback(() => {
-    setTimeout(() => { // delayed to avoid lagging on scroll
-      if (nftList.length > nftList_.length) {
-        const nextPage = page + 1;
-        const from = (nextPage - 1) * NFT_PER_PAGE;
-        const to = from + NFT_PER_PAGE > nftList.length ? nftList.length : (from + NFT_PER_PAGE);
-
-        setNftList_([
-          ...nftList_,
-          ...nftList.slice(from, to)
-        ]);
-        setPage(nextPage);
-      }
-    }, 100);
-  }, [nftList, nftList_, page]);
 
   const onBack = useCallback(() => {
     navigate('/home/nfts/collections');
@@ -192,14 +168,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           displayGrid={true}
           enableSearchInput={true}
           gridGap={'14px'}
-          list={nftList_}
-          minColumnWidth={'172px'}
-          pagination={{
-            hasMore: nftList.length > nftList_.length,
-            loadMore: loadMoreNfts
-          }}
+          ignoreScrollbar={nftList.length > 2}
+          list={nftList}
+          minColumnWidth={'160px'}
           renderItem={renderNft}
-          renderOnScroll={false}
+          renderOnScroll={true}
           renderWhenEmpty={emptyNft}
           searchFunction={searchNft}
           searchPlaceholder={t<string>('Search Nft name or ID')}
@@ -216,7 +189,8 @@ const NftCollectionDetail = styled(Component)<Props>(({ theme: { token } }: Prop
 
     '.nft_item_list__container': {
       paddingTop: 14,
-      flex: 1
+      flex: 1,
+      height: '100%'
     },
 
     '&__inner': {

@@ -238,7 +238,9 @@ function getAccountBalance (
     totalBalanceInfo.change.status = 'decrease';
   }
 
-  totalBalanceInfo.change.percent = totalBalanceInfo.change.value.multipliedBy(BN_100).dividedBy(totalBalanceInfo.converted24hValue);
+  if (!totalBalanceInfo.change.value.eq(0)) {
+    totalBalanceInfo.change.percent = totalBalanceInfo.change.value.multipliedBy(BN_100).dividedBy(totalBalanceInfo.converted24hValue);
+  }
 
   return {
     tokenBalanceMap,

@@ -1,11 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
 import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useGoBackSelectAccount from '@subwallet/extension-koni-ui/hooks/modal/useGoBackSelectAccount';
+import useClickOutSide from '@subwallet/extension-koni-ui/hooks/useClickOutSide';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { renderModalSelector } from '@subwallet/extension-koni-ui/util/dom';
 import { BackgroundIcon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { DeviceTabletCamera, Eye, QrCode, Swatches } from 'phosphor-react';
@@ -28,12 +33,17 @@ const modalId = ATTACH_ACCOUNT_MODAL;
 const Component: React.FC<Props> = ({ className }: Props) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { inactiveModal } = useContext(ModalContext);
+  const { checkActive, inactiveModal } = useContext(ModalContext);
   const { token } = useTheme() as Theme;
+  const isActive = checkActive(modalId);
+
+  const onBack = useGoBackSelectAccount(modalId);
 
   const onCancel = useCallback(() => {
     inactiveModal(modalId);
   }, [inactiveModal]);
+
+  useClickOutSide(isActive, renderModalSelector(className), onCancel);
 
   const renderIcon = useCallback((item: AttachAccountItem) => {
     return (
@@ -87,8 +97,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <SwModal
       className={CN(className)}
+      closeIcon={(<BackIcon />)}
       id={modalId}
-      onCancel={onCancel}
+      maskClosable={false}
+      onCancel={onBack}
+      rightIconProps={{
+        icon: <CloseIcon />,
+        onClick: onCancel
+      }}
       title={t<string>('Attach account')}
     >
       <div className='items-container'>

@@ -2,16 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { canDerive } from '@subwallet/extension-base/utils';
+import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { CREATE_ACCOUNT_MODAL, DERIVE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useGoBackSelectAccount from '@subwallet/extension-koni-ui/hooks/modal/useGoBackSelectAccount';
+import useClickOutSide from '@subwallet/extension-koni-ui/hooks/useClickOutSide';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
+import { renderModalSelector } from '@subwallet/extension-koni-ui/util/dom';
+import { BackgroundIcon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Info, Leaf, ShareNetwork } from 'phosphor-react';
+import { Leaf, ShareNetwork } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -31,9 +36,13 @@ const modalId = CREATE_ACCOUNT_MODAL;
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+
   const { token } = useTheme() as Theme;
   const { accounts } = useSelector((state: RootState) => state.accountState);
+  const isActive = checkActive(modalId);
+
+  const onBack = useGoBackSelectAccount(modalId);
 
   const disableDerive = useMemo(
     () => !accounts
@@ -45,6 +54,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onCancel = useCallback(() => {
     inactiveModal(modalId);
   }, [inactiveModal]);
+
+  useClickOutSide(isActive, renderModalSelector(className), onCancel);
 
   const renderIcon = useCallback((item: CreateAccountItem) => {
     return (
@@ -86,15 +97,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <SwModal
       className={CN(className)}
+      closeIcon={(<BackIcon />)}
       id={modalId}
-      onCancel={onCancel}
+      maskClosable={false}
+      onCancel={onBack}
       rightIconProps={{
-        icon: (
-          <Icon
-            phosphorIcon={Info}
-            size='sm'
-          />
-        )
+        icon: <CloseIcon />,
+        onClick: onCancel
       }}
       title={t<string>('Create new account')}
     >

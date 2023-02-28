@@ -6,6 +6,7 @@ import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import TokenItemFooter from '@subwallet/extension-koni-ui/Popup/Settings/Tokens/component/TokenItemFooter';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -25,7 +26,6 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import Layout from '../../../components/Layout';
-import useDefaultNavigate from "@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate";
 
 type Props = ThemeProps
 

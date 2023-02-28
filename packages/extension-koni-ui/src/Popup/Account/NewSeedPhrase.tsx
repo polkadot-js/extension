@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, LoadingContainer } from '@subwallet/extension-koni-ui/components';
+import { Layout, LoadingScreen } from '@subwallet/extension-koni-ui/components';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
@@ -15,7 +15,7 @@ import { NewSeedPhraseState } from '@subwallet/extension-koni-ui/types/account';
 import { Icon } from '@subwallet/react-ui';
 import { CheckCircle, Info } from 'phosphor-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -35,7 +35,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const location = useLocation();
   const notify = useNotification();
-  const navigate = useNavigate();
   const goHome = useDefaultNavigate().goHome;
   const [accountTypes] = useState<KeypairType[]>((location.state as NewSeedPhraseState)?.accountTypes || []);
 
@@ -73,7 +72,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }, 500);
-  }, [accountName, seedPhrase, accountTypes, navigate, notify]);
+  }, [seedPhrase, accountName, accountTypes, goHome, notify]);
 
   useEffect((): void => {
     createSeedV2(undefined, undefined, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
@@ -117,7 +116,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           <WordPhrase seedPhrase={seedPhrase} />
         </div>
       )}
-      {!seedPhrase && (<LoadingContainer />)}
+      {!seedPhrase && (<LoadingScreen />)}
     </Layout.Base>
   );
 };

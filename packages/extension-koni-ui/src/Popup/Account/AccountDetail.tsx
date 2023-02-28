@@ -102,7 +102,7 @@ const Component: React.FC<Props> = (props: Props) => {
         setDeriving(false);
       });
     }, 500);
-  }, [account?.address, navigate, notify]);
+  }, [account?.address, goHome, notify]);
 
   const onExport = useCallback(() => {
     if (account?.address) {

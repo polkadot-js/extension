@@ -6,6 +6,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { ActionItemType, ActionModal } from '@subwallet/extension-koni-ui/components/Modal/ActionModal';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { changeAuthorization, changeAuthorizationPerAccount, forgetSite, toggleAuthorization } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateAuthUrls } from '@subwallet/extension-koni-ui/stores/utils';
@@ -22,7 +23,6 @@ import { useLocation } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
-import useDefaultNavigate from "@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate";
 
 type Props = ThemeProps & ManageWebsiteAccessDetailParam & {
   authInfo: AuthUrlInfo;

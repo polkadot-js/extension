@@ -1188,12 +1188,6 @@ export default class KoniState {
     return this.chainService.removeChain(networkKey);
   }
 
-  public disableChain (networkKey: string): boolean {
-    const defaultChains = this.getDefaultNetworkKeys();
-
-    return this.chainService.setChainActiveStatus(networkKey, false, defaultChains);
-  }
-
   // TODO: avoids turning off chains related to ledger account
   private getDefaultNetworkKeys = (): string[] => {
     const genesisHashes: Record<string, string> = {};
@@ -1236,7 +1230,18 @@ export default class KoniState {
     });
   }
 
-  public enableChain (chainSlug: string, enableTokens?: boolean): boolean {
+  public async disableChain (chainSlug: string): Promise<boolean> {
+    // const defaultChains = this.getDefaultNetworkKeys();
+    this.updateAssetSettingByChain(chainSlug, false);
+
+    const result = await this.chainService.disableChain(chainSlug);
+
+    this.updateServiceInfo();
+
+    return result;
+  }
+
+  public enableChain (chainSlug: string, enableTokens = true): boolean {
     if (enableTokens) {
       this.updateAssetSettingByChain(chainSlug, true);
     }

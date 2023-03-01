@@ -6,17 +6,23 @@ import { _ChainState } from '@subwallet/extension-base/services/chain-service/ty
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { updateChainActiveState } from '@subwallet/extension-koni-ui/messaging';
+import { ChainDetail } from '@subwallet/extension-koni-ui/Popup/Settings/Chains/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Switch } from '@subwallet/react-ui';
+import { Button, Switch } from '@subwallet/react-ui';
+import Icon from '@subwallet/react-ui/es/icon';
+import { DotsThree } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
+import { NavigateFunction } from 'react-router';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   chainState: _ChainState,
-  chainInfo: _ChainInfo
+  chainInfo: _ChainInfo,
+  showDetailNavigation?: boolean,
+  navigate?: NavigateFunction
 }
 
-function Component ({ chainInfo, chainState, className = '' }: Props): React.ReactElement<Props> {
+function Component ({ chainInfo, chainState, className = '', navigate, showDetailNavigation }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const showNotification = useNotification();
 
@@ -48,6 +54,10 @@ function Component ({ chainInfo, chainState, className = '' }: Props): React.Rea
     }
   }, [chainInfo.slug, loading, showNotification, t]);
 
+  const onClick = useCallback(() => {
+    navigate && navigate('/settings/chains/detail', { state: { chainInfo, chainState } as ChainDetail });
+  }, [chainInfo, navigate]);
+
   return (
     <div className={`${className}`}>
       <Switch
@@ -55,6 +65,18 @@ function Component ({ chainInfo, chainState, className = '' }: Props): React.Rea
         disabled={loading}
         onClick={onSwitchChainState}
       />
+      {
+        showDetailNavigation && <Button
+          icon={<Icon
+            phosphorIcon={DotsThree}
+            size='sm'
+            type='phosphor'
+          />}
+          onClick={onClick}
+          size={'xs'}
+          type={'ghost'}
+        />
+      }
     </div>
   );
 }

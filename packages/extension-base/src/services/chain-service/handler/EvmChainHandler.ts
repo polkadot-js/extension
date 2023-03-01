@@ -31,6 +31,11 @@ export class EvmChainHandler {
     this.evmApiMap[chainSlug] = evmApi;
   }
 
+  public destroyEvmApi (chainSlug: string) {
+    // TODO: handle API destroy better
+    delete this.evmApiMap[chainSlug];
+  }
+
   public refreshApi (slug: string, endpoint: string, providerName?: string) {
     this.evmApiMap[slug] = this.initApi(slug, endpoint, providerName);
   }

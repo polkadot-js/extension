@@ -6,7 +6,7 @@ import { _ChainState, _CUSTOM_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwall
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-export function _isCustomNetwork (slug: string) {
+export function _isCustomChain (slug: string) {
   if (slug.length === 0) {
     return true;
   }
@@ -107,8 +107,8 @@ export function _isSmartContractToken (tokenInfo: _ChainAsset) {
   return _SMART_CONTRACT_STANDARDS.includes(tokenInfo.assetType);
 }
 
-export function _isEvmChain (chainInfo: _ChainInfo) {
-  return !!chainInfo.evmInfo; // fallback to Ethereum
+export function _isSubstrateChain (chainInfo: _ChainInfo) {
+  return !!chainInfo.substrateInfo; // fallback to Ethereum
 }
 
 export function _getEvmChainId (chainInfo: _ChainInfo) {
@@ -335,6 +335,6 @@ export function _isAssetFungibleToken (chainAsset: _ChainAsset): boolean {
   return ![_AssetType.ERC721, _AssetType.PSP34, _AssetType.UNKNOWN].includes(chainAsset.assetType);
 }
 
-export function _getAssetType (chainAsset: _ChainAsset): _AssetType {
-  return chainAsset.assetType;
+export function _getCrowdloanUrlFromChain (chainInfo: _ChainInfo): string {
+  return chainInfo?.substrateInfo?.crowdloanUrl || '';
 }

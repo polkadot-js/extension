@@ -24,6 +24,8 @@ const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/H
 const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
 
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
+const ManageChains = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ManageChains'));
+const ChainDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ChainDetail'));
 const ManageTokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/ManageTokens'));
 const FungibleTokenImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/FungibleTokenImport'));
 const TokenDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/TokenDetail'));
@@ -204,13 +206,26 @@ export const router = createHashRouter([{
         }, {
           path: 'dapp-access-edit',
           element: <ManageWebsiteAccessDetail />
-        }, {
-          path: 'network',
-          element: <Example />
-        }, {
-          path: 'network-edit',
-          element: <Example />
-        }, {
+        },
+        {
+          path: 'chains',
+          element: <Outlet />,
+          children: [
+            {
+              path: 'manage',
+              element: <ManageChains />
+            },
+            {
+              path: 'import',
+              element: <Example />
+            },
+            {
+              path: 'detail',
+              element: <ChainDetail />
+            }
+          ]
+        },
+        {
           path: 'tokens',
           element: <Outlet />,
           children: [
@@ -231,7 +246,8 @@ export const router = createHashRouter([{
               element: <NftImport />
             }
           ]
-        }, {
+        },
+        {
           path: 'master-password',
           element: <Example />
         }

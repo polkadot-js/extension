@@ -7,6 +7,7 @@ import { REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/cons
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
+import CreatePasswordDone from '@subwallet/extension-koni-ui/Popup/Keyring/CreatePassword/Done';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
@@ -17,7 +18,6 @@ import { CaretLeft, CheckCircle, Info, ShieldPlus } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -47,7 +47,6 @@ const modalId = 'create-password-instruction-modal';
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const navigate = useNavigate();
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
@@ -58,6 +57,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [submitError, setSubmitError] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const onSubmit: Callbacks<CreatePasswordFormState>['onFinish'] = useCallback((values: CreatePasswordFormState) => {
     const password = values[FormFieldName.PASSWORD];
@@ -71,7 +71,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (!res.status) {
           setSubmitError(res.errors[0]);
         } else {
-          navigate(-2);
+          setSuccess(true);
         }
       }).catch((e: Error) => {
         setSubmitError(e.message);
@@ -79,7 +79,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         setLoading(false);
       });
     }
-  }, [navigate]);
+  }, []);
 
   const onUpdate: Callbacks<CreatePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
     const error = allFields.map((data) => data.errors || [])
@@ -113,119 +113,141 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <Layout.Base
       className={CN(className)}
-      rightFooterButton={{
-        children: t('Continue'),
-        onClick: form.submit,
-        loading: loading,
-        disabled: isDisabled,
-        icon: FooterIcon
-      }}
+      rightFooterButton={
+        success
+          ? {
+            children: t('Exit')
+            // onClick: form.submit,
+          }
+          : {
+            children: t('Continue'),
+            onClick: form.submit,
+            loading: loading,
+            disabled: isDisabled,
+            icon: FooterIcon
+          }
+      }
       showBackButton={true}
       showSubHeader={true}
       subHeaderBackground='transparent'
       subHeaderCenter={true}
-      subHeaderIcons={[
-        {
-          icon: (
-            <Icon
-              phosphorIcon={Info}
-              size='sm'
-            />
-          ),
-          onClick: openModal
-        }
-      ]}
+      subHeaderIcons={
+        !success
+          ? [
+            {
+              icon: (
+                <Icon
+                  phosphorIcon={Info}
+                  size='sm'
+                />
+              ),
+              onClick: openModal
+            }
+          ]
+          : undefined
+      }
       subHeaderPaddingVertical={true}
-      title={t('Create a password')}
+      title={success ? t('Successful') : t('Create a password')}
     >
-      <div className='body-container'>
-        <div className='page-icon'>
-          <PageIcon
-            color='var(--page-icon-color)'
-            iconProps={{
-              weight: 'fill',
-              phosphorIcon: ShieldPlus
-            }}
-          />
-        </div>
-        <div className='title'>
-          {t('Create a password')}
-        </div>
-        <Form
-          form={form}
-          initialValues={{
-            [FormFieldName.PASSWORD]: '',
-            [FormFieldName.CONFIRM_PASSWORD]: ''
-          }}
-          name='create-password-form'
-          onFieldsChange={onUpdate}
-          onFinish={onSubmit}
-        >
-          <Form.Item
-            className='form-item-no-error'
-            name={FormFieldName.PASSWORD}
-            rules={passwordRules}
-          >
-            <Input
-              onChange={onChangePassword}
-              placeholder={t('Enter password')}
-              type='password'
-            />
-          </Form.Item>
-          <Form.Item
-            className='form-item-no-error'
-            name={FormFieldName.CONFIRM_PASSWORD}
-            rules={confirmPasswordRules}
-          >
-            <Input
-              placeholder={t('Confirm password')}
-              type='password'
-            />
-          </Form.Item>
-          <Form.Item>
-            <AlertBox
-              description={t('Recommended security practice')}
-              title={t('Always choose a strong password!')}
-              type='warning'
-            />
-          </Form.Item>
-          <Form.Item
-            help={submitError}
-            validateStatus={submitError && 'error'}
-          />
-        </Form>
-        <SwModal
-          closeIcon={(
-            <Icon
-              phosphorIcon={CaretLeft}
-              size='sm'
-            />
-          )}
-          id={modalId}
-          onCancel={closeModal}
-          rightIconProps={{
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='sm'
+      {
+        !success && (
+          <div className='body-container'>
+            <div className='page-icon'>
+              <PageIcon
+                color='var(--page-icon-color)'
+                iconProps={{
+                  weight: 'fill',
+                  phosphorIcon: ShieldPlus
+                }}
               />
-            )
-          }}
-          title={t('Instructions')}
-          wrapClassName={className}
-        >
-          <div className='instruction-container'>
-            <AlertBox
-              description={t('For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it.')}
-              title={t('Why do I need to enter a password?')}
-            />
-            <AlertBox
-              description={t('The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!')}
-              title={t('Can I recover a password?')}
-            />
+            </div>
+            <div className='title'>
+              {t('Create a password')}
+            </div>
+            <Form
+              form={form}
+              initialValues={{
+                [FormFieldName.PASSWORD]: '',
+                [FormFieldName.CONFIRM_PASSWORD]: ''
+              }}
+              name='create-password-form'
+              onFieldsChange={onUpdate}
+              onFinish={onSubmit}
+            >
+              <Form.Item
+                hideError={true}
+                name={FormFieldName.PASSWORD}
+                rules={passwordRules}
+              >
+                <Input
+                  onChange={onChangePassword}
+                  placeholder={t('Enter password')}
+                  type='password'
+                />
+              </Form.Item>
+              <Form.Item
+                hideError={true}
+                name={FormFieldName.CONFIRM_PASSWORD}
+                rules={confirmPasswordRules}
+              >
+                <Input
+                  placeholder={t('Confirm password')}
+                  type='password'
+                />
+              </Form.Item>
+              <Form.Item>
+                <AlertBox
+                  description={t('Recommended security practice')}
+                  title={t('Always choose a strong password!')}
+                  type='warning'
+                />
+              </Form.Item>
+              {
+                submitError && (
+                  <Form.Item
+                    help={submitError}
+                    validateStatus='error'
+                  />
+                )
+              }
+            </Form>
+            <SwModal
+              closeIcon={(
+                <Icon
+                  phosphorIcon={CaretLeft}
+                  size='sm'
+                />
+              )}
+              id={modalId}
+              onCancel={closeModal}
+              rightIconProps={{
+                icon: (
+                  <Icon
+                    phosphorIcon={Info}
+                    size='sm'
+                  />
+                )
+              }}
+              title={t('Instructions')}
+              wrapClassName={className}
+            >
+              <div className='instruction-container'>
+                <AlertBox
+                  description={t('For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it.')}
+                  title={t('Why do I need to enter a password?')}
+                />
+                <AlertBox
+                  description={t('The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!')}
+                  title={t('Can I recover a password?')}
+                />
+              </div>
+            </SwModal>
           </div>
-        </SwModal>
-      </div>
+        )
+      }
+      {
+        success && (<CreatePasswordDone />)
+      }
     </Layout.Base>
   );
 };
@@ -250,12 +272,6 @@ const CreatePassword = styled(Component)<Props>(({ theme: { token } }: Props) =>
         fontSize: token.fontSizeHeading3,
         lineHeight: token.lineHeightHeading3,
         color: token.colorTextBase
-      },
-
-      '.form-item-no-error': {
-        '.ant-form-item-explain': {
-          display: 'none'
-        }
       }
     },
 

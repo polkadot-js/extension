@@ -66,23 +66,21 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
     if (pathName === '/') {
       if (isNoAccount(accounts)) {
-        console.log(0);
         navigate('/welcome');
       } else if (!hasMasterPassword) {
-        console.log(1);
         navigate('/keyring/create-password');
       } else if (isLocked) {
-        console.log(2);
         navigate('/keyring/login');
       } else if (needMigrate) {
         navigate('/keyring/migrate-password');
       } else if (hasConfirmations) {
-        console.log(3);
         openPModal('confirmations');
       } else {
         navigate('/home/tokens');
       }
     } else if (pathName === '/keyring/login' && !isLocked) {
+      navigate(DEFAULT_ROUTER_PATH);
+    } else if (pathName === '/welcome' && !isNoAccount(accounts)) {
       navigate(DEFAULT_ROUTER_PATH);
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');

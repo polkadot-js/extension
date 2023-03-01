@@ -18,9 +18,8 @@ export const PREDEFINED_MODAL_NAMES = ['debugger', 'transaction', 'confirmations
 type PredefinedModalName = typeof PREDEFINED_MODAL_NAMES[number];
 
 export const usePredefinedModal = () => {
-  const [, setSearchParams] = useSearchParams();
-
-  return useCallback((name: PredefinedModalName | null) => {
+  const [seachParam, setSearchParams] = useSearchParams();
+  const openPModal = useCallback((name: PredefinedModalName | null) => {
     setSearchParams((prev) => {
       if (name) {
         prev.set('popup', name);
@@ -31,6 +30,10 @@ export const usePredefinedModal = () => {
       return prev;
     });
   }, [setSearchParams]);
+
+  const isOpenPModal = useMemo(() => (seachParam.has('popup')), [seachParam]);
+
+  return { openPModal, isOpenPModal };
 };
 
 const DebugIcon = <Icon
@@ -47,7 +50,7 @@ const DebugTrigger = styled.div(({ theme }) => ({
 export const WalletModalContext = ({ children }: Props) => {
   const { activeList, activeModal, inactiveModals, scannerOpen } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
-  const openPModal = usePredefinedModal();
+  const { openPModal } = usePredefinedModal();
 
   const hasActiveModal = useMemo(() => !!activeList.length, [activeList.length]);
 

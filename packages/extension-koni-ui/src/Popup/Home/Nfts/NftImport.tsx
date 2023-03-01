@@ -7,6 +7,7 @@ import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetContractSupportedChains';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -19,7 +20,6 @@ import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { CheckCircle, QrCode } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -66,7 +66,7 @@ function getNftTypeSupported (chainInfo: _ChainInfo) {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const goBack = useDefaultNavigate().goBack;
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
@@ -82,10 +82,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const nftTypeOptions = useMemo(() => {
     return getNftTypeSupported(chainInfoMap[selectedChain]);
   }, [chainInfoMap, selectedChain]);
-
-  const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
 
   const onSubmit = useCallback(() => {
     const formValues = formRef.current?.getFieldsValue() as NftImportFormType;
@@ -114,7 +110,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           showNotification({
             message: t('Imported NFT successfully')
           });
-          navigate(-1);
+          goBack();
         } else {
           showNotification({
             message: t('An error occurred, please try again')
@@ -126,7 +122,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           message: t('An error occurred, please try again')
         });
       });
-  }, [symbol, chainInfoMap, showNotification, t, navigate]);
+  }, [symbol, chainInfoMap, showNotification, t, goBack]);
 
   const isSubmitDisabled = useCallback(() => {
     return contractValidation.status === '' || contractValidation.status === 'error';
@@ -330,7 +326,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['nft'])}
     >
       <Layout.Base
-        onBack={onBack}
+        onBack={goBack}
         rightFooterButton={{
           block: true,
           disabled: isSubmitDisabled(),

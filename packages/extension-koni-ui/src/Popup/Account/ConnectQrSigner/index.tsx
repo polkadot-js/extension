@@ -4,9 +4,9 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/QrScanner/ErrorNotice';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
@@ -18,7 +18,6 @@ import CN from 'classnames';
 import { Info, QrCode } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import ChainLogoMap from '../../../assets/logo';
@@ -43,7 +42,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { className, description, instructionUrl, logoUrl, subTitle, title } = props;
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const goHome = useDefaultNavigate().goHome;
 
   const accountName = useGetDefaultAccountName();
 
@@ -89,7 +88,7 @@ const Component: React.FC<Props> = (props: Props) => {
           } else {
             setVisible(false);
             setValidateState({});
-            navigate(DEFAULT_ROUTER_PATH);
+            goHome();
           }
         })
         .catch((error: Error) => {
@@ -104,7 +103,7 @@ const Component: React.FC<Props> = (props: Props) => {
     } else {
       setLoading(false);
     }
-  }, [accountName, account, navigate]);
+  }, [account, accountName, goHome]);
 
   const openCamera = useCallback(() => {
     setVisible(true);

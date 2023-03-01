@@ -3,7 +3,7 @@
 
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/commont';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging';
@@ -65,6 +65,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const isPopup = useIsPopup();
   const notify = useNotification();
+  const { goBack, goHome } = useDefaultNavigate();
 
   const [locking, setLocking] = useState(false);
 
@@ -74,7 +75,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setTimeout(() => {
       keyringLock()
         .then(() => {
-          navigate(DEFAULT_ROUTER_PATH);
+          goHome();
         })
         .catch((e: Error) => {
           notify({
@@ -86,7 +87,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           setLocking(false);
         });
     }, 100);
-  }, [navigate, notify]);
+  }, [goHome, notify]);
 
   // todo: i18n all titles, labels below
   const SettingGroupItemType: SettingGroupItemType[] = [
@@ -255,12 +256,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             weight={'bold'}
           />
         ),
-        onClick: () => {
-          navigate(-1);
-        }
+        onClick: goBack
       }
     ];
-  }, [navigate]);
+  }, [goBack]);
 
   return (
     <PageWrapper className={`settings ${className}`}>

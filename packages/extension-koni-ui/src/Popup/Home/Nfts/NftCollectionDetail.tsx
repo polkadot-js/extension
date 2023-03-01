@@ -6,6 +6,7 @@ import { _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainAssetInfo';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/useConfirmModal';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
@@ -35,6 +36,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const location = useLocation();
   const navigate = useNavigate();
+  const goBack = useDefaultNavigate().goBack;
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
 
@@ -121,7 +123,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         deleteCustomAssets(collectionInfo.originAsset)
           .then((result) => {
             if (result) {
-              navigate(-1);
+              goBack();
               showNotification({
                 message: t('Deleted NFT collection successfully')
               });
@@ -138,7 +140,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           });
       }
     }).catch(console.log);
-  }, [collectionInfo.originAsset, handleSimpleConfirmModal, navigate, showNotification, t]);
+  }, [collectionInfo.originAsset, goBack, handleSimpleConfirmModal, showNotification, t]);
 
   const subHeaderButton: ButtonProps[] = [
     {

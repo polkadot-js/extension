@@ -4,7 +4,6 @@
 import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,7 +12,6 @@ import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/fo
 import { Button, Form, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -28,7 +26,6 @@ interface LoginFormState {
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [form] = Form.useForm<LoginFormState>();
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
@@ -50,9 +47,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         password: values[FormFieldName.PASSWORD]
       })
         .then((data) => {
-          if (data.status) {
-            navigate(DEFAULT_ROUTER_PATH);
-          } else {
+          if (!data.status) {
             onError(data.errors[0]);
           }
         })
@@ -63,7 +58,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }, 500);
-  }, [navigate, onError]);
+  }, [onError]);
 
   return (
     <Layout.Base

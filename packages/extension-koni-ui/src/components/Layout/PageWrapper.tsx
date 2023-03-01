@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LoadingContainer } from '@subwallet/extension-koni-ui/components';
+import { LoadingScreen } from '@subwallet/extension-koni-ui/components';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useEffect, useState } from 'react';
 import { Await, useLocation } from 'react-router-dom';
@@ -12,11 +12,12 @@ export interface PageWrapperProps extends ThemeProps{
   resolve?: Promise<any>;
   children?: React.ReactNode;
   animateOnce?: boolean;
+  loadingClass?: string;
 }
 
 const defaultResolver = Promise.resolve(true);
 
-function Component ({ animateOnce, children, className, resolve }: PageWrapperProps) {
+function Component ({ animateOnce, children, className, loadingClass, resolve }: PageWrapperProps) {
   const nodeRef = React.useRef(null);
   const location = useLocation();
   const [pathName, setPathName] = useState<string | undefined>();
@@ -31,7 +32,7 @@ function Component ({ animateOnce, children, className, resolve }: PageWrapperPr
     });
   }, [animateOnce, location.pathname]);
 
-  return <React.Suspense fallback={<LoadingContainer />}>
+  return <React.Suspense fallback={<LoadingScreen className={loadingClass} />}>
     <Await resolve={resolve || defaultResolver}>
       <CSSTransition
         classNames={'page'}

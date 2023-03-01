@@ -3,9 +3,9 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,7 +13,6 @@ import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { Form, Icon, Input } from '@subwallet/react-ui';
 import { FileArrowDown, Info } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -30,7 +29,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const { t } = useTranslation();
   const timeOutRef = useRef<NodeJS.Timer>();
-  const navigate = useNavigate();
+  const goHome = useDefaultNavigate().goHome;
 
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [validating, setValidating] = useState(false);
@@ -59,7 +58,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         types: [EVM_ACCOUNT_TYPE]
       })
         .then(() => {
-          navigate(DEFAULT_ROUTER_PATH);
+          goHome();
         })
         .catch((error: Error): void => {
           setValidateState({
@@ -71,7 +70,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }
-  }, [privateKey, accountName, navigate]);
+  }, [privateKey, accountName, goHome]);
 
   useEffect(() => {
     let amount = true;

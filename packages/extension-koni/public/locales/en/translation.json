@@ -674,5 +674,14 @@
   "Contract address": "",
   "Input Address": "",
   "SubWallet": "",
-  "Polkadot, Substrate & Ethereum wallet": ""
+  "Polkadot, Substrate & Ethereum wallet": "",
+  "Please type or paste an address": "",
+  "Select token": "",
+  "No chain": "",
+  "Your chain will appear here.": "",
+  "Sender available balance:": "",
+  "value": "",
+  "Send to account": "",
+  "Your request has been sent. You can track its progress on the Transaction History page.": "",
+  "View transaction": ""
 }

@@ -49,8 +49,6 @@ const _SendFund: React.FC = () => {
     Object.values(assetRegistry).map(({ name, originChain, slug, symbol }) => ({ name, slug, originChain, symbol }))
   ), [assetRegistry]);
 
-  console.log(assetRegistry);
-
   const onFieldsChange = useCallback(
     ({ chain, from }: Partial<TransferFromProps>, values: TransferFromProps) => {
       if (from) {

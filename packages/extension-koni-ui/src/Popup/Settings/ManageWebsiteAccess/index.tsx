@@ -5,6 +5,7 @@ import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { ActionItemType, ActionModal } from '@subwallet/extension-koni-ui/components/Modal/ActionModal';
 import { WebsiteAccessItem } from '@subwallet/extension-koni-ui/components/Setting/WebsiteAccessItem';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { changeAuthorizationAll, forgetAllSite } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateAuthUrls } from '@subwallet/extension-koni-ui/stores/utils';
@@ -37,15 +38,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const goBack = useDefaultNavigate().goBack;
   const { token } = useTheme() as Theme;
 
   const websiteAccessItems = useMemo<AuthUrlInfo[]>(() => {
     return getWebsiteItems(authUrlMap);
   }, [authUrlMap]);
-
-  const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
 
   const onOpenActionModal = useCallback(() => {
     activeModal(ActionModalId);
@@ -130,7 +128,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <SwSubHeader
         background={'transparent'}
         center
-        onBack={onBack}
+        onBack={goBack}
         paddingVertical
         rightButtons={[
           {

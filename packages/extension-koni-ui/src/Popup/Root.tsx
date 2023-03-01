@@ -7,11 +7,11 @@ import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { changeHeaderLogo } from '@subwallet/react-ui';
-import Bowser from 'bowser';
 import React, { useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -19,37 +19,16 @@ import styled from 'styled-components';
 
 changeHeaderLogo(<Logo2D />);
 
-export function initRootPromise () {
-  // Init Application with some default data if not existed
-  const VARIANTS = ['beam', 'marble', 'pixel', 'sunset', 'bauhaus', 'ring'];
-
-  function getRandomVariant (): string {
-    const random = Math.floor(Math.random() * 6);
-
-    return VARIANTS[random];
-  }
-
-  const browser = Bowser.getParser(window.navigator.userAgent);
-
-  if (!window.localStorage.getItem('randomVariant') || !window.localStorage.getItem('randomNameForLogo')) {
-    const randomVariant = getRandomVariant();
-
-    window.localStorage.setItem('randomVariant', randomVariant);
-    window.localStorage.setItem('randomNameForLogo', `${Date.now()}`);
-  }
-
-  if (!!browser.getBrowser() && !!browser.getBrowser().name && !!browser.getOS().name) {
-    window.localStorage.setItem('browserInfo', browser.getBrowser().name as string);
-    window.localStorage.setItem('osInfo', browser.getOS().name as string);
-  }
-
-  return true;
-}
+export const RouteState = {
+  prevDiffirentPathNum: -1,
+  lastPathName: '/'
+};
 
 function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();
-  const openPModal = usePredefinedModal();
+  const goHome = useDefaultNavigate().goHome;
+  const { isOpenPModal, openPModal } = usePredefinedModal();
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
@@ -61,10 +40,21 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     , [accounts]
   );
 
+  // Update goBack number
+  useEffect(() => {
+    if (location.pathname === RouteState.lastPathName) {
+      RouteState.prevDiffirentPathNum -= 1;
+    } else {
+      RouteState.prevDiffirentPathNum = -1;
+    }
+
+    RouteState.lastPathName = location.pathname;
+  }, [location]);
+
   useEffect(() => {
     const pathName = location.pathname;
 
-    if (pathName === '/') {
+    if (pathName === DEFAULT_ROUTER_PATH) {
       if (isNoAccount(accounts)) {
         navigate('/welcome');
       } else if (!hasMasterPassword) {
@@ -79,15 +69,15 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
         navigate('/home/tokens');
       }
     } else if (pathName === '/keyring/login' && !isLocked) {
-      navigate(DEFAULT_ROUTER_PATH);
+      goHome();
     } else if (pathName === '/welcome' && !isNoAccount(accounts)) {
-      navigate(DEFAULT_ROUTER_PATH);
+      goHome();
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');
+    } else if (!hasInternalConfirmations && isOpenPModal) {
+      openPModal(null);
     }
-  },
-  [accounts, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, location.pathname, navigate, needMigrate, openPModal]
-  );
+  }, [accounts, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
 
   return <>{children}</>;
 }
@@ -106,6 +96,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
     <WalletModalContext>
       <PageWrapper
         animateOnce={true}
+        loadingClass={'root-loading'}
         resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings'])}
       >
         <DefaultRoute>

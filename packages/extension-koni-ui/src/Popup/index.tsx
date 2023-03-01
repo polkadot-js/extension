@@ -12,7 +12,7 @@ import NotificationProvider from '@subwallet/react-ui/es/notification/Notificati
 import React from 'react';
 import { RouterProvider } from 'react-router';
 
-import LoadingContainer from '../components/LoadingContainer';
+import LoadingScreen from '../components/LoadingScreen';
 import { router } from './router';
 
 export default function Popup (): React.ReactElement {
@@ -26,7 +26,7 @@ export default function Popup (): React.ReactElement {
                 <QRContextProvider>
                   <NotificationProvider>
                     <RouterProvider
-                      fallbackElement={<LoadingContainer />}
+                      fallbackElement={<LoadingScreen />}
                       router={router}
                     />
                   </NotificationProvider>

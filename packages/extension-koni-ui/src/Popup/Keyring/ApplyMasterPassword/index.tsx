@@ -4,8 +4,8 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import { forgetAccount, keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import MigrateDone from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword/Done';
@@ -21,7 +21,6 @@ import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps;
@@ -59,7 +58,7 @@ const removeIcon = (
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const goHome = useDefaultNavigate().goHome;
   const notify = useNotification();
   const { token } = useTheme() as Theme;
 
@@ -153,7 +152,7 @@ const Component: React.FC<Props> = (props: Props) => {
         return {
           children: t('Finish'),
           onClick: () => {
-            navigate(DEFAULT_ROUTER_PATH);
+            goHome();
           },
           icon: finishIcon
         };
@@ -166,7 +165,7 @@ const Component: React.FC<Props> = (props: Props) => {
           icon: nextIcon
         };
     }
-  }, [form, navigate, needMigrate.length, step, t]);
+  }, [form, goHome, needMigrate.length, step, t]);
 
   const onDelete = useCallback(() => {
     if (currentAccount?.address) {

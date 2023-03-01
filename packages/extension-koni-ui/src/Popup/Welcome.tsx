@@ -4,6 +4,7 @@
 import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
+import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -11,6 +12,7 @@ import { Button, ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -50,13 +52,18 @@ const items: WelcomeButtonItem[] = [
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const navigate = useNavigate();
 
   const openModal = useCallback((id: string) => {
     return () => {
-      inactiveModal(SELECT_ACCOUNT_MODAL);
-      activeModal(id);
+      if (id === CREATE_ACCOUNT_MODAL) {
+        navigate('/accounts/new-seed-phrase', { state: { accountTypes: [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE] } });
+      } else {
+        inactiveModal(SELECT_ACCOUNT_MODAL);
+        activeModal(id);
+      }
     };
-  }, [activeModal, inactiveModal]);
+  }, [activeModal, inactiveModal, navigate]);
 
   return (
     <Layout.Base

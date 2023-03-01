@@ -4,6 +4,7 @@
 import { BrowserConfirmationType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { languageOptions } from '@subwallet/extension-base/constants/i18n';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveBrowserConfirmationType } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateBrowserConfirmationType, updateLanguage, updateTheme } from '@subwallet/extension-koni-ui/stores/utils';
@@ -13,7 +14,6 @@ import i18next from 'i18next';
 import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout, MoonStars, Sun } from 'phosphor-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps;
@@ -99,12 +99,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     language: false
   });
 
-  const navigate = useNavigate();
+  const goBack = useDefaultNavigate().goBack;
   const { token } = useTheme() as Theme;
-
-  const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
 
   const themeItems = useMemo<SelectionItemType[]>(() => {
     return [
@@ -206,7 +202,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <SwSubHeader
         background={'transparent'}
         center
-        onBack={onBack}
+        onBack={goBack}
         paddingVertical
         showBackButton
         title={'General settings' } // todo: i18n this

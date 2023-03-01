@@ -5,7 +5,7 @@ import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
 import Footer from '@subwallet/extension-koni-ui/components/Layout/parts/Footer';
 import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import { Aperture, Database, Globe, Rocket, Wallet } from 'phosphor-react';
@@ -75,6 +75,7 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
 
 const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBaseProps) => {
   const navigate = useNavigate();
+  const goHome = useDefaultNavigate().goHome;
   const { pathname } = useLocation();
 
   const selectedTab = useMemo((): string => {
@@ -98,8 +99,8 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
   );
 
   const defaultOnBack = useCallback(() => {
-    navigate(DEFAULT_ROUTER_PATH);
-  }, [navigate]);
+    goHome();
+  }, [goHome]);
 
   return (
     <SwScreenLayout

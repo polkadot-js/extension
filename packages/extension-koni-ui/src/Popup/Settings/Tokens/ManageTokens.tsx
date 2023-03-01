@@ -6,6 +6,7 @@ import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import TokenItemFooter from '@subwallet/extension-koni-ui/Popup/Settings/Tokens/component/TokenItemFooter';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -80,6 +81,7 @@ function filterFungibleTokens (assetRegistry: Record<string, _ChainAsset>, asset
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const goBack = useDefaultNavigate().goBack;
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -189,10 +191,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     ];
   }, [navigate]);
 
-  const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
-
   const openFilterModal = useCallback(() => {
     activeModal('filterTokenModal');
   }, [activeModal]);
@@ -246,7 +244,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['assetRegistry'])}
     >
       <Layout.Base
-        onBack={onBack}
+        onBack={goBack}
         showBackButton={true}
         showSubHeader={true}
         subHeaderBackground={'transparent'}

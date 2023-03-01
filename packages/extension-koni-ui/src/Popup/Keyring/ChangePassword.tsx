@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,7 +13,6 @@ import CN from 'classnames';
 import { Info, ShieldCheck } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -35,7 +34,7 @@ const confirmPasswordRules = renderBaseConfirmPasswordRules(FormFieldName.PASSWO
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const goHome = useDefaultNavigate().goHome;
 
   const [form] = Form.useForm<ChangePasswordFormState>();
   const [isDisabled, setIsDisable] = useState(true);
@@ -58,7 +57,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           if (!res.status) {
             setSubmitError(res.errors[0]);
           } else {
-            navigate(DEFAULT_ROUTER_PATH);
+            goHome();
           }
         }).catch((e: Error) => {
           setSubmitError(e.message);
@@ -67,7 +66,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         });
       }, 1000);
     }
-  }, [navigate]);
+  }, [goHome]);
 
   const onUpdate: Callbacks<ChangePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
     const error = allFields.map((data) => data.errors || [])
@@ -84,16 +83,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     form.resetFields([FormFieldName.CONFIRM_PASSWORD]);
   }, [form]);
 
-  const goBack = useCallback(() => {
-    navigate(DEFAULT_ROUTER_PATH);
-  }, [navigate]);
-
   return (
     <Layout.Base
       className={CN(className)}
       leftFooterButton={{
         children: t('Cancel'),
-        onClick: goBack,
+        onClick: goHome,
         disabled: loading
       }}
       rightFooterButton={{

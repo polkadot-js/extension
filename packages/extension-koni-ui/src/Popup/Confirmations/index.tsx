@@ -3,7 +3,6 @@
 
 import { ConfirmationDefinitions } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
-import { usePredefinedModal } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
 import useConfirmationsInfo from '@subwallet/extension-koni-ui/hooks/screen/confirmation/useConfirmationInfo';
 import AuthorizeConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AuthorizeConfirmation';
 import EvmSignConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/EvmSignConfirmation';
@@ -11,9 +10,8 @@ import MetadataConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmatio
 import SignConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/SignConfirmation';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import ConfirmationHeader from './ConfirmationHeader';
@@ -25,8 +23,6 @@ const Component = function ({ className }: Props) {
   const [index, setIndex] = useState(0);
   const confirmation = confirmationData.confirmationQueue[index] || null;
   const { t } = useTranslation();
-  const pModal = usePredefinedModal();
-  const navigate = useNavigate();
 
   const titleMap = useMemo<Record<ConfirmationType, string>>(() => ({
     authorizeRequest: t('Connect to SubWallet'),
@@ -40,12 +36,6 @@ const Component = function ({ className }: Props) {
     evmSendTransactionRequest: t('Transaction Request'),
     evmSendTransactionRequestExternal: t('Transaction Request')
   } as Record<ConfirmationType, string>), [t]);
-
-  useEffect(() => {
-    if (!confirmationData.hasConfirmations) {
-      pModal(null);
-    }
-  }, [pModal, confirmationData.hasConfirmations, navigate]);
 
   const nextConfirmation = useCallback(() => {
     setIndex((val) => Math.min(val + 1, confirmationData.numberOfConfirmations - 1));

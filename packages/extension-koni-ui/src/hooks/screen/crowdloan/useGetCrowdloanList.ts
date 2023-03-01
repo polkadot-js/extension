@@ -1,35 +1,33 @@
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, CrowdloanItem } from '@subwallet/extension-base/background/KoniTypes';
-import { useSelector } from 'react-redux';
+import { _getChainNativeTokenBasicInfo, _getCrowdloanUrlFromChain, _getSubstrateParaId, _getSubstrateRelayParent } from '@subwallet/extension-base/services/chain-service/utils';
+import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CrowdloanContributeValueType, CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan';
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  _getChainNativeTokenBasicInfo,
-  _getCrowdloanUrl, _getSubstrateParaId,
-  _getSubstrateRelayParent
-} from '@subwallet/extension-base/services/chain-service/utils';
 import BigN from 'bignumber.js';
 import { useMemo } from 'react';
-import {
-  getBalanceValue,
-  getConvertedBalanceValue
-} from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
+import { useSelector } from 'react-redux';
 
 export const BN_TEN = new BigN(10);
 export const BN_ZERO = new BigN(0);
 
 const GroupDisplayNameMap: Record<string, string> = {
   polkadot: 'Polkadot parachain',
-  kusama: 'Kusama parachain',
+  kusama: 'Kusama parachain'
 };
 
-function getGroupDisplayName(key: string): string {
-  return GroupDisplayNameMap[key]
+function getGroupDisplayName (key: string): string {
+  return GroupDisplayNameMap[key];
 }
 
 function getCrowdloanChains (chainInfoMap: Record<string, _ChainInfo>) {
   const result: string[] = [];
+
   for (const chainKey in chainInfoMap) {
+    // eslint-disable-next-line no-prototype-builtins
     if (!chainInfoMap.hasOwnProperty(chainKey)) {
       continue;
     }
@@ -40,20 +38,20 @@ function getCrowdloanChains (chainInfoMap: Record<string, _ChainInfo>) {
       continue;
     }
 
-    result.push(chainKey)
+    result.push(chainKey);
   }
 
   return result;
 }
 
-function getCrowdloanItem(
+function getCrowdloanItem (
   slug: string,
   contributeValueInfo: CrowdloanContributeValueType,
   chainInfo: _ChainInfo
 ): CrowdloanItemType {
   const relayParentKey = _getSubstrateRelayParent(chainInfo);
   const relayParentDisplayName = getGroupDisplayName(relayParentKey);
-  const { value, convertedValue, symbol } = contributeValueInfo.contribute;
+  const { convertedValue, symbol, value } = contributeValueInfo.contribute;
 
   return {
     contribute: value,
@@ -63,44 +61,46 @@ function getCrowdloanItem(
     symbol,
     relayParentDisplayName,
     paraState: contributeValueInfo.paraState,
-    crowdloanUrl: _getCrowdloanUrl(chainInfo),
-  }
+    crowdloanUrl: _getCrowdloanUrlFromChain(chainInfo)
+  };
 }
 
-function getCrowdloanContributeList(
+function getCrowdloanContributeList (
   chainInfoMap: Record<string, _ChainInfo>,
   chainKeys: string[],
   crowdloanContributeMap: Record<string, CrowdloanContributeValueType>,
-  includeZeroBalance = false,
+  includeZeroBalance = false
 ): CrowdloanItemType[] {
   const result: CrowdloanItemType[] = [];
 
-  chainKeys.forEach(n => {
+  chainKeys.forEach((n) => {
     const chainInfo = chainInfoMap[n];
     const contributeValueInfo: CrowdloanContributeValueType = crowdloanContributeMap[n] || {
       contribute: {
         value: new BigN(0),
-        convertedValue: new BigN(0),
+        convertedValue: new BigN(0)
       }
-    }
+    };
+
     if (!includeZeroBalance && !BN_ZERO.lt(new BigN(contributeValueInfo.contribute.value))) {
       return;
     }
 
-    result.push(getCrowdloanItem(n, contributeValueInfo, chainInfo))
-  })
+    result.push(getCrowdloanItem(n, contributeValueInfo, chainInfo));
+  });
 
   return result;
 }
 
-function getCrowdloanContributeMap(
+function getCrowdloanContributeMap (
   crowdloanChains: string[],
   chainInfoMap: Record<string, _ChainInfo>,
   crowdloanMap: Record<string, CrowdloanItem>,
-  priceMap: Record<string, number>,
+  priceMap: Record<string, number>
 ) {
   const crowdloanContributeMap: Record<string, CrowdloanContributeValueType> = {};
-  crowdloanChains.forEach(key => {
+
+  crowdloanChains.forEach((key) => {
     const chainInfo = chainInfoMap[key];
     const relayParentKey = _getSubstrateRelayParent(chainInfo);
     const relayChainInfo = chainInfoMap[relayParentKey];
@@ -118,13 +118,13 @@ function getCrowdloanContributeMap(
     const { decimals, symbol } = _getChainNativeTokenBasicInfo(relayChainInfo);
     const price = priceMap[relayParentKey];
     const contributeValue = getBalanceValue(crowdloanItem.contribute, decimals);
-    const convertedContributeValue = getConvertedBalanceValue(contributeValue, price)
+    const convertedContributeValue = getConvertedBalanceValue(contributeValue, price);
 
     const contributeInfo = {
       value: contributeValue,
       convertedValue: convertedContributeValue,
       symbol: symbol
-    }
+    };
 
     crowdloanContributeMap[key] = {
       paraState: crowdloanItem.paraState,
@@ -135,16 +135,16 @@ function getCrowdloanContributeMap(
   return crowdloanContributeMap;
 }
 
-
-export default function useGetCrowdloanList() {
+export default function useGetCrowdloanList () {
   const crowdloanMap = useSelector((state: RootState) => state.crowdloan.crowdloanMap);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const crowdloanChains = useMemo<string[]>(() => getCrowdloanChains(chainInfoMap), [chainInfoMap]);
+  console.log('crowdloanMap', crowdloanMap);
 
   return useMemo<CrowdloanItemType[]>(() => {
     const crowdloanContributeMap = getCrowdloanContributeMap(crowdloanChains, chainInfoMap, crowdloanMap, priceMap);
 
-    return getCrowdloanContributeList(chainInfoMap, crowdloanChains, crowdloanContributeMap)
+    return getCrowdloanContributeList(chainInfoMap, crowdloanChains, crowdloanContributeMap);
   }, [crowdloanMap, crowdloanChains, chainInfoMap, priceMap]);
 }

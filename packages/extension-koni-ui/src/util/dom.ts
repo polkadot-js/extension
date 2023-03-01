@@ -26,3 +26,23 @@ export const waitForElement = (selector: string, callback: (element: Element) =>
 export const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text).then().catch(console.log);
 };
+
+export const clickOutside = (selector: string, callback: () => void, enable: boolean): ((event: MouseEvent) => void) => {
+  return (event: MouseEvent) => {
+    const elem = document.querySelector(selector);
+
+    let outsideClick = false;
+
+    if (elem) {
+      outsideClick = typeof event.composedPath === 'function' && !event.composedPath().includes(elem);
+    }
+
+    if (outsideClick) {
+      callback();
+    }
+  };
+};
+
+export const renderModalSelector = (className?: string): string => {
+  return `.${(className || '').replace(' ', '.')}.ant-sw-modal`;
+};

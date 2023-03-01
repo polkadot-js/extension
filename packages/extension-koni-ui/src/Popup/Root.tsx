@@ -27,7 +27,7 @@ export const RouteState = {
 function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();
-  const goHome = useDefaultNavigate().goHome;
+  const { goBack, goHome } = useDefaultNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
@@ -70,12 +70,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       }
     } else if (pathName === '/keyring/login' && !isLocked) {
       goHome();
+    } else if (pathName === '/welcome' && !isNoAccount(accounts)) {
+      goHome();
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');
     } else if (!hasInternalConfirmations && isOpenPModal) {
       openPModal(null);
     }
-  }, [accounts, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
+  }, [accounts, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
 
   return <>{children}</>;
 }

@@ -215,3 +215,4 @@ export function getScanExplorerAddressInfoUrl (networkKey: string, address: stri
 }
 
 export { toAddress } from './toAddress';
+export { openInNewTab } from '@subwallet/extension-koni-ui/util/browser';

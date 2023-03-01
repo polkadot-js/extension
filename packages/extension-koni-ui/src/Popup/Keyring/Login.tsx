@@ -24,9 +24,13 @@ interface LoginFormState {
   [FormFieldName.PASSWORD]: string;
 }
 
+const passwordInputId = 'login-password';
+
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
+
   const [form] = Form.useForm<LoginFormState>();
+
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
 
@@ -38,6 +42,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const onError = useCallback((error: string) => {
     form.setFields([{ name: FormFieldName.PASSWORD, errors: [error] }]);
+    (document.getElementById(passwordInputId) as HTMLInputElement)?.select();
   }, [form]);
 
   const onSubmit: FormCallbacks<LoginFormState>['onFinish'] = useCallback((values: LoginFormState) => {
@@ -83,7 +88,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           onFinish={onSubmit}
         >
           <Form.Item
-            className='form-item-no-error'
+            hideError={true}
             name={FormFieldName.PASSWORD}
             rules={[
               {
@@ -93,6 +98,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             ]}
           >
             <Input.Password
+              id={passwordInputId}
               containerClassName='password-input'
               placeholder={t('Password')}
             />
@@ -168,12 +174,6 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
         color: token.colorTextLight3
-      },
-
-      '.form-item-no-error': {
-        '.ant-form-item-explain': {
-          display: 'none'
-        }
       },
 
       '.password-input': {

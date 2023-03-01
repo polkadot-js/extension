@@ -12,9 +12,10 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
+import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import classNames from 'classnames';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -44,6 +45,8 @@ function Component (): React.ReactElement {
   const [isShrink, setIsShrink] = useState<boolean>(false);
   const goBack = useDefaultNavigate().goBack;
   const location = useLocation();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const topBlockRef = useRef<HTMLDivElement>(null);
   const { symbol,
     tokenGroup: currentTokenGroup,
     tokenSlug: currentTokenSlug } = location.state as TokenDetailParam;
@@ -76,10 +79,54 @@ function Component (): React.ReactElement {
   }, [currentTokenGroup, currentTokenSlug, tokenGroupMap]);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
-    if (event.currentTarget.scrollTop > 80) {
-      setIsShrink(true);
+    const topPosition = event.currentTarget.scrollTop;
+
+    if (topPosition > 60) {
+      setIsShrink((value) => {
+        if (!value && topBlockRef.current && containerRef.current) {
+          const containerProps = containerRef.current.getBoundingClientRect();
+
+          topBlockRef.current.style.position = 'fixed';
+          topBlockRef.current.style.transition = 'all 0s';
+          topBlockRef.current.style.opacity = '0';
+          topBlockRef.current.style.paddingTop = '0';
+          topBlockRef.current.style.top = `${containerProps.top}px`;
+          topBlockRef.current.style.left = `${containerProps.left}px`;
+          topBlockRef.current.style.right = `${containerProps.right}px`;
+          topBlockRef.current.style.width = `${containerProps.width - getScrollbarWidth()}px`;
+
+          setTimeout(() => {
+            if (topBlockRef.current) {
+              topBlockRef.current.style.transition = 'opacity, padding-top 0.27s ease';
+              topBlockRef.current.style.paddingTop = '8px';
+              topBlockRef.current.style.opacity = '1';
+            }
+          }, 100);
+        }
+
+        return true;
+      });
     } else {
-      setIsShrink(false);
+      setIsShrink((value) => {
+        if (value && topBlockRef.current) {
+          topBlockRef.current.style.position = 'absolute';
+          topBlockRef.current.style.top = '0';
+          topBlockRef.current.style.left = '0';
+          topBlockRef.current.style.right = '0';
+          topBlockRef.current.style.right = '100%';
+          topBlockRef.current.style.transition = 'all 0s';
+          topBlockRef.current.style.opacity = '0';
+
+          setTimeout(() => {
+            if (topBlockRef.current) {
+              topBlockRef.current.style.transition = 'opacity 0.27s ease';
+              topBlockRef.current.style.opacity = '1';
+            }
+          }, 100);
+        }
+
+        return false;
+      });
     }
   }, []);
 
@@ -108,29 +155,27 @@ function Component (): React.ReactElement {
 
   // todo: wait design for scrolling mode
   return (
-    <>
-      <div className={classNames('__upper-block-wrapper', {
-        '-is-shrink': isShrink
-      })}
+    <div
+      className={'token-detail-container'}
+      onScroll={handleScroll}
+      ref={containerRef}
+    >
+      <div
+        className={classNames('__upper-block-wrapper', {
+          '-is-shrink': isShrink
+        })}
+        ref={topBlockRef}
       >
         <DetailUpperBlock
           balanceValue={tokenBalanceValue}
           className={'__static-block'}
-          isShrink={false}
-          onClickBack={goBack}
-          symbol={symbol}
-        />
-        <DetailUpperBlock
-          balanceValue={tokenBalanceValue}
-          className={'__scrolling-block'}
-          isShrink={true}
+          isShrink={isShrink}
           onClickBack={goBack}
           symbol={symbol}
         />
       </div>
       <div
         className={'__scroll-container'}
-        onScroll={handleScroll}
       >
         {
           tokenSlugs.map((tokenSlug) => {
@@ -157,39 +202,48 @@ function Component (): React.ReactElement {
         onCancel={onCloseDetail}
         tokenBalanceMap={tokenBalanceMap}
       />
-    </>
+    </div>
   );
 }
 
 const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, token } }: ThemeProps) => {
   return ({
-    height: '100%',
-    color: token.colorTextLight1,
-    fontSize: token.fontSizeLG,
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
+    overflow: 'hidden',
+
+    '.token-detail-container': {
+      height: '100%',
+      overflow: 'auto',
+      color: token.colorTextLight1,
+      fontSize: token.fontSizeLG,
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+      paddingTop: 206,
+      marginRight: -getScrollbarWidth()
+    },
 
     '.__scroll-container': {
       flex: 1,
-      overflow: 'auto',
       paddingLeft: token.size,
-      paddingRight: token.size,
-      paddingTop: 210
+      paddingRight: token.size
     },
 
     '.__upper-block-wrapper': {
       position: 'absolute',
       backgroundColor: token.colorBgDefault,
-      height: 210,
       zIndex: 10,
+      height: 206,
+      paddingTop: 8,
       top: 0,
       left: 0,
       right: 0,
       display: 'flex',
       alignItems: 'center',
-      transition: '0.1s height',
-      backgroundImage: extendToken.tokensScreenInfoBackgroundColor
+      backgroundImage: extendToken.tokensScreenInfoBackgroundColor,
+
+      '&.-is-shrink': {
+        height: 128
+      }
     },
 
     '.tokens-upper-block': {

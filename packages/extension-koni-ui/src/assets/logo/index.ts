@@ -545,7 +545,11 @@ export const ChainLogoMap: Record<string, string> = {
   '3dpass': LoadLogosMap['193.3dpass.png'],
   alephSmartNet: LoadLogosMap['55.Aleph.png'],
   kulupu: LoadLogosMap['194.kulupu.png'],
-  joystream: LoadLogosMap['195.joystream.png']
+  joystream: LoadLogosMap['195.joystream.png'],
+  subwallet: LoadLogosMap['197.SubWallet.png'],
+  parity: LoadLogosMap['198.Parity.png'],
+  keystone: LoadLogosMap['199.Keystone.png'],
+  ledger: LoadLogosMap['200.Ledger.png']
 };
 
 export const TokenLogoMap: Record<string, string> = {

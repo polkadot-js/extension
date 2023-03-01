@@ -56,7 +56,7 @@ function Component ({ chainInfo, chainState, className = '', navigate, showDetai
 
   const onClick = useCallback(() => {
     navigate && navigate('/settings/chains/detail', { state: { chainInfo, chainState } as ChainDetail });
-  }, [chainInfo, navigate]);
+  }, [chainInfo, chainState, navigate]);
 
   return (
     <div className={`${className}`}>

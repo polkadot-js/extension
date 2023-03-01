@@ -38,6 +38,7 @@ const NewSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popu
 const ImportSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportSeedPhrase'));
 const ImportPrivateKey = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportPrivateKey'));
 const RestoreJson = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/RestoreJson'));
+const ImportQrCode = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportQrCode'));
 const AttachReadOnly = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/AttachReadOnly'));
 const ConnectParitySigner = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectParitySigner'));
 const ConnectKeystone = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
@@ -272,6 +273,10 @@ export const router = createHashRouter([{
         {
           path: 'restore-json',
           element: <RestoreJson />
+        },
+        {
+          path: 'import-by-qr',
+          element: <ImportQrCode />
         },
         {
           path: 'attach-read-only',

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateShowZeroBalanceState } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -18,6 +19,7 @@ type Props = ThemeProps & {
 }
 
 function Component ({ className = '', id, onCancel }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
 
@@ -30,7 +32,7 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
       className={className}
       id={id}
       onCancel={onCancel}
-      title={'Select token'} // todo: i18n this
+      title={t('Customization')}
     >
       <div className={'__group-label'}>Balance</div>
       <div className={'__group-content'}>

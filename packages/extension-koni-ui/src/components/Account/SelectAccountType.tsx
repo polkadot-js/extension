@@ -87,7 +87,7 @@ const Component: React.FC<SelectAccountTypeProps> = (props: SelectAccountTypePro
                   <Logo
                     shape='circle'
                     size={28}
-                    token={item.icon}
+                    network={item.icon}
                   />
                 )}
                 name={t<string>(item.label)}

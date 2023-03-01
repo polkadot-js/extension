@@ -1,25 +1,23 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
+import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
+import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan';
+import { Button, Checkbox, CrowdloanItem, Icon, SwList, SwModal, Tag } from '@subwallet/react-ui';
+import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
+import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import Layout from '@subwallet/extension-koni-ui/components/Layout';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { Button, Checkbox, CrowdloanItem, Icon, SwList, SwModal, Tag } from '@subwallet/react-ui';
-import { CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan';
-import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
-import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
-import { Rocket, FadersHorizontal } from 'phosphor-react';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
-import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
-import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 
-interface Props extends ThemeProps {
-
-}
+type Props = ThemeProps
 
 const TOKENS_PER_PAGE = 10;
 
@@ -37,7 +35,7 @@ const FILTER_OPTIONS = [
   { label: 'Fail', value: FilterValue.FAIL }
 ];
 
-function getTagColor(paraState?: CrowdloanParaState) {
+function getTagColor (paraState?: CrowdloanParaState) {
   if (!paraState) {
     return 'default';
   }
@@ -57,7 +55,7 @@ function getTagColor(paraState?: CrowdloanParaState) {
   return 'default';
 }
 
-function getRelayParentKey(groupDisplayName: string) {
+function getRelayParentKey (groupDisplayName: string) {
   if (groupDisplayName === 'Polkadot parachain') {
     return 'polkadot';
   } else {
@@ -65,8 +63,9 @@ function getRelayParentKey(groupDisplayName: string) {
   }
 }
 
-function getFilteredList(items: CrowdloanItemType[], filters: FilterValue[]) {
+function getFilteredList (items: CrowdloanItemType[], filters: FilterValue[]) {
   const filteredList: CrowdloanItemType[] = [];
+
   items.forEach((item) => {
     let isValidationPassed = filters.length <= 0;
 
@@ -97,7 +96,7 @@ function getFilteredList(items: CrowdloanItemType[], filters: FilterValue[]) {
     if (isValidationPassed) {
       filteredList.push(item);
     }
-  })
+  });
 
   return filteredList;
 }
@@ -108,7 +107,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const items: CrowdloanItemType[] = useGetCrowdloanList();
-  const { inactiveModal, activeModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
   const [selectedFilters, setSelectedFilters] = useState<FilterValue[]>([]);
   const [changeFilters, setChangeFilters] = useState<FilterValue[]>(selectedFilters);
   const [filteredList, setFilteredList] = useState<CrowdloanItemType[]>([]);
@@ -120,9 +119,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useEffect(() => {
     setFilteredList(allCrowdloanList.slice(0, TOKENS_PER_PAGE));
     setPaging(TOKENS_PER_PAGE);
-  }, [allCrowdloanList])
+  }, [allCrowdloanList]);
 
-  //load more
+  // load more
   const hasMore = useMemo(() => {
     return allCrowdloanList.length > filteredList.length;
   }, [allCrowdloanList.length, filteredList.length]);
@@ -131,18 +130,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setTimeout(() => {
       if (hasMore) {
         const nextPaging = paging + TOKENS_PER_PAGE;
-        const to = nextPaging > allCrowdloanList.length? allCrowdloanList.length : nextPaging
+        const to = nextPaging > allCrowdloanList.length ? allCrowdloanList.length : nextPaging;
 
         setFilteredList(allCrowdloanList.slice(0, to));
         setPaging(nextPaging);
       }
-    }, 50)
+    }, 50);
   }, [allCrowdloanList, hasMore, paging]);
 
-  //filter
+  // filter
   const onClickActionBtn = () => {
     activeModal(FILTER_MODAL_ID);
-  }
+  };
 
   const onChangeFilterOpt = useCallback((e: CheckboxChangeEvent) => {
     const changedValue = e.target.value as FilterValue;
@@ -151,9 +150,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       setChangeFilters([...changeFilters, changedValue]);
     } else {
       const newSelectedFilters: FilterValue[] = [];
+
       changeFilters.forEach((filterVal) => {
         if (filterVal !== changedValue) {
-          newSelectedFilters.push(filterVal)
+          newSelectedFilters.push(filterVal);
         }
       });
       setChangeFilters(newSelectedFilters);
@@ -167,7 +167,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onApplyFilter = useCallback(() => {
     inactiveModal(FILTER_MODAL_ID);
     setSelectedFilters(changeFilters);
-  }, [changeFilters, inactiveModal])
+  }, [changeFilters, inactiveModal]);
 
   const filterModalFooter = useCallback(() => {
     return (
@@ -193,7 +193,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
-  //render item
+  // render item
   const getParaStateLabel = (paraState?: CrowdloanParaState) => {
     if (!paraState) {
       return '';
@@ -212,36 +212,36 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     return '';
-  }
+  };
 
   const renderItem = (item: CrowdloanItemType) => {
     return (
       <CrowdloanItem
-        className={'crowdloan-item'}
-        decimal={0}
-        key={`${item.symbol}_${item.slug}`}
         balanceValue={item.contribute}
+        className={'crowdloan-item'}
         convertedBalanceValue={item.convertedContribute}
-        displayNetwork={item.chainDisplayName}
         crowdloanStatusTag={
           <Tag color={getTagColor(item.paraState)}>{getParaStateLabel(item.paraState)}</Tag>
         }
-        paraChain={item.relayParentDisplayName}
+        decimal={0}
+        displayNetwork={item.chainDisplayName}
         displayToken={item.symbol}
-        networkKey={item.slug}
-        subNetworkKey={getRelayParentKey(item.relayParentDisplayName)}
         isShowSubLogo={true}
+        key={`${item.symbol}_${item.slug}`}
+        networkKey={item.slug}
+        paraChain={item.relayParentDisplayName}
+        subNetworkKey={getRelayParentKey(item.relayParentDisplayName)}
       />
     );
-  }
+  };
 
-  //empty list
+  // empty list
   const emptyCrowdloanList = () => {
     return (
       <EmptyList
-        phosphorIcon={Rocket}
-        emptyTitle={t('No crowdloan')}
         emptyMessage={t('Your crowdloan will appear here!')}
+        emptyTitle={t('No crowdloan')}
+        phosphorIcon={Rocket}
       />
     );
   };
@@ -259,29 +259,32 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t<string>('Crowdloans')}
       >
         <SwList.Section
-          enableSearchInput={true}
-          searchPlaceholder={t('Search project')}
-          showActionBtn
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-          onClickActionBtn={onClickActionBtn}
+          enableSearchInput={true}
           list={filteredList}
+          // eslint-disable-next-line react/jsx-no-bind
+          onClickActionBtn={onClickActionBtn}
           pagination={{
             hasMore,
             loadMore: loadMoreItems
           }}
-          renderOnScroll={false}
-          renderWhenEmpty={emptyCrowdloanList}
+          // eslint-disable-next-line react/jsx-no-bind
           renderItem={renderItem}
+          renderOnScroll={false}
+          // eslint-disable-next-line react/jsx-no-bind
+          renderWhenEmpty={emptyCrowdloanList}
           searchFunction={searchFunction}
           searchMinCharactersCount={1}
+          searchPlaceholder={t('Search project')}
+          showActionBtn
         />
 
         <SwModal
           className={className}
-          id={FILTER_MODAL_ID}
-          title={t('Filter')}
-          onCancel={closeFilterModal}
           footer={filterModalFooter()}
+          id={FILTER_MODAL_ID}
+          onCancel={closeFilterModal}
+          title={t('Filter')}
         >
           <div className={'crowdloan__filter_option_wrapper'}>
             {
@@ -299,7 +302,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       {opt.label}
                     </Checkbox>
                   </div>
-                )
+                );
               })
             }
           </div>
@@ -315,7 +318,7 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
     fontSize: token.fontSizeLG,
 
     '.crowdloan-item': {
-      marginBottom: token.marginXS,
+      marginBottom: token.marginXS
     },
 
     '.crowdloan__filter_option': {
@@ -326,7 +329,7 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
       display: 'flex',
       flexDirection: 'column',
       gap: token.marginLG
-    },
+    }
   });
 });
 

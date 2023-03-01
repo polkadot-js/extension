@@ -140,7 +140,6 @@ export default function useGetCrowdloanList () {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const crowdloanChains = useMemo<string[]>(() => getCrowdloanChains(chainInfoMap), [chainInfoMap]);
-  console.log('crowdloanMap', crowdloanMap);
 
   return useMemo<CrowdloanItemType[]>(() => {
     const crowdloanContributeMap = getCrowdloanContributeMap(crowdloanChains, chainInfoMap, crowdloanMap, priceMap);

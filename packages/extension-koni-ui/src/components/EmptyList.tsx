@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React from 'react';
-import styled, { useTheme } from 'styled-components';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import { IconProps } from 'phosphor-react';
+import React from 'react';
+import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
   phosphorIcon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>,
@@ -14,7 +14,7 @@ interface Props extends ThemeProps {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, phosphorIcon, emptyTitle, emptyMessage } = props;
+  const { className, emptyMessage, emptyTitle, phosphorIcon } = props;
   const { token } = useTheme() as Theme;
 
   return (
@@ -70,7 +70,7 @@ const EmptyList = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.empty_icon_wrapper': {
       display: 'flex',
       justifyContent: 'center'
-    },
+    }
   };
 });
 

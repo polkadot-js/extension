@@ -6,7 +6,7 @@ import { APIItemState, CrowdloanItem } from '@subwallet/extension-base/backgroun
 import { _getChainNativeTokenBasicInfo, _getCrowdloanUrlFromChain, _getSubstrateParaId, _getSubstrateRelayParent } from '@subwallet/extension-base/services/chain-service/utils';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { CrowdloanContributeValueType, CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan';
+import { CrowdloanContributeValueType, CrowdloanItemType, CrowdloanValueInfo } from '@subwallet/extension-koni-ui/types/crowdloan';
 import BigN from 'bignumber.js';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -124,7 +124,7 @@ function getCrowdloanContributeMap (
       value: contributeValue,
       convertedValue: convertedContributeValue,
       symbol: symbol
-    };
+    } as CrowdloanValueInfo;
 
     crowdloanContributeMap[key] = {
       paraState: crowdloanItem.paraState,

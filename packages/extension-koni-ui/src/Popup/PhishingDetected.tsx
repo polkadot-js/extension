@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ButtonProps, Icon, PageIcon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ShieldSlash, XCircle } from 'phosphor-react';
 import React from 'react';
 import { useParams } from 'react-router';
-import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { Layout } from '../components';
@@ -19,7 +19,7 @@ interface Props {
 
 function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { goHome } = useDefaultNavigate();
   const { token } = useTheme() as Theme;
   const website = useParams<{ website: string }>().website || '';
   const decodedWebsite = decodeURIComponent(website);
@@ -30,7 +30,7 @@ function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
       phosphorIcon={XCircle}
       weight='fill'
     />,
-    onClick: () => navigate('/home/tokens')
+    onClick: goHome
   };
 
   return (

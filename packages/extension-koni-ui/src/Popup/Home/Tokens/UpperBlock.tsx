@@ -81,21 +81,30 @@ function Component (
       )}
       <div className={'__action-button-container'}>
         <Button
-          icon={<Icon size={isShrink ? 'sm' : 'md' } phosphorIcon={ArrowFatLinesDown} />}
+          icon={<Icon
+            phosphorIcon={ArrowFatLinesDown}
+            size={isShrink ? 'sm' : 'md' }
+          />}
           onClick={openReceive}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
         />
         <div className={'__button-space'} />
         <Button
-          icon={<Icon size={isShrink ? 'sm' : 'md' } phosphorIcon={PaperPlaneTilt} />}
+          icon={<Icon
+            phosphorIcon={PaperPlaneTilt}
+            size={isShrink ? 'sm' : 'md' }
+          />}
           onClick={openSendFund}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
         />
         <div className={'__button-space'} />
         <Button
-          icon={<Icon size={isShrink ? 'sm' : 'md' } phosphorIcon={ShoppingCartSimple} />}
+          icon={<Icon
+            phosphorIcon={ShoppingCartSimple}
+            size={isShrink ? 'sm' : 'md' }
+          />}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
         />

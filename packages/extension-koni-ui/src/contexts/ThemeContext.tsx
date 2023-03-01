@@ -68,7 +68,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       fontWeight: token.headingFontWeight,
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5
-    },
+    }
 
   });
 });

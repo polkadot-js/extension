@@ -448,6 +448,48 @@ export interface TransactionHistoryItemJson {
   total: number
 }
 
+export interface HistoryItemBase<T = 'transfer' | 'nft' | 'staking' | 'claim_reward' | 'crowdloan'> {
+  type: T,
+  chain: string,
+  senderAddress: string,
+  senderName?: string,
+  recipientAddress: string,
+  recipientName?: string,
+  status: 'completed' | 'processing' | 'failed' | 'cancelled',
+  extrinsicHash: string,
+  time: number,
+  chainFee: string,
+  symbol: string,
+  amount: string,
+}
+
+export interface TransferHistoryItem extends HistoryItemBase<'transfer'> {
+  isReceived?: boolean,
+  destinationChainInfo?: {
+    slug: string,
+    fee: string,
+    symbol: string,
+  }
+}
+
+export interface NftHistoryItem extends HistoryItemBase<'nft'> {
+  collectionName: string,
+}
+
+export interface StakingHistoryItem extends HistoryItemBase<'staking'> {
+  stakingType: 'stake' | 'unstake' | 'withdraw' | 'compounding',
+}
+
+export type ClaimRewardHistoryItem = HistoryItemBase<'claim_reward'>;
+
+export type CrowdloanHistoryItem = HistoryItemBase<'crowdloan'>;
+
+export type HistoryItem = TransferHistoryItem
+| NftHistoryItem
+| StakingHistoryItem
+| ClaimRewardHistoryItem
+| CrowdloanHistoryItem;
+
 export interface RequestTransactionHistoryAdd {
   address: string;
   networkKey: string;

@@ -9,7 +9,7 @@ import { generateTheme, SW_THEME_CONFIGS, SwThemeConfig } from '@subwallet/exten
 import { ConfigProvider, theme as reactUiTheme } from '@subwallet/react-ui';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { createGlobalStyle, ThemeProvider as StyledComponentThemeProvider } from 'styled-components';
+import styled, { createGlobalStyle, ThemeProvider as StyledComponentThemeProvider } from 'styled-components';
 
 import { Theme } from '../types';
 
@@ -77,6 +77,9 @@ export interface ThemeProviderProps {
 }
 
 const getPopupContainer = () => document.getElementById('popup-container') || document.body;
+const getTooltipContainer = () => document.getElementById('tooltip-container') || document.body;
+
+const TooltipContainer = styled.div`z-index: 10000`;
 
 export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactElement<ThemeProviderProps> {
   const themeName = useSelector((state: RootState) => state.settings.theme);
@@ -85,9 +88,11 @@ export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactEle
   return (
     <ConfigProvider
       getPopupContainer={getPopupContainer}
+      getTooltipContainer={getTooltipContainer}
       theme={themeConfig}
     >
       <ThemeGenerator themeConfig={themeConfig}>
+        <TooltipContainer id='tooltip-container' />
         {children}
       </ThemeGenerator>
     </ConfigProvider>

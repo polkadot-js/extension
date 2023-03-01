@@ -1,19 +1,19 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import classNames from 'classnames';
-import React, { useMemo } from 'react';
-import styled from 'styled-components';
-import TokenItem, { TokenItemProps } from '@subwallet/react-ui/es/web3-block/token-item';
-import { Button, Icon } from '@subwallet/react-ui';
-import { Copy, QrCode } from 'phosphor-react';
-import CopyToClipboard from 'react-copy-to-clipboard';
+import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
-import { _getChainSubstrateAddressPrefix, _isEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
+import { Button, Icon } from '@subwallet/react-ui';
+import TokenItem, { TokenItemProps } from '@subwallet/react-ui/es/web3-block/token-item';
+import classNames from 'classnames';
+import { Copy, QrCode } from 'phosphor-react';
+import React, { useCallback, useMemo } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import styled from 'styled-components';
 
 type Props = TokenItemProps & ThemeProps & {
   address?: string;
@@ -23,33 +23,31 @@ type Props = TokenItemProps & ThemeProps & {
 };
 
 function Component (
-  { address, className, chain, name, subName, symbol, onClickCopyBtn, onClickQrBtn, ...restProps }: Props) {
+  { address, chain, className, name, onClickCopyBtn, onClickQrBtn, symbol, ...restProps }: Props) {
   const chainInfo = useFetchChainInfo(chain || '');
   const notify = useNotification();
   const { t } = useTranslation();
 
   const formattedAddress = useMemo(() => {
     const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
-    const isEvmChain = _isEvmChain(chainInfo);
+    const isEvmChain = !!chainInfo.evmInfo;
+
     return reformatAddress(address || '', networkPrefix, isEvmChain);
-  }, []);
-  const _onCLickCopyBtn = (e: React.SyntheticEvent) => {
+  }, [address, chainInfo]);
+
+  const _onCLickCopyBtn = useCallback((e: React.SyntheticEvent) => {
     e.stopPropagation();
     notify({
       message: t('Copied to clipboard')
-    })
+    });
     onClickCopyBtn && onClickCopyBtn();
-  }
+  }, [notify, onClickCopyBtn, t]);
 
   return (
     <div className={classNames('token-balance-selection-item', className)}>
       <TokenItem
         {...restProps}
         isShowSubLogo
-        symbol={symbol?.toLowerCase()}
-        name={name}
-        subName={chainInfo.name}
-        networkMainLogoShape='squircle'
         middleItem={
           (
             <>
@@ -60,16 +58,36 @@ function Component (
             </>
           )
         }
+        name={name}
+        networkMainLogoShape='squircle'
         rightItem={
           (
             <>
               <CopyToClipboard text={formattedAddress}>
-                <Button onClick={_onCLickCopyBtn} size='xs' type='ghost' icon={<Icon phosphorIcon={Copy} size='sm' />} />
+                <Button
+                  icon={<Icon
+                    phosphorIcon={Copy}
+                    size='sm'
+                  />}
+                  onClick={_onCLickCopyBtn}
+                  size='xs'
+                  type='ghost'
+                />
               </CopyToClipboard>
-              <Button onClick={onClickQrBtn} size='xs' type='ghost' icon={<Icon phosphorIcon={QrCode} size='sm' />} />
+              <Button
+                icon={<Icon
+                  phosphorIcon={QrCode}
+                  size='sm'
+                />}
+                onClick={onClickQrBtn}
+                size='xs'
+                type='ghost'
+              />
             </>
           )
         }
+        subName={chainInfo.name}
+        symbol={symbol?.toLowerCase()}
       />
     </div>
   );
@@ -81,6 +99,6 @@ export const TokenSelectionItem = styled(Component)<Props>(({ theme: { token } }
       color: token.colorTextLight4,
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM
-    },
+    }
   });
 });

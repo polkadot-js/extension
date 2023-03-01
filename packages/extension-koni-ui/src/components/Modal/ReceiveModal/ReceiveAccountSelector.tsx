@@ -30,7 +30,7 @@ interface Props extends ThemeProps {
   customInput?: React.ReactNode,
 }
 
-function Component ({ className = '', id, label, onSelectItem, selectedItem, customInput }: Props): React.ReactElement<Props> {
+function Component ({ className = '', customInput, id, label, onSelectItem, selectedItem }: Props): React.ReactElement<Props> {
   const items = useSelector((state: RootState) => state.accountState.accounts).filter((a) => !isAccountAll(a.address));
   const { t } = useTranslation();
   const renderChainSelected = useCallback((item: AccountJson) => {
@@ -66,9 +66,9 @@ function Component ({ className = '', id, label, onSelectItem, selectedItem, cus
   const renderItem = useCallback((item: AccountJson, selected: boolean) => {
     return (
       <AccountItemWithName
-        avatarSize={24}
         accountName={item.name}
         address={item.address}
+        avatarSize={24}
         isSelected={selected}
       />
     );
@@ -77,8 +77,8 @@ function Component ({ className = '', id, label, onSelectItem, selectedItem, cus
   return (
     <SelectModal
       className={`${className} account-selector-modal`}
+      customInput={customInput}
       id={id}
-      title={t('Select account')}
       inputClassName={`${className} account-selector-input`}
       itemKey={'address'}
       items={items}
@@ -91,7 +91,7 @@ function Component ({ className = '', id, label, onSelectItem, selectedItem, cus
       searchPlaceholder={t('Account name')}
       searchableMinCharactersCount={2}
       selected={selectedItem}
-      customInput={customInput}
+      title={t('Select account')}
     />
   );
 }

@@ -1,15 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, ModalContext, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
 import { ArrowFatLinesDown, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 
 type Props = ThemeProps & {
   totalValue: SwNumberProps['value'];
@@ -36,13 +36,13 @@ function Component (
   [navigate]
   );
 
-  const openReceive = () => {
+  const openReceive = useCallback(() => {
     if (currentAccount && isAccountAll(currentAccount.address)) {
       activeModal('receive-account-selector');
     } else {
       activeModal('receive-token-selector');
     }
-  };
+  }, [activeModal, currentAccount]);
 
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>

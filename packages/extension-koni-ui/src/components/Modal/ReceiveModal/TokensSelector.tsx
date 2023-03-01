@@ -1,15 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { TokenSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenSelectionItem';
+import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useGetTokensBySettings from '@subwallet/extension-koni-ui/hooks/screen/home/useGetTokensBySettings';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
-import { TokenSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenSelectionItem';
-import useGetTokensBySettings from '@subwallet/extension-koni-ui/hooks/screen/home/useGetTokensBySettings';
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 
 export type ChainItemType = {
   name: string,
@@ -22,7 +22,7 @@ interface Props extends ThemeProps {
   onChangeSelectedNetwork?: (value: string) => void;
 }
 
-function Component ({ className = '', id, address, onChangeSelectedNetwork }: Props): React.ReactElement<Props> {
+function Component ({ address, className = '', id, onChangeSelectedNetwork }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const itemsMap = useGetTokensBySettings(address);
   const items = Object.values(itemsMap);
@@ -38,37 +38,43 @@ function Component ({ className = '', id, address, onChangeSelectedNetwork }: Pr
 
   const onCancel = useCallback(() => {
     inactiveModal(id);
-  }, [inactiveModal]);
-
+  }, [id, inactiveModal]);
 
   const renderItem = useCallback((item: _ChainAsset) => {
     return (
       <TokenSelectionItem
-        className={'token-selector-item'}
         address={address}
-        name={item.symbol}
-        subName={item.name}
         chain={item.originChain}
-        symbol={item.symbol}
-        subNetworkKey={item.originChain || ''}
+        className={'token-selector-item'}
+        name={item.symbol}
+        // eslint-disable-next-line react/jsx-no-bind
         onClickQrBtn={() => {
-          onChangeSelectedNetwork && onChangeSelectedNetwork(item.originChain)
+          onChangeSelectedNetwork && onChangeSelectedNetwork(item.originChain);
           inactiveModal(id);
           activeModal(RECEIVE_QR_MODAL);
         }}
+        subName={item.name}
+        subNetworkKey={item.originChain || ''}
+        symbol={item.symbol}
       />
     );
-  }, [address]);
+  }, [activeModal, address, id, inactiveModal, onChangeSelectedNetwork]);
 
   return (
     <SwModal
-      onCancel={onCancel}
       className={`${className} chain-selector-modal`}
       id={id}
+      onCancel={onCancel}
 
       title={t('Select token')}
     >
-      <SwList.Section list={items} renderItem={renderItem} searchFunction={searchFunction} searchPlaceholder={t('Search chain')} enableSearchInput={true} />
+      <SwList.Section
+        enableSearchInput={true}
+        list={items}
+        renderItem={renderItem}
+        searchFunction={searchFunction}
+        searchPlaceholder={t('Search chain')}
+      />
     </SwModal>
   );
 }
@@ -91,6 +97,6 @@ export const TokensSelector = styled(Component)<Props>(({ theme: { token } }: Pr
 
     '&.chain-selector-input .__selected-item': {
       color: token.colorText
-    },
+    }
   });
 });

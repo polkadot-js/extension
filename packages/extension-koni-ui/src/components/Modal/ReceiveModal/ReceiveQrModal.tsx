@@ -1,25 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _getBlockExplorerFromChain, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
+import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { getScanExplorerAddressInfoUrl } from '@subwallet/extension-koni-ui/util';
+import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { Button, Icon, Logo, ModalContext, QRCode, SwModal } from '@subwallet/react-ui';
+import AccountItem from '@subwallet/react-ui/es/web3-block/account-item';
 import CN from 'classnames';
 import { CopySimple, Info } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components';
-import AccountItem from '@subwallet/react-ui/es/web3-block/account-item';
-import {
-  _getBlockExplorerFromChain,
-  _getChainSubstrateAddressPrefix,
-  _isEvmChain
-} from '@subwallet/extension-base/services/chain-service/utils';
-import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
-import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
-import { getScanExplorerAddressInfoUrl } from '@subwallet/extension-koni-ui/util';
+import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
   address?: string;
@@ -36,22 +32,24 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
   const chainInfo = useFetchChainInfo(selectedNetwork || '');
   const formattedAddress = useMemo(() => {
     if (chainInfo) {
-      const isEvmChain = _isEvmChain(chainInfo);
+      const isEvmChain = !!chainInfo.evmInfo;
       const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
+
       return reformatAddress(address || '', networkPrefix, isEvmChain);
     } else {
-      return address || ''
+      return address || '';
     }
-
   }, [address, chainInfo]);
   const scanExplorerAddressUrl = useMemo(() => {
     let route = '';
     const blockExplorer = selectedNetwork && _getBlockExplorerFromChain(chainInfo);
+
     if (blockExplorer && blockExplorer.includes('subscan.io')) {
       route = 'account';
     } else {
       route = 'address';
     }
+
     if (blockExplorer) {
       return `${blockExplorer}${route}/${formattedAddress}`;
     } else {
@@ -61,13 +59,16 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
 
   const handleClickViewOnExplorer = useCallback(() => {
     try {
-     if (scanExplorerAddressUrl) {
-       void chrome.tabs.create({ url: scanExplorerAddressUrl, active: true }).then(() => console.log('redirecting'));
-     }
+      if (scanExplorerAddressUrl) {
+        // eslint-disable-next-line no-void
+        void chrome.tabs.create({ url: scanExplorerAddressUrl, active: true }).then(() => console.log('redirecting'));
+      }
     } catch (e) {
       console.log('error redirecting to a new tab');
     }
   }, [scanExplorerAddressUrl]);
+
+  const onClickCopyBtn = useCallback(() => notify({ message: t('Copied to clipboard') }), [notify, t]);
 
   const onCancel = useCallback(() => {
     inactiveModal(modalId);
@@ -90,32 +91,47 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
     >
       <>
         <div className='receive-qr-code-wrapper'>
-          <QRCode value={formattedAddress} size={264} errorLevel='H' />
+          <QRCode
+            errorLevel='H'
+            size={264}
+            value={formattedAddress}
+          />
         </div>
 
         <AccountItem
-          className={'receive-account-item'}
+          address={formattedAddress}
           addressPreLength={7}
           addressSufLength={7}
+          avatarIdentPrefix={42}
+          className={'receive-account-item'}
           leftItem={
-            <Logo network={chainInfo?.slug}  size={24} />
+            <Logo
+              network={chainInfo?.slug}
+              size={24}
+            />
           }
           rightItem={
             <CopyToClipboard text={formattedAddress}>
               <Button
-                onClick={() => notify({ message: t('Copied to clipboard')})}
-                size='xs'
                 className='__copy-button'
+                icon={<Icon
+                  iconColor={token.colorTextLight4}
+                  phosphorIcon={CopySimple}
+                  size='sm'
+                />}
+                onClick={onClickCopyBtn}
+                size='xs'
                 type='ghost'
-                icon={<Icon phosphorIcon={CopySimple} size='sm' iconColor={token.colorTextLight4} />}
               />
             </CopyToClipboard>
           }
-          address={formattedAddress}
-          avatarIdentPrefix={42}
         />
 
-        <Button disabled={!scanExplorerAddressUrl} block onClick={handleClickViewOnExplorer}>{t('View on explorer')}</Button>
+        <Button
+          block
+          disabled={!scanExplorerAddressUrl}
+          onClick={handleClickViewOnExplorer}
+        >{t('View on explorer')}</Button>
       </>
     </SwModal>
   );
@@ -147,10 +163,10 @@ const ReceiveQrModal = styled(Component)<Props>(({ theme: { token } }: Props) =>
       marginBottom: 16,
 
       '.ant-account-item-address': {
-          fontSize: token.fontSize,
-          lineHeight: token.lineHeight,
-          color: token.colorTextLight4,
-          fontWeight: token.bodyFontWeight,
+        fontSize: token.fontSize,
+        lineHeight: token.lineHeight,
+        color: token.colorTextLight4,
+        fontWeight: token.bodyFontWeight
       }
     },
 
@@ -163,7 +179,7 @@ const ReceiveQrModal = styled(Component)<Props>(({ theme: { token } }: Props) =>
       display: 'flex',
       paddingTop: 16,
       flex: 1,
-      justifyContent: 'center',
+      justifyContent: 'center'
     }
   };
 });

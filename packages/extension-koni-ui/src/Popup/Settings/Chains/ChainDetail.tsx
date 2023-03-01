@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _getBlockExplorerFromChain, _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix, _getCrowdloanUrlFromChain, _getSubstrateParaId, _isChainEvmCompatible, _isCustomChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { isUrl } from '@subwallet/extension-base/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useGetChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainAssetInfo';
@@ -13,13 +14,12 @@ import { Button, ButtonProps, Col, Field, Form, Input, Row, Tooltip } from '@sub
 import { useForm } from '@subwallet/react-ui/es/form/Form';
 import Icon from '@subwallet/react-ui/es/icon';
 import { FloppyDiskBack, Globe, Plus, ShareNetwork, Trash } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { FieldData, RuleObject } from 'rc-field-form/lib/interface';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import Layout from '../../../components/Layout';
-import {RuleObject} from "rc-field-form/lib/interface";
-import {isUrl} from "@subwallet/extension-base/utils";
 
 type Props = ThemeProps
 
@@ -40,6 +40,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [form] = useForm<ChainDetailForm>();
 
   const [isChanged, setIsChanged] = useState(false);
+  const [isValueValid, setIsValueValid] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { chainInfo, chainState } = useMemo(() => {
@@ -104,7 +105,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       blockExplorer: _getBlockExplorerFromChain(chainInfo),
       crowdloanUrl: _getCrowdloanUrlFromChain(chainInfo)
     } as ChainDetailForm;
-  }, [chainInfo, currentProviderUrl, nativeTokenInfo?.priceId]);
+  }, [chainInfo, chainState.currentProvider, nativeTokenInfo?.priceId]);
 
   const subHeaderButton: ButtonProps[] = [
     {
@@ -122,6 +123,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const handleClickProviderSuffix = useCallback(() => {
     console.log('click suffix');
   }, []);
+
+  const isSubmitDisabled = useCallback(() => {
+    return !isChanged || !isValueValid;
+  }, [isChanged, isValueValid]);
 
   const onSubmit = useCallback(() => {
     // setLoading(true);
@@ -145,34 +150,25 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [handleClickProviderSuffix]);
 
-  const onFormValuesChange = useCallback(({ blockExplorer, crowdloanUrl, currentProvider, priceId }: Partial<ChainDetailForm>, values: ChainDetailForm) => {
+  const onFormValuesChange = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
+    let isFieldsValid = true;
+
+    for (const changedField of allFields) {
+      if (changedField.errors && changedField.errors.length > 0) {
+        isFieldsValid = false;
+        break;
+      }
+    }
+
     setIsChanged(true);
+    setIsValueValid(isFieldsValid);
+  }, []);
 
-    if (blockExplorer) {
-      form.setFieldValue('blockExplorer', blockExplorer);
-    }
-
-    if (crowdloanUrl) {
-      form.setFieldValue('crowdloanUrl', crowdloanUrl);
-    }
-
-    if (priceId) {
-      form.setFieldValue('priceId', priceId);
-    }
-
-    if (currentProvider) {
-      form.setFieldValue('currentProvider', currentProvider);
-    }
-  }, [form]);
-
-  const crowdloanUrlValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+  const optionalUrlValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      console.log('validating crowdloan url', isUrl(value));
       if (value.length === 0 || isUrl(value)) {
-        console.log('valid');
         resolve();
       } else {
-        console.log('invalid');
         reject(new Error(t('Crowdloan URL must be a valid URL')));
       }
     });
@@ -187,7 +183,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         onBack={onBack}
         rightFooterButton={{
           block: true,
-          disabled: !isChanged,
+          disabled: isSubmitDisabled(),
           icon: (
             <Icon
               phosphorIcon={FloppyDiskBack}
@@ -211,7 +207,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           <Form
             form={form}
             initialValues={formInitValues}
-            onValuesChange={onFormValuesChange}
+            onFieldsChange={onFormValuesChange}
           >
             <div className={'chain_detail__attributes_container'}>
               <Form.Item
@@ -325,7 +321,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     <div>
                       <Form.Item
                         name={'priceId'}
-                        noStyle={true}
                       >
                         <Input
                           placeholder={t('Price Id')}
@@ -356,7 +351,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <div>
                   <Form.Item
                     name={'blockExplorer'}
-                    noStyle={true}
+                    rules={[{ validator: optionalUrlValidator }]}
                   >
                     <Input placeholder={t('Block explorer')} />
                   </Form.Item>
@@ -370,8 +365,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <div>
                   <Form.Item
                     name={'crowdloanUrl'}
-                    noStyle={true}
-                    rules={[{validator: crowdloanUrlValidator}]}
+                    rules={[{ validator: optionalUrlValidator }]}
                   >
                     <Input placeholder={t('Crowdloan URL')} />
                   </Form.Item>
@@ -406,6 +400,10 @@ const TokenDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-btn.-size-xs.-icon-only': {
       minWidth: 0
+    },
+
+    '.ant-form-item': {
+      marginBottom: 0
     }
   });
 });

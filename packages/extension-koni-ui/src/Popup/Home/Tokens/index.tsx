@@ -51,7 +51,7 @@ function Component (): React.ReactElement {
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
-  const [{ selectedAcc, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>({});
+  const [{ selectedAcc, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>({ selectedAcc: currentAccount?.address });
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;

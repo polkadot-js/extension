@@ -70,6 +70,7 @@ function Component ({ className = '', customInput, id, label, onSelectItem, sele
         address={item.address}
         avatarSize={24}
         isSelected={selected}
+        key={item.address}
       />
     );
   }, []);

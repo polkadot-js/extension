@@ -46,6 +46,7 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
         address={address}
         chain={item.originChain}
         className={'token-selector-item'}
+        key={`${item.symbol}-${item.originChain}`}
         name={item.symbol}
         // eslint-disable-next-line react/jsx-no-bind
         onClickQrBtn={() => {

@@ -9,7 +9,7 @@ import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification'
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ChainDetail } from '@subwallet/extension-koni-ui/Popup/Settings/Chains/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Col, Field, Form, Input, Row } from '@subwallet/react-ui';
+import { Button, ButtonProps, Col, Field, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
 import Icon from '@subwallet/react-ui/es/icon';
 import { FloppyDiskBack, Globe, Plus, ShareNetwork, Trash } from 'phosphor-react';
@@ -18,6 +18,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import Layout from '../../../components/Layout';
+import {RuleObject} from "rc-field-form/lib/interface";
+import {isUrl} from "@subwallet/extension-base/utils";
 
 type Props = ThemeProps
 
@@ -37,7 +39,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const showNotification = useNotification();
   const [form] = useForm<ChainDetailForm>();
 
-  const isChanged = useRef(false);
+  const [isChanged, setIsChanged] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { chainInfo, chainState } = useMemo(() => {
@@ -97,7 +99,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const formInitValues = useMemo(() => {
     return {
-      currentProvider: currentProviderUrl,
+      currentProvider: chainState.currentProvider,
       priceId: nativeTokenInfo?.priceId || '',
       blockExplorer: _getBlockExplorerFromChain(chainInfo),
       crowdloanUrl: _getCrowdloanUrlFromChain(chainInfo)
@@ -122,9 +124,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const onSubmit = useCallback(() => {
-    setLoading(true);
-    console.log('submit');
-  }, []);
+    // setLoading(true);
+    console.log('submit', form.getFieldsValue());
+  }, [form]);
 
   const providerFieldSuffix = useCallback(() => {
     return (
@@ -144,8 +146,37 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [handleClickProviderSuffix]);
 
   const onFormValuesChange = useCallback(({ blockExplorer, crowdloanUrl, currentProvider, priceId }: Partial<ChainDetailForm>, values: ChainDetailForm) => {
-    console.log('form changed', blockExplorer, crowdloanUrl, priceId);
-  }, []);
+    setIsChanged(true);
+
+    if (blockExplorer) {
+      form.setFieldValue('blockExplorer', blockExplorer);
+    }
+
+    if (crowdloanUrl) {
+      form.setFieldValue('crowdloanUrl', crowdloanUrl);
+    }
+
+    if (priceId) {
+      form.setFieldValue('priceId', priceId);
+    }
+
+    if (currentProvider) {
+      form.setFieldValue('currentProvider', currentProvider);
+    }
+  }, [form]);
+
+  const crowdloanUrlValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      console.log('validating crowdloan url', isUrl(value));
+      if (value.length === 0 || isUrl(value)) {
+        console.log('valid');
+        resolve();
+      } else {
+        console.log('invalid');
+        reject(new Error(t('Crowdloan URL must be a valid URL')));
+      }
+    });
+  }, [t]);
 
   return (
     <PageWrapper
@@ -156,7 +187,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         onBack={onBack}
         rightFooterButton={{
           block: true,
-          disabled: !isChanged.current,
+          disabled: !isChanged,
           icon: (
             <Icon
               phosphorIcon={FloppyDiskBack}
@@ -187,94 +218,166 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 name={'currentProvider'}
                 noStyle={true}
               >
-                <Field
-                  content={currentProviderUrl}
-                  placeholder={t('Provider URL')}
-                  prefix={<Icon
-                    customSize={'24px'}
-                    iconColor={token['gray-4']}
-                    phosphorIcon={ShareNetwork}
-                    type={'phosphor'}
-                    weight={'bold'}
-                  />}
-                  suffix={providerFieldSuffix()}
-                />
+                <Tooltip
+                  placement={'topLeft'}
+                  title={t('Provider URL')}
+                >
+                  <div>
+                    <Field
+                      content={currentProviderUrl}
+                      placeholder={t('Provider URL')}
+                      prefix={<Icon
+                        customSize={'24px'}
+                        iconColor={token['gray-4']}
+                        phosphorIcon={ShareNetwork}
+                        type={'phosphor'}
+                        weight={'bold'}
+                      />}
+                      suffix={providerFieldSuffix()}
+                    />
+                  </div>
+                </Tooltip>
               </Form.Item>
 
               <Row gutter={token.paddingSM}>
                 <Col span={16}>
-                  <Field
-                    content={chainInfo.name}
-                    placeholder={t('Chain name')}
-                    prefix={<Icon
-                      customSize={'24px'}
-                      iconColor={token['gray-4']}
-                      phosphorIcon={Globe}
-                      type={'phosphor'}
-                      weight={'bold'}
-                    />}
-                  />
+                  <Tooltip
+                    placement={'topLeft'}
+                    title={t('Chain name')}
+                  >
+                    <div>
+                      <Field
+                        content={chainInfo.name}
+                        placeholder={t('Chain name')}
+                        prefix={<Icon
+                          customSize={'24px'}
+                          iconColor={token['gray-4']}
+                          phosphorIcon={Globe}
+                          type={'phosphor'}
+                          weight={'bold'}
+                        />}
+                      />
+                    </div>
+                  </Tooltip>
                 </Col>
                 <Col span={8}>
-                  <Field
-                    content={symbol}
-                    placeholder={t('Symbol')}
-                  />
+                  <Tooltip
+                    placement={'topLeft'}
+                    title={t('Symbol')}
+                  >
+                    <div>
+                      <Field
+                        content={symbol}
+                        placeholder={t('Symbol')}
+                      />
+                    </div>
+                  </Tooltip>
                 </Col>
               </Row>
 
               <Row gutter={token.paddingSM}>
                 <Col span={12}>
-                  <Field
-                    content={decimals}
-                    placeholder={t('Decimals')}
-                  />
+                  <Tooltip
+                    placement={'topLeft'}
+                    title={t('Decimals')}
+                  >
+                    <div>
+                      <Field
+                        content={decimals}
+                        placeholder={t('Decimals')}
+                      />
+                    </div>
+                  </Tooltip>
                 </Col>
                 <Col span={12}>
-                  <Field
-                    content={paraId > -1 ? paraId : 'None'}
-                    placeholder={t('ParaId')}
-                  />
+                  <Tooltip
+                    placement={'topLeft'}
+                    title={t('ParaId')}
+                  >
+                    <div>
+                      <Field
+                        content={paraId > -1 ? paraId : 'None'}
+                        placeholder={t('ParaId')}
+                      />
+                    </div>
+                  </Tooltip>
                 </Col>
               </Row>
 
-              <Field
-                content={addressPrefix.toString()}
-                placeholder={t('Address prefix')}
-              />
+              <Tooltip
+                placement={'topLeft'}
+                title={t('Address prefix')}
+              >
+                <div>
+                  <Field
+                    content={addressPrefix.toString()}
+                    placeholder={t('Address prefix')}
+                  />
+                </div>
+              </Tooltip>
 
               <Row gutter={token.paddingSM}>
                 <Col span={12}>
+                  <Tooltip
+                    placement={'topLeft'}
+                    title={t('Price Id (from CoinGecko)')}
+                  >
+                    <div>
+                      <Form.Item
+                        name={'priceId'}
+                        noStyle={true}
+                      >
+                        <Input
+                          placeholder={t('Price Id')}
+                        />
+                      </Form.Item>
+                    </div>
+                  </Tooltip>
+                </Col>
+                <Col span={12}>
+                  <Tooltip
+                    placement={'topLeft'}
+                    title={t('Chain type')}
+                  >
+                    <div>
+                      <Field
+                        content={chainTypeString()}
+                        placeholder={t('Chain type')}
+                      />
+                    </div>
+                  </Tooltip>
+                </Col>
+              </Row>
+
+              <Tooltip
+                placement={'topLeft'}
+                title={t('Block explorer')}
+              >
+                <div>
                   <Form.Item
-                    name={'priceId'}
+                    name={'blockExplorer'}
                     noStyle={true}
                   >
-                    <Input
-                      placeholder={t('Price Id (from CoinGecko)')}
-                    />
+                    <Input placeholder={t('Block explorer')} />
                   </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Field
-                    content={chainTypeString()}
-                    placeholder={t('Chain type')}
-                  />
-                </Col>
-              </Row>
+                </div>
+              </Tooltip>
 
-              <Form.Item
-                name={'blockExplorer'}
-                noStyle={true}
+              <Tooltip
+                placement={'topLeft'}
+                title={t('Crowdloan URL')}
               >
-                <Input placeholder={t('Block explorer')} />
-              </Form.Item>
+                <div>
+                  <Form.Item
+                    name={'crowdloanUrl'}
+                    noStyle={true}
+                    rules={[{validator: crowdloanUrlValidator}]}
+                  >
+                    <Input placeholder={t('Crowdloan URL')} />
+                  </Form.Item>
+                </div>
+              </Tooltip>
 
-              <Form.Item
-                name={'crowdloanUrl'}
-                noStyle={true}
-              >
-                <Input placeholder={t('Crowdloan URL')} />
-              </Form.Item>
             </div>
           </Form>
         </div>

@@ -2,22 +2,32 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { ReceiveAccountSelector } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveAccountSelector';
+import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
+import { TokensSelector } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelector';
 import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenGroupBalanceItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/UpperBlock';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import classNames from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
 import React, { useCallback, useContext, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
+
+type ReceiveSelectedResult = {
+  selectedAcc?: string;
+  selectedNetwork?: string;
+};
 
 function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
@@ -34,11 +44,14 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
 
 function Component (): React.ReactElement {
   const [isShrink, setIsShrink] = useState<boolean>(false);
+  const { activeModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
+  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
+  const [{ selectedAcc, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>({ selectedAcc: currentAccount?.address });
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;
@@ -160,6 +173,29 @@ function Component (): React.ReactElement {
           </Button>
         </div>
       </div>
+      <ReceiveAccountSelector
+        className='token-account-selector'
+        id='receive-account-selector'
+        // eslint-disable-next-line react/jsx-no-bind
+        onSelectItem={(address: string) => {
+          setReceiveSelectedResult({ selectedAcc: address });
+          activeModal('receive-token-selector');
+        }}
+        selectedItem=''
+      />
+
+      <TokensSelector
+        address={selectedAcc || currentAccount?.address}
+        className='receive-token-selector'
+        id='receive-token-selector'
+        // eslint-disable-next-line react/jsx-no-bind
+        onChangeSelectedNetwork={(value) => setReceiveSelectedResult((prevState) => ({ ...prevState, selectedNetwork: value }))}
+      />
+
+      <ReceiveQrModal
+        address={selectedAcc}
+        selectedNetwork={selectedNetwork}
+      />
     </div>
   );
 }
@@ -220,6 +256,20 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
 
     '.token-group-balance-item': {
       marginBottom: token.sizeXS
+    },
+
+    '.__upper-block-wrapper.-is-shrink': {
+      '.__static-block': {
+        display: 'none'
+      },
+
+      '.__scrolling-block': {
+        display: 'flex'
+      }
+    },
+
+    '.token-account-selector, .receive-token-selector': {
+      display: 'none'
     }
   });
 });

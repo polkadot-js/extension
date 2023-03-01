@@ -5,14 +5,18 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
+import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
-import { DERIVE_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { CREATE_ACCOUNT_MODAL, DERIVE_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
+import useClickOutSide from '@subwallet/extension-koni-ui/hooks/useClickOutSide';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { deriveAccountV3 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account';
+import { renderModalSelector } from '@subwallet/extension-koni-ui/util/dom';
 import { Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { SpinnerGap } from 'phosphor-react';
@@ -44,9 +48,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { token } = useTheme() as Theme;
   const notify = useNotification();
 
-  const { inactiveModal } = useContext(ModalContext);
+  const { checkActive, inactiveModal } = useContext(ModalContext);
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
+
+  const isActive = checkActive(modalId);
 
   const [selected, setSelected] = useState('');
 
@@ -60,6 +66,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onCancel = useCallback(() => {
     inactiveModal(modalId);
   }, [inactiveModal]);
+
+  useClickOutSide(isActive || !!selected, renderModalSelector(className), onCancel);
 
   const onSelectAccount = useCallback((account: AccountJson): () => void => {
     return () => {
@@ -100,18 +108,20 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     );
   }, [onSelectAccount, selected, token.sizeLG]);
 
+  const onBack = useSwitchModal(modalId, CREATE_ACCOUNT_MODAL);
+
   return (
     <SwModal
       className={className}
+      closeIcon={(<BackIcon />)}
       id={modalId}
       maskClosable={false}
-      onCancel={selected ? undefined : onCancel}
+      onCancel={selected ? undefined : onBack}
       title={t('Select Account')}
     >
       <SwList.Section
         displayRow={true}
         enableSearchInput={true}
-        height='370px'
         list={filtered}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}
@@ -140,7 +150,7 @@ const DeriveAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
     },
 
     '.ant-sw-modal-body': {
-      padding: `0 0 ${token.padding}px`
+      padding: 0
     },
 
     '.disabled': {

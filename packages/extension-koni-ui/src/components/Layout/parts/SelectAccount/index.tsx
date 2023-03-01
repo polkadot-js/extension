@@ -69,6 +69,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const currentAuth = useGetCurrentAuth();
   const isPopup = useIsPopup();
 
+  const noAllAccounts = useMemo(() => {
+    return accounts.filter(({ address }) => !isAccountAll(address));
+  }, [accounts]);
+
   const _onSelect = useCallback((address: string) => {
     if (address) {
       const accountByAddress = findAccountByAddress(accounts, address);
@@ -105,6 +109,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       return (
         <AccountItemWithName
           address={item.address}
+          className='all-account-selection'
           isSelected={_selected}
         />
       );
@@ -170,9 +175,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             setConnectionState(isAllowed ? ConnectionStatement.CONNECTED : ConnectionStatement.DISCONNECTED);
           }
         } else {
-          const _accounts = accounts.filter(({ address }) => !isAccountAll(address));
-
-          const numberAccounts = _accounts.filter(({ address }) => filterType(address)).length;
+          const numberAccounts = noAllAccounts.filter(({ address }) => filterType(address)).length;
           const numberAllowedAccounts = Object.entries(allowedMap)
             .filter(([address]) => filterType(address))
             .filter(([, value]) => value)
@@ -197,7 +200,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       setConnected(0);
       setConnectionState(ConnectionStatement.NOT_CONNECTED);
     }
-  }, [currentAccount?.address, currentAuth, isAllAccount, accounts]);
+  }, [currentAccount?.address, currentAuth, isAllAccount, noAllAccounts]);
 
   const visibleText = useMemo((): string => {
     switch (connectionState) {
@@ -267,7 +270,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         id={modalId}
         inputWidth={'100%'}
         itemKey='address'
-        items={accounts}
+        items={noAllAccounts.length <= 1 ? noAllAccounts : accounts}
         onSelect={_onSelect}
         renderItem={renderItem}
         renderSelected={renderSelectedItem}
@@ -328,6 +331,13 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
         textAlign: 'initial'
       },
 
+      '.all-account-selection': {
+        '.account-item-name': {
+          fontSize: token.fontSizeHeading5,
+          lineHeight: token.lineHeightHeading5
+        }
+      },
+
       '.ant-account-card-name': {
         textOverflow: 'ellipsis',
         overflow: 'hidden',
@@ -337,10 +347,6 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
 
       '.ant-input-container .ant-input': {
         color: token.colorTextLight1
-      },
-
-      '.ant-sw-list-section': {
-        paddingBottom: token.padding
       }
     },
 

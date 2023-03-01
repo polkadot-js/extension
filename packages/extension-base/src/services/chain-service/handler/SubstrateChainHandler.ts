@@ -176,6 +176,11 @@ export class SubstrateChainHandler {
     this.substrateApiMap[chainSlug] = substrateApi;
   }
 
+  public async destroySubstrateApi (chainSlug: string) {
+    this.substrateApiMap[chainSlug].api.disconnect && await this.substrateApiMap[chainSlug].api.disconnect();
+    delete this.substrateApiMap[chainSlug];
+  }
+
   public initApi (chainSlug: string, apiUrl: string, providerName?: string): _SubstrateApi {
     const registry = new TypeRegistry();
 

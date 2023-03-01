@@ -216,6 +216,7 @@ const Component: React.FC<Props> = (props: Props) => {
       }
 
       if (!prevState) {
+        setIsDisable(true);
         form.resetFields();
 
         return needMigrate[0];
@@ -225,6 +226,7 @@ const Component: React.FC<Props> = (props: Props) => {
         if (exists) {
           return prevState;
         } else {
+          setIsDisable(true);
           form.resetFields();
 
           return needMigrate[0];
@@ -301,7 +303,6 @@ const Component: React.FC<Props> = (props: Props) => {
             >
               <Input
                 label={t('Current password')}
-                placeholder={t('Current password')}
                 type='password'
               />
             </Form.Item>

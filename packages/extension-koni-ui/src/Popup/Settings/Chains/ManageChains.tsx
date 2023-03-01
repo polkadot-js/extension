@@ -1,26 +1,24 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
-import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { _isChainEvmCompatible, _isCustomChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import TokenItemFooter from '@subwallet/extension-koni-ui/Popup/Settings/Tokens/component/TokenItemFooter';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Checkbox, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Checkbox, NetworkItem, SwList } from '@subwallet/react-ui';
 import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
 import Icon from '@subwallet/react-ui/es/icon';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import SwModal from '@subwallet/react-ui/es/sw-modal';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
-import TokenItem from '@subwallet/react-ui/es/web3-block/token-item';
 import CN from 'classnames';
-import { Coin, FadersHorizontal, Plus } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { FadersHorizontal, ListChecks, Plus } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -29,36 +27,44 @@ import Layout from '../../../components/Layout';
 
 type Props = ThemeProps
 
-const TOKENS_PER_PAGE = 10;
-
 enum FilterValue {
   ENABLED = 'enabled',
   DISABLED = 'disabled',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
+  SUBSTRATE = 'substrate',
+  EVM = 'evm'
 }
 
 const FILTER_OPTIONS = [
-  { label: 'Enabled tokens', value: FilterValue.ENABLED },
-  { label: 'Disabled tokens', value: FilterValue.DISABLED },
-  { label: 'Custom tokens', value: FilterValue.CUSTOM }
+  { label: 'EVM chains', value: FilterValue.EVM },
+  { label: 'Substrate chains', value: FilterValue.SUBSTRATE },
+  { label: 'Custom chains', value: FilterValue.CUSTOM },
+  { label: 'Enabled chains', value: FilterValue.ENABLED },
+  { label: 'Disabled chains', value: FilterValue.DISABLED }
 ];
 
-function filterFungibleTokens (assetRegistry: Record<string, _ChainAsset>, assetSettingMap: Record<string, AssetSetting>, filters: FilterValue[]): _ChainAsset[] {
-  const filteredTokenList: _ChainAsset[] = [];
+function filterChains (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, filters: FilterValue[]): _ChainInfo[] {
+  const filteredChainList: _ChainInfo[] = [];
 
-  Object.values(assetRegistry).forEach((chainAsset) => {
+  Object.values(chainInfoMap).forEach((chainInfo) => {
     let isValidationPassed = filters.length <= 0;
 
     for (const filter of filters) {
       switch (filter) {
         case FilterValue.CUSTOM:
-          isValidationPassed = _isCustomAsset(chainAsset.slug);
+          isValidationPassed = _isCustomChain(chainInfo.slug);
           break;
         case FilterValue.ENABLED:
-          isValidationPassed = assetSettingMap[chainAsset.slug] && assetSettingMap[chainAsset.slug].visible;
+          isValidationPassed = chainStateMap[chainInfo.slug].active;
           break;
         case FilterValue.DISABLED:
-          isValidationPassed = !assetSettingMap[chainAsset.slug] || !assetSettingMap[chainAsset.slug].visible;
+          isValidationPassed = !chainStateMap[chainInfo.slug].active;
+          break;
+        case FilterValue.SUBSTRATE:
+          isValidationPassed = _isSubstrateChain(chainInfo);
+          break;
+        case FilterValue.EVM:
+          isValidationPassed = _isChainEvmCompatible(chainInfo);
           break;
         default:
           isValidationPassed = false;
@@ -70,18 +76,17 @@ function filterFungibleTokens (assetRegistry: Record<string, _ChainAsset>, asset
       }
     }
 
-    if (_isAssetFungibleToken(chainAsset) && isValidationPassed) {
-      filteredTokenList.push(chainAsset);
+    if (isValidationPassed) {
+      filteredChainList.push(chainInfo);
     }
   });
 
-  return filteredTokenList;
+  return filteredChainList;
 }
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goBack = useDefaultNavigate().goBack;
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -89,88 +94,62 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [selectedFilters, setSelectedFilters] = useState<FilterValue[]>([]);
   const [changeFilters, setChangeFilters] = useState<FilterValue[]>(selectedFilters);
 
-  const { assetRegistry, assetSettingMap } = useSelector((state: RootState) => state.assetRegistry);
+  const { chainInfoMap, chainStateMap } = useSelector((state: RootState) => state.chainStore);
 
-  const [fungibleTokenList, setFungibleTokenList] = useState<_ChainAsset[]>([]);
-  const allFungibleTokens = useMemo(() => {
-    return filterFungibleTokens(assetRegistry, assetSettingMap, selectedFilters);
-  }, [assetRegistry, assetSettingMap, selectedFilters]);
+  const allChains = useMemo(() => {
+    return filterChains(chainInfoMap, chainStateMap, selectedFilters);
+  }, [chainInfoMap, chainStateMap, selectedFilters]);
 
-  const [paging, setPaging] = useState(TOKENS_PER_PAGE);
-
-  useEffect(() => {
-    setFungibleTokenList(allFungibleTokens.slice(0, TOKENS_PER_PAGE));
-    setPaging(TOKENS_PER_PAGE);
-  }, [allFungibleTokens]);
-
-  const hasMore = useMemo(() => {
-    return allFungibleTokens.length > fungibleTokenList.length;
-  }, [allFungibleTokens.length, fungibleTokenList.length]);
-
-  const loadMoreTokens = useCallback(() => {
-    setTimeout(() => { // delayed to avoid lagging on scroll
-      if (hasMore) {
-        const nextPaging = paging + TOKENS_PER_PAGE;
-        const to = nextPaging > allFungibleTokens.length ? allFungibleTokens.length : nextPaging;
-
-        setFungibleTokenList(allFungibleTokens.slice(0, to));
-        setPaging(nextPaging);
-      }
-    }, 50);
-  }, [allFungibleTokens, hasMore, paging]);
-
-  const searchToken = useCallback((token: _ChainAsset, searchText: string) => {
+  const searchToken = useCallback((chainInfo: _ChainInfo, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
     return (
-      token.name.toLowerCase().includes(searchTextLowerCase) ||
-      token.symbol.toLowerCase().includes(searchTextLowerCase)
+      chainInfo.name.toLowerCase().includes(searchTextLowerCase)
     );
   }, []);
 
-  const renderTokenRightItem = useCallback((tokenInfo: _ChainAsset) => {
-    const assetSetting = assetSettingMap[tokenInfo.slug];
+  const renderNetworkRightItem = useCallback((chainInfo: _ChainInfo) => {
+    const chainState = chainStateMap[chainInfo.slug];
 
     return (
-      <TokenItemFooter
-        assetSetting={assetSetting}
+      <ChainItemFooter
+        chainInfo={chainInfo}
+        chainState={chainState}
         navigate={navigate}
-        tokenInfo={tokenInfo}
+        showDetailNavigation={true}
       />
     );
-  }, [assetSettingMap, navigate]);
+  }, [chainStateMap, navigate]);
 
-  const renderTokenItem = useCallback((tokenInfo: _ChainAsset) => {
+  const renderChainItem = useCallback((chainInfo: _ChainInfo) => {
     return (
-      <TokenItem
+      <NetworkItem
         isShowSubLogo={true}
-        key={tokenInfo.slug}
-        name={tokenInfo.symbol}
-        rightItem={renderTokenRightItem(tokenInfo)}
-        subName={tokenInfo.originChain}
-        subNetworkKey={tokenInfo.originChain}
-        symbol={tokenInfo.symbol.toLowerCase()}
+        key={chainInfo.slug}
+        name={chainInfo.name}
+        networkKey={chainInfo.slug}
+        rightItem={renderNetworkRightItem(chainInfo)}
         withDivider={true}
       />
     );
-  }, [renderTokenRightItem]);
+  }, [renderNetworkRightItem]);
 
   const emptyTokenList = useCallback(() => {
     return (
-      <div className={'manage_tokens__empty_container'}>
-        <div className={'manage_tokens__empty_icon_wrapper'}>
+      <div className={'manage_chains__empty_container'}>
+        <div className={'manage_chains__empty_icon_wrapper'}>
           <PageIcon
             color={token['gray-3']}
             iconProps={{
-              phosphorIcon: Coin,
+              phosphorIcon: ListChecks,
               weight: 'fill'
             }}
           />
         </div>
 
-        <div className={'manage_tokens__empty_text_container'}>
-          <div className={'manage_tokens__empty_title'}>{t<string>('No token')}</div>
-          <div className={'manage_tokens__empty_subtitle'}>{t<string>('Your token will appear here.')}</div>
+        <div className={'manage_chains__empty_text_container'}>
+          <div className={'manage_chains__empty_title'}>{t<string>('No chain found')}</div>
+          <div className={'manage_chains__empty_subtitle'}>{t<string>('Your chain will appear here.')}</div>
         </div>
       </div>
     );
@@ -185,10 +164,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           type='phosphor'
         />,
         onClick: () => {
-          navigate('/settings/tokens/import', { state: { isExternalRequest: false } });
+          navigate('/settings/chains/import', { state: { isExternalRequest: false } });
         }
       }
     ];
+  }, [navigate]);
+
+  const onBack = useCallback(() => {
+    navigate(-1);
   }, [navigate]);
 
   const openFilterModal = useCallback(() => {
@@ -215,7 +198,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />}
         onClick={onApplyFilter}
       >
-        <span className={'manage_tokens__token_filter_button'}>{t('Apply filter')}</span>
+        <span className={'manage_chains__token_filter_button'}>{t('Apply filter')}</span>
       </Button>
     );
   }, [t, onApplyFilter]);
@@ -240,18 +223,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   return (
     <PageWrapper
-      className={`manage_tokens ${className}`}
-      resolve={dataContext.awaitStores(['assetRegistry'])}
+      className={`manage_chains ${className}`}
+      resolve={dataContext.awaitStores(['chainStore'])}
     >
       <Layout.Base
-        onBack={goBack}
+        onBack={onBack}
         showBackButton={true}
         showSubHeader={true}
         subHeaderBackground={'transparent'}
         subHeaderCenter={true}
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
-        title={t<string>('Manage tokens')}
+        title={t<string>('Manage chains')}
       >
         <SwList.Section
           actionBtnIcon={<Icon
@@ -261,26 +244,23 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             type='phosphor'
             weight={'fill'}
           />}
-          className={'manage_tokens__container'}
+          className={'manage_chains__container'}
           enableSearchInput={true}
-          gridGap={'14px'}
-          list={fungibleTokenList}
-          minColumnWidth={'172px'}
+          ignoreScrollbar={allChains.length > 2}
+          list={allChains}
+          mode={'boxed'}
           onClickActionBtn={openFilterModal}
-          pagination={{
-            hasMore,
-            loadMore: loadMoreTokens
-          }}
-          renderItem={renderTokenItem}
-          renderOnScroll={false}
+          renderItem={renderChainItem}
+          renderOnScroll={true}
           renderWhenEmpty={emptyTokenList}
           searchFunction={searchToken}
-          searchPlaceholder={t<string>('Search token')}
+          searchMinCharactersCount={1}
+          searchPlaceholder={t<string>('Search chain')}
           showActionBtn={true}
         />
 
         <SwModal
-          className={CN('manage_tokens__token_filter_modal')}
+          className={CN('manage_chains__token_filter_modal')}
           footer={filterModalFooter()}
           id={'filterTokenModal'}
           onCancel={closeFilterModal}
@@ -288,12 +268,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           title={t<string>('Filter')}
           wrapClassName={className}
         >
-          <div className={'manage_tokens__filter_option_wrapper'}>
+          <div className={'manage_chains__filter_option_wrapper'}>
             {
               FILTER_OPTIONS.map((filterOption) => {
                 return (
                   <div
-                    className={'manage_tokens__filter_option'}
+                    className={'manage_chains__filter_option'}
                     key={filterOption.label}
                   >
                     <Checkbox
@@ -301,7 +281,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       onChange={onChangeFilterOption}
                       value={filterOption.value}
                     >
-                      <span className={'manage_tokens__filter_option_label'}>{filterOption.label}</span>
+                      <span className={'manage_chains__filter_option_label'}>{filterOption.label}</span>
                     </Checkbox>
                   </div>
                 );
@@ -314,7 +294,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '&__inner': {
       display: 'flex',
@@ -322,12 +302,12 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
       overflow: 'hidden'
     },
 
-    '.manage_tokens__container': {
+    '.manage_chains__container': {
       paddingTop: 14,
       flex: 1
     },
 
-    '.manage_tokens__empty_container': {
+    '.manage_chains__empty_container': {
       marginTop: 44,
       display: 'flex',
       flexWrap: 'wrap',
@@ -336,7 +316,7 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
       alignContent: 'center'
     },
 
-    '.manage_tokens__empty_text_container': {
+    '.manage_chains__empty_text_container': {
       display: 'flex',
       flexDirection: 'column',
       alignContent: 'center',
@@ -344,41 +324,41 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flexWrap: 'wrap'
     },
 
-    '.manage_tokens__empty_title': {
+    '.manage_chains__empty_title': {
       fontWeight: token.headingFontWeight,
       textAlign: 'center',
       fontSize: token.fontSizeLG,
       color: token.colorText
     },
 
-    '.manage_tokens__empty_subtitle': {
+    '.manage_chains__empty_subtitle': {
       marginTop: 6,
       textAlign: 'center',
       color: token.colorTextTertiary
     },
 
-    '.manage_tokens__empty_icon_wrapper': {
+    '.manage_chains__empty_icon_wrapper': {
       display: 'flex',
       justifyContent: 'center'
     },
 
-    '.manage_tokens__token_filter_button': {
+    '.manage_chains__token_filter_button': {
       fontSize: token.fontSizeLG,
       lineHeight: token.lineHeightLG,
       fontWeight: token.headingFontWeight
     },
 
-    '.manage_tokens__filter_option_wrapper': {
+    '.manage_chains__filter_option_wrapper': {
       display: 'flex',
       flexDirection: 'column',
       gap: token.marginLG
     },
 
-    '.manage_tokens__filter_option': {
+    '.manage_chains__filter_option': {
       width: '100%'
     },
 
-    '.manage_tokens__filter_option_label': {
+    '.manage_chains__filter_option_label': {
       color: token.colorTextLight1
     },
 
@@ -386,7 +366,7 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
       cursor: 'default'
     },
 
-    '.manage_tokens__right_item_container': {
+    '.manage_chains__right_item_container': {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center'
@@ -394,4 +374,4 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
   });
 });
 
-export default ManageTokens;
+export default ManageChains;

@@ -478,6 +478,7 @@ html::-webkit-scrollbar {
   border-radius: 0px;
   height: 100%;
   padding: 0px;
+  max-height: unset;
 }
 
 .modal-full .ant-sw-modal-body {
@@ -539,10 +540,6 @@ div#popup-container {
   left: 0;
 }
 
-.ant-sw-modal-root .ant-sw-modal-wrap {
-  position: absolute;
-}
-
-.ant-sw-qr-scanner-root .ant-sw-qr-scanner-wrap {
+.ant-sw-modal-root .ant-sw-modal-mask, .ant-sw-modal-root .ant-sw-modal-wrap, .ant-sw-qr-scanner-root .ant-sw-qr-scanner-wrap {
   position: absolute;
 }

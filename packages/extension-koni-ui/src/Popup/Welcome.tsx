@@ -73,7 +73,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       <div className='bg-image' />
       <div className='body-container'>
         <div className='logo-container'>
-          <Logo3D />
+          <Logo3D
+            height={100}
+            width={69}
+          />
         </div>
         <div className='title'>
           {t('SubWallet')}

@@ -32,49 +32,60 @@ function Component (
 
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
-      <Button
-        className={'__back-button'}
-        icon={
-          <Icon
-            customSize={'24px'}
-            phosphorIcon={CaretLeft}
+      <div className='__top'>
+        <Button
+          className={'__back-button'}
+          icon={
+            <Icon
+              customSize={'24px'}
+              phosphorIcon={CaretLeft}
+            />
+          }
+          onClick={onClickBack}
+          size={'xs'}
+          type={'ghost'}
+        />
+        <div className={'__token-display'}>Token: {symbol}</div>
+      </div>
+      <div className='__bottom'>
+        <Number
+          className={'__balance-value'}
+          decimal={0}
+          decimalOpacity={0.45}
+          prefix='$'
+          size={38}
+          subFloatNumber
+          value={balanceValue}
+        />
+        <div className={'__action-button-container'}>
+          <Button
+            icon={<Icon
+              phosphorIcon={ArrowFatLinesDown}
+              size={isShrink ? 'sm' : 'md'}
+            />}
+            shape='squircle'
+            size={isShrink ? 'xs' : 'sm'}
           />
-        }
-        onClick={onClickBack}
-        size={'xs'}
-        type={'ghost'}
-      />
-      <div className={'__token-display'}>Token: {symbol}</div>
-
-      <Number
-        className={'__balance-value'}
-        decimal={0}
-        decimalOpacity={0.45}
-        prefix='$'
-        size={38}
-        subFloatNumber
-        value={balanceValue}
-      />
-
-      <div className={'__action-button-container'}>
-        <Button
-          icon={<Icon phosphorIcon={ArrowFatLinesDown} />}
-          shape='squircle'
-          size={isShrink ? 'xs' : 'md'}
-        />
-        <div className={'__button-space'} />
-        <Button
-          icon={<Icon phosphorIcon={PaperPlaneTilt} />}
-          onClick={openSendFund}
-          shape='squircle'
-          size={isShrink ? 'xs' : 'md'}
-        />
-        <div className={'__button-space'} />
-        <Button
-          icon={<Icon phosphorIcon={ShoppingCartSimple} />}
-          shape='squircle'
-          size={isShrink ? 'xs' : 'md'}
-        />
+          <div className={'__button-space'} />
+          <Button
+            icon={<Icon
+              phosphorIcon={PaperPlaneTilt}
+              size={isShrink ? 'sm' : 'md'}
+            />}
+            onClick={openSendFund}
+            shape='squircle'
+            size={isShrink ? 'xs' : 'sm'}
+          />
+          <div className={'__button-space'} />
+          <Button
+            icon={<Icon
+              phosphorIcon={ShoppingCartSimple}
+              size={isShrink ? 'sm' : 'md'}
+            />}
+            shape='squircle'
+            size={isShrink ? 'xs' : 'sm'}
+          />
+        </div>
       </div>
     </div>
   );
@@ -82,21 +93,29 @@ function Component (
 
 export const DetailUpperBlock = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    padding: '14px 8px 24px 8px',
+    padding: '0px 8px 24px 8px',
     display: 'flex',
     flexDirection: 'column',
 
+    '.__top': {
+      display: 'flex',
+      marginBottom: 16,
+      alignItems: 'center'
+    },
+
     '.__token-display': {
       textAlign: 'center',
+      flex: 1,
       fontSize: token.fontSizeHeading4,
       lineHeight: token.lineHeightHeading4,
-      marginBottom: 22
+      marginRight: 40
+    },
+
+    '.ant-btn': {
+      transition: 'width, height, padding 0s'
     },
 
     '.__back-button': {
-      position: 'absolute',
-      left: token.sizeSM,
-      top: token.sizeSM,
       color: token.colorTextLight1,
 
       '&:hover': {
@@ -132,8 +151,10 @@ export const DetailUpperBlock = styled(Component)<Props>(({ theme: { token } }: 
     },
 
     '&.-shrink': {
-      paddingBottom: 36,
-      flexDirection: 'row',
+
+      '.__bottom': {
+        display: 'flex'
+      },
 
       '.__balance-value': {
         textAlign: 'left',

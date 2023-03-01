@@ -46,7 +46,7 @@ export interface SwThemeConfig extends ThemeConfig {
 
 function genDefaultExtraTokens (token: AliasToken): ExtraToken {
   return {
-    bodyBackgroundColor: token.colorBgSecondary,
+    bodyBackgroundColor: token['gray-1'],
     logo: subWalletLogo,
     defaultImagePlaceholder,
     tokensScreenSuccessBackgroundColor: 'linear-gradient(180deg, rgba(76, 234, 172, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',

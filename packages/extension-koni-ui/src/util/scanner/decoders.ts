@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainEnabled, _isEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainEnabled, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { createTransactionFromRLP } from '@subwallet/extension-base/utils/eth';
 import { EthereumParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateMultiParsedData } from '@subwallet/extension-koni-ui/types/scanner';
 import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
@@ -320,7 +320,7 @@ const findNetworkAndAccountByGenesisHash = (
       continue;
     }
 
-    const addressLength = !_isEvmChain(network) ? 64 : 40;
+    const addressLength = !_isChainEvmCompatible(network) ? 64 : 40;
     const address = pubKeyHex.substring(0, addressLength);
 
     account = findAccountByAddress(accounts, '0x' + address);

@@ -7,11 +7,12 @@ import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDele
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
-import { deriveAccountV3, forgetAccount } from '@subwallet/extension-koni-ui/messaging';
+import { deriveAccountV3, editAccount, forgetAccount } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { FormCallbacks } from '@subwallet/extension-koni-ui/types/form';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { copyToClipboard } from '@subwallet/extension-koni-ui/util/dom';
-import { BackgroundIcon, Button, Field, Icon, QRCode } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, QRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CopySimple, Export, FloppyDiskBack, Info, ShareNetwork, TrashSimple } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -19,7 +20,15 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
-type Props = ThemeProps
+type Props = ThemeProps;
+
+enum FormFieldName {
+  NAME = 'name'
+}
+
+interface DetailFormState {
+  [FormFieldName.NAME]: string;
+}
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -30,6 +39,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const notify = useNotification();
   const { token } = useTheme() as Theme;
   const { accountAddress } = useParams();
+
+  const [form] = Form.useForm<DetailFormState>();
 
   const account = useGetAccountByAddress(accountAddress);
   const deleteAccountAction = useDeleteAccount();
@@ -117,6 +128,23 @@ const Component: React.FC<Props> = (props: Props) => {
     });
   }, [account?.address, notify]);
 
+  const onSubmit: FormCallbacks<DetailFormState>['onFinish'] = useCallback((values: DetailFormState) => {
+    const name = values[FormFieldName.NAME];
+
+    if (!account) {
+      return;
+    }
+
+    const address = account.address;
+
+    if (!address) {
+      return;
+    }
+
+    editAccount(account.address, name)
+      .catch(console.error);
+  }, [account]);
+
   useEffect(() => {
     if (!account) {
       goHome();
@@ -148,20 +176,44 @@ const Component: React.FC<Props> = (props: Props) => {
             value={account.address}
           />
         </div>
-        <div className='account-field'>
-          <Field
-            content={account.name || ''}
-            label={t('Wallet name')}
-            placeholder={t('Wallet name')}
-            suffix={(
-              <Icon
-                className='single-icon-only'
-                phosphorIcon={FloppyDiskBack}
-                size='sm'
-              />
-            )}
-          />
-        </div>
+        <Form
+          form={form}
+          initialValues={{
+            [FormFieldName.NAME]: account.name || ''
+          }}
+          name='account-detail-form'
+          onFinish={onSubmit}
+        >
+          <Form.Item
+            className={CN('account-field')}
+            hideError={true}
+            name={FormFieldName.NAME}
+            rules={[
+              {
+                message: 'Wallet name is required',
+                required: true
+              }
+            ]}
+          >
+            <Input
+              label={t('Wallet name')}
+              onBlur={form.submit}
+              placeholder={t('Wallet name')}
+              suffix={(
+                <Button
+                  icon={(
+                    <Icon
+                      phosphorIcon={FloppyDiskBack}
+                      size='sm'
+                    />
+                  )}
+                  size='xs'
+                  type='ghost'
+                />
+              )}
+            />
+          </Form.Item>
+        </Form>
         <div className={CN('account-field', 'mb-lg')}>
           <Field
             content={toShort(account.address, 11, 13)}
@@ -266,6 +318,14 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
         '.single-icon-only': {
           color: token['gray-4']
+        },
+
+        '.ant-input-label': {
+          marginBottom: token.marginXS - 2
+        },
+
+        '.ant-input-suffix': {
+          marginRight: 0
         },
 
         '.ant-btn': {

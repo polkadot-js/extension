@@ -57,18 +57,18 @@ function Component (
                   className={'__converted-value'}
                   decimal={0}
                   decimalOpacity={0.45}
-                  prefix='$'
-                  value={total.convertedValue}
+                  suffix={symbol}
+                  value={total.value}
                 />
                 <Number
                   className={'__value'}
                   decimal={0}
                   decimalOpacity={0.45}
                   intOpacity={0.45}
+                  prefix='$'
                   size={12}
-                  suffix={symbol}
                   unitOpacity={0.45}
-                  value={total.value}
+                  value={total.convertedValue}
                 />
               </div>
 

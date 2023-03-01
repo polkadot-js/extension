@@ -64,7 +64,7 @@ function Component ({ className }: Props) {
   const titleMap = useMemo<Record<string, string>>(() => ({
     transfer: t('Transfer')
   }), [t]);
-  const { goBack } = useDefaultNavigate();
+  const { goHome } = useDefaultNavigate();
 
   useEffect(() => {
     let cancel = false;
@@ -101,7 +101,7 @@ function Component ({ className }: Props) {
               background={'transparent'}
               center
               className={'transaction-header'}
-              onBack={goBack}
+              onBack={goHome}
               showBackButton
               title={titleMap[transactionType]}
             />

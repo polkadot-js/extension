@@ -1,18 +1,17 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { Theme } from '@subwallet/extension-koni-ui/themes';
+import { ButtonProps, Icon, PageIcon, Typography } from '@subwallet/react-ui';
+import CN from 'classnames';
+import { ShieldSlash, XCircle } from 'phosphor-react';
 import React from 'react';
 import { useParams } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
-import useTranslation from '../hooks/useTranslation';
-import CN from 'classnames';
 import { Layout } from '../components';
-import { Theme } from '@subwallet/extension-koni-ui/themes';
-import classNames from 'classnames';
-import { ButtonProps, Icon, PageIcon, Typography } from '@subwallet/react-ui';
-import { ShieldSlash, XCircle } from 'phosphor-react';
-import { useNavigate } from 'react-router-dom';
+import useTranslation from '../hooks/useTranslation';
 
 interface Props {
   className?: string;
@@ -27,20 +26,26 @@ function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
 
   const footerBtn: ButtonProps = {
     children: t('Get me out of here'),
-    icon: <Icon phosphorIcon={XCircle} weight='fill' />,
-    onClick: () => navigate('/home/tokens'),
-  }
+    icon: <Icon
+      phosphorIcon={XCircle}
+      weight='fill'
+    />,
+    onClick: () => navigate('/home/tokens')
+  };
 
   return (
     <Layout.WithSubHeaderOnly
-      rightFooterButton={footerBtn}
       className={CN(className)}
+      rightFooterButton={footerBtn}
       showBackButton={false}
-      title={t('Phishing detection')}
       subHeaderPaddingVertical={true}
+      title={t('Phishing detection')}
     >
-      <div className={classNames('__upper-block-wrapper')} />
-      <PageIcon iconProps={{ phosphorIcon: ShieldSlash, weight: 'fill' }} color={token.colorError} />
+      <div className={CN('__upper-block-wrapper')} />
+      <PageIcon
+        color={token.colorError}
+        iconProps={{ phosphorIcon: ShieldSlash, weight: 'fill' }}
+      />
       <div className='title h3-text text-danger'>{t('Phishing detection')}</div>
       <div className='h4-text text-danger'>{decodedWebsite}</div>
       <div className='phishing-detection-message'>
@@ -54,7 +59,7 @@ function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
 }
 
 const PhishingDetected = styled(_PhishingDetected)<Props>(({ theme }) => {
-  const { token, extendToken } = theme as Theme;
+  const { extendToken, token } = theme as Theme;
 
   return ({
     position: 'relative',
@@ -63,7 +68,7 @@ const PhishingDetected = styled(_PhishingDetected)<Props>(({ theme }) => {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      paddingTop: 48,
+      paddingTop: 48
     },
 
     '.ant-sw-sub-header-title-content': {
@@ -72,7 +77,7 @@ const PhishingDetected = styled(_PhishingDetected)<Props>(({ theme }) => {
 
     '.title': {
       paddingTop: 16,
-      paddingBottom: 16,
+      paddingBottom: 16
     },
 
     '.phishing-detection-message': {
@@ -82,7 +87,7 @@ const PhishingDetected = styled(_PhishingDetected)<Props>(({ theme }) => {
       textAlign: 'center',
       fontSize: token.fontSizeLG,
       lineHeight: token.lineHeightLG,
-      color: token.colorTextLight3,
+      color: token.colorTextLight3
     },
 
     '.__upper-block-wrapper': {
@@ -95,8 +100,8 @@ const PhishingDetected = styled(_PhishingDetected)<Props>(({ theme }) => {
       alignItems: 'center',
       transaction: '0.1s height',
       backgroundImage: extendToken.tokensScreenDangerBackgroundColor
-    },
-  })
+    }
+  });
 });
 
-export default PhishingDetected
+export default PhishingDetected;

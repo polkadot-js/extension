@@ -5,6 +5,7 @@ import { Layout } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
 import { REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import CreatePasswordDone from '@subwallet/extension-koni-ui/Popup/Keyring/CreatePassword/Done';
@@ -47,8 +48,9 @@ const modalId = 'create-password-instruction-modal';
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { goBack, goHome } = useDefaultNavigate();
 
-  const { accounts } = useSelector((state: RootState) => state.accountState);
+  const { accounts, hasMasterPassword } = useSelector((state: RootState) => state.accountState);
 
   const [noAccount] = useState(isNoAccount(accounts));
 
@@ -110,14 +112,30 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, [activeModal, noAccount]);
 
+  useEffect(() => {
+    let amount = true;
+
+    if (!success && hasMasterPassword) {
+      setTimeout(() => {
+        if (amount) {
+          goHome();
+        }
+      }, 300);
+    }
+
+    return () => {
+      amount = false;
+    };
+  }, [goHome, hasMasterPassword, success]);
+
   return (
     <Layout.Base
       className={CN(className)}
       rightFooterButton={
         success
           ? {
-            children: t('Exit')
-            // onClick: form.submit,
+            children: t('Exit'),
+            onClick: goBack
           }
           : {
             children: t('Continue'),

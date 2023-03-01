@@ -68,22 +68,22 @@ function Component (
       )}
       <div className={'__action-button-container'}>
         <Button
-          icon={<Icon phosphorIcon={ArrowFatLinesDown} />}
+          icon={<Icon size={isShrink ? 'sm' : 'md' } phosphorIcon={ArrowFatLinesDown} />}
           shape='squircle'
-          size={isShrink ? 'xs' : 'md'}
+          size={isShrink ? 'xs' : 'sm'}
         />
         <div className={'__button-space'} />
         <Button
-          icon={<Icon phosphorIcon={PaperPlaneTilt} />}
+          icon={<Icon size={isShrink ? 'sm' : 'md' } phosphorIcon={PaperPlaneTilt} />}
           onClick={openSendFund}
           shape='squircle'
-          size={isShrink ? 'xs' : 'md'}
+          size={isShrink ? 'xs' : 'sm'}
         />
         <div className={'__button-space'} />
         <Button
-          icon={<Icon phosphorIcon={ShoppingCartSimple} />}
+          icon={<Icon size={isShrink ? 'sm' : 'md' } phosphorIcon={ShoppingCartSimple} />}
           shape='squircle'
-          size={isShrink ? 'xs' : 'md'}
+          size={isShrink ? 'xs' : 'sm'}
         />
       </div>
     </div>
@@ -92,7 +92,7 @@ function Component (
 
 export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    padding: '36px 8px 24px 8px',
+    padding: '0px 8px 24px 8px',
     display: 'flex',
     flexDirection: 'column',
 
@@ -107,6 +107,10 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
       '.ant-typography': {
         lineHeight: 'inherit'
       }
+    },
+
+    '.ant-btn': {
+      transition: 'width, height, padding 0s'
     },
 
     '.__balance-change-container': {
@@ -155,7 +159,7 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
     },
 
     '&.-shrink': {
-      paddingBottom: 36,
+      paddingBottom: 32,
       flexDirection: 'row',
 
       '.__total-balance-value': {

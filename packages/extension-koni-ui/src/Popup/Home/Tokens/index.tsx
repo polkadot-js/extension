@@ -10,9 +10,10 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { Button, Icon } from '@subwallet/react-ui';
+import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import classNames from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -34,14 +35,60 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
 function Component (): React.ReactElement {
   const [isShrink, setIsShrink] = useState<boolean>(false);
   const navigate = useNavigate();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const topBlockRef = useRef<HTMLDivElement>(null);
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
-    if (event.currentTarget.scrollTop > 80) {
-      setIsShrink(true);
+    const topPosition = event.currentTarget.scrollTop;
+
+    if (topPosition > 80) {
+      setIsShrink((value) => {
+        if (!value && topBlockRef.current && containerRef.current) {
+          const containerProps = containerRef.current.getBoundingClientRect();
+
+          topBlockRef.current.style.position = 'fixed';
+          topBlockRef.current.style.transition = 'all 0s';
+          topBlockRef.current.style.opacity = '0';
+          topBlockRef.current.style.paddingTop = '0';
+          topBlockRef.current.style.top = `${containerProps.top}px`;
+          topBlockRef.current.style.left = `${containerProps.left}px`;
+          topBlockRef.current.style.right = `${containerProps.right}px`;
+          topBlockRef.current.style.width = `${containerProps.width - getScrollbarWidth()}px`;
+
+          setTimeout(() => {
+            if (topBlockRef.current) {
+              topBlockRef.current.style.transition = 'opacity, padding-top 0.27s ease';
+              topBlockRef.current.style.opacity = '1';
+              topBlockRef.current.style.paddingTop = '32px';
+            }
+          }, 100);
+        }
+
+        return true;
+      });
     } else {
-      setIsShrink(false);
+      setIsShrink((value) => {
+        if (value && topBlockRef.current) {
+          topBlockRef.current.style.position = 'absolute';
+          topBlockRef.current.style.top = '0';
+          topBlockRef.current.style.left = '0';
+          topBlockRef.current.style.right = '0';
+          topBlockRef.current.style.right = '100%';
+          topBlockRef.current.style.transition = 'all 0s';
+          topBlockRef.current.style.opacity = '0';
+
+          setTimeout(() => {
+            if (topBlockRef.current) {
+              topBlockRef.current.style.transition = 'opacity 0.27s ease';
+              topBlockRef.current.style.opacity = '1';
+            }
+          }, 100);
+        }
+
+        return false;
+      });
     }
   }, []);
 
@@ -61,24 +108,21 @@ function Component (): React.ReactElement {
   }, [navigate]);
 
   return (
-    <>
-      <div className={classNames('__upper-block-wrapper', {
-        '-is-shrink': isShrink,
-        '-decrease': isTotalBalanceDecrease
-      })}
+    <div
+      className={'tokens-screen-container'}
+      onScroll={handleScroll}
+      ref={containerRef}
+    >
+      <div
+        className={classNames('__upper-block-wrapper', {
+          '-is-shrink': isShrink,
+          '-decrease': isTotalBalanceDecrease
+        })}
+        ref={topBlockRef}
       >
         <UpperBlock
-          className={'__static-block'}
           isPriceDecrease={isTotalBalanceDecrease}
-          isShrink={false}
-          totalChangePercent={totalBalanceInfo.change.percent}
-          totalChangeValue={totalBalanceInfo.change.value}
-          totalValue={totalBalanceInfo.convertedValue}
-        />
-        <UpperBlock
-          className={'__scrolling-block'}
-          isPriceDecrease={isTotalBalanceDecrease}
-          isShrink={true}
+          isShrink={isShrink}
           totalChangePercent={totalBalanceInfo.change.percent}
           totalChangeValue={totalBalanceInfo.change.value}
           totalValue={totalBalanceInfo.convertedValue}
@@ -86,7 +130,6 @@ function Component (): React.ReactElement {
       </div>
       <div
         className={'__scroll-container'}
-        onScroll={handleScroll}
       >
         {
           sortedTokenGroups.map((tokenGroupKey) => {
@@ -117,43 +160,47 @@ function Component (): React.ReactElement {
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
 const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, token } }: ThemeProps) => {
   return ({
-    height: '100%',
-    color: token.colorTextLight1,
-    fontSize: token.fontSizeLG,
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-    paddingTop: 112,
+    overflow: 'hidden',
+
+    '.tokens-screen-container': {
+      height: '100%',
+      color: token.colorTextLight1,
+      fontSize: token.fontSizeLG,
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      paddingTop: 210,
+      marginRight: -getScrollbarWidth()
+    },
 
     '.__scroll-container': {
-      flex: 1,
-      overflow: 'auto',
-      paddingTop: 106,
       paddingLeft: token.size,
       paddingRight: token.size
     },
 
     '.__upper-block-wrapper': {
-      position: 'absolute',
       backgroundColor: token.colorBgDefault,
-      height: 218,
+      position: 'absolute',
+      paddingTop: '32px',
+      height: 210,
       zIndex: 10,
       top: 0,
       left: 0,
-      right: 0,
+      width: '100%',
       display: 'flex',
       alignItems: 'center',
-      transition: '0.1s height',
       backgroundImage: extendToken.tokensScreenSuccessBackgroundColor,
 
       '&.-is-shrink': {
-        height: 112
+        height: 104
       },
 
       '&.-decrease': {
@@ -165,10 +212,6 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
       flex: 1
     },
 
-    '.__scrolling-block': {
-      display: 'none'
-    },
-
     '.__scroll-footer': {
       display: 'flex',
       justifyContent: 'center',
@@ -177,16 +220,6 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
 
     '.token-group-balance-item': {
       marginBottom: token.sizeXS
-    },
-
-    '.__upper-block-wrapper.-is-shrink': {
-      '.__static-block': {
-        display: 'none'
-      },
-
-      '.__scrolling-block': {
-        display: 'flex'
-      }
     }
   });
 });

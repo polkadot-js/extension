@@ -15,11 +15,11 @@ const BN_0 = new BigN(0);
 const BN_10 = new BigN(10);
 const BN_100 = new BigN(100);
 
-function getBalanceValue (balance: string, decimals: number): BigN {
+export function getBalanceValue (balance: string, decimals: number): BigN {
   return new BigN(balance).div(BN_10.pow(decimals));
 }
 
-function getConvertedBalanceValue (balance: BigN, price: number): BigN {
+export function getConvertedBalanceValue (balance: BigN, price: number): BigN {
   return balance ? balance.multipliedBy(new BigN(price)) : BN_0;
 }
 

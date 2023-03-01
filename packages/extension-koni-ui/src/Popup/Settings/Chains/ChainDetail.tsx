@@ -129,7 +129,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [isChanged, isValueValid]);
 
   const onSubmit = useCallback(() => {
-    // setLoading(true);
+    setLoading(true);
     console.log('submit', form.getFieldsValue());
   }, [form]);
 

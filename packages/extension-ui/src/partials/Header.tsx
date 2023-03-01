@@ -13,10 +13,9 @@ import helpIcon from '../assets/help.svg';
 import settingsIcon from '../assets/settings.svg';
 import { ActionContext, Link, Svg, Tooltip } from '../components';
 import useTranslation from '../hooks/useTranslation';
+import { Z_INDEX } from '../zindex';
 // import { getConnectedTabsUrl } from '../messaging';
 // TODO: these will be reused in the future
-// import MenuAdd from './MenuAdd';
-// import MenuSettings from './MenuSettings';
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -35,7 +34,6 @@ interface Props extends ThemeProps {
 function Header({
   children,
   className = '',
-
   smallMargin = false,
   text,
   withBackArrow,
@@ -126,6 +124,10 @@ export default React.memo(
   font-weight: normal;
   margin: 0;
   position: sticky;
+  position: sticky;
+  top: 0px;
+  backdrop-filter: blur(10px);
+  z-index: ${Z_INDEX.HEADER};
   margin-bottom: ${withStepper ? '0px' : '25px'};
 
   && {

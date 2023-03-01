@@ -20,6 +20,10 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
+const CustomHeader = styled(Header)`
+  margin: 0px;
+`;
+
 function Accounts({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [filter, setFilter] = useState('');
@@ -45,13 +49,38 @@ function Accounts({ className }: Props): React.ReactElement {
     setFilter(filter.toLowerCase());
   }, []);
 
+  const accounts = Object.entries(groupedParents).map(([networkName, details]) => {
+    if (details.length > 0) {
+      return (
+        <div key={networkName}>
+          {networkName !== defaultNetwork && <span className='network-heading'>{networkName}</span>}
+          {details.map((json) => (
+            <AccountsTree
+              {...json}
+              key={json.address}
+            />
+          ))}
+          {filterChildren(networkName, defaultNetwork, details).map((json) => (
+            <AccountsTree
+              {...json}
+              key={json.address}
+              parentName={getParentName(json)}
+            />
+          ))}
+        </div>
+      );
+    } else {
+      return null;
+    }
+  });
+
   return (
     <>
       {hierarchy.length === 0 ? (
         <AddAccount />
       ) : (
         <>
-          <Header
+          <CustomHeader
             onFilter={_onFilter}
             showConnectedAccounts
             text={t<string>('Accounts')}
@@ -59,26 +88,7 @@ function Accounts({ className }: Props): React.ReactElement {
             withSettings
           />
           <ScrollWrapper>
-            <div className={className}>
-              {Object.entries(groupedParents).map(([networkName, details]) => (
-                <div key={networkName}>
-                  {networkName !== defaultNetwork && <span className='network-heading'>{networkName}</span>}
-                  {details.map((json) => (
-                    <AccountsTree
-                      {...json}
-                      key={json.address}
-                    />
-                  ))}
-                  {filterChildren(networkName, defaultNetwork, details).map((json) => (
-                    <AccountsTree
-                      {...json}
-                      key={json.address}
-                      parentName={getParentName(json)}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
+            <div className={className}>{accounts}</div>
           </ScrollWrapper>
           <VerticalSpace />
           <ButtonArea>

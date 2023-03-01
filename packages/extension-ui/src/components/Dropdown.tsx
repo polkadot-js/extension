@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import { ALEPH_ZERO_GENESIS_HASH } from '../constants';
 import useTranslation from '../hooks/useTranslation';
 import InputLock from './InputLock';
 import Label from './Label';
@@ -62,7 +63,7 @@ function Dropdown({
       >
         <select
           autoFocus={isFocussed}
-          defaultValue={defaultValue || undefined}
+          defaultValue={defaultValue || ALEPH_ZERO_GENESIS_HASH}
           disabled={isDisabled || isLocked}
           onBlur={onBlur}
           onChange={_onChange}
@@ -161,8 +162,6 @@ export default React.memo(
     line-height: 130%;
     letter-spacing: 0.06em;
   }
-
-
 `
   )
 );

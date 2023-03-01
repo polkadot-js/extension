@@ -41,7 +41,6 @@ const MNEMONIC_WORDS_INITIAL_STATE: MnemonicWords = {
   '7': '',
   '8': '',
   '9': '',
-  // eslint-disable-next-line sort-keys
   '10': '',
   '11': ''
 };

@@ -22,7 +22,8 @@ module.exports = {
     'import-newlines/enforce': ['error', { 'max-len': 120, items: Infinity }], // we break only if line too long
     '@typescript-eslint/indent': [0],
     'react/jsx-closing-bracket-location': 0,
-    'react/jsx-newline': ['warn', { prevent: true, allowMultilines: false }]
+    'react/jsx-newline': ['warn', { prevent: true, allowMultilines: false }],
+    'sort-keys': 'off'
   },
   plugins: [...base.plugins, 'prettier'],
   extends: [...base.extends, 'prettier']

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
 
 import RadioCard from './RadioCard';
 
@@ -10,14 +11,26 @@ interface Option {
   value: string;
 }
 
+interface OptionsReduce {
+  alephOptions: Option[];
+  otherOptions: Option[];
+}
+
 interface Props {
   className?: string;
   options: Array<Option>;
   onSelectionChange: (value: string) => void;
   defaultSelectedValue?: string | null;
+  withTestNetwork?: boolean;
 }
 
-const RadioGroup: React.FC<Props> = ({ className, defaultSelectedValue, onSelectionChange, options }) => {
+const RadioGroup: React.FC<Props> = ({
+  className,
+  defaultSelectedValue,
+  onSelectionChange,
+  options,
+  withTestNetwork = false
+}) => {
   const [selectedValue, setSelectedValue] = useState(defaultSelectedValue || '');
 
   const handleChange = useCallback(
@@ -28,20 +41,79 @@ const RadioGroup: React.FC<Props> = ({ className, defaultSelectedValue, onSelect
     [onSelectionChange]
   );
 
+  const { alephOptions, otherOptions } = options.reduce<OptionsReduce>(
+    (acc, option) => {
+      const isAleph = withTestNetwork ? option.text.includes('Aleph Zero') : option.text === 'Aleph Zero';
+
+      if (isAleph) {
+        return {
+          ...acc,
+          alephOptions: [...acc.alephOptions, option]
+        };
+      }
+
+      if (withTestNetwork || !option.text.includes('Aleph Zero')) {
+        return {
+          ...acc,
+          otherOptions: [...acc.otherOptions, option]
+        };
+      }
+
+      return acc;
+    },
+    { alephOptions: [], otherOptions: [] }
+  );
+
   return (
     <div className={className}>
-      {options.map((option, index) => (
-        <div key={option.value}>
-          <RadioCard
-            onChange={handleChange}
-            option={option}
-            position={index === 0 ? 'top' : index === options.length - 1 ? 'bottom' : 'middle'}
-            selectedValue={selectedValue}
-          />
-        </div>
-      ))}
+      <div className='aleph-options'>
+        {alephOptions.map((option) => (
+          <div key={option.value}>
+            <RadioCard
+              onChange={handleChange}
+              option={option}
+              selectedValue={selectedValue}
+            />
+          </div>
+        ))}
+      </div>
+      <div className='other-options'>
+        {otherOptions.map((option) => (
+          <div key={option.value}>
+            <RadioCard
+              onChange={handleChange}
+              option={option}
+              selectedValue={selectedValue}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-export default RadioGroup;
+export default styled(RadioGroup)`
+  .aleph-options {
+    margin-bottom: 16px;
+  }
+
+  .aleph-options, .other-options {
+    & > div:first-child {
+      ${RadioCard}{
+        border-radius: 8px 8px 2px 2px;
+      }
+    }
+
+    & > div:last-child {
+      ${RadioCard}{
+        border-radius: 2px 2px 8px 8px;
+      }
+    }
+
+    & > div:only-child {
+      ${RadioCard}{
+        border-radius: 8px;
+      }
+    }
+  }
+`;

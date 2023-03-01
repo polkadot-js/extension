@@ -12,6 +12,7 @@ NOTES.md
 .npmrc
 .yarn/*
 !.yarn/releases
+!.yarn/patches/*
 !.yarn/plugins
 .pnp.*
 cc-test-reporter

@@ -188,7 +188,6 @@ export default React.memo(
       ({ theme }: Props) => `
   color: ${theme.textColor};
   height: 100%;
-  height: calc(100vh - 2px);
   overflow-y: scroll;
   scrollbar-width: none;
       

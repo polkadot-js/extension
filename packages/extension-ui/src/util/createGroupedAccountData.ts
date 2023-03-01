@@ -27,7 +27,9 @@ export const createGroupedAccountData = (filteredAccount: AccountWithChildren[])
   const groupedParents: GroupedData = parents.reduce(
     (acc: GroupedData, next: AccountWithChildren) => {
       const { genesisHash } = next;
-      const foundKey = Object.keys(knownGenesis).find((key) => knownGenesis[key].includes(genesisHash ?? ''));
+      const foundKey = Object.keys(knownGenesis)
+        .find((key) => knownGenesis[key].includes(genesisHash ?? ''))
+        ?.replace(/-/g, ' ');
 
       if (!foundKey) {
         acc.any.push(next);
@@ -37,7 +39,7 @@ export const createGroupedAccountData = (filteredAccount: AccountWithChildren[])
 
       return acc;
     },
-    { any: [] }
+    { any: [], 'aleph zero': [], 'aleph zero testnet': [] }
   );
 
   function filterChildren(networkName: string, defaultNetwork: string, details: AccountWithChildren[]) {

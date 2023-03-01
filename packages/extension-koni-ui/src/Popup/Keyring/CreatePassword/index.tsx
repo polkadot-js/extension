@@ -19,6 +19,7 @@ import { CaretLeft, CheckCircle, Info, ShieldPlus } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -48,7 +49,9 @@ const modalId = 'create-password-instruction-modal';
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const { goBack, goHome } = useDefaultNavigate();
+  const { goHome } = useDefaultNavigate();
+  const navigate = useNavigate();
+  const previousInfo = useLocation().state as {prevPathname: string, prevState: any};
 
   const { accounts, hasMasterPassword } = useSelector((state: RootState) => state.accountState);
 
@@ -106,6 +109,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     inactiveModal(modalId);
   }, [inactiveModal]);
 
+  const onExit = useCallback(() => {
+    if (previousInfo?.prevPathname) {
+      navigate(previousInfo.prevPathname, { state: previousInfo.prevState as unknown });
+    } else {
+      goHome();
+    }
+  }, [goHome, navigate, previousInfo.prevPathname, previousInfo.prevState]);
+
   useEffect(() => {
     if (!noAccount) {
       activeModal(REQUEST_CREATE_PASSWORD_MODAL);
@@ -135,7 +146,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         success
           ? {
             children: t('Exit'),
-            onClick: goBack
+            onClick: onExit
           }
           : {
             children: t('Continue'),

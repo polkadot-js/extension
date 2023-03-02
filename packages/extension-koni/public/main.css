@@ -447,8 +447,8 @@ html::-webkit-scrollbar {
 
 .page {
   position: absolute;
-  left: 0px;
-  right: 0px;
+  left: 0;
+  right: 0;
 }
 
 .page-enter {
@@ -457,7 +457,7 @@ html::-webkit-scrollbar {
 
 .page-enter-active {
   opacity: 1;
-  transition: opacity 300ms, transform 300ms;
+  transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
 }
 
 .page-exit {
@@ -467,7 +467,7 @@ html::-webkit-scrollbar {
 .page-exit-active {
   opacity: 0;
   display: none;
-  transition: opacity 0ms, transform 300ms;
+  transition: opacity 0ms, transform 300ms ease-in-out;
 }
 
 .modal-full {
@@ -475,18 +475,18 @@ html::-webkit-scrollbar {
 }
 
 .modal-full .ant-sw-modal-content {
-  border-radius: 0px;
+  border-radius: 0;
   height: 100%;
-  padding: 0px;
+  padding: 0;
   max-height: unset;
 }
 
 .modal-full .ant-sw-modal-body {
-  border-radius: 0px;
+  border-radius: 0;
   height: 100%;
   max-height: 100%;
-  padding: 0px;
-  margin: 0px;
+  padding: 0;
+  margin: 0;
 }
 
 input,
@@ -494,7 +494,7 @@ button,
 select,
 optgroup,
 textarea {
-  margin: 0px;
+  margin: 0;
   color: inherit;
   font-size: inherit;
   font-family: inherit;

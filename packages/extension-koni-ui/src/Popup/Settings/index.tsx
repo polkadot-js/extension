@@ -62,7 +62,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const isPopup = useIsPopup();
   const notify = useNotification();
-  const { goBack, goHome } = useDefaultNavigate();
+  const { goHome } = useDefaultNavigate();
 
   const [locking, setLocking] = useState(false);
 
@@ -119,8 +119,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightIcon: CaretRight,
           title: 'Security settings',
           onClick: () => {
-            // todo: make Security settings screen, them change this navigation
-            navigate('/settings/dapp-access');
+            navigate('/settings/security');
           }
         },
         {
@@ -239,16 +238,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             weight={'bold'}
           />
         ),
-        onClick: goBack
+        onClick: goHome
       }
     ];
-  }, [goBack]);
+  }, [goHome]);
 
   return (
     <PageWrapper className={`settings ${className}`}>
       <>
         <SwHeader
           left='logo'
+          onClickLeft={goHome}
           rightButtons={headerIcons}
           showLeftButton={true}
         >
@@ -285,7 +285,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             })
           }
 
-          {/* // todo: i18n Lock */}
           <Button
             block
             icon={
@@ -364,11 +363,11 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: -token.marginXS,
-      color: token.colorTextLight4
+      color: token['gray-4']
     },
 
     '.__setting-item:hover .ant-web3-block-right-item': {
-      color: token.colorTextLight2
+      color: token['gray-6']
     },
 
     '.__version': {

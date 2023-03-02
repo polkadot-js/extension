@@ -10,7 +10,7 @@ import MetadataConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmatio
 import SignConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/SignConfirmation';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -18,24 +18,24 @@ import ConfirmationHeader from './ConfirmationHeader';
 
 type Props = ThemeProps
 
+const titleMap: Record<ConfirmationType, string> = {
+  addNetworkRequest: 'Add Network Request',
+  addTokenRequest: 'Add Token Request',
+  authorizeRequest: 'Connect to SubWallet',
+  evmSendTransactionRequest: 'Transaction Request',
+  evmSendTransactionRequestExternal: 'Transaction Request',
+  evmSignatureRequest: 'Signature request',
+  evmSignatureRequestExternal: 'Signature request',
+  metadataRequest: 'Update Metadata',
+  signingRequest: 'Signature request',
+  switchNetworkRequest: 'Add Network Request'
+} as Record<ConfirmationType, string>;
+
 const Component = function ({ className }: Props) {
   const confirmationData = useConfirmationsInfo();
   const [index, setIndex] = useState(0);
   const confirmation = confirmationData.confirmationQueue[index] || null;
   const { t } = useTranslation();
-
-  const titleMap = useMemo<Record<ConfirmationType, string>>(() => ({
-    authorizeRequest: t('Connect to SubWallet'),
-    metadataRequest: t('Update Metadata'),
-    signingRequest: t('Signing Request'),
-    addNetworkRequest: t('Add Network Request'),
-    addTokenRequest: t('Add Token Request'),
-    switchNetworkRequest: t('Add Network Request'),
-    evmSignatureRequest: t('Signing Request'),
-    evmSignatureRequestExternal: t('Signing Request'),
-    evmSendTransactionRequest: t('Transaction Request'),
-    evmSendTransactionRequestExternal: t('Transaction Request')
-  } as Record<ConfirmationType, string>), [t]);
 
   const nextConfirmation = useCallback(() => {
     setIndex((val) => Math.min(val + 1, confirmationData.numberOfConfirmations - 1));
@@ -51,7 +51,7 @@ const Component = function ({ className }: Props) {
       numberOfConfirmations={confirmationData.numberOfConfirmations}
       onClickNext={nextConfirmation}
       onClickPrev={prevConfirmation}
-      title={titleMap[confirmation?.type] || ''}
+      title={t(titleMap[confirmation?.type] || '')}
     />
     {confirmation?.type === 'authorizeRequest' &&
       <AuthorizeConfirmation request={confirmation.item as AuthorizeRequest} />}
@@ -81,16 +81,27 @@ const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps
     paddingTop: token.sizeXS,
     paddingBottom: token.sizeXS,
     backgroundColor: 'transparent',
+    marginBottom: token.marginMD,
 
     h4: {
       marginBottom: 0
     }
   },
 
+  '--content-gap': token.sizeMD,
+
   '.confirmation-content': {
     flex: '1 1 auto',
     overflow: 'auto',
-    padding: token.paddingSM
+    padding: `0 ${token.paddingSM}px`,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--content-gap)',
+    textAlign: 'center'
+  },
+
+  '.__domain': {
+    marginBottom: 0
   },
 
   '.confirmation-footer': {
@@ -98,6 +109,8 @@ const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps
     flexWrap: 'wrap',
     padding: token.paddingSM,
     gap: token.sizeSM,
+    marginBottom: token.marginMD,
+    marginTop: token.marginXS,
 
     '.ant-btn': {
       flex: '1 1 auto',
@@ -106,6 +119,19 @@ const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps
         flex: '0 0 52px'
       }
     }
+  },
+
+  '.title': {
+    fontSize: token.fontSizeHeading4,
+    lineHeight: token.lineHeightHeading4,
+    color: token.colorTextBase,
+    fontWeight: token.fontWeightStrong
+  },
+
+  '.description': {
+    fontSize: token.fontSizeHeading6,
+    lineHeight: token.lineHeightHeading6,
+    color: token.colorTextDescription
   }
 }));
 

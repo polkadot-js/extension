@@ -16,3 +16,8 @@ export enum SCAN_TYPE {
   SECRET = 'SECRET',
   QR_SIGNER = 'QR_SIGNER'
 }
+
+export const CMD_SIGN_MORTAL = 0;
+export const CMD_SIGN_HASH = 1;
+export const CMD_SIGN_IMMORTAL = 2;
+export const CMD_SIGN_MSG = 3;

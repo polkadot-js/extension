@@ -320,7 +320,12 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
 
     '&.ant-sw-modal': {
       '.ant-sw-modal-body': {
-        height: 370
+        height: 370,
+        marginBottom: 0
+      },
+
+      '.ant-sw-modal-footer': {
+        marginTop: 0
       },
 
       '.ant-account-card': {

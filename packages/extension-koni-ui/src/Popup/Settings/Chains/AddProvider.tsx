@@ -4,7 +4,6 @@
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
-import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Col, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
@@ -40,7 +39,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const location = useLocation();
-  const showNotification = useNotification();
 
   const chainSlug = useMemo(() => {
     return location.state as string;
@@ -51,7 +49,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   console.log('chainInfo', chainInfo);
 
   const [form] = useForm<AddProviderForm>();
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [isValidProvider, setIsValidProvider] = useState(false);
 
   const onBack = useCallback(() => {

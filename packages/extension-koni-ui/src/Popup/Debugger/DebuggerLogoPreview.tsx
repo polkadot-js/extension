@@ -30,6 +30,7 @@ const logoList = Object.entries(ChainLogoMap).map(([key, value]) => {
     isNew: value?.startsWith('./images/projects')
   } as LogoItem;
 }));
+
 interface CategoriesFilter {
   showOld: boolean
   showNew: boolean
@@ -39,11 +40,14 @@ function Component (props: ThemeProps) {
   const [categories, setCategories] = useState<CategoriesFilter>({ showOld: true, showNew: true });
   const renderItem = useCallback(
     (item: LogoItem) => {
-      return (<div key={item.key} className={CN('logo-item', item.isNew ? 'is-new' : 'is-old')}>
+      return (<div
+        className={CN('logo-item', item.isNew ? 'is-new' : 'is-old')}
+        key={item.key}
+      >
         <Logo
           network={item.type === 'network' ? item.key : undefined}
-          token={item.type === 'token' ? item.key : undefined}
           size={56}
+          token={item.type === 'token' ? item.key : undefined}
         />
         <span>{item.key}</span>
       </div>);

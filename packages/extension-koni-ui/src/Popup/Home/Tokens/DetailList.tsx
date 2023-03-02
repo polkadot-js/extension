@@ -47,7 +47,7 @@ function Component (): React.ReactElement {
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
-  const [routeParams] = useState<TokenDetailParam>(location.state as TokenDetailParam)
+  const [routeParams] = useState<TokenDetailParam>(location.state as TokenDetailParam);
   const { symbol,
     tokenGroup: currentTokenGroup,
     tokenSlug: currentTokenSlug } = routeParams;

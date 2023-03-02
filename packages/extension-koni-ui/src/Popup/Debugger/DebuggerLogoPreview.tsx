@@ -30,9 +30,6 @@ const logoList = Object.entries(ChainLogoMap).map(([key, value]) => {
     isNew: value?.startsWith('./images/projects')
   } as LogoItem;
 }));
-
-console.log(logoList);
-
 interface CategoriesFilter {
   showOld: boolean
   showNew: boolean

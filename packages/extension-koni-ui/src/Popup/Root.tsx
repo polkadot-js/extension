@@ -74,7 +74,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       goHome();
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');
-    } else if (!hasInternalConfirmations && !isOpenPModal) {
+    } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
       openPModal(null);
     }
   }, [accounts, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);

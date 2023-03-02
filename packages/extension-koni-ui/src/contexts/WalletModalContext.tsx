@@ -31,7 +31,18 @@ export const usePredefinedModal = () => {
     });
   }, [setSearchParams]);
 
-  const isOpenPModal = useMemo(() => (seachParam.has('popup')), [seachParam]);
+  const isOpenPModal = useCallback(
+    (popupName?: string) => {
+      const currentPopup = seachParam.get('popup');
+
+      if (popupName) {
+        return currentPopup === popupName;
+      } else {
+        return !!currentPopup;
+      }
+    },
+    [seachParam]
+  );
 
   return { openPModal, isOpenPModal };
 };

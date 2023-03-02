@@ -3,12 +3,13 @@
 
 import { _getBlockExplorerFromChain, _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix, _getCrowdloanUrlFromChain, _getSubstrateParaId, _isChainEvmCompatible, _isCustomChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { isUrl } from '@subwallet/extension-base/utils';
+import { ProviderSelector } from '@subwallet/extension-koni-ui/components/Field/ProviderSelector';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useGetChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainAssetInfo';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { ChainDetail } from '@subwallet/extension-koni-ui/Popup/Settings/Chains/utils';
+import { ChainDetail as _ChainDetail } from '@subwallet/extension-koni-ui/Popup/Settings/Chains/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ButtonProps, Col, Field, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
@@ -44,7 +45,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(false);
 
   const { chainInfo, chainState } = useMemo(() => {
-    return location.state as ChainDetail;
+    return location.state as _ChainDetail;
   }, [location.state]);
 
   const nativeTokenInfo = useGetChainAssetInfo(_getChainNativeTokenSlug(chainInfo));
@@ -210,30 +211,29 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             onFieldsChange={onFormValuesChange}
           >
             <div className={'chain_detail__attributes_container'}>
-              <Form.Item
-                name={'currentProvider'}
-                noStyle={true}
-              >
-                <Tooltip
-                  placement={'topLeft'}
-                  title={t('Provider URL')}
-                >
-                  <div>
-                    <Field
-                      content={currentProviderUrl}
-                      placeholder={t('Provider URL')}
-                      prefix={<Icon
-                        customSize={'24px'}
-                        iconColor={token['gray-4']}
-                        phosphorIcon={ShareNetwork}
-                        type={'phosphor'}
-                        weight={'bold'}
-                      />}
-                      suffix={providerFieldSuffix()}
+              {
+                Object.keys(chainInfo.providers).length > 1
+                  ? <Form.Item
+                    name={'currentProvider'}
+                  >
+                    <ProviderSelector
+                      chainInfo={chainInfo}
+                      value={chainState.currentProvider}
                     />
-                  </div>
-                </Tooltip>
-              </Form.Item>
+                  </Form.Item>
+                  : <Field
+                    content={currentProviderUrl}
+                    placeholder={t('Provider URL')}
+                    prefix={<Icon
+                      customSize={'24px'}
+                      iconColor={token['gray-4']}
+                      phosphorIcon={ShareNetwork}
+                      type={'phosphor'}
+                      weight={'bold'}
+                    />}
+                    suffix={providerFieldSuffix()}
+                  />
+              }
 
               <Row gutter={token.paddingSM}>
                 <Col span={16}>
@@ -380,7 +380,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-const TokenDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ChainDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.chain_detail__container': {
       marginTop: 22,
@@ -408,4 +408,4 @@ const TokenDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
   });
 });
 
-export default TokenDetail;
+export default ChainDetail;

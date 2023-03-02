@@ -11,7 +11,7 @@ import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/form';
 import { Button, Form, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -65,6 +65,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }, 500);
   }, [onError]);
 
+  // Auto focus to password field
+  useEffect(() => {
+    (form.getFieldInstance('password') as HTMLInputElement).focus();
+  }, [form]);
+
   return (
     <Layout.Base
       className={CN(className)}
@@ -98,8 +103,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             ]}
           >
             <Input.Password
-              id={passwordInputId}
               containerClassName='password-input'
+              id={passwordInputId}
               placeholder={t('Password')}
             />
           </Form.Item>

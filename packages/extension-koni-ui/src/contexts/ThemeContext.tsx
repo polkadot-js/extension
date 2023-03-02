@@ -48,11 +48,28 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       lineHeight: token.lineHeight
     },
 
+    '.text-danger': {
+      color: token.colorError
+    },
+
+    '.h3-text': {
+      fontSize: token.fontSizeHeading3,
+      lineHeight: token.lineHeightHeading3,
+      fontWeight: token.headingFontWeight
+    },
+
+    '.h4-text': {
+      fontSize: token.fontSizeHeading4,
+      lineHeight: token.lineHeightHeading4,
+      fontWeight: token.headingFontWeight
+    },
+
     '.h5-text': {
       fontWeight: token.headingFontWeight,
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5
     }
+
   });
 });
 

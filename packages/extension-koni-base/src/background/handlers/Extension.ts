@@ -11,7 +11,12 @@ import { AccountAuthType, AccountJson, AllowedPath, AuthorizeRequest, MessageTyp
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _ChainState, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import {
+  _ChainState,
+  _NetworkUpsertParams,
+  _ValidateCustomAssetRequest,
+  _ValidateCustomAssetResponse
+} from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 import { AuthUrls, SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import { SWTransactionInput, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
@@ -2066,7 +2071,7 @@ export default class KoniExtension {
     return txState;
   }
 
-  private upsertNetworkMap (data: Record<string, any>): boolean {
+  private upsertChain (data: _NetworkUpsertParams): boolean {
     try {
       return this.#koniState.upsertChainInfo(data);
     } catch (e) {
@@ -2089,7 +2094,7 @@ export default class KoniExtension {
   }
 
   private async validateNetwork ({ existedChainSlug, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
-    return await this.#koniState.validateCustomChain(provider, existedChainSlug) as ValidateNetworkResponse;
+    return await this.#koniState.validateCustomChain(provider, existedChainSlug);
   }
 
   private resetDefaultNetwork (): boolean {
@@ -4544,8 +4549,8 @@ export default class KoniExtension {
         return this.removeNetworkMap(request as string);
       case 'pri(chainService.validateCustomChain)':
         return await this.validateNetwork(request as ValidateNetworkRequest);
-      case 'pri(chainService.upsertCustomChain)':
-        return this.upsertNetworkMap(request as Record<string, any>);
+      case 'pri(chainService.upsertChain)':
+        return this.upsertChain(request as _NetworkUpsertParams);
       case 'pri(chainService.resetDefaultChains)':
         return this.resetDefaultNetwork();
       case 'pri(chainService.enableChains)':

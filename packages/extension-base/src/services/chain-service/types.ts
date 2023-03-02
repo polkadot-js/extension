@@ -89,18 +89,19 @@ export interface _EvmApi extends _ChainBaseApi {
 }
 
 export type _NetworkUpsertParams = {
+  mode: 'update' | 'insert',
   chainEditInfo: {
-    chainType: string,
+    chainType?: string,
     currentProvider: string,
-    name: string,
+    name?: string,
     providers: Record<string, string>,
     slug: string,
-    symbol: string,
+    symbol?: string,
     blockExplorer?: string,
     crowdloanUrl?: string,
     priceId?: string
   },
-  chainSpec: {
+  chainSpec?: {
     // Substrate
     genesisHash: string,
     paraId: number | null,

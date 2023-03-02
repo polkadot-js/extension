@@ -3,6 +3,7 @@
 
 import { AssetRefMap, ChainAssetMap, ChainInfoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
+import { ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
@@ -708,9 +709,7 @@ export class ChainService {
     }
   }
 
-  public upsertChainInfo (data: Record<string, any>) {
-    const params = data as _NetworkUpsertParams;
-
+  public upsertChainInfo (params: _NetworkUpsertParams) {
     if (this.lockChainInfoMap) {
       return false;
     }
@@ -724,102 +723,102 @@ export class ChainService {
       const targetChainInfo = chainInfoMap[slug];
 
       targetChainInfo.providers = params.chainEditInfo.providers;
-      targetChainInfo.name = params.chainEditInfo.name;
 
       if (targetChainInfo.substrateInfo) {
-        targetChainInfo.substrateInfo.symbol = params.chainEditInfo.symbol;
-      } else if (targetChainInfo.evmInfo) {
-        targetChainInfo.evmInfo.symbol = params.chainEditInfo.symbol;
+        targetChainInfo.substrateInfo.blockExplorer = params.chainEditInfo.blockExplorer || null;
+        targetChainInfo.substrateInfo.blockExplorer = params.chainEditInfo.crowdloanUrl || null;
       }
 
       this.updateChainState(params.chainEditInfo.slug, null, params.chainEditInfo.currentProvider);
     } else { // insert custom network
-      const newSlug = this.generateSlugForCustomChain(params.chainEditInfo.chainType, params.chainEditInfo.name, params.chainSpec.paraId, params.chainSpec.evmChainId);
+      if (params.chainSpec) {
+        const newSlug = this.generateSlugForCustomChain(params.chainEditInfo.chainType as string, params.chainEditInfo.name as string, params.chainSpec.paraId, params.chainSpec.evmChainId);
 
-      let substrateInfo: _SubstrateInfo | null = null;
-      let evmInfo: _EvmInfo | null = null;
+        let substrateInfo: _SubstrateInfo | null = null;
+        let evmInfo: _EvmInfo | null = null;
 
-      if (params.chainSpec.genesisHash !== '') {
-        substrateInfo = {
-          addressPrefix: params.chainSpec.addressPrefix,
-          blockExplorer: params.chainEditInfo.blockExplorer || null,
-          chainType: params.chainSpec.paraId !== null ? _SubstrateChainType.PARACHAIN : _SubstrateChainType.RELAYCHAIN,
-          crowdloanUrl: params.chainEditInfo.crowdloanUrl || null,
-          decimals: params.chainSpec.decimals,
-          existentialDeposit: params.chainSpec.existentialDeposit,
-          paraId: params.chainSpec.paraId,
-          symbol: params.chainEditInfo.symbol,
-          genesisHash: params.chainSpec.genesisHash,
-          relaySlug: null,
-          hasNativeNft: false,
-          supportStaking: params.chainSpec.paraId === null,
-          supportSmartContract: null
+        if (params.chainSpec.genesisHash !== '') {
+          substrateInfo = {
+            addressPrefix: params.chainSpec.addressPrefix,
+            blockExplorer: params.chainEditInfo.blockExplorer || null,
+            chainType: params.chainSpec.paraId !== null ? _SubstrateChainType.PARACHAIN : _SubstrateChainType.RELAYCHAIN,
+            crowdloanUrl: params.chainEditInfo.crowdloanUrl || null,
+            decimals: params.chainSpec.decimals,
+            existentialDeposit: params.chainSpec.existentialDeposit,
+            paraId: params.chainSpec.paraId,
+            symbol: params.chainEditInfo.symbol as string,
+            genesisHash: params.chainSpec.genesisHash,
+            relaySlug: null,
+            hasNativeNft: false,
+            supportStaking: params.chainSpec.paraId === null,
+            supportSmartContract: null
+          };
+        } else if (params.chainSpec.evmChainId !== null) {
+          evmInfo = {
+            supportSmartContract: [_AssetType.ERC20, _AssetType.ERC721], // set support for ERC token by default
+            blockExplorer: params.chainEditInfo.blockExplorer || null,
+            decimals: params.chainSpec.decimals,
+            evmChainId: params.chainSpec.evmChainId,
+            existentialDeposit: params.chainSpec.existentialDeposit,
+            symbol: params.chainEditInfo.symbol as string,
+            abiExplorer: null
+          };
+        }
+
+        // insert new chainInfo
+        chainInfoMap[newSlug] = {
+          slug: newSlug,
+          name: params.chainEditInfo.name as string,
+          providers: params.chainEditInfo.providers,
+          substrateInfo,
+          evmInfo,
+          logo: '',
+          isTestnet: false,
+          chainStatus: _ChainStatus.ACTIVE
         };
-      } else if (params.chainSpec.evmChainId !== null) {
-        evmInfo = {
-          supportSmartContract: [_AssetType.ERC20, _AssetType.ERC721], // set support for ERC token by default
-          blockExplorer: params.chainEditInfo.blockExplorer || null,
+
+        // insert new chainState
+        const chainStateMap = this.getChainStateMap();
+
+        // create a record in assetRegistry for native token
+        this.upsertCustomToken({
+          assetType: _AssetType.NATIVE,
           decimals: params.chainSpec.decimals,
-          evmChainId: params.chainSpec.evmChainId,
-          existentialDeposit: params.chainSpec.existentialDeposit,
-          symbol: params.chainEditInfo.symbol,
-          abiExplorer: null
+          metadata: null,
+          minAmount: params.chainSpec.existentialDeposit,
+          multiChainAsset: null,
+          name: params.chainEditInfo.name as string,
+          originChain: newSlug,
+          priceId: null,
+          slug: '',
+          symbol: params.chainEditInfo.symbol as string,
+          hasValue: true,
+          logo: null
+        });
+
+        chainStateMap[newSlug] = {
+          active: true,
+          connectionStatus: _ChainConnectionStatus.DISCONNECTED,
+          currentProvider: params.chainEditInfo.currentProvider,
+          slug: newSlug
         };
+
+        // TODO: add try, catch, move storage update and subject update to somewhere else
+        this.dbService.updateChainStore({
+          active: false,
+          currentProvider: params.chainEditInfo.currentProvider,
+          evmInfo,
+          logo: '',
+          name: params.chainEditInfo.name as string,
+          providers: params.chainEditInfo.providers,
+          slug: newSlug,
+          substrateInfo,
+          isTestnet: false,
+          chainStatus: _ChainStatus.ACTIVE
+        }).catch((e) => this.logger.error(e));
+
+        this.chainStateMapSubject.next(this.getChainStateMap());
       }
-
-      // insert new chainInfo
-      chainInfoMap[newSlug] = {
-        slug: newSlug,
-        name: params.chainEditInfo.name,
-        providers: params.chainEditInfo.providers,
-        substrateInfo,
-        evmInfo,
-        logo: '',
-        isTestnet: false,
-        chainStatus: _ChainStatus.ACTIVE
-      };
-
-      // insert new chainState
-      const chainStateMap = this.getChainStateMap();
-
-      // create a record in assetRegistry for native token
-      this.upsertCustomToken({
-        assetType: _AssetType.NATIVE,
-        decimals: params.chainSpec.decimals,
-        metadata: null,
-        minAmount: params.chainSpec.existentialDeposit,
-        multiChainAsset: null,
-        name: params.chainEditInfo.name,
-        originChain: newSlug,
-        priceId: null,
-        slug: '',
-        symbol: params.chainEditInfo.symbol,
-        hasValue: true,
-        logo: null
-      });
-
-      chainStateMap[newSlug] = {
-        active: true,
-        connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-        currentProvider: params.chainEditInfo.currentProvider,
-        slug: newSlug
-      };
-
-      // TODO: add try, catch, move storage update and subject update to somewhere else
-      this.dbService.updateChainStore({
-        active: false,
-        currentProvider: params.chainEditInfo.currentProvider,
-        evmInfo,
-        logo: '',
-        name: params.chainEditInfo.name,
-        providers: params.chainEditInfo.providers,
-        slug: newSlug,
-        substrateInfo,
-        isTestnet: false,
-        chainStatus: _ChainStatus.ACTIVE
-      }).catch((e) => this.logger.error(e));
-
-      this.chainStateMapSubject.next(this.getChainStateMap());
     }
 
     this.chainInfoMapSubject.next(this.getChainInfoMap());
@@ -845,9 +844,9 @@ export class ChainService {
     }
   }
 
-  public async validateCustomChain (provider: string, existingChainSlug?: string) {
+  public async validateCustomChain (provider: string, existingChainSlug?: string): Promise<ValidateNetworkResponse> {
     // currently only supports WS provider for Substrate and HTTP provider for EVM
-    let result: Record<string, any> = {
+    let result: ValidateNetworkResponse = {
       decimals: 0,
       existentialDeposit: '',
       paraId: null,
@@ -861,6 +860,8 @@ export class ChainService {
 
     try {
       const { conflictChainName: providerConflictChainName, conflictChainSlug: providerConflictChainSlug, error: providerError } = this.validateProvider(provider, existingChainSlug);
+
+      console.log(providerError, providerConflictChainSlug, providerConflictChainName);
 
       if (providerError === _CHAIN_VALIDATION_ERROR.NONE) {
         let api: _EvmApi | _SubstrateApi;
@@ -898,11 +899,11 @@ export class ChainService {
 
             if (existedChainInfo.evmInfo !== null) {
               if (result.evmChainId !== existedChainInfo.evmInfo.evmChainId) {
-                result.error = _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN as string;
+                result.error = _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN;
               }
             } else if (existedChainInfo.substrateInfo !== null) {
               if (result.genesisHash !== existedChainInfo.substrateInfo.genesisHash) {
-                result.error = _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN as string;
+                result.error = _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN;
               }
             }
           } else {
@@ -910,9 +911,9 @@ export class ChainService {
             if (result.evmChainId !== null) {
               for (const chainInfo of Object.values(this.getChainInfoMap())) {
                 if (chainInfo.evmInfo !== null && chainInfo.evmInfo.evmChainId === result.evmChainId) {
-                  result.error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN as string;
-                  result.conflictChainName = chainInfo.name;
-                  result.conflictChainSlug = chainInfo.slug;
+                  result.error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
+                  result.conflictChain = chainInfo.name;
+                  result.conflictKey = chainInfo.slug;
 
                   break;
                 }
@@ -920,9 +921,9 @@ export class ChainService {
             } else if (result.genesisHash !== '') {
               for (const chainInfo of Object.values(this.getChainInfoMap())) {
                 if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo.genesisHash === result.genesisHash) {
-                  result.error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN as string;
-                  result.conflictChainName = chainInfo.name;
-                  result.conflictChainSlug = chainInfo.slug;
+                  result.error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
+                  result.conflictChain = chainInfo.name;
+                  result.conflictKey = chainInfo.slug;
 
                   break;
                 }
@@ -930,14 +931,14 @@ export class ChainService {
             }
           }
         } else {
-          result.error = _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE as string;
+          result.error = _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE;
           result.success = false;
         }
       } else {
         result.success = false;
-        result.error = providerError as string;
-        result.conflictChainName = providerConflictChainName;
-        result.conflictChainSlug = providerConflictChainSlug;
+        result.error = providerError;
+        result.conflictChain = providerConflictChainName;
+        result.conflictKey = providerConflictChainSlug;
       }
 
       if (!result.error && (result.evmChainId !== null || result.genesisHash !== '')) {
@@ -949,7 +950,7 @@ export class ChainService {
       console.error('Error connecting to provider', e);
 
       result.success = false;
-      result.error = _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE as string;
+      result.error = _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE;
 
       return result;
     }
@@ -974,7 +975,7 @@ export class ChainService {
       const chainInfo = chainInfoMap[existingChainSlug];
 
       if (Object.values(chainInfo.providers).includes(targetProvider)) {
-        error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
+        error = _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER;
         conflictChainSlug = chainInfo.slug;
         conflictChainName = chainInfo.name;
       }
@@ -991,7 +992,7 @@ export class ChainService {
 
     for (const { key, provider } of allExistedProviders) {
       if (provider === targetProvider) {
-        error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
+        error = _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER;
         conflictChainSlug = key as string;
         conflictChainName = chainInfoMap[key as string].name;
         break;

@@ -1,17 +1,23 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
+import { _generateCustomProviderKey, _getChainNativeTokenBasicInfo, _isChainEvmCompatible, _isCustomProvider, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { isUrl } from '@subwallet/extension-base/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, Col, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
+import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
+import { ActivityIndicator, ButtonProps, Col, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
 import Icon from '@subwallet/react-ui/es/icon';
-import { Globe, Info, ShareNetwork, WifiHigh } from 'phosphor-react';
-import { FieldData } from 'rc-field-form/lib/interface';
+import { Globe, Info, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
+import { FieldData, RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -27,12 +33,30 @@ interface AddProviderForm {
   symbol: string
 }
 
-const formInitValues: AddProviderForm = {
-  provider: '',
-  name: '',
-  chainType: '',
-  symbol: ''
-};
+interface ValidationInfo {
+  status: ValidateStatus,
+  message?: string
+}
+
+function parseProviders (newProvider: string, existingProviders: Record<string, string>) {
+  let count = 0;
+
+  Object.keys(existingProviders).forEach((providerKey) => {
+    if (_isCustomProvider(providerKey)) {
+      count += 1;
+    }
+  });
+
+  const newProviderKey = _generateCustomProviderKey(count);
+
+  return {
+    newProviderKey,
+    newProviders: {
+      ...existingProviders,
+      [newProviderKey]: newProvider
+    }
+  };
+}
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -48,23 +72,91 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const chainInfo = useFetchChainInfo(chainSlug);
 
-  console.log('chainInfo', chainInfo);
+  const chainType = useCallback(() => {
+    let result = '';
+    const types: string[] = [];
+
+    if (_isSubstrateChain(chainInfo)) {
+      types.push('Substrate');
+    }
+
+    if (_isChainEvmCompatible(chainInfo)) {
+      types.push('EVM');
+    }
+
+    for (let i = 0; i < types.length; i++) {
+      result = result.concat(types[i]);
+
+      if (i !== types.length - 1) {
+        result = result.concat(', ');
+      }
+    }
+
+    return result;
+  }, [chainInfo]);
+
+  const formInitValues = useCallback(() => {
+    return {
+      provider: '',
+      name: chainInfo.name,
+      chainType: chainType(),
+      symbol: _getChainNativeTokenBasicInfo(chainInfo).symbol
+    };
+  }, [chainInfo, chainType]);
 
   const [form] = useForm<AddProviderForm>();
+  const [isValidating, setIsValidating] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [isValidProvider, setIsValidProvider] = useState(false);
+  const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);
+  const [providerValidation, setProviderValidation] = useState<ValidationInfo>({ status: '' });
 
   const onBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
 
   const isSubmitDisabled = useCallback(() => {
-    return !isValidProvider;
-  }, [isValidProvider]);
+    return providerValidation.status !== 'success';
+  }, [providerValidation.status]);
 
   const onSubmit = useCallback(() => {
-    console.log('submit');
-  }, []);
+    setLoading(true);
+
+    const newProvider = form.getFieldValue('provider') as string;
+
+    const { newProviderKey, newProviders } = parseProviders(newProvider, chainInfo.providers);
+
+    const params: _NetworkUpsertParams = {
+      mode: 'update',
+      chainEditInfo: {
+        currentProvider: newProviderKey,
+        providers: newProviders
+      }
+    };
+
+    console.log(params);
+
+    // upsertChain(params)
+    //   .then((result) => {
+    //     setLoading(false);
+    //
+    //     if (result) {
+    //       showNotification({
+    //         message: t('Added a provider successfully')
+    //       });
+    //       navigate(-1);
+    //     } else {
+    //       showNotification({
+    //         message: t('An error occurred, please try again')
+    //       });
+    //     }
+    //   })
+    //   .catch(() => {
+    //     setLoading(false);
+    //     showNotification({
+    //       message: t('An error occurred, please try again')
+    //     });
+    //   });
+  }, [chainInfo.providers, form, navigate, showNotification, t]);
 
   const onCancel = useCallback(() => {
     navigate(-1);
@@ -85,6 +177,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   ];
 
+  const handleErrorMessage = useCallback((errorCode: _CHAIN_VALIDATION_ERROR) => {
+    switch (errorCode) {
+      case _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE:
+        return t('Cannot connect to this provider');
+      case _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER:
+        return t('This provider has already been added');
+      case _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN:
+        return t('This provider is not for this chain');
+      default:
+        return t('Error validating this provider');
+    }
+  }, [t]);
+
   const onFormValuesChange = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
     let isFieldsValid = true;
 
@@ -95,20 +200,82 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }
     }
 
-    setIsValidProvider(isFieldsValid);
-  }, []);
+    const provider = form.getFieldValue('provider') as string;
+
+    if (isFieldsValid && provider !== '') {
+      setIsShowConnectionStatus(true);
+      setIsValidating(true);
+      // const parsedProvider = provider.replaceAll(' ', '');
+
+      validateCustomChain(provider, chainInfo.slug)
+        .then((result) => {
+          setIsValidating(false);
+
+          if (result.success) {
+            setProviderValidation({ status: 'success' });
+          }
+
+          if (result.error) {
+            setProviderValidation({ status: 'error', message: handleErrorMessage(result.error) });
+          }
+        })
+        .catch(() => {
+          setIsValidating(false);
+          setProviderValidation({ status: 'error', message: t('Error validating this provider') });
+        });
+    } else {
+      setProviderValidation({ status: '' });
+      setIsShowConnectionStatus(false);
+    }
+  }, [chainInfo.slug, form, handleErrorMessage, t]);
 
   const providerSuffix = useCallback(() => {
-    return (
-      <Icon
-        customSize={'20px'}
-        iconColor={token.colorSuccess}
-        phosphorIcon={WifiHigh}
-        type={'phosphor'}
-        weight={'bold'}
-      />
-    );
-  }, [token.colorSuccess]);
+    if (!isShowConnectionStatus) {
+      return <></>;
+    }
+
+    if (providerValidation.status === 'success') {
+      return (
+        <Icon
+          customSize={'20px'}
+          iconColor={token.colorSuccess}
+          phosphorIcon={WifiHigh}
+          type={'phosphor'}
+          weight={'bold'}
+        />
+      );
+    }
+
+    if (isValidating) {
+      return (
+        <ActivityIndicator size={'20px'} />
+      );
+    }
+
+    if (providerValidation.status === 'error') {
+      return (
+        <Icon
+          customSize={'20px'}
+          iconColor={token['gray-4']}
+          phosphorIcon={WifiSlash}
+          type={'phosphor'}
+          weight={'bold'}
+        />
+      );
+    }
+
+    return <></>;
+  }, [isShowConnectionStatus, isValidating, providerValidation.status, token]);
+
+  const providerValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (value.length === 0 || isUrl(value)) {
+        resolve();
+      } else {
+        reject(new Error(t('Provider URL is not valid')));
+      }
+    });
+  }, [t]);
 
   return (
     <PageWrapper
@@ -124,7 +291,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         onBack={onBack}
         rightFooterButton={{
           block: true,
-          disabled: isSubmitDisabled(),
+          // disabled: isSubmitDisabled(),
           loading: loading,
           onClick: onSubmit,
           children: 'Save'
@@ -140,14 +307,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <div className={'add_provider__container'}>
           <Form
             form={form}
-            initialValues={formInitValues}
+            initialValues={formInitValues()}
             onFieldsChange={onFormValuesChange}
           >
             <div className={'add_provider__attributes_container'}>
               <Form.Item
                 name={'provider'}
+                rules={[{ validator: providerValidator }]}
               >
                 <Input
+                  disabled={isValidating}
                   placeholder={t('Provider URL')}
                   prefix={<Icon
                     customSize={'24px'}
@@ -205,13 +374,25 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 </Col>
               </Row>
 
-              <Form.Item name={'chainType'}>
-                <Input
-                  disabled={true}
-                  placeholder={t('Chain type')}
-                  value={chainInfo.slug}
-                />
-              </Form.Item>
+              <Tooltip
+                placement={'topLeft'}
+                title={t('Chain type')}
+              >
+                <div>
+                  <Form.Item name={'chainType'}>
+                    <Input
+                      disabled={true}
+                      placeholder={t('Chain type')}
+                      value={chainInfo.slug}
+                    />
+                  </Form.Item>
+                </div>
+              </Tooltip>
+
+              <Form.Item
+                help={providerValidation.message}
+                validateStatus={providerValidation.status}
+              />
             </div>
           </Form>
         </div>

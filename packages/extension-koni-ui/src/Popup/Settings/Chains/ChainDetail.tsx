@@ -165,12 +165,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setIsValueValid(isFieldsValid);
   }, []);
 
-  const optionalUrlValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+  const crowdloanUrlValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (value.length === 0 || isUrl(value)) {
         resolve();
       } else {
         reject(new Error(t('Crowdloan URL must be a valid URL')));
+      }
+    });
+  }, [t]);
+
+  const blockExplorerValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (value.length === 0 || isUrl(value)) {
+        resolve();
+      } else {
+        reject(new Error(t('Block explorer must be a valid URL')));
       }
     });
   }, [t]);
@@ -351,7 +361,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <div>
                   <Form.Item
                     name={'blockExplorer'}
-                    rules={[{ validator: optionalUrlValidator }]}
+                    rules={[{ validator: blockExplorerValidator }]}
                   >
                     <Input placeholder={t('Block explorer')} />
                   </Form.Item>
@@ -365,7 +375,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <div>
                   <Form.Item
                     name={'crowdloanUrl'}
-                    rules={[{ validator: optionalUrlValidator }]}
+                    rules={[{ validator: crowdloanUrlValidator }]}
                   >
                     <Input placeholder={t('Crowdloan URL')} />
                   </Form.Item>

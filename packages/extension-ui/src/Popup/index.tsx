@@ -42,6 +42,7 @@ import EditName from './Accounts/EditName';
 import EditNetwork from './Accounts/EditNetwork';
 import AccountManagement from './AuthManagement/AccountManagement';
 import RestoreJson from './Restore/RestoreJson';
+import TransactionStatus from './Signing/TransactionStatus';
 import About from './About';
 import Accounts from './Accounts';
 import AuthList from './AuthManagement';
@@ -195,6 +196,9 @@ export default function Popup(): React.ReactElement {
                             </Route>
                             <Route path='/account/edit-menu/:address'>
                               {wrapWithErrorBoundary(<EditAccountMenu />, 'edit-menu')}
+                            </Route>
+                            <Route path='/transaction-status/:status'>
+                              {wrapWithErrorBoundary(<TransactionStatus />, 'transaction-status')}
                             </Route>
                             <Route path='/account/edit-name/:address'>
                               {wrapWithErrorBoundary(<EditName />, 'edit-name')}

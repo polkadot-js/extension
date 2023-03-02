@@ -2,21 +2,34 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Chain } from '@polkadot/extension-chains/types';
-import type { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
-import type { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
+import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
+import type { SignerPayloadJSON } from '@polkadot/types/types';
+import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
-import { TFunction } from 'i18next';
-import React, { useMemo, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { BN, bnToBn, formatNumber } from '@polkadot/util';
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { bnToBn, formatNumber } from '@polkadot/util';
+import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import { Table } from '../../components';
+import helpIcon from '../../assets/help.svg';
+import { Svg, Table } from '../../components';
+import { SettingsContext } from '../../components/contexts';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
+import { ellipsisName } from '../../util/ellipsisName';
+import Tooltip from './Tooltip';
 
-interface Decoded {
-  args: AnyJson | null;
-  method: Call | null;
+interface DecodedMethod {
+  args: {
+    dest: {
+      Id: string;
+    };
+    value: string;
+  };
+  method: string;
+  section: string;
+  target: string | null;
 }
 
 interface Props {
@@ -26,128 +39,97 @@ interface Props {
   url: string;
 }
 
-function displayDecodeVersion (message: string, chain: Chain, specVersion: BN): string {
-  return `${message}: chain=${chain.name}, specVersion=${chain.specVersion.toString()} (request specVersion=${specVersion.toString()})`;
-}
+const decodeMethodApi = async (data: string, chain: Chain | null, settings: SettingsStruct): Promise<DecodedMethod> => {
+  const provider = new WsProvider('wss://rpc.polkadot.io');
+  const api = await ApiPromise.create({ provider });
+  const methodCall = api.registry.createType('Call', data);
+  const prefix = chain?.ss58Format ?? settings.prefix === -1 ? 42 : settings.prefix;
+  const target = decodeAddress(methodCall.args[0]?.toString());
+  const targetEncoded = encodeAddress(target, prefix);
 
-function decodeMethod (data: string, chain: Chain, specVersion: BN): Decoded {
-  let args: AnyJson | null = null;
-  let method: Call | null = null;
+  const humanRedableResponse = methodCall.toHuman();
 
-  try {
-    if (specVersion.eqn(chain.specVersion)) {
-      method = chain.registry.createType('Call', data);
-      args = (method.toHuman() as { args: AnyJson }).args;
-    } else {
-      console.log(displayDecodeVersion('Outdated metadata to decode', chain, specVersion));
-    }
-  } catch (error) {
-    console.error(`${displayDecodeVersion('Error decoding method', chain, specVersion)}:: ${(error as Error).message}`);
+  return {
+    args: (humanRedableResponse as { args: { dest: { Id: string }; value: string } })?.args,
+    method: humanRedableResponse?.method as string,
+    section: humanRedableResponse?.section as string,
+    target: targetEncoded || null
+  };
+};
 
-    args = null;
-    method = null;
-  }
-
-  return { args, method };
-}
-
-function renderMethod (data: string, { args, method }: Decoded, t: TFunction): React.ReactNode {
-  if (!args || !method) {
-    return (
-      <tr>
-        <td className='label'>{t<string>('method data')}</td>
-        <td className='data'>{data}</td>
-      </tr>
-    );
-  }
-
-  return (
-    <>
-      <tr>
-        <td className='label'>{t<string>('method')}</td>
-        <td className='data'>
-          <details>
-            <summary>{method.section}.{method.method}{
-              method.meta
-                ? `(${method.meta.args.map(({ name }) => name).join(', ')})`
-                : ''
-            }</summary>
-            <pre>{JSON.stringify(args, null, 2)}</pre>
-          </details>
-        </td>
-      </tr>
-      {method.meta && (
-        <tr>
-          <td className='label'>{t<string>('info')}</td>
-          <td className='data'>
-            <details>
-              <summary>{method.meta.docs.map((d) => d.toString().trim()).join(' ')}</summary>
-            </details>
-          </td>
-        </tr>
-      )}
-    </>
-  );
-}
-
-function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string, t: TFunction): string {
-  if (era.isImmortalEra) {
-    return t<string>('immortal');
-  }
-
-  const blockNumber = bnToBn(hexBlockNumber);
-  const mortal = era.asMortalEra;
-
-  return t<string>('mortal, valid from {{birth}} to {{death}}', {
-    replace: {
-      birth: formatNumber(mortal.birth(blockNumber)),
-      death: formatNumber(mortal.death(blockNumber))
-    }
-  });
-}
-
-function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
+function Extrinsic({
+  className,
+  payload: { nonce },
+  request: { genesisHash, method, specVersion: hexSpec },
+  url
+}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const chain = useMetadata(genesisHash);
+  const chain = useMetadata(genesisHash, true);
+  const settings = useContext(SettingsContext);
   const specVersion = useRef(bnToBn(hexSpec)).current;
-  const decoded = useMemo(
-    () => chain && chain.hasMetadata
-      ? decodeMethod(method, chain, specVersion)
-      : { args: null, method: null },
-    [method, chain, specVersion]
-  );
+  const [methodDetails, setMethodDetails] = useState<DecodedMethod>();
+
+  useEffect(() => {
+    const getDetails = async () => {
+      setMethodDetails(await decodeMethodApi(method, chain, settings));
+    };
+
+    getDetails().catch((e) => console.error(e));
+  }, [chain, method, settings, specVersion]);
+
+  function prettyPrintValue(value: string) {
+    const numValue = parseFloat(value.replace(/,/g, ''));
+    const trillion = 1000000000000; // 10^12
+
+    return numValue / trillion;
+  }
 
   return (
-    <Table
-      className={className}
-      isFull
-    >
+    <Table className={className}>
       <tr>
         <td className='label'>{t<string>('from')}</td>
-        <td className='data'>{url}</td>
+        <div className='separator'></div>
+        <td className='from'>{url}</td>
       </tr>
-      <tr>
-        <td className='label'>{chain ? t<string>('chain') : t<string>('genesis')}</td>
-        <td className='data'>{chain ? chain.name : genesisHash}</td>
-      </tr>
-      <tr>
-        <td className='label'>{t<string>('version')}</td>
-        <td className='data'>{specVersion.toNumber()}</td>
-      </tr>
-      <tr>
-        <td className='label'>{t<string>('nonce')}</td>
-        <td className='data'>{formatNumber(nonce)}</td>
-      </tr>
-      {!tip.isEmpty && (
-        <tr>
-          <td className='label'>{t<string>('tip')}</td>
-          <td className='data'>{formatNumber(tip)}</td>
-        </tr>
+      {methodDetails && (
+        <>
+          <tr>
+            <td className='label'>{t<string>('module')}</td>
+            <div className='separator'></div>
+            <td className='data'>{methodDetails.section}</td>
+          </tr>
+          <tr>
+            <td className='label'>{t<string>('Call')}</td>
+            <div className='separator'></div>
+            <td className='data'>{methodDetails?.method?.toString()}</td>
+          </tr>
+          <tr>
+            <td className='label'>{t<string>('amount')}</td>
+            <div className='separator'></div>
+            <td className='data'>
+              {prettyPrintValue(methodDetails?.args?.value || '')}&nbsp;
+              {chain?.definition.symbol}
+            </td>
+          </tr>
+          <tr>
+            <td className='label'>{t<string>('target')}</td>
+            <div className='separator'></div>
+            <td className='data'>{ellipsisName(methodDetails.target || '')}</td>
+          </tr>
+        </>
       )}
-      {renderMethod(method, decoded, t)}
       <tr>
-        <td className='label'>{t<string>('lifetime')}</td>
-        <td className='data'>{mortalityAsString(era, blockNumber, t)}</td>
+        <td className='label'>
+          {t<string>('nonce')}&nbsp;
+          <Tooltip content='The overall, lifetime transaction count of your account.'>
+            <Svg
+              className='help-icon'
+              src={helpIcon}
+            />
+          </Tooltip>
+        </td>
+        <div className='separator'></div>
+        <td className='data'>{formatNumber(nonce)}</td>
       </tr>
     </Table>
   );

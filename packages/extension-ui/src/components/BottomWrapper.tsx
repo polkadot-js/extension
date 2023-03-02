@@ -18,9 +18,9 @@ const BottomWrapper: React.FC<Props> = ({ children, className }) => {
 
 export default styled(BottomWrapper)`
   display: flex;
-  backdrop-filter: blur(10px);
   flex-direction: column;
   position: sticky;
   bottom: 0;
   z-index: ${Z_INDEX.BOTTOM_WRAPPER};
+  max-width: 375px;
 `;

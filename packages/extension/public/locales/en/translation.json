@@ -267,5 +267,16 @@
   "file to import?": "",
   "Show test networks": "",
   "Any chain": "",
-  " You can paste it into any field.": ""
+  "New transaction": "",
+  " You can paste it into any field.": "",
+  "New Transaction": "",
+  "Sign": "",
+  "Decline": "",
+  "Remember password for {{expiration}} minutes": "",
+  "module": "",
+  "Call": "",
+  "amount": "",
+  "target": "",
+  "Transaction Signed": "",
+  "Transaction Declined": ""
 }

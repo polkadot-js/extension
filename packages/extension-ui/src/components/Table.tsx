@@ -12,49 +12,85 @@ interface Props {
   isFull?: boolean;
 }
 
-function Table ({ children, className = '', isFull }: Props): React.ReactElement<Props> {
+function Table({ children, className = '', isFull }: Props): React.ReactElement<Props> {
   return (
     <table className={`${className} ${isFull ? 'isFull' : ''}`}>
-      <tbody>
-        {children}
-      </tbody>
+      <tbody>{children}</tbody>
     </table>
   );
 }
 
-export default React.memo(styled(Table)(({ theme }: ThemeProps) => `
+export default React.memo(
+  styled(Table)(
+    ({ theme }: ThemeProps) => `
   border: 0;
   display: block;
   font-size: ${theme.labelFontSize};
   line-height: ${theme.labelLineHeight};
   margin-bottom: 1rem;
+  padding: 0px 8px;
 
   &.isFull {
     height: 100%;
     overflow: auto;
   }
 
-  td.data {
-    max-width: 0;
-    overflow: hidden;
-    text-align: left;
-    text-overflow: ellipsis;
-    vertical-align: middle;
-    width: 100%;
-
-    pre {
-      font-family: inherit;
-      font-size: 0.75rem;
-      margin: 0;
-    }
+  tr {
+    display: flex;
+    width: 312px;
+    max-height: 34px;
+    padding: 6px 4px 8px;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
   }
 
-  td.label {
-    opacity: 0.5;
-    padding: 0 0.5rem;
-    text-align: right;
+  td.label{
+    text-align: left;
     vertical-align: top;
+    font-style: normal;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 145%;
+    display: flex;
+    align-items: center;
+    letter-spacing: 0.07em;
+    color: ${theme.subTextColor};
+    text-transform: capitalize;
+    justify-content: flex-start;
+  }
+
+  .separator {
+    border-bottom: 1px solid ${theme.boxBorderColor};
+    width: calc(100% - 16px);
+
+    margin: 0px 8px;
+  }
+
+  td.data {
+    text-overflow: ellipsis;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 145%;
+    text-align: right;
+    letter-spacing: 0.07em;
     white-space: nowrap;
+    display: flex;
+    justify-content: flex-start;
+    text-transform: capitalize;
+  }
+
+  td.from {    
+    text-overflow: ellipsis;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 145%;
+    text-align: right;
+    letter-spacing: 0.07em;
+    white-space: nowrap;
+    justify-content: flex-start;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   details {
@@ -72,4 +108,12 @@ export default React.memo(styled(Table)(({ theme }: ThemeProps) => `
       white-space: normal;
     }
   }
-`));
+
+  .help-icon {
+    background: ${theme.iconNeutralColor};
+    width: 12px;
+    height: 12px;
+  }
+`
+  )
+);

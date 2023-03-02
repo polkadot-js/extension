@@ -7,6 +7,7 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
 
 import { TypeRegistry } from '@polkadot/types';
 
@@ -39,11 +40,30 @@ export const CMD_SIGN_MESSAGE = 3;
 // keep it global, we can and will re-use this across requests
 const registry = new TypeRegistry();
 
-function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload is SignerPayloadRaw {
+function isRawPayload(payload: SignerPayloadJSON | SignerPayloadRaw): payload is SignerPayloadRaw {
   return !!(payload as SignerPayloadRaw).data;
 }
 
-export default function Request ({ account: { accountIndex, addressOffset, genesisHash, isExternal, isHardware }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+const StyledAddress = styled(Address)`
+  max-width: 324px;
+  margin: 0px 8px 8px 8px;`;
+
+const Wrapper = styled.div`
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  bottom: 16px;
+  margin: 0px 8px;
+`;
+
+export default function Request({
+  account: { accountIndex, addressOffset, genesisHash, isExternal, isHardware },
+  buttonText,
+  isFirst,
+  request,
+  signId,
+  url
+}: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
@@ -84,36 +104,25 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
 
     return (
       <>
-        <div>
-          <Address
+        {isExternal && !isHardware ? (
+          <Qr
             address={json.address}
+            cmd={CMD_MORTAL}
             genesisHash={json.genesisHash}
-            isExternal={isExternal}
-            isHardware={isHardware}
+            onSignature={_onSignature}
+            payload={payload}
           />
-        </div>
-        {isExternal && !isHardware
-          ? (
-            <Qr
-              address={json.address}
-              cmd={CMD_MORTAL}
-              genesisHash={json.genesisHash}
-              onSignature={_onSignature}
-              payload={payload}
-            />
-          )
-          : (
-            <Extrinsic
-              payload={payload}
-              request={json}
-              url={url}
-            />
-          )
-        }
+        ) : (
+          <Extrinsic
+            payload={payload}
+            request={json}
+            url={url}
+          />
+        )}
         {isHardware && (
           <LedgerSign
-            accountIndex={accountIndex as number || 0}
-            addressOffset={addressOffset as number || 0}
+            accountIndex={(accountIndex as number) || 0}
+            addressOffset={(addressOffset as number) || 0}
             error={error}
             genesisHash={json.genesisHash}
             onSignature={_onSignature}
@@ -121,14 +130,22 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
             setError={setError}
           />
         )}
-        <SignArea
-          buttonText={buttonText}
-          error={error}
-          isExternal={isExternal}
-          isFirst={isFirst}
-          setError={setError}
-          signId={signId}
-        />
+        <Wrapper>
+          <StyledAddress
+            address={json.address}
+            genesisHash={json.genesisHash}
+            isExternal={isExternal}
+            isHardware={isHardware}
+          />
+          <SignArea
+            buttonText={buttonText}
+            error={error}
+            isExternal={isExternal}
+            isFirst={isFirst}
+            setError={setError}
+            signId={signId}
+          />
+        </Wrapper>
       </>
     );
   } else if (hexBytes !== null) {
@@ -136,48 +153,50 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
 
     return (
       <>
-        <div>
-          <Address
+        {isExternal && !isHardware && genesisHash ? (
+          <Qr
             address={address}
-            isExternal={isExternal}
+            cmd={CMD_SIGN_MESSAGE}
+            genesisHash={genesisHash}
+            onSignature={_onSignature}
+            payload={data}
           />
-        </div>
-        {isExternal && !isHardware && genesisHash
-          ? (
-            <Qr
-              address={address}
-              cmd={CMD_SIGN_MESSAGE}
-              genesisHash={genesisHash}
-              onSignature={_onSignature}
-              payload={data}
-            />
-          )
-          : (
-            <Bytes
-              bytes={data}
-              url={url}
-            />
-          )
-        }
-        <VerticalSpace />
+        ) : (
+          <Bytes
+            bytes={data}
+            url={url}
+          />
+        )}
         {isExternal && !isHardware && !genesisHash && (
           <>
-            <Warning isDanger>{t('"Allow use on any network" is not supported to show a QR code. You must associate this account with a network.')}</Warning>
+            <Warning isDanger>
+              {t(
+                '"Allow use on any network" is not supported to show a QR code. You must associate this account with a network.'
+              )}
+            </Warning>
             <VerticalSpace />
           </>
         )}
-        {isHardware && <>
-          <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
-          <VerticalSpace />
-        </>}
-        <SignArea
-          buttonText={buttonText}
-          error={error}
-          isExternal={isExternal}
-          isFirst={isFirst}
-          setError={setError}
-          signId={signId}
-        />
+        {isHardware && (
+          <>
+            <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
+            <VerticalSpace />
+          </>
+        )}
+        <Wrapper>
+          <StyledAddress
+            address={address}
+            isExternal={isExternal}
+          />
+          <SignArea
+            buttonText={buttonText}
+            error={error}
+            isExternal={isExternal}
+            isFirst={isFirst}
+            setError={setError}
+            signId={signId}
+          />
+        </Wrapper>
       </>
     );
   }

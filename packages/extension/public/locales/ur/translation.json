@@ -233,5 +233,14 @@
     "Version": "",
     "version-number": "1.0.0.0",
     "Show test networks": "",
-    "Any chain": ""
+    "Any chain": "",
+    "New transaction": "",
+    "Sign": "",
+    "Decline": "",
+    "Remember password for {{expiration}} minutes": "",
+    "module": "",
+    "Call": "",
+    "amount": "",
+    "target": "",
+    "Transaction Signed": ""
 }

@@ -5,7 +5,7 @@ import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { Registry } from '@polkadot/types/types';
 
 export interface Chain {
-  definition: MetadataDef;
+  definition: MetadataDef & {symbol?: string};
   genesisHash?: string;
   hasMetadata: boolean;
   icon: string;

@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 
 import { getMetadata } from '../messaging';
 
-export default function useMetadata (genesisHash?: string | null, isPartial?: boolean): Chain | null {
+export default function useMetadata(genesisHash?: string | null, isPartial?: boolean): Chain | null {
   const [chain, setChain] = useState<Chain | null>(null);
 
   useEffect((): void => {

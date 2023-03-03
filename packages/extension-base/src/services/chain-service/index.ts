@@ -9,7 +9,7 @@ import { EvmChainHandler } from '@subwallet/extension-base/services/chain-servic
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Subject } from 'rxjs';
@@ -280,7 +280,7 @@ export class ChainService {
   }
 
   // Setter
-  public removeChain (slug: string) {
+  public removeCustomChain (slug: string) {
     if (this.lockChainInfoMap) {
       return false;
     }
@@ -294,16 +294,20 @@ export class ChainService {
       return false;
     }
 
-    if (chainStateMap[slug].active) {
+    if (!_isCustomChain(slug)) {
       return false;
     }
 
-    this.dbService.removeFromChainStore([slug]).catch((e) => this.logger.error(e));
+    if (chainStateMap[slug].active) {
+      return false;
+    }
 
     delete chainStateMap[slug];
     delete chainInfoMap[slug];
 
     this.updateChainSubscription();
+
+    this.dbService.removeFromChainStore([slug]).catch((e) => this.logger.error(e));
 
     this.lockChainInfoMap = false;
 
@@ -408,9 +412,9 @@ export class ChainService {
     }
   }
 
-  private async destroyApiForChain (chainInfo: _ChainInfo) {
+  private destroyApiForChain (chainInfo: _ChainInfo) {
     if (chainInfo.substrateInfo !== null) {
-      await this.substrateChainHandler.destroySubstrateApi(chainInfo.slug);
+      this.substrateChainHandler.destroySubstrateApi(chainInfo.slug);
     }
 
     if (chainInfo.evmInfo !== null) {
@@ -451,7 +455,7 @@ export class ChainService {
     return true;
   }
 
-  public async disableChain (chainSlug: string): Promise<boolean> {
+  public disableChain (chainSlug: string): boolean {
     const chainInfo = this.getChainInfoByKey(chainSlug);
     const chainStateMap = this.getChainStateMap();
 
@@ -461,7 +465,7 @@ export class ChainService {
 
     this.lockChainInfoMap = true;
     chainStateMap[chainSlug].active = false;
-    await this.destroyApiForChain(chainInfo);
+    this.destroyApiForChain(chainInfo);
 
     this.dbService.updateChainStore({
       ...chainInfo,
@@ -708,7 +712,7 @@ export class ChainService {
       }
 
       if (params.chainEditInfo.crowdloanUrl) {
-        targetChainInfo.substrateInfo.blockExplorer = params.chainEditInfo.crowdloanUrl || null;
+        targetChainInfo.substrateInfo.crowdloanUrl = params.chainEditInfo.crowdloanUrl || null;
       }
     }
 

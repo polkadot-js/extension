@@ -2076,12 +2076,12 @@ export default class KoniExtension {
     }
   }
 
-  private removeNetworkMap (networkKey: string): boolean {
-    return this.#koniState.removeChain(networkKey);
+  private removeCustomChain (networkKey: string): boolean {
+    return this.#koniState.removeCustomChain(networkKey);
   }
 
-  private async disableChain (networkKey: string): Promise<boolean> {
-    return await this.#koniState.disableChain(networkKey);
+  private disableChain (networkKey: string): boolean {
+    return this.#koniState.disableChain(networkKey);
   }
 
   private enableChain (networkKey: string): boolean {
@@ -2254,18 +2254,6 @@ export default class KoniExtension {
       for (const networkKey of targetKeys) {
         this.enableChain(networkKey);
       }
-    } catch (e) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private async disableChains (targetKeys: string[]) {
-    try {
-      await Promise.all(targetKeys.map(async (key) => {
-        return await this.disableChain(key);
-      }));
     } catch (e) {
       return false;
     }
@@ -4539,9 +4527,9 @@ export default class KoniExtension {
       case 'pri(chainService.enableChain)':
         return this.enableChain(request as string);
       case 'pri(chainService.disableChain)':
-        return await this.disableChain(request as string);
+        return this.disableChain(request as string);
       case 'pri(chainService.removeChain)':
-        return this.removeNetworkMap(request as string);
+        return this.removeCustomChain(request as string);
       case 'pri(chainService.validateCustomChain)':
         return await this.validateNetwork(request as ValidateNetworkRequest);
       case 'pri(chainService.upsertChain)':
@@ -4550,8 +4538,6 @@ export default class KoniExtension {
         return this.resetDefaultNetwork();
       case 'pri(chainService.enableChains)':
         return this.enableChains(request as string[]);
-      case 'pri(chainService.disableChains)':
-        return await this.disableChains(request as string[]);
       case 'pri(chainService.subscribeAssetRegistry)':
         return this.subscribeAssetRegistry(id, port);
       case 'pri(chainService.subscribeMultiChainAssetMap)':

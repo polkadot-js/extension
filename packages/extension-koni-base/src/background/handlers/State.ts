@@ -1184,8 +1184,8 @@ export default class KoniState {
     return result;
   }
 
-  public removeChain (networkKey: string): boolean {
-    return this.chainService.removeChain(networkKey);
+  public removeCustomChain (networkKey: string): boolean {
+    return this.chainService.removeCustomChain(networkKey);
   }
 
   // TODO: avoids turning off chains related to ledger account
@@ -1230,11 +1230,11 @@ export default class KoniState {
     });
   }
 
-  public async disableChain (chainSlug: string): Promise<boolean> {
+  public disableChain (chainSlug: string): boolean {
     // const defaultChains = this.getDefaultNetworkKeys();
     this.updateAssetSettingByChain(chainSlug, false);
 
-    const result = await this.chainService.disableChain(chainSlug);
+    const result = this.chainService.disableChain(chainSlug);
 
     this.updateServiceInfo();
 

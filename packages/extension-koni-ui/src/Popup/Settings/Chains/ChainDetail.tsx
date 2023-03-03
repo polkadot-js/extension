@@ -1,16 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _getBlockExplorerFromChain, _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getChainSubstrateAddressPrefix, _getCrowdloanUrlFromChain, _getSubstrateParaId, _isChainEvmCompatible, _isCustomChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
+import { _getBlockExplorerFromChain, _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix, _getCrowdloanUrlFromChain, _getEvmChainId, _getSubstrateParaId, _isChainEvmCompatible, _isCustomChain, _isPureEvmChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { isUrl } from '@subwallet/extension-base/utils';
 import { ProviderSelector } from '@subwallet/extension-koni-ui/components/Field/ProviderSelector';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useFetchChainState from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainState';
-import useGetChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainAssetInfo';
+import useConfirmModal from '@subwallet/extension-koni-ui/hooks/useConfirmModal';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { removeChain, upsertChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ButtonProps, Col, Field, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
@@ -27,7 +29,6 @@ type Props = ThemeProps
 
 interface ChainDetailForm {
   currentProvider: string,
-  priceId: string,
   blockExplorer: string,
   crowdloanUrl: string
 }
@@ -40,10 +41,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const location = useLocation();
   const showNotification = useNotification();
   const [form] = useForm<ChainDetailForm>();
+  const { handleSimpleConfirmModal } = useConfirmModal({
+    title: t<string>('Delete chain'),
+    maskClosable: true,
+    closable: true,
+    type: 'error',
+    subTitle: t<string>('You are about to delete this chain'),
+    content: t<string>('Confirm delete this chain'),
+    okText: t<string>('Remove')
+  });
 
   const [isChanged, setIsChanged] = useState(false);
   const [isValueValid, setIsValueValid] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const chainSlug = useMemo(() => {
     return location.state as string;
@@ -52,7 +63,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const chainInfo = useFetchChainInfo(chainSlug);
   const chainState = useFetchChainState(chainSlug);
 
-  const nativeTokenInfo = useGetChainAssetInfo(_getChainNativeTokenSlug(chainInfo));
+  const isPureEvmChain = useMemo(() => {
+    return _isPureEvmChain(chainInfo);
+  }, [chainInfo]);
 
   const { decimals, symbol } = useMemo(() => {
     return _getChainNativeTokenBasicInfo(chainInfo);
@@ -66,6 +79,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return _getSubstrateParaId(chainInfo);
   }, [chainInfo]);
 
+  const chainId = useMemo(() => {
+    return _getEvmChainId(chainInfo);
+  }, [chainInfo]);
+
   const addressPrefix = useMemo(() => {
     return _getChainSubstrateAddressPrefix(chainInfo);
   }, [chainInfo]);
@@ -75,10 +92,32 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [navigate]);
 
   const handleDeleteCustomChain = useCallback(() => {
-    showNotification({
-      message: t('delete custom chain')
-    });
-  }, [showNotification, t]);
+    handleSimpleConfirmModal()
+      .then(() => {
+        setIsDeleting(true);
+        removeChain(chainInfo.slug)
+          .then((result) => {
+            if (result) {
+              navigate(-1);
+              showNotification({
+                message: t('Deleted chain successfully')
+              });
+            } else {
+              showNotification({
+                message: t('Error. Please try again')
+              });
+              setIsDeleting(false);
+            }
+          })
+          .catch(() => {
+            showNotification({
+              message: t('Error. Please try again')
+            });
+            setIsDeleting(false);
+          });
+      })
+      .catch(console.log);
+  }, [chainInfo.slug, handleSimpleConfirmModal, navigate, showNotification, t]);
 
   const chainTypeString = useCallback(() => {
     let result = '';
@@ -106,11 +145,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const formInitValues = useMemo(() => {
     return {
       currentProvider: chainState.currentProvider,
-      priceId: nativeTokenInfo?.priceId || '',
       blockExplorer: _getBlockExplorerFromChain(chainInfo),
       crowdloanUrl: _getCrowdloanUrlFromChain(chainInfo)
     } as ChainDetailForm;
-  }, [chainInfo, chainState.currentProvider, nativeTokenInfo?.priceId]);
+  }, [chainInfo, chainState.currentProvider]);
 
   const subHeaderButton: ButtonProps[] = [
     {
@@ -126,17 +164,52 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   ];
 
   const handleClickProviderSuffix = useCallback(() => {
-    console.log('click suffix');
-  }, []);
+    navigate('/settings/chains/add-provider', { state: chainInfo.slug });
+  }, [chainInfo.slug, navigate]);
 
   const isSubmitDisabled = useCallback(() => {
-    return !isChanged || !isValueValid;
-  }, [isChanged, isValueValid]);
+    return !isChanged || !isValueValid || isDeleting;
+  }, [isChanged, isDeleting, isValueValid]);
 
   const onSubmit = useCallback(() => {
     setLoading(true);
-    console.log('submit', form.getFieldsValue());
-  }, [form]);
+
+    const blockExplorer = form.getFieldValue('blockExplorer') as string;
+    const crowdloanUrl = form.getFieldValue('crowdloanUrl') as string;
+
+    const params: _NetworkUpsertParams = {
+      mode: 'update',
+      chainEditInfo: {
+        slug: chainInfo.slug,
+        currentProvider: chainState.currentProvider,
+        providers: chainInfo.providers,
+        blockExplorer,
+        crowdloanUrl
+      }
+    };
+
+    upsertChain(params)
+      .then((result) => {
+        setLoading(false);
+
+        if (result) {
+          showNotification({
+            message: t('Updated chain successfully')
+          });
+          navigate(-1);
+        } else {
+          showNotification({
+            message: t('An error occurred, please try again')
+          });
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+        showNotification({
+          message: t('An error occurred, please try again')
+        });
+      });
+  }, [chainInfo.providers, chainInfo.slug, chainState.currentProvider, form, navigate, showNotification, t]);
 
   const providerFieldSuffix = useCallback(() => {
     return (
@@ -161,7 +234,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     for (const changedField of allFields) {
       if (changedField.errors && changedField.errors.length > 0) {
         isFieldsValid = false;
-        break;
       }
     }
 
@@ -220,6 +292,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       >
         <div className={'chain_detail__container'}>
           <Form
+            disabled={isDeleting}
             form={form}
             initialValues={formInitValues}
             onFieldsChange={onFormValuesChange}
@@ -232,10 +305,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   >
                     <ProviderSelector
                       chainInfo={chainInfo}
+                      disabled={isDeleting}
                       value={chainState.currentProvider}
                     />
                   </Form.Item>
                   : <Field
+                    className={'chain_detail__provider_url'}
                     content={currentProviderUrl}
                     placeholder={t('Provider URL')}
                     prefix={<Icon
@@ -300,50 +375,53 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   </Tooltip>
                 </Col>
                 <Col span={12}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('ParaId')}
-                  >
-                    <div>
-                      <Field
-                        content={paraId > -1 ? paraId : 'None'}
-                        placeholder={t('ParaId')}
-                      />
-                    </div>
-                  </Tooltip>
+                  {
+                    !isPureEvmChain
+                      ? <Tooltip
+                        placement={'topLeft'}
+                        title={t('ParaId')}
+                      >
+                        <div>
+                          <Field
+                            content={paraId > -1 ? paraId : 'None'}
+                            placeholder={t('ParaId')}
+                          />
+                        </div>
+                      </Tooltip>
+                      : <Tooltip
+                        placement={'topLeft'}
+                        title={t('Chain ID')}
+                      >
+                        <div>
+                          <Field
+                            content={chainId > -1 ? chainId : 'None'}
+                            placeholder={t('Chain ID')}
+                          />
+                        </div>
+                      </Tooltip>
+                  }
                 </Col>
               </Row>
 
-              <Tooltip
-                placement={'topLeft'}
-                title={t('Address prefix')}
-              >
-                <div>
-                  <Field
-                    content={addressPrefix.toString()}
-                    placeholder={t('Address prefix')}
-                  />
-                </div>
-              </Tooltip>
-
               <Row gutter={token.paddingSM}>
-                <Col span={12}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('Price Id (from CoinGecko)')}
-                  >
-                    <div>
-                      <Form.Item
-                        name={'priceId'}
-                      >
-                        <Input
-                          placeholder={t('Price Id')}
+                {
+                  !isPureEvmChain &&
+                  <Col span={12}>
+                    <Tooltip
+                      placement={'topLeft'}
+                      title={t('Address prefix')}
+                    >
+                      <div>
+                        <Field
+                          content={addressPrefix.toString()}
+                          placeholder={t('Address prefix')}
                         />
-                      </Form.Item>
-                    </div>
-                  </Tooltip>
-                </Col>
-                <Col span={12}>
+                      </div>
+                    </Tooltip>
+                  </Col>
+                }
+
+                <Col span={!isPureEvmChain ? 12 : 24}>
                   <Tooltip
                     placement={'topLeft'}
                     title={t('Chain type')}
@@ -385,7 +463,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   </Form.Item>
                 </div>
               </Tooltip>
-
             </div>
           </Form>
         </div>
@@ -418,6 +495,14 @@ const ChainDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-form-item': {
       marginBottom: 0
+    },
+
+    '.ant-field-container .ant-field-wrapper .ant-field-content-wrapper .ant-field-content': {
+      color: token.colorTextLight5
+    },
+
+    '.chain_detail__provider_url .ant-field-wrapper .ant-field-content-wrapper .ant-field-content': {
+      color: token.colorTextLight1
     }
   });
 });

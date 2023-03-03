@@ -176,8 +176,12 @@ export class SubstrateChainHandler {
     this.substrateApiMap[chainSlug] = substrateApi;
   }
 
-  public async destroySubstrateApi (chainSlug: string) {
-    this.substrateApiMap[chainSlug].api.disconnect && await this.substrateApiMap[chainSlug].api.disconnect();
+  public destroySubstrateApi (chainSlug: string) {
+    if (!(chainSlug in this.substrateApiMap)) {
+      return;
+    }
+
+    this.substrateApiMap[chainSlug].api.disconnect && this.substrateApiMap[chainSlug].api.disconnect().then().catch(console.error);
     delete this.substrateApiMap[chainSlug];
   }
 

@@ -36,6 +36,12 @@ function Component (
   [navigate]
   );
 
+  const openBuyTokens = useCallback(() => {
+    navigate('/buy-tokens');
+  },
+  [navigate]
+  );
+
   const openReceive = useCallback(() => {
     if (currentAccount && isAccountAll(currentAccount.address)) {
       activeModal('receive-account-selector');
@@ -101,10 +107,13 @@ function Component (
         />
         <div className={'__button-space'} />
         <Button
-          icon={<Icon
-            phosphorIcon={ShoppingCartSimple}
-            size={isShrink ? 'sm' : 'md' }
-          />}
+          icon={
+            <Icon
+              phosphorIcon={ShoppingCartSimple}
+              size={isShrink ? 'sm' : 'md' }
+            />
+          }
+          onClick={openBuyTokens}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
         />

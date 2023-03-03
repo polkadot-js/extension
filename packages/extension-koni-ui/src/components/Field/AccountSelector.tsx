@@ -17,17 +17,20 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-export type ChainItemType = {
-  name: string,
-  slug: string,
-};
+interface Props extends ThemeProps, BasicInputWrapper {
+  filter?: (account: AccountJson) => boolean
+}
 
-interface Props extends ThemeProps, BasicInputWrapper {}
+function defaultFiler (account: AccountJson): boolean {
+  return !isAccountAll(account.address);
+}
 
-const Component = ({ className = '', id = 'account-selector', label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
-  const items = useSelector((state: RootState) => state.accountState.accounts).filter((a) => !isAccountAll(a.address));
+const Component = ({ className = '', disabled, filter, id = 'account-selector', label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
+  const items = useSelector((state: RootState) => state.accountState.accounts)
+    .filter(filter || defaultFiler);
   const { t } = useTranslation();
-  const renderChainSelected = useCallback((item: AccountJson) => {
+
+  const renderSelected = useCallback((item: AccountJson) => {
     return (
       <div className={'__selected-item'}>
         <div className={'__selected-item-name common-text'}>
@@ -70,6 +73,7 @@ const Component = ({ className = '', id = 'account-selector', label, onChange, p
     <>
       <SelectModal
         className={`${className} account-selector-modal`}
+        disabled={disabled}
         id={id}
         inputClassName={`${className} account-selector-input`}
         itemKey={'address'}
@@ -85,9 +89,9 @@ const Component = ({ className = '', id = 'account-selector', label, onChange, p
           />
         }
         renderItem={renderItem}
-        renderSelected={renderChainSelected}
+        renderSelected={renderSelected}
         searchFunction={searchFunction}
-        searchPlaceholder={t('Search chain')}
+        searchPlaceholder={t('Search name')}
         searchableMinCharactersCount={2}
         selected={value || ''}
       />

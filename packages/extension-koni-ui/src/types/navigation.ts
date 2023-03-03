@@ -16,3 +16,9 @@ export type ManageWebsiteAccessDetailParam = {
   origin: string,
   accountAuthType: string,
 };
+
+// buy tokens
+
+export type BuyTokensParam = {
+  symbol: string,
+};

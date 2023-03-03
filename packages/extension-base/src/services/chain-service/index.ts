@@ -692,8 +692,13 @@ export class ChainService {
       targetChainInfo.providers = params.chainEditInfo.providers;
       targetChainState.currentProvider = params.chainEditInfo.currentProvider;
 
-      // TODO: update API
+      // Enable chain if not before
+      if (!targetChainState.active) {
+        targetChainState.active = true;
+      }
 
+      // TODO: it might override existed API
+      this.initApiForChain(targetChainInfo);
       this.updateChainStateMapSubscription();
     }
 

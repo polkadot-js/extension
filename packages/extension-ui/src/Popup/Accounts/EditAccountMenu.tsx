@@ -139,7 +139,7 @@ function EditAccountMenu({
           <EditMenuCard
             description=''
             extra='chevron'
-            onClick={goTo(`/account/derive/${master.address}/locked`)}
+            onClick={goTo(`/account/derive/${address}/locked`)}
             position='both'
             preIcon={
               <Svg

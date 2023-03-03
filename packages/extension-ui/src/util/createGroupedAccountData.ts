@@ -2,11 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
-import { knownGenesis } from '@polkadot/networks/defaults';
+import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
 
 interface GroupedData {
   [key: string]: AccountWithChildren[];
 }
+
+const networkMap = getNetworkMap();
+
+const findOtherItemGenesis = (item: AccountJson, idx: number, arr: AccountJson[]) =>
+  arr.filter((_, index) => index !== idx).find((i) => i.genesisHash === item.genesisHash);
 
 export const createGroupedAccountData = (filteredAccount: AccountWithChildren[]) => {
   const flattened: AccountJson[] = filteredAccount.reduce((acc: AccountJson[], next) => {
@@ -22,16 +27,13 @@ export const createGroupedAccountData = (filteredAccount: AccountWithChildren[])
     return acc;
   }, []);
 
-  const children = flattened.filter((item) => item.parentAddress);
-
-  const parents = flattened.filter((item) => !item.parentAddress);
+  const children = flattened.filter((item, idx, arr) => item.parentAddress && findOtherItemGenesis(item, idx, arr));
+  const parents = flattened.filter((item, idx, arr) => !item.parentAddress || !findOtherItemGenesis(item, idx, arr));
 
   const groupedParents: GroupedData = parents.reduce(
     (acc: GroupedData, next: AccountWithChildren) => {
       const { genesisHash } = next;
-      const foundKey = Object.keys(knownGenesis)
-        .find((key) => knownGenesis[key].includes(genesisHash ?? ''))
-        ?.replace(/-/g, ' ');
+      const foundKey = networkMap.get(genesisHash as string)?.replace(/-/g, ' ');
 
       if (!foundKey) {
         acc.any.push(next);
@@ -41,7 +43,7 @@ export const createGroupedAccountData = (filteredAccount: AccountWithChildren[])
 
       return acc;
     },
-    { any: [], 'aleph zero': [], 'aleph zero testnet': [] }
+    { any: [], 'Aleph Zero': [], 'Aleph Zero Testnet': [] }
   );
 
   function filterChildren(networkName: string, defaultNetwork: string, details: AccountWithChildren[]) {

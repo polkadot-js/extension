@@ -1,4 +1,4 @@
-     587	Jaco                          	Add empty loader for image files (#1216)
+     588	Jaco                          	Add wf continue-on-error: true (#1217)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

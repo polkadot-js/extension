@@ -10,9 +10,9 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
-  "version": "0.44.10-2-x",
+  "version": "0.44.10-3-x",
   "versions": {
-    "git": "0.44.10-2-x",
+    "git": "0.44.10-3-x",
     "npm": "0.44.9"
   },
   "workspaces": [
@@ -38,8 +38,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.21.0",
-    "@polkadot/dev": "^0.69.17",
-    "@types/node": "^18.14.1",
+    "@polkadot/dev": "^0.69.25",
+    "@types/node": "^18.14.5",
     "i18next-scanner": "^4.1.1",
     "sinon-chrome": "^3.0.1"
   },

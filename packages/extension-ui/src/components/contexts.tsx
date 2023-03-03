@@ -14,8 +14,6 @@ import React from 'react';
 
 import settings from '@polkadot/ui-settings';
 
-import { SnackbarTypes } from '../types';
-
 const noop = (): void => undefined;
 
 const AccountContext = React.createContext<AccountsContext>({ accounts: [], hierarchy: [], master: undefined });
@@ -26,9 +24,7 @@ const MetadataReqContext = React.createContext<MetadataRequest[]>([]);
 const SettingsContext = React.createContext<SettingsStruct>(settings.get());
 const SigningReqContext = React.createContext<SigningRequest[]>([]);
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
-const ToastContext = React.createContext<{
-  show: (message: string, type: SnackbarTypes, callback?: () => void) => void;
-}>({ show: noop });
+const ToastContext = React.createContext<{ show: (message: string) => void }>({ show: noop });
 
 export {
   AccountContext,

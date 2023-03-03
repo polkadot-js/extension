@@ -12,10 +12,12 @@ export const createGroupedAccountData = (filteredAccount: AccountWithChildren[])
   const flattened: AccountJson[] = filteredAccount.reduce((acc: AccountJson[], next) => {
     if (next.children) {
       next.children.forEach((c) => acc.push(c));
-      delete next.children;
     }
 
-    acc.push(next);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { children, ...rest } = next;
+
+    acc.push(rest);
 
     return acc;
   }, []);

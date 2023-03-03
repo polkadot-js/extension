@@ -31,7 +31,10 @@ function Accounts({ className }: Props): React.ReactElement {
   const { hierarchy } = useContext(AccountContext);
   const networkMap = useMemo(() => getNetworkMap(), []);
   const defaultNetwork = 'any';
-  const { filterChildren, getParentName, groupedParents } = createGroupedAccountData(filteredAccount);
+  const { filterChildren, getParentName, groupedParents } = useMemo(
+    () => createGroupedAccountData(filteredAccount),
+    [filteredAccount]
+  );
 
   useEffect(() => {
     setFilteredAccount(
@@ -49,8 +52,9 @@ function Accounts({ className }: Props): React.ReactElement {
     setFilter(filter.toLowerCase());
   }, []);
 
-  const accounts = Object.entries(groupedParents).map(([networkName, details]) => {
-    if (details.length > 0) {
+  const accounts = Object.entries(groupedParents)
+    .filter(([_, details]) => details.length > 0)
+    .map(([networkName, details]) => {
       return (
         <div key={networkName}>
           {networkName !== defaultNetwork && <span className='network-heading'>{networkName}</span>}
@@ -69,10 +73,7 @@ function Accounts({ className }: Props): React.ReactElement {
           ))}
         </div>
       );
-    } else {
-      return null;
-    }
-  });
+    });
 
   return (
     <>

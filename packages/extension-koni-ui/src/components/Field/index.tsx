@@ -14,5 +14,6 @@ export interface BasicInputWrapper<T = string> {
   label?: string,
   placeholder?: string
   value?: T,
+  disabled?: boolean,
   onChange?: BasicOnChangeFunction<T>
 }

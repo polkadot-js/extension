@@ -6,6 +6,7 @@ import type { SnackbarTypes, ThemeProps } from '../../types';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
+import useTranslation from '../../hooks/useTranslation';
 import { Z_INDEX } from '../../zindex';
 import * as icons from './iconsList';
 import ToastCloseIcon from './ToastCloseIcon';
@@ -16,9 +17,12 @@ interface Props extends ThemeProps {
   className?: string;
   type: SnackbarTypes;
   visible: boolean;
+  undoTimeout?: NodeJS.Timeout | undefined;
+  onUndoClick?: () => void;
 }
 
-function Toast({ className, content, type }: Props): React.ReactElement<Props> {
+function Toast({ className, content, onUndoClick, type, undoTimeout }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const _getIconByType = useCallback((type: SnackbarTypes): string => icons?.[type] ?? icons.info, []);
 
   return (
@@ -30,8 +34,18 @@ function Toast({ className, content, type }: Props): React.ReactElement<Props> {
         />
       </div>
       <div className='snackbar-content'>{content}</div>
-      <div className='snackbar-close'>
-        <ToastCloseIcon animationDurationInSeconds={TOAST_TIMEOUT / 1000} />
+      <div className='snackbar-end-group'>
+        {undoTimeout && (
+          <div
+            className='snackbar-undo'
+            onClick={onUndoClick}
+          >
+            {t<string>('Undo')}
+          </div>
+        )}
+        <div className='snackbar-close'>
+          <ToastCloseIcon animationDurationInSeconds={TOAST_TIMEOUT / 1000} />
+        </div>
       </div>
     </div>
   );
@@ -55,7 +69,7 @@ export default styled(Toast)(
   width: 344px;
   padding: 16px;
   box-sizing: border-box;
-  animation: toast 0.2s, toast  0.2s linear 1.4s reverse;
+  animation: toast 0.2s, toast  0.2s linear ${TOAST_TIMEOUT / 1000}s reverse;
   z-index: ${Z_INDEX.TOAST}};
 
   @keyframes toast {
@@ -68,6 +82,21 @@ export default styled(Toast)(
     transform: translateY(0);
   }
 }
+
+  .snackbar-undo {
+    display: flex;
+    width: fit-content;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .snackbar-end-group {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+  }
 
   .snackbar-content {
     min-width: 200px;

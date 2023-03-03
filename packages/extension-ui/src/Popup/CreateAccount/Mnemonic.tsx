@@ -25,14 +25,14 @@ const onCopy = (): void => {
   document.execCommand('copy');
 };
 
-function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
+function Mnemonic({ onNextStep, seed }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
   const { show } = useToast();
 
   const _onCopy = useCallback((): void => {
     onCopy();
-    show(t('Copied'));
+    show(t('Copied'), 'success');
   }, [show, t]);
 
   return (
@@ -42,7 +42,9 @@ function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
         seed={seed}
       />
       <Warning>
-        {t<string>("Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets.")}
+        {t<string>(
+          "Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets."
+        )}
       </Warning>
       <VerticalSpace />
       <Checkbox

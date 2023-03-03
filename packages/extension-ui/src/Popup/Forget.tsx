@@ -11,6 +11,7 @@ import helpIcon from '../assets/help.svg';
 import forgetIconSVG from '../assets/vanish.svg';
 import { ActionContext, Address, Button, ButtonArea, Svg, VerticalSpace } from '../components';
 import HelperFooter from '../components/HelperFooter';
+import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';
@@ -28,21 +29,24 @@ function Forget({
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
+  const { show } = useToast();
 
   const _goTo = useCallback((path: string) => () => onAction(path), [onAction]);
 
   const _onClick = useCallback((): void => {
-    setIsBusy(true);
-    forgetAccount(address)
-      .then(() => {
-        setIsBusy(false);
-        onAction('/');
-      })
-      .catch((error: Error) => {
-        setIsBusy(false);
-        console.error(error);
-      });
-  }, [address, onAction]);
+    show(t<string>('Account forgotten'), 'success', () => {
+      setIsBusy(true);
+      forgetAccount(address)
+        .then(() => {
+          setIsBusy(false);
+          onAction('/');
+        })
+        .catch((error: Error) => {
+          setIsBusy(false);
+          console.error(error);
+        });
+    });
+  }, [address, onAction, show, t]);
 
   const footer = (
     <HelperFooter>

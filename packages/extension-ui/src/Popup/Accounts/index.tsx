@@ -104,6 +104,7 @@ export default styled(Accounts)(
   ({ theme }: Props) => `
   height: calc(100vh - 2px);
   scrollbar-width: none;
+  margin-top: 16px;
 
   &::-webkit-scrollbar {
     display: none;

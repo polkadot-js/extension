@@ -1,7 +1,8 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
+import { noop } from 'rxjs';
 
 import { SnackbarTypes } from '../../types';
 import { ToastContext } from '..';
@@ -11,32 +12,58 @@ interface ToastProviderProps {
   children?: React.ReactNode;
 }
 
-export const TOAST_TIMEOUT = 1500;
+export const TOAST_TIMEOUT = 2500;
 
 const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<ToastProviderProps> => {
   const [content, setContent] = useState('');
   const [visible, setVisible] = useState(false);
   const [type, setType] = useState<SnackbarTypes>('info');
+  const method = useRef<NodeJS.Timeout>();
 
-  const show = useCallback((message: string, type: SnackbarTypes = 'info'  ): () => void => {
-    const timerId = setTimeout(() => setVisible(false), TOAST_TIMEOUT);
+  const cancelCallback = useCallback(() => {
+    setVisible(false);
+    clearTimeout(method.current);
+    method.current = undefined;
+  }, [method]);
 
-    setContent(message);
-    setVisible(true);
+  const show = useCallback(
+    (message: string, type: SnackbarTypes = 'info', callback?: () => void): (() => void) => {
+      if (visible) {
+        return noop;
+      }
 
-    if(type){
-      setType(type);
-    }
+      if (callback) {
+        method.current = setTimeout(() => callback(), TOAST_TIMEOUT);
+      }
 
-    return (): void => clearTimeout(timerId);
-  }, []);
+      const timerId = setTimeout(() => {
+        setVisible(false);
+        cancelCallback();
+      }, TOAST_TIMEOUT);
+
+      setContent(message);
+      setVisible(true);
+
+      if (type) {
+        setType(type);
+      }
+
+      return (): void => {
+        clearTimeout(timerId);
+        cancelCallback();
+      };
+    },
+    [cancelCallback, visible]
+  );
 
   return (
     <ToastContext.Provider value={{ show }}>
       {children}
       <Toast
         content={content}
+        onUndoClick={cancelCallback}
         type={type}
+        undoTimeout={method.current}
         visible={visible}
       />
     </ToastContext.Provider>

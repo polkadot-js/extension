@@ -74,7 +74,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       goHome();
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');
-    } else if (!hasInternalConfirmations && isOpenPModal) {
+    } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
       openPModal(null);
     }
   }, [accounts, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
@@ -96,7 +96,6 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
     <WalletModalContext>
       <PageWrapper
         animateOnce={true}
-        loadingClass={'root-loading'}
         resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings'])}
       >
         <DefaultRoute>

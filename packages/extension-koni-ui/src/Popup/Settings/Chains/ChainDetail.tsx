@@ -6,10 +6,11 @@ import { isUrl } from '@subwallet/extension-base/utils';
 import { ProviderSelector } from '@subwallet/extension-koni-ui/components/Field/ProviderSelector';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
+import useFetchChainState from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainState';
 import useGetChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainAssetInfo';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { ChainDetail as _ChainDetail } from '@subwallet/extension-koni-ui/Popup/Settings/Chains/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ButtonProps, Col, Field, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
@@ -44,9 +45,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [isValueValid, setIsValueValid] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { chainInfo, chainState } = useMemo(() => {
-    return location.state as _ChainDetail;
+  const chainSlug = useMemo(() => {
+    return location.state as string;
   }, [location.state]);
+
+  const chainInfo = useFetchChainInfo(chainSlug);
+  const chainState = useFetchChainState(chainSlug);
 
   const nativeTokenInfo = useGetChainAssetInfo(_getChainNativeTokenSlug(chainInfo));
 

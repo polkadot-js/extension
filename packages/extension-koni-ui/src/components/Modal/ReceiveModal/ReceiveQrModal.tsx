@@ -3,7 +3,7 @@
 
 import { _getBlockExplorerFromChain, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
+import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';

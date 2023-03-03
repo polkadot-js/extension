@@ -6,7 +6,7 @@ import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrap
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetAccountInfoByAddress from '@subwallet/extension-koni-ui/hooks/screen/common/useGetAccountInfoByAddress';
-import useGetChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
+import useGetChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';

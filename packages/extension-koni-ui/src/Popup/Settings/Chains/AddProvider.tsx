@@ -7,7 +7,7 @@ import { _generateCustomProviderKey, _getChainNativeTokenBasicInfo, _isChainEvmC
 import { isUrl } from '@subwallet/extension-base/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainInfo';
+import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
@@ -17,7 +17,7 @@ import { ActivityIndicator, ButtonProps, Col, Form, Input, Row, Tooltip } from '
 import { useForm } from '@subwallet/react-ui/es/form/Form';
 import Icon from '@subwallet/react-ui/es/icon';
 import { Globe, Info, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
-import { FieldData, RuleObject } from 'rc-field-form/lib/interface';
+import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -123,40 +123,39 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     const newProvider = form.getFieldValue('provider') as string;
 
-    const { newProviderKey, newProviders } = parseProviders(newProvider, chainInfo.providers);
+    const { newProviderKey, newProviders } = parseProviders(newProvider.replaceAll(' ', ''), chainInfo.providers);
 
     const params: _NetworkUpsertParams = {
       mode: 'update',
       chainEditInfo: {
+        slug: chainInfo.slug,
         currentProvider: newProviderKey,
         providers: newProviders
       }
     };
 
-    console.log(params);
+    upsertChain(params)
+      .then((result) => {
+        setLoading(false);
 
-    // upsertChain(params)
-    //   .then((result) => {
-    //     setLoading(false);
-    //
-    //     if (result) {
-    //       showNotification({
-    //         message: t('Added a provider successfully')
-    //       });
-    //       navigate(-1);
-    //     } else {
-    //       showNotification({
-    //         message: t('An error occurred, please try again')
-    //       });
-    //     }
-    //   })
-    //   .catch(() => {
-    //     setLoading(false);
-    //     showNotification({
-    //       message: t('An error occurred, please try again')
-    //     });
-    //   });
-  }, [chainInfo.providers, form, navigate, showNotification, t]);
+        if (result) {
+          showNotification({
+            message: t('Added a provider successfully')
+          });
+          navigate(-1);
+        } else {
+          showNotification({
+            message: t('An error occurred, please try again')
+          });
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+        showNotification({
+          message: t('An error occurred, please try again')
+        });
+      });
+  }, [chainInfo.providers, chainInfo.slug, form, navigate, showNotification, t]);
 
   const onCancel = useCallback(() => {
     navigate(-1);
@@ -189,45 +188,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         return t('Error validating this provider');
     }
   }, [t]);
-
-  const onFormValuesChange = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
-    let isFieldsValid = true;
-
-    for (const changedField of allFields) {
-      if (changedField.errors && changedField.errors.length > 0) {
-        isFieldsValid = false;
-        break;
-      }
-    }
-
-    const provider = form.getFieldValue('provider') as string;
-
-    if (isFieldsValid && provider !== '') {
-      setIsShowConnectionStatus(true);
-      setIsValidating(true);
-      // const parsedProvider = provider.replaceAll(' ', '');
-
-      validateCustomChain(provider, chainInfo.slug)
-        .then((result) => {
-          setIsValidating(false);
-
-          if (result.success) {
-            setProviderValidation({ status: 'success' });
-          }
-
-          if (result.error) {
-            setProviderValidation({ status: 'error', message: handleErrorMessage(result.error) });
-          }
-        })
-        .catch(() => {
-          setIsValidating(false);
-          setProviderValidation({ status: 'error', message: t('Error validating this provider') });
-        });
-    } else {
-      setProviderValidation({ status: '' });
-      setIsShowConnectionStatus(false);
-    }
-  }, [chainInfo.slug, form, handleErrorMessage, t]);
 
   const providerSuffix = useCallback(() => {
     if (!isShowConnectionStatus) {
@@ -267,15 +227,43 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return <></>;
   }, [isShowConnectionStatus, isValidating, providerValidation.status, token]);
 
-  const providerValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+  const providerValidator = useCallback((rule: RuleObject, provider: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      if (value.length === 0 || isUrl(value)) {
+      if (provider.length === 0) {
         resolve();
       } else {
-        reject(new Error(t('Provider URL is not valid')));
+        if (isUrl(provider)) {
+          setIsShowConnectionStatus(true);
+          setIsValidating(true);
+          const parsedProvider = provider.replaceAll(' ', '');
+
+          validateCustomChain(parsedProvider, chainInfo.slug)
+            .then((result) => {
+              setIsValidating(false);
+
+              if (result.success) {
+                resolve();
+                setProviderValidation({ status: 'success' });
+              }
+
+              if (result.error) {
+                reject(new Error(handleErrorMessage(result.error)));
+                setProviderValidation({ status: 'error', message: handleErrorMessage(result.error) });
+              }
+            })
+            .catch(() => {
+              setIsValidating(false);
+              reject(new Error(t('Error validating this provider')));
+              setProviderValidation({ status: 'error', message: t('Error validating this provider') });
+            });
+        } else {
+          reject(new Error(t('Provider URL is not valid')));
+          setProviderValidation({ status: '' });
+          setIsShowConnectionStatus(false);
+        }
       }
     });
-  }, [t]);
+  }, [chainInfo.slug, handleErrorMessage, t]);
 
   return (
     <PageWrapper
@@ -291,7 +279,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         onBack={onBack}
         rightFooterButton={{
           block: true,
-          // disabled: isSubmitDisabled(),
+          disabled: isSubmitDisabled(),
           loading: loading,
           onClick: onSubmit,
           children: 'Save'
@@ -308,12 +296,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           <Form
             form={form}
             initialValues={formInitValues()}
-            onFieldsChange={onFormValuesChange}
           >
             <div className={'add_provider__attributes_container'}>
               <Form.Item
                 name={'provider'}
                 rules={[{ validator: providerValidator }]}
+                validateTrigger={['onBlur']}
               >
                 <Input
                   disabled={isValidating}
@@ -388,11 +376,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   </Form.Item>
                 </div>
               </Tooltip>
-
-              <Form.Item
-                help={providerValidation.message}
-                validateStatus={providerValidation.status}
-              />
             </div>
           </Form>
         </div>
@@ -429,6 +412,10 @@ const AddProvider = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-input-container .ant-input-affix-wrapper': {
       overflow: 'hidden'
+    },
+
+    '.ant-form-item-with-help .ant-form-item-explain': {
+      paddingBottom: 0
     }
   });
 });

@@ -1,4 +1,4 @@
-     588	Jaco                          	Add wf continue-on-error: true (#1217)
+     589	Jaco                          	Bump dev & update gh workflows (#1218)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

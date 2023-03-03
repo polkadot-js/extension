@@ -13,6 +13,8 @@ export enum KoniTransactionStatus {
   COMPLETED = 'COMPLETED'
 }
 
+export type SwExtrinsicType = 'transfer.balance' | 'transfer.token' | 'transfer.xcm' | 'send_nft' | 'crowdloan' | 'staking.stake' | 'staking.unstake' | 'staking.bond' | 'staking.unbond' | 'staking.claim_reward' | 'evm.smart_contract';
+
 export interface SWTransaction {
   id: string;
   url?: string;
@@ -23,7 +25,7 @@ export interface SWTransaction {
   data: any;
   status: KoniTransactionStatus;
   extrinsicHash: string;
-  extrinsicType: string;
+  extrinsicType: SwExtrinsicType;
   createdAt: Date;
   updatedAt: Date;
   errors?: string[];

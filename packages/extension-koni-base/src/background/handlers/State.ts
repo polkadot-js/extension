@@ -1768,7 +1768,7 @@ export default class KoniState {
       chain: networkKey,
       url,
       data: { ...transaction },
-      extrinsicType: 'evm:extrinsic:external',
+      extrinsicType: transaction.value ? 'transfer.balance' : 'evm.smart_contract',
       chainType: 'ethereum'
     });
 

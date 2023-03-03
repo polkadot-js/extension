@@ -1843,7 +1843,7 @@ export default class KoniExtension {
       swTransactionInput.chainType = 'ethereum';
 
       if (_isTokenEvmSmartContract(tokenInfo)) {
-        swTransactionInput.extrinsicType = 'ethereum:erc20:transfer';
+        swTransactionInput.extrinsicType = 'transfer.token';
         const assetAddress = _getContractAddressOfToken(tokenInfo);
 
         const [transaction, , estimateFee] = await getERC20TransactionObject(assetAddress, chainInfo, from, to, transferVal, isTransferAll, evmApiMap);
@@ -1855,7 +1855,7 @@ export default class KoniExtension {
           hashPayload: fromPair?.meta?.external ? this.#koniState.generateHashPayload(networkKey, transaction) : ''
         };
       } else {
-        swTransactionInput.extrinsicType = 'ethereum:balance:transfer';
+        swTransactionInput.extrinsicType = 'transfer.balance';
 
         const [transaction, , estimateFee] = await getEVMTransactionObject(chainInfo, to, transferVal, isTransferAll, evmApiMap);
 
@@ -1882,7 +1882,7 @@ export default class KoniExtension {
       });
 
       if (transaction) {
-        swTransactionInput.extrinsicType = 'substrate::transfer';
+        swTransactionInput.extrinsicType = 'transfer.balance';
         swTransactionInput.chainType = 'substrate';
         swTransactionInput.transaction = transaction;
       }

@@ -84,7 +84,7 @@ export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactEle
 
   return (
     <ConfigProvider
-      getPopupContainer={getPopupContainer}
+      getModalContainer={getPopupContainer}
       theme={themeConfig}
     >
       <ThemeGenerator themeConfig={themeConfig}>

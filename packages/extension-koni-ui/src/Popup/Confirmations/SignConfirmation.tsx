@@ -8,10 +8,11 @@ import ViewDetailIcon from '@subwallet/extension-koni-ui/components/Icon/ViewDet
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useOpenDetailModal from '@subwallet/extension-koni-ui/hooks/confirmation/useOpenDetailModal';
-import { approveSignPasswordV2, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
+import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
 import BaseDetailModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/BaseDetailModal';
 import SubstrateMessageDetail from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/Substrate/Message';
-import DisplaySubstrateQr from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/Display/Substrate';
+import DisplayPayloadModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload';
+import SubstrateQr from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload/Substrate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getSignMode } from '@subwallet/extension-koni-ui/util/account';
@@ -26,6 +27,7 @@ import styled from 'styled-components';
 
 import { TypeRegistry } from '@polkadot/types';
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
+import { HexString } from '@polkadot/util/types';
 
 interface Props extends ThemeProps {
   request: SigningRequest;
@@ -36,12 +38,20 @@ interface Data {
   payload: ExtrinsicPayload | null;
 }
 
+interface SignatureSimple {
+  signature: HexString
+}
+
 async function handleConfirm ({ id }: SigningRequest) {
   return await approveSignPasswordV2({ id });
 }
 
 async function handleCancel ({ id }: SigningRequest) {
   return await cancelSignRequest(id);
+}
+
+async function handleSignature ({ id }: SigningRequest, { signature }: SignatureSimple) {
+  return await approveSignSignature(id, signature);
 }
 
 const registry = new TypeRegistry();
@@ -87,7 +97,7 @@ function Component ({ className, request }: Props) {
     });
   }, [request]);
 
-  const onConfirmPassword = useCallback(() => {
+  const onApprovePassword = useCallback(() => {
     setLoading(true);
 
     setTimeout(() => {
@@ -101,6 +111,20 @@ function Component ({ className, request }: Props) {
     }, 300);
   }, [request]);
 
+  const onApproveSignature = useCallback((signature: SignatureSimple) => {
+      setLoading(true);
+
+      setTimeout(() => {
+        handleSignature(request, signature)
+          .catch((e) => {
+            console.log(e);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }, 300);
+  }, [request]);
+
   const onConfirmQr = useCallback(() => {
     activeModal(CONFIRMATION_QR_MODAL);
   }, [activeModal]);
@@ -111,9 +135,11 @@ function Component ({ className, request }: Props) {
         onConfirmQr();
         break;
       default:
-        onConfirmPassword();
+        onApprovePassword();
     }
-  }, [onConfirmPassword, onConfirmQr, signMode]);
+  }, [onApprovePassword, onConfirmQr, signMode]);
+
+
 
   useEffect((): void => {
     const payload = request.request.payload;
@@ -191,11 +217,17 @@ function Component ({ className, request }: Props) {
       >
         {hexBytes && (<SubstrateMessageDetail bytes={hexBytes} />)}
       </BaseDetailModal>
-      <DisplaySubstrateQr
-        address={account.address}
-        genesisHash={genesisHash}
-        payload={payload || hexBytes || ''}
-      />
+      {
+        signMode === SIGN_MODE.QR && (
+          <DisplayPayloadModal>
+            <SubstrateQr
+              address={account.address}
+              genesisHash={genesisHash}
+              payload={payload || hexBytes || ''}
+            />
+          </DisplayPayloadModal>
+        )
+      }
     </>
   );
 }

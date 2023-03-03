@@ -8,7 +8,7 @@ import { qrcode } from '@polkadot/react-qr/qrcode';
 import { objectSpread } from '@polkadot/util';
 import { xxhashAsHex } from '@polkadot/util-crypto';
 
-const FRAME_DELAY = 100;
+const FRAME_DELAY = 10;
 const TIMER_INC = 10;
 
 const getDataUrl = (value: Uint8Array): string => {
@@ -42,7 +42,7 @@ const useCreateQrPayload = (value: Uint8Array, skipEncoding?: boolean): { images
   });
 
   useEffect(() => {
-    const nextFrame = () =>
+    const nextFrame = () => {
       setFrameState((state) => {
         // when we have a single frame, we only ever fire once
         if (state.frames.length <= 1) {
@@ -64,6 +64,7 @@ const useCreateQrPayload = (value: Uint8Array, skipEncoding?: boolean): { images
           index: frameIdx
         });
       });
+    };
 
     timerRef.current.timerId = setTimeout(nextFrame, FRAME_DELAY);
 

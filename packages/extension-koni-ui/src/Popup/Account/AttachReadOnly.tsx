@@ -10,12 +10,12 @@ import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging'
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { readOnlyScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
-import { Button, Form, Icon, Input, SwQrScanner } from '@subwallet/react-ui';
+import { Button, Form, Icon, Input, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 import CN from 'classnames';
 import { Eye, Info, QrCode } from 'phosphor-react';
-import React, { ChangeEventHandler, useCallback, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -28,15 +28,18 @@ const FooterIcon = (
   />
 );
 
+const modalId = 'attach-read-only-scanner-modal';
+
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
-  const goHome = useDefaultNavigate().goHome;
+  const { goHome } = useDefaultNavigate();
+
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const [address, setAddress] = useState('');
   const [reformatAddress, setReformatAddress] = useState('');
-  const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isEthereum, setIsEthereum] = useState(false);
   const [scanningError, setScanningError] = useState(false);
@@ -73,22 +76,22 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const openCamera = useCallback(() => {
     setScanningError(false);
-    setVisible(true);
-  }, []);
+    activeModal(modalId);
+  }, [activeModal]);
 
   const closeCamera = useCallback(() => {
     setScanningError(false);
-    setVisible(false);
-  }, []);
+    inactiveModal(modalId);
+  }, [inactiveModal]);
 
   const onSuccess = useCallback((result: ScannerResult) => {
     const rs = handleResult(result.text);
 
     if (rs) {
-      setVisible(false);
+      inactiveModal(modalId);
       setAddress(result.text);
     }
-  }, [handleResult]);
+  }, [handleResult, inactiveModal]);
 
   const onError = useCallback((error: string) => {
     setReformatAddress('');
@@ -204,11 +207,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
         <SwQrScanner
           className={className}
+          id={modalId}
           isError={!!validateState.status && scanningError}
           onClose={closeCamera}
           onError={onError}
           onSuccess={onSuccess}
-          open={visible}
           overlay={scanningError && validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
         />
       </div>

@@ -4,7 +4,7 @@
 import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, NewAccountModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components/Modal';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { Debugger } from '@subwallet/extension-koni-ui/Popup/Debugger';
-import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import { Bug } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -48,11 +48,13 @@ const DebugTrigger = styled.div(({ theme }) => ({
 }));
 
 export const WalletModalContext = ({ children }: Props) => {
-  const { activeList, activeModal, inactiveModals, scannerOpen } = useContext(ModalContext);
+  const { activeList, activeModal, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const { openPModal } = usePredefinedModal();
 
   const hasActiveModal = useMemo(() => !!activeList.length, [activeList.length]);
+
+  useExcludeModal('confirmations');
 
   useEffect(() => {
     const confirmID = searchParams.get('popup');
@@ -80,7 +82,7 @@ export const WalletModalContext = ({ children }: Props) => {
   return <>
     <div
       id='popup-container'
-      style={{ zIndex: hasActiveModal || scannerOpen ? undefined : -1 }}
+      style={{ zIndex: hasActiveModal ? undefined : -1 }}
     />
     {children}
     <DebugTrigger>
@@ -102,6 +104,7 @@ export const WalletModalContext = ({ children }: Props) => {
     <SwModal
       className={'modal-full'}
       closable={false}
+      destroyOnClose={true}
       id={'confirmations'}
       onCancel={onCloseModal}
       transitionName={'fade'}

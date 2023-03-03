@@ -10,3 +10,4 @@ export const DERIVE_ACCOUNT_MODAL = 'derive-account-modal';
 export const REQUEST_CREATE_PASSWORD_MODAL = 'request-create-password-modal';
 export const CONFIRMATION_DETAIL_MODAL = 'confirmation-detail-modal';
 export const CONFIRMATION_QR_MODAL = 'confirmation-qr-modal';
+export const CONFIRMATION_SCAN_MODAL = 'confirmation-scan-modal';

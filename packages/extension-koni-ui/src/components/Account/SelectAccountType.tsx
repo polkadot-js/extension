@@ -85,9 +85,9 @@ const Component: React.FC<SelectAccountTypeProps> = (props: SelectAccountTypePro
                 className={CN('setting-item', { selected: _selected })}
                 leftItemIcon={(
                   <Logo
+                    network={item.icon}
                     shape='circle'
                     size={28}
-                    network={item.icon}
                   />
                 )}
                 name={t<string>(item.label)}

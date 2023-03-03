@@ -26,7 +26,7 @@ export default function Popup (): React.ReactElement {
                 <QRContextProvider>
                   <NotificationProvider>
                     <RouterProvider
-                      fallbackElement={<LoadingScreen />}
+                      fallbackElement={<LoadingScreen className='root-loading' />}
                       router={router}
                     />
                   </NotificationProvider>

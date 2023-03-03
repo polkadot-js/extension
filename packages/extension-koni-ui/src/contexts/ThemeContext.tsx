@@ -9,7 +9,7 @@ import { generateTheme, SW_THEME_CONFIGS, SwThemeConfig } from '@subwallet/exten
 import { ConfigProvider, theme as reactUiTheme } from '@subwallet/react-ui';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { createGlobalStyle, ThemeProvider as StyledComponentThemeProvider } from 'styled-components';
+import styled, { createGlobalStyle, ThemeProvider as StyledComponentThemeProvider } from 'styled-components';
 
 import { Theme } from '../types';
 
@@ -48,11 +48,28 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       lineHeight: token.lineHeight
     },
 
+    '.text-danger': {
+      color: token.colorError
+    },
+
+    '.h3-text': {
+      fontSize: token.fontSizeHeading3,
+      lineHeight: token.lineHeightHeading3,
+      fontWeight: token.headingFontWeight
+    },
+
+    '.h4-text': {
+      fontSize: token.fontSizeHeading4,
+      lineHeight: token.lineHeightHeading4,
+      fontWeight: token.headingFontWeight
+    },
+
     '.h5-text': {
       fontWeight: token.headingFontWeight,
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5
     }
+
   });
 });
 
@@ -76,7 +93,10 @@ export interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-const getPopupContainer = () => document.getElementById('popup-container') || document.body;
+const getModalContainer = () => document.getElementById('popup-container') || document.body;
+const getTooltipContainer = () => document.getElementById('tooltip-container') || document.body;
+
+const TooltipContainer = styled.div`z-index: 10000`;
 
 export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactElement<ThemeProviderProps> {
   const themeName = useSelector((state: RootState) => state.settings.theme);
@@ -84,10 +104,12 @@ export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactEle
 
   return (
     <ConfigProvider
-      getModalContainer={getPopupContainer}
+      getModalContainer={getModalContainer}
+      getPopupContainer={getTooltipContainer}
       theme={themeConfig}
     >
       <ThemeGenerator themeConfig={themeConfig}>
+        <TooltipContainer id='tooltip-container' />
         {children}
       </ThemeGenerator>
     </ConfigProvider>

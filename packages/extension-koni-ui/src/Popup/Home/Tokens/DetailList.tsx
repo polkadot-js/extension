@@ -47,9 +47,10 @@ function Component (): React.ReactElement {
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
+  const [routeParams] = useState<TokenDetailParam>(location.state as TokenDetailParam);
   const { symbol,
     tokenGroup: currentTokenGroup,
-    tokenSlug: currentTokenSlug } = location.state as TokenDetailParam;
+    tokenSlug: currentTokenSlug } = routeParams;
   const { accountBalance: { tokenBalanceMap, tokenGroupBalanceMap }, tokenGroupStructure: { tokenGroupMap } } = useContext(HomeContext);
 
   const { activeModal, inactiveModal } = useContext(ModalContext);

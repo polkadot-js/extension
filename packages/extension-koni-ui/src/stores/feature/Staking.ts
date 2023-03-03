@@ -7,7 +7,7 @@ import { ReduxStatus, StakingStore } from '@subwallet/extension-koni-ui/stores/t
 
 const initialState = {
   reduxStatus: ReduxStatus.INIT,
-  stakingMap: {},
+  stakingMap: [],
   stakeUnlockingMap: [],
   stakingRewardMap: []
 } as StakingStore;
@@ -16,7 +16,7 @@ const stakingSlice = createSlice({
   initialState,
   name: 'staking',
   reducers: {
-    updateStaking (state, action: PayloadAction<Record<string, StakingItem>>) {
+    updateStaking (state, action: PayloadAction<StakingItem[]>) {
       const payload = action.payload;
 
       return {

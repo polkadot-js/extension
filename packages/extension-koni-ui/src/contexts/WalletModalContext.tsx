@@ -112,7 +112,7 @@ export const WalletModalContext = ({ children }: Props) => {
     </SwModal>
     <SwModal
       className={'modal-full'}
-      closable={false}
+      closable={true}
       id={'confirmations'}
       onCancel={onCloseModal}
       transitionName={'fade'}

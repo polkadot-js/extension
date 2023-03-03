@@ -6,20 +6,26 @@ import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import { Button, Icon, Input, InputRef, SwQrScanner } from '@subwallet/react-ui';
+import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
-import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useState } from 'react';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
-type Props = ThemeProps & BasicInputWrapper;
+interface Props extends BasicInputWrapper, ThemeProps {
+  showAddressBook?: boolean;
+  showScanner?: boolean;
+}
 
-function Component ({ className = '', label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+const MODAL_ID = 'input-address';
+
+function Component ({ className = '', label, onChange, placeholder, showAddressBook = false, showScanner = true, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [isScannerOpen, setScannerOpen] = useState(false);
+
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     const val = event.target.value;
@@ -28,21 +34,21 @@ function Component ({ className = '', label, onChange, placeholder, value }: Pro
   }, [onChange]);
 
   const onOpenScanner = useCallback(() => {
-    setScannerOpen(true);
-  }, []);
+    activeModal(MODAL_ID);
+  }, [activeModal]);
 
   const onCloseScanner = useCallback(() => {
-    setScannerOpen(false);
-  }, []);
+    inactiveModal(MODAL_ID);
+  }, [inactiveModal]);
 
   const onScanError = useCallback(() => {
     // do something
   }, []);
 
   const onSuccess = useCallback((result: ScannerResult) => {
-    setScannerOpen(false);
+    inactiveModal(MODAL_ID);
     onChange && onChange({ target: { value: result.text } });
-  }, [onChange]);
+  }, [inactiveModal, onChange]);
 
   // todo: Will work with "Manage address book" feature later
   return (
@@ -79,7 +85,7 @@ function Component ({ className = '', label, onChange, placeholder, value }: Pro
         // status={'error'}
         suffix={(
           <>
-            <Button
+            {showAddressBook && <Button
               icon={(
                 <Icon
                   phosphorIcon={Book}
@@ -88,8 +94,8 @@ function Component ({ className = '', label, onChange, placeholder, value }: Pro
               )}
               size='xs'
               type='ghost'
-            />
-            <Button
+            />}
+            {showScanner && <Button
               icon={(
                 <Icon
                   phosphorIcon={Scan}
@@ -99,7 +105,7 @@ function Component ({ className = '', label, onChange, placeholder, value }: Pro
               onClick={onOpenScanner}
               size='xs'
               type='ghost'
-            />
+            />}
           </>
         )}
         value={value}
@@ -107,10 +113,10 @@ function Component ({ className = '', label, onChange, placeholder, value }: Pro
 
       <SwQrScanner
         className={className}
+        id={MODAL_ID}
         onClose={onCloseScanner}
         onError={onScanError}
         onSuccess={onSuccess}
-        open={isScannerOpen}
       />
     </>
   );

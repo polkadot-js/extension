@@ -93,8 +93,8 @@ export interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-const getPopupContainer = () => document.getElementById('popup-container') || document.body;
-const getTooltipContainer = () => document.getElementById('tooltip-container') || document.body;
+const getModalContainer = () => document.getElementById('popup-container') || document.body;
+const getPopupContainer = () => document.getElementById('tooltip-container') || document.body;
 
 const TooltipContainer = styled.div`z-index: 10000`;
 
@@ -104,8 +104,8 @@ export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactEle
 
   return (
     <ConfigProvider
+      getModalContainer={getModalContainer}
       getPopupContainer={getPopupContainer}
-      getTooltipContainer={getTooltipContainer}
       theme={themeConfig}
     >
       <ThemeGenerator themeConfig={themeConfig}>

@@ -1,0 +1,153 @@
+<!-- Html Simple boilerplate display all image in this folder -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Deprecated logos</title>
+  <style>
+    .logo-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .logo-item img {
+        width: 50px;
+        height: 50px;
+        margin-right: 10px;
+      }
+  </style>
+</head>
+<body>
+    <h1>Deprecated logos</h1>
+    <div id="logo-list-wrapper">
+      <ul id="logo-list"></ul>
+    </div>
+<script>
+const deprecatedLogos = {
+  '01.chaosdao.png': './01.chaosdao.png',
+  '03.Ukraine.png': './03.Ukraine.png',
+  '04.Aris.png': './04.Aris.png',
+  '05.ArthSwap.svg': './05.ArthSwap.svg',
+  '08.Beans.png': './08.Beans.png',
+  '11.Chrwna.png': './11.Chrwna.png',
+  '14.csg.png': './14.csg.png',
+  '15.CSM.png': './15.CSM.png',
+  '18.KMA.png': './18.KMA.png',
+  '22.JPYD.png': './22.JPYD.png',
+  '23.kbtc.png': './23.kbtc.png',
+  '33.Moonbase.png': './33.Moonbase.png',
+  '35.OAK_Network.png': './35.OAK_Network.png',
+  '36.Opal.png': './36.Opal.png',
+  '37.Oru.png': './37.Oru.png',
+  '40.Pkex.png': './40.Pkex.png',
+  '40.PolarisDAO.png': './40.PolarisDAO.png',
+  '44.SiriusFinance.png': './44.SiriusFinance.png',
+  '45.Starlay.png': './45.Starlay.png',
+  '47.TaiKSM.png': './47.TaiKSM.png',
+  '50.StellaSwap.png': './50.StellaSwap.png',
+  '52.Zenlink.png': './52.Zenlink.png',
+  '53.3USD.png': './53.3USD.png',
+  '57.AdtrisDAO.png': './57.AdtrisDAO.png',
+  '58.aUSD.png': './58.aUSD.png',
+  '60.Bill.png': './60.Bill.png',
+  '62.BNB.png': './62.BNB.png',
+  '64.BTC.png': './64.BTC.png',
+  '65.BUSD.png': './65.BUSD.png',
+  '70.DAI.png': './70.DAI.png',
+  '73.Default.png': './73.Default.png',
+  '74.Dolphin.png': './74.Dolphin.png',
+  '79.Glint.png': './79.Glint.png',
+  '88.Odyssey.png': './88.Odyssey.png',
+  '89.Pangolin.png': './89.Pangolin.png',
+  '95.Rococo.png': './95.Rococo.png',
+  '98.Shiba.png': './98.Shiba.png',
+  '103.tDOT.png': './103.tDOT.png',
+  '105.USDC.png': './105.USDC.png',
+  '106.USDT.png': './106.USDT.png',
+  '107.Westend.png': './107.Westend.png',
+  '109.cws.png': './109.cws.png',
+  '110.solarflare.png': './110.solarflare.png',
+  '111.rib.png': './111.rib.png',
+  '114.kapex.png': './114.kapex.png',
+  '119.gmDie.png': './119.gmDie.png',
+  '120.amplitude.jpg': './120.amplitude.jpg',
+  '123.iBTC.jpg': './123.iBTC.jpg',
+  '128.BIT.png': './128.BIT.png',
+  '130.PANX.jpg': './130.PANX.jpg',
+  '131.Arctic.png': './131.Arctic.png',
+  '132.LDO.png': './132.LDO.png',
+  '133.1inch.jpg': './133.1inch.jpg',
+  '134.apecoin.jpg': './134.apecoin.jpg',
+  '135.bat.jpg': './135.bat.jpg',
+  '139.link.jpg': './139.link.jpg',
+  '140.chiliz.jpg': './140.chiliz.jpg',
+  '141.comp.jpg': './141.comp.jpg',
+  '142.cro.jpg': './142.cro.jpg',
+  '143.enjin.jpg': './143.enjin.jpg',
+  '144.ens.jpg': './144.ens.jpg',
+  '145.FTM.jpg': './145.FTM.jpg',
+  '146.gala.jpg': './146.gala.jpg',
+  '147.kyber.jpg': './147.kyber.jpg',
+  '148.MKR.jpg': './148.MKR.jpg',
+  '149.MATIC.jpg': './149.MATIC.jpg',
+  '150.SAND.jpg': './150.SAND.jpg',
+  '151.NEAR.jpg': './151.NEAR.jpg',
+  '153.THETA.jpg': './153.THETA.jpg',
+  '154.Uniswap.jpg': './154.Uniswap.jpg',
+  '156.wsteth.jpg': './156.wsteth.jpg',
+  '157.BNB.png': './157.BNB.png',
+  '157.busdt.png': './157.busdt.png',
+  '158.cardano.png': './158.cardano.png',
+  '159.pancake.png': './159.pancake.png',
+  '160.vbusd.png': './160.vbusd.png',
+  '161.vusdt.png': './161.vusdt.png',
+  '162.xrp.png': './162.xrp.png',
+  '164.xxnetwork.png': './164.xxnetwork.png',
+  '166.fusotao.png': './166.fusotao.png',
+  '167.discovol.png': './167.discovol.png',
+  '168.atocha.png': './168.atocha.png',
+  '169.myriad.png': './169.myriad.png',
+  '170.dbio.png': './170.dbio.png',
+  '171.barnacle.png': './171.barnacle.png',
+  '172.collectives.png': './172.collectives.png',
+  '175.frequency.png': './175.frequency.png',
+  '176.hashed.png': './176.hashed.png',
+  '180.luhn.png': './180.luhn.png',
+  '183.creditcoin.png': './183.creditcoin.png',
+  '184.crownSterling.png': './184.crownSterling.png',
+  '185.dockMainnet.png': './185.dockMainnet.png',
+  '186.kusari.png': './186.kusari.png',
+  '187.logion.png': './187.logion.png',
+  '188.nftmart.png': './188.nftmart.png',
+  '189.polymesh.png': './189.polymesh.png',
+  '190.riochain.png': './190.riochain.png',
+  '191.sherpax.png': './191.sherpax.png',
+  '192.swapdex.png': './192.swapdex.png',
+  '193.3dpass.png': './193.3dpass.png',
+  '196.tfa.png': './196.tfa.png'
+}
+// Create a label for each logo
+const createLabel = (name, src) => {
+  const label = document.createElement('span');
+  label.innerText = name;
+  return label;
+};
+const createLogo = (name, src) => {
+  const logo = document.createElement('img');
+  logo.src = src;
+  logo.alt = name;
+  return logo;
+};
+// Render DeprecatedLogos into #logo-list
+const logoListDiv = document.getElementById('logo-list');
+  Object.keys(deprecatedLogos).forEach((logo) => {
+    const logoDiv = document.createElement('li');
+    logoDiv.className = 'logo-item';
+    logoDiv.appendChild(createLogo(logo, deprecatedLogos[logo]));
+    logoDiv.appendChild(createLabel(logo, deprecatedLogos[logo]));
+    logoListDiv.appendChild(logoDiv);
+  });
+</script>
+</body>
+</html>

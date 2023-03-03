@@ -2,21 +2,25 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/QrScanner/ErrorNotice';
+import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
+import { convertFieldToObject } from '@subwallet/extension-koni-ui/util/form';
 import { readOnlyScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
-import { Button, Form, Icon, Input, SwQrScanner } from '@subwallet/react-ui';
+import { Form, Icon } from '@subwallet/react-ui';
+import { useForm } from '@subwallet/react-ui/es/form/Form';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
-import { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 import CN from 'classnames';
-import { Eye, Info, QrCode } from 'phosphor-react';
-import React, { ChangeEventHandler, useCallback, useState } from 'react';
+import { Eye, Info } from 'phosphor-react';
+import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -28,75 +32,64 @@ const FooterIcon = (
   />
 );
 
+interface ReadOnlyAccountInput {
+  address?: string
+}
+
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
   const goHome = useDefaultNavigate().goHome;
 
-  const [address, setAddress] = useState('');
   const [reformatAddress, setReformatAddress] = useState('');
-  const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isEthereum, setIsEthereum] = useState(false);
-  const [scanningError, setScanningError] = useState(false);
   const [validateState, setValidateState] = useState<ValidateState>({});
   const accountName = useGetDefaultAccountName();
+  const [form] = useForm<ReadOnlyAccountInput>();
+  const accounts = useSelector((root: RootState) => root.accountState.accounts);
 
-  const handleResult = useCallback((val: string): boolean => {
+  const handleResult = useCallback((val: string) => {
     const result = readOnlyScan(val);
 
     if (result) {
       setReformatAddress(result.content);
       setIsEthereum(result.isEthereum);
+    }
+  }, []);
+
+  const onFieldsChange: Callbacks<ReadOnlyAccountInput>['onFieldsChange'] = useCallback((changes: FieldData[], formData: FieldData[]) => {
+    const changeMap = convertFieldToObject<ReadOnlyAccountInput>(changes);
+
+    if (changeMap.address) {
       setValidateState({});
+      handleResult(changeMap.address);
+    }
+  }, [handleResult]);
 
-      return true;
+  const accountAddressValidator = useCallback((rule: RuleObject, value: string) => {
+    const result = readOnlyScan(value);
+
+    if (result) {
+      // For each account, check if the address already exists return promise reject
+      for (const account of accounts) {
+        if (account.address === result.content) {
+          setReformatAddress('');
+
+          return Promise.reject(t('Account already exists'));
+        }
+      }
     } else {
-      setScanningError(true);
       setReformatAddress('');
-      setValidateState({
-        message: 'Invalid address',
-        status: 'error'
-      });
 
-      return false;
+      if (value !== '') {
+        return Promise.reject(t('Invalid address'));
+      }
     }
-  }, []);
 
-  const onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
-    const val = event.target.value;
-
-    setAddress(val);
-    handleResult(val);
-  }, [handleResult]);
-
-  const openCamera = useCallback(() => {
-    setScanningError(false);
-    setVisible(true);
-  }, []);
-
-  const closeCamera = useCallback(() => {
-    setScanningError(false);
-    setVisible(false);
-  }, []);
-
-  const onSuccess = useCallback((result: ScannerResult) => {
-    const rs = handleResult(result.text);
-
-    if (rs) {
-      setVisible(false);
-      setAddress(result.text);
-    }
-  }, [handleResult]);
-
-  const onError = useCallback((error: string) => {
-    setReformatAddress('');
-    setValidateState({
-      message: error,
-      status: 'error'
-    });
-  }, []);
+    return Promise.resolve();
+  }, [accounts, t]);
 
   const onSubmit = useCallback(() => {
     setLoading(true);
@@ -135,12 +128,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, [reformatAddress, accountName, isEthereum, goHome]);
 
+  const isFormValidated = form.getFieldsError().filter(({ errors }) => errors.length).length > 0;
+
   return (
     <Layout.Base
       rightFooterButton={{
         children: t('Attach read-only account'),
         icon: FooterIcon,
-        disabled: !reformatAddress || !!validateState.status,
+        disabled: !reformatAddress || !!validateState.status || isFormValidated,
         onClick: onSubmit,
         loading: loading
       }}
@@ -174,43 +169,31 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             }}
           />
         </div>
-        <Form>
-          <Form.Item validateStatus={validateState.status}>
-            <Input
-              label={t('Account address')}
-              onChange={onChange}
-              placeholder={t('Please type or paste account address')}
-              suffix={(
-                <Button
-                  icon={(
-                    <Icon
-                      phosphorIcon={QrCode}
-                      size='sm'
-                    />
-                  )}
-                  onClick={openCamera}
-                  size='xs'
-                  type='ghost'
-                />
-              )}
-              value={address}
-            />
+        <Form
+          form={form}
+          initialValues={{ address: '' }}
+          onFieldsChange={onFieldsChange}
+          onFinish={onSubmit}
+        >
+          <Form.Item
+            name='address'
+            rules={[
+              {
+                message: t('Account address is required'),
+                required: true
+              },
+              {
+                validator: accountAddressValidator
+              }
+            ]}
+          >
+            <AddressInput placeholder={t('Please type or paste account address')} />
           </Form.Item>
           <Form.Item
             help={validateState.message}
             validateStatus={validateState.status}
           />
         </Form>
-
-        <SwQrScanner
-          className={className}
-          isError={!!validateState.status && scanningError}
-          onClose={closeCamera}
-          onError={onError}
-          onSuccess={onSuccess}
-          open={visible}
-          overlay={scanningError && validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
-        />
       </div>
     </Layout.Base>
   );

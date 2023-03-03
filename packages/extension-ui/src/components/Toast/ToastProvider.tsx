@@ -1,10 +1,11 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import { noop } from 'rxjs';
 
 import { SnackbarTypes } from '../../types';
+import { ActionContext } from '../contexts';
 import { ToastContext } from '..';
 import Toast from './Toast';
 
@@ -19,12 +20,14 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
   const [visible, setVisible] = useState(false);
   const [type, setType] = useState<SnackbarTypes>('info');
   const method = useRef<NodeJS.Timeout>();
+  const onAction = useContext(ActionContext);
 
   const cancelCallback = useCallback(() => {
     setVisible(false);
     clearTimeout(method.current);
     method.current = undefined;
-  }, [method]);
+    onAction('/');
+  }, [onAction]);
 
   const show = useCallback(
     (message: string, type: SnackbarTypes = 'info', callback?: () => void): (() => void) => {

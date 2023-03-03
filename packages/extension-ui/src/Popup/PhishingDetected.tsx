@@ -19,7 +19,7 @@ interface WebsiteState {
   website: string;
 }
 
-function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
+function PhishingDetected({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { website } = useParams<WebsiteState>();
   const decodedWebsite = decodeURIComponent(website);
@@ -29,14 +29,16 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
       <Header text={t<string>('Phishing detected')} />
       <div className={className}>
         <p>
-          {t<string>('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.')}
+          {t<string>(
+            'You have been redirected because the Aleph Zero Signer extension believes that this website could compromise the security of your accounts and your tokens.'
+          )}
         </p>
-        <p className='websiteAddress'>
-          {decodedWebsite}
-        </p>
+        <p className='websiteAddress'>{decodedWebsite}</p>
         <p>
           <Trans i18nKey='phishing.incorrect'>
-            Note that this  website was reported on a community-driven, curated list. It might be incomplete or inaccurate. If you think that this website was flagged incorrectly, <a href='https://github.com/polkadot-js/phishing/issues/new'>please open an issue by clicking here</a>.
+            Note that this website was reported on a community-driven, curated list. It might be incomplete or
+            inaccurate. If you think that this website was flagged incorrectly,{' '}
+            <a href='https://github.com/polkadot-js/phishing/issues/new'>please open an issue by clicking here</a>.
           </Trans>
         </p>
       </div>
@@ -44,7 +46,8 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(PhishingDetected)(({ theme }: Props) => `
+export default styled(PhishingDetected)(
+  ({ theme }: Props) => `
   p {
     color: ${theme.subTextColor};
     margin-bottom: 1rem;
@@ -59,4 +62,5 @@ export default styled(PhishingDetected)(({ theme }: Props) => `
       text-align: center;
     }
   }
-`);
+`
+);

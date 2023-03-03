@@ -22,16 +22,7 @@ interface Props extends ThemeProps {
   to?: string;
 }
 
-function Button({
-  children,
-  className = '',
-  isBusy,
-  // isDanger,
-  isDisabled,
-  // isSuccess,
-  onClick,
-  to
-}: Props): React.ReactElement<Props> {
+function Button({ children, className = '', isBusy, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
   const _onClick = useCallback((): void => {
     if (isBusy || isDisabled) {
       return;
@@ -81,7 +72,9 @@ export default styled(Button)(
   border: none;
   border-radius: ${tertiary ? '2px' : theme.buttonBorderRadius};
   color: ${
-    isDanger
+    isBusy
+      ? 'transparent'
+      : isDanger
       ? theme.buttonTextColor
       : secondary
       ? theme.buttonSecondaryTextColor
@@ -183,6 +176,7 @@ export default styled(Button)(
     align-items: center;
     justify-content: center;
     gap: 8px;
+    color: ${isBusy ? 'transparent' : 'currentColor'};
     font-family: ${theme.secondaryFontFamily};
   }
 

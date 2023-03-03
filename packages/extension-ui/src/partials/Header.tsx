@@ -5,24 +5,25 @@ import type { ThemeProps } from '../types';
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import connectionStatus from '../assets/anim_connection_status.svg';
 import logo from '../assets/azeroLogo.svg';
 import helpIcon from '../assets/help.svg';
+import notConnected from '../assets/not_connected.svg';
 import settingsIcon from '../assets/settings.svg';
 import { ActionContext, Link, Svg, Tooltip } from '../components';
 import useTranslation from '../hooks/useTranslation';
+import { getConnectedTabsUrl } from '../messaging';
 import { Z_INDEX } from '../zindex';
-// import { getConnectedTabsUrl } from '../messaging';
-// TODO: these will be reused in the future
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
   className?: string;
   onFilter?: (filter: string) => void;
   withBackArrow?: boolean;
-  showConnectedAccounts?: boolean;
+  withConnectedAccounts?: boolean;
   withHelp?: boolean;
   withSettings?: boolean;
   smallMargin?: boolean;
@@ -37,82 +38,104 @@ function Header({
   smallMargin = false,
   text,
   withBackArrow,
+  withConnectedAccounts,
   withGoToRoot = false,
   withHelp,
   withSettings
 }: Props): React.ReactElement<Props> {
-  // TODO: check if needed
-  // const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);
+  const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);
   const { t } = useTranslation();
 
-  // TODO: check if needed
-  // const isConnected = useMemo(() => connectedTabsUrl.length >= 1, [connectedTabsUrl]);
+  const isConnected = useMemo(() => connectedTabsUrl.length >= 1, [connectedTabsUrl]);
   const onAction = useContext(ActionContext);
 
-  // TODO: check if needed
-  // useEffect(() => {
-  //   if (!showConnectedAccounts) {
-  //     return;
-  //   }
+  useEffect(() => {
+    if (!withConnectedAccounts) {
+      return;
+    }
 
-  // getConnectedTabsUrl()
-  //   .then((tabsUrl) => setConnectedTabsUrl(tabsUrl))
-  //   .catch(console.error);
-  // }, [showConnectedAccounts]);
+    getConnectedTabsUrl()
+      .then((tabsUrl) => setConnectedTabsUrl(tabsUrl))
+      .catch(console.error);
+  }, [withConnectedAccounts]);
 
   const _onBackArrowClick = useCallback(() => onAction('..'), [onAction]);
   const _goToRoot = useCallback(() => onAction('/'), [onAction]);
 
   return (
-    <div className={`${className} ${smallMargin ? 'smallMargin' : ''} header`}>
-      <div className='container'>
-        <div className='branding'>
-          {withBackArrow ? (
-            <FontAwesomeIcon
-              className='arrowLeftIcon'
-              icon={faArrowLeft}
-              onClick={withGoToRoot ? _goToRoot : _onBackArrowClick}
-            />
-          ) : (
-            <div className='flex'>
-              <img
-                className='logo'
-                src={logo}
+    <>
+      <div className={`${className} ${smallMargin ? 'smallMargin' : ''} header`}>
+        <div className='container'>
+          <div className='branding'>
+            {withBackArrow ? (
+              <FontAwesomeIcon
+                className='arrowLeftIcon'
+                icon={faArrowLeft}
+                onClick={withGoToRoot ? _goToRoot : _onBackArrowClick}
               />
-            </div>
-          )}
-        </div>
-        <div className='logoText-container'>
-          <span className='logoText'>{text || 'polkadot{.js}'}</span>
-        </div>
-        <div className='popupMenus'>
-          {withHelp && (
-            <Tooltip text={t<string>('Help')}>
-              <Link to={'/help'}>
-                <Svg
-                  className='popupToggle'
-                  src={helpIcon}
+            ) : (
+              <div className='flex'>
+                <img
+                  className='logo'
+                  src={logo}
                 />
-              </Link>
-            </Tooltip>
-          )}
-          {withSettings && (
-            <Tooltip text={t<string>('Settings')}>
-              <Link to={'/account/settings'}>
-                <Svg
-                  className='popupToggle'
-                  data-toggle-settings
-                  src={settingsIcon}
-                />
-              </Link>
-            </Tooltip>
-          )}
+              </div>
+            )}
+          </div>
+          <div className='logoText-container'>
+            <span className='logoText'>{text || t<string>('Aleph Zero Signer')}</span>
+          </div>
+          <div className='popupMenus'>
+            {withHelp && (
+              <Tooltip text={t<string>('Help')}>
+                <Link to={'/help'}>
+                  <Svg
+                    className='popupToggle'
+                    src={helpIcon}
+                  />
+                </Link>
+              </Tooltip>
+            )}
+            {withSettings && (
+              <Tooltip text={t<string>('Settings')}>
+                <Link to={'/account/settings'}>
+                  <Svg
+                    className='popupToggle'
+                    data-toggle-settings
+                    src={settingsIcon}
+                  />
+                </Link>
+              </Tooltip>
+            )}
+          </div>
+          {children}
         </div>
-        {/* TODO: will be reused */}
-        {/* {isSettingsOpen && <MenuSettings reference={setMenuRef} />} */}
-        {children}
+        {withConnectedAccounts && (
+          <div className='connectedAccountsWrapper'>
+            {isConnected ? (
+              <Link
+                className='connectedAccounts'
+                to={connectedTabsUrl.length === 1 ? `/url/manage/${connectedTabsUrl[0]}` : '/auth-list'}
+              >
+                <img
+                  className='greenDot'
+                  src={connectionStatus}
+                />
+                <span></span>Connected
+              </Link>
+            ) : (
+              <div className='connectedAccounts'>
+                <img
+                  className='greenDot'
+                  src={notConnected}
+                />
+                <div>Not Connected</div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -136,6 +159,43 @@ export default React.memo(
 
   .flex {
     display: flex;
+  }
+
+  .connectedAccountsWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 0;
+    left: 0;
+    top: 45px;
+    height: 22px;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    border-radius: 2px;
+    background: ${theme.connectedIndicator};
+    border: 1px solid ${theme.boxBorderColor};
+    margin: 0 auto;
+    width: fit-content;
+
+  }
+
+  .connectedAccounts {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.subTextColor};
+    font-weight: 300;
+    font-size: 13px;
+    line-height: 130%;
+    letter-spacing: 0.06em;
+    gap: 4px;
+
+    .greenDot {
+      width: 20px;
+      height: 20px;
+      color: ${theme.connectedDotColor};
+    }
   }
 
   > .container {
@@ -164,7 +224,7 @@ export default React.memo(
       display:flex;
       align-items: center;
       justify-content: center;
-      margin-left: ${withSettings ? '16px' : '0px'};
+      margin-left: ${withSettings ? '32px' : '0px'};
       width: 100%;
 
       .logoText {
@@ -187,25 +247,7 @@ export default React.memo(
       }
     }
 
-    .connectedAccountsWrapper {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .connectedAccounts {
-      border: 1px solid ${theme.inputBorderColor};
-      border-radius: 4px;
-      padding: 0 0.5rem;
-
-      .greenDot {
-        margin-right: 0.3rem;
-        font-size: 1.5rem;
-        color: ${theme.connectedDotColor};
-        padding-bottom: 0.2rem;
-      }
-    }
+    
 
     .searchBarWrapper {
       flex: 1;

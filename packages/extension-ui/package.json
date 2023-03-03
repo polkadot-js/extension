@@ -42,11 +42,11 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^11.7.1",
-    "react-i18next": "^12.1.5",
+    "react-i18next": "^12.2.0",
     "react-is": "^18.2.0",
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
-    "styled-components": "^5.3.6"
+    "styled-components": "^5.3.8"
   },
   "devDependencies": {
     "@polkadot/extension-mocks": "^0.44.10-3-x",

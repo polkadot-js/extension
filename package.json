@@ -38,8 +38,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.21.0",
-    "@polkadot/dev": "^0.69.14",
-    "@types/node": "^18.14.1",
+    "@polkadot/dev": "^0.69.25",
+    "@types/node": "^18.14.5",
     "i18next-scanner": "^4.1.1",
     "sinon-chrome": "^3.0.1"
   },

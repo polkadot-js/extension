@@ -3,10 +3,12 @@
 
 import type { ThemeProps } from '../../types';
 
-import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
+
+import useTranslation from '../../hooks/useTranslation';
 
 interface Props {
   className?: string;
@@ -16,40 +18,49 @@ interface Props {
   onPreviousClick: () => void;
 }
 
-function TransactionIndex ({ className, index, onNextClick, onPreviousClick, totalItems }: Props): React.ReactElement<Props> {
+function TransactionIndex({
+  className,
+  index,
+  onNextClick,
+  onPreviousClick,
+  totalItems
+}: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const previousClickActive = index !== 0;
   const nextClickActive = index < totalItems - 1;
 
-  const prevClick = useCallback(
-    (): void => {
-      previousClickActive && onPreviousClick();
-    },
-    [onPreviousClick, previousClickActive]
-  );
+  const prevClick = useCallback((): void => {
+    previousClickActive && onPreviousClick();
+  }, [onPreviousClick, previousClickActive]);
 
-  const nextClick = useCallback(
-    (): void => {
-      nextClickActive && onNextClick();
-    },
-    [nextClickActive, onNextClick]
-  );
+  const nextClick = useCallback((): void => {
+    nextClickActive && onNextClick();
+  }, [nextClickActive, onNextClick]);
+
+  const transactionsLeft = totalItems - 1;
 
   return (
     <div className={className}>
       <div>
-        <span className='currentStep'>{index + 1}</span>
-        <span className='totalSteps'>/{totalItems}</span>
+        <span>
+          {transactionsLeft}&nbsp;{t<string>('more')}&nbsp;
+          {transactionsLeft === 1 ? t<string>('Transaction') : t<string>('Transactions')}
+        </span>
       </div>
-      <div>
+      <div className='arrow-group'>
         <FontAwesomeIcon
           className={`arrowLeft ${previousClickActive ? 'active' : ''}`}
-          icon={faArrowLeft}
+          icon={faChevronLeft}
           onClick={prevClick}
           size='sm'
         />
+        <div>
+          <span className='currentStep'>{index + 1}</span>
+          <span className='totalSteps'>/{totalItems}</span>
+        </div>
         <FontAwesomeIcon
           className={`arrowRight ${nextClickActive ? 'active' : ''}`}
-          icon={faArrowRight}
+          icon={faChevronRight}
           onClick={nextClick}
           size='sm'
         />
@@ -58,19 +69,41 @@ function TransactionIndex ({ className, index, onNextClick, onPreviousClick, tot
   );
 }
 
-export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
-  align-items: center;
+export default styled(TransactionIndex)(
+  ({ theme }: ThemeProps) => `
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
-  flex-grow: 1;
-  padding-right: 24px;
+  align-items: center;
+  border-radius: 32px;
+  box-sizing: border-box;
+  padding: 8px 8px 8px 16px;
+  gap: 83px;
+  background: #FFFFFF;
+  color: ${theme.buttonTextColor};
+  font-family: ${theme.secondaryFontFamily};
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 120%;
+  letter-spacing: 0.07em;
+  width: 328px;
+  height: 40px;
+  margin-top: 8px;
+
+  .arrow-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
 
   .arrowLeft, .arrowRight {
     display: inline-block;
-    color: ${theme.iconNeutralColor};
+    opacity: 0.65;
+    color: ${theme.stepsInactiveColor};
 
     &.active {
-      color: ${theme.primaryColor};
+      color: ${theme.buttonTextColor};
       cursor: pointer;
     }
   }
@@ -79,16 +112,11 @@ export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
     margin-left: 0.5rem;
   }
 
-  .currentStep {
-    color: ${theme.primaryColor};
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
+  .currentStep, .totalSteps {
+    font-size: 14px;
+    line-height: 120%;
     margin-left: 10px;
   }
 
-  .totalSteps {
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
-    color: ${theme.textColor};
-  }
-`);
+`
+);

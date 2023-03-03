@@ -152,7 +152,7 @@ describe('Signing requests', () => {
 
   describe('Switching between requests', () => {
     it('initially first request should be shown', () => {
-      expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
+      expect(wrapper.find(TransactionIndex).text()).toBe('1\xa0more\xa0Transaction1/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
 
@@ -163,14 +163,14 @@ describe('Signing requests', () => {
       wrapper.find('FontAwesomeIcon.arrowLeft').simulate('click');
       await act(flushAllPromises);
 
-      expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
+      expect(wrapper.find(TransactionIndex).text()).toBe('1\xa0more\xa0Transaction1/2');
     });
 
     it('should display second request after clicking right arrow', async () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
       await act(flushAllPromises);
 
-      expect(wrapper.find(TransactionIndex).text()).toBe('2/2');
+      expect(wrapper.find(TransactionIndex).text()).toBe('1\xa0more\xa0Transaction2/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[1].id);
     });
 
@@ -181,7 +181,7 @@ describe('Signing requests', () => {
       expect(wrapper.find('FontAwesomeIcon.arrowLeft.active')).toHaveLength(1);
       expect(wrapper.find('FontAwesomeIcon.arrowRight')).toHaveLength(1);
       expect(wrapper.find('FontAwesomeIcon.arrowRight.active')).toHaveLength(0);
-      expect(wrapper.find(TransactionIndex).text()).toBe('2/2');
+      expect(wrapper.find(TransactionIndex).text()).toBe(`1\xa0more\xa0Transaction2/2`);
     });
 
     it('should display previous request after the left arrow has been clicked', async () => {
@@ -190,7 +190,7 @@ describe('Signing requests', () => {
       wrapper.find('FontAwesomeIcon.arrowLeft').simulate('click');
       await act(flushAllPromises);
 
-      expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
+      expect(wrapper.find(TransactionIndex).text()).toBe('1\xa0more\xa0Transaction1/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
   });

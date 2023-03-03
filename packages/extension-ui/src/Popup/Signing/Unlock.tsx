@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
 import { isNotShorterThan } from '@polkadot/extension-ui/util/validators';
 
@@ -15,7 +14,7 @@ interface Props {
   className?: string;
   error?: string | null;
   isBusy: boolean;
-  onSign: () => void;
+  onSign: () => void | Promise<void>;
   password: string;
   setError: (error: string | null) => void;
   setPassword: (password: string) => void;
@@ -82,6 +81,4 @@ function Unlock({
   );
 }
 
-export default React.memo(styled(Unlock)`
-  height: 89px
-`);
+export default React.memo(Unlock);

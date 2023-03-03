@@ -43,7 +43,7 @@ export default React.memo(
     line-height: ${theme.labelLineHeight};
 
     &.danger {
-      margin-top: -10px;
+      margin-top: -20px;
     }
   }
 

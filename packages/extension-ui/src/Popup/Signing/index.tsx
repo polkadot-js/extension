@@ -45,15 +45,17 @@ function Signing({ className }: Props): React.ReactElement<Props> {
     <PopupBorderContainer>
       <div className={className}>
         <div className='content'>
-          {isTransaction && <span className='heading'>{t<string>('New Transaction')}</span>}
           {requests.length > 1 && (
-            <TransactionIndex
-              index={requestIndex}
-              onNextClick={_onNextClick}
-              onPreviousClick={_onPreviousClick}
-              totalItems={requests.length}
-            />
+            <div className='centered'>
+              <TransactionIndex
+                index={requestIndex}
+                onNextClick={_onNextClick}
+                onPreviousClick={_onPreviousClick}
+                totalItems={requests.length}
+              />
+            </div>
           )}
+          {isTransaction && <span className='heading'>{t<string>('Authorization')}</span>}
           <Request
             account={request.account}
             buttonText={isTransaction ? t('Sign') : t('Sign the message')}
@@ -82,6 +84,12 @@ export default React.memo(
       overflow-x: hidden;
     }
 
+    .centered {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
     .heading {
       font-family: ${theme.secondaryFontFamily};
       font-style: normal;
@@ -94,7 +102,7 @@ export default React.memo(
       justify-content: center;
       letter-spacing: 0.03em;
       color: ${theme.textColor};
-      margin: 16px 0px 8px 0px;
+      margin: 8px 0px 4px 0px;
     }
   `
   )

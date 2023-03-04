@@ -134,7 +134,7 @@ export interface NftStore extends BaseReduxStore {
 }
 
 export interface StakingStore extends BaseReduxStore {
-  stakingMap: Record<string, StakingItem>,
+  stakingMap: StakingItem[],
   stakingRewardMap: StakingRewardItem[],
   stakeUnlockingMap: UnlockingStakeInfo[]
 }

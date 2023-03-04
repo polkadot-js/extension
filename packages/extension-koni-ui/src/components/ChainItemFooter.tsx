@@ -6,7 +6,6 @@ import { _ChainState } from '@subwallet/extension-base/services/chain-service/ty
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { updateChainActiveState } from '@subwallet/extension-koni-ui/messaging';
-import { ChainDetail } from '@subwallet/extension-koni-ui/Popup/Settings/Chains/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Switch } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
@@ -55,8 +54,8 @@ function Component ({ chainInfo, chainState, className = '', navigate, showDetai
   }, [chainInfo.slug, loading, showNotification, t]);
 
   const onClick = useCallback(() => {
-    navigate && navigate('/settings/chains/detail', { state: { chainInfo, chainState } as ChainDetail });
-  }, [chainInfo, chainState, navigate]);
+    navigate && navigate('/settings/chains/detail', { state: chainInfo.slug });
+  }, [chainInfo, navigate]);
 
   return (
     <div className={`${className}`}>

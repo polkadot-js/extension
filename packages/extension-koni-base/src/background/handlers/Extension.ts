@@ -11,7 +11,7 @@ import { AccountAuthType, AccountJson, AllowedPath, AuthorizeRequest, MessageTyp
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _ChainState, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 import { AuthUrls, SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import { SWTransactionInput, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
@@ -2066,7 +2066,7 @@ export default class KoniExtension {
     return txState;
   }
 
-  private upsertNetworkMap (data: Record<string, any>): boolean {
+  private upsertChain (data: _NetworkUpsertParams): boolean {
     try {
       return this.#koniState.upsertChainInfo(data);
     } catch (e) {
@@ -2076,12 +2076,12 @@ export default class KoniExtension {
     }
   }
 
-  private removeNetworkMap (networkKey: string): boolean {
-    return this.#koniState.removeChain(networkKey);
+  private removeCustomChain (networkKey: string): boolean {
+    return this.#koniState.removeCustomChain(networkKey);
   }
 
-  private async disableChain (networkKey: string): Promise<boolean> {
-    return await this.#koniState.disableChain(networkKey);
+  private disableChain (networkKey: string): boolean {
+    return this.#koniState.disableChain(networkKey);
   }
 
   private enableChain (networkKey: string): boolean {
@@ -2089,7 +2089,7 @@ export default class KoniExtension {
   }
 
   private async validateNetwork ({ existedChainSlug, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
-    return await this.#koniState.validateCustomChain(provider, existedChainSlug) as ValidateNetworkResponse;
+    return await this.#koniState.validateCustomChain(provider, existedChainSlug);
   }
 
   private resetDefaultNetwork (): boolean {
@@ -2254,18 +2254,6 @@ export default class KoniExtension {
       for (const networkKey of targetKeys) {
         this.enableChain(networkKey);
       }
-    } catch (e) {
-      return false;
-    }
-
-    return true;
-  }
-
-  private async disableChains (targetKeys: string[]) {
-    try {
-      await Promise.all(targetKeys.map(async (key) => {
-        return await this.disableChain(key);
-      }));
     } catch (e) {
       return false;
     }
@@ -4539,19 +4527,17 @@ export default class KoniExtension {
       case 'pri(chainService.enableChain)':
         return this.enableChain(request as string);
       case 'pri(chainService.disableChain)':
-        return await this.disableChain(request as string);
+        return this.disableChain(request as string);
       case 'pri(chainService.removeChain)':
-        return this.removeNetworkMap(request as string);
+        return this.removeCustomChain(request as string);
       case 'pri(chainService.validateCustomChain)':
         return await this.validateNetwork(request as ValidateNetworkRequest);
-      case 'pri(chainService.upsertCustomChain)':
-        return this.upsertNetworkMap(request as Record<string, any>);
+      case 'pri(chainService.upsertChain)':
+        return this.upsertChain(request as _NetworkUpsertParams);
       case 'pri(chainService.resetDefaultChains)':
         return this.resetDefaultNetwork();
       case 'pri(chainService.enableChains)':
         return this.enableChains(request as string[]);
-      case 'pri(chainService.disableChains)':
-        return await this.disableChains(request as string[]);
       case 'pri(chainService.subscribeAssetRegistry)':
         return this.subscribeAssetRegistry(id, port);
       case 'pri(chainService.subscribeMultiChainAssetMap)':

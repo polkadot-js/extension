@@ -14,11 +14,11 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.45.0",
+  "version": "0.45.1",
   "dependencies": {
-    "@polkadot/extension-base": "^0.45.0",
-    "@polkadot/extension-inject": "^0.45.0",
-    "@polkadot/extension-ui": "^0.45.0",
+    "@polkadot/extension-base": "^0.45.1",
+    "@polkadot/extension-inject": "^0.45.1",
+    "@polkadot/extension-ui": "^0.45.1",
     "tslib": "^2.5.0"
   },
   "devDependencies": {

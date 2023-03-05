@@ -14,16 +14,15 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.44.10-4-x",
+  "version": "0.45.0",
   "dependencies": {
-    "@babel/runtime": "^7.21.0",
-    "@polkadot/extension-base": "^0.44.10-4-x",
-    "@polkadot/extension-inject": "^0.44.10-4-x",
-    "@polkadot/extension-ui": "^0.44.10-4-x"
+    "@polkadot/extension-base": "^0.45.0",
+    "@polkadot/extension-inject": "^0.45.0",
+    "@polkadot/extension-ui": "^0.45.0",
+    "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.69.25",
-    "babel-loader": "^8.3.0",
+    "@polkadot/dev": "^0.69.28",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^11.0.0",
@@ -34,7 +33,7 @@
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
-    "thread-loader": "^3.0.4",
+    "ts-loader": "^9.4.2",
     "url-loader": "^4.1.1",
     "webpack-extension-manifest-plugin": "^0.8.0"
   }

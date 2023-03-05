@@ -30,11 +30,14 @@ module.exports = (entry, alias = {}) => ({
     rules: [
       {
         exclude: /(node_modules)/,
-        test: /\.(js|mjs|ts|tsx)$/,
+        test: /\.(ts|tsx)$/,
         use: [
           {
-            loader: require.resolve('babel-loader'),
-            options: require('@polkadot/dev/config/babel-config-webpack.cjs')
+            loader: require.resolve('ts-loader'),
+            options: {
+              configFile: 'tsconfig.webpack.json',
+              transpileOnly: true
+            }
           }
         ]
       },

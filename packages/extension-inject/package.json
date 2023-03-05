@@ -14,15 +14,15 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "0.44.10-4-x",
+  "version": "0.45.0",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.21.0",
-    "@polkadot/rpc-provider": "^9.14.2",
-    "@polkadot/types": "^9.14.2",
-    "@polkadot/util": "^10.4.2",
-    "@polkadot/util-crypto": "^10.4.2",
-    "@polkadot/x-global": "^10.4.2"
+    "@polkadot/rpc-provider": "^10.0.1",
+    "@polkadot/types": "^10.0.1",
+    "@polkadot/util": "^11.0.1",
+    "@polkadot/util-crypto": "^11.0.1",
+    "@polkadot/x-global": "^11.0.1",
+    "tslib": "^2.5.0"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.219",

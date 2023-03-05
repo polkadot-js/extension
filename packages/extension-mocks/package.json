@@ -14,10 +14,10 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.44.10-4-x",
+  "version": "0.45.0",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.21.0",
-    "sinon-chrome": "^3.0.1"
+    "sinon-chrome": "^3.0.1",
+    "tslib": "^2.5.0"
   }
 }

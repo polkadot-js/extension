@@ -256,7 +256,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           </div>
         </SwModal>
 
-        <StakingDetailModal chain={chain} stakingType={stakingType} />
+        <StakingDetailModal
+          chain={chain}
+          stakingType={stakingType}
+        />
 
         <MoreActionModal />
       </Layout.Base>

@@ -47,14 +47,14 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
       convertedStakingValue={convertedBalanceValue}
       decimal={0}
       displayToken={staking.nativeToken}
-      networkKey={staking.chain}
-      // eslint-disable-next-line react/jsx-no-bind
-      onPressItem={() => onClickItem(staking.chain, staking.type)}
       onClickRightIcon={onClickRightIcon}
       stakingNetwork={staking.name}
       stakingType={getStakingTypeTag(staking.type)}
       stakingValue={balanceValue}
       symbol={staking.nativeToken}
+      networkKey={staking.chain}
+      // eslint-disable-next-line react/jsx-no-bind
+      onPressItem={() => onClickItem(staking.chain, staking.type)}
     />
   );
 };

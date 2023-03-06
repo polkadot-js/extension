@@ -2,15 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountInfoItem, BalanceInfoItem, ChainInfoItem, DisplayTypeInfoItem, InfoItem, MetaInfoBlock } from '@subwallet/extension-koni-ui/components/MetaInfoBlock';
+import { AccountInfoItem, BalanceInfoItem, ChainInfoItem, DisplayTypeInfoItem, InfoItem, MetaInfoBlock, StakingStatusInfoItem } from '@subwallet/extension-koni-ui/components/MetaInfoBlock';
+import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import { getBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
-import { SwModal } from '@subwallet/react-ui';
-import React, { useMemo } from 'react';
+import { Button, Icon, SwModal } from '@subwallet/react-ui';
+import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { CheckCircle, DotsThree } from 'phosphor-react';
+import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
   chain?: string;
@@ -21,6 +25,8 @@ export const STAKING_DETAIL_MODAL_ID = 'staking-detail-modal-id';
 
 const Component: React.FC<Props> = (props: Props) => {
   const { chain, className, stakingType } = props;
+  const { token } = useTheme() as Theme;
+  const { activeModal, inactiveModal } = useContext(ModalContext);
   const { data: stakingData } = useGetStakingList();
   const data = useMemo((): StakingDataType => {
     return stakingData.find(
@@ -30,10 +36,30 @@ const Component: React.FC<Props> = (props: Props) => {
   const { decimals, reward, staking } = data || { staking: {}, reward: {} };
   const { t } = useTranslation();
   const modalTitle = stakingType === StakingType.NOMINATED.valueOf() ? 'Nominate details' : 'Pooled details';
+  const stakingStatusLabel = stakingType === StakingType.NOMINATED.valueOf() ? 'Nominate status' : 'Pooled status';
+  const accountName = useGetAccountByAddress(staking.address);
 
   const stakingTypeNameMap: Record<string, string> = {
     nominated: t('Nominated'),
     pooled: t('Pooled')
+  };
+
+  const footer = () => {
+    return (
+      <div className='staking-detail-modal-footer'>
+        <Button
+          icon={<Icon phosphorIcon={DotsThree} />}
+          schema='secondary'
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => activeModal(MORE_ACTION_MODAL)}
+        />
+        <Button
+          className='__action-btn'
+          schema='secondary'
+        >{t('Unstake')}</Button>
+        <Button className='__action-btn'>{t('Stake more')}</Button>
+      </div>
+    );
   };
 
   const genInfoItems = () => {
@@ -99,12 +125,27 @@ const Component: React.FC<Props> = (props: Props) => {
       chain: staking.chain,
       chainName: staking.name
     };
+
     const account: AccountInfoItem = {
       type: 'account',
       key: 'account_info',
       label: t('Account'),
       address: staking.address,
-      name: 'name'
+      name: accountName?.name || ''
+    };
+
+    // TODO: change this when background update information
+    const stakingStatus: StakingStatusInfoItem = {
+      type: 'stakingStatus',
+      key: 'staking_status',
+      label: stakingStatusLabel,
+      status: 'Earning Reward',
+      statusIcon: <Icon
+        iconColor={token.colorSuccess}
+        phosphorIcon={CheckCircle}
+        size='sm'
+        weight='fill'
+      />
     };
 
     const result: InfoItem[] = [
@@ -128,7 +169,7 @@ const Component: React.FC<Props> = (props: Props) => {
       result.push(totalReward);
     }
 
-    result.push(stakingType, network, account);
+    result.push(stakingType, network, account, stakingStatus);
 
     return result;
   };
@@ -136,8 +177,11 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <SwModal
       className={className}
+      footer={footer()}
       id={STAKING_DETAIL_MODAL_ID}
       title={modalTitle}
+      // eslint-disable-next-line react/jsx-no-bind
+      onCancel={() => inactiveModal(STAKING_DETAIL_MODAL_ID)}
     >
       <MetaInfoBlock infoItems={genInfoItems()} />
     </SwModal>
@@ -146,12 +190,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const StakingDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.staking-type-info-field': {
-      color: token.colorSecondary
+    '.staking-detail-modal-footer': {
+      display: 'flex',
+      alignItems: 'center'
     },
 
-    '.network-info-field': {
-      display: 'flex'
+    '.__action-btn': {
+      flex: 1
     }
   };
 });

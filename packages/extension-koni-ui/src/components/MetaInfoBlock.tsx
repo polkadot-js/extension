@@ -16,7 +16,7 @@ type Props = ThemeProps & {
   infoItems: InfoItem[]
 }
 
-interface InfoItemBase<T = 'default' | 'status' | 'transfer' | 'chain' | 'display_type' | 'balance' | 'account'> {
+interface InfoItemBase<T = 'default' | 'status' | 'transfer' | 'chain' | 'display_type' | 'balance' | 'account' | 'stakingStatus'> {
   type: T,
   key: string,
   label: string,
@@ -65,13 +65,19 @@ export interface AccountInfoItem extends InfoItemBase<'account'> {
   name?: string;
 }
 
+export interface StakingStatusInfoItem extends InfoItemBase<'stakingStatus'> {
+  status: string;
+  statusIcon: React.ReactNode;
+}
+
 export type InfoItem = DefaultInfoItem
 | StatusInfoItem
 | TransferInfoItem
 | ChainInfoItem
 | DisplayTypeInfoItem
 | BalanceInfoItem
-| AccountInfoItem;
+| AccountInfoItem
+| StakingStatusInfoItem;
 
 function DefaultItem ({ label, value }: DefaultInfoItem): React.ReactElement<DefaultInfoItem> {
   return (
@@ -265,6 +271,26 @@ function BalanceItem ({ balanceValue, label, suffix }: BalanceInfoItem): React.R
   );
 }
 
+function StakingStatusInfoItem ({ label, status, statusIcon }: StakingStatusInfoItem): React.ReactElement<StakingStatusInfoItem> {
+  return (
+    <div className={'__row'}>
+      <div className={'__col'}>
+        <div className={'__label'}>
+          {label}
+        </div>
+      </div>
+      <div className={'__col -to-right'}>
+        <div className={'__staking-status-item'}>
+          {statusIcon}
+          <div className={'__tx-type __status-name'}>
+            {status}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Component ({ className = '', infoItems }: Props): React.ReactElement<Props> {
   const genInfoItemComponent = (item: InfoItem) => {
     if (item.type === 'status') {
@@ -300,6 +326,12 @@ function Component ({ className = '', infoItems }: Props): React.ReactElement<Pr
     if (item.type === 'account') {
       return (
         <AccountItem {...item} />
+      );
+    }
+
+    if (item.type === 'stakingStatus') {
+      return (
+        <StakingStatusInfoItem {...item} />
       );
     }
 
@@ -363,7 +395,7 @@ export const MetaInfoBlock = styled(Component)<Props>(({ theme: { token } }: Pro
       color: token.colorSuccess
     },
 
-    '.__chain-item, .__status-item, .__account-item': {
+    '.__chain-item, .__status-item, .__account-item, .__staking-status-item': {
       display: 'flex',
       alignItems: 'center'
     },

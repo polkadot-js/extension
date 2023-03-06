@@ -19,6 +19,8 @@ import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { FadersHorizontal, Trophy } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import {useSelector} from "react-redux";
+import {RootState} from "@subwallet/extension-koni-ui/stores";
 
 type Props = ThemeProps
 
@@ -81,6 +83,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const allStakingList = useMemo(() => {
     return getFilteredList(data, selectedFilters);
   }, [data, selectedFilters]);
+
+  const bondingStore = useSelector((state: RootState) => state.bonding);
+
+  console.log('bondingStore', bondingStore);
 
   useEffect(() => {
     setFilteredList(allStakingList.slice(0, TOKENS_PER_PAGE));

@@ -100,10 +100,9 @@ export default styled(EditMenuCard)(
   align-items: center;
   padding: 0px 16px;
   background: ${theme.menuBackground};
-  border-radius: 8px;
   height: 48px;
   margin-bottom: ${position === 'top' || position === 'middle' ? ' 2px' : '16px'};
-  margin-top: ${position === 'both' ? '16px' : '0px'}
+  margin-top: ${position === 'both' ? '16px' : '0px'};
   border-radius: ${
     position === 'top'
       ? '8px 8px 2px 2px'

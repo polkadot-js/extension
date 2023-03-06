@@ -16,12 +16,10 @@ import styled from 'styled-components';
 import details from '../assets/details.svg';
 import exportIcon from '../assets/export.svg';
 import subAccountIcon from '../assets/subAccount.svg';
-import viewOff from '../assets/viewOff.svg';
 import useMetadata from '../hooks/useMetadata';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
-import { showAccount } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import { ellipsisName } from '../util/ellipsisName';
 import getParentNameSuri from '../util/getParentNameSuri';
@@ -65,7 +63,6 @@ function Address({
   genesisHash,
   isExternal,
   isHardware,
-  isHidden,
   name,
   parentName,
   suri,
@@ -127,12 +124,6 @@ function Address({
   const _onClick = useCallback(() => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
 
   const _onCopy = useCallback(() => show(t<string>('Public address copied to your clipboard'), 'success'), [show, t]);
-
-  const _toggleVisibility = useCallback((): void => {
-    if (address) {
-      showAccount(address, isHidden || false).catch(console.error);
-    }
-  }, [address, isHidden]);
 
   const Name = () => {
     const accountName = name || account?.name;
@@ -224,13 +215,6 @@ function Address({
             >
               {_ellipsisName(formatted || address) || t('<unknown>')}
             </div>
-            {isHidden && (
-              <img
-                className='hiddenIcon'
-                onClick={_toggleVisibility}
-                src={viewOff}
-              />
-            )}
           </div>
         </div>
         {withExport && address && (
@@ -276,7 +260,7 @@ function Address({
 }
 
 export default styled(Address)(
-  ({ isHidden, theme }: Props) => `
+  ({ theme }: Props) => `
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
   border-radius: 8px;
@@ -339,7 +323,6 @@ export default styled(Address)(
     margin-left: 16px;
     margin-right: 14px;
     width: 50px;
-    opacity: ${isHidden ? 0.6 : 1};
 
     & svg {
       width: 50px;
@@ -401,8 +384,7 @@ export default styled(Address)(
     text-overflow: ellipsis;
     width: 300px;
     white-space: nowrap;
-    color: ${isHidden ? theme.subTextColor : theme.textColor};
-    opacity: ${isHidden ? 0.6 : 1};
+    color: ${theme.textColor};
   } 
 
     &.displaced {
@@ -451,7 +433,6 @@ export default styled(Address)(
     line-height: 145%;
     font-weight: 300;
     letter-spacing: 0.07em;
-    opacity: ${isHidden ? 0.5 : 1};}  
   }
 
   .detailsIcon {

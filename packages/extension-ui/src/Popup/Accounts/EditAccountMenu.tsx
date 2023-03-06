@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
@@ -16,11 +16,10 @@ import { IconTheme } from '@polkadot/react-identicon/types';
 import exportAccountIcon from '../../assets/export.svg';
 import subAccountIcon from '../../assets/subAccount.svg';
 import forgetIcon from '../../assets/vanish.svg';
-import { Svg, Switch } from '../../components';
+import { Svg } from '../../components';
 import { AccountContext, ActionContext, SettingsContext } from '../../components/contexts';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
-import { showAccount } from '../../messaging';
 import Header from '../../partials/Header';
 import { DEFAULT_TYPE } from '../../util/defaultType';
 import { ellipsisName } from '../../util/ellipsisName';
@@ -48,8 +47,6 @@ function EditAccountMenu({
 
   const account = useMemo(() => accounts.find((account) => account.address === address), [accounts, address]);
 
-  const [isHidden, setIsHidden] = useState(account?.isHidden);
-
   const chain = useMetadata(account?.genesisHash, true);
 
   const type = chain && chain.definition.chainType === 'ethereum' ? 'ethereum' : DEFAULT_TYPE;
@@ -61,17 +58,6 @@ function EditAccountMenu({
   const theme = (account && account.type === 'ethereum' ? 'ethereum' : chain?.icon || 'polkadot') as IconTheme;
 
   const _onCopy = useCallback(() => show(t<string>('Public address copied to your clipboard'), 'success'), [show, t]);
-
-  const _toggleVisibility = useCallback((): void => {
-    if (address) {
-      showAccount(address, isHidden || false)
-        .then(() => {
-          setIsHidden(!isHidden);
-          show(t<string>('Visibility for apps changed successfully'), 'success');
-        })
-        .catch(console.error);
-    }
-  }, [address, isHidden, show, t]);
 
   const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
 
@@ -120,27 +106,12 @@ function EditAccountMenu({
           position='middle'
           title={t<string>('Network')}
         />
-        <EditMenuCard
-          description=''
-          position='bottom'
-          title='Visibility for apps'
-          toggle={
-            <>
-              <Switch
-                checked={!account?.isHidden}
-                checkedLabel=''
-                onChange={_toggleVisibility}
-                uncheckedLabel=''
-              />
-            </>
-          }
-        />
         {!!master && isExternal === 'false' && canDerive(type) && (
           <EditMenuCard
             description=''
             extra='chevron'
             onClick={goTo(`/account/derive/${address}/locked`)}
-            position='both'
+            position='bottom'
             preIcon={
               <Svg
                 className='icon'

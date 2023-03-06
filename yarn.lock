@@ -1102,9 +1102,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.70.1":
-  version: 0.70.1
-  resolution: "@polkadot/dev@npm:0.70.1"
+"@polkadot/dev@npm:^0.70.4":
+  version: 0.70.4
+  resolution: "@polkadot/dev@npm:0.70.4"
   dependencies:
     "@eslint/js": ^8.35.0
     "@rollup/plugin-alias": ^4.0.3
@@ -1169,7 +1169,7 @@ __metadata:
     polkadot-exec-rollup: scripts/polkadot-exec-rollup.mjs
     polkadot-exec-tsc: scripts/polkadot-exec-tsc.mjs
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.mjs
-  checksum: 51b257671a11356f40c2b9da716fdf40514e028ab68c2300dc8eadde0ede1b7d29553e0858ffcec5008d782ecc7c82aced7a5b8f0d1fe6c528381d8a704f4f94
+  checksum: 446bc7a0637a91d30829d5fccb2b6c74d9f54bc7e67290c11cfca56a0f528a33b5ee1b066ed9bde6b669d866c89e3895ff7a44b79210bb549dd406afccc0ca9d
   languageName: node
   linkType: hard
 
@@ -1324,7 +1324,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
-    "@polkadot/dev": ^0.70.1
+    "@polkadot/dev": ^0.70.4
     "@polkadot/extension-base": ^0.45.2-0-x
     "@polkadot/extension-inject": ^0.45.2-0-x
     "@polkadot/extension-ui": ^0.45.2-0-x
@@ -12777,7 +12777,7 @@ fsevents@~2.3.2:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@babel/core": ^7.21.0
-    "@polkadot/dev": ^0.70.1
+    "@polkadot/dev": ^0.70.4
     "@types/node": ^18.14.5
     i18next-scanner: ^4.1.1
     sinon-chrome: ^3.0.1

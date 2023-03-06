@@ -67,7 +67,14 @@ const BaseDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) =
     },
 
     '.data-container': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.size,
 
+      '&.data-row': {
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+      }
     },
 
     '.data-title': {
@@ -80,7 +87,12 @@ const BaseDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) =
     '.data-value': {
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
-      color: token.colorTextDescription
+      color: token.colorTextDescription,
+
+      '&.highlight': {
+        color: token.colorSecondary,
+        fontWeight: token.fontWeightStrong
+      }
     }
 
   };

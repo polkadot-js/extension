@@ -5,6 +5,7 @@ import { Transaction } from '@subwallet/extension-base/utils/eth';
 
 import { GenericExtrinsicPayload } from '@polkadot/types';
 
+export { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 export interface Frames {
   completedFramesCount: number;
   isMultipart: boolean;

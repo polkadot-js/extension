@@ -1,68 +1,60 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SigningRequest } from '@subwallet/extension-base/background/types';
+import { ConfirmationDefinitions, ConfirmationResult } from '@subwallet/extension-base/background/KoniTypes';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
 import ViewDetailIcon from '@subwallet/extension-koni-ui/components/Icon/ViewDetailIcon';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useOpenDetailModal from '@subwallet/extension-koni-ui/hooks/confirmation/useOpenDetailModal';
-import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
+import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import BaseDetailModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/BaseDetailModal';
-import SubstrateMessageDetail from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/Substrate/Message';
+import EvmMessageDetail from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/Evm/Message';
 import DisplayPayloadModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload';
-import SubstrateQr from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload/Substrate';
+import EvmQr from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload/Evm';
 import ScanSignature from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/ScanSignature';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getSignMode } from '@subwallet/extension-koni-ui/util/account';
-import { isRawPayload } from '@subwallet/extension-koni-ui/util/request/substrate';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, QrCode, Swatches, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { TypeRegistry } from '@polkadot/types';
-import { ExtrinsicPayload } from '@polkadot/types/interfaces';
-
+type SupportConfirmationType = 'evmSendTransactionRequest' | 'evmSignatureRequest';
 interface Props extends ThemeProps {
-  request: SigningRequest;
+  type: SupportConfirmationType
+  request: ConfirmationDefinitions['evmSendTransactionRequest'][0] | ConfirmationDefinitions['evmSignatureRequest'][0]
 }
 
-interface Data {
-  hexBytes: string | null;
-  payload: ExtrinsicPayload | null;
+async function handleConfirm (type: SupportConfirmationType, id: string, payload: string) {
+  return await completeConfirmation(type, { id, isApproved: true, payload } as ConfirmationResult<string>);
 }
 
-async function handleConfirm ({ id }: SigningRequest) {
-  return await approveSignPasswordV2({ id });
+async function handleCancel (type: SupportConfirmationType, { id }: ConfirmationDefinitions[typeof type][0]) {
+  return await completeConfirmation(type, { id, isApproved: false } as ConfirmationResult<string>);
 }
 
-async function handleCancel ({ id }: SigningRequest) {
-  return await cancelSignRequest(id);
+async function handleSignature (type: SupportConfirmationType, id: string, signature: string) {
+  return await completeConfirmation(type, { id, isApproved: true, payload: signature } as ConfirmationResult<string>);
 }
 
-async function handleSignature ({ id }: SigningRequest, { signature }: SigData) {
-  return await approveSignSignature(id, signature);
-}
+const isMessageRequest = (request: ConfirmationDefinitions['evmSendTransactionRequest'][0] | ConfirmationDefinitions['evmSignatureRequest'][0]): request is ConfirmationDefinitions['evmSignatureRequest'][0] => {
+  return !!(request as ConfirmationDefinitions['evmSignatureRequest'][0]).payload.type;
+};
 
-const registry = new TypeRegistry();
-
-function Component ({ className, request }: Props) {
-  const { account } = request;
-
+function Component ({ className, request, type }: Props) {
+  const { payload: { account, canSign, hashPayload } } = request;
   const { t } = useTranslation();
+
   const { activeModal } = useContext(ModalContext);
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
   const [loading, setLoading] = useState(false);
-  const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
-
   const signMode = useMemo(() => getSignMode(account), [account]);
+
+  const isMessage = isMessageRequest(request);
 
   const approveIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
@@ -77,41 +69,28 @@ function Component ({ className, request }: Props) {
 
   const onClickDetail = useOpenDetailModal();
 
-  const genesisHash = useMemo(() => {
-    if (payload) {
-      return payload.genesisHash.toHex();
-    } else {
-      return chainInfoMap.polkadot.substrateInfo?.genesisHash || '';
-    }
-  }, [chainInfoMap.polkadot.substrateInfo?.genesisHash, payload]);
-
   // Handle buttons actions
   const onCancel = useCallback(() => {
     setLoading(true);
-    handleCancel(request).finally(() => {
+    handleCancel(type, request).finally(() => {
       setLoading(false);
     });
-  }, [request]);
+  }, [request, type]);
 
   const onApprovePassword = useCallback(() => {
     setLoading(true);
-
     setTimeout(() => {
-      handleConfirm(request)
-        .catch((e) => {
-          console.log(e);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      handleConfirm(type, request.id, '').finally(() => {
+        setLoading(false);
+      });
     }, 1000);
-  }, [request]);
+  }, [request.id, type]);
 
   const onApproveSignature = useCallback((signature: SigData) => {
     setLoading(true);
 
     setTimeout(() => {
-      handleSignature(request, signature)
+      handleSignature(type, request.id, signature.signature)
         .catch((e) => {
           console.log(e);
         })
@@ -119,7 +98,7 @@ function Component ({ className, request }: Props) {
           setLoading(false);
         });
     }, 300);
-  }, [request]);
+  }, [request.id, type]);
 
   const onConfirmQr = useCallback(() => {
     activeModal(CONFIRMATION_QR_MODAL);
@@ -134,22 +113,6 @@ function Component ({ className, request }: Props) {
         onApprovePassword();
     }
   }, [onApprovePassword, onConfirmQr, signMode]);
-
-  useEffect((): void => {
-    const payload = request.request.payload;
-
-    if (isRawPayload(payload)) {
-      setData({
-        hexBytes: payload.data,
-        payload: null
-      });
-    } else {
-      setData({
-        hexBytes: null,
-        payload: registry.createType('ExtrinsicPayload', payload, { version: payload.version })
-      });
-    }
-  }, [request]);
 
   return (
     <>
@@ -194,6 +157,7 @@ function Component ({ className, request }: Props) {
           {t('Cancel')}
         </Button>
         <Button
+          disabled={!canSign}
           icon={(
             <Icon
               phosphorIcon={approveIcon}
@@ -207,17 +171,17 @@ function Component ({ className, request }: Props) {
         </Button>
       </div>
       <BaseDetailModal
-        title={hexBytes ? t('Message details') : t('Transaction details')}
+        title={isMessage ? t('Message details') : t('Transaction details')}
       >
-        {hexBytes && (<SubstrateMessageDetail bytes={hexBytes} />)}
+        {isMessage && <EvmMessageDetail payload={request.payload} />}
       </BaseDetailModal>
       {
         signMode === SIGN_MODE.QR && (
           <DisplayPayloadModal>
-            <SubstrateQr
+            <EvmQr
               address={account.address}
-              genesisHash={genesisHash}
-              payload={payload || hexBytes || ''}
+              hashPayload={hashPayload}
+              isMessage={isMessage}
             />
           </DisplayPayloadModal>
         )
@@ -227,7 +191,7 @@ function Component ({ className, request }: Props) {
   );
 }
 
-const SignConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => ({
+const EvmSignatureConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => ({
   '.account-list': {
     '.__prop-label': {
       marginRight: token.marginMD,
@@ -237,4 +201,4 @@ const SignConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemePr
   }
 }));
 
-export default SignConfirmation;
+export default EvmSignatureConfirmation;

@@ -6,7 +6,7 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
@@ -27,7 +27,6 @@ import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { decodePair } from '@subwallet/keyring/pair/decode';
-import { KeyringPair$Meta } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import SimpleKeyring from 'eth-simple-keyring';
@@ -74,24 +73,6 @@ const generateDefaultCrowdloanMap = (): Record<string, CrowdloanItem> => {
   });
 
   return crowdloanMap;
-};
-
-const createValidateConfirmationResponsePayload = <CT extends ConfirmationType> (fromAddress: string): (result: ConfirmationDefinitions[CT][1]) => Error | undefined => {
-  return (result: ConfirmationDefinitions[CT][1]) => {
-    if (result.isApproved) {
-      const pair = keyring.getPair(fromAddress);
-
-      if (pair.isLocked) {
-        keyring.unlockPair(pair.address);
-      }
-
-      if (pair.isLocked) {
-        return Error('Cannot unlock pair');
-      }
-    }
-
-    return undefined;
-  };
 };
 
 export default class KoniState {
@@ -1565,7 +1546,14 @@ export default class KoniState {
       throw new EvmRpcError('INVALID_PARAMS', 'Not found address or payload to sign');
     }
 
-    if (['eth_sign', 'personal_sign', 'eth_signTypedData', 'eth_signTypedData_v1', 'eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) < 0) {
+    if ([
+      'eth_sign',
+      'personal_sign',
+      'eth_signTypedData',
+      'eth_signTypedData_v1',
+      'eth_signTypedData_v3',
+      'eth_signTypedData_v4'
+    ].indexOf(method) < 0) {
       throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
     }
 
@@ -1579,82 +1567,59 @@ export default class KoniState {
       throw new EvmRpcError('INVALID_PARAMS', 'Account ' + address + ' not in allowed list');
     }
 
-    const validateConfirmationResponsePayload = createValidateConfirmationResponsePayload<'evmSignatureRequest'>(address);
+    const pair = keyring.getPair(address);
 
-    let meta: KeyringPair$Meta;
-
-    try {
-      const pair = keyring.getPair(address);
-
-      if (!pair) {
-        throw new EvmRpcError('INVALID_PARAMS', 'Cannot find pair with address: ' + address);
-      }
-
-      meta = pair.meta;
-    } catch (e) {
+    if (!pair) {
       throw new EvmRpcError('INVALID_PARAMS', 'Cannot find pair with address: ' + address);
     }
 
-    if (!meta.isExternal) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const signPayload = { address, type: method, payload };
+    const account: AccountJson = { address: pair.address, ...pair.meta };
 
-      return this.requestService.addConfirmation(id, url, 'evmSignatureRequest', signPayload, {
-        requiredPassword: false,
-        address
-      }, validateConfirmationResponsePayload)
-        .then(async ({ isApproved }) => {
-          if (isApproved) {
-            const pair = keyring.getPair(address);
+    let qrPayload = '';
+    let canSign = false;
 
-            switch (method) {
-              case 'eth_sign':
-              case 'personal_sign':
-              case 'eth_signTypedData':
-              case 'eth_signTypedData_v1':
-              case 'eth_signTypedData_v3':
-              case 'eth_signTypedData_v4':
-                return await pair.evmSigner.signMessage(payload, method);
-              default:
-                throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
-            }
-          } else {
-            throw new EvmRpcError('USER_REJECTED_REQUEST');
-          }
-        });
-    } else {
-      let qrPayload = '';
-      let canSign = false;
-
-      switch (method) {
-        case 'personal_sign':
+    switch (method) {
+      case 'personal_sign':
+        canSign = true;
+        qrPayload = payload as string;
+        break;
+      case 'eth_sign':
+      case 'eth_signTypedData':
+      case 'eth_signTypedData_v1':
+      case 'eth_signTypedData_v3':
+      case 'eth_signTypedData_v4':
+        if (!account.isExternal) {
           canSign = true;
-          qrPayload = payload as string;
-          break;
-        default:
-          break;
-      }
+        }
 
-      const signPayload: EvmSignatureRequestExternal = {
-        address,
-        type: method,
-        payload: payload as unknown,
-        hashPayload: qrPayload,
-        canSign: canSign
-      };
-
-      return this.requestService.addConfirmation(id, url, 'evmSignatureRequestExternal', signPayload, {
-        requiredPassword: false,
-        address
-      })
-        .then(({ isApproved, signature }) => {
-          if (isApproved) {
-            return signature;
-          } else {
-            throw new EvmRpcError('USER_REJECTED_REQUEST');
-          }
-        });
+        break;
+      default:
+        break;
     }
+
+    const signPayload: EvmSignatureRequest = {
+      account: account,
+      type: method,
+      payload: payload as unknown,
+      hashPayload: qrPayload,
+      canSign: canSign
+    };
+
+    return this.requestService.addConfirmation(id, url, 'evmSignatureRequest', signPayload, {
+      requiredPassword: false,
+      address
+    })
+      .then(({ isApproved, payload }) => {
+        if (isApproved) {
+          if (payload) {
+            return payload;
+          } else {
+            throw new EvmRpcError('INVALID_PARAMS', 'Not found signature');
+          }
+        } else {
+          throw new EvmRpcError('USER_REJECTED_REQUEST');
+        }
+      });
   }
 
   public generateHashPayload (networkKey: string, transaction: TransactionConfig): HexString {
@@ -1738,19 +1703,13 @@ export default class KoniState {
       throw new EvmRpcError('INVALID_PARAMS', 'From address is not in available for ' + url);
     }
 
-    let meta: KeyringPair$Meta;
+    const pair = keyring.getPair(fromAddress);
 
-    try {
-      const pair = keyring.getPair(fromAddress);
-
-      if (!pair) {
-        throw new EvmRpcError('INVALID_PARAMS', 'Cannot find pair with address: ' + fromAddress);
-      }
-
-      meta = pair.meta;
-    } catch (e) {
+    if (!pair) {
       throw new EvmRpcError('INVALID_PARAMS', 'Cannot find pair with address: ' + fromAddress);
     }
+
+    const account: AccountJson = { address: pair.address, ...pair.meta };
 
     // Validate balance
     const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
@@ -1759,9 +1718,16 @@ export default class KoniState {
       throw new EvmRpcError('INVALID_PARAMS', 'Balance can be not enough to send transaction');
     }
 
-    const hashPayload = meta.external ? this.generateHashPayload(networkKey, transaction) : '';
+    const hashPayload = this.generateHashPayload(networkKey, transaction);
 
-    const requestPayload = { ...transaction, estimateGas, hashPayload };
+    const requestPayload = {
+      ...transaction,
+      estimateGas,
+      hashPayload,
+      account: account,
+      canSign: true
+    };
+
     const transactionEmitter = await this.transactionService.addTransaction({
       transaction: requestPayload,
       address: requestPayload.from as string,

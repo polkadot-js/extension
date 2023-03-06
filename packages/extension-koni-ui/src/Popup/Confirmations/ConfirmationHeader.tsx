@@ -24,11 +24,11 @@ function Component ({ className, index, numberOfConfirmations, onClickNext, onCl
       className={CN(className)}
       onBack={onClickPrev}
       paddingVertical={true}
-      rightButtons={index === (numberOfConfirmations - 1)
+      rightButtons={(index === (numberOfConfirmations - 1) || numberOfConfirmations === 1)
         ? undefined
         : [
           {
-            className: CN('__right-block', { hidden: index === (numberOfConfirmations - 1) }),
+            className: CN('__right-block'),
             onClick: onClickNext,
             size: 'xs',
             icon: (<Icon

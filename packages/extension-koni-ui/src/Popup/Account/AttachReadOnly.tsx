@@ -81,8 +81,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const closeCamera = useCallback(() => {
     setScanningError(false);
-    inactiveModal(modalId);
-  }, [inactiveModal]);
+  }, []);
 
   const onSuccess = useCallback((result: ScannerResult) => {
     const rs = handleResult(result.text);

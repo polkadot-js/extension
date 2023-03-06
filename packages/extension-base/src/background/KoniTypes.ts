@@ -978,10 +978,19 @@ export interface SwitchNetworkRequest {
   address?: string;
 }
 
-export interface EvmSignatureRequest {
-  address: string,
+export interface EvmSignRequest {
+  account: AccountJson;
+  hashPayload: string;
+  canSign: boolean;
+}
+
+export interface EvmSignatureRequest extends EvmSignRequest {
   type: string;
-  payload: unknown
+  payload: unknown;
+}
+
+export interface EvmSendTransactionRequest extends TransactionConfig, EvmSignRequest {
+  estimateGas: string;
 }
 
 export interface ConfirmationsQueueItemOptions {
@@ -990,7 +999,7 @@ export interface ConfirmationsQueueItemOptions {
   networkKey?: string;
 }
 
-export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions, ConfirmationRequestBase{
+export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions, ConfirmationRequestBase {
   payload: T;
   payloadJson: string;
 }
@@ -998,14 +1007,6 @@ export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions
 export interface ConfirmationResult<T> extends ConfirmationRequestBase {
   isApproved: boolean;
   payload?: T;
-}
-export interface ConfirmationResultExternal<T> extends ConfirmationResult<T>{
-  signature: `0x${string}`;
-}
-
-export interface EvmSendTransactionRequest extends TransactionConfig {
-  estimateGas: string;
-  hashPayload: string;
 }
 
 export interface EvmRequestExternal {
@@ -1040,9 +1041,7 @@ export interface ConfirmationDefinitions {
   addTokenRequest: [ConfirmationsQueueItem<AddTokenRequestExternal>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
-  evmSignatureRequestExternal: [ConfirmationsQueueItem<EvmSignatureRequestExternal>, ConfirmationResultExternal<string>],
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<string>]
-  evmSendTransactionRequestExternal: [ConfirmationsQueueItem<EvmSendTransactionRequestExternal>, ConfirmationResultExternal<string>]
 }
 
 export type ConfirmationType = keyof ConfirmationDefinitions;

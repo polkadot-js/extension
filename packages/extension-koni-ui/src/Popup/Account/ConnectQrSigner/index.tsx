@@ -111,10 +111,6 @@ const Component: React.FC<Props> = (props: Props) => {
     activeModal(modalId);
   }, [activeModal]);
 
-  const closeCamera = useCallback(() => {
-    inactiveModal(modalId);
-  }, [inactiveModal]);
-
   const onSuccess = useCallback((result: ScannerResult) => {
     if (!loading) {
       const rs = handleResult(result.text);
@@ -198,7 +194,6 @@ const Component: React.FC<Props> = (props: Props) => {
           className={className}
           id={modalId}
           isError={!!validateState.status}
-          onClose={closeCamera}
           onError={onError}
           onSuccess={onSuccess}
           overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}

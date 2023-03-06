@@ -6,20 +6,23 @@ import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import { Button, Icon, Input, InputRef, SwQrScanner } from '@subwallet/react-ui';
+import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
-import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useState } from 'react';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps & BasicInputWrapper;
 
-function Component ({ className = '', label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+const modalId = 'input-account-address-modal';
+
+function Component ({ className = '', label, onChange, placeholder, value, id = modalId }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [isScannerOpen, setScannerOpen] = useState(false);
+
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     const val = event.target.value;
@@ -28,21 +31,17 @@ function Component ({ className = '', label, onChange, placeholder, value }: Pro
   }, [onChange]);
 
   const onOpenScanner = useCallback(() => {
-    setScannerOpen(true);
-  }, []);
-
-  const onCloseScanner = useCallback(() => {
-    setScannerOpen(false);
-  }, []);
+    activeModal(id);
+  }, [activeModal, id]);
 
   const onScanError = useCallback(() => {
     // do something
   }, []);
 
   const onSuccess = useCallback((result: ScannerResult) => {
-    setScannerOpen(false);
+    inactiveModal(id);
     onChange && onChange({ target: { value: result.text } });
-  }, [onChange]);
+  }, [inactiveModal, id, onChange]);
 
   // todo: Will work with "Manage address book" feature later
   return (
@@ -107,10 +106,9 @@ function Component ({ className = '', label, onChange, placeholder, value }: Pro
 
       <SwQrScanner
         className={className}
-        onClose={onCloseScanner}
+        id={id}
         onError={onScanError}
         onSuccess={onSuccess}
-        open={isScannerOpen}
       />
     </>
   );

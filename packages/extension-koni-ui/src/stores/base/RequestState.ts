@@ -16,9 +16,7 @@ const initialState: RequestState = {
   addTokenRequest: {},
   switchNetworkRequest: {},
   evmSignatureRequest: {},
-  evmSignatureRequestExternal: {},
   evmSendTransactionRequest: {},
-  evmSendTransactionRequestExternal: {},
 
   // Summary Info
   reduxStatus: ReduxStatus.INIT,
@@ -35,9 +33,7 @@ export const CONFIRMATIONS_FIELDS: Array<keyof RequestState> = [
   'addTokenRequest',
   'switchNetworkRequest',
   'evmSignatureRequest',
-  'evmSignatureRequestExternal',
-  'evmSendTransactionRequest',
-  'evmSendTransactionRequestExternal'
+  'evmSendTransactionRequest'
 ];
 
 export interface ConfirmationQueueItem {

@@ -5,7 +5,7 @@ import { ConfirmationDefinitions } from '@subwallet/extension-base/background/Ko
 import { AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import useConfirmationsInfo from '@subwallet/extension-koni-ui/hooks/screen/confirmation/useConfirmationInfo';
 import AuthorizeConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AuthorizeConfirmation';
-import EvmSignConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/EvmSignConfirmation';
+import EvmSignatureConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/EvmSignatureConfirmation';
 import MetadataConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/MetadataConfirmation';
 import SignConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/SignConfirmation';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
@@ -23,9 +23,7 @@ const titleMap: Record<ConfirmationType, string> = {
   addTokenRequest: 'Add Token Request',
   authorizeRequest: 'Connect to SubWallet',
   evmSendTransactionRequest: 'Transaction Request',
-  evmSendTransactionRequestExternal: 'Transaction Request',
   evmSignatureRequest: 'Signature request',
-  evmSignatureRequestExternal: 'Signature request',
   metadataRequest: 'Update Metadata',
   signingRequest: 'Signature request',
   switchNetworkRequest: 'Add Network Request'
@@ -60,12 +58,12 @@ const Component = function ({ className }: Props) {
     {confirmation?.type === 'signingRequest' &&
       <SignConfirmation request={confirmation.item as SigningRequest} />}
     {confirmation?.type === 'evmSendTransactionRequest' &&
-      <EvmSignConfirmation
+      <EvmSignatureConfirmation
         request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]}
         type={confirmation.type}
       />}
     {confirmation?.type === 'evmSignatureRequest' &&
-      <EvmSignConfirmation
+      <EvmSignatureConfirmation
         request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]}
         type={confirmation.type}
       />}

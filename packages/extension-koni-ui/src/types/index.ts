@@ -87,3 +87,7 @@ export interface ModalQrProps {
   };
   showExportButton: boolean;
 }
+
+export interface SigData {
+  signature: `0x${string}`;
+}

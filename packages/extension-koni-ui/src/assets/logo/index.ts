@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-const ProjectLogos: Record<string, string> = {
+export const ProjectLogos: Record<string, string> = {
   '1beam': './images/projects/1beam.png',
   '2fa-guru': './images/projects/2fa-guru.png',
   acala: './images/projects/acala.png',
@@ -553,7 +553,9 @@ const ProjectLogos: Record<string, string> = {
   zeropool: './images/projects/zeropool.png',
   'zircon-finance': './images/projects/zircon-finance.png',
   zoo: './images/projects/zoo.png',
-  zoodao: './images/projects/zoodao.png'
+  zoodao: './images/projects/zoodao.png',
+  onramper: './images/projects/onramper.png',
+  moonpay: './images/projects/moonpay.png'
 };
 
 const DeprecatedLogos: Record<string, string> = {

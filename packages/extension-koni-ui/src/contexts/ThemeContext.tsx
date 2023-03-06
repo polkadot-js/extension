@@ -68,6 +68,28 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       fontWeight: token.headingFontWeight,
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5
+    },
+
+    '.form-space-xs': {
+      '.ant-form-item': {
+        marginBottom: token.marginXS
+      }
+    },
+
+    '.form-space-sm': {
+      '.ant-form-item': {
+        marginBottom: token.marginSM
+      }
+    },
+
+    '.form-row': {
+      display: 'flex',
+      gap: token.sizeSM,
+
+      '.ant-form-item': {
+        flex: 1,
+        overflow: 'hidden'
+      }
     }
 
   });
@@ -94,7 +116,7 @@ export interface ThemeProviderProps {
 }
 
 const getModalContainer = () => document.getElementById('popup-container') || document.body;
-const getTooltipContainer = () => document.getElementById('tooltip-container') || document.body;
+const getPopupContainer = () => document.getElementById('tooltip-container') || document.body;
 
 const TooltipContainer = styled.div`z-index: 10000`;
 
@@ -105,7 +127,7 @@ export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactEle
   return (
     <ConfigProvider
       getModalContainer={getModalContainer}
-      getPopupContainer={getTooltipContainer}
+      getPopupContainer={getPopupContainer}
       theme={themeConfig}
     >
       <ThemeGenerator themeConfig={themeConfig}>

@@ -133,11 +133,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               });
             }
           })
-          .catch(() => {
-            showNotification({
-              message: t('Deleted NFT collection unsuccessfully')
-            });
-          });
+          .catch(console.log);
       }
     }).catch(console.log);
   }, [collectionInfo.originAsset, goBack, handleSimpleConfirmModal, showNotification, t]);

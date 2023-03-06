@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
+import BuyTokens from '@subwallet/extension-koni-ui/Popup/BuyTokens';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import SendFund from '@subwallet/extension-koni-ui/Popup/Transaction/SendFund';
 import { i18nPromise } from '@subwallet/extension-koni-ui/util/i18n';
@@ -91,6 +92,10 @@ export const router = createHashRouter([
       {
         path: '/welcome',
         element: <Welcome title={'Welcome Content'} />
+      },
+      {
+        path: '/buy-tokens',
+        element: <BuyTokens />
       },
       {
         path: '/home',

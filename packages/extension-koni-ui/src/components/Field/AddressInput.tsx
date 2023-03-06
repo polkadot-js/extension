@@ -15,11 +15,14 @@ import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
-type Props = ThemeProps & BasicInputWrapper;
+interface Props extends BasicInputWrapper, ThemeProps {
+  showAddressBook?: boolean;
+  showScanner?: boolean;
+}
 
 const modalId = 'input-account-address-modal';
 
-function Component ({ className = '', label, onChange, placeholder, value, id = modalId }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ className = '', label, onChange, placeholder, value, id = modalId, showAddressBook, showScanner }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -33,6 +36,10 @@ function Component ({ className = '', label, onChange, placeholder, value, id = 
   const onOpenScanner = useCallback(() => {
     activeModal(id);
   }, [activeModal, id]);
+
+  const onCloseScanner = useCallback(() => {
+    inactiveModal(id);
+  }, [inactiveModal, id]);
 
   const onScanError = useCallback(() => {
     // do something
@@ -78,7 +85,7 @@ function Component ({ className = '', label, onChange, placeholder, value, id = 
         // status={'error'}
         suffix={(
           <>
-            <Button
+            {showAddressBook && <Button
               icon={(
                 <Icon
                   phosphorIcon={Book}
@@ -87,8 +94,8 @@ function Component ({ className = '', label, onChange, placeholder, value, id = 
               )}
               size='xs'
               type='ghost'
-            />
-            <Button
+            />}
+            {showScanner && <Button
               icon={(
                 <Icon
                   phosphorIcon={Scan}
@@ -98,7 +105,7 @@ function Component ({ className = '', label, onChange, placeholder, value, id = 
               onClick={onOpenScanner}
               size='xs'
               type='ghost'
-            />
+            />}
           </>
         )}
         value={value}
@@ -107,6 +114,7 @@ function Component ({ className = '', label, onChange, placeholder, value, id = 
       <SwQrScanner
         className={className}
         id={id}
+        onClose={onCloseScanner}
         onError={onScanError}
         onSuccess={onSuccess}
       />

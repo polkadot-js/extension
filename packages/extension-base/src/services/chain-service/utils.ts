@@ -338,3 +338,11 @@ export function _isAssetFungibleToken (chainAsset: _ChainAsset): boolean {
 export function _getCrowdloanUrlFromChain (chainInfo: _ChainInfo): string {
   return chainInfo?.substrateInfo?.crowdloanUrl || '';
 }
+
+export function _isCustomProvider (providerKey: string) {
+  return providerKey.startsWith(_CUSTOM_PREFIX);
+}
+
+export function _generateCustomProviderKey (index: number) {
+  return `${_CUSTOM_PREFIX}provider-${index}`;
+}

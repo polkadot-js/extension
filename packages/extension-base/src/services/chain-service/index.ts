@@ -3,12 +3,13 @@
 
 import { AssetRefMap, ChainAssetMap, ChainInfoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
+import { ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isEqualContractAddress, _isEqualSmartContractAsset, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Subject } from 'rxjs';
@@ -279,33 +280,7 @@ export class ChainService {
   }
 
   // Setter
-  public setChainActiveStatus (slug: string, active: boolean, excludedChains?: string[]) {
-    const chainStateMap = this.getChainStateMap();
-
-    if (!Object.keys(chainStateMap).includes(slug)) {
-      return false;
-    }
-
-    if (excludedChains && excludedChains.includes(slug)) {
-      return false;
-    }
-
-    if (this.lockChainInfoMap) {
-      return false;
-    }
-
-    this.lockChainInfoMap = true;
-
-    chainStateMap[slug].active = active;
-
-    this.chainStateMapSubject.next(this.getChainStateMap());
-
-    this.lockChainInfoMap = false;
-
-    return true;
-  }
-
-  public removeChain (slug: string) {
+  public removeCustomChain (slug: string) {
     if (this.lockChainInfoMap) {
       return false;
     }
@@ -319,17 +294,20 @@ export class ChainService {
       return false;
     }
 
+    if (!_isCustomChain(slug)) {
+      return false;
+    }
+
     if (chainStateMap[slug].active) {
       return false;
     }
 
-    this.dbService.removeFromChainStore([slug]).catch((e) => this.logger.error(e));
-
     delete chainStateMap[slug];
     delete chainInfoMap[slug];
 
-    this.chainInfoMapSubject.next(this.getChainInfoMap());
-    this.chainStateMapSubject.next(this.getChainStateMap());
+    this.updateChainSubscription();
+
+    this.dbService.removeFromChainStore([slug]).catch((e) => this.logger.error(e));
 
     this.lockChainInfoMap = false;
 
@@ -351,7 +329,7 @@ export class ChainService {
       }
     }
 
-    this.chainStateMapSubject.next(this.getChainStateMap());
+    this.updateChainStateMapSubscription();
 
     this.lockChainInfoMap = false;
 
@@ -362,20 +340,6 @@ export class ChainService {
     const chainStateMap = this.getChainStateMap();
 
     chainStateMap[slug].connectionStatus = connectionStatus;
-  }
-
-  public updateChainState (slug: string, active: boolean | null, currentProvider: string | null) {
-    const chainStateMap = this.getChainStateMap();
-
-    if (active) {
-      chainStateMap[slug].active = active;
-    }
-
-    if (currentProvider) {
-      chainStateMap[slug].currentProvider = currentProvider;
-    }
-
-    this.chainStateMapSubject.next(this.getChainStateMap());
   }
 
   public upsertCustomToken (token: _ChainAsset) {
@@ -448,9 +412,9 @@ export class ChainService {
     }
   }
 
-  private async destroyApiForChain (chainInfo: _ChainInfo) {
+  private destroyApiForChain (chainInfo: _ChainInfo) {
     if (chainInfo.substrateInfo !== null) {
-      await this.substrateChainHandler.destroySubstrateApi(chainInfo.slug);
+      this.substrateChainHandler.destroySubstrateApi(chainInfo.slug);
     }
 
     if (chainInfo.evmInfo !== null) {
@@ -485,13 +449,13 @@ export class ChainService {
       currentProvider: chainStateMap[chainSlug].currentProvider
     }).catch(console.error);
 
-    this.chainStateMapSubject.next(this.dataMap.chainStateMap);
+    this.updateChainStateMapSubscription();
     this.lockChainInfoMap = false;
 
     return true;
   }
 
-  public async disableChain (chainSlug: string): Promise<boolean> {
+  public disableChain (chainSlug: string): boolean {
     const chainInfo = this.getChainInfoByKey(chainSlug);
     const chainStateMap = this.getChainStateMap();
 
@@ -501,7 +465,7 @@ export class ChainService {
 
     this.lockChainInfoMap = true;
     chainStateMap[chainSlug].active = false;
-    await this.destroyApiForChain(chainInfo);
+    this.destroyApiForChain(chainInfo);
 
     this.dbService.updateChainStore({
       ...chainInfo,
@@ -509,7 +473,7 @@ export class ChainService {
       currentProvider: chainStateMap[chainSlug].currentProvider
     }).catch(console.error);
 
-    this.chainStateMapSubject.next(this.dataMap.chainStateMap);
+    this.updateChainStateMapSubscription();
     this.lockChainInfoMap = false;
 
     return true;
@@ -708,33 +672,64 @@ export class ChainService {
     }
   }
 
-  public upsertChainInfo (data: Record<string, any>) {
-    const params = data as _NetworkUpsertParams;
+  private updateChainStateMapSubscription () {
+    this.chainStateMapSubject.next(this.getChainStateMap());
+  }
 
-    if (this.lockChainInfoMap) {
-      return false;
-    }
+  private updateChainInfoMapSubscription () {
+    this.chainInfoMapSubject.next(this.getChainInfoMap());
+  }
 
-    const chainInfoMap = this.getChainInfoMap();
-    const slug = params.chainEditInfo.slug;
+  private updateChainSubscription () {
+    this.updateChainInfoMapSubscription();
+    this.updateChainStateMapSubscription();
+  }
 
-    this.lockChainInfoMap = true;
+  // Can only update providers or block explorer, crowdloan url
+  private updateChain (params: _NetworkUpsertParams) {
+    const chainSlug = params.chainEditInfo.slug;
+    const targetChainInfo = this.getChainInfoByKey(chainSlug);
+    const targetChainState = this.getChainStateByKey(chainSlug);
+    const changedProvider = params.chainEditInfo.currentProvider !== targetChainState.currentProvider;
 
-    if (slug !== '' && slug in chainInfoMap) { // update existing chainInfo
-      const targetChainInfo = chainInfoMap[slug];
-
+    if (changedProvider) {
       targetChainInfo.providers = params.chainEditInfo.providers;
-      targetChainInfo.name = params.chainEditInfo.name;
+      targetChainState.currentProvider = params.chainEditInfo.currentProvider;
 
-      if (targetChainInfo.substrateInfo) {
-        targetChainInfo.substrateInfo.symbol = params.chainEditInfo.symbol;
-      } else if (targetChainInfo.evmInfo) {
-        targetChainInfo.evmInfo.symbol = params.chainEditInfo.symbol;
+      // Enable chain if not before
+      if (!targetChainState.active) {
+        targetChainState.active = true;
       }
 
-      this.updateChainState(params.chainEditInfo.slug, null, params.chainEditInfo.currentProvider);
-    } else { // insert custom network
-      const newSlug = this.generateSlugForCustomChain(params.chainEditInfo.chainType, params.chainEditInfo.name, params.chainSpec.paraId, params.chainSpec.evmChainId);
+      // TODO: it might override existed API
+      this.initApiForChain(targetChainInfo);
+      this.updateChainStateMapSubscription();
+    }
+
+    if (targetChainInfo.substrateInfo) {
+      if (params.chainEditInfo.blockExplorer) {
+        targetChainInfo.substrateInfo.blockExplorer = params.chainEditInfo.blockExplorer || null;
+      }
+
+      if (params.chainEditInfo.crowdloanUrl) {
+        targetChainInfo.substrateInfo.crowdloanUrl = params.chainEditInfo.crowdloanUrl || null;
+      }
+    }
+
+    this.updateChainInfoMapSubscription();
+
+    this.dbService.updateChainStore({
+      ...targetChainInfo,
+      active: targetChainState.active,
+      currentProvider: targetChainState.currentProvider
+    }).catch((e) => this.logger.error(e));
+  }
+
+  private insertChain (params: _NetworkUpsertParams) {
+    const chainInfoMap = this.getChainInfoMap();
+
+    if (params.chainSpec) {
+      const newChainSlug = this.generateSlugForCustomChain(params.chainEditInfo.chainType as string, params.chainEditInfo.name as string, params.chainSpec.paraId, params.chainSpec.evmChainId);
 
       let substrateInfo: _SubstrateInfo | null = null;
       let evmInfo: _EvmInfo | null = null;
@@ -748,7 +743,7 @@ export class ChainService {
           decimals: params.chainSpec.decimals,
           existentialDeposit: params.chainSpec.existentialDeposit,
           paraId: params.chainSpec.paraId,
-          symbol: params.chainEditInfo.symbol,
+          symbol: params.chainEditInfo.symbol as string,
           genesisHash: params.chainSpec.genesisHash,
           relaySlug: null,
           hasNativeNft: false,
@@ -762,15 +757,15 @@ export class ChainService {
           decimals: params.chainSpec.decimals,
           evmChainId: params.chainSpec.evmChainId,
           existentialDeposit: params.chainSpec.existentialDeposit,
-          symbol: params.chainEditInfo.symbol,
+          symbol: params.chainEditInfo.symbol as string,
           abiExplorer: null
         };
       }
 
       // insert new chainInfo
-      chainInfoMap[newSlug] = {
-        slug: newSlug,
-        name: params.chainEditInfo.name,
+      chainInfoMap[newChainSlug] = {
+        slug: newChainSlug,
+        name: params.chainEditInfo.name as string,
         providers: params.chainEditInfo.providers,
         substrateInfo,
         evmInfo,
@@ -782,28 +777,31 @@ export class ChainService {
       // insert new chainState
       const chainStateMap = this.getChainStateMap();
 
-      // create a record in assetRegistry for native token
+      chainStateMap[newChainSlug] = {
+        active: true,
+        connectionStatus: _ChainConnectionStatus.DISCONNECTED,
+        currentProvider: params.chainEditInfo.currentProvider,
+        slug: newChainSlug
+      };
+
+      // create a record in assetRegistry for native token and update store/subscription
       this.upsertCustomToken({
         assetType: _AssetType.NATIVE,
         decimals: params.chainSpec.decimals,
         metadata: null,
         minAmount: params.chainSpec.existentialDeposit,
         multiChainAsset: null,
-        name: params.chainEditInfo.name,
-        originChain: newSlug,
+        name: params.chainEditInfo.name as string,
+        originChain: newChainSlug,
         priceId: null,
         slug: '',
-        symbol: params.chainEditInfo.symbol,
+        symbol: params.chainEditInfo.symbol as string,
         hasValue: true,
         logo: null
       });
 
-      chainStateMap[newSlug] = {
-        active: true,
-        connectionStatus: _ChainConnectionStatus.DISCONNECTED,
-        currentProvider: params.chainEditInfo.currentProvider,
-        slug: newSlug
-      };
+      // update subscription
+      this.updateChainSubscription();
 
       // TODO: add try, catch, move storage update and subject update to somewhere else
       this.dbService.updateChainStore({
@@ -811,18 +809,28 @@ export class ChainService {
         currentProvider: params.chainEditInfo.currentProvider,
         evmInfo,
         logo: '',
-        name: params.chainEditInfo.name,
+        name: params.chainEditInfo.name as string,
         providers: params.chainEditInfo.providers,
-        slug: newSlug,
+        slug: newChainSlug,
         substrateInfo,
         isTestnet: false,
         chainStatus: _ChainStatus.ACTIVE
       }).catch((e) => this.logger.error(e));
+    }
+  }
 
-      this.chainStateMapSubject.next(this.getChainStateMap());
+  public upsertChain (params: _NetworkUpsertParams) {
+    if (this.lockChainInfoMap) {
+      return false;
     }
 
-    this.chainInfoMapSubject.next(this.getChainInfoMap());
+    this.lockChainInfoMap = true;
+
+    if (params.mode === 'update') { // update existing chainInfo
+      this.updateChain(params);
+    } else { // insert custom network
+      this.insertChain(params);
+    }
 
     this.lockChainInfoMap = false;
 
@@ -845,9 +853,9 @@ export class ChainService {
     }
   }
 
-  public async validateCustomChain (provider: string, existingChainSlug?: string) {
+  public async validateCustomChain (provider: string, existingChainSlug?: string): Promise<ValidateNetworkResponse> {
     // currently only supports WS provider for Substrate and HTTP provider for EVM
-    let result: Record<string, any> = {
+    let result: ValidateNetworkResponse = {
       decimals: 0,
       existentialDeposit: '',
       paraId: null,
@@ -886,11 +894,16 @@ export class ChainService {
         ]); // check connection
 
         if (connectionTrial !== null) {
-          const _api = connectionTrial as _SubstrateApi | _EvmApi;
+          let _api = connectionTrial as _SubstrateApi | _EvmApi | null;
 
-          const chainSpec = await this.getChainSpecByProvider(_api);
+          const chainSpec = await this.getChainSpecByProvider(_api as _SubstrateApi | _EvmApi);
 
           result = Object.assign(result, chainSpec);
+          // TODO: disconnect and destroy API
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          // _api?.api?.disconnect && await _api?.api?.disconnect();
+          _api = null;
 
           if (existingChainSlug) {
             // check if same network (with existingChainSlug)
@@ -898,11 +911,11 @@ export class ChainService {
 
             if (existedChainInfo.evmInfo !== null) {
               if (result.evmChainId !== existedChainInfo.evmInfo.evmChainId) {
-                result.error = _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN as string;
+                result.error = _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN;
               }
             } else if (existedChainInfo.substrateInfo !== null) {
               if (result.genesisHash !== existedChainInfo.substrateInfo.genesisHash) {
-                result.error = _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN as string;
+                result.error = _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN;
               }
             }
           } else {
@@ -910,9 +923,9 @@ export class ChainService {
             if (result.evmChainId !== null) {
               for (const chainInfo of Object.values(this.getChainInfoMap())) {
                 if (chainInfo.evmInfo !== null && chainInfo.evmInfo.evmChainId === result.evmChainId) {
-                  result.error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN as string;
-                  result.conflictChainName = chainInfo.name;
-                  result.conflictChainSlug = chainInfo.slug;
+                  result.error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
+                  result.conflictChain = chainInfo.name;
+                  result.conflictKey = chainInfo.slug;
 
                   break;
                 }
@@ -920,9 +933,9 @@ export class ChainService {
             } else if (result.genesisHash !== '') {
               for (const chainInfo of Object.values(this.getChainInfoMap())) {
                 if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo.genesisHash === result.genesisHash) {
-                  result.error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN as string;
-                  result.conflictChainName = chainInfo.name;
-                  result.conflictChainSlug = chainInfo.slug;
+                  result.error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
+                  result.conflictChain = chainInfo.name;
+                  result.conflictKey = chainInfo.slug;
 
                   break;
                 }
@@ -930,14 +943,14 @@ export class ChainService {
             }
           }
         } else {
-          result.error = _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE as string;
+          result.error = _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE;
           result.success = false;
         }
       } else {
         result.success = false;
-        result.error = providerError as string;
-        result.conflictChainName = providerConflictChainName;
-        result.conflictChainSlug = providerConflictChainSlug;
+        result.error = providerError;
+        result.conflictChain = providerConflictChainName;
+        result.conflictKey = providerConflictChainSlug;
       }
 
       if (!result.error && (result.evmChainId !== null || result.genesisHash !== '')) {
@@ -949,7 +962,7 @@ export class ChainService {
       console.error('Error connecting to provider', e);
 
       result.success = false;
-      result.error = _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE as string;
+      result.error = _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE;
 
       return result;
     }
@@ -974,7 +987,7 @@ export class ChainService {
       const chainInfo = chainInfoMap[existingChainSlug];
 
       if (Object.values(chainInfo.providers).includes(targetProvider)) {
-        error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
+        error = _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER;
         conflictChainSlug = chainInfo.slug;
         conflictChainName = chainInfo.name;
       }
@@ -991,7 +1004,7 @@ export class ChainService {
 
     for (const { key, provider } of allExistedProviders) {
       if (provider === targetProvider) {
-        error = _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN;
+        error = _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER;
         conflictChainSlug = key as string;
         conflictChainName = chainInfoMap[key as string].name;
         break;

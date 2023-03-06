@@ -4,7 +4,8 @@
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
-import { _ChainState, _EvmApi, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
@@ -448,6 +449,48 @@ export interface TransactionHistoryItemJson {
   total: number
 }
 
+export interface HistoryItemBase<T = 'transfer' | 'nft' | 'staking' | 'claim_reward' | 'crowdloan'> {
+  type: T,
+  chain: string,
+  senderAddress: string,
+  senderName?: string,
+  recipientAddress: string,
+  recipientName?: string,
+  status: 'completed' | 'processing' | 'failed' | 'cancelled',
+  extrinsicHash: string,
+  time: number,
+  chainFee: string,
+  symbol: string,
+  amount: string,
+}
+
+export interface TransferHistoryItem extends HistoryItemBase<'transfer'> {
+  isReceived?: boolean,
+  destinationChainInfo?: {
+    slug: string,
+    fee: string,
+    symbol: string,
+  }
+}
+
+export interface NftHistoryItem extends HistoryItemBase<'nft'> {
+  collectionName: string,
+}
+
+export interface StakingHistoryItem extends HistoryItemBase<'staking'> {
+  stakingType: 'stake' | 'unstake' | 'withdraw' | 'compounding',
+}
+
+export type ClaimRewardHistoryItem = HistoryItemBase<'claim_reward'>;
+
+export type CrowdloanHistoryItem = HistoryItemBase<'crowdloan'>;
+
+export type HistoryItem = TransferHistoryItem
+| NftHistoryItem
+| StakingHistoryItem
+| ClaimRewardHistoryItem
+| CrowdloanHistoryItem;
+
 export interface RequestTransactionHistoryAdd {
   address: string;
   networkKey: string;
@@ -847,7 +890,7 @@ export interface EvmNftSubmitTransaction extends BaseRequestSign {
 export interface ValidateNetworkResponse {
   // validation state
   success: boolean,
-  error?: string,
+  error?: _CHAIN_VALIDATION_ERROR,
   conflictChain?: string,
   conflictKey?: string,
 
@@ -1539,7 +1582,7 @@ export interface KoniRequestSignatures {
   'pri(chainService.subscribeChainStateMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeAssetRegistry)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeMultiChainAssetMap)': [null, Record<string, any>, Record<string, any>];
-  'pri(chainService.upsertCustomChain)': [Record<string, any>, boolean];
+  'pri(chainService.upsertChain)': [_NetworkUpsertParams, boolean];
   'pri(chainService.enableChains)': [string[], boolean];
   'pri(chainService.disableChains)': [string[], boolean];
   'pri(chainService.enableChain)': [string, boolean];

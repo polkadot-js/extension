@@ -12,7 +12,8 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps, BasicInputWrapper {
-  chainInfo: _ChainInfo
+  chainInfo: _ChainInfo,
+  disabled: boolean
 }
 
 interface ProviderItemType {
@@ -20,7 +21,7 @@ interface ProviderItemType {
   label: string
 }
 
-const Component = ({ chainInfo, className = '', id = 'provider-selector', label, onChange, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
+const Component = ({ chainInfo, className = '', disabled, id = 'provider-selector', label, onChange, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
@@ -93,6 +94,7 @@ const Component = ({ chainInfo, className = '', id = 'provider-selector', label,
     <>
       <SelectModal
         className={`${className} provider_selector__modal`}
+        disabled={disabled}
         footer={footerButton()}
         id={id}
         inputClassName={`${className} provider_selector__input`}
@@ -120,7 +122,10 @@ const Component = ({ chainInfo, className = '', id = 'provider-selector', label,
 export const ProviderSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return ({
     '.provider_selector__selected_label': {
-      color: token.colorTextLight1
+      color: token.colorTextLight1,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
 
     '.ant-web3-block .ant-web3-block-right-item': {
@@ -131,6 +136,10 @@ export const ProviderSelector = styled(forwardRef(Component))<Props>(({ theme: {
       borderTop: 0,
       margin: 0,
       padding: 0
+    },
+
+    '.ant-setting-item .ant-setting-item-name': {
+      whiteSpace: 'nowrap'
     }
   });
 });

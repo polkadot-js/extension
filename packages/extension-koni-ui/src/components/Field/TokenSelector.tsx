@@ -18,18 +18,22 @@ export type TokenItemType = {
 };
 
 interface Props extends ThemeProps, BasicInputWrapper {
-  items: TokenItemType[]
+  items: TokenItemType[],
+  showChainInSelected?: boolean,
 }
 
-function Component ({ className = '', id = 'token-select', items, label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ className = '', disabled, id = 'token-select', items, label, onChange, placeholder, showChainInSelected = true, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 
   const renderTokenSelected = useCallback((item: TokenItemType) => {
     return (
-      <div className={'__selected-item'}>{item.symbol} ({item.originChain})</div>
+      <div className={'__selected-item'}>
+        {item.symbol}
+        {showChainInSelected && (<>({item.originChain})</>)}
+      </div>
     );
-  }, []);
+  }, [showChainInSelected]);
 
   const _onChange = useCallback(
     (value: string) => {
@@ -81,6 +85,7 @@ function Component ({ className = '', id = 'token-select', items, label, onChang
   return (
     <SelectModal
       className={`${className} chain-selector-modal`}
+      disabled={disabled}
       id={id}
       inputClassName={`${className} chain-selector-input`}
       itemKey={'slug'}

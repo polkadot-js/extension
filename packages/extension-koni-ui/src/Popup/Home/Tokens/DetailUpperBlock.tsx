@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { PREDEFINED_TRANSAK_TOKEN } from '@subwallet/extension-koni-ui/constants/transak';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Number } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
@@ -17,6 +18,10 @@ type Props = ThemeProps & {
   onClickBack: () => void;
 };
 
+function isSupportBuyTokens (symbol: string) {
+  return !!PREDEFINED_TRANSAK_TOKEN[symbol];
+}
+
 function Component (
   { balanceValue,
     className = '',
@@ -28,6 +33,12 @@ function Component (
     navigate('/transaction/send-fund');
   },
   [navigate]
+  );
+
+  const openBuyTokens = useCallback(() => {
+    navigate('/buy-tokens', { state: { symbol } });
+  },
+  [navigate, symbol]
   );
 
   return (
@@ -78,10 +89,12 @@ function Component (
           />
           <div className={'__button-space'} />
           <Button
+            disabled={!isSupportBuyTokens(symbol)}
             icon={<Icon
               phosphorIcon={ShoppingCartSimple}
               size={isShrink ? 'sm' : 'md'}
             />}
+            onClick={openBuyTokens}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
           />

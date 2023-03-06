@@ -282,5 +282,9 @@
   "Undo": "",
   "Account forgotten": "",
   "Authorization": "",
-  "Transactions": ""
+  "Transactions": "",
+  "You do NOT have any account": "You do NOT have\nany account",
+  "Please": "",
+  "and refresh the application's page.": "and\nrefresh the application's page.",
+  "Only connect with sites you trust.": ""
 }

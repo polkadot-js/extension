@@ -36,7 +36,6 @@ import {
 } from '../messaging';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AddAccountMenu from './Accounts/AddAccountMenu';
-import CreateAccountMenu from './Accounts/CreateAccountMenu';
 import EditAccountMenu from './Accounts/EditAccountMenu';
 import EditName from './Accounts/EditName';
 import EditNetwork from './Accounts/EditNetwork';
@@ -187,9 +186,6 @@ export default function Popup(): React.ReactElement {
                             <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'settings')}</Route>
                             <Route path='/account/add-menu'>
                               {wrapWithErrorBoundary(<AddAccountMenu />, 'adding-account-menu')}
-                            </Route>
-                            <Route path='/account/create-menu'>
-                              {wrapWithErrorBoundary(<CreateAccountMenu />, 'account-creation-menu')}
                             </Route>
                             <Route path='/account/create'>
                               {wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}

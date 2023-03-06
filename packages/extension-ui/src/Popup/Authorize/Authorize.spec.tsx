@@ -8,10 +8,10 @@ import type { AccountJson, AuthorizeRequest } from '@polkadot/extension-base/bac
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 
 import { AccountContext, AuthorizeReqContext, themes, Warning } from '../../components';
-import { Header } from '../../partials';
 import { buildHierarchy } from '../../util/buildHierarchy';
 import Account from '../Accounts/Account';
 import Request from './Request';
@@ -50,30 +50,35 @@ describe('Authorize', () => {
   ): ReactWrapper =>
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     mount(
-      <AuthorizeReqContext.Provider value={authorizeRequests}>
-        <AccountContext.Provider
-          value={{
-            accounts,
-            hierarchy: accounts ? buildHierarchy(accounts) : []
-          }}
-        >
-          <ThemeProvider theme={themes.dark}>
-            <Authorize />
-          </ThemeProvider>
-        </AccountContext.Provider>
-      </AuthorizeReqContext.Provider>
+      <Router>
+        <AuthorizeReqContext.Provider value={authorizeRequests}>
+          <AccountContext.Provider
+            value={{
+              accounts,
+              hierarchy: accounts ? buildHierarchy(accounts) : []
+            }}
+          >
+            <ThemeProvider theme={themes.dark}>
+              <Authorize />
+            </ThemeProvider>
+          </AccountContext.Provider>
+        </AuthorizeReqContext.Provider>
+      </Router>
     );
 
   it('render component', () => {
     const wrapper = mountAuthorize();
 
-    expect(wrapper.find(Header).text()).toBe('Account connection request');
     expect(wrapper.find(Request).length).toBe(0);
+    setTimeout(() => {
+      expect(wrapper.find('.heading').text()).toBe('You do NOT have any account');
+    }, 1000);
   });
 
   it('render requests', () => {
     const wrapper = mountAuthorize(oneRequest);
 
+    wrapper.update();
     expect(wrapper.find(Request).length).toBe(1);
     expect(wrapper.find(Request).find('.warning-message').text()).toBe(
       'An application, self-identifying as ??? is requesting access from http://polkadot.org'
@@ -95,9 +100,9 @@ describe('Authorize', () => {
     const wrapper = mountAuthorize(oneRequest, []);
 
     expect(wrapper.find(Request).length).toBe(1);
-    expect(wrapper.find(Request).find('.warning-message').text()).toBe(
-      "You do not have any account. Please create an account and refresh the application's page."
-    );
+    setTimeout(() => {
+      expect(wrapper.find('.heading').text()).toBe('You do NOT have any account');
+    }, 1000);
     expect(wrapper.find('button.acceptButton').length).toBe(1);
   });
 

@@ -5,45 +5,175 @@ import type { ThemeProps } from '../../types';
 
 import { t } from 'i18next';
 import React, { useCallback } from 'react';
-import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { Button, Warning } from '@polkadot/extension-ui/components';
 import { deleteAuthRequest } from '@polkadot/extension-ui/messaging';
+
+import animatedWarning from '../../assets/anim_warning.svg';
+import helpIcon from '../../assets/help.svg';
+import { Button, ButtonArea, Link, Svg, VerticalSpace } from '../../components';
+import HelperFooter from '../../components/HelperFooter';
 
 interface Props extends ThemeProps {
   authId: string;
   className?: string;
 }
 
-function NoAccount ({ authId, className }: Props): React.ReactElement<Props> {
-  const _onClick = useCallback(() => {
-    deleteAuthRequest(authId).catch(console.error);
-  }, [authId]
+const CustomButtonArea = styled(ButtonArea)`
+  padding: 0px 24px;
+  margin-top: 96px;
+  margin-bottom: 0px;
+`;
+
+const CustomFooter = styled(HelperFooter)`
+  flex-direction: row;
+  display: flex;
+  gap: 8px;
+
+  .icon-container {
+    margin-top: 4px;
+  }
+  .text-container {
+    display: flex;
+    gap: 4px;
+  }
+
+  .group {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    margin-left: -32px;
+  }
+`;
+
+function NoAccount({ authId, className }: Props): React.ReactElement<Props> {
+  const _onClick = useCallback(async () => {
+    try {
+      await deleteAuthRequest(authId);
+      window.close();
+    } catch (error) {
+      console.error(error);
+    }
+  }, [authId]);
+
+  const footer = (
+    <CustomFooter>
+      <div className='group'>
+        <div className='icon-container'>
+          <Svg
+            className='icon'
+            src={helpIcon}
+          />
+        </div>
+        <div className='text-container'>
+          <span>
+            {t<string>('Only connect with sites you trust.')}&nbsp;
+            <br />
+            <span className='link'>{t<string>('Learn more')}</span>
+          </span>
+        </div>
+      </div>
+    </CustomFooter>
   );
 
   return (
-    <div className={className}>
-      <Warning className='warningMargin'>
-        <Trans>You do not have any account. Please create an account and refresh the application&apos;s page.</Trans>
-      </Warning>
-      <Button
-        className='acceptButton'
-        onClick={_onClick}
-      >
-        {t<string>('Understood')}
-      </Button>
-    </div>
+    <>
+      <div className={className}>
+        <div className='content-inner'>
+          <Svg
+            className='warning-icon'
+            src={animatedWarning}
+          />
+          <span className='heading'>{t<string>('You do NOT have any account')}</span>
+          <span className='subtitle'>
+            {t<string>('Please')}&nbsp;
+            <Link
+              className='link'
+              to='/account/add-menu'
+            >
+              {t<string>('create an account')}
+            </Link>
+            &nbsp;
+            {t<string>("and refresh the application's page.")}&nbsp;
+          </span>
+        </div>
+      </div>
+      <VerticalSpace />
+      <CustomButtonArea footer={footer}>
+        <Button
+          className='acceptButton'
+          onClick={_onClick}
+          secondary
+        >
+          {t<string>('Got it!')}
+        </Button>
+      </CustomButtonArea>
+    </>
   );
 }
 
-export default styled(NoAccount)`
+export default styled(NoAccount)(
+  ({ theme }: Props) => `
+  overflow: hidden
   .acceptButton {
     width: 90%;
     margin: 25px auto 0;
   }
 
-  .warningMargin {
-    margin: 1rem 24px 0 1.45rem;
+  .warning-icon {
+    width: 96px;
+    height: 96px;
+    background: ${theme.warningColor};
   }
-`;
+
+  .content-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 110px;
+  }
+
+  .heading {
+    font-family: ${theme.secondaryFontFamily};
+    font-style: normal;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 118%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.03em;
+    color: ${theme.textColor};
+    margin: 16px 0px 8px 0px;
+    text-align: center;
+    white-space: pre-line;
+  }
+
+  ${Link} {
+    display: inline;
+    vertical-align: baseline;
+  }
+
+  .subtitle {
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 145%;
+    text-align: center;
+    letter-spacing: 0.07em;
+    white-space: pre-line;
+    color: ${theme.subTextColor};
+    
+    .link {
+      color: ${theme.primaryColor};
+      cursor: pointer;
+
+      :hover {
+        text-decoration: underline;
+      }
+    }
+  }
+`
+);

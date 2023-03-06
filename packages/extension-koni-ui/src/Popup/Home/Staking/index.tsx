@@ -14,15 +14,15 @@ import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import MoreActionModal, { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {useSelector} from "react-redux";
-import {RootState} from "@subwallet/extension-koni-ui/stores";
 
 type Props = ThemeProps
 

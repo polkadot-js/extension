@@ -6227,6 +6227,7 @@ __metadata:
     react-router: ^6.6.1
     react-router-dom: ^6.6.1
     react-select: ^5.7.0
+    react-tabs: ^6.0.0
     react-tooltip: 4.5.1
     react-transition-group: ^4.4.5
     redux: ^4.2.0
@@ -11069,7 +11070,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clsx@npm:^1.1.1":
+"clsx@npm:^1.1.0, clsx@npm:^1.1.1":
   version: 1.2.1
   resolution: "clsx@npm:1.2.1"
   checksum: 30befca8019b2eb7dbad38cff6266cf543091dae2825c856a62a8ccf2c3ab9c2907c4d12b288b73101196767f66812365400a227581484a05f968b0307cfaf12
@@ -21071,7 +21072,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.0, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.5.0, prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.0, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -22296,6 +22297,18 @@ __metadata:
     react: ">=16.11"
     react-dom: ">=16.11"
   checksum: 93686ba3d7c8fe4501b37f1fff7142109c7668d11df924e190a812cec6e2d3cd7d13220d32f31aa0b757161f1619c4c37b88d0667316dd527252a5c8348854a4
+  languageName: node
+  linkType: hard
+
+"react-tabs@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "react-tabs@npm:6.0.0"
+  dependencies:
+    clsx: ^1.1.0
+    prop-types: ^15.5.0
+  peerDependencies:
+    react: ^18.0.0
+  checksum: 711dfe862a37019d1d9794840999e5ecac3bca9ea0b0fbe3d36163142df5f200c60de7832e9158adf92034e942d5476753a3a4fa842b64652172d80ee829df1a
   languageName: node
   linkType: hard
 

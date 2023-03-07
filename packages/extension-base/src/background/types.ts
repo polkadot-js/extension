@@ -34,19 +34,21 @@ export type SeedLengths = 12 | 24;
 
 export interface AccountJson extends KeyringPair$Meta {
   address: string;
+  accountIndex?: number;
+  addressOffset?: number;
   genesisHash?: string | null;
-  originGenesisHash?: string | null;
   isExternal?: boolean;
   isHardware?: boolean;
   isHidden?: boolean;
+  isMasterAccount?: boolean;
+  isMasterPassword?: boolean;
+  isReadOnly?: boolean;
   name?: string;
+  originGenesisHash?: string | null;
   parentAddress?: string;
   suri?: string;
   type?: KeypairType;
   whenCreated?: number;
-  isReadOnly?: boolean;
-  isMasterAccount?: boolean;
-  isMasterPassword?: boolean;
 }
 
 // all Accounts and the address of the current Account

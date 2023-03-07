@@ -192,6 +192,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             <AddressInput
               id={modalId}
               placeholder={t('Please type or paste account address')}
+              showScanner={true}
             />
           </Form.Item>
           <Form.Item

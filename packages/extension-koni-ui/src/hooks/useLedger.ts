@@ -51,7 +51,7 @@ const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[]): Ledger => 
   return new Ledger('webusb', def.network);
 };
 
-export function useLedger (slug: string): Result {
+export function useLedger (slug?: string): Result {
   const { t } = useTranslation();
 
   const ledgerChains = useGetSupportedLedger();
@@ -105,7 +105,7 @@ export function useLedger (slug: string): Result {
           setIsLoading(false);
           const { displayName } = getNetwork(slug, ledgerChains) || { displayName: 'unknown network' };
 
-          const warningMessage = e.message.includes('Code: 26628')
+          const warningMessage = e.message.includes('Locked device (0x5515)')
             ? t<string>('Please unlock your Ledger')
             : null;
 

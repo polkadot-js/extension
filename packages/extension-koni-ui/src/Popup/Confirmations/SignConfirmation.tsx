@@ -7,7 +7,9 @@ import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Con
 import ViewDetailIcon from '@subwallet/extension-koni-ui/components/Icon/ViewDetailIcon';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
+import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByGenesisHash';
 import useOpenDetailModal from '@subwallet/extension-koni-ui/hooks/confirmation/useOpenDetailModal';
+import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
 import BaseDetailModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/BaseDetailModal';
 import SubstrateMessageDetail from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/Substrate/Message';
@@ -52,6 +54,8 @@ async function handleSignature ({ id }: SigningRequest, { signature }: SigData) 
 
 const registry = new TypeRegistry();
 
+const modeCanSignMessage: SIGN_MODE[] = [SIGN_MODE.QR, SIGN_MODE.PASSWORD];
+
 function Component ({ className, request }: Props) {
   const { account } = request;
 
@@ -63,6 +67,8 @@ function Component ({ className, request }: Props) {
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
 
   const signMode = useMemo(() => getSignMode(account), [account]);
+
+  const isMessage = useMemo(() => isRawPayload(request.request.payload), [request.request.payload]);
 
   const approveIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
@@ -84,6 +90,12 @@ function Component ({ className, request }: Props) {
       return chainInfoMap.polkadot.substrateInfo?.genesisHash || '';
     }
   }, [chainInfoMap.polkadot.substrateInfo?.genesisHash, payload]);
+
+  const chain = useGetChainInfoByGenesisHash(genesisHash);
+
+  const { isLoading: isLedgerLoading, isLocked, ledger, refresh: refreshLedger } = useLedger(chain?.slug);
+
+  const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [isLedgerLoading, isLocked, ledger]);
 
   // Handle buttons actions
   const onCancel = useCallback(() => {
@@ -125,15 +137,47 @@ function Component ({ className, request }: Props) {
     activeModal(CONFIRMATION_QR_MODAL);
   }, [activeModal]);
 
+  const onConfirmLedger = useCallback(() => {
+    if (!payload) {
+      return;
+    }
+
+    if (!isLedgerConnected || !ledger) {
+      refreshLedger();
+
+      return;
+    }
+
+    setLoading(true);
+
+    setTimeout(() => {
+      const payloadU8a = payload.toU8a(true);
+
+      ledger
+        .sign(payloadU8a, account.accountIndex, account.addressOffset)
+        .then(({ signature }) => {
+          console.log(signature);
+          onApproveSignature({ signature });
+        })
+        .catch((e: Error) => {
+          console.log(e);
+          setLoading(false);
+        });
+    });
+  }, [account.accountIndex, account.addressOffset, isLedgerConnected, ledger, onApproveSignature, payload, refreshLedger]);
+
   const onConfirm = useCallback(() => {
     switch (signMode) {
       case SIGN_MODE.QR:
         onConfirmQr();
         break;
+      case SIGN_MODE.LEDGER:
+        onConfirmLedger();
+        break;
       default:
         onApprovePassword();
     }
-  }, [onApprovePassword, onConfirmQr, signMode]);
+  }, [onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect((): void => {
     const payload = request.request.payload;
@@ -144,6 +188,8 @@ function Component ({ className, request }: Props) {
         payload: null
       });
     } else {
+      registry.setSignedExtensions(payload.signedExtensions); // Important
+
       setData({
         hexBytes: null,
         payload: registry.createType('ExtrinsicPayload', payload, { version: payload.version })
@@ -194,6 +240,7 @@ function Component ({ className, request }: Props) {
           {t('Cancel')}
         </Button>
         <Button
+          disabled={isMessage && !modeCanSignMessage.includes(signMode)}
           icon={(
             <Icon
               phosphorIcon={approveIcon}
@@ -203,7 +250,13 @@ function Component ({ className, request }: Props) {
           loading={loading}
           onClick={onConfirm}
         >
-          {t('Approve')}
+          {
+            signMode !== SIGN_MODE.LEDGER
+              ? t('Approve')
+              : !isLedgerConnected
+                ? t('Refresh')
+                : t('Approve')
+          }
         </Button>
       </div>
       <BaseDetailModal

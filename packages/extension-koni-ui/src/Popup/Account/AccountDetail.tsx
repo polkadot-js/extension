@@ -174,6 +174,7 @@ const Component: React.FC<Props> = (props: Props) => {
             iconSize={token.sizeLG * 1.5}
             size={token.sizeXL * 3.5}
             value={account.address}
+            errorLevel='H'
           />
         </div>
         <Form

@@ -178,72 +178,68 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const providerValidator = useCallback((rule: RuleObject, provider: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      if (!provider || provider.length === 0) {
-        resolve();
+      if (isUrl(provider)) {
+        setIsShowConnectionStatus(true);
+        setIsValidating(true);
+        const parsedProvider = provider.replaceAll(' ', '');
+
+        validateCustomChain(parsedProvider)
+          .then((result) => {
+            setIsValidating(false);
+
+            if (result.success) {
+              setProviderValidation({ status: 'success' });
+
+              if (result.evmChainId) {
+                setIsPureEvmChain(true);
+                form.setFieldValue('evmChainId', result.evmChainId);
+                form.setFieldValue('type', 'EVM');
+              } else {
+                setIsPureEvmChain(false);
+                form.setFieldValue('addressPrefix', result.addressPrefix);
+                form.setFieldValue('paraId', result.paraId);
+                form.setFieldValue('type', 'Substrate');
+                setGenesisHash(result.genesisHash);
+                setExistentialDeposit(result.existentialDeposit);
+              }
+
+              form.setFieldValue('decimals', result.decimals);
+              form.setFieldValue('name', result.name);
+              form.setFieldValue('symbol', result.symbol);
+
+              resolve();
+            }
+
+            if (result.error) {
+              if (result.evmChainId) {
+                setIsPureEvmChain(true);
+                form.setFieldValue('evmChainId', result.evmChainId);
+                form.setFieldValue('type', 'EVM');
+              } else {
+                setIsPureEvmChain(false);
+                form.setFieldValue('addressPrefix', result.addressPrefix);
+                form.setFieldValue('paraId', result.paraId);
+                form.setFieldValue('type', 'Substrate');
+              }
+
+              form.setFieldValue('decimals', result.decimals);
+              form.setFieldValue('name', result.name);
+              form.setFieldValue('symbol', result.symbol);
+
+              setProviderValidation({ status: 'error', message: handleErrorMessage(result.error) });
+
+              reject(new Error(handleErrorMessage(result.error)));
+            }
+          })
+          .catch(() => {
+            setIsValidating(false);
+            reject(new Error(t('Error validating this provider')));
+            setProviderValidation({ status: 'error', message: t('Error validating this provider') });
+          });
       } else {
-        if (isUrl(provider)) {
-          setIsShowConnectionStatus(true);
-          setIsValidating(true);
-          const parsedProvider = provider.replaceAll(' ', '');
-
-          validateCustomChain(parsedProvider)
-            .then((result) => {
-              setIsValidating(false);
-
-              if (result.success) {
-                setProviderValidation({ status: 'success' });
-
-                if (result.evmChainId) {
-                  setIsPureEvmChain(true);
-                  form.setFieldValue('evmChainId', result.evmChainId);
-                  form.setFieldValue('type', 'EVM');
-                } else {
-                  setIsPureEvmChain(false);
-                  form.setFieldValue('addressPrefix', result.addressPrefix);
-                  form.setFieldValue('paraId', result.paraId);
-                  form.setFieldValue('type', 'Substrate');
-                  setGenesisHash(result.genesisHash);
-                  setExistentialDeposit(result.existentialDeposit);
-                }
-
-                form.setFieldValue('decimals', result.decimals);
-                form.setFieldValue('name', result.name);
-                form.setFieldValue('symbol', result.symbol);
-
-                resolve();
-              }
-
-              if (result.error) {
-                if (result.evmChainId) {
-                  setIsPureEvmChain(true);
-                  form.setFieldValue('evmChainId', result.evmChainId);
-                  form.setFieldValue('type', 'EVM');
-                } else {
-                  setIsPureEvmChain(false);
-                  form.setFieldValue('addressPrefix', result.addressPrefix);
-                  form.setFieldValue('paraId', result.paraId);
-                  form.setFieldValue('type', 'Substrate');
-                }
-
-                form.setFieldValue('decimals', result.decimals);
-                form.setFieldValue('name', result.name);
-                form.setFieldValue('symbol', result.symbol);
-
-                setProviderValidation({ status: 'error', message: handleErrorMessage(result.error) });
-
-                reject(new Error(handleErrorMessage(result.error)));
-              }
-            })
-            .catch(() => {
-              setIsValidating(false);
-              reject(new Error(t('Error validating this provider')));
-              setProviderValidation({ status: 'error', message: t('Error validating this provider') });
-            });
-        } else {
-          reject(new Error(t('Provider URL is not valid')));
-          setProviderValidation({ status: '' });
-          setIsShowConnectionStatus(false);
-        }
+        reject(new Error(t('Provider URL is not valid')));
+        setProviderValidation({ status: '' });
+        setIsShowConnectionStatus(false);
       }
     });
   }, [form, handleErrorMessage, t]);

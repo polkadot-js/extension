@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, ChainBondingBasics, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxInfo, ChainBondingInfo, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -47,9 +47,9 @@ export async function getRelayChainBondingBasics (networkKey: string, substrateA
 
   return {
     isMaxNominators: maxNominator !== -1 ? nominatorCount >= maxNominator : false,
-    stakedReturn,
+    estimatedReturn: stakedReturn,
     validatorCount: eraStakers.length
-  } as ChainBondingBasics;
+  } as ChainBondingInfo;
 }
 
 export async function getRelayValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {

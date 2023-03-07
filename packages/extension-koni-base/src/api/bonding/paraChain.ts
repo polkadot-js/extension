@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, ChainBondingBasics, DelegationItem, StakingType, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxInfo, ChainBondingInfo, DelegationItem, StakingType, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _PARACHAIN_INFLATION_DISTRIBUTION, _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -71,9 +71,9 @@ export async function getParaBondingBasics (networkKey: string, substrateApi: _S
 
   return {
     isMaxNominators: false,
-    stakedReturn,
+    estimatedReturn: stakedReturn,
     validatorCount: rawAllCollators.length
-  } as ChainBondingBasics;
+  } as ChainBondingInfo;
 }
 
 export async function getParaCollatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {

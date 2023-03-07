@@ -5,26 +5,28 @@ import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import SwStakingItem from '@subwallet/extension-koni-ui/components/StakingItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
+import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyList';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import MoreActionModal, { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
-import { Button, Checkbox, Icon, SwList, SwModal } from '@subwallet/react-ui';
-import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
+import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
-import { FadersHorizontal, Trophy } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
+import React, { SyntheticEvent, useCallback, useContext, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 type Props = ThemeProps
 
 const FILTER_MODAL_ID = 'staking-filter-modal';
-
-const TOKENS_PER_PAGE = 10;
 
 enum FilterValue {
   NOMINATED = 'nominated',
@@ -36,7 +38,13 @@ const FILTER_OPTIONS = [
   { label: 'Pooled', value: FilterValue.POOLED }
 ];
 
-function getFilteredList (items: StakingDataType[], filters: FilterValue[]) {
+const rightIcon = <Icon
+  phosphorIcon={Plus}
+  size='sm'
+  type='phosphor'
+/>;
+
+function getFilteredList (items: StakingDataType[], filters: string[]) {
   const filteredList: StakingDataType[] = [];
 
   items.forEach((item) => {
@@ -73,81 +81,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { t } = useTranslation();
   const { data, priceMap } = useGetStakingList();
-  const [selectedFilters, setSelectedFilters] = useState<FilterValue[]>([]);
-  const [changeFilters, setChangeFilters] = useState<FilterValue[]>(selectedFilters);
-  const [filteredList, setFilteredList] = useState<StakingDataType[]>([]);
   const [{ chain, stakingType }, setSelectedItem] = useState<{ chain: string | undefined, stakingType: StakingType | undefined }>({ chain: undefined, stakingType: undefined });
-  const [paging, setPaging] = useState(TOKENS_PER_PAGE);
-  const allStakingList = useMemo(() => {
-    return getFilteredList(data, selectedFilters);
-  }, [data, selectedFilters]);
-
-  useEffect(() => {
-    setFilteredList(allStakingList.slice(0, TOKENS_PER_PAGE));
-    setPaging(TOKENS_PER_PAGE);
-  }, [allStakingList]);
-
-  const hasMore = useMemo(() => {
-    return allStakingList.length > filteredList.length;
-  }, [allStakingList.length, filteredList.length]);
-
-  const loadMoreItems = useCallback(() => {
-    setTimeout(() => {
-      if (hasMore) {
-        const nextPaging = paging + TOKENS_PER_PAGE;
-        const to = nextPaging > allStakingList.length ? allStakingList.length : nextPaging;
-
-        setFilteredList(allStakingList.slice(0, to));
-        setPaging(nextPaging);
-      }
-    }, 50);
-  }, [allStakingList, hasMore, paging]);
+  const { changeFilters, filteredList, onApplyFilter, onChangeFilterOpt } = useFilterModal(data, FILTER_MODAL_ID, getFilteredList);
+  const { hasMore, lazyItems, loadMoreItems } = useLazyList(filteredList);
 
   const onClickActionBtn = () => {
     activeModal(FILTER_MODAL_ID);
   };
 
-  const onChangeFilterOpt = useCallback((e: CheckboxChangeEvent) => {
-    const changedValue = e.target.value as FilterValue;
+  const bondingStore = useSelector((state: RootState) => state.bonding);
 
-    if (e.target.checked) {
-      setChangeFilters([...changeFilters, changedValue]);
-    } else {
-      const newSelectedFilters: FilterValue[] = [];
-
-      changeFilters.forEach((filterVal) => {
-        if (filterVal !== changedValue) {
-          newSelectedFilters.push(filterVal);
-        }
-      });
-      setChangeFilters(newSelectedFilters);
-    }
-  }, [changeFilters]);
+  console.log('bondingStore', bondingStore);
 
   const closeFilterModal = useCallback(() => {
     inactiveModal(FILTER_MODAL_ID);
   }, [inactiveModal]);
-
-  const onApplyFilter = useCallback(() => {
-    inactiveModal(FILTER_MODAL_ID);
-    setSelectedFilters(changeFilters);
-  }, [changeFilters, inactiveModal]);
-
-  const filterModalFooter = useCallback(() => {
-    return (
-      <Button
-        block={true}
-        icon={<Icon
-          phosphorIcon={FadersHorizontal}
-          type='phosphor'
-          weight={'bold'}
-        />}
-        onClick={onApplyFilter}
-      >
-        <span className={'staking__token_filter_button'}>{t('Apply filter')}</span>
-      </Button>
-    );
-  }, [t, onApplyFilter]);
 
   const onClickRightIcon = useCallback((e?: SyntheticEvent) => {
     e && e.stopPropagation();
@@ -159,9 +107,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       chain,
       stakingType
     });
-    console.log('345345345345');
+
     activeModal(STAKING_DETAIL_MODAL_ID);
   }, [activeModal]);
+
+  const subHeaderButton: ButtonProps[] = [
+    {
+      icon: rightIcon,
+      onClick: () => {
+        // TODO: Add navigation to Bond screen
+      }
+    }
+  ];
 
   const renderItem = useCallback((item: StakingDataType) => {
     return (
@@ -204,13 +161,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showSubHeader={true}
         subHeaderBackground={'transparent'}
         subHeaderCenter={false}
+        subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
         title={t('Staking')}
       >
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           enableSearchInput={true}
-          list={allStakingList}
+          list={lazyItems}
           // eslint-disable-next-line react/jsx-no-bind
           onClickActionBtn={onClickActionBtn}
           pagination={{
@@ -227,34 +185,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           showActionBtn
         />
 
-        <SwModal
-          className={className}
-          footer={filterModalFooter()}
+        <FilterModal
           id={FILTER_MODAL_ID}
+          onApplyFilter={onApplyFilter}
           onCancel={closeFilterModal}
-          title={t('Filter')}
-        >
-          <div className={'staking__filter_option_wrapper'}>
-            {
-              FILTER_OPTIONS.map((opt) => {
-                return (
-                  <div
-                    className={'staking__filter_option'}
-                    key={opt.label}
-                  >
-                    <Checkbox
-                      checked={changeFilters.includes(opt.value)}
-                      onChange={onChangeFilterOpt}
-                      value={opt.value}
-                    >
-                      {opt.label}
-                    </Checkbox>
-                  </div>
-                );
-              })
-            }
-          </div>
-        </SwModal>
+          onChangeOption={onChangeFilterOpt}
+          optionSelection={changeFilters}
+          options={FILTER_OPTIONS}
+        />
 
         <StakingDetailModal
           chain={chain}

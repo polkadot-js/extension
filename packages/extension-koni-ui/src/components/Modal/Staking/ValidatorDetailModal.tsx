@@ -16,6 +16,7 @@ type Props = ThemeProps & {
   status: 'active' | 'in_active' | 'oversubscribed',
   minStake: SwNumberProps['value'],
   ownStake: SwNumberProps['value'],
+  decimals: number,
   symbol: string,
   earningEstimated: SwNumberProps['value'],
   commission: SwNumberProps['value']
@@ -24,7 +25,8 @@ type Props = ThemeProps & {
 export const ValidatorDetailModalId = 'validatorDetailModalId';
 
 function Component ({ className,
-  commission, earningEstimated,
+  commission, decimals,
+  earningEstimated,
   minStake,
   onCancel,
   ownStake,
@@ -75,6 +77,7 @@ function Component ({ className,
         label: t('Min stake'),
         valueColorSchema: 'even-odd',
         value: minStake,
+        decimals,
         suffix: symbol
       },
       {
@@ -83,6 +86,7 @@ function Component ({ className,
         label: t('Own stake'),
         valueColorSchema: 'even-odd',
         value: ownStake,
+        decimals,
         suffix: symbol
       },
       {
@@ -102,7 +106,7 @@ function Component ({ className,
         suffix: '%'
       }
     ];
-  }, [commission, earningEstimated, minStake, ownStake, status, statusMap, symbol, t, validatorAddress, validatorName]);
+  }, [commission, decimals, earningEstimated, minStake, ownStake, status, statusMap, symbol, t, validatorAddress, validatorName]);
 
   return (
     <SwModal

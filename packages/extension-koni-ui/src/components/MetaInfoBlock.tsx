@@ -65,12 +65,14 @@ export interface DisplayTypeInfoItem extends Omit<InfoItemBase<'display_type'>, 
 export interface NumberInfoItem extends Omit<InfoItemBase<'number'>, 'valueColorSchema'> {
   value: string | number | BigN,
   suffix?: string,
+  decimals?: number,
   valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd'
 }
 
-export interface TotalInfoItem extends Omit<InfoItemBase<'total'>, 'label'> {
+export interface TotalInfoItem extends Omit<InfoItemBase<'total'>, 'label' | 'valueColorSchema'> {
   value: string | number | BigN,
   suffix?: string,
+  decimals?: number
 }
 
 export interface DataInfoItem extends InfoItemBase<'data'> {
@@ -290,7 +292,7 @@ function DisplayTypeItem ({ label, type, typeName }: DisplayTypeInfoItem): React
   );
 }
 
-function NumberItem ({ label, suffix, type, value, valueColorSchema = 'default' }: NumberInfoItem): React.ReactElement<NumberInfoItem> {
+function NumberItem ({ decimals = 0, label, suffix, type, value, valueColorSchema = 'default' }: NumberInfoItem): React.ReactElement<NumberInfoItem> {
   return (
     <div className={`__row -type-${type}`}>
       <div className={'__col'}>
@@ -301,7 +303,7 @@ function NumberItem ({ label, suffix, type, value, valueColorSchema = 'default' 
       <div className={'__col -to-right'}>
         <Number
           className={`__number-item __value -schema-${valueColorSchema}`}
-          decimal={0}
+          decimal={decimals}
           decimalOpacity={1}
           intOpacity={1}
           suffix={suffix}
@@ -313,7 +315,7 @@ function NumberItem ({ label, suffix, type, value, valueColorSchema = 'default' 
   );
 }
 
-function TotalItem ({ suffix, type, value }: TotalInfoItem): React.ReactElement<TotalInfoItem> {
+function TotalItem ({ decimals = 0, suffix, type, value }: TotalInfoItem): React.ReactElement<TotalInfoItem> {
   const { t } = useTranslation();
 
   return (
@@ -326,7 +328,7 @@ function TotalItem ({ suffix, type, value }: TotalInfoItem): React.ReactElement<
       <div className={'__col -to-right'}>
         <Number
           className={'__balance-item __value -schema-even-odd'}
-          decimal={0}
+          decimal={decimals}
           decimalOpacity={1}
           intOpacity={1}
           suffix={suffix}

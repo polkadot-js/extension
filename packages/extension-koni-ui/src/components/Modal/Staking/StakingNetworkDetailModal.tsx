@@ -16,6 +16,7 @@ type Props = ThemeProps & {
   minimumActive: {
     value: SwNumberProps['value'],
     symbol: string,
+    decimals: number,
   },
   unstakingPeriod: string,
 };
@@ -72,7 +73,8 @@ function Component ({ className,
         label: t('Minimum active'),
         value: minimumActive.value,
         valueColorSchema: 'success',
-        suffix: minimumActive.symbol
+        suffix: minimumActive.symbol,
+        decimals: minimumActive.decimals
       },
       {
         type: 'default',

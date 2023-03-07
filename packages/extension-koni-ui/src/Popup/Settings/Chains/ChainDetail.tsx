@@ -159,7 +159,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         weight={'light'}
       />,
       onClick: handleDeleteCustomChain,
-      disabled: !_isCustomChain(chainInfo.slug)
+      disabled: !(_isCustomChain(chainInfo.slug) && !chainState.active)
     }
   ];
 
@@ -176,12 +176,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     const blockExplorer = form.getFieldValue('blockExplorer') as string;
     const crowdloanUrl = form.getFieldValue('crowdloanUrl') as string;
+    const currentProvider = form.getFieldValue('currentProvider') as string;
 
     const params: _NetworkUpsertParams = {
       mode: 'update',
       chainEditInfo: {
         slug: chainInfo.slug,
-        currentProvider: chainState.currentProvider,
+        currentProvider: currentProvider,
         providers: chainInfo.providers,
         blockExplorer,
         crowdloanUrl
@@ -209,7 +210,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           message: t('An error occurred, please try again')
         });
       });
-  }, [chainInfo.providers, chainInfo.slug, chainState.currentProvider, form, navigate, showNotification, t]);
+  }, [chainInfo.providers, chainInfo.slug, form, navigate, showNotification, t]);
 
   const providerFieldSuffix = useCallback(() => {
     return (
@@ -383,7 +384,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       >
                         <div>
                           <Field
-                            content={paraId > -1 ? paraId : 'None'}
+                            content={paraId > -1 ? paraId : undefined}
                             placeholder={t('ParaId')}
                           />
                         </div>

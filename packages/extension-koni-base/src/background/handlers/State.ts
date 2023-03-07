@@ -12,7 +12,7 @@ import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/con
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getEvmChainId, _getOriginChainOfAsset, _getSubstrateGenesisHash, _isChainEnabled, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
@@ -1150,7 +1150,12 @@ export default class KoniState {
   }
 
   public upsertCustomToken (data: _ChainAsset) {
-    this.chainService.upsertCustomToken(data);
+    const tokenSlug = this.chainService.upsertCustomToken(data);
+
+    if (_isAssetFungibleToken(data)) {
+      this.updateAssetSetting(tokenSlug, { visible: true });
+    }
+
     this.updateServiceInfo();
   }
 
@@ -1178,11 +1183,15 @@ export default class KoniState {
   }
 
   public upsertChainInfo (data: _NetworkUpsertParams): boolean {
-    const result = this.chainService.upsertChain(data);
+    const newNativeTokenSlug = this.chainService.upsertChain(data);
+
+    if (newNativeTokenSlug) {
+      this.updateAssetSetting(newNativeTokenSlug, { visible: true });
+    }
 
     this.updateServiceInfo();
 
-    return result;
+    return true;
   }
 
   public removeCustomChain (networkKey: string): boolean {

@@ -223,6 +223,10 @@ export function _getChainNativeTokenBasicInfo (chainInfo: _ChainInfo) {
 }
 
 export function _getChainNativeTokenSlug (chainInfo: _ChainInfo) {
+  if (_isCustomChain(chainInfo.slug)) {
+    return `${_CUSTOM_PREFIX}${chainInfo.slug}-${_AssetType.NATIVE}-${_getChainNativeTokenBasicInfo(chainInfo).symbol}`;
+  }
+
   return `${chainInfo.slug}-${_AssetType.NATIVE}-${_getChainNativeTokenBasicInfo(chainInfo).symbol}`;
 }
 

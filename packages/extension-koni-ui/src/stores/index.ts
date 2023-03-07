@@ -9,6 +9,7 @@ import AccountStateReducer from './base/AccountState';
 import RequestStateReducer from './base/RequestState';
 import SettingsReducer from './base/Settings';
 import BalanceReducer from './feature/Balance';
+import BondingReducer from './feature/Bonding';
 import AssetRegistryReducer from './feature/common/AssetRegistry';
 import ChainStoreReducer from './feature/common/ChainStore';
 import CrowdloanReducer from './feature/Crowdloan';
@@ -34,6 +35,7 @@ const rootReducers = combineReducers({
   staking: StakingReducer,
   price: PriceReducer,
   balance: BalanceReducer,
+  bonding: BondingReducer,
 
   // common
   chainStore: ChainStoreReducer,

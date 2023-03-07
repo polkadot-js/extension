@@ -48,6 +48,18 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       lineHeight: token.lineHeight
     },
 
+    '.mono-text': {
+      fontFamily: token.monoSpaceFontFamily
+    },
+
+    '.ml-xs': {
+      marginLeft: token.marginXS
+    },
+
+    '.ml-xxs': {
+      marginLeft: token.marginXXS
+    },
+
     '.text-danger': {
       color: token.colorError
     },

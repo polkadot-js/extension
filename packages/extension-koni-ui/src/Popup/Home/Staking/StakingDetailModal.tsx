@@ -2,19 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountInfoItem, BalanceInfoItem, ChainInfoItem, DisplayTypeInfoItem, InfoItem, MetaInfoBlock, StakingStatusInfoItem } from '@subwallet/extension-koni-ui/components/MetaInfoBlock';
+import { AccountInfoItem, BalanceInfoItem, ChainInfoItem, DisplayTypeInfoItem, InfoItem, MetaInfoBlock, StatusInfoItem } from '@subwallet/extension-koni-ui/components/MetaInfoBlock';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import { getBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { Button, Icon, SwModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { CheckCircle, DotsThree } from 'phosphor-react';
 import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   chain?: string;
@@ -25,7 +25,6 @@ export const STAKING_DETAIL_MODAL_ID = 'staking-detail-modal-id';
 
 const Component: React.FC<Props> = (props: Props) => {
   const { chain, className, stakingType } = props;
-  const { token } = useTheme() as Theme;
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { data: stakingData } = useGetStakingList();
   const data = useMemo((): StakingDataType => {
@@ -49,9 +48,9 @@ const Component: React.FC<Props> = (props: Props) => {
       <div className='staking-detail-modal-footer'>
         <Button
           icon={<Icon phosphorIcon={DotsThree} />}
-          schema='secondary'
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => activeModal(MORE_ACTION_MODAL)}
+          schema='secondary'
         />
         <Button
           className='__action-btn'
@@ -135,17 +134,13 @@ const Component: React.FC<Props> = (props: Props) => {
     };
 
     // TODO: change this when background update information
-    const stakingStatus: StakingStatusInfoItem = {
-      type: 'stakingStatus',
+    const stakingStatus: StatusInfoItem = {
+      type: 'status',
       key: 'staking_status',
       label: stakingStatusLabel,
-      status: 'Earning Reward',
-      statusIcon: <Icon
-        iconColor={token.colorSuccess}
-        phosphorIcon={CheckCircle}
-        size='sm'
-        weight='fill'
-      />
+      valueColorSchema: 'success',
+      statusName: t('Earning Reward'),
+      statusIcon: CheckCircle
     };
 
     const result: InfoItem[] = [
@@ -179,9 +174,9 @@ const Component: React.FC<Props> = (props: Props) => {
       className={className}
       footer={footer()}
       id={STAKING_DETAIL_MODAL_ID}
-      title={modalTitle}
       // eslint-disable-next-line react/jsx-no-bind
       onCancel={() => inactiveModal(STAKING_DETAIL_MODAL_ID)}
+      title={modalTitle}
     >
       <MetaInfoBlock infoItems={genInfoItems()} />
     </SwModal>

@@ -6,20 +6,27 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { Icon, Logo, Number, SwIconProps } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
+import CN from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-type Props = ThemeProps & {
-  infoItems: InfoItem[]
-}
+type InfoItemType = 'default'
+| 'status'
+| 'transfer'
+| 'chain'
+| 'balance'
+| 'account'
+| 'data'
+| 'total';
 
-interface InfoItemBase<T = 'default' | 'status' | 'transfer' | 'chain' | 'display_type' | 'balance' | 'account' | 'stakingStatus'> {
+interface InfoItemBase<T = InfoItemType> {
   type: T,
   key: string,
   label: string,
+  valueColorSchema?: 'default' | 'success' | 'gold' | 'danger'
 }
 
 type ChainInfo = {
@@ -28,11 +35,11 @@ type ChainInfo = {
 }
 
 export interface DefaultInfoItem extends InfoItemBase<'default'> {
-  value: string
+  value: React.ReactNode,
+  labelAlign?: 'top' | 'center',
 }
 
 export interface StatusInfoItem extends InfoItemBase<'status'> {
-  status: string,
   statusIcon: SwIconProps['phosphorIcon'],
   statusName: string,
 }
@@ -51,23 +58,28 @@ export interface ChainInfoItem extends InfoItemBase<'chain'> {
   chainName: string,
 }
 
-export interface DisplayTypeInfoItem extends InfoItemBase<'display_type'> {
+export interface DisplayTypeInfoItem extends Omit<InfoItemBase<'display_type'>, 'valueColorSchema'> {
   typeName: string
 }
 
-export interface BalanceInfoItem extends InfoItemBase<'balance'> {
+export interface BalanceInfoItem extends Omit<InfoItemBase<'balance'>, 'valueColorSchema'> {
   balanceValue: string | number | BigN,
-  suffix?: string
+  suffix?: string,
+  valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd'
+}
+
+export interface TotalInfoItem extends Omit<InfoItemBase<'total'>, 'label'> {
+  balanceValue: string | number | BigN,
+  suffix?: string,
+}
+
+export interface DataInfoItem extends InfoItemBase<'data'> {
+  value: string
 }
 
 export interface AccountInfoItem extends InfoItemBase<'account'> {
   address: string;
   name?: string;
-}
-
-export interface StakingStatusInfoItem extends InfoItemBase<'stakingStatus'> {
-  status: string;
-  statusIcon: React.ReactNode;
 }
 
 export type InfoItem = DefaultInfoItem
@@ -77,18 +89,32 @@ export type InfoItem = DefaultInfoItem
 | DisplayTypeInfoItem
 | BalanceInfoItem
 | AccountInfoItem
-| StakingStatusInfoItem;
+| TotalInfoItem
+| DataInfoItem;
 
-function DefaultItem ({ label, value }: DefaultInfoItem): React.ReactElement<DefaultInfoItem> {
+type Props = ThemeProps & {
+  infoItems: InfoItem[],
+  hasBackgroundWrapper?: boolean,
+  labelColorScheme?: 'light' | 'gray',
+  labelFontWeight?: 'regular' | 'semibold',
+  valueColorScheme?: 'light' | 'gray',
+  spaceSize?: 'xs' | 'sm' | 'ms'
+}
+
+function DefaultItem ({ label, labelAlign, type, value, valueColorSchema = 'default' }: DefaultInfoItem): React.ReactElement<DefaultInfoItem> {
   return (
-    <div className={'__row'}>
-      <div className={'__col'}>
+    <div className={`__row -type-${type}`}>
+      <div className={CN('__col', {
+        '-v-align-top': labelAlign === 'top',
+        '-v-align-center': labelAlign === 'center'
+      })}
+      >
         <div className={'__label'}>
           {label}
         </div>
       </div>
       <div className={'__col -to-right'}>
-        <div className={'__value'}>
+        <div className={`__value -schema-${valueColorSchema}`}>
           {value}
         </div>
       </div>
@@ -96,23 +122,40 @@ function DefaultItem ({ label, value }: DefaultInfoItem): React.ReactElement<Def
   );
 }
 
-function StatusItem ({ label, status, statusIcon, statusName }: StatusInfoItem): React.ReactElement<StatusInfoItem> {
+function DataItem ({ label, type, value, valueColorSchema = 'default' }: DataInfoItem): React.ReactElement<DataInfoItem> {
   return (
-    <div className={'__row'}>
+    <div className={`__row -d-column -type-${type}`}>
       <div className={'__col'}>
         <div className={'__label'}>
           {label}
         </div>
       </div>
       <div className={'__col -to-right'}>
-        <div className={`__status-item -${status}`}>
+        <div className={`__value mono-text -schema-${valueColorSchema}`}>
+          {value}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatusItem ({ label, statusIcon, statusName, type, valueColorSchema = 'default' }: StatusInfoItem): React.ReactElement<StatusInfoItem> {
+  return (
+    <div className={`__row -type-${type}`}>
+      <div className={'__col'}>
+        <div className={'__label'}>
+          {label}
+        </div>
+      </div>
+      <div className={'__col -to-right'}>
+        <div className={`__status-item __value -is-wrapper -schema-${valueColorSchema}`}>
           <Icon
             className={'__status-icon'}
             phosphorIcon={statusIcon}
             size={'sm'}
             weight={'fill'}
           />
-          <div className={'__status-name'}>
+          <div className={'__status-name ml-xxs'}>
             {statusName}
           </div>
         </div>
@@ -121,29 +164,28 @@ function StatusItem ({ label, status, statusIcon, statusName }: StatusInfoItem):
   );
 }
 
-function AccountItem ({ address, label, name }: AccountInfoItem): React.ReactElement<AccountInfoItem> {
+function AccountItem ({ address, label, name, type, valueColorSchema = 'default' }: AccountInfoItem): React.ReactElement<AccountInfoItem> {
   return (
-    <div className={'__row'}>
+    <div className={`__row -type-${type}`}>
       <div className={'__col'}>
         <div className={'__label'}>
           {label}
         </div>
       </div>
       <div className={'__col -to-right'}>
-        <div className={'__account-item'}>
+        <div className={`__account-item __value -is-wrapper -schema-${valueColorSchema}`}>
           <Avatar
             className={'__account-avatar'}
             size={24}
             theme={address ? isEthereumAddress(address) ? 'ethereum' : 'polkadot' : undefined}
             value={address}
           />
-          <div className={'__account-name'}>
+          <div className={'__account-name ml-xs'}>
             {name || toShort(address)}
           </div>
         </div>
       </div>
     </div>
-
   );
 }
 
@@ -152,12 +194,13 @@ function TransferItem ({ destinationChain,
   recipientAddress,
   recipientName,
   senderAddress,
-  senderName }: TransferInfoItem): React.ReactElement<TransferInfoItem> {
+  senderName,
+  type, valueColorSchema = 'default' }: TransferInfoItem): React.ReactElement<TransferInfoItem> {
   const { t } = useTranslation();
 
   const genAccountBlock = (address: string, name?: string) => {
     return (
-      <div className={'__account-item'}>
+      <div className={`__account-item __value -schema-${valueColorSchema}`}>
         <Avatar
           className={'__account-avatar'}
           size={24}
@@ -173,14 +216,14 @@ function TransferItem ({ destinationChain,
 
   const genChainBlock = (chain: ChainInfo) => {
     return (
-      <div className={'__chain-item'}>
+      <div className={`__chain-item __value -is-wrapper -schema-${valueColorSchema}`}>
         <Logo
           className={'__chain-logo'}
           network={chain.slug}
           size={24}
         />
 
-        <div className={'__chain-name'}>
+        <div className={'__chain-name ml-xs'}>
           {chain.name}
         </div>
       </div>
@@ -188,7 +231,7 @@ function TransferItem ({ destinationChain,
   };
 
   return (
-    <div className={'__row'}>
+    <div className={`__row -type-${type}`}>
       <div className={'__col'}>
         <div className={'__label'}>{t('Sender')}</div>
 
@@ -205,23 +248,23 @@ function TransferItem ({ destinationChain,
   );
 }
 
-function ChainItem ({ chain, chainName, label }: ChainInfoItem): React.ReactElement<ChainInfoItem> {
+function ChainItem ({ chain, chainName, label, type, valueColorSchema = 'default' }: ChainInfoItem): React.ReactElement<ChainInfoItem> {
   return (
-    <div className={'__row'}>
+    <div className={`__row -type-${type}`}>
       <div className={'__col'}>
         <div className={'__label'}>
           {label}
         </div>
       </div>
       <div className={'__col -to-right'}>
-        <div className={'__chain-item'}>
+        <div className={`__chain-item __value -is-wrapper -schema-${valueColorSchema}`}>
           <Logo
             className={'__chain-logo'}
             network={chain}
             size={24}
           />
 
-          <div className={'__chain-name'}>
+          <div className={'__chain-name ml-xs'}>
             {chainName}
           </div>
         </div>
@@ -230,16 +273,16 @@ function ChainItem ({ chain, chainName, label }: ChainInfoItem): React.ReactElem
   );
 }
 
-function DisplayTypeItem ({ label, typeName }: DisplayTypeInfoItem): React.ReactElement<DisplayTypeInfoItem> {
+function DisplayTypeItem ({ label, type, typeName }: DisplayTypeInfoItem): React.ReactElement<DisplayTypeInfoItem> {
   return (
-    <div className={'__row'}>
+    <div className={`__row -type-${type}`}>
       <div className={'__col'}>
         <div className={'__label'}>
           {label}
         </div>
       </div>
       <div className={'__col -to-right'}>
-        <div className={'__tx-type'}>
+        <div className={'__type-name __value'}>
           {typeName}
         </div>
       </div>
@@ -247,9 +290,9 @@ function DisplayTypeItem ({ label, typeName }: DisplayTypeInfoItem): React.React
   );
 }
 
-function BalanceItem ({ balanceValue, label, suffix }: BalanceInfoItem): React.ReactElement<BalanceInfoItem> {
+function BalanceItem ({ balanceValue, label, suffix, type, valueColorSchema = 'default' }: BalanceInfoItem): React.ReactElement<BalanceInfoItem> {
   return (
-    <div className={'__row'}>
+    <div className={`__row -type-${type}`}>
       <div className={'__col'}>
         <div className={'__label'}>
           {label}
@@ -257,13 +300,12 @@ function BalanceItem ({ balanceValue, label, suffix }: BalanceInfoItem): React.R
       </div>
       <div className={'__col -to-right'}>
         <Number
-          className='__balance-item'
+          className={`__balance-item __value -schema-${valueColorSchema}`}
           decimal={0}
-          decimalOpacity={0.45}
-          intOpacity={0.45}
-          size={14}
+          decimalOpacity={1}
+          intOpacity={1}
           suffix={suffix}
-          unitOpacity={0.45}
+          unitOpacity={1}
           value={balanceValue}
         />
       </div>
@@ -271,27 +313,37 @@ function BalanceItem ({ balanceValue, label, suffix }: BalanceInfoItem): React.R
   );
 }
 
-function StakingStatusInfoItem ({ label, status, statusIcon }: StakingStatusInfoItem): React.ReactElement<StakingStatusInfoItem> {
+function TotalItem ({ balanceValue, suffix, type }: TotalInfoItem): React.ReactElement<TotalInfoItem> {
+  const { t } = useTranslation();
+
   return (
-    <div className={'__row'}>
+    <div className={`__row -type-${type}`}>
       <div className={'__col'}>
         <div className={'__label'}>
-          {label}
+          {t('Total')}
         </div>
       </div>
       <div className={'__col -to-right'}>
-        <div className={'__staking-status-item'}>
-          {statusIcon}
-          <div className={'__tx-type __status-name'}>
-            {status}
-          </div>
-        </div>
+        <Number
+          className={'__balance-item __value -schema-even-odd'}
+          decimal={0}
+          decimalOpacity={1}
+          intOpacity={1}
+          suffix={suffix}
+          unitOpacity={1}
+          value={balanceValue}
+        />
       </div>
     </div>
   );
 }
 
-function Component ({ className = '', infoItems }: Props): React.ReactElement<Props> {
+function Component ({ className = '', hasBackgroundWrapper = false,
+  infoItems,
+  labelColorScheme = 'light',
+  labelFontWeight = 'semibold',
+  spaceSize = 'ms',
+  valueColorScheme = 'gray' }: Props): React.ReactElement<Props> {
   const genInfoItemComponent = (item: InfoItem) => {
     if (item.type === 'status') {
       return (
@@ -329,9 +381,15 @@ function Component ({ className = '', infoItems }: Props): React.ReactElement<Pr
       );
     }
 
-    if (item.type === 'stakingStatus') {
+    if (item.type === 'total') {
       return (
-        <StakingStatusInfoItem {...item} />
+        <TotalItem {...item} />
+      );
+    }
+
+    if (item.type === 'data') {
+      return (
+        <DataItem {...item} />
       );
     }
 
@@ -341,7 +399,17 @@ function Component ({ className = '', infoItems }: Props): React.ReactElement<Pr
   };
 
   return (
-    <div className={className}>
+    <div className={CN(
+      'meta-info-block',
+      className,
+      `-label-scheme-${labelColorScheme}`,
+      `-label-font-weight-${labelFontWeight}`,
+      `-value-scheme-${valueColorScheme}`,
+      `-space-size-${spaceSize}`,
+      {
+        '-has-background-wrapper': hasBackgroundWrapper
+      })}
+    >
       {infoItems.map(genInfoItemComponent)}
     </div>
   );
@@ -349,6 +417,22 @@ function Component ({ className = '', infoItems }: Props): React.ReactElement<Pr
 
 export const MetaInfoBlock = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '& + .meta-info-block': {
+      marginTop: token.marginSM
+    },
+
+    '.ant-number .ant-typography': {
+      fontSize: 'inherit !important',
+      color: 'inherit !important',
+      lineHeight: 'inherit'
+    },
+
+    '&.-has-background-wrapper': {
+      background: token.colorBgSecondary,
+      borderRadius: token.borderRadiusLG,
+      padding: token.paddingSM
+    },
+
     '.ant-sw-modal-body': {
       marginBottom: 0
     },
@@ -361,8 +445,50 @@ export const MetaInfoBlock = styled(Component)<Props>(({ theme: { token } }: Pro
       display: 'flex'
     },
 
-    '.__row + .__row': {
-      marginTop: token.margin
+    '.__row.-d-column': {
+      flexDirection: 'column'
+    },
+
+    '&.-space-size-xs': {
+      '.__row + .__row, .__row.-d-column .__col + .__col': {
+        marginTop: token.marginXS
+      },
+
+      '.__row.-type-total': {
+        paddingTop: token.paddingXS
+      }
+    },
+
+    '&.-space-size-sm': {
+      '.__row + .__row, .__row.-d-column .__col + .__col': {
+        marginTop: token.marginSM
+      },
+
+      '.__row.-type-total': {
+        paddingTop: token.paddingSM
+      }
+    },
+
+    '&.-space-size-ms': {
+      '.__row + .__row, .__row.-d-column .__col + .__col': {
+        marginTop: token.margin
+      },
+
+      '.__row.-type-total': {
+        paddingTop: token.padding
+      }
+    },
+
+    '&.-label-font-weight-semibold': {
+      fontWeight: token.headingFontWeight
+    },
+
+    '&.-label-scheme-light .__label, &.-value-scheme-light .__value': {
+      color: token.colorTextLight2
+    },
+
+    '&.-label-scheme-gray .__label, &.-value-scheme-gray .__value': {
+      color: token.colorTextLight4
     },
 
     '.__col': {
@@ -381,37 +507,49 @@ export const MetaInfoBlock = styled(Component)<Props>(({ theme: { token } }: Pro
       alignItems: 'flex-end'
     },
 
+    '.__col.-v-align-top': {
+      justifyContent: 'flex-start'
+    },
+
     '.__label': {
       fontSize: token.fontSize,
-      lineHeight: token.lineHeight,
-      fontWeight: token.headingFontWeight,
-      color: token.colorTextLight2
+      lineHeight: token.lineHeight
     },
 
-    '.__tx-type': {
-      fontSize: token.fontSize,
-      lineHeight: token.lineHeight,
-      fontWeight: token.headingFontWeight,
-      color: token.colorSuccess
-    },
-
-    '.__chain-item, .__status-item, .__account-item, .__staking-status-item': {
-      display: 'flex',
-      alignItems: 'center'
-    },
-
-    '.__chain-item, .__account-item, .__value': {
-      color: token.colorTextLight4
-    },
-
-    '.__chain-name, .__status-name, .__value, .__account-name': {
+    '.__value': {
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       fontWeight: token.bodyFontWeight
     },
 
-    '.__chain-name, .__account-name': {
-      marginLeft: token.sizeXS
+    '.__value.-schema-success': {
+      color: token.colorSuccess
+    },
+
+    '.__value.-schema-gold': {
+      color: token['gold-6']
+    },
+
+    '.__value.-schema-danger': {
+      color: token.colorError
+    },
+
+    '.__value.-schema-even-odd': {
+      color: token.colorTextLight2,
+
+      '.ant-number-decimal': {
+        color: `${token.colorTextLight4} !important`
+      }
+    },
+
+    '.__value.__type-name': {
+      fontWeight: token.headingFontWeight,
+      color: token.colorSuccess
+    },
+
+    '.__value.-is-wrapper': {
+      display: 'flex',
+      alignItems: 'center'
     },
 
     '.__status-item': {
@@ -428,8 +566,14 @@ export const MetaInfoBlock = styled(Component)<Props>(({ theme: { token } }: Pro
       }
     },
 
-    '.__status-name': {
-      marginLeft: token.sizeXXS
+    '.__row.-type-total': {
+      borderTop: '2px solid',
+      borderTopColor: token.colorBgDivider,
+
+      '.__label, .__value': {
+        fontSize: token.fontSizeLG,
+        lineHeight: token.lineHeightLG
+      }
     }
   });
 });

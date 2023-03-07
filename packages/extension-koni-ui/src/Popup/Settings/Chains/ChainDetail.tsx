@@ -383,7 +383,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       >
                         <div>
                           <Field
-                            content={paraId > -1 ? paraId : 'None'}
+                            content={paraId > -1 ? paraId : undefined}
                             placeholder={t('ParaId')}
                           />
                         </div>

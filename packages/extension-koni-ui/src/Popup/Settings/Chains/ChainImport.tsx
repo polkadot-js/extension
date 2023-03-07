@@ -1,17 +1,23 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { _CUSTOM_PREFIX, _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
+import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { isUrl } from '@subwallet/extension-base/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
-import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps } from '@subwallet/react-ui';
+import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
+import { ActivityIndicator, ButtonProps, Col, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
 import Icon from '@subwallet/react-ui/es/icon';
-import { FloppyDiskBack, Info } from 'phosphor-react';
-import React, { useCallback, useContext, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { FloppyDiskBack, Globe, Info, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
+import { RuleObject } from 'rc-field-form/lib/interface';
+import React, { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import Layout from '../../../components/Layout';
@@ -20,20 +26,37 @@ type Props = ThemeProps
 
 interface ChainImportForm {
   provider: string,
+  name: string,
+  symbol: string,
+  decimals: number,
+  type: string,
+  addressPrefix: number,
+  paraId: number,
+  evmChainId: number,
   blockExplorer: string,
   crowdloanUrl: string
+}
+
+interface ValidationInfo {
+  status: ValidateStatus,
+  message?: string
 }
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
-  const location = useLocation();
   const showNotification = useNotification();
   const [form] = useForm<ChainImportForm>();
 
   const [loading, setLoading] = useState(false);
+  const [isPureEvmChain, setIsPureEvmChain] = useState(false);
+  const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);
+  const [providerValidation, setProviderValidation] = useState<ValidationInfo>({ status: '' });
+  const [isValidating, setIsValidating] = useState(false);
+
+  const [genesisHash, setGenesisHash] = useState('');
+  const [existentialDeposit, setExistentialDeposit] = useState('0');
 
   const handleClickSubheaderButton = useCallback(() => {
     console.log('click subheader');
@@ -56,16 +79,220 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [navigate]);
 
   const isSubmitDisabled = useCallback(() => {
-    return true;
-  }, []);
+    return providerValidation.status !== 'success';
+  }, [providerValidation.status]);
 
   const onSubmit = useCallback(() => {
-    console.log('submit');
-  }, []);
+    setLoading(true);
+
+    const blockExplorer = form.getFieldValue('blockExplorer') as string;
+    const crowdloanUrl = form.getFieldValue('crowdloanUrl') as string;
+    const provider = form.getFieldValue('provider') as string;
+
+    const decimals = form.getFieldValue('decimals') as number;
+    const symbol = form.getFieldValue('symbol') as string;
+    const addressPrefix = form.getFieldValue('addressPrefix') as number;
+    const paraId = form.getFieldValue('paraId') as number;
+    const evmChainId = form.getFieldValue('evmChainId') as number;
+    const name = form.getFieldValue('name') as string;
+
+    const newProviderKey = _generateCustomProviderKey(0);
+
+    const params: _NetworkUpsertParams = {
+      mode: 'insert',
+      chainEditInfo: {
+        slug: '',
+        currentProvider: newProviderKey,
+        providers: { [newProviderKey]: provider },
+        blockExplorer,
+        crowdloanUrl,
+        symbol,
+        chainType: isPureEvmChain ? 'EVM' : 'Substrate',
+        name
+      },
+      chainSpec: {
+        genesisHash,
+        decimals,
+        addressPrefix,
+        paraId,
+        evmChainId,
+        existentialDeposit
+      }
+    };
+
+    upsertChain(params)
+      .then((result) => {
+        setLoading(false);
+
+        if (result) {
+          showNotification({
+            message: t('Imported chain successfully')
+          });
+          navigate(-1);
+        } else {
+          showNotification({
+            message: t('An error occurred, please try again')
+          });
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+        showNotification({
+          message: t('An error occurred, please try again')
+        });
+      });
+  }, [existentialDeposit, form, genesisHash, isPureEvmChain, navigate, showNotification, t]);
+
+  const blockExplorerValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (value.length === 0 || isUrl(value)) {
+        resolve();
+      } else {
+        reject(new Error(t('Block explorer must be a valid URL')));
+      }
+    });
+  }, [t]);
+
+  const crowdloanUrlValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (value.length === 0 || isUrl(value)) {
+        resolve();
+      } else {
+        reject(new Error(t('Crowdloan URL must be a valid URL')));
+      }
+    });
+  }, [t]);
+
+  const handleErrorMessage = useCallback((errorCode: _CHAIN_VALIDATION_ERROR) => {
+    switch (errorCode) {
+      case _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE:
+        return t('Cannot connect to this provider');
+      case _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER:
+        return t('This chain has already been added');
+      case _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN:
+        return t('This chain has already been added');
+      default:
+        return t('Error validating this provider');
+    }
+  }, [t]);
+
+  const providerValidator = useCallback((rule: RuleObject, provider: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (!provider || provider.length === 0) {
+        resolve();
+      } else {
+        if (isUrl(provider)) {
+          setIsShowConnectionStatus(true);
+          setIsValidating(true);
+          const parsedProvider = provider.replaceAll(' ', '');
+
+          validateCustomChain(parsedProvider)
+            .then((result) => {
+              setIsValidating(false);
+
+              if (result.success) {
+                setProviderValidation({ status: 'success' });
+
+                if (result.evmChainId) {
+                  setIsPureEvmChain(true);
+                  form.setFieldValue('evmChainId', result.evmChainId);
+                  form.setFieldValue('type', 'EVM');
+                } else {
+                  setIsPureEvmChain(false);
+                  form.setFieldValue('addressPrefix', result.addressPrefix);
+                  form.setFieldValue('paraId', result.paraId);
+                  form.setFieldValue('type', 'Substrate');
+                  setGenesisHash(result.genesisHash);
+                  setExistentialDeposit(result.existentialDeposit);
+                }
+
+                form.setFieldValue('decimals', result.decimals);
+                form.setFieldValue('name', result.name);
+                form.setFieldValue('symbol', result.symbol);
+
+                resolve();
+              }
+
+              if (result.error) {
+                if (result.evmChainId) {
+                  setIsPureEvmChain(true);
+                  form.setFieldValue('evmChainId', result.evmChainId);
+                  form.setFieldValue('type', 'EVM');
+                } else {
+                  setIsPureEvmChain(false);
+                  form.setFieldValue('addressPrefix', result.addressPrefix);
+                  form.setFieldValue('paraId', result.paraId);
+                  form.setFieldValue('type', 'Substrate');
+                }
+
+                form.setFieldValue('decimals', result.decimals);
+                form.setFieldValue('name', result.name);
+                form.setFieldValue('symbol', result.symbol);
+
+                setProviderValidation({ status: 'error', message: handleErrorMessage(result.error) });
+
+                reject(new Error(handleErrorMessage(result.error)));
+              }
+            })
+            .catch(() => {
+              setIsValidating(false);
+              reject(new Error(t('Error validating this provider')));
+              setProviderValidation({ status: 'error', message: t('Error validating this provider') });
+            });
+        } else {
+          reject(new Error(t('Provider URL is not valid')));
+          setProviderValidation({ status: '' });
+          setIsShowConnectionStatus(false);
+        }
+      }
+    });
+  }, [form, handleErrorMessage, t]);
+
+  const providerSuffix = useCallback(() => {
+    if (!isShowConnectionStatus) {
+      return <></>;
+    }
+
+    if (providerValidation.status === 'success') {
+      return (
+        <Icon
+          customSize={'20px'}
+          iconColor={token.colorSuccess}
+          phosphorIcon={WifiHigh}
+          type={'phosphor'}
+          weight={'bold'}
+        />
+      );
+    }
+
+    if (isValidating) {
+      return (
+        <ActivityIndicator size={'20px'} />
+      );
+    }
+
+    if (providerValidation.status === 'error') {
+      return (
+        <Icon
+          customSize={'20px'}
+          iconColor={token['gray-4']}
+          phosphorIcon={WifiSlash}
+          type={'phosphor'}
+          weight={'bold'}
+        />
+      );
+    }
+
+    return <></>;
+  }, [isShowConnectionStatus, isValidating, providerValidation.status, token]);
 
   return (
     <PageWrapper className={`chain_import ${className}`}>
       <Layout.Base
+        leftFooterButton={{
+          onClick: onBack,
+          children: 'Cancel'
+        }}
         onBack={onBack}
         rightFooterButton={{
           block: true,
@@ -87,14 +314,252 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderCenter={true}
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
-        title={t<string>('Chain detail')}
+        title={t<string>('Import chain')}
       >
+        <div className={'chain_import__container'}>
+          <div className={'chain_import__header_info'}>
+            {t('Currently support WSS provider for Substrate networks and HTTP provider for EVM network')}
+          </div>
+          <Form
+            disabled={loading}
+            form={form}
+          >
+            <div className={'chain_import__attributes_container'}>
+              <Tooltip
+                placement={'topLeft'}
+                title={t('Provider URL')}
+              >
+                <div>
+                  <Form.Item
+                    name={'provider'}
+                    rules={[{ validator: providerValidator }]}
+                    validateTrigger={['onBlur']}
+                  >
+                    <Input
+                      disabled={isValidating}
+                      placeholder={t('Provider URL')}
+                      prefix={<Icon
+                        customSize={'24px'}
+                        iconColor={token['gray-4']}
+                        phosphorIcon={ShareNetwork}
+                        type={'phosphor'}
+                        weight={'bold'}
+                      />}
+                      suffix={providerSuffix()}
+                    />
+                  </Form.Item>
+                </div>
+              </Tooltip>
 
+              <Row gutter={token.paddingSM}>
+                <Col span={16}>
+                  <Tooltip
+                    placement={'topLeft'}
+                    title={t('Chain name')}
+                  >
+                    <div>
+                      <Form.Item name={'name'}>
+                        <Input
+                          disabled={true}
+                          placeholder={t('Chain name')}
+                          prefix={<Icon
+                            customSize={'24px'}
+                            iconColor={token['gray-4']}
+                            phosphorIcon={Globe}
+                            type={'phosphor'}
+                            weight={'bold'}
+                          />}
+                        />
+                      </Form.Item>
+                    </div>
+                  </Tooltip>
+                </Col>
+                <Col span={8}>
+                  <Tooltip
+                    placement={'topLeft'}
+                    title={t('Symbol')}
+                  >
+                    <div>
+                      <Form.Item name={'symbol'}>
+                        <Input
+                          disabled={true}
+                          placeholder={t('Symbol')}
+                        />
+                      </Form.Item>
+                    </div>
+                  </Tooltip>
+                </Col>
+              </Row>
+
+              <Row gutter={token.paddingSM}>
+                <Col span={12}>
+                  <Tooltip
+                    placement={'topLeft'}
+                    title={t('Decimals')}
+                  >
+                    <div>
+                      <Form.Item name={'decimals'}>
+                        <Input
+                          disabled={true}
+                          placeholder={t('Decimals')}
+                        />
+                      </Form.Item>
+                    </div>
+                  </Tooltip>
+                </Col>
+                <Col span={12}>
+                  {
+                    !isPureEvmChain
+                      ? <Tooltip
+                        placement={'topLeft'}
+                        title={t('ParaId')}
+                      >
+                        <div>
+                          <Form.Item name={'paraId'}>
+                            <Input
+                              disabled={true}
+                              placeholder={t('ParaId')}
+                            />
+                          </Form.Item>
+                        </div>
+                      </Tooltip>
+                      : <Tooltip
+                        placement={'topLeft'}
+                        title={t('Chain ID')}
+                      >
+                        <div>
+                          <Form.Item name={'evmChainId'}>
+                            <Input
+                              disabled={true}
+                              placeholder={t('Chain ID')}
+                            />
+                          </Form.Item>
+                        </div>
+                      </Tooltip>
+                  }
+                </Col>
+              </Row>
+
+              <Row gutter={token.paddingSM}>
+                {
+                  !isPureEvmChain &&
+                  <Col span={12}>
+                    <Tooltip
+                      placement={'topLeft'}
+                      title={t('Address prefix')}
+                    >
+                      <div>
+                        <Form.Item name={'addressPrefix'}>
+                          <Input
+                            disabled={true}
+                            placeholder={t('Address prefix')}
+                          />
+                        </Form.Item>
+                      </div>
+                    </Tooltip>
+                  </Col>
+                }
+
+                <Col span={!isPureEvmChain ? 12 : 24}>
+                  <Tooltip
+                    placement={'topLeft'}
+                    title={t('Chain type')}
+                  >
+                    <div>
+                      <Form.Item name={'type'}>
+                        <Input
+                          disabled={true}
+                          placeholder={t('Chain type')}
+                        />
+                      </Form.Item>
+                    </div>
+                  </Tooltip>
+                </Col>
+              </Row>
+
+              <Tooltip
+                placement={'topLeft'}
+                title={t('Block explorer')}
+              >
+                <div>
+                  <Form.Item
+                    name={'blockExplorer'}
+                    rules={[{ validator: blockExplorerValidator }]}
+                  >
+                    <Input placeholder={t('Block explorer')} />
+                  </Form.Item>
+                </div>
+              </Tooltip>
+
+              <Tooltip
+                placement={'topLeft'}
+                title={t('Crowdloan URL')}
+              >
+                <div>
+                  <Form.Item
+                    name={'crowdloanUrl'}
+                    rules={[{ validator: crowdloanUrlValidator }]}
+                  >
+                    <Input placeholder={t('Crowdloan URL')} />
+                  </Form.Item>
+                </div>
+              </Tooltip>
+            </div>
+          </Form>
+        </div>
       </Layout.Base>
     </PageWrapper>
   );
 }
 
 const ChainImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  return ({});
+  return ({
+    '.chain_import__header_info': {
+      color: token.colorTextTertiary,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      fontWeight: token.bodyFontWeight,
+      width: '100%',
+      textAlign: 'center',
+      marginBottom: token.margin,
+      marginTop: 22
+    },
+
+    '.chain_import__container': {
+      marginRight: token.margin,
+      marginLeft: token.margin
+    },
+
+    '.chain_import__attributes_container': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.marginSM
+    },
+
+    '.ant-input-container .ant-input-wrapper': {
+      overflow: 'hidden'
+    },
+
+    '.ant-form-item': {
+      marginBottom: 0
+    },
+
+    '.ant-input-container.-disabled .ant-input': {
+      cursor: 'default'
+    },
+
+    '.ant-input-container.-disabled': {
+      cursor: 'default'
+    },
+
+    '.ant-form-item-with-help .ant-form-item-explain': {
+      paddingBottom: 0
+    },
+
+    '.ant-input-container .ant-input-suffix': {
+      marginRight: 0
+    }
+  });
 });
+
+export default ChainImport;

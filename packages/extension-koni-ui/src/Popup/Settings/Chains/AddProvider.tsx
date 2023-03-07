@@ -161,10 +161,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     navigate(-1);
   }, [navigate]);
 
-  const isCancelDisabled = useCallback(() => {
-    return false;
-  }, []);
-
   const subHeaderButton: ButtonProps[] = [
     {
       icon: <Icon
@@ -272,7 +268,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     >
       <Layout.Base
         leftFooterButton={{
-          disabled: isCancelDisabled(),
           onClick: onCancel,
           children: 'Cancel'
         }}

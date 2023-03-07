@@ -61,6 +61,10 @@ export function _isPureEvmChain (chainInfo: _ChainInfo) {
   return (chainInfo.evmInfo !== null && chainInfo.substrateInfo === null);
 }
 
+export function _isPureSubstrateChain (chainInfo: _ChainInfo) {
+  return (chainInfo.evmInfo === null && chainInfo.substrateInfo !== null);
+}
+
 export function _getOriginChainOfAsset (assetSlug: string) {
   return assetSlug.split('-')[0];
 }

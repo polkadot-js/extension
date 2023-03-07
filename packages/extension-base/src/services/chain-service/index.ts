@@ -9,7 +9,7 @@ import { EvmChainHandler } from '@subwallet/extension-base/services/chain-servic
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenSlug, _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Subject } from 'rxjs';
@@ -328,6 +328,7 @@ export class ChainService {
 
     delete chainStateMap[slug];
     delete chainInfoMap[slug];
+    this.deleteAssetsByChain(slug);
 
     this.updateChainSubscription();
 
@@ -388,6 +389,23 @@ export class ChainService {
     this.assetRegistrySubject.next(assetRegistry);
 
     return token.slug;
+  }
+
+  public deleteAssetsByChain (chainSlug: string) {
+    if (!_isCustomChain(chainSlug)) {
+      return;
+    }
+
+    const targetAssets: string[] = [];
+    const assetRegistry = this.getAssetRegistry();
+
+    Object.values(assetRegistry).forEach((targetToken) => {
+      if (targetToken.originChain === chainSlug) {
+        targetAssets.push(targetToken.slug);
+      }
+    });
+
+    this.deleteCustomAssets(targetAssets);
   }
 
   public deleteCustomAssets (targetAssets: string[]) {
@@ -739,12 +757,12 @@ export class ChainService {
     }
 
     if (targetChainInfo.substrateInfo) {
-      if (params.chainEditInfo.blockExplorer) {
-        targetChainInfo.substrateInfo.blockExplorer = params.chainEditInfo.blockExplorer || null;
+      if (params.chainEditInfo.blockExplorer !== undefined) {
+        targetChainInfo.substrateInfo.blockExplorer = params.chainEditInfo.blockExplorer;
       }
 
-      if (params.chainEditInfo.crowdloanUrl) {
-        targetChainInfo.substrateInfo.crowdloanUrl = params.chainEditInfo.crowdloanUrl || null;
+      if (params.chainEditInfo.crowdloanUrl !== undefined) {
+        targetChainInfo.substrateInfo.crowdloanUrl = params.chainEditInfo.crowdloanUrl;
       }
     }
 

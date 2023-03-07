@@ -1195,7 +1195,11 @@ export default class KoniState {
   }
 
   public removeCustomChain (networkKey: string): boolean {
-    return this.chainService.removeCustomChain(networkKey);
+    const result = this.chainService.removeCustomChain(networkKey);
+
+    this.updateServiceInfo();
+
+    return result;
   }
 
   // TODO: avoids turning off chains related to ledger account

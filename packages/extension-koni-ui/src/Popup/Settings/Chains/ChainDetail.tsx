@@ -159,7 +159,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         weight={'light'}
       />,
       onClick: handleDeleteCustomChain,
-      disabled: !_isCustomChain(chainInfo.slug)
+      disabled: !(_isCustomChain(chainInfo.slug) && !chainState.active)
     }
   ];
 

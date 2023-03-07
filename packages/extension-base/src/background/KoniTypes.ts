@@ -667,6 +667,19 @@ export interface RequestAccountCreateHardwareV2 {
   isAllowed?: boolean;
 }
 
+export interface CreateHardwareAccountItem {
+  accountIndex: number;
+  address: string;
+  addressOffset: number;
+  genesisHash: string;
+  hardwareType: string;
+  name: string;
+}
+
+export interface RequestAccountCreateHardwareMultiple {
+  accounts: CreateHardwareAccountItem[];
+}
+
 // Restore account with public and secret key
 
 export interface RequestAccountCreateWithSecretKey {
@@ -1174,7 +1187,8 @@ export interface ResponseParseEVMContractInput {
 export interface LedgerNetwork {
   genesisHash: string;
   displayName: string;
-  network: string;
+  network: string; // network is predefined in ledger lib
+  slug: string; // slug in chain list
   icon: 'substrate' | 'ethereum';
   isDevMode: boolean;
 }
@@ -1649,6 +1663,7 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
   'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, AccountExternalError[]];
   'pri(accounts.create.hardwareV2)': [RequestAccountCreateHardwareV2, boolean];
+  'pri(accounts.create.hardwareMultiple)': [RequestAccountCreateHardwareMultiple, boolean];
   'pri(accounts.create.withSecret)': [RequestAccountCreateWithSecretKey, ResponseAccountCreateWithSecretKey];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean]; // Substrate
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];

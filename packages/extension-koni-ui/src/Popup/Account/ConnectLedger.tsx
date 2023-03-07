@@ -1,20 +1,41 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
+import { reformatAddress } from '@subwallet/extension-base/utils';
 import { Layout } from '@subwallet/extension-koni-ui/components';
+import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
+import AccountWithNameSkeleton from '@subwallet/extension-koni-ui/components/Account/Item/AccountWithNameSkeleton';
+import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field';
+import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
-// import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/useGetSupportedLedger';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
+import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, Image } from '@subwallet/react-ui';
+import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
+import { BackgroundIcon, Button, Icon, Image, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Info, Swatches } from 'phosphor-react';
-import React from 'react';
+import { CheckCircle, CircleNotch, Info, Swatches } from 'phosphor-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-// import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import LogosMap from '../../assets/logo';
+
+type Props = ThemeProps;
+
+interface ImportLedgerItem {
+  accountIndex: number;
+  address: string;
+  name: string;
+}
+
+const LIMIT_PER_PAGE = 20;
 
 const FooterIcon = (
   <Icon
@@ -23,22 +44,199 @@ const FooterIcon = (
   />
 );
 
-type Props = ThemeProps
-
 const Component: React.FC<Props> = (props: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { className } = props;
-  const { t } = useTranslation();
-  // const navigate = useNavigate();
 
-  // const accountName = useGetDefaultAccountName();
+  const { t } = useTranslation();
+
+  const supportedLedger = useGetSupportedLedger();
+  const { goHome } = useDefaultNavigate();
+
+  const { accounts } = useSelector((state: RootState) => state.accountState);
+
+  const [firstStep, setFirstStep] = useState(true);
+
+  const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
+    name: network.displayName,
+    slug: network.network
+  })), [supportedLedger]);
+
+  const [chain, setChain] = useState(supportedLedger[0].slug);
+  const [ledgerAccounts, setLedgerAccounts] = useState<Array<ImportLedgerItem | null>>([]);
+  const [page, setPage] = useState(0);
+  const [selectedAccounts, setSelectedAccounts] = useState<ImportLedgerItem[]>([]);
+  const [isLoadMore, setIsLoadMore] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const selectedChain = useMemo((): LedgerNetwork | undefined => {
+    return supportedLedger.find((n) => n.slug === chain);
+  }, [chain, supportedLedger]);
+
+  const networkName = useMemo(() => selectedChain?.displayName.replaceAll(' network', '') || 'Unknown network', [selectedChain]);
+
+  const { error, getAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain);
+
+  const onPreviousStep = useCallback(() => {
+    setFirstStep(true);
+  }, []);
+
+  const onChainChange: BasicOnChangeFunction = useCallback((event) => {
+    const value = event.target.value;
+
+    setChain(value);
+  }, []);
+
+  const onLoadMore = useCallback((loading: boolean, page: number): () => void => {
+    return () => {
+      if (!loading) {
+        setIsLoadMore(true);
+        setPage(page + 1);
+
+        const handler = async () => {
+          const start = page * LIMIT_PER_PAGE;
+          const end = (page + 1) * LIMIT_PER_PAGE;
+
+          const rs: Array<ImportLedgerItem | null> = new Array<ImportLedgerItem | null>(LIMIT_PER_PAGE).fill(null);
+
+          setLedgerAccounts((prevState) => {
+            return [...prevState, ...rs];
+          });
+
+          for (let i = start; i < end; i++) {
+            try {
+              const { address } = await getAddress(i);
+
+              const item: ImportLedgerItem = {
+                accountIndex: i,
+                name: `Ledger ${networkName} ${i + 1}`,
+                address: address
+              };
+
+              rs[i - start] = item;
+
+              setLedgerAccounts((prevState) => {
+                const result = [...prevState];
+
+                result[i] = item;
+
+                return result;
+              });
+            } catch (e) {
+              refresh();
+              setFirstStep(true);
+              break;
+            }
+          }
+        };
+
+        handler().then().catch().finally(() => setIsLoadMore(false));
+      }
+    };
+  }, [getAddress, networkName, refresh]);
+
+  const onNextStep = useCallback(() => {
+    setFirstStep(false);
+    onLoadMore(isLoadMore, page)();
+  }, [isLoadMore, onLoadMore, page]);
+
+  const onClickItem = useCallback((selectedAccounts: ImportLedgerItem[], item: ImportLedgerItem): () => void => {
+    return () => {
+      const exists = selectedAccounts.find((it) => it.address === item.address);
+      let result: ImportLedgerItem[];
+
+      if (exists) {
+        result = selectedAccounts.filter((it) => it.address !== item.address);
+      } else {
+        result = [...selectedAccounts];
+        result.push(item);
+      }
+
+      setSelectedAccounts(result);
+    };
+  }, []);
+
+  const renderItem = useCallback((selectedAccounts: ImportLedgerItem[]): ((item: ImportLedgerItem | null, key: string) => React.ReactNode) => {
+    // eslint-disable-next-line react/display-name
+    return (item: ImportLedgerItem | null, key: string) => {
+      if (!item) {
+        return (
+          <AccountWithNameSkeleton
+            direction='vertical'
+            key={key}
+          />
+        );
+      }
+
+      const selected = !!selectedAccounts.find((it) => it.address === item.address);
+      const originAddress = reformatAddress(item.address, 42);
+      const disabled = !!accounts.find((acc) => acc.address === originAddress);
+
+      return (
+        <AccountItemWithName
+          accountName={item.name}
+          address={item.address}
+          className={CN({ disabled: disabled })}
+          direction='vertical'
+          genesisHash={selectedChain?.genesisHash}
+          isSelected={selected || disabled}
+          key={item.address}
+          onClick={disabled ? undefined : onClickItem(selectedAccounts, item)}
+          showUnselectIcon={true}
+        />
+      );
+    };
+  }, [accounts, onClickItem, selectedChain?.genesisHash]);
+
+  const onSubmit = useCallback(() => {
+    if (!selectedAccounts.length || !selectedChain) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    setTimeout(() => {
+      createAccountHardwareMultiple({
+        accounts: selectedAccounts.map((item) => ({
+          accountIndex: item.accountIndex,
+          address: item.address,
+          addressOffset: 0, // don't change
+          genesisHash: selectedChain.genesisHash,
+          hardwareType: 'ledger',
+          name: item.name
+        }))
+      })
+        .then(() => {
+          goHome();
+        })
+        .catch((e: Error) => {
+          console.log(e);
+        })
+        .finally(() => {
+          setIsSubmitting(false);
+        });
+    }, 300);
+  }, [selectedAccounts, selectedChain, goHome]);
+
+  useEffect(() => {
+    setSelectedAccounts([]);
+    setLedgerAccounts([]);
+    setPage(0);
+  }, [ledger]);
+
+  const isConnected = !isLocked && !isLoading && !!ledger;
 
   return (
     <Layout.Base
+      className={className}
+      onBack={firstStep ? undefined : onPreviousStep}
       rightFooterButton={{
         children: t('Connect Ledger device'),
-        icon: FooterIcon
+        icon: FooterIcon,
+        disabled: !isConnected || (!firstStep && !selectedAccounts.length),
+        onClick: firstStep ? onNextStep : onSubmit,
+        loading: isSubmitting || isLoadMore
       }}
       showBackButton={true}
       showSubHeader={true}
@@ -46,39 +244,109 @@ const Component: React.FC<Props> = (props: Props) => {
       subHeaderCenter={true}
       subHeaderIcons={[
         {
-          icon: <Icon
-            phosphorIcon={Info}
-            size='sm'
-          />
+          icon: (
+            <Icon
+              phosphorIcon={Info}
+              size='sm'
+            />
+          )
         }
       ]}
       subHeaderPaddingVertical={true}
       title={t('Connect Ledger device')}
     >
-      <div className={CN(className, 'container')}>
+      <div className={CN('container')}>
         <div className='sub-title'>
           {t('Connect and unlock your Ledger, then open the DApps on your Ledger.')}
         </div>
-        <div className='logo'>
-          <DualLogo
-            leftLogo={(
-              <Image
-                height={56}
-                shape='squircle'
-                src={LogosMap.subwallet}
-                width={56}
+        {
+          firstStep && (
+            <>
+              <div className='logo'>
+                <DualLogo
+                  leftLogo={(
+                    <Image
+                      height={56}
+                      shape='squircle'
+                      src={LogosMap.subwallet}
+                      width={56}
+                    />
+                  )}
+                  rightLogo={(
+                    <Image
+                      height={56}
+                      shape='squircle'
+                      src={LogosMap.ledger}
+                      width={56}
+                    />
+                  )}
+                />
+              </div>
+              <ChainSelector
+                items={networks}
+                label={t('Select network')}
+                onChange={onChainChange}
+                value={chain}
               />
-            )}
-            rightLogo={(
-              <Image
-                height={56}
-                shape='squircle'
-                src={LogosMap.ledger}
-                width={56}
-              />
-            )}
-          />
-        </div>
+              <Button
+                block={true}
+                className={CN('ledger-button', { connected: isConnected })}
+                contentAlign='left'
+                icon={(
+                  <BackgroundIcon
+                    backgroundColor='var(--icon-bg-color)'
+                    phosphorIcon={isConnected ? Swatches : CircleNotch}
+                    size='sm'
+                    weight='fill'
+                  />
+                )}
+                onClick={refresh}
+                schema='secondary'
+              >
+                <div className='ledger-button-content'>
+                  <span>
+                    {t(isConnected
+                      ? 'Connected ledger'
+                      : warning
+                        ? 'Please unlock your Ledger'
+                        : error || (
+                          ledger
+                            ? 'Waiting'
+                            : 'Searching Ledger device'
+                        )
+                    )}
+                  </span>
+                  {
+                    isConnected && (
+                      <Icon
+                        className='check-icon'
+                        phosphorIcon={CheckCircle}
+                        size='md'
+                        weight='fill'
+                      />
+                    )
+                  }
+                </div>
+              </Button>
+            </>
+          )
+        }
+        {
+          !firstStep && (
+            <SwList.Section
+              className='list-container'
+              displayRow={true}
+              list={ledgerAccounts}
+              pagination={{
+                hasMore: !isLoadMore,
+                loadMore: () => console.log(12)
+              }}
+              renderItem={renderItem(selectedAccounts)}
+              renderOnScroll={true}
+              rowGap='var(--list-gap)'
+            />
+          )
+        }
       </div>
     </Layout.Base>
   );
@@ -86,8 +354,18 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '&.container': {
-      padding: token.padding
+    '--list-gap': token.sizeXS,
+
+    '.ant-sw-screen-layout-body': {
+      overflow: 'hidden'
+    },
+
+    '.container': {
+      padding: `${token.padding}px ${token.padding}px `,
+      overflow: 'hidden',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column'
     },
 
     '.sub-title': {
@@ -101,6 +379,51 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
     '.logo': {
       margin: `${token.controlHeightLG}px 0`,
       '--logo-size': token.controlHeightLG + token.controlHeightXS
+    },
+
+    '.ledger-button-content': {
+      marginLeft: token.marginSM,
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flex: 1
+    },
+
+    '.ledger-button': {
+      marginTop: token.margin - 2,
+      padding: `0 ${token.paddingSM}px`,
+      '--icon-bg-color': token['gray-4'],
+
+      '&.connected': {
+        '--icon-bg-color': token['green-6']
+      }
+    },
+
+    '.check-icon': {
+      color: token.colorSuccess
+    },
+
+    '.list-container': {
+      margin: `${token.margin}px -${token.margin}px 0`,
+      flex: 1
+    },
+
+    '.ant-sw-list': {
+      '.ant-web3-block': {
+        display: 'flex',
+        overflow: 'visible',
+
+        '&.disabled': {
+          opacity: 0.4,
+          cursor: 'not-allowed'
+        }
+      },
+
+      '.ant-account-item': {
+        paddingTop: token.paddingSM,
+        paddingBottom: token.paddingSM
+      }
     }
   };
 });

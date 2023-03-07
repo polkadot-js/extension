@@ -1732,6 +1732,8 @@ export default class KoniState {
       throw new EvmRpcError('INVALID_PARAMS', 'Balance can be not enough to send transaction');
     }
 
+    transaction.nonce = await web3.eth.getTransactionCount(fromAddress);
+
     const hashPayload = this.generateHashPayload(networkKey, transaction);
 
     const requestPayload = {

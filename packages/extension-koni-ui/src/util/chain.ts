@@ -9,7 +9,7 @@ export const findChainInfoByGenesisHash = (chainMap: Record<string, _ChainInfo>,
   }
 
   for (const chainInfo of Object.values(chainMap)) {
-    if (chainInfo.substrateInfo?.genesisHash.toLowerCase() === genesisHash.toLowerCase() ){
+    if (chainInfo.substrateInfo?.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
       return chainInfo;
     }
   }

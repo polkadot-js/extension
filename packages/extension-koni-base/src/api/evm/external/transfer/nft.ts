@@ -5,9 +5,10 @@ import { BasicTxResponse, ExternalRequestPromiseStatus } from '@subwallet/extens
 import { QrState, Web3Transaction } from '@subwallet/extension-base/signers/types';
 import QrSigner from '@subwallet/extension-base/signers/web3/QrSigner';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
+import { parseTxAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { TransactionReceipt } from 'web3-core';
 
-import { EvmExternalProps, parseTxAndSignature } from '../shared';
+import { EvmExternalProps } from '../shared';
 
 interface TransferNftExternalArg extends EvmExternalProps{
   rawTransaction: Record<string, any>;

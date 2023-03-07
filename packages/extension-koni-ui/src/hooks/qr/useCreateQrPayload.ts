@@ -8,8 +8,8 @@ import { qrcode } from '@polkadot/react-qr/qrcode';
 import { objectSpread } from '@polkadot/util';
 import { xxhashAsHex } from '@polkadot/util-crypto';
 
-const FRAME_DELAY = 10;
-const TIMER_INC = 10;
+const FRAME_DELAY = 1000;
+const TIMER_INC = 100;
 
 const getDataUrl = (value: Uint8Array): string => {
   const qr = qrcode(0, 'M'); // HACK See our qrcode stringToBytes override as used internally. This

@@ -9,6 +9,9 @@ import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { getTransactionId } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { KoniTransactionStatus, SendTransactionEvents, SWTransaction, SWTransactionInput, TransactionEmitter, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { Web3Transaction } from '@subwallet/extension-base/signers/types';
+import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
+import { parseTxAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import EventEmitter from 'eventemitter3';
 import { BehaviorSubject } from 'rxjs';
 
@@ -184,6 +187,8 @@ export default class TransactionService {
   private async signAndSendEvmTransaction ({ address, chain, id, transaction, url }: SWTransaction): Promise<TransactionEmitter> {
     const payload = (transaction as EvmSendTransactionRequest);
 
+    const { account } = payload;
+
     // Set unique nonce to avoid transaction errors
     if (!payload.nonce) {
       const evmApi = this.chainService.getEvmApi(chain);
@@ -202,12 +207,47 @@ export default class TransactionService {
       payload.from = address;
     }
 
+    const isExternal = !!account.isExternal;
+
     const emitter = new EventEmitter<SendTransactionEvents, TransactionEventResponse>();
+
+    const txObject: Web3Transaction = {
+      nonce: payload.nonce || 1,
+      from: payload.from as string,
+      gasPrice: anyNumberToBN(payload.gasPrice).toNumber(),
+      gasLimit: anyNumberToBN(payload.gas).toNumber(),
+      to: payload.to !== undefined ? payload.to : '',
+      value: anyNumberToBN(payload.value).toNumber(),
+      data: payload.data ? payload.data : '',
+      chainId: payload.chainId
+    };
 
     this.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
       .then(({ isApproved, payload }) => {
         if (isApproved) {
-          payload && this.chainService.getEvmApi(chain).api.eth.sendSignedTransaction(payload)
+          let signedTransaction: string | undefined;
+
+          if (!payload) {
+            throw new EvmRpcError('UNAUTHORIZED', 'Bad signature');
+          }
+
+          const web3Api = this.chainService.getEvmApi(chain).api;
+
+          if (!isExternal) {
+            signedTransaction = payload;
+          } else {
+            const signed = parseTxAndSignature(txObject, payload as `0x${string}`);
+
+            const recover = web3Api.eth.accounts.recoverTransaction(signed);
+
+            if (recover.toLowerCase() !== account.address.toLowerCase()) {
+              throw new EvmRpcError('UNAUTHORIZED', 'Bad signature');
+            }
+
+            signedTransaction = signed;
+          }
+
+          signedTransaction && web3Api.eth.sendSignedTransaction(signedTransaction)
             .once('transactionHash', (hash) => {
               emitter.emit('extrinsicHash', { id, extrinsicHash: hash });
             })

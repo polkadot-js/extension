@@ -171,10 +171,10 @@ const Component: React.FC<Props> = (props: Props) => {
       <div className='body-container'>
         <div className='account-qr'>
           <QRCode
+            errorLevel='H'
             iconSize={token.sizeLG * 1.5}
             size={token.sizeXL * 3.5}
             value={account.address}
-            errorLevel='H'
           />
         </div>
         <Form

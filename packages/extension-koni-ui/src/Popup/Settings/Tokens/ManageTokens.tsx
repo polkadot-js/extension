@@ -185,7 +185,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           type='phosphor'
         />,
         onClick: () => {
-          navigate('/settings/tokens/import', { state: { isExternalRequest: false } });
+          navigate('/settings/tokens/import-token', { state: { isExternalRequest: false } });
         }
       }
     ];

@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, AssetSetting, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TxHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, AssetSetting, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
@@ -217,7 +217,7 @@ export const updateStakeUnlockingInfo = (data: StakeUnlockingJson) => {
 
 export const subscribeStakeUnlockingInfo = lazySubscribeMessage('pri(unbonding.subscribeUnlockingInfo)', null, updateStakeUnlockingInfo, updateStakeUnlockingInfo);
 
-export const updateTxHistory = (data: TxHistoryItem[]) => {
+export const updateTxHistory = (data: TransactionHistoryItem[]) => {
   store.dispatch({ type: 'transactionHistory/update', payload: data });
 };
 

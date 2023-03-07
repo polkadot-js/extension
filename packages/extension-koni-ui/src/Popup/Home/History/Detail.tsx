@@ -1,27 +1,34 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { HistoryItem } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainName } from '@subwallet/extension-base/services/chain-service/utils';
-import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/util';
-import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
-import { Button, Icon, Logo, SwIconProps } from '@subwallet/react-ui';
+import {
+  AmountData,
+  ExtrinsicStatus,
+  ExtrinsicType,
+  TransactionAdditionalInfo
+} from '@subwallet/extension-base/background/KoniTypes';
+import {_getChainName} from '@subwallet/extension-base/services/chain-service/utils';
+import {Avatar} from '@subwallet/extension-koni-ui/components/Avatar';
+import {RootState} from '@subwallet/extension-koni-ui/stores';
+import {ThemeProps} from '@subwallet/extension-koni-ui/types';
+import {toShort} from '@subwallet/extension-koni-ui/util';
+import {customFormatDate} from '@subwallet/extension-koni-ui/util/customFormatDate';
+import {Button, Icon, Logo, SwIconProps} from '@subwallet/react-ui';
 import SwModal from '@subwallet/react-ui/es/sw-modal';
-import { ArrowSquareUpRight, CheckCircle, ProhibitInset, Spinner, StopCircle, XCircle } from 'phosphor-react';
-import React, { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import {ArrowSquareUpRight, CheckCircle, ProhibitInset, Spinner, StopCircle, XCircle} from 'phosphor-react';
+import React, {useMemo} from 'react';
+import {useTranslation} from 'react-i18next';
+import {useSelector} from 'react-redux';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
+import {isEthereumAddress} from '@polkadot/util-crypto';
+import {TransactionHistoryDisplayItem} from "@subwallet/extension-koni-ui/Popup/Home/History/index";
+import {balanceFormatter, formatNumber} from "@subwallet/react-ui/es/_util/number";
 
 type Props = ThemeProps & {
   id: string,
   onCancel: () => void,
-  data: HistoryItem
+  data: TransactionHistoryDisplayItem
 }
 
 interface InfoItemBase<T = 'default' | 'status' | 'transfer' | 'chain' | 'display_type'> {
@@ -218,71 +225,53 @@ function DisplayTypeItem ({ label, typeName }: DisplayTypeInfoItem): React.React
   );
 }
 
-function getBalanceText (balance: string, symbol: string): string {
-  return `${balance} ${symbol}`;
+function formatAmount (amountData?: AmountData): string {
+  if (!amountData) {
+    return '';
+  }
+  const { decimals, symbol, value } = amountData;
+  const displayValue = formatNumber(value, decimals, balanceFormatter);
+
+  return `${displayValue} ${symbol}`;
 }
 
 function Component ({ className = '', data, id, onCancel }: Props): React.ReactElement<Props> {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const { t } = useTranslation();
+  const {title} = data.displayData;
+  const {amount, fee} = data;
 
-  const statusNameMap: Record<string, string> = {
-    completed: t('Completed'),
-    processing: t('Processing'),
-    failed: t('Failed'),
-    cancelled: t('Cancelled')
+  const statusNameMap: Record<ExtrinsicStatus, string> = {
+    [ExtrinsicStatus.SUCCESS]: t('Completed'),
+    [ExtrinsicStatus.FAIL]: t('Failed'),
+    [ExtrinsicStatus.PROCESSING]: t('Processing'),
+    [ExtrinsicStatus.UNKNOWN]: t('Unknown')
   };
 
   const txTypeNameMap: Record<string, string> = {
-    transfer: t('Transfer'),
-    nft: t('NFT'),
-    staking: t('Staking'),
-    claim_reward: t('Claim reward'),
-    crowdloan: t('Crowdloan')
+      [ExtrinsicType.TRANSFER_BALANCE] : t('Transfer'),
+      [ExtrinsicType.TRANSFER_TOKEN] : t('Transfer'),
+      [ExtrinsicType.TRANSFER_XCM] : t('Transfer'),
+      [ExtrinsicType.SEND_NFT] : t('NFT'),
+      [ExtrinsicType.CROWDLOAN] : t('Crowdloan'),
+      [ExtrinsicType.STAKING_STAKE] : t('Stake'),
+      [ExtrinsicType.STAKING_UNSTAKE] : t('Unstake'),
+      [ExtrinsicType.STAKING_BOND] : t ('Bond'),
+      [ExtrinsicType.STAKING_UNBOND] : t ('Unbond'),
+      [ExtrinsicType.STAKING_CLAIM_REWARD] : t ('Claim reward'),
+      [ExtrinsicType.STAKING_WITHDRAW] : t ('Withdraw'),
+      [ExtrinsicType.STAKING_COMPOUNDING] : t('Compounding'),
+      [ExtrinsicType.EVM_EXECUTE] : t('EVM Execute'),
   };
 
   const stakingTypeNameMap: Record<string, string> = {
-    stake: t('Stake'),
-    unstake: t('Unstake'),
-    withdraw: t('Withdraw'),
-    compounding: t('Compounding')
+    [ExtrinsicType.STAKING_STAKE]: t('Stake'),
+    [ExtrinsicType.STAKING_UNSTAKE]: t('Unstake'),
+    [ExtrinsicType.STAKING_BOND]: t('Bond'),
+    [ExtrinsicType.STAKING_UNBOND]: t('Unbond'),
+    [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw'),
+    [ExtrinsicType.STAKING_COMPOUNDING]: t('Compounding')
   };
-
-  const modalTitle = useMemo<string>(() => {
-    if (data.type === 'transfer') {
-      if (data.isReceived) {
-        return t('Send transaction');
-      }
-
-      return t('Receive transaction');
-    }
-
-    if (data.type === 'nft') {
-      return t('NFT transaction');
-    }
-
-    if (data.type === 'staking') {
-      if (data.stakingType === 'stake') {
-        return t('Stake transaction');
-      }
-
-      if (data.stakingType === 'unstake') {
-        return t('Unstake transaction');
-      }
-
-      if (data.stakingType === 'withdraw') {
-        return t('Withdraw transaction');
-      }
-
-      return t('Compounding transaction');
-    }
-
-    if (data.type === 'claim_reward') {
-      return t('Claim reward transaction');
-    }
-
-    return t('Crowdloan transaction');
-  }, [t, data]);
 
   const genInfoItemComponent = (item: InfoItem) => {
     if (item.type === 'status') {
@@ -356,33 +345,36 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
     const transferItem: TransferInfoItem = {
       type: 'transfer',
       key: 'send_receive',
-      senderAddress: data.senderAddress,
-      senderName: data.senderName,
-      recipientAddress: data.recipientAddress,
-      recipientName: data.recipientName
+      senderAddress: data.from,
+      senderName: data.fromName,
+      recipientAddress: data.to,
+      recipientName: data.toName
     };
 
     const networkFeeItem: DefaultInfoItem = {
       type: 'default',
       key: 'network_fee',
       label: t('Network fee'),
-      value: getBalanceText(data.chainFee, data.symbol)
+      value: formatAmount(fee)
     };
 
     const result: InfoItem[] = [
       txTypeItem
     ];
 
-    if (data.type === 'transfer') {
-      if (data.destinationChainInfo) {
+    const transactionType = data.type;
+
+    if (transactionType === ExtrinsicType.TRANSFER_BALANCE || transactionType === ExtrinsicType.TRANSFER_TOKEN || transactionType === ExtrinsicType.TRANSFER_XCM) {
+      if (data.additionalInfo && transactionType === ExtrinsicType.TRANSFER_XCM) {
+        const xcmInfo = data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.TRANSFER_XCM>;
         transferItem.originChain = {
           slug: data.chain,
           name: _getChainName(chainInfoMap[data.chain])
         };
 
         transferItem.destinationChain = {
-          slug: data.destinationChainInfo.slug,
-          name: _getChainName(chainInfoMap[data.destinationChainInfo.slug])
+          slug: xcmInfo.destinationChain,
+          name: _getChainName(chainInfoMap[xcmInfo.destinationChain])
         };
 
         result.push(transferItem);
@@ -398,23 +390,24 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
           type: 'default',
           key: 'amount',
           label: t('Amount'),
-          value: getBalanceText(data.amount, data.symbol)
+          value: formatAmount(amount)
         }
       );
 
-      if (data.destinationChainInfo) {
+      if (data.additionalInfo && transactionType === ExtrinsicType.TRANSFER_XCM) {
+        const xcmInfo = data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.TRANSFER_XCM>;
         result.push(
           {
             type: 'default',
             key: 'origin_chain_fee',
             label: t('Origin Chain fee'),
-            value: getBalanceText(data.chainFee, data.symbol)
+            value: formatAmount(fee)
           },
           {
             type: 'default',
             key: 'destination_fee',
             label: t('Destination fee'),
-            value: getBalanceText(data.destinationChainInfo.fee, data.destinationChainInfo.symbol)
+            value: formatAmount(xcmInfo.fee)
           }
         );
       } else {
@@ -432,19 +425,20 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
       timeItem
     );
 
-    if (data.type === 'nft') {
+    if (data.additionalInfo && transactionType === ExtrinsicType.SEND_NFT) {
+      const nftInfo = data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.SEND_NFT>;
       result.push(
         {
           type: 'default',
           key: 'amount',
           label: t('Amount'),
-          value: data.amount
+          value: amount?.value || ''
         },
         {
           type: 'default',
           key: 'collection_name',
           label: t('Collection Name'),
-          value: data.collectionName
+          value: nftInfo.collectionName
         },
         networkFeeItem
       );
@@ -452,19 +446,20 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
       return result;
     }
 
-    if (data.type === 'staking') {
+    const isStaking = [ExtrinsicType.STAKING_STAKE, ExtrinsicType.STAKING_UNSTAKE, ExtrinsicType.STAKING_BOND, ExtrinsicType.STAKING_UNBOND, ExtrinsicType.STAKING_WITHDRAW, ExtrinsicType.STAKING_COMPOUNDING].includes(transactionType);
+    if (isStaking) {
       result.push(
         {
           type: 'display_type',
           key: 'staking_type',
           label: t('Staking type'),
-          typeName: stakingTypeNameMap[data.stakingType]
+          typeName: stakingTypeNameMap[transactionType]
         },
         {
           type: 'default',
           key: 'staking_value',
           label: t('Staking value'),
-          value: getBalanceText(data.amount, data.symbol)
+          value: formatAmount(amount)
         },
         networkFeeItem
       );
@@ -472,13 +467,13 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
       return result;
     }
 
-    if (data.type === 'claim_reward') {
+    if (transactionType === ExtrinsicType.STAKING_CLAIM_REWARD) {
       result.push(
         {
           type: 'default',
           key: 'amount',
           label: t('Amount'),
-          value: getBalanceText(data.amount, data.symbol)
+          value: formatAmount(amount)
         },
         networkFeeItem
       );
@@ -491,7 +486,7 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
         type: 'default',
         key: 'contribute_balance',
         label: t('Contribute balance'),
-        value: getBalanceText(data.amount, data.symbol)
+        value: formatAmount(amount)
       },
       networkFeeItem
     );
@@ -539,7 +534,7 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
       footer={modalFooter}
       id={id}
       onCancel={onCancel}
-      title={modalTitle}
+      title={title}
     >
       <div className={'__layout-container'}>
         {genInfoItems().map(genInfoItemComponent)}

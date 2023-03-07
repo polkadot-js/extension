@@ -1,94 +1,35 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { HistoryItem as HistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { capitalize, toShort } from '@subwallet/extension-koni-ui/util';
-import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
-import { Icon, Logo, Number, SwIconProps, Web3Block } from '@subwallet/react-ui';
+import {TransactionHistoryDisplayItem} from '@subwallet/extension-koni-ui/Popup/Home/History';
+import {ThemeProps} from '@subwallet/extension-koni-ui/types';
+import {Icon, Logo, Number, Web3Block} from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Aperture, ArrowDownLeft, ArrowUpRight, CaretRight, ClockCounterClockwise, Database, Rocket, Spinner } from 'phosphor-react';
+import {CaretRight} from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
+import {TransactionDirection} from "@subwallet/extension-base/background/KoniTypes";
 
 type Props = ThemeProps & {
-  item: HistoryItemType,
+  item: TransactionHistoryDisplayItem,
   onClick?: () => void,
 };
 
-const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
-  send: ArrowUpRight,
-  receive: ArrowDownLeft,
-  claim_reward: ClockCounterClockwise,
-  staking: Database,
-  crowdloan: Rocket,
-  nft: Aperture,
-  processing: Spinner
-};
-
-function getItemMeta (item: HistoryItemType): [string, string, SwIconProps['phosphorIcon']] {
-  if (item.status === 'processing') {
-    return ['-processing', 'Processing...', IconMap.processing];
-  }
-
-  const time = customFormatDate(item.time, '#hh#:#mm# #AMPM#');
-
-  const status = (() => {
-    if (item.status === 'failed') {
-      return ' fail';
-    }
-
-    if (item.status === 'cancelled') {
-      return ' cancel';
-    }
-
-    return '';
-  })();
-
-  if (item.type === 'transfer') {
-    if (item.isReceived) {
-      return [`-receive -${item.status}`, `Receive${status} - ${time}`, IconMap.receive];
-    } else {
-      return [`-send -${item.status}`, `Send${status} - ${time}`, IconMap.send];
-    }
-  }
-
-  const typeName = (() => {
-    if (item.type === 'nft') {
-      return 'NFT';
-    }
-
-    if (item.type === 'claim_reward') {
-      return 'Claim Reward';
-    }
-
-    if (item.type === 'staking') {
-      return capitalize(item.stakingType);
-    }
-
-    return 'Crowdloan';
-  })();
-
-  return [
-    `-${item.type} -${item.status}`,
-    `${typeName}${status} - ${time}`,
-    IconMap[item.type]
-  ];
-}
-
 function Component (
   { className = '', item, onClick }: Props) {
-  const [_classNames, metaInfo, icon] = getItemMeta(item);
+  const displayData = item.displayData;
+
+  console.log(item.chain, item?.amount?.decimals, item?.amount?.value);
 
   return (
     <Web3Block
-      className={CN('history-item', className, _classNames)}
+      className={CN('history-item', className, displayData.className)}
       leftItem={(
         <>
           <div className={'__main-icon-wrapper'}>
             <Icon
               className={'__main-icon'}
-              phosphorIcon={icon}
+              phosphorIcon={displayData.icon}
               size={'md'}
             />
             <Logo
@@ -101,8 +42,8 @@ function Component (
       )}
       middleItem={(
         <>
-          <div className={'__account-name'}>{item.senderName || toShort(item.senderAddress)}</div>
-          <div className={'__meta'}>{metaInfo}</div>
+          <div className={'__account-name'}>{item.direction === TransactionDirection.SEND ? (item.fromName || item.from || '') : (item.toName || item.to || '')}</div>
+          <div className={'__meta'}>{displayData.typeName}</div>
         </>
       )}
       onClick={onClick}
@@ -111,19 +52,19 @@ function Component (
           <div className={'__value-wrapper'}>
             <Number
               className={'__value'}
-              decimal={0}
+              decimal={item?.amount?.decimals || 0}
               decimalOpacity={0.45}
-              suffix={item.type === 'nft' ? undefined : item.symbol}
-              value={item.amount}
+              suffix={item?.amount?.symbol}
+              value={item?.amount?.value || '0'}
             />
             <Number
               className={'__fee'}
-              decimal={0}
+              decimal={item?.fee?.decimals || 0}
               decimalOpacity={0.45}
               intOpacity={0.45}
-              suffix={item.symbol}
+              suffix={item.fee?.symbol}
               unitOpacity={0.45}
-              value={item.chainFee}
+              value={item.fee?.value || '0'}
             />
           </div>
           <div className={'__arrow-icon'}>

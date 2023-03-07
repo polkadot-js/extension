@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
-import { EvmSendTransactionRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainType, EvmSendTransactionRequest } from '@subwallet/extension-base/background/KoniTypes';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
@@ -136,7 +136,7 @@ export default class TransactionService {
     const transaction = this.getTransaction(id);
     const chainInfo = this.chainService.getChainInfoByKey(transaction.chain);
 
-    if (transaction.chainType === 'ethereum') {
+    if (transaction.chainType === ChainType.EVM) {
       const explorerLink = chainInfo?.evmInfo?.blockExplorer;
 
       if (explorerLink) {

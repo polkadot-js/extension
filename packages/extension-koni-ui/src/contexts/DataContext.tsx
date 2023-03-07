@@ -102,7 +102,7 @@ const _DataContext: DataContextType = {
   awaitStores: function (storeNames: StoreName[], renew = false) {
     const key = storeNames.join('-');
 
-    // Todo: use lazy to avoid renew too many times
+    // Check await cache to avoid rerun many times
     if (!Object.hasOwnProperty.call(this.awaitRequestsCache, key) || renew) {
       const handlers = storeNames.reduce((acc, sName) => {
         (this.storeDependencies[sName] || []).forEach((handlerName) => {

@@ -142,7 +142,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
-  const emptyStakingList = () => {
+  const emptyStakingList = useCallback(() => {
     return (
       <EmptyList
         emptyMessage={t('Your staking accounts will appear here!')}
@@ -150,7 +150,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         phosphorIcon={Trophy}
       />
     );
-  };
+  }, [t]);
 
   return (
     <PageWrapper

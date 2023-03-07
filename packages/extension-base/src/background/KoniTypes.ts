@@ -494,8 +494,8 @@ export interface NFTTransactionAdditionalInfo {
 export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
   ? XCMTransactionAdditionalInfo
   : T extends ExtrinsicType.SEND_NFT
-  ? NFTTransactionAdditionalInfo
-  : undefined;
+    ? NFTTransactionAdditionalInfo
+    : undefined;
 export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType.TRANSFER_BALANCE> {
   origin?: string, // 'app' or history source
   callhash?: string,

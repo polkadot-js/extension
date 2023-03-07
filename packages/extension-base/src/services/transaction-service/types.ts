@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ChainType, EvmSendTransactionRequest, ExtrinsicType} from '@subwallet/extension-base/background/KoniTypes';
+import { ChainType, EvmSendTransactionRequest, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import EventEmitter from 'eventemitter3';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';

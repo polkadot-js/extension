@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {TransactionHistoryDisplayItem} from '@subwallet/extension-koni-ui/Popup/Home/History';
-import {ThemeProps} from '@subwallet/extension-koni-ui/types';
-import {Icon, Logo, Number, Web3Block} from '@subwallet/react-ui';
+import { TransactionDirection } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/Popup/Home/History';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Icon, Logo, Number, Web3Block } from '@subwallet/react-ui';
 import CN from 'classnames';
-import {CaretRight} from 'phosphor-react';
+import { CaretRight } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
-import {TransactionDirection} from "@subwallet/extension-base/background/KoniTypes";
 
 type Props = ThemeProps & {
   item: TransactionHistoryDisplayItem,

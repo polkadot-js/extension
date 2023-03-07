@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { isAccountAll } from '@subwallet/extension-base/utils';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { HistoryItem } from '@subwallet/extension-koni-ui/components/History/HistoryItem';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
@@ -16,7 +17,6 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {isAccountAll} from "@subwallet/extension-base/utils";
 
 type Props = ThemeProps
 
@@ -44,7 +44,6 @@ const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
 };
 
 function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, string>, titleMap: Record<string, string>): TransactionHistoryDisplayData {
-
   let displayData: TransactionHistoryDisplayData;
   const time = customFormatDate(item.time, '#hh#:#mm# #AMPM#');
 
@@ -81,6 +80,7 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
   }
 
   const isProcessing = item.status === ExtrinsicStatus.PROCESSING;
+
   if (isProcessing) {
     displayData.className = '-processing';
     displayData.typeName = nameMap.processing;
@@ -93,7 +93,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const rawHistoryList = useSelector((root: RootState) => root.transactionHistory.historyList);
-  const {currentAccount} = useSelector((root: RootState) => root.accountState);
+  const { currentAccount } = useSelector((root: RootState) => root.accountState);
   const dataContext = useContext(DataContext);
   const [selectedItem, setSelectedItem] = useState<TransactionHistoryDisplayItem | null>(null);
 
@@ -128,12 +128,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   // Fill display data to history list
   const historyList = useMemo(() => {
-    const processedList =  rawHistoryList.map((item: TransactionHistoryItem) => {
+    const processedList = rawHistoryList.map((item: TransactionHistoryItem) => {
       return { ...item, displayData: getDisplayData(item, typeNameMap, typeTitleMap) };
     }).sort((a, b) => b.time > a.time ? 1 : -1);
 
     // Filter current account records
     const currentAddress = currentAccount?.address;
+
     if (currentAddress && !isAccountAll(currentAddress)) {
       return processedList.filter((item: TransactionHistoryItem) => {
         return item.address === currentAddress;

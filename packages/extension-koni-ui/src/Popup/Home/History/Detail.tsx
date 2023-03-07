@@ -1,29 +1,24 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  AmountData,
-  ExtrinsicStatus,
-  ExtrinsicType,
-  TransactionAdditionalInfo
-} from '@subwallet/extension-base/background/KoniTypes';
-import {_getChainName} from '@subwallet/extension-base/services/chain-service/utils';
-import {Avatar} from '@subwallet/extension-koni-ui/components/Avatar';
-import {RootState} from '@subwallet/extension-koni-ui/stores';
-import {ThemeProps} from '@subwallet/extension-koni-ui/types';
-import {toShort} from '@subwallet/extension-koni-ui/util';
-import {customFormatDate} from '@subwallet/extension-koni-ui/util/customFormatDate';
-import {Button, Icon, Logo, SwIconProps} from '@subwallet/react-ui';
+import { AmountData, ExtrinsicStatus, ExtrinsicType, TransactionAdditionalInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _getChainName } from '@subwallet/extension-base/services/chain-service/utils';
+import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
+import { TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/Popup/Home/History/index';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { toShort } from '@subwallet/extension-koni-ui/util';
+import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
+import { Button, Icon, Logo, SwIconProps } from '@subwallet/react-ui';
+import { balanceFormatter, formatNumber } from '@subwallet/react-ui/es/_util/number';
 import SwModal from '@subwallet/react-ui/es/sw-modal';
-import {ArrowSquareUpRight, CheckCircle, ProhibitInset, Spinner, StopCircle, XCircle} from 'phosphor-react';
-import React, {useMemo} from 'react';
-import {useTranslation} from 'react-i18next';
-import {useSelector} from 'react-redux';
+import { ArrowSquareUpRight, CheckCircle, ProhibitInset, Spinner, StopCircle, XCircle } from 'phosphor-react';
+import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import {isEthereumAddress} from '@polkadot/util-crypto';
-import {TransactionHistoryDisplayItem} from "@subwallet/extension-koni-ui/Popup/Home/History/index";
-import {balanceFormatter, formatNumber} from "@subwallet/react-ui/es/_util/number";
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps & {
   id: string,
@@ -229,6 +224,7 @@ function formatAmount (amountData?: AmountData): string {
   if (!amountData) {
     return '';
   }
+
   const { decimals, symbol, value } = amountData;
   const displayValue = formatNumber(value, decimals, balanceFormatter);
 
@@ -238,8 +234,8 @@ function formatAmount (amountData?: AmountData): string {
 function Component ({ className = '', data, id, onCancel }: Props): React.ReactElement<Props> {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const { t } = useTranslation();
-  const {title} = data.displayData;
-  const {amount, fee} = data;
+  const { title } = data.displayData;
+  const { amount, fee } = data;
 
   const statusNameMap: Record<ExtrinsicStatus, string> = {
     [ExtrinsicStatus.SUCCESS]: t('Completed'),
@@ -249,19 +245,19 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
   };
 
   const txTypeNameMap: Record<string, string> = {
-      [ExtrinsicType.TRANSFER_BALANCE] : t('Transfer'),
-      [ExtrinsicType.TRANSFER_TOKEN] : t('Transfer'),
-      [ExtrinsicType.TRANSFER_XCM] : t('Transfer'),
-      [ExtrinsicType.SEND_NFT] : t('NFT'),
-      [ExtrinsicType.CROWDLOAN] : t('Crowdloan'),
-      [ExtrinsicType.STAKING_STAKE] : t('Stake'),
-      [ExtrinsicType.STAKING_UNSTAKE] : t('Unstake'),
-      [ExtrinsicType.STAKING_BOND] : t ('Bond'),
-      [ExtrinsicType.STAKING_UNBOND] : t ('Unbond'),
-      [ExtrinsicType.STAKING_CLAIM_REWARD] : t ('Claim reward'),
-      [ExtrinsicType.STAKING_WITHDRAW] : t ('Withdraw'),
-      [ExtrinsicType.STAKING_COMPOUNDING] : t('Compounding'),
-      [ExtrinsicType.EVM_EXECUTE] : t('EVM Execute'),
+    [ExtrinsicType.TRANSFER_BALANCE]: t('Transfer'),
+    [ExtrinsicType.TRANSFER_TOKEN]: t('Transfer'),
+    [ExtrinsicType.TRANSFER_XCM]: t('Transfer'),
+    [ExtrinsicType.SEND_NFT]: t('NFT'),
+    [ExtrinsicType.CROWDLOAN]: t('Crowdloan'),
+    [ExtrinsicType.STAKING_STAKE]: t('Stake'),
+    [ExtrinsicType.STAKING_UNSTAKE]: t('Unstake'),
+    [ExtrinsicType.STAKING_BOND]: t('Bond'),
+    [ExtrinsicType.STAKING_UNBOND]: t('Unbond'),
+    [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim reward'),
+    [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw'),
+    [ExtrinsicType.STAKING_COMPOUNDING]: t('Compounding'),
+    [ExtrinsicType.EVM_EXECUTE]: t('EVM Execute')
   };
 
   const stakingTypeNameMap: Record<string, string> = {
@@ -367,6 +363,7 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
     if (transactionType === ExtrinsicType.TRANSFER_BALANCE || transactionType === ExtrinsicType.TRANSFER_TOKEN || transactionType === ExtrinsicType.TRANSFER_XCM) {
       if (data.additionalInfo && transactionType === ExtrinsicType.TRANSFER_XCM) {
         const xcmInfo = data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.TRANSFER_XCM>;
+
         transferItem.originChain = {
           slug: data.chain,
           name: _getChainName(chainInfoMap[data.chain])
@@ -396,6 +393,7 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
 
       if (data.additionalInfo && transactionType === ExtrinsicType.TRANSFER_XCM) {
         const xcmInfo = data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.TRANSFER_XCM>;
+
         result.push(
           {
             type: 'default',
@@ -427,6 +425,7 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
 
     if (data.additionalInfo && transactionType === ExtrinsicType.SEND_NFT) {
       const nftInfo = data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.SEND_NFT>;
+
       result.push(
         {
           type: 'default',
@@ -447,6 +446,7 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
     }
 
     const isStaking = [ExtrinsicType.STAKING_STAKE, ExtrinsicType.STAKING_UNSTAKE, ExtrinsicType.STAKING_BOND, ExtrinsicType.STAKING_UNBOND, ExtrinsicType.STAKING_WITHDRAW, ExtrinsicType.STAKING_COMPOUNDING].includes(transactionType);
+
     if (isStaking) {
       result.push(
         {

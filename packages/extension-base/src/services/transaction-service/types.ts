@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EvmSendTransactionRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainType, EvmSendTransactionRequest, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import EventEmitter from 'eventemitter3';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
@@ -13,19 +13,17 @@ export enum KoniTransactionStatus {
   COMPLETED = 'COMPLETED'
 }
 
-export type SwExtrinsicType = 'transfer.balance' | 'transfer.token' | 'transfer.xcm' | 'send_nft' | 'crowdloan' | 'staking.stake' | 'staking.unstake' | 'staking.bond' | 'staking.unbond' | 'staking.claim_reward' | 'evm.smart_contract';
-
 export interface SWTransaction {
   id: string;
   url?: string;
   isInternal: boolean,
   chain: string;
-  chainType: 'substrate' | 'ethereum';
+  chainType: ChainType;
   address: string;
   data: any;
   status: KoniTransactionStatus;
   extrinsicHash: string;
-  extrinsicType: SwExtrinsicType;
+  extrinsicType: ExtrinsicType;
   createdAt: Date;
   updatedAt: Date;
   errors?: string[];

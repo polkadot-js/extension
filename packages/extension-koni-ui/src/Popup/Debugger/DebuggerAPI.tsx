@@ -93,7 +93,6 @@ const API_LIST = [
   'pri(crowdloan.getSubscription)',
   'pri(chainService.subscribeAssetRegistry)',
   'pri(transaction.history.getSubscription)',
-  'pri(transaction.history.add)',
   'pri(nft.getNft)',
   'pri(nft.getSubscription)',
   'pri(nftCollection.getSubscription)',

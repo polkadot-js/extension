@@ -6,13 +6,14 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TxHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmSendTransactionParams, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
+import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
@@ -122,9 +123,6 @@ export default class KoniState {
   private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
   private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: [] };
 
-  private historyMap: TxHistoryItem[] = [];
-  private historySubject = new Subject<TxHistoryItem[]>();
-
   private lazyMap: Record<string, unknown> = {};
 
   // TODO: consider making chainService public (or getter) and call function directly
@@ -138,6 +136,8 @@ export default class KoniState {
   private readonly requestService: RequestService;
   private readonly transactionService: TransactionService;
 
+  readonly historyService: HistoryService;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor (providers: Providers = {}) {
     this.providers = providers;
@@ -148,6 +148,7 @@ export default class KoniState {
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService);
     this.transactionService = new TransactionService(this.chainService, this.requestService);
+    this.historyService = new HistoryService(this.dbService, this.chainService);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');
@@ -613,48 +614,114 @@ export default class KoniState {
     return this.stakingRewardSubject;
   }
 
-  public setHistory (address: string, network: string, item: TxHistoryItem | TxHistoryItem[], callback?: (items: TxHistoryItem[]) => void): void {
-    let items: TxHistoryItem[];
-    const nativeTokenInfo = this.chainService.getNativeTokenInfo(network);
+  // public setHistory (address: string, network: string, item: TxHistoryItem | TxHistoryItem[], callback?: (items: TxHistoryItem[]) => void): void {
+  //   let items: TxHistoryItem[];
+  //   const nativeTokenInfo = this.chainService.getNativeTokenInfo(network);
+  //
+  //   if (!nativeTokenInfo) {
+  //     return;
+  //   }
+  //
+  //   if (item && !Array.isArray(item)) {
+  //     item.origin = 'app';
+  //     items = [item];
+  //   } else {
+  //     items = item;
+  //   }
+  //
+  //   items.forEach((item) => {
+  //     item.feeSymbol = nativeTokenInfo.symbol;
+  //
+  //     if (!item.changeSymbol) {
+  //       item.changeSymbol = nativeTokenInfo.symbol;
+  //     }
+  //   });
+  //
+  //   if (items.length) {
+  //     this.getAccountAddress().then((currentAddress) => {
+  //       if (currentAddress === address) {
+  //         const oldItems = this.historyMap || [];
+  //
+  //         this.historyMap = this.combineHistories(oldItems, items);
+  //         this.saveHistoryToStorage(address, network, this.historyMap);
+  //         callback && callback(this.historyMap);
+  //
+  //         this.lazyNext('setHistory', () => {
+  //           this.publishHistory();
+  //         });
+  //       } else {
+  //         this.saveHistoryToStorage(address, network, items);
+  //         callback && callback(this.historyMap);
+  //       }
+  //     }).catch((e) => this.logger.warn(e));
+  //   }
+  // }
 
-    if (!nativeTokenInfo) {
-      return;
-    }
+  // public getTransactionHistory (address: string, networkKey: string, update: (items: TxHistoryItem[]) => void): void {
+  //   const items = this.historyMap;
+  //
+  //   if (!items) {
+  //     update([]);
+  //   } else {
+  //     update(items);
+  //   }
+  // }
 
-    if (item && !Array.isArray(item)) {
-      item.origin = 'app';
-      items = [item];
-    } else {
-      items = item;
-    }
-
-    items.forEach((item) => {
-      item.feeSymbol = nativeTokenInfo.symbol;
-
-      if (!item.changeSymbol) {
-        item.changeSymbol = nativeTokenInfo.symbol;
-      }
-    });
-
-    if (items.length) {
-      this.getAccountAddress().then((currentAddress) => {
-        if (currentAddress === address) {
-          const oldItems = this.historyMap || [];
-
-          this.historyMap = this.combineHistories(oldItems, items);
-          this.saveHistoryToStorage(address, network, this.historyMap);
-          callback && callback(this.historyMap);
-
-          this.lazyNext('setHistory', () => {
-            this.publishHistory();
-          });
-        } else {
-          this.saveHistoryToStorage(address, network, items);
-          callback && callback(this.historyMap);
-        }
-      }).catch((e) => this.logger.warn(e));
-    }
-  }
+  // public subscribeHistory () {
+  //   return this.historySubject;
+  // }
+  //
+  // public getHistoryMap (): TxHistoryItem[] {
+  //   return this.removeInactiveTxHistoryByChain(this.historyMap);
+  // }
+  //
+  // private removeInactiveTxHistoryByChain (historyList: TxHistoryItem[]) {
+  //   const activeData: TxHistoryItem[] = [];
+  //
+  //   historyList.forEach((item) => {
+  //     if (this.chainService.getChainStateByKey(item.networkKey) && this.chainService.getChainStateByKey(item.networkKey).active) {
+  //       activeData.push(item);
+  //     }
+  //   });
+  //
+  //   return activeData;
+  // }
+  //
+  // public async resetHistoryMap (newAddress: string): Promise<void> {
+  //   this.historyMap = [];
+  //
+  //   const storedData = await this.getStoredHistories(newAddress);
+  //
+  //   if (storedData) {
+  //     this.historyMap = storedData;
+  //   }
+  //
+  //   this.publishHistory();
+  // }
+  //
+  // public async getStoredHistories (address: string) {
+  //   const items = await this.dbService.stores.transaction.getHistoies({address});
+  //
+  //   return items || [];
+  // }
+  //
+  // private saveHistoryToStorage (address: string, network: string, items: TxHistoryItem[]) {
+  //   this.dbService.upsertHistory(network, address, items).catch((e) => this.logger.warn(e));
+  // }
+  //
+  // private combineHistories (oldItems: TxHistoryItem[], newItems: TxHistoryItem[]): TxHistoryItem[] {
+  //   const newHistories = newItems.filter((item) => !oldItems.some((old) => this.isSameHistory(old, item)));
+  //
+  //   return [...oldItems, ...newHistories].filter((his) => his.origin === 'app');
+  // }
+  //
+  // public isSameHistory (oldItem: TxHistoryItem, newItem: TxHistoryItem): boolean {
+  //   if (oldItem.extrinsicHash === newItem.extrinsicHash && oldItem.action === newItem.action) {
+  //     return oldItem.origin === 'app';
+  //   }
+  //
+  //   return false;
+  // }
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
     this.currentAccountStore.get('CurrentAccountInfo', update);
@@ -980,36 +1047,6 @@ export default class KoniState {
 
   public subscribeCrowdloan () {
     return this.crowdloanSubject;
-  }
-
-  // public getTransactionHistory (address: string, networkKey: string, update: (items: TxHistoryItem[]) => void): void {
-  //   const items = this.historyMap;
-  //
-  //   if (!items) {
-  //     update([]);
-  //   } else {
-  //     update(items);
-  //   }
-  // }
-
-  public subscribeHistory () {
-    return this.historySubject;
-  }
-
-  public getHistoryMap (): TxHistoryItem[] {
-    return this.removeInactiveTxHistoryByChain(this.historyMap);
-  }
-
-  private removeInactiveTxHistoryByChain (historyList: TxHistoryItem[]) {
-    const activeData: TxHistoryItem[] = [];
-
-    historyList.forEach((item) => {
-      if (this.chainService.getChainStateByKey(item.networkKey) && this.chainService.getChainStateByKey(item.networkKey).active) {
-        activeData.push(item);
-      }
-    });
-
-    return activeData;
   }
 
   public getAllPriceIds () {
@@ -1364,42 +1401,6 @@ export default class KoniState {
     }
   }
 
-  public async resetHistoryMap (newAddress: string): Promise<void> {
-    this.historyMap = [];
-
-    const storedData = await this.getStoredHistories(newAddress);
-
-    if (storedData) {
-      this.historyMap = storedData;
-    }
-
-    this.publishHistory();
-  }
-
-  public async getStoredHistories (address: string) {
-    const items = await this.dbService.stores.transaction.getHistoryByAddressAsObject(address);
-
-    return items || [];
-  }
-
-  private saveHistoryToStorage (address: string, network: string, items: TxHistoryItem[]) {
-    this.dbService.addHistories(network, address, items).catch((e) => this.logger.warn(e));
-  }
-
-  private combineHistories (oldItems: TxHistoryItem[], newItems: TxHistoryItem[]): TxHistoryItem[] {
-    const newHistories = newItems.filter((item) => !oldItems.some((old) => this.isSameHistory(old, item)));
-
-    return [...oldItems, ...newHistories].filter((his) => his.origin === 'app');
-  }
-
-  public isSameHistory (oldItem: TxHistoryItem, newItem: TxHistoryItem): boolean {
-    if (oldItem.extrinsicHash === newItem.extrinsicHash && oldItem.action === newItem.action) {
-      return oldItem.origin === 'app';
-    }
-
-    return false;
-  }
-
   public pauseAllNetworks (code?: number, reason?: string): Promise<void[]> {
     return this.chainService.stopAllChainApis();
   }
@@ -1416,9 +1417,9 @@ export default class KoniState {
     this.crowdloanSubject.next(this.getCrowdloan(reset));
   }
 
-  private publishHistory () {
-    this.historySubject.next(this.getHistoryMap());
-  }
+  // private publishHistory () {
+  //   this.historySubject.next(this.getHistoryMap());
+  // }
 
   // private removeInactiveDataByChain<T> (data: Record<string, T>) {
   //   const activeData: Record<string, T> = {};
@@ -1560,14 +1561,7 @@ export default class KoniState {
       throw new EvmRpcError('INVALID_PARAMS', 'Not found address or payload to sign');
     }
 
-    if ([
-      'eth_sign',
-      'personal_sign',
-      'eth_signTypedData',
-      'eth_signTypedData_v1',
-      'eth_signTypedData_v3',
-      'eth_signTypedData_v4'
-    ].indexOf(method) < 0) {
+    if (['eth_sign', 'personal_sign', 'eth_signTypedData', 'eth_signTypedData_v1', 'eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) < 0) {
       throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
     }
 
@@ -1750,8 +1744,8 @@ export default class KoniState {
       chain: networkKey,
       url,
       data: { ...transaction },
-      extrinsicType: transaction.value ? 'transfer.balance' : 'evm.smart_contract',
-      chainType: 'ethereum'
+      extrinsicType: transaction.value ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.EVM_EXECUTE,
+      chainType: ChainType.EVM
     });
 
     // Wait extrinsic hash

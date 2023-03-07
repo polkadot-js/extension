@@ -5,6 +5,8 @@ import BaseStoreWithAddressAndChain from '@subwallet/extension-base/services/sto
 
 import { ITransactionHistoryItem } from '../databases';
 
+export interface HistoryQuery {chain?: string, address?: string}
+
 export default class TransactionStore extends BaseStoreWithAddressAndChain<ITransactionHistoryItem> {
   async getHistoryByAddressAsObject (address: string) {
     if (address === 'ALL') { // Todo: Migrate to all account key
@@ -14,15 +16,23 @@ export default class TransactionStore extends BaseStoreWithAddressAndChain<ITran
     return this.table.where('address').equals(address).toArray();
   }
 
-  // convertHistoriesToJsonObject (items: ITransactionHistoryItem[]): Record<string, ITransactionHistoryItem[]> {
-  //   return items.reduce((a, v) => {
-  //     // @ts-ignore
-  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  //     const value = Array.isArray(a[v.chain]) ? [...a[v.chain], v] : [v];
-  //
-  //     return { ...a, [v.chain]: value };
-  //   }, {});
-  // }
+  public async queryHistory (query?: HistoryQuery) {
+    if (!query?.address && !query?.chain) {
+      return this.table.toArray();
+    } else {
+      const queryObject = {} as HistoryQuery;
+
+      if (query?.chain) {
+        queryObject.chain = query?.chain;
+      }
+
+      if (query?.address) {
+        queryObject.address = query?.address;
+      }
+
+      return this.table.where(queryObject).toArray();
+    }
+  }
 
   public override async bulkUpsert (records: ITransactionHistoryItem[]): Promise<unknown> {
     await this.table.bulkPut(records);

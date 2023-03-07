@@ -1103,19 +1103,31 @@ export type RequestConfirmationComplete = {
 
 export interface ValidatorInfo {
   address: string;
-  totalStake: number;
-  ownStake: number;
-  otherStake: number;
+  chain: string;
+
+  totalStake: string;
+  ownStake: string;
+  otherStake: string;
+
+  minBond: string;
   nominatorCount: number;
-  commission: number;
-  expectedReturn: number;
+  commission: number; // in %
+  expectedReturn: number; // in %, annually
+
   blocked: boolean;
   identity?: string;
   isVerified: boolean;
-  minBond: number;
   isNominated: boolean; // this validator has been staked to before
   icon?: string;
   hasScheduledRequest?: boolean; // for parachain, can't stake more on a collator that has existing scheduled request
+}
+
+export interface NominationPoolInfo {
+  id: string,
+  identity?: string,
+  address: string,
+  memberCount: number,
+  bondedAmount: string
 }
 
 export interface ExtraDelegationInfo {
@@ -1316,6 +1328,14 @@ export interface ResponseCheckCrossChainTransfer {
 /// Stake
 
 // Bonding
+export interface NominatorInfo {
+  chain: string,
+  address: string,
+
+  isBondedBefore: boolean,
+  bondedValidators: string[],
+  bondedPool: string[]
+}
 
 export interface BondingOptionInfo {
   isBondedBefore: boolean,
@@ -1326,11 +1346,13 @@ export interface BondingOptionInfo {
   bondedValidators: string[]
 }
 
-export interface ChainBondingBasics {
-  stakedReturn: number,
-  // minBond: number,
-  isMaxNominators: boolean,
-  validatorCount: number
+export interface ChainBondingInfo {
+  chain: string,
+  estimatedReturn: number, // yearly
+  activeNominatorCount: number,
+  totalNominatorCount: number,
+  unbondingPeriod: number, // in hours
+  totalStake: string
 }
 
 export interface BondingSubmitParams extends BaseRequestSign {
@@ -1575,7 +1597,7 @@ export interface KoniRequestSignatures {
   'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
   'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];
   'pri(bonding.submitTransaction)': [RequestBondingSubmit, BasicTxResponse, BasicTxResponse];
-  'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingBasics>, Record<string, ChainBondingBasics>];
+  'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingInfo>, Record<string, ChainBondingInfo>];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
 
   // Chains, assets functions

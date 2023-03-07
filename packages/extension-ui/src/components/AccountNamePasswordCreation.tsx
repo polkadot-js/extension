@@ -26,6 +26,7 @@ interface Props {
   onNameChange: (name: string) => void;
   onPasswordChange?: (password: string) => void;
   isDeriving?: boolean;
+  isImporting?: boolean;
 }
 
 const CustomFooter = styled(HelperFooter)`
@@ -49,6 +50,7 @@ function AccountNamePasswordCreation({
   genesisHash,
   isBusy,
   isDeriving = false,
+  isImporting = false,
   onBackClick,
   onCreate,
   onNameChange,
@@ -61,14 +63,19 @@ function AccountNamePasswordCreation({
   const { show } = useToast();
   const options = useGenesisHashOptions();
   const { master } = useContext(AccountContext);
+  const toastMessage = isDeriving
+    ? t('Creating a sub-account successfully!')
+    : isImporting
+    ? t('Import successful')
+    : t('Account created successfully!');
 
   const _onCreate = useCallback(async () => {
     if (name && password) {
-      show(t(isDeriving ? 'Creating a sub-account successfully!' : 'Import successful'), 'success');
+      show(toastMessage, 'success');
 
       await onCreate(name, password);
     }
-  }, [name, password, isDeriving, onCreate, show, t]);
+  }, [name, password, show, toastMessage, onCreate]);
 
   const _onNameChange = useCallback(
     (name: string | null) => {

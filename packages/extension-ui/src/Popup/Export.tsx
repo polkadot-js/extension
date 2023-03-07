@@ -124,7 +124,6 @@ function Export({
           className='export-button'
           data-export-button
           isBusy={isBusy}
-          isDanger
           isDisabled={pass.length < MIN_LENGTH || pass === '' || !!error}
           onClick={_onExportButtonClick}
         >

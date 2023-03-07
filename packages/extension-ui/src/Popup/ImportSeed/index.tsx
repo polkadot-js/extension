@@ -89,6 +89,7 @@ function ImportSeed(): React.ReactElement {
           buttonLabel={t<string>('Import')}
           genesisHash={genesis}
           isBusy={isBusy}
+          isImporting
           onBackClick={_onPreviousStep}
           onCreate={_onCreate}
           onNameChange={setName}

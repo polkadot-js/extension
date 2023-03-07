@@ -5,11 +5,24 @@ import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/backg
 import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
 
 type IterationKeys = 'children' | 'parents';
+
+interface ParsedAccountJson extends AccountJson {
+  nestedChild?: boolean;
+}
 interface GroupedData {
   [key: string]: AccountWithChildren[];
 }
 
 const networkMap = getNetworkMap();
+
+const parseEntries = (data: AccountWithChildren | AccountJson, nestedChild = false): ParsedAccountJson[] => {
+  const { children, ...rest } = data as AccountWithChildren;
+
+  return [
+    { ...rest, nestedChild },
+    ...(children?.flatMap((entry) => parseEntries(entry, Boolean(data.parentAddress))) ?? [])
+  ];
+};
 
 const findOtherItemGenesis = (item: AccountJson, idx: number, arr: AccountJson[]) =>
   arr
@@ -21,18 +34,10 @@ const findOtherItemGenesis = (item: AccountJson, idx: number, arr: AccountJson[]
     );
 
 export const createGroupedAccountData = (filteredAccount: AccountWithChildren[]) => {
-  const flattened: AccountJson[] = filteredAccount.reduce((acc: AccountJson[], next) => {
-    if (next.children) {
-      next.children.forEach((c) => acc.push(c));
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { children, ...rest } = next;
-
-    acc.push(rest);
-
-    return acc;
-  }, []);
+  const flattened: AccountJson[] = filteredAccount.reduce(
+    (acc: AccountJson[], next) => acc.concat(parseEntries(next)),
+    []
+  );
 
   const { children, parents } = flattened.reduce<Record<IterationKeys, AccountJson[]>>(
     (acc, next, idx, arr) => {
@@ -71,8 +76,8 @@ export const createGroupedAccountData = (filteredAccount: AccountWithChildren[])
     });
   }
 
-  function getParentName(child: AccountJson) {
-    const parent = parents.find((i) => i.address === child.parentAddress);
+  function getParentName(child: ParsedAccountJson) {
+    const parent = (child.nestedChild ? children : parents).find((i) => i.address === child.parentAddress);
 
     return parent?.name;
   }

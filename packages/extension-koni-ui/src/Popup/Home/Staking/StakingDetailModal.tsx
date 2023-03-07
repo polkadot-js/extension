@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountInfoItem, BalanceInfoItem, ChainInfoItem, DisplayTypeInfoItem, InfoItem, MetaInfoBlock, StatusInfoItem } from '@subwallet/extension-koni-ui/components/MetaInfoBlock';
+import { AccountInfoItem, ChainInfoItem, DisplayTypeInfoItem, InfoItem, MetaInfoBlock, NumberInfoItem, StatusInfoItem } from '@subwallet/extension-koni-ui/components/MetaInfoBlock';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import { getBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
@@ -62,51 +62,51 @@ const Component: React.FC<Props> = (props: Props) => {
   };
 
   const genInfoItems = () => {
-    const bondedFund: BalanceInfoItem = {
-      type: 'balance',
+    const bondedFund: NumberInfoItem = {
+      type: 'number',
       key: 'bonded_fund',
       label: t('Bonded fund'),
-      balanceValue: getBalanceValue(staking.balance || '0', decimals),
+      value: getBalanceValue(staking.balance || '0', decimals),
       suffix: staking.nativeToken
     };
 
-    const unlockingStake: BalanceInfoItem = {
-      type: 'balance',
+    const unlockingStake: NumberInfoItem = {
+      type: 'number',
       key: 'unlocking_stake',
       label: t('Unlocking stake'),
-      balanceValue: getBalanceValue(staking.unlockingBalance || '0', decimals),
+      value: getBalanceValue(staking.unlockingBalance || '0', decimals),
       suffix: staking.nativeToken
     };
 
-    const unclaimedReward: BalanceInfoItem = {
-      type: 'balance',
+    const unclaimedReward: NumberInfoItem = {
+      type: 'number',
       key: 'unclaimed_reward',
       label: t('Unclaimed reward'),
-      balanceValue: getBalanceValue(reward?.unclaimedReward || '0', decimals),
+      value: getBalanceValue(reward?.unclaimedReward || '0', decimals),
       suffix: staking.nativeToken
     };
 
-    const totalSlash: BalanceInfoItem = {
-      type: 'balance',
+    const totalSlash: NumberInfoItem = {
+      type: 'number',
       key: 'total_slash',
       label: t('Total slash'),
-      balanceValue: getBalanceValue(reward?.totalReward || '0', decimals),
+      value: getBalanceValue(reward?.totalReward || '0', decimals),
       suffix: staking.nativeToken
     };
 
-    const latestReward: BalanceInfoItem = {
-      type: 'balance',
+    const latestReward: NumberInfoItem = {
+      type: 'number',
       key: 'latest_reward',
       label: t('Total slash'),
-      balanceValue: getBalanceValue(reward?.latestReward || '0', decimals),
+      value: getBalanceValue(reward?.latestReward || '0', decimals),
       suffix: staking.nativeToken
     };
 
-    const totalReward: BalanceInfoItem = {
-      type: 'balance',
+    const totalReward: NumberInfoItem = {
+      type: 'number',
       key: 'total_reward',
       label: t('Total reward'),
-      balanceValue: getBalanceValue(reward?.totalReward || '0', decimals),
+      value: getBalanceValue(reward?.totalReward || '0', decimals),
       suffix: staking.nativeToken
     };
 

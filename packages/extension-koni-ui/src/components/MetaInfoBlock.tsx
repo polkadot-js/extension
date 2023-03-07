@@ -17,16 +17,16 @@ type InfoItemType = 'default'
 | 'status'
 | 'transfer'
 | 'chain'
-| 'balance'
+| 'number'
 | 'account'
 | 'data'
 | 'total';
 
-interface InfoItemBase<T = InfoItemType> {
+export interface InfoItemBase<T = InfoItemType> {
   type: T,
   key: string,
   label: string,
-  valueColorSchema?: 'default' | 'success' | 'gold' | 'danger'
+  valueColorSchema?: 'default' | 'light' | 'gray' | 'success' | 'gold' | 'danger'
 }
 
 type ChainInfo = {
@@ -62,14 +62,14 @@ export interface DisplayTypeInfoItem extends Omit<InfoItemBase<'display_type'>, 
   typeName: string
 }
 
-export interface BalanceInfoItem extends Omit<InfoItemBase<'balance'>, 'valueColorSchema'> {
-  balanceValue: string | number | BigN,
+export interface NumberInfoItem extends Omit<InfoItemBase<'number'>, 'valueColorSchema'> {
+  value: string | number | BigN,
   suffix?: string,
   valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd'
 }
 
 export interface TotalInfoItem extends Omit<InfoItemBase<'total'>, 'label'> {
-  balanceValue: string | number | BigN,
+  value: string | number | BigN,
   suffix?: string,
 }
 
@@ -87,7 +87,7 @@ export type InfoItem = DefaultInfoItem
 | TransferInfoItem
 | ChainInfoItem
 | DisplayTypeInfoItem
-| BalanceInfoItem
+| NumberInfoItem
 | AccountInfoItem
 | TotalInfoItem
 | DataInfoItem;
@@ -290,7 +290,7 @@ function DisplayTypeItem ({ label, type, typeName }: DisplayTypeInfoItem): React
   );
 }
 
-function BalanceItem ({ balanceValue, label, suffix, type, valueColorSchema = 'default' }: BalanceInfoItem): React.ReactElement<BalanceInfoItem> {
+function NumberItem ({ label, suffix, type, value, valueColorSchema = 'default' }: NumberInfoItem): React.ReactElement<NumberInfoItem> {
   return (
     <div className={`__row -type-${type}`}>
       <div className={'__col'}>
@@ -300,20 +300,20 @@ function BalanceItem ({ balanceValue, label, suffix, type, valueColorSchema = 'd
       </div>
       <div className={'__col -to-right'}>
         <Number
-          className={`__balance-item __value -schema-${valueColorSchema}`}
+          className={`__number-item __value -schema-${valueColorSchema}`}
           decimal={0}
           decimalOpacity={1}
           intOpacity={1}
           suffix={suffix}
           unitOpacity={1}
-          value={balanceValue}
+          value={value}
         />
       </div>
     </div>
   );
 }
 
-function TotalItem ({ balanceValue, suffix, type }: TotalInfoItem): React.ReactElement<TotalInfoItem> {
+function TotalItem ({ suffix, type, value }: TotalInfoItem): React.ReactElement<TotalInfoItem> {
   const { t } = useTranslation();
 
   return (
@@ -331,7 +331,7 @@ function TotalItem ({ balanceValue, suffix, type }: TotalInfoItem): React.ReactE
           intOpacity={1}
           suffix={suffix}
           unitOpacity={1}
-          value={balanceValue}
+          value={value}
         />
       </div>
     </div>
@@ -369,9 +369,9 @@ function Component ({ className = '', hasBackgroundWrapper = false,
       );
     }
 
-    if (item.type === 'balance') {
+    if (item.type === 'number') {
       return (
-        <BalanceItem {...item} />
+        <NumberItem {...item} />
       );
     }
 
@@ -520,6 +520,14 @@ export const MetaInfoBlock = styled(Component)<Props>(({ theme: { token } }: Pro
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       fontWeight: token.bodyFontWeight
+    },
+
+    '.__value.-schema-light': {
+      color: token.colorTextLight2
+    },
+
+    '.__value.-schema-gray': {
+      color: token.colorTextLight4
     },
 
     '.__value.-schema-success': {

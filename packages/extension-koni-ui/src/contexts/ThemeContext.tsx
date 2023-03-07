@@ -43,6 +43,14 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       color: token.colorTextTertiary
     },
 
+    '.text-light-2': {
+      color: token.colorTextLight2
+    },
+
+    '.text-light-4': {
+      color: token.colorTextLight4
+    },
+
     '.common-text': {
       fontSize: token.fontSize,
       lineHeight: token.lineHeight

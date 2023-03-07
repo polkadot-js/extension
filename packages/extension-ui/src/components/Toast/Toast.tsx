@@ -18,12 +18,18 @@ interface Props extends ThemeProps {
   type: SnackbarTypes;
   visible: boolean;
   undoTimeout?: NodeJS.Timeout | undefined;
-  onUndoClick?: () => void;
+  onUndoClick?: (shouldRedirectBack: boolean) => void;
 }
 
 function Toast({ className, content, onUndoClick, type, undoTimeout }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const _getIconByType = useCallback((type: SnackbarTypes): string => icons?.[type] ?? icons.info, []);
+
+  const _onUndoClick = useCallback(() => {
+    if (onUndoClick) {
+      onUndoClick(true);
+    }
+  }, [onUndoClick]);
 
   return (
     <div className={className}>
@@ -38,7 +44,7 @@ function Toast({ className, content, onUndoClick, type, undoTimeout }: Props): R
         {undoTimeout && (
           <div
             className='snackbar-undo'
-            onClick={onUndoClick}
+            onClick={_onUndoClick}
           >
             {t<string>('Undo')}
           </div>

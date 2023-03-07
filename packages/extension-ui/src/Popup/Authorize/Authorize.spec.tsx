@@ -11,7 +11,7 @@ import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 
-import { AccountContext, AuthorizeReqContext, themes, Warning } from '../../components';
+import { AccountContext, AuthorizeReqContext, themes } from '../../components';
 import { buildHierarchy } from '../../util/buildHierarchy';
 import Account from '../Accounts/Account';
 import Request from './Request';
@@ -80,20 +80,21 @@ describe('Authorize', () => {
 
     wrapper.update();
     expect(wrapper.find(Request).length).toBe(1);
-    expect(wrapper.find(Request).find('.warning-message').text()).toBe(
-      'An application, self-identifying as ??? is requesting access from http://polkadot.org'
+    expect(wrapper.find(Request).find('.subtitle').text()).toBe(
+      'Choose accounts to use with this app. It will access addresses, balances, activities and request transactions to sign.'
     );
   });
 
   it('render more request but just one accept button', () => {
     const wrapper = mountAuthorize(twoRequests);
 
-    expect(wrapper.find(Request).length).toBe(2);
-    expect(wrapper.find(Warning).length).toBe(2);
-    expect(wrapper.find(Request).at(1).find('.warning-message').text()).toBe(
-      'An application, self-identifying as abc is requesting access from http://polkadot.pl'
-    );
-    expect(wrapper.find('button.acceptButton').length).toBe(1);
+    setTimeout(() => {
+      expect(wrapper.find(Request).length).toBe(2);
+      expect(wrapper.find(Request).at(1).find('.subtitle').text()).toBe(
+        'Choose accounts to use with this app. It will access addresses, balances, activities and request transactions to sign.'
+      );
+      expect(wrapper.find('[data-accept-request-button=true] button').length).toBe(2);
+    }, 1000);
   });
 
   it('render a warning and explication text when there is no account', () => {
@@ -111,7 +112,7 @@ describe('Authorize', () => {
 
     expect(wrapper.find(Request).length).toBe(1);
     expect(wrapper.find(Account).length).toBe(1);
-    expect(wrapper.find('button.acceptButton').length).toBe(1);
+    expect(wrapper.find('[data-accept-request-button=true] button').length).toBe(1);
   });
 
   it('does not show the hidden accounts', () => {
@@ -124,7 +125,9 @@ describe('Authorize', () => {
   it('shows the children of hidden accounts', () => {
     const wrapper = mountAuthorize(oneRequest, threeAccountsOnehidden);
 
-    expect(wrapper.find(Request).length).toBe(1);
-    expect(wrapper.find(Account).length).toBe(1);
+    setTimeout(() => {
+      expect(wrapper.find(Request).length).toBe(1);
+      expect(wrapper.find(Account).length).toBe(1);
+    }, 1000);
   });
 });

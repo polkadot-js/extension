@@ -194,5 +194,8 @@
   "You do NOT have any account": "",
   "Please": "",
   "and refresh the application's page.": "",
-  "Only connect with sites you trust.": ""
+  "Only connect with sites you trust.": "",
+  "Connect apps": "",
+  "Choose accounts to use with this app. It will access addresses, balances, activities and request transactions to sign.": "",
+  "App connected": ""
 }

@@ -134,14 +134,6 @@ function Account({
 
   return (
     <div className={className}>
-      {withCheckbox && (
-        <Checkbox
-          checked={checked}
-          className='accountTree-checkbox'
-          label=''
-          onChange={_onCheckboxChange}
-        />
-      )}
       <Address
         actions={withMenu ? _actions : null}
         address={address}
@@ -164,6 +156,14 @@ function Account({
             onChange={setName}
           />
         )}
+        {withCheckbox && (
+          <Checkbox
+            checked={checked}
+            className='accountTree-checkbox'
+            label=''
+            onChange={_onCheckboxChange}
+          />
+        )}
       </Address>
     </div>
   );
@@ -171,7 +171,10 @@ function Account({
 
 export default styled(Account)(
   ({ theme }: ThemeProps) => `
+
   .address {
+    display: flex;
+    align-items: center;
     margin-bottom: 16px;
   }
 

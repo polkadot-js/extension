@@ -15,10 +15,12 @@ interface Props extends AccountWithChildren {
   withCheckbox?: boolean;
   withMenu?: boolean;
   showHidden?: boolean;
+  isAuthList?: boolean;
 }
 
 function AccountsTree({
   className,
+  isAuthList = false,
   parentName,
   showHidden = true,
   suri,
@@ -38,6 +40,19 @@ function AccountsTree({
           withMenu={withMenu}
         />
       )}
+      {/* this is needed for the RequestComponent */}
+      {isAuthList &&
+        account?.children?.map((child, index) => (
+          <AccountsTree
+            key={`${index}:${child.address}`}
+            {...child}
+            isAuthList={isAuthList}
+            parentName={account.name}
+            showHidden={showHidden}
+            withCheckbox={withCheckbox}
+            withMenu={withMenu}
+          />
+        ))}
     </div>
   );
 }

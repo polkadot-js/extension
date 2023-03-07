@@ -57,6 +57,7 @@ export { default as InputLock } from './InputLock';
 export { default as FileNameDisplay } from './FileNameDisplay';
 export { default as RadioGroup } from './RadioGroup';
 export { default as PopupBorderContainer } from './PopupBorderContainer';
+export { default as FaviconBox } from './FaviconBox';
 
 export { Input, TextArea } from './TextInputs';
 

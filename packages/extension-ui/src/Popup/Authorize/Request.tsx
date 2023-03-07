@@ -7,7 +7,10 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, ActionBar, ActionContext, Button, Link } from '../../components';
+import helpIcon from '../../assets/help.svg';
+import { AccountContext, ActionContext, Button, ButtonArea, Svg } from '../../components';
+import HelperFooter from '../../components/HelperFooter';
+import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { approveAuthRequest, deleteAuthRequest } from '../../messaging';
 import { AccountSelection } from '../../partials';
@@ -21,10 +24,38 @@ interface Props extends ThemeProps {
   url: string;
 }
 
+const CustomButtonArea = styled(ButtonArea)`
+  padding: 0px;
+  margin-bottom: 0px;
+`;
+
+const CustomFooter = styled(HelperFooter)`
+  flex-direction: row;
+  display: flex;
+  gap: 8px;
+
+  .icon-container {
+    margin-top: 4px;
+  }
+  .text-container {
+    display: flex;
+    gap: 4px;
+  }
+
+  .group {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    margin-left: -32px;
+  }
+`;
+
 function Request({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
   const { accounts, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
+  const { show } = useToast();
 
   useEffect(() => {
     const defaultAccountSelection = accounts
@@ -34,11 +65,15 @@ function Request({ authId, className, isFirst, request: { origin }, url }: Props
     setSelectedAccounts && setSelectedAccounts(defaultAccountSelection);
   }, [accounts, setSelectedAccounts]);
 
-  const _onApprove = useCallback((): void => {
-    approveAuthRequest(authId, selectedAccounts)
-      .then(() => onAction())
-      .catch((error: Error) => console.error(error));
-  }, [authId, onAction, selectedAccounts]);
+  const _onApprove = useCallback(async (): Promise<void> => {
+    try {
+      await approveAuthRequest(authId, selectedAccounts);
+      onAction();
+      show(t('App connected'), 'success');
+    } catch (error) {
+      console.error(error);
+    }
+  }, [authId, onAction, selectedAccounts, show, t]);
 
   const _onClose = useCallback((): void => {
     deleteAuthRequest(authId)
@@ -50,46 +85,46 @@ function Request({ authId, className, isFirst, request: { origin }, url }: Props
     return <NoAccount authId={authId} />;
   }
 
+  const footer = (
+    <CustomFooter>
+      <div className='group'>
+        <div className='icon-container'>
+          <Svg
+            className='icon'
+            src={helpIcon}
+          />
+        </div>
+        <div className='text-container'>
+          <span>
+            {t<string>('Only connect with sites you trust.')}&nbsp;
+            <br />
+            <span className='link'>{t<string>('Learn more')}</span>
+          </span>
+        </div>
+      </div>
+    </CustomFooter>
+  );
+
   return (
     <div className={className}>
       <AccountSelection
         origin={origin}
         url={url}
       />
-      {isFirst && (
+      <CustomButtonArea footer={footer}>
         <Button
-          className='acceptButton'
-          onClick={_onApprove}
-        >
-          {t<string>('Connect {{total}} account(s)', { replace: { total: selectedAccounts.length } })}
-        </Button>
-      )}
-      <ActionBar className='rejectionButton'>
-        <Link
-          className='closeLink'
-          isDanger
           onClick={_onClose}
+          secondary
+          data-accept-request-button
         >
-          {t<string>('Ask again later')}
-        </Link>
-      </ActionBar>
+          {t<string>('Cancel')}
+        </Button>
+        {isFirst && <Button onClick={_onApprove}>{t<string>('Connect')}</Button>}
+      </CustomButtonArea>
     </div>
   );
 }
 
 export default styled(Request)`
-  .acceptButton {
-    width: 90%;
-    margin: .5rem auto 0;
-  }
-
-  .rejectionButton {
-    margin: 0 0 15px 0;
-    text-decoration: underline;
-
-    .closeLink {
-      margin: auto;
-      padding: 0;
-    }
-  }
+  padding: 0px 16px;
 `;

@@ -22,12 +22,15 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
   const method = useRef<NodeJS.Timeout>();
   const onAction = useContext(ActionContext);
 
-  const cancelCallback = useCallback(() => {
-    setVisible(false);
-    clearTimeout(method.current);
-    method.current = undefined;
-    onAction('/');
-  }, [onAction]);
+  const cancelCallback = useCallback(
+    (shouldRedirectBack: boolean) => {
+      setVisible(false);
+      clearTimeout(method.current);
+      method.current = undefined;
+      shouldRedirectBack && onAction('/');
+    },
+    [onAction]
+  );
 
   const show = useCallback(
     (message: string, type: SnackbarTypes = 'info', callback?: () => void): (() => void) => {
@@ -41,7 +44,7 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
 
       const timerId = setTimeout(() => {
         setVisible(false);
-        cancelCallback();
+        cancelCallback(false);
       }, TOAST_TIMEOUT);
 
       setContent(message);
@@ -53,7 +56,7 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
 
       return (): void => {
         clearTimeout(timerId);
-        cancelCallback();
+        cancelCallback(false);
       };
     },
     [cancelCallback, visible]

@@ -6,9 +6,7 @@ import type { ThemeProps } from '../../types';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { AuthorizeReqContext, PopupBorderContainer } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { Header } from '../../partials';
+import { AccountContext, AuthorizeReqContext, PopupBorderContainer } from '../../components';
 import Request from './Request';
 
 interface Props extends ThemeProps {
@@ -16,12 +14,15 @@ interface Props extends ThemeProps {
 }
 
 function Authorize({ className = '' }: Props): React.ReactElement {
-  const { t } = useTranslation();
   const requests = useContext(AuthorizeReqContext);
+  const { accounts } = useContext(AccountContext);
+  const classes = [requests.length === 1 ? 'lastRequest' : null, !accounts.length ? 'warning-outline' : null]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <PopupBorderContainer>
-      <div className={`${className} ${requests.length === 1 ? 'lastRequest' : ''}`}>
+      <div className={`${className} ${classes}`}>
         {requests.map(
           ({ id, request, url }, index): React.ReactNode => (
             <Request
@@ -41,8 +42,8 @@ function Authorize({ className = '' }: Props): React.ReactElement {
 
 export default styled(Authorize)(
   ({ theme }: Props) => `
-  overflow-y: auto;
-  outline:  37px solid ${theme.warningColor};
+  overflow-y: auto;  
+  outline:  37px solid ${theme.newTransactionBackground};
   border-radius: 32px;
   height: 584px;
   margin-top: 8px;
@@ -59,6 +60,10 @@ export default styled(Authorize)(
 
   .request {
     padding: 0 24px;
+  }
+
+  &.warning-outline {
+    outline:  37px solid ${theme.warningColor};
   }
 `
 );

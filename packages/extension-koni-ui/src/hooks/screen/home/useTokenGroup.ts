@@ -56,22 +56,22 @@ function getTokenGroup (assetRegistryMap: AssetRegistryStore['assetRegistry'], f
     sortedTokenSlugs: []
   };
 
-  Object.keys(assetRegistryMap).forEach((slug) => {
-    const chain = (slug.split('-'))[0];
+  Object.values(assetRegistryMap).forEach((chainAsset) => {
+    const chain = chainAsset.originChain;
 
     if (filteredChains && !filteredChains.includes(chain)) {
       return;
     }
 
-    const token = _getAssetSymbol(assetRegistryMap[slug]);
+    const token = _getAssetSymbol(chainAsset);
 
-    const multiChainAsset = _getMultiChainAsset(assetRegistryMap[slug]);
+    const multiChainAsset = _getMultiChainAsset(chainAsset);
     const tokenGroupKey = multiChainAsset || `${token}-${chain}`;
 
     if (result.tokenGroupMap[tokenGroupKey]) {
-      result.tokenGroupMap[tokenGroupKey].push(slug);
+      result.tokenGroupMap[tokenGroupKey].push(chainAsset.slug);
     } else {
-      result.tokenGroupMap[tokenGroupKey] = [slug];
+      result.tokenGroupMap[tokenGroupKey] = [chainAsset.slug];
       result.sortedTokenGroups.push(tokenGroupKey);
     }
   });

@@ -161,10 +161,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     navigate(-1);
   }, [navigate]);
 
-  const isCancelDisabled = useCallback(() => {
-    return false;
-  }, []);
-
   const subHeaderButton: ButtonProps[] = [
     {
       icon: <Icon
@@ -229,38 +225,34 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const providerValidator = useCallback((rule: RuleObject, provider: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      if (provider.length === 0) {
-        resolve();
+      if (isUrl(provider)) {
+        setIsShowConnectionStatus(true);
+        setIsValidating(true);
+        const parsedProvider = provider.replaceAll(' ', '');
+
+        validateCustomChain(parsedProvider, chainInfo.slug)
+          .then((result) => {
+            setIsValidating(false);
+
+            if (result.success) {
+              resolve();
+              setProviderValidation({ status: 'success' });
+            }
+
+            if (result.error) {
+              reject(new Error(handleErrorMessage(result.error)));
+              setProviderValidation({ status: 'error', message: handleErrorMessage(result.error) });
+            }
+          })
+          .catch(() => {
+            setIsValidating(false);
+            reject(new Error(t('Error validating this provider')));
+            setProviderValidation({ status: 'error', message: t('Error validating this provider') });
+          });
       } else {
-        if (isUrl(provider)) {
-          setIsShowConnectionStatus(true);
-          setIsValidating(true);
-          const parsedProvider = provider.replaceAll(' ', '');
-
-          validateCustomChain(parsedProvider, chainInfo.slug)
-            .then((result) => {
-              setIsValidating(false);
-
-              if (result.success) {
-                resolve();
-                setProviderValidation({ status: 'success' });
-              }
-
-              if (result.error) {
-                reject(new Error(handleErrorMessage(result.error)));
-                setProviderValidation({ status: 'error', message: handleErrorMessage(result.error) });
-              }
-            })
-            .catch(() => {
-              setIsValidating(false);
-              reject(new Error(t('Error validating this provider')));
-              setProviderValidation({ status: 'error', message: t('Error validating this provider') });
-            });
-        } else {
-          reject(new Error(t('Provider URL is not valid')));
-          setProviderValidation({ status: '' });
-          setIsShowConnectionStatus(false);
-        }
+        reject(new Error(t('Provider URL is not valid')));
+        setProviderValidation({ status: '' });
+        setIsShowConnectionStatus(false);
       }
     });
   }, [chainInfo.slug, handleErrorMessage, t]);
@@ -272,7 +264,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     >
       <Layout.Base
         leftFooterButton={{
-          disabled: isCancelDisabled(),
           onClick: onCancel,
           children: 'Cancel'
         }}

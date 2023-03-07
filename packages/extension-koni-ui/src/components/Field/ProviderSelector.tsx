@@ -5,9 +5,9 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Button, Icon, InputRef, SelectModal, SettingItem } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Icon, InputRef, ModalContext, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { CheckCircle, PlusCircle, ShareNetwork } from 'phosphor-react';
-import React, { ForwardedRef, forwardRef, useCallback } from 'react';
+import React, { ForwardedRef, forwardRef, useCallback, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -25,6 +25,7 @@ const Component = ({ chainInfo, className = '', disabled, id = 'provider-selecto
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
+  const modalContext = useContext(ModalContext);
 
   const providerValueList = useCallback(() => {
     return Object.entries(chainInfo.providers).map(([key, provider]) => {
@@ -69,8 +70,9 @@ const Component = ({ chainInfo, className = '', disabled, id = 'provider-selecto
   }, []);
 
   const handleAddProvider = useCallback(() => {
+    modalContext.inactiveModal(id);
     navigate('/settings/chains/add-provider', { state: chainInfo.slug });
-  }, [chainInfo, navigate]);
+  }, [chainInfo.slug, id, modalContext, navigate]);
 
   const footerButton = useCallback(() => {
     return (

@@ -51,7 +51,7 @@ const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[]): Ledger => 
   return new Ledger('webusb', def.network);
 };
 
-export function useLedger (slug?: string): Result {
+export function useLedger (slug?: string, active = true): Result {
   const { t } = useTranslation();
 
   const ledgerChains = useGetSupportedLedger();
@@ -75,7 +75,7 @@ export function useLedger (slug?: string): Result {
     // when it is shown as locked and the user has actually
     // unlocked it, which we can't know.
     if (refreshLock || slug) {
-      if (!slug) {
+      if (!slug || !active) {
         return null;
       }
 
@@ -87,10 +87,10 @@ export function useLedger (slug?: string): Result {
     }
 
     return null;
-  }, [slug, ledgerChains, refreshLock]);
+  }, [refreshLock, slug, active, ledgerChains]);
 
   useEffect(() => {
-    if (!ledger || !slug) {
+    if (!ledger || !slug || !active) {
       return;
     }
 
@@ -119,7 +119,7 @@ export function useLedger (slug?: string): Result {
           console.error(e);
         });
     }, 300);
-  }, [slug, ledger, ledgerChains, t]);
+  }, [slug, ledger, ledgerChains, t, active]);
 
   const getAddress = useCallback(async (accountIndex: number): Promise<LedgerAddress> => {
     if (ledger) {

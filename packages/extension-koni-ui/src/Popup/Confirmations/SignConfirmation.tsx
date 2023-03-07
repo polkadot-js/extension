@@ -70,6 +70,8 @@ function Component ({ className, request }: Props) {
 
   const isMessage = useMemo(() => isRawPayload(request.request.payload), [request.request.payload]);
 
+  const isLedger = useMemo(() => signMode === SIGN_MODE.LEDGER, [signMode]);
+
   const approveIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
       case SIGN_MODE.QR:
@@ -93,7 +95,7 @@ function Component ({ className, request }: Props) {
 
   const chain = useGetChainInfoByGenesisHash(genesisHash);
 
-  const { isLoading: isLedgerLoading, isLocked, ledger, refresh: refreshLedger } = useLedger(chain?.slug);
+  const { isLoading: isLedgerLoading, isLocked, ledger, refresh: refreshLedger } = useLedger(chain?.slug, isLedger);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [isLedgerLoading, isLocked, ledger]);
 

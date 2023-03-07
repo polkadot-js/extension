@@ -61,6 +61,10 @@ export function _isPureEvmChain (chainInfo: _ChainInfo) {
   return (chainInfo.evmInfo !== null && chainInfo.substrateInfo === null);
 }
 
+export function _isPureSubstrateChain (chainInfo: _ChainInfo) {
+  return (chainInfo.evmInfo === null && chainInfo.substrateInfo !== null);
+}
+
 export function _getOriginChainOfAsset (assetSlug: string) {
   return assetSlug.split('-')[0];
 }
@@ -219,6 +223,10 @@ export function _getChainNativeTokenBasicInfo (chainInfo: _ChainInfo) {
 }
 
 export function _getChainNativeTokenSlug (chainInfo: _ChainInfo) {
+  if (_isCustomChain(chainInfo.slug)) {
+    return `${_CUSTOM_PREFIX}${chainInfo.slug}-${_AssetType.NATIVE}-${_getChainNativeTokenBasicInfo(chainInfo).symbol}`;
+  }
+
   return `${chainInfo.slug}-${_AssetType.NATIVE}-${_getChainNativeTokenBasicInfo(chainInfo).symbol}`;
 }
 

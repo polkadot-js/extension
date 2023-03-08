@@ -20,6 +20,8 @@ const NftCollections = React.lazy(() => import('@subwallet/extension-koni-ui/Pop
 const NftCollectionDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail'));
 const NftImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftImport'));
 
+const Stake = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Stake'));
+
 const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home'));
@@ -156,7 +158,7 @@ export const router = createHashRouter([
           },
           {
             path: 'stake',
-            element: <Example />
+            element: <Stake />
           },
           {
             path: 'unstake',

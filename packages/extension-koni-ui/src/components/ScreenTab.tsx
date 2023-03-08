@@ -3,46 +3,60 @@
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React from 'react';
-import { Tab, TabList, Tabs } from 'react-tabs';
+import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import styled from 'styled-components';
 
-type Props = ThemeProps & {
-  tabList: string[];
-  children: React.ReactNode;
+export type ChildProps = {
+  label: string;
+  children: React.ReactElement;
 }
 
-const Component: React.FC<Props> = (props: Props) => {
-  const { children, className, tabList } = props;
+type Props = ThemeProps & {
+  children: React.ReactElement<ChildProps>[];
+}
 
-  const renderTabItem = () => {
-    return (
-      <TabList>
-        {
-          tabList.map((item) => (
-            <Tab key={item}>{item}</Tab>
-          ))
-        }
-      </TabList>
-    );
-  };
+const SwTabPanel = ({ children, label }: ChildProps) => {
+  return (
+    children
+  );
+};
+
+const Component = (props: Props) => {
+  const { children, className } = props;
+
+  const tabLabelList = React.Children.map(children, (child) => {
+    return child.props.label;
+  });
 
   return (
     <Tabs className={className}>
-      {renderTabItem()}
+      <TabList>
+        {
+          tabLabelList.map((label) => (
+            <Tab key={label}>{label}</Tab>
+          ))
+        }
+      </TabList>
 
-      {children}
+      {
+        React.Children.map(children, (child) => (
+          <TabPanel>
+            {child}
+          </TabPanel>
+        ))
+      }
     </Tabs>
   );
 };
 
-const ScreenTab = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const _ScreenTab = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
 
     '.react-tabs__tab-list': {
       display: 'flex',
       padding: 4,
       borderRadius: '8px',
-      margin: '16px',
+      margin: '0 16px',
       background: '#1A1A1A'
     },
 
@@ -67,5 +81,13 @@ const ScreenTab = styled(Component)<Props>(({ theme: { token } }: Props) => {
     }
   };
 });
+
+type CompoundedComponent = React.ForwardRefExoticComponent<Omit<Props, 'theme'>> & {
+  SwTabPanel: typeof SwTabPanel,
+};
+
+const ScreenTab = _ScreenTab as unknown as CompoundedComponent;
+
+ScreenTab.SwTabPanel = SwTabPanel;
 
 export default ScreenTab;

@@ -4,11 +4,11 @@
 import type { InjectedAccount } from '@subwallet/extension-inject/types';
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
+import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
 import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesSign';
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
@@ -229,7 +229,7 @@ export default class KoniTabs {
     if (request.accountAuthType === 'evm') {
       return new Promise((resolve, reject) => {
         this.#koniState.authorizeUrlV2(url, request).then(resolve).catch((e: Error) => {
-          reject(new EvmRpcError('USER_REJECTED_REQUEST'));
+          reject(new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST));
         });
       });
     } else {
@@ -329,7 +329,7 @@ export default class KoniTabs {
     if (networkKey) {
       await this.#koniState.switchEvmNetworkByUrl(stripUrl(url), networkKey);
     } else {
-      throw new EvmRpcError('INVALID_PARAMS', `Not found chainId ${chainId} in wallet`);
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, `Not found chainId ${chainId} in wallet`);
     }
 
     return null;
@@ -349,18 +349,18 @@ export default class KoniTabs {
     const tokenType = input?.type?.toLowerCase() || '';
 
     if (tokenType !== 'erc20' && tokenType !== 'erc721') {
-      throw new EvmRpcError('INVALID_PARAMS', `Assets type ${tokenType} is not supported`);
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, `Assets type ${tokenType} is not supported`);
     }
 
     if (!input?.options?.address || !input?.options?.symbol) {
-      throw new EvmRpcError('INVALID_PARAMS', 'Assets params require address and symbol');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Assets params require address and symbol');
     }
 
     const evmState = await this.getEvmState(url);
     const chain = evmState.networkKey;
 
     if (!chain) {
-      throw new EvmRpcError('INTERNAL_ERROR', 'Current chain is not available');
+      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current chain is not available');
     }
 
     try {
@@ -375,7 +375,7 @@ export default class KoniTabs {
 
       return await this.#koniState.addTokenConfirm(id, url, tokenInfo);
     } catch (e) {
-      throw new EvmRpcError('INVALID_PARAMS', 'Invalid assets params');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid assets params');
     }
   }
 
@@ -402,7 +402,7 @@ export default class KoniTabs {
           });
 
           if (!ok) {
-            throw new EvmRpcError('USER_REJECTED_REQUEST');
+            throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
           }
         }
       }
@@ -483,7 +483,7 @@ export default class KoniTabs {
             if (connecting && !isConnected) {
               emitEvent('connect', { chainId: evmState.chainId });
             } else if (!connecting && isConnected) {
-              emitEvent('disconnect', new EvmRpcError('CHAIN_DISCONNECTED'));
+              emitEvent('disconnect', new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED));
             }
 
             isConnected = connecting;
@@ -546,10 +546,10 @@ export default class KoniTabs {
     if ((!provider || !provider?.connected) && provider?.supportsSubscriptions()) { // excludes HttpProvider
       Object.values(this.evmEventEmitterMap).forEach((m) => {
         Object.values(m).forEach((emitter) => {
-          emitter('disconnect', new EvmRpcError('CHAIN_DISCONNECTED'));
+          emitter('disconnect', new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED));
         });
       });
-      throw new EvmRpcError('CHAIN_DISCONNECTED');
+      throw new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED);
     }
   }
 
@@ -604,7 +604,7 @@ export default class KoniTabs {
     if (signResult) {
       return signResult;
     } else {
-      throw new EvmRpcError('INVALID_PARAMS', 'Have something wrong to sign message');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Have something wrong to sign message');
     }
   }
 
@@ -626,7 +626,7 @@ export default class KoniTabs {
     const transactionHash = await this.#koniState.evmSendTransaction(id, url, networkKey, allowedAccounts, transactionParams);
 
     if (!transactionHash) {
-      throw new EvmRpcError('USER_REJECTED_REQUEST');
+      throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
     }
 
     return transactionHash;
@@ -682,7 +682,7 @@ export default class KoniTabs {
       } else {
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        throw new EvmRpcError('INTERNAL_ERROR', e.message);
+        throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, e.message);
       }
     }
   }
@@ -725,7 +725,7 @@ export default class KoniTabs {
       await this.#koniState.ensureUrlAuthorizedV2(url)
         .catch((e: Error) => {
           if (type.startsWith('evm')) {
-            throw new EvmRpcError('INTERNAL_ERROR', e.message);
+            throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, e.message);
           } else {
             throw e;
           }

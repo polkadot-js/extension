@@ -13,18 +13,7 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-type InfoItemType = 'default'
-| 'status'
-| 'transfer'
-| 'chain'
-| 'number'
-| 'account'
-| 'data'
-| 'total';
-
-export interface InfoItemBase<T = InfoItemType> {
-  type: T,
-  key: string,
+export interface InfoItemBase {
   label: string,
   valueColorSchema?: 'default' | 'light' | 'gray' | 'success' | 'gold' | 'danger'
 }
@@ -34,17 +23,17 @@ type ChainInfo = {
   name: string,
 }
 
-export interface DefaultInfoItem extends InfoItemBase<'default'> {
+export interface DefaultInfoItem extends InfoItemBase {
   value: React.ReactNode,
   labelAlign?: 'top' | 'center',
 }
 
-export interface StatusInfoItem extends InfoItemBase<'status'> {
+export interface StatusInfoItem extends InfoItemBase {
   statusIcon: SwIconProps['phosphorIcon'],
   statusName: string,
 }
 
-export interface TransferInfoItem extends Omit<InfoItemBase<'transfer'>, 'label'> {
+export interface TransferInfoItem extends Omit<InfoItemBase, 'label'> {
   senderAddress: string,
   senderName?: string,
   recipientAddress: string,
@@ -53,49 +42,39 @@ export interface TransferInfoItem extends Omit<InfoItemBase<'transfer'>, 'label'
   destinationChain?: ChainInfo,
 }
 
-export interface ChainInfoItem extends InfoItemBase<'chain'> {
+export interface ChainInfoItem extends InfoItemBase {
   chain: string,
   chainName: string,
 }
 
-export interface DisplayTypeInfoItem extends Omit<InfoItemBase<'display_type'>, 'valueColorSchema'> {
+export interface DisplayTypeInfoItem extends Omit<InfoItemBase, 'valueColorSchema'> {
   typeName: string
 }
 
-export interface NumberInfoItem extends Omit<InfoItemBase<'number'>, 'valueColorSchema'> {
+export interface NumberInfoItem extends Omit<InfoItemBase, 'valueColorSchema'> {
   value: string | number | BigN,
   suffix?: string,
   decimals?: number,
   valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd'
 }
 
-export interface TotalInfoItem extends Omit<InfoItemBase<'total'>, 'label' | 'valueColorSchema'> {
+export interface TotalInfoItem extends Omit<InfoItemBase, 'label' | 'valueColorSchema'> {
   value: string | number | BigN,
   suffix?: string,
   decimals?: number
 }
 
-export interface DataInfoItem extends InfoItemBase<'data'> {
+export interface DataInfoItem extends InfoItemBase {
   value: string
 }
 
-export interface AccountInfoItem extends InfoItemBase<'account'> {
+export interface AccountInfoItem extends InfoItemBase {
   address: string;
   name?: string;
 }
 
-export type InfoItem = DefaultInfoItem
-| StatusInfoItem
-| TransferInfoItem
-| ChainInfoItem
-| DisplayTypeInfoItem
-| NumberInfoItem
-| AccountInfoItem
-| TotalInfoItem
-| DataInfoItem;
-
 type Props = ThemeProps & {
-  infoItems: InfoItem[],
+  children?: React.ReactNode,
   hasBackgroundWrapper?: boolean,
   labelColorScheme?: 'light' | 'gray',
   labelFontWeight?: 'regular' | 'semibold',
@@ -103,9 +82,9 @@ type Props = ThemeProps & {
   spaceSize?: 'xs' | 'sm' | 'ms'
 }
 
-function DefaultItem ({ label, labelAlign, type, value, valueColorSchema = 'default' }: DefaultInfoItem): React.ReactElement<DefaultInfoItem> {
+function DefaultItem ({ label, labelAlign, value, valueColorSchema = 'default' }: DefaultInfoItem): React.ReactElement<DefaultInfoItem> {
   return (
-    <div className={`__row -type-${type}`}>
+    <div className={'__row -type-default'}>
       <div className={CN('__col', {
         '-v-align-top': labelAlign === 'top',
         '-v-align-center': labelAlign === 'center'
@@ -124,9 +103,9 @@ function DefaultItem ({ label, labelAlign, type, value, valueColorSchema = 'defa
   );
 }
 
-function DataItem ({ label, type, value, valueColorSchema = 'default' }: DataInfoItem): React.ReactElement<DataInfoItem> {
+function DataItem ({ label, value, valueColorSchema = 'default' }: DataInfoItem): React.ReactElement<DataInfoItem> {
   return (
-    <div className={`__row -d-column -type-${type}`}>
+    <div className={'__row -d-column -type-data'}>
       <div className={'__col'}>
         <div className={'__label'}>
           {label}
@@ -141,9 +120,9 @@ function DataItem ({ label, type, value, valueColorSchema = 'default' }: DataInf
   );
 }
 
-function StatusItem ({ label, statusIcon, statusName, type, valueColorSchema = 'default' }: StatusInfoItem): React.ReactElement<StatusInfoItem> {
+function StatusItem ({ label, statusIcon, statusName, valueColorSchema = 'default' }: StatusInfoItem): React.ReactElement<StatusInfoItem> {
   return (
-    <div className={`__row -type-${type}`}>
+    <div className={'__row -type-status'}>
       <div className={'__col'}>
         <div className={'__label'}>
           {label}
@@ -166,9 +145,9 @@ function StatusItem ({ label, statusIcon, statusName, type, valueColorSchema = '
   );
 }
 
-function AccountItem ({ address, label, name, type, valueColorSchema = 'default' }: AccountInfoItem): React.ReactElement<AccountInfoItem> {
+function AccountItem ({ address, label, name, valueColorSchema = 'default' }: AccountInfoItem): React.ReactElement<AccountInfoItem> {
   return (
-    <div className={`__row -type-${type}`}>
+    <div className={'__row -type-account'}>
       <div className={'__col'}>
         <div className={'__label'}>
           {label}
@@ -197,7 +176,7 @@ function TransferItem ({ destinationChain,
   recipientName,
   senderAddress,
   senderName,
-  type, valueColorSchema = 'default' }: TransferInfoItem): React.ReactElement<TransferInfoItem> {
+  valueColorSchema = 'default' }: TransferInfoItem): React.ReactElement<TransferInfoItem> {
   const { t } = useTranslation();
 
   const genAccountBlock = (address: string, name?: string) => {
@@ -233,7 +212,7 @@ function TransferItem ({ destinationChain,
   };
 
   return (
-    <div className={`__row -type-${type}`}>
+    <div className={'__row -type-transfer'}>
       <div className={'__col'}>
         <div className={'__label'}>{t('Sender')}</div>
 
@@ -250,9 +229,9 @@ function TransferItem ({ destinationChain,
   );
 }
 
-function ChainItem ({ chain, chainName, label, type, valueColorSchema = 'default' }: ChainInfoItem): React.ReactElement<ChainInfoItem> {
+function ChainItem ({ chain, chainName, label, valueColorSchema = 'default' }: ChainInfoItem): React.ReactElement<ChainInfoItem> {
   return (
-    <div className={`__row -type-${type}`}>
+    <div className={'__row -type-chain'}>
       <div className={'__col'}>
         <div className={'__label'}>
           {label}
@@ -275,9 +254,9 @@ function ChainItem ({ chain, chainName, label, type, valueColorSchema = 'default
   );
 }
 
-function DisplayTypeItem ({ label, type, typeName }: DisplayTypeInfoItem): React.ReactElement<DisplayTypeInfoItem> {
+function DisplayTypeItem ({ label, typeName }: DisplayTypeInfoItem): React.ReactElement<DisplayTypeInfoItem> {
   return (
-    <div className={`__row -type-${type}`}>
+    <div className={'__row -type-display-type'}>
       <div className={'__col'}>
         <div className={'__label'}>
           {label}
@@ -292,9 +271,9 @@ function DisplayTypeItem ({ label, type, typeName }: DisplayTypeInfoItem): React
   );
 }
 
-function NumberItem ({ decimals = 0, label, suffix, type, value, valueColorSchema = 'default' }: NumberInfoItem): React.ReactElement<NumberInfoItem> {
+function NumberItem ({ decimals = 0, label, suffix, value, valueColorSchema = 'default' }: NumberInfoItem): React.ReactElement<NumberInfoItem> {
   return (
-    <div className={`__row -type-${type}`}>
+    <div className={'__row -type-number'}>
       <div className={'__col'}>
         <div className={'__label'}>
           {label}
@@ -315,11 +294,11 @@ function NumberItem ({ decimals = 0, label, suffix, type, value, valueColorSchem
   );
 }
 
-function TotalItem ({ decimals = 0, suffix, type, value }: TotalInfoItem): React.ReactElement<TotalInfoItem> {
+function TotalItem ({ decimals = 0, suffix, value }: TotalInfoItem): React.ReactElement<TotalInfoItem> {
   const { t } = useTranslation();
 
   return (
-    <div className={`__row -type-${type}`}>
+    <div className={'__row -type-total}'}>
       <div className={'__col'}>
         <div className={'__label'}>
           {t('Total')}
@@ -340,66 +319,11 @@ function TotalItem ({ decimals = 0, suffix, type, value }: TotalInfoItem): React
   );
 }
 
-function Component ({ className = '', hasBackgroundWrapper = false,
-  infoItems,
+function Component ({ children, className = '',
+  hasBackgroundWrapper = false,
   labelColorScheme = 'light',
   labelFontWeight = 'semibold',
-  spaceSize = 'ms',
-  valueColorScheme = 'gray' }: Props): React.ReactElement<Props> {
-  const genInfoItemComponent = (item: InfoItem) => {
-    if (item.type === 'status') {
-      return (
-        <StatusItem {...item} />
-      );
-    }
-
-    if (item.type === 'transfer') {
-      return (
-        <TransferItem {...item} />
-      );
-    }
-
-    if (item.type === 'chain') {
-      return (
-        <ChainItem {...item} />
-      );
-    }
-
-    if (item.type === 'display_type') {
-      return (
-        <DisplayTypeItem {...item} />
-      );
-    }
-
-    if (item.type === 'number') {
-      return (
-        <NumberItem {...item} />
-      );
-    }
-
-    if (item.type === 'account') {
-      return (
-        <AccountItem {...item} />
-      );
-    }
-
-    if (item.type === 'total') {
-      return (
-        <TotalItem {...item} />
-      );
-    }
-
-    if (item.type === 'data') {
-      return (
-        <DataItem {...item} />
-      );
-    }
-
-    return (
-      <DefaultItem {...item} />
-    );
-  };
-
+  spaceSize = 'ms', valueColorScheme = 'gray' }: Props): React.ReactElement<Props> {
   return (
     <div className={CN(
       'meta-info-block',
@@ -412,12 +336,12 @@ function Component ({ className = '', hasBackgroundWrapper = false,
         '-has-background-wrapper': hasBackgroundWrapper
       })}
     >
-      {infoItems.map(genInfoItemComponent)}
+      {children}
     </div>
   );
 }
 
-export const MetaInfoBlock = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '& + .meta-info-block': {
       marginTop: token.marginSM
@@ -587,3 +511,29 @@ export const MetaInfoBlock = styled(Component)<Props>(({ theme: { token } }: Pro
     }
   });
 });
+
+type CompoundedComponent = React.ForwardRefExoticComponent<Omit<Props, 'theme'>> & {
+  Data: typeof DataItem,
+  Status: typeof StatusItem,
+  Account: typeof AccountItem,
+  Transfer: typeof TransferItem,
+  Chain: typeof ChainItem,
+  DisplayType: typeof DisplayTypeItem,
+  Number: typeof NumberItem,
+  Total: typeof TotalItem,
+  Default: typeof DefaultItem,
+};
+
+const MetaInfo = _MetaInfo as unknown as CompoundedComponent;
+
+MetaInfo.Data = DataItem;
+MetaInfo.Status = StatusItem;
+MetaInfo.Account = AccountItem;
+MetaInfo.Transfer = TransferItem;
+MetaInfo.Chain = ChainItem;
+MetaInfo.DisplayType = DisplayTypeItem;
+MetaInfo.Number = NumberItem;
+MetaInfo.Total = TotalItem;
+MetaInfo.Default = DefaultItem;
+
+export default MetaInfo;

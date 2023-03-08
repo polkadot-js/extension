@@ -1,23 +1,20 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { InfoItem, MetaInfoBlock } from '@subwallet/extension-koni-ui/components/MetaInfoBlock';
+import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, Number, SwModal, SwNumberProps } from '@subwallet/react-ui';
 import { Info } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
   onCancel: () => void,
   activeNominators: [SwNumberProps['value'], SwNumberProps['value']],
   estimatedEarning: SwNumberProps['value'],
-  minimumActive: {
-    value: SwNumberProps['value'],
-    symbol: string,
-    decimals: number,
-  },
+  minimumActive: AmountData,
   unstakingPeriod: string,
 };
 
@@ -30,60 +27,6 @@ function Component ({ className,
   minimumActive,
   unstakingPeriod }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-
-  const infoItems = useMemo<InfoItem[]>(() => {
-    return [
-      {
-        type: 'default',
-        key: 'active_nominators',
-        label: t('Active nominators'),
-        value: (
-          <div className={'__active-nominators-value'}>
-            <Number
-              className={'__current-nominator-count'}
-              decimal={0}
-              decimalOpacity={1}
-              intOpacity={1}
-              unitOpacity={1}
-              value={currentNominatorCount}
-            />
-            <span className={'__slash'}>/</span>
-            <Number
-              className={'__total-nominator-count'}
-              decimal={0}
-              decimalOpacity={1}
-              intOpacity={1}
-              unitOpacity={1}
-              value={totalNominatorCount}
-            />
-          </div>
-        )
-      },
-      {
-        type: 'number',
-        key: 'estimated_earning',
-        label: t('Estimated earning'),
-        value: estimatedEarning,
-        valueColorSchema: 'even-odd',
-        suffix: '%'
-      },
-      {
-        type: 'number',
-        key: 'minimum_active',
-        label: t('Minimum active'),
-        value: minimumActive.value,
-        valueColorSchema: 'success',
-        suffix: minimumActive.symbol,
-        decimals: minimumActive.decimals
-      },
-      {
-        type: 'default',
-        key: 'unstaking_period',
-        label: t('Unstaking period'),
-        value: unstakingPeriod
-      }
-    ];
-  }, [currentNominatorCount, estimatedEarning, minimumActive.symbol, minimumActive.value, t, totalNominatorCount, unstakingPeriod]);
 
   return (
     <SwModal
@@ -100,12 +43,56 @@ function Component ({ className,
       }}
       title={t('Network details')}
     >
-      <MetaInfoBlock
+      <MetaInfo
         hasBackgroundWrapper
-        infoItems={infoItems}
         spaceSize={'xs'}
         valueColorScheme={'light'}
-      />
+      >
+        <MetaInfo.Default
+          label={t('Active nominators')}
+          value={(
+            <div className={'__active-nominators-value'}>
+              <Number
+                className={'__current-nominator-count'}
+                decimal={0}
+                decimalOpacity={1}
+                intOpacity={1}
+                unitOpacity={1}
+                value={currentNominatorCount}
+              />
+              <span className={'__slash'}>/</span>
+              <Number
+                className={'__total-nominator-count'}
+                decimal={0}
+                decimalOpacity={1}
+                intOpacity={1}
+                unitOpacity={1}
+                value={totalNominatorCount}
+              />
+            </div>
+          )}
+        />
+
+        <MetaInfo.Number
+          label={t('Estimated earning')}
+          suffix={'%'}
+          value={estimatedEarning}
+          valueColorSchema={'even-odd'}
+        />
+
+        <MetaInfo.Number
+          decimals={minimumActive.decimals}
+          label={t('Minimum active')}
+          suffix={minimumActive.symbol}
+          value={minimumActive.value}
+          valueColorSchema={'even-odd'}
+        />
+
+        <MetaInfo.Default
+          label={t('Active nominators')}
+          value={unstakingPeriod}
+        />
+      </MetaInfo>
     </SwModal>
   );
 }

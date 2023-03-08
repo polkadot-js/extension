@@ -30,14 +30,14 @@ const Component: React.FC<TransferInfoItem> = (props: TransferInfoItem) => {
 
   const genAccountBlock = (address: string, name?: string) => {
     return (
-      <div className={`__account-item __value -schema-${valueColorSchema}`}>
+      <div className={`__account-item __value -is-wrapper -schema-${valueColorSchema}`}>
         <Avatar
           className={'__account-avatar'}
           size={24}
           theme={address ? isEthereumAddress(address) ? 'ethereum' : 'polkadot' : undefined}
           value={address}
         />
-        <div className={'__account-name'}>
+        <div className={'__account-name ml-xs'}>
           {name || toShort(address)}
         </div>
       </div>

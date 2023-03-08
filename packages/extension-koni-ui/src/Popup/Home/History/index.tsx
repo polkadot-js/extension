@@ -7,7 +7,7 @@ import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { HistoryItem } from '@subwallet/extension-koni-ui/components/History/HistoryItem';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { HistoryDetailModal } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
+import { HistoryDetailModal, HistoryDetailModalId } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
@@ -19,8 +19,6 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 type Props = ThemeProps
-
-const HistoryDetailModalId = 'historyDetailModalId';
 
 export interface TransactionHistoryDisplayData {
   className: string,
@@ -242,7 +240,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       {!!selectedItem && (
         <HistoryDetailModal
           data={selectedItem}
-          id={HistoryDetailModalId}
           onCancel={onCloseDetail}
         />
       )}

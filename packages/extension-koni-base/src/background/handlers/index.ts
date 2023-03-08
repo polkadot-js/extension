@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SubWalletProviderError } from '@subwallet/extension-base/background/errors/SubWalletProviderError';
+import { ProviderError } from '@subwallet/extension-base/background/errors/ProviderError';
 import { MessageTypes, TransportRequestMessage } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { NftHandler } from '@subwallet/extension-koni-base/api/nft';
@@ -61,7 +61,7 @@ export default function handlers<TMessageType extends MessageTypes> ({ id, messa
 
       port.postMessage({ id, response });
     })
-    .catch((error: SubWalletProviderError): void => {
+    .catch((error: ProviderError): void => {
       console.error(error);
       console.log(`[err] ${source}:: ${error.message}`);
 

@@ -524,6 +524,31 @@ export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType
   additionalInfo?: TransactionAdditionalInfo<ET>
 }
 
+export interface SWError extends Error {
+  code?: number;
+  errorType: string;
+  data?: unknown;
+}
+
+export enum TransactionErrorType {
+  NOT_ENOUGH_BALANCE = 'NOT_ENOUGH_BALANCE',
+  CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
+  INVALID_PARAMS = 'INVALID_PARAMS',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
+  DUPLICATE_TRANSACTION = 'DUPLICATE_TRANSACTION',
+  UNABLE_TO_SIGN = 'UNABLE_TO_SIGN',
+  USER_REJECT_SIGN = 'USER_REJECT_SIGN',
+  UNABLE_TO_SEND = 'UNABLE_TO_SEND',
+  SEND_TRANSACTION_FAILED = 'SEND_TRANSACTION_FAILED',
+}
+
+export enum ProviderErrorType {
+  CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
+  INVALID_PARAMS = 'INVALID_PARAMS',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
+  USER_REJECT = 'USER_REJECT',
+}
+
 export interface RequestTransactionHistoryAdd {
   address: string;
   networkKey: string;
@@ -1027,16 +1052,15 @@ export interface ResponseEvmProviderSend {
   result?: JsonRpcResponse;
 }
 
-export interface SubWalletProviderErrorInterface extends Error{
-  code?: number;
-  data?: unknown;
+export enum EvmProviderErrorType {
+  USER_REJECTED_REQUEST = 'USER_REJECTED_REQUEST',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  UNSUPPORTED_METHOD = 'UNSUPPORTED_METHOD',
+  DISCONNECTED = 'DISCONNECTED',
+  CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
+  INVALID_PARAMS = 'INVALID_PARAMS',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
 }
-
-export interface EvmProviderRpcErrorInterface extends SubWalletProviderErrorInterface{
-  code: number;
-}
-
-export type EvmRpcErrorHelperMap = Record<'USER_REJECTED_REQUEST'| 'UNAUTHORIZED'| 'UNSUPPORTED_METHOD'| 'DISCONNECTED'| 'CHAIN_DISCONNECTED'| 'INVALID_PARAMS'| 'INTERNAL_ERROR', [number, string]>;
 
 export interface EvmSendTransactionParams {
   from: string;

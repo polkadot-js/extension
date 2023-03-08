@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
-import { ChainType, EvmSendTransactionRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
+import { ChainType, EvmProviderErrorType, EvmSendTransactionRequest } from '@subwallet/extension-base/background/KoniTypes';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
@@ -222,7 +222,7 @@ export default class TransactionService {
             });
         } else {
           this.removeTransaction(id);
-          emitter.emit('error', new EvmRpcError('USER_REJECTED_REQUEST', 'User Rejected'));
+          emitter.emit('error', new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST, 'User Rejected'));
         }
       })
       .catch((e: Error) => {

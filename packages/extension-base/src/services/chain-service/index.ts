@@ -161,7 +161,6 @@ export class ChainService {
 
   public getNativeTokenInfo (chainSlug: string) {
     let nativeTokenInfo: _ChainAsset = {
-      logo: null,
       assetType: _AssetType.NATIVE,
       decimals: 0,
       metadata: null,
@@ -624,7 +623,6 @@ export class ChainService {
               slug: storedSlug,
               name: storedChainInfo.name,
               providers: storedChainInfo.providers,
-              logo: storedChainInfo.logo,
               evmInfo: storedChainInfo.evmInfo,
               substrateInfo: storedChainInfo.substrateInfo,
               isTestnet: storedChainInfo.isTestnet,
@@ -821,7 +819,6 @@ export class ChainService {
       providers: params.chainEditInfo.providers,
       substrateInfo,
       evmInfo,
-      logo: '',
       isTestnet: false,
       chainStatus: _ChainStatus.ACTIVE
     };
@@ -852,8 +849,7 @@ export class ChainService {
       priceId: null,
       slug: '',
       symbol: params.chainEditInfo.symbol as string,
-      hasValue: true,
-      logo: null
+      hasValue: true
     });
 
     // update subscription
@@ -918,6 +914,8 @@ export class ChainService {
       name: '',
       evmChainId: null
     };
+
+    // TODO: cant validate EVM chain
 
     try {
       const { conflictChainName: providerConflictChainName, conflictChainSlug: providerConflictChainSlug, error: providerError } = this.validateProvider(provider, existingChainSlug);

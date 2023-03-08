@@ -1,17 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainType, EvmSendTransactionRequest, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { ChainType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import EventEmitter from 'eventemitter3';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-
-export enum KoniTransactionStatus {
-  PENDING = 'PENDING',
-  REJECTED = 'REJECTED',
-  FAILED = 'FAILED',
-  COMPLETED = 'COMPLETED'
-}
 
 export interface SWTransaction {
   id: string;
@@ -21,7 +15,7 @@ export interface SWTransaction {
   chainType: ChainType;
   address: string;
   data: any;
-  status: KoniTransactionStatus;
+  status: ExtrinsicStatus;
   extrinsicHash: string;
   extrinsicType: ExtrinsicType;
   createdAt: Date;
@@ -41,7 +35,7 @@ export type TransactionEmitter = EventEmitter<SendTransactionEvents, Transaction
 export interface TransactionEventResponse {
   id: string,
   extrinsicHash?: string,
-  error?: Error
+  error?: TransactionError
 }
 
 export interface PrepareInternalRequest {

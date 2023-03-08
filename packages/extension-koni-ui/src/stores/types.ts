@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { AddNetworkRequestExternal, AssetSetting, BalanceItem, ChainBondingInfo, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, NominationPoolInfo, NominatorInfo, PriceJson, StakingItem, StakingRewardItem, TxHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AssetSetting, BalanceItem, ChainBondingInfo, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, NominationPoolInfo, NominatorInfo, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
@@ -17,7 +17,7 @@ export type CurrentAccountType = {
 }
 
 export type TransactionHistoryReducerType = {
-  historyList: TxHistoryItem[]
+  historyList: TransactionHistoryItem[]
 }
 
 export type TransferNftParams = {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceItem, CrowdloanItem, ExtraDelegationInfo, NftCollection, NftItem, StakingItem, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceItem, CrowdloanItem, ExtraDelegationInfo, NftCollection, NftItem, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import Dexie, { Table, Transaction } from 'dexie';
 
 const DEFAULT_DATABASE = 'SubWalletDB_v2';
@@ -24,7 +24,7 @@ export interface IChain extends _ChainInfo {
 }
 export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc, DefaultChainDoc {}
 export interface INft extends NftItem, DefaultAddressDoc {}
-export interface ITransactionHistoryItem extends TxHistoryItem, DefaultAddressDoc, DefaultChainDoc {}
+export interface ITransactionHistoryItem extends TransactionHistoryItem, DefaultAddressDoc, DefaultChainDoc {}
 
 // TODO: refactor this
 export interface IMigration {

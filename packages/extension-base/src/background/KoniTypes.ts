@@ -422,17 +422,44 @@ export interface RandomTestRequest {
   end: number;
 }
 
-// TODO: support more history types
-export enum TxHistoryType {
+export enum TransactionDirection {
   SEND = 'send',
   RECEIVED = 'received'
+}
+
+export enum ChainType {
+  EVM = 'evm',
+  SUBSTRATE = 'substrate'
+}
+
+export enum ExtrinsicType {
+  TRANSFER_BALANCE = 'transfer.balance',
+  TRANSFER_TOKEN = 'transfer.token',
+  TRANSFER_XCM = 'transfer.xcm',
+  SEND_NFT = 'send_nft',
+  CROWDLOAN = 'crowdloan',
+  STAKING_STAKE = 'staking.stake',
+  STAKING_UNSTAKE = 'staking.unstake',
+  STAKING_BOND = 'staking.bond',
+  STAKING_UNBOND = 'staking.unbond',
+  STAKING_CLAIM_REWARD = 'staking.claim_reward',
+  STAKING_WITHDRAW = 'staking.withdraw',
+  STAKING_COMPOUNDING = 'staking.compounding',
+  EVM_EXECUTE = 'evm.smart_contract',
+}
+
+export enum ExtrinsicStatus {
+  SUCCESS = 'success',
+  FAIL = 'fail',
+  PROCESSING = 'processing',
+  UNKNOWN = 'unknown'
 }
 
 export interface TxHistoryItem {
   time: number | string;
   networkKey: string;
   isSuccess: boolean;
-  action: TxHistoryType;
+  action: TransactionDirection;
   extrinsicHash: string;
 
   change?: string;
@@ -449,47 +476,53 @@ export interface TransactionHistoryItemJson {
   total: number
 }
 
-export interface HistoryItemBase<T = 'transfer' | 'nft' | 'staking' | 'claim_reward' | 'crowdloan'> {
-  type: T,
+export interface AmountData {
+  value: string,
+  decimals: number,
+  symbol: string
+}
+
+export interface XCMTransactionAdditionalInfo {
+  destinationChain: string,
+  fee: AmountData
+}
+
+export interface NFTTransactionAdditionalInfo {
+  collectionName: string
+}
+
+export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
+  ? XCMTransactionAdditionalInfo
+  : T extends ExtrinsicType.SEND_NFT
+    ? NFTTransactionAdditionalInfo
+    : undefined;
+export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType.TRANSFER_BALANCE> {
+  origin?: string, // 'app' or history source
+  callhash?: string,
+  signature?: string,
   chain: string,
-  senderAddress: string,
-  senderName?: string,
-  recipientAddress: string,
-  recipientName?: string,
-  status: 'completed' | 'processing' | 'failed' | 'cancelled',
+  chainType?: ChainType,
+  chainName?: string,
+  direction: TransactionDirection,
+  type: ExtrinsicType,
+  from: string,
+  fromName?: string,
+  to: string,
+  toName?: string,
+  address: string,
+  status: ExtrinsicStatus,
   extrinsicHash: string,
   time: number,
-  chainFee: string,
-  symbol: string,
-  amount: string,
+  data?: string,
+  blockNumber: number,
+  blockHash: string,
+  amount?: AmountData,
+  tip?: AmountData,
+  fee?: AmountData,
+  explorerUrl?: string,
+
+  additionalInfo?: TransactionAdditionalInfo<ET>
 }
-
-export interface TransferHistoryItem extends HistoryItemBase<'transfer'> {
-  isReceived?: boolean,
-  destinationChainInfo?: {
-    slug: string,
-    fee: string,
-    symbol: string,
-  }
-}
-
-export interface NftHistoryItem extends HistoryItemBase<'nft'> {
-  collectionName: string,
-}
-
-export interface StakingHistoryItem extends HistoryItemBase<'staking'> {
-  stakingType: 'stake' | 'unstake' | 'withdraw' | 'compounding',
-}
-
-export type ClaimRewardHistoryItem = HistoryItemBase<'claim_reward'>;
-
-export type CrowdloanHistoryItem = HistoryItemBase<'crowdloan'>;
-
-export type HistoryItem = TransferHistoryItem
-| NftHistoryItem
-| StakingHistoryItem
-| ClaimRewardHistoryItem
-| CrowdloanHistoryItem;
 
 export interface RequestTransactionHistoryAdd {
   address: string;
@@ -1694,8 +1727,8 @@ export interface KoniRequestSignatures {
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
 
   // Subscription
-  'pri(transaction.history.getSubscription)': [null, TxHistoryItem[], TxHistoryItem[]];
-  'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TxHistoryItem[]];
+  'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];
+  // 'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItem[]];
   'pri(transfer.checkReferenceCount)': [RequestTransferCheckReferenceCount, boolean];
   'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, SupportTransferResponse];
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];

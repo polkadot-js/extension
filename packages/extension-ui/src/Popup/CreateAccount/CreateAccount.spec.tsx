@@ -1,7 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line spaced-comment
 /// <reference types="@polkadot/dev/node/test/node" />
 
 import '@polkadot/extension-mocks/chrome';

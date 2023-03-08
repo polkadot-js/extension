@@ -26,6 +26,10 @@ export default class BalanceStore extends BaseStoreWithAddress<IBalance> {
     return balanceMap;
   }
 
+  async removeBySlugs (tokenSlugs: string[]) {
+    return this.table.where('tokenSlug').anyOfIgnoreCase(tokenSlugs).delete();
+  }
+
   // private balanceSub!: Subscription;
   // liveQueryBalance (address: string, cb: (result: BalanceJson) => void) {
   //   if (this.balanceSub) {

@@ -953,10 +953,13 @@ export default class KoniState {
 
     Object.entries(balanceMap).forEach(([tokenSlug, balanceItem]) => {
       const tokenInfo = this.chainService.getAssetBySlug(tokenSlug);
-      const chainInfo = this.chainService.getChainInfoByKey(tokenInfo.originChain);
 
-      if (this.getChainStateByKey(chainInfo.slug).active) {
-        activeBalanceMap[tokenSlug] = balanceItem;
+      if (tokenInfo) {
+        const chainInfo = this.chainService.getChainInfoByKey(tokenInfo.originChain);
+
+        if (chainInfo && this.getChainStateByKey(chainInfo.slug).active) {
+          activeBalanceMap[tokenSlug] = balanceItem;
+        }
       }
     });
 

@@ -782,5 +782,22 @@
   "Delete chain": "",
   "You are about to delete this chain": "",
   "Confirm delete this chain": "",
-  "Stake more": ""
+  "Stake more": "",
+  "Unknown": "",
+  "Bond": "",
+  "Unbond": "",
+  "EVM Execute": "",
+  "Processing...": "",
+  "Claim Reward": "",
+  "Bond transaction": "",
+  "Unbond transaction": "",
+  "Claim Reward transaction": "",
+  "EVM Execute transaction": "",
+  "Your transactions history will appear here!": "",
+  "No transactions yet": "",
+  "Search history": "",
+  "Imported chain successfully": "",
+  "This chain has already been added": "",
+  "Currently support WSS provider for Substrate networks and HTTP provider for EVM network": "",
+  "Import chain": ""
 }

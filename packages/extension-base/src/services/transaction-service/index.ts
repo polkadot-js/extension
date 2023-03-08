@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
-import { EvmSendTransactionRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { ChainType, EvmSendTransactionRequest, ExtrinsicStatus, TransactionErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { getTransactionId } from '@subwallet/extension-base/services/transaction-service/helpers';
-import { KoniTransactionStatus, SendTransactionEvents, SWTransaction, SWTransactionInput, TransactionEmitter, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { SendTransactionEvents, SWTransaction, SWTransactionInput, TransactionEmitter, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import EventEmitter from 'eventemitter3';
 import { BehaviorSubject } from 'rxjs';
 
@@ -40,20 +40,22 @@ export default class TransactionService {
     return Object.values(this.transactions);
   }
 
-  private get pendingTransactions (): SWTransaction[] {
-    return this.allTransactions.filter((t) => t.status === 'PENDING');
+  private get processingTransactions (): SWTransaction[] {
+    return this.allTransactions.filter((t) => t.status === ExtrinsicStatus.PENDING || t.status === ExtrinsicStatus.PROCESSING);
   }
 
   private getTransaction (id: string) {
     return this.transactions[id];
   }
 
-  private validateTransaction (transaction: SWTransaction): boolean {
+  private validateTransaction (transaction: SWTransaction) {
     // Check duplicated transaction
-    const existed = this.pendingTransactions
+    const existed = this.processingTransactions
       .filter((item) => item.address === transaction.address && item.chain === transaction.chain);
 
-    return !(existed.length > 0);
+    if (existed.length > 0) {
+      throw new TransactionError(TransactionErrorType.DUPLICATE_TRANSACTION);
+    }
   }
 
   public notice (message: string): void {
@@ -68,7 +70,7 @@ export default class TransactionService {
       createdAt: new Date(),
       updatedAt: new Date(),
       url: transaction.url || EXTENSION_REQUEST_URL,
-      status: KoniTransactionStatus.PENDING,
+      status: ExtrinsicStatus.PENDING,
       isInternal,
       id: getTransactionId(transaction.chainType, transaction.chain, isInternal),
       extrinsicHash: ''
@@ -80,12 +82,7 @@ export default class TransactionService {
     const transaction = this.fillTransactionDefaultInfo(inputTransaction);
 
     // Validate Transaction
-    const idValid = this.validateTransaction(transaction);
-
-    if (!idValid) {
-      this.logger.log('Invalid transaction');
-      throw new Error('Invalid transaction');
-    }
+    this.validateTransaction(transaction);
 
     // Add Transaction
     this.transactions[transaction.id] = transaction;
@@ -108,7 +105,7 @@ export default class TransactionService {
     });
 
     emitter.on('error', (data: TransactionEventResponse) => {
-      this.onFailed({ ...data, error: data.error || new Error('Unknown error') });
+      this.onFailed({ ...data, error: data.error || new TransactionError(TransactionErrorType.INTERNAL_ERROR) });
     });
 
     return emitter;
@@ -136,7 +133,7 @@ export default class TransactionService {
     const transaction = this.getTransaction(id);
     const chainInfo = this.chainService.getChainInfoByKey(transaction.chain);
 
-    if (transaction.chainType === 'ethereum') {
+    if (transaction.chainType === ChainType.EVM) {
       const explorerLink = chainInfo?.evmInfo?.blockExplorer;
 
       if (explorerLink) {
@@ -155,7 +152,7 @@ export default class TransactionService {
 
   private onHasTransactionHash ({ extrinsicHash, id }: TransactionEventResponse) {
     // Todo: Write pending transaction history
-    this.updateTransaction(id, { extrinsicHash });
+    this.updateTransaction(id, { extrinsicHash, status: ExtrinsicStatus.PROCESSING });
     console.log(`Transaction "${id}" is submitted with hash ${extrinsicHash || ''}`);
   }
 
@@ -163,7 +160,7 @@ export default class TransactionService {
     // Todo: Write success transaction history
     const transaction = this.getTransaction(id);
 
-    this.updateTransaction(id, { status: KoniTransactionStatus.COMPLETED });
+    this.updateTransaction(id, { status: ExtrinsicStatus.SUCCESS });
     console.log('Transaction completed', id, transaction.extrinsicHash);
     NotificationService.createNotification('Transaction completed', `Transaction ${transaction?.extrinsicHash} completed`, this.getTransactionLink(id));
   }
@@ -173,7 +170,7 @@ export default class TransactionService {
     const transaction = this.getTransaction(id);
 
     if (transaction) {
-      this.updateTransaction(id, { status: KoniTransactionStatus.FAILED, errors: [error?.message || 'Unknown error'] });
+      this.updateTransaction(id, { status: ExtrinsicStatus.FAIL, errors: [error?.message || 'Unknown error'] });
       console.log('Transaction failed', id, transaction.extrinsicHash);
       NotificationService.createNotification('Transaction failed', `Transaction ${transaction?.extrinsicHash} failed`, this.getTransactionLink(id));
     }
@@ -215,19 +212,21 @@ export default class TransactionService {
               emitter.emit('success', { id, transactionHash: rs.transactionHash });
             })
             .once('error', (e) => {
-              emitter.emit('error', { id, error: e });
+              emitter.emit('error', { id, error: new TransactionError(TransactionErrorType.SEND_TRANSACTION_FAILED, e.message) });
             })
             .catch((e: Error) => {
-              emitter.emit('error', { id, error: e });
+              emitter.emit('error', { id, error: new TransactionError(TransactionErrorType.UNABLE_TO_SEND, e.message) });
             });
         } else {
           this.removeTransaction(id);
-          emitter.emit('error', new EvmRpcError('USER_REJECTED_REQUEST', 'User Rejected'));
+          emitter.emit('error', new TransactionError(TransactionErrorType.USER_REJECT_REQUEST, 'User Rejected'));
         }
       })
       .catch((e: Error) => {
         this.removeTransaction(id);
-        emitter.emit('error', { id, error: e });
+        const error = new TransactionError(TransactionErrorType.UNABLE_TO_SIGN, e.message);
+
+        emitter.emit('error', { id, error: error });
       });
 
     return emitter;

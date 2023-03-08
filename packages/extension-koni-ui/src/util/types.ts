@@ -30,10 +30,6 @@ export type Info = {
   name: string
 }
 
-export type ChainInfo = {
-  [key: string]: Info
-}
-
 export type BalanceSubInfo = {
   key: string;
   label: string;

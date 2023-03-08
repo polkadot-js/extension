@@ -119,7 +119,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <SwStakingItem
         className='staking-item'
         decimals={item.decimals}
-        key={item.staking.chain}
+        key={`${item.staking.chain}-${item.staking.type}`}
         onClickItem={onClickItem}
         onClickRightIcon={onClickRightIcon}
         priceMap={priceMap}
@@ -136,7 +136,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
-  const emptyStakingList = () => {
+  const emptyStakingList = useCallback(() => {
     return (
       <EmptyList
         emptyMessage={t('Your staking accounts will appear here!')}
@@ -144,7 +144,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         phosphorIcon={Trophy}
       />
     );
-  };
+  }, [t]);
 
   return (
     <PageWrapper

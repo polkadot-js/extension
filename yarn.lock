@@ -5870,14 +5870,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:^0.0.8":
-  version: 0.0.8
-  resolution: "@subwallet/chain-list@npm:0.0.8"
+"@subwallet/chain-list@npm:^0.0.11":
+  version: 0.0.11
+  resolution: "@subwallet/chain-list@npm:0.0.11"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: 26b31482ce930ed43e7e8bce0edf3dd26e02c027d7fc555a62be81db600db61d9161d026477252748d58aca2db9b99f86a30fe0332f7a0fb275caf08e41a38c9
+  checksum: 2707d4643ca4cdf2e3511f92ecc5f47b49ba56a1b9b71eda7a2848b6c03c58936c2b1c487118d699f8b4ad86bde30b32971763eac65163d47d5d8fa5ccdd3115
   languageName: node
   linkType: hard
 
@@ -5939,7 +5939,7 @@ __metadata:
     "@sora-substrate/type-definitions": ^1.12.4
     "@subsocial/types": ^0.6.8
     "@substrate/connect": ^0.7.18
-    "@subwallet/chain-list": ^0.0.8
+    "@subwallet/chain-list": ^0.0.11
     "@subwallet/extension-base": ^0.8.1
     "@subwallet/extension-chains": ^0.8.1
     "@subwallet/extension-dapp": ^0.8.1
@@ -5947,7 +5947,7 @@ __metadata:
     "@subwallet/extension-koni-base": ^0.8.1
     "@subwallet/extension-mocks": ^0.8.1
     "@subwallet/keyring": ^0.0.4
-    "@subwallet/react-ui": 5.1.2-b21
+    "@subwallet/react-ui": 5.1.2-b22
     "@subwallet/ui-keyring": ^0.0.3
     "@unique-nft/types": ^0.6.0-4
     "@zeitgeistpm/type-defs": ^0.10.0
@@ -6114,7 +6114,7 @@ __metadata:
     "@sora-substrate/type-definitions": ^1.12.4
     "@subsocial/types": ^0.6.8
     "@substrate/connect": ^0.7.18
-    "@subwallet/chain-list": ^0.0.8
+    "@subwallet/chain-list": ^0.0.11
     "@subwallet/extension-base": ^0.8.1
     "@subwallet/extension-chains": ^0.8.1
     "@subwallet/extension-dapp": ^0.8.1
@@ -6176,7 +6176,7 @@ __metadata:
     "@polkadot/util-crypto": ^10.2.1
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": ^0.0.8
+    "@subwallet/chain-list": ^0.0.11
     "@subwallet/extension-base": ^0.8.1
     "@subwallet/extension-chains": ^0.8.1
     "@subwallet/extension-dapp": ^0.8.1
@@ -6184,7 +6184,7 @@ __metadata:
     "@subwallet/extension-koni-base": ^0.8.1
     "@subwallet/extension-mocks": ^0.8.1
     "@subwallet/keyring": ^0.0.4
-    "@subwallet/react-ui": 5.1.2-b21
+    "@subwallet/react-ui": 5.1.2-b22
     "@subwallet/ui-keyring": ^0.0.3
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -6227,6 +6227,7 @@ __metadata:
     react-router: ^6.6.1
     react-router-dom: ^6.6.1
     react-select: ^5.7.0
+    react-tabs: ^6.0.0
     react-tooltip: 4.5.1
     react-transition-group: ^4.4.5
     redux: ^4.2.0
@@ -6298,9 +6299,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b21":
-  version: 5.1.2-b21
-  resolution: "@subwallet/react-ui@npm:5.1.2-b21"
+"@subwallet/react-ui@npm:5.1.2-b22":
+  version: 5.1.2-b22
+  resolution: "@subwallet/react-ui@npm:5.1.2-b22"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -6367,7 +6368,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: 8e3f52feea6162e0b47c6eca4c11f81a4d8bef55d15fe30a977a16da55775ce373f1f6489ccb24f0ecc319a4b1a9895bbeb99223e4fe1222df3eb3878cbd6698
+  checksum: e8b2091eced388f66cc9d6dcc5ac313b987a3a5642f4c13d93a0c19a960bda6b48b7bcc184814ea16364c0c9ca2f5b6c469370de60ae1aa6a14fdafbaea124b1
   languageName: node
   linkType: hard
 
@@ -11069,7 +11070,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clsx@npm:^1.1.1":
+"clsx@npm:^1.1.0, clsx@npm:^1.1.1":
   version: 1.2.1
   resolution: "clsx@npm:1.2.1"
   checksum: 30befca8019b2eb7dbad38cff6266cf543091dae2825c856a62a8ccf2c3ab9c2907c4d12b288b73101196767f66812365400a227581484a05f968b0307cfaf12
@@ -21071,7 +21072,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.0, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.5.0, prop-types@npm:^15.6.0, prop-types@npm:^15.6.2, prop-types@npm:^15.7.0, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -22296,6 +22297,18 @@ __metadata:
     react: ">=16.11"
     react-dom: ">=16.11"
   checksum: 93686ba3d7c8fe4501b37f1fff7142109c7668d11df924e190a812cec6e2d3cd7d13220d32f31aa0b757161f1619c4c37b88d0667316dd527252a5c8348854a4
+  languageName: node
+  linkType: hard
+
+"react-tabs@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "react-tabs@npm:6.0.0"
+  dependencies:
+    clsx: ^1.1.0
+    prop-types: ^15.5.0
+  peerDependencies:
+    react: ^18.0.0
+  checksum: 711dfe862a37019d1d9794840999e5ecac3bca9ea0b0fbe3d36163142df5f200c60de7832e9158adf92034e942d5476753a3a4fa842b64652172d80ee829df1a
   languageName: node
   linkType: hard
 

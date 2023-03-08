@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, CrowdloanItem, NftCollection, NftItem, StakingItem, TxHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
+import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
 import { Subscription } from 'dexie';
 
 import { logger as createLogger } from '@polkadot/util';
@@ -42,6 +43,12 @@ export default class DatabaseService {
 
       return this.stores.balance.upsert({ address, ...item } as IBalance);
     }
+  }
+
+  async removeFromBalanceStore (assets: string[]) {
+    this.logger.log('Bulk removing AssetStore');
+
+    return this.stores.balance.removeBySlugs(assets);
   }
 
   // Crowdloan
@@ -92,11 +99,19 @@ export default class DatabaseService {
     return this.stakingSubscription;
   }
 
-  // Transaction history
-  async addHistories (chain: string, address: string, histories: TxHistoryItem[]) {
-    this.logger.log(`Updating transaction history for [${chain}]`);
+  // Transaction histories
+  async getHistories (query?: HistoryQuery) {
+    const histories = await this.stores.transaction.queryHistory(query);
 
-    return this.stores.transaction.bulkUpsert(histories.map((item) => ({ chain, address, ...item })));
+    this.logger.log('Get histories: ', histories);
+
+    return histories;
+  }
+
+  async upsertHistory (histories: TransactionHistoryItem[]) {
+    this.logger.log('Updating transaction histories');
+
+    return this.stores.transaction.bulkUpsert(histories);
   }
 
   // NFT Collection

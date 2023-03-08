@@ -3,11 +3,10 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ApiMap, NftTransferExtra, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { ALL_ACCOUNT_KEY, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKE_UNLOCKING_INFO, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-base/constants';
+import { ALL_ACCOUNT_KEY, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKE_UNLOCKING_INFO, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-base/constants';
 import { _ChainConnectionStatus, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
-import { fetchMultiChainHistories } from '@subwallet/extension-koni-base/api/subsquid/subsquid-multi-chain-history';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
 import { Subject, Subscription } from 'rxjs';
 
@@ -88,9 +87,6 @@ export class KoniCron {
         this.refreshStakingReward(currentAccountInfo.address);
         this.refreshStakingRewardFastInterval(currentAccountInfo.address);
         this.refreshStakeUnlockingInfo(currentAccountInfo.address, this.state.getChainInfoMap(), this.state.getSubstrateApiMap());
-        this.resetHistory(currentAccountInfo.address).then(() => {
-          this.refreshHistoryV2(currentAccountInfo.address);
-        }).catch((err) => this.logger.warn(err));
       } else {
         this.setStakingRewardReady();
       }
@@ -117,10 +113,6 @@ export class KoniCron {
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
         this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(currentAccountInfo.address, this.state.getChainInfoMap(), this.state.getSubstrateApiMap()), CRON_REFRESH_STAKE_UNLOCKING_INFO);
-
-        this.resetHistory(currentAccountInfo.address).then(() => {
-          this.addCron('refreshHistory', this.refreshHistoryV2(currentAccountInfo.address), CRON_REFRESH_HISTORY_INTERVAL);
-        }).catch((err) => this.logger.warn(err));
       } else {
         this.setStakingRewardReady();
       }
@@ -135,13 +127,6 @@ export class KoniCron {
         this.resetNft(address);
         this.resetNftTransferMeta();
         this.removeCron('refreshNft');
-        this.resetHistory(address).then(() => {
-          this.removeCron('refreshHistory');
-
-          if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
-            this.addCron('refreshHistory', this.refreshHistoryV2(address), CRON_REFRESH_HISTORY_INTERVAL);
-          }
-        }).catch((err) => this.logger.warn(err));
 
         this.removeCron('refreshStakeUnlockingInfo');
         this.removeCron('refreshStakingReward');
@@ -200,7 +185,7 @@ export class KoniCron {
     }
 
     this.state.getCurrentAccount(({ address }) => {
-      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, this.state.getChainInfoMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
+      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
     });
   };
 
@@ -294,22 +279,6 @@ export class KoniCron {
     };
   };
 
-  refreshHistoryV2 = (currentAddress: string) => {
-    return () => {
-      const addresses = currentAddress !== ALL_ACCOUNT_KEY ? [currentAddress] : Object.values(this.state.getAllAddresses());
-
-      this.logger.log('Refresh History state');
-      fetchMultiChainHistories(addresses).then((historiesMap) => {
-        Object.entries(historiesMap).forEach(([address, data]) => {
-          data.forEach((item) => {
-            // TODO: networkKey from indexer API might not be the same as in ChainService
-            this.state.setHistory(address, item.networkKey, item);
-          });
-        });
-      }).catch((err) => this.logger.warn(err));
-    };
-  };
-
   refreshStakeUnlockingInfo (address: string, networkMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>) {
     return () => {
       if (address.toLowerCase() !== ALL_ACCOUNT_KEY) {
@@ -322,10 +291,6 @@ export class KoniCron {
 
   setStakingRewardReady = () => {
     this.state.updateStakingRewardReady(true);
-  };
-
-  resetHistory = (address: string): Promise<void> => {
-    return this.state.resetHistoryMap(address).catch((err) => this.logger.warn(err));
   };
 
   checkNetworkAvailable = (serviceInfo: ServiceInfo): boolean => {

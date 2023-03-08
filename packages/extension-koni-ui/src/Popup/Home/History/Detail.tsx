@@ -7,6 +7,7 @@ import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/Popup/Home/History/index';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ChainInfo } from '@subwallet/extension-koni-ui/types/chain';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { formatAmount } from '@subwallet/extension-koni-ui/util/amount';
 import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
@@ -30,11 +31,6 @@ interface InfoItemBase<T = 'default' | 'status' | 'transfer' | 'chain' | 'displa
   type: T,
   key: string,
   label: string,
-}
-
-type ChainInfo = {
-  slug: string,
-  name: string,
 }
 
 interface DefaultInfoItem extends InfoItemBase<'default'> {

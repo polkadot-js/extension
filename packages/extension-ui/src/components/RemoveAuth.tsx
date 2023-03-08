@@ -8,12 +8,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import styled from 'styled-components';
 
-interface Props{
-  className?: string
-  onRemove: () => void
+interface Props {
+  className?: string;
+  onRemove: () => void;
 }
 
-function RemoveAuth ({ className, onRemove }: Props): React.ReactElement {
+function RemoveAuth({ className, onRemove }: Props): React.ReactElement {
   return (
     <FontAwesomeIcon
       className={className}
@@ -24,7 +24,8 @@ function RemoveAuth ({ className, onRemove }: Props): React.ReactElement {
   );
 }
 
-export default styled(RemoveAuth)(({ theme }: ThemeProps) => `
+export default styled(RemoveAuth)(
+  ({ theme }: ThemeProps) => `
   cursor: pointer;
   color: ${theme.labelColor};
   margin-right: 1rem;
@@ -32,4 +33,5 @@ export default styled(RemoveAuth)(({ theme }: ThemeProps) => `
   &.selected {
     color: ${theme.primaryColor};
   }
-`);
+`
+);

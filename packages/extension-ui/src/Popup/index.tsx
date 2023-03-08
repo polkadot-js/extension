@@ -227,7 +227,7 @@ export default function Popup(): React.ReactElement {
                             <Route path='/account/derive/:address'>
                               {wrapWithErrorBoundary(<Derive />, 'derive-address')}
                             </Route>
-                            <Route path='/url/manage/:url'>
+                            <Route path='/url/manage'>
                               {wrapWithErrorBoundary(<AccountManagement />, 'manage-url')}
                             </Route>
                             <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>

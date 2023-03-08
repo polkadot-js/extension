@@ -33,7 +33,7 @@ describe('Extension', () => {
     keyring.loadAll({ store: new AccountsStore() });
     const authUrls: AuthUrls = {};
 
-    authUrls['localhost:3000'] = {
+    authUrls['http://localhost:3000'] = {
       authorizedAccounts: [address],
       count: 0,
       id: '11',

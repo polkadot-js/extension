@@ -238,7 +238,7 @@ export default class State {
     const complete = (authorizedAccounts: string[] = []) => {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
-      this.#authUrls[this.stripUrl(url)] = {
+      this.#authUrls[url] = {
         authorizedAccounts,
         count: 0,
         id: idStr,
@@ -270,7 +270,7 @@ export default class State {
 
       // the assert in stripUrl may throw for new tabs with "chrome://newtab/"
       try {
-        strippedUrl = this.stripUrl(url);
+        strippedUrl = url;
       } catch (e) {
         console.error(e);
       }
@@ -343,14 +343,6 @@ export default class State {
     };
   };
 
-  public stripUrl (url: string): string {
-    assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
-
-    const parts = url.split('/');
-
-    return parts[2];
-  }
-
   private updateIcon (): void {
     const authCount = this.numAuthRequests;
     const metaCount = this.numMetaRequests;
@@ -401,7 +393,7 @@ export default class State {
   }
 
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<AuthResponse> {
-    const idStr = this.stripUrl(url);
+    const idStr = url;
 
     // Do not enqueue duplicate authorization requests.
     const isDuplicate = Object
@@ -437,7 +429,7 @@ export default class State {
   }
 
   public ensureUrlAuthorized (url: string): boolean {
-    const entry = this.#authUrls[this.stripUrl(url)];
+    const entry = this.#authUrls[url];
 
     assert(entry, `The source ${url} has not been enabled yet`);
 

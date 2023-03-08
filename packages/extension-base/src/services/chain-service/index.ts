@@ -9,7 +9,7 @@ import { EvmChainHandler } from '@subwallet/extension-base/services/chain-servic
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenSlug, _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Subject } from 'rxjs';
@@ -331,8 +331,6 @@ export class ChainService {
 
     this.updateChainSubscription();
 
-    this.dbService.removeFromChainStore([slug]).catch((e) => this.logger.error(e));
-
     this.lockChainInfoMap = false;
 
     return true;
@@ -414,6 +412,7 @@ export class ChainService {
       delete assetRegistry[targetToken];
     });
 
+    this.dbService.removeFromBalanceStore(targetAssets).catch((e) => this.logger.error(e));
     this.dbService.removeFromAssetStore(targetAssets).catch((e) => this.logger.error(e));
 
     this.assetRegistrySubject.next(assetRegistry);
@@ -914,8 +913,6 @@ export class ChainService {
       name: '',
       evmChainId: null
     };
-
-    // TODO: cant validate EVM chain
 
     try {
       const { conflictChainName: providerConflictChainName, conflictChainSlug: providerConflictChainSlug, error: providerError } = this.validateProvider(provider, existingChainSlug);

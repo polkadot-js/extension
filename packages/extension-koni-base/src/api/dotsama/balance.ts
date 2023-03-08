@@ -35,22 +35,22 @@ export function subscribeBalance (addresses: string[], chainInfoMap: Record<stri
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   // Looping over each chain
-  const unsubList = Object.entries(substrateApiMap).map(async ([networkKey, substrateApi]) => {
-    const networkAPI = await substrateApi.isReady;
-    const chainInfo = chainInfoMap[networkKey];
+  const unsubList = Object.entries(chainInfoMap).map(async ([chainSlug, chainInfo]) => {
     const useAddresses = _isChainEvmCompatible(chainInfo) ? evmAddresses : substrateAddresses;
 
     if (_isPureEvmChain(chainInfo)) {
-      const nativeTokenInfo = state.getNativeTokenInfo(networkKey);
+      const nativeTokenInfo = state.getNativeTokenInfo(chainSlug);
 
-      return subscribeEVMBalance(networkKey, useAddresses, evmApiMap, callback, nativeTokenInfo);
+      return subscribeEVMBalance(chainSlug, useAddresses, evmApiMap, callback, nativeTokenInfo);
     }
 
-    if (!useAddresses || useAddresses.length === 0 || _PURE_EVM_CHAINS.indexOf(networkKey) > -1) {
+    if (!useAddresses || useAddresses.length === 0 || _PURE_EVM_CHAINS.indexOf(chainSlug) > -1) {
       return undefined;
     }
 
-    return subscribeSubstrateBalance(useAddresses, chainInfo, networkKey, networkAPI, evmApiMap, callback);
+    const networkAPI = await substrateApiMap[chainSlug].isReady;
+
+    return subscribeSubstrateBalance(useAddresses, chainInfo, chainSlug, networkAPI, evmApiMap, callback);
   });
 
   return () => {

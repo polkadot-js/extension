@@ -44,6 +44,12 @@ export default class DatabaseService {
     }
   }
 
+  async removeFromBalanceStore (assets: string[]) {
+    this.logger.log('Bulk removing AssetStore');
+
+    return this.stores.balance.removeBySlugs(assets);
+  }
+
   // Crowdloan
   async updateCrowdloanStore (chain: string, address: string, item: CrowdloanItem) {
     if (item.state === APIItemState.READY && item.contribute !== '0') {

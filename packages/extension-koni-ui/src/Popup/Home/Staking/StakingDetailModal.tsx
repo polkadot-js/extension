@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountInfoItem, ChainInfoItem, DisplayTypeInfoItem, InfoItem, MetaInfoBlock, NumberInfoItem, StatusInfoItem } from '@subwallet/extension-koni-ui/components/MetaInfoBlock';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
-import { getBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -61,114 +60,6 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   };
 
-  const genInfoItems = () => {
-    const bondedFund: NumberInfoItem = {
-      type: 'number',
-      key: 'bonded_fund',
-      label: t('Bonded fund'),
-      value: getBalanceValue(staking.balance || '0', decimals),
-      suffix: staking.nativeToken
-    };
-
-    const unlockingStake: NumberInfoItem = {
-      type: 'number',
-      key: 'unlocking_stake',
-      label: t('Unlocking stake'),
-      value: getBalanceValue(staking.unlockingBalance || '0', decimals),
-      suffix: staking.nativeToken
-    };
-
-    const unclaimedReward: NumberInfoItem = {
-      type: 'number',
-      key: 'unclaimed_reward',
-      label: t('Unclaimed reward'),
-      value: getBalanceValue(reward?.unclaimedReward || '0', decimals),
-      suffix: staking.nativeToken
-    };
-
-    const totalSlash: NumberInfoItem = {
-      type: 'number',
-      key: 'total_slash',
-      label: t('Total slash'),
-      value: getBalanceValue(reward?.totalReward || '0', decimals),
-      suffix: staking.nativeToken
-    };
-
-    const latestReward: NumberInfoItem = {
-      type: 'number',
-      key: 'latest_reward',
-      label: t('Total slash'),
-      value: getBalanceValue(reward?.latestReward || '0', decimals),
-      suffix: staking.nativeToken
-    };
-
-    const totalReward: NumberInfoItem = {
-      type: 'number',
-      key: 'total_reward',
-      label: t('Total reward'),
-      value: getBalanceValue(reward?.totalReward || '0', decimals),
-      suffix: staking.nativeToken
-    };
-
-    const stakingType: DisplayTypeInfoItem = {
-      type: 'display_type',
-      key: 'staking_type',
-      label: t('Staking type'),
-      typeName: stakingTypeNameMap[staking.type]
-    };
-
-    const network: ChainInfoItem = {
-      type: 'chain',
-      key: 'network_info',
-      label: t('Network'),
-      chain: staking.chain,
-      chainName: staking.name
-    };
-
-    const account: AccountInfoItem = {
-      type: 'account',
-      key: 'account_info',
-      label: t('Account'),
-      address: staking.address,
-      name: accountName?.name || ''
-    };
-
-    // TODO: change this when background update information
-    const stakingStatus: StatusInfoItem = {
-      type: 'status',
-      key: 'staking_status',
-      label: stakingStatusLabel,
-      valueColorSchema: 'success',
-      statusName: t('Earning Reward'),
-      statusIcon: CheckCircle
-    };
-
-    const result: InfoItem[] = [
-      bondedFund,
-      unlockingStake
-    ];
-
-    if (reward && reward.unclaimedReward) {
-      result.push(unclaimedReward);
-    }
-
-    if (reward && reward.totalSlash) {
-      result.push(totalSlash);
-    }
-
-    if (reward && reward.latestReward) {
-      result.push(latestReward);
-    }
-
-    if (reward && reward.totalReward) {
-      result.push(totalReward);
-    }
-
-    result.push(stakingType, network, account, stakingStatus);
-
-    return result;
-  };
-
   return (
     <SwModal
       className={className}
@@ -178,7 +69,83 @@ const Component: React.FC<Props> = (props: Props) => {
       onCancel={() => inactiveModal(STAKING_DETAIL_MODAL_ID)}
       title={modalTitle}
     >
-      <MetaInfoBlock infoItems={genInfoItems()} />
+      <MetaInfo>
+        <MetaInfo.Number
+          decimals={decimals}
+          label={t('Bonded fund')}
+          suffix={staking.nativeToken}
+          value={staking.balance || '0'}
+        />
+
+        <MetaInfo.Number
+          decimals={decimals}
+          label={t('Unlocking stake')}
+          suffix={staking.nativeToken}
+          value={staking.unlockingBalance || '0'}
+        />
+
+        {!!reward?.unclaimedReward && (
+          <MetaInfo.Number
+            decimals={decimals}
+            label={t('Unclaimed reward')}
+            suffix={staking.nativeToken}
+            value={reward?.unclaimedReward || '0'}
+          />
+        )}
+
+        {!!reward?.totalSlash && (
+          <MetaInfo.Number
+            decimals={decimals}
+            label={t('Total slash')}
+            suffix={staking.nativeToken}
+            value={reward?.totalReward || '0'}
+          />
+        )}
+
+        {!!reward?.latestReward && (
+          <MetaInfo.Number
+            decimals={decimals}
+            label={t('Latest Reward')}
+            suffix={staking.nativeToken}
+            value={reward?.latestReward || '0'}
+          />
+        )}
+
+        {!!reward?.totalReward && (
+          <MetaInfo.Number
+            decimals={decimals}
+            label={t('Total reward')}
+            suffix={staking.nativeToken}
+            value={reward?.totalReward || '0'}
+          />
+        )}
+
+        <MetaInfo.DisplayType
+          label={t('Staking type')}
+          typeName={stakingTypeNameMap[staking.type]}
+        />
+
+        <MetaInfo.Chain
+          chain={staking.chain}
+          chainName={staking.name}
+          label={t('Network')}
+        />
+
+        <MetaInfo.Account
+          address={staking.address}
+          label={t('Account')}
+          name={accountName?.name || ''}
+        />
+
+        {/* // TODO: change this when background update information */}
+        <MetaInfo.Status
+          label={stakingStatusLabel}
+          statusIcon={CheckCircle}
+          statusName={t('Earning Reward')}
+          valueColorSchema={'success'}
+        />
+
+      </MetaInfo>
     </SwModal>
   );
 };

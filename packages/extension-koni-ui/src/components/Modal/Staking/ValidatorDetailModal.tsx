@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { InfoItem, MetaInfoBlock, StatusInfoItem } from '@subwallet/extension-koni-ui/components/MetaInfoBlock';
+import MetaInfo, { InfoItemBase } from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwModal, SwNumberProps } from '@subwallet/react-ui';
@@ -38,75 +38,21 @@ function Component ({ className,
 
   const statusMap = useMemo(() => ({
     active: {
-      schema: 'success',
+      schema: 'success' as InfoItemBase['valueColorSchema'],
       icon: CheckCircle,
       name: t('Success')
     },
     in_active: {
-      schema: 'gray',
+      schema: 'gray' as InfoItemBase['valueColorSchema'],
       icon: StopCircle,
       name: t('Inactive')
     },
     oversubscribed: {
-      schema: 'danger',
+      schema: 'danger' as InfoItemBase['valueColorSchema'],
       icon: ProhibitInset,
       name: t('Oversubscribed')
     }
   }), [t]);
-
-  const infoItems = useMemo<InfoItem[]>(() => {
-    return [
-      {
-        type: 'account',
-        key: 'validator',
-        label: t('Validator'),
-        address: validatorAddress,
-        name: validatorName
-      },
-      {
-        type: 'status',
-        key: 'status',
-        label: t('Status'),
-        valueColorSchema: statusMap[status].schema,
-        statusName: statusMap[status].name,
-        statusIcon: statusMap[status].icon
-      } as StatusInfoItem,
-      {
-        type: 'number',
-        key: 'min_stake',
-        label: t('Min stake'),
-        valueColorSchema: 'even-odd',
-        value: minStake,
-        decimals,
-        suffix: symbol
-      },
-      {
-        type: 'number',
-        key: 'own_stake',
-        label: t('Own stake'),
-        valueColorSchema: 'even-odd',
-        value: ownStake,
-        decimals,
-        suffix: symbol
-      },
-      {
-        type: 'number',
-        key: 'earning_estimated',
-        label: t('Earning estimated'),
-        valueColorSchema: 'even-odd',
-        value: earningEstimated,
-        suffix: '%'
-      },
-      {
-        type: 'number',
-        key: 'commission',
-        label: t('Commission'),
-        valueColorSchema: 'even-odd',
-        value: commission,
-        suffix: '%'
-      }
-    ];
-  }, [commission, decimals, earningEstimated, minStake, ownStake, status, statusMap, symbol, t, validatorAddress, validatorName]);
 
   return (
     <SwModal
@@ -115,12 +61,54 @@ function Component ({ className,
       onCancel={onCancel}
       title={t('Validator details')}
     >
-      <MetaInfoBlock
+      <MetaInfo
         hasBackgroundWrapper
-        infoItems={infoItems}
         spaceSize={'xs'}
         valueColorScheme={'light'}
-      />
+      >
+        <MetaInfo.Account
+          address={validatorAddress}
+          label={t('Validator')}
+          name={validatorName}
+        />
+
+        <MetaInfo.Status
+          label={t('Status')}
+          statusIcon={statusMap[status].icon}
+          statusName={statusMap[status].name}
+          valueColorSchema={statusMap[status].schema}
+        />
+
+        <MetaInfo.Number
+          decimals={decimals}
+          label={t('Min stake')}
+          suffix={symbol}
+          value={minStake}
+          valueColorSchema={'even-odd'}
+        />
+
+        <MetaInfo.Number
+          decimals={decimals}
+          label={t('Own stake')}
+          suffix={symbol}
+          value={ownStake}
+          valueColorSchema={'even-odd'}
+        />
+
+        <MetaInfo.Number
+          label={t('Earning estimated')}
+          suffix={'%'}
+          value={earningEstimated}
+          valueColorSchema={'even-odd'}
+        />
+
+        <MetaInfo.Number
+          label={t('Commission')}
+          suffix={'%'}
+          value={commission}
+          valueColorSchema={'even-odd'}
+        />
+      </MetaInfo>
     </SwModal>
   );
 }

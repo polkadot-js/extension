@@ -12,10 +12,11 @@ interface SettingItemSelectionProps {
   leftItemIcon?: React.ReactNode;
   isSelected?: boolean;
   className?: string;
+  onClickItem?: () => void;
 }
 
 function _SettingItemSelection (props: SettingItemSelectionProps): React.ReactElement<SettingItemSelectionProps> {
-  const { className, isSelected, label, leftItemIcon } = props;
+  const { className, isSelected, label, leftItemIcon, onClickItem } = props;
   const { token } = useTheme() as Theme;
 
   return (
@@ -23,6 +24,7 @@ function _SettingItemSelection (props: SettingItemSelectionProps): React.ReactEl
       className={className}
       leftItemIcon={leftItemIcon}
       name={label}
+      onPressItem={onClickItem}
       rightItem={isSelected && <Icon
         className={'__selected-icon'}
         iconColor={token.colorSecondary}

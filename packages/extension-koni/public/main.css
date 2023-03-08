@@ -477,10 +477,9 @@ html::-webkit-scrollbar {
 .modal-full .ant-sw-modal-content {
   border-radius: 0;
   height: 100%;
-  padding: 16px 0 0;
+  padding: 0;
   max-height: unset;
 }
-
 
 .modal-full .ant-sw-modal-header {
   margin: 0;

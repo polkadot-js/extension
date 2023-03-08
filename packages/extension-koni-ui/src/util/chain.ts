@@ -16,3 +16,17 @@ export const findChainInfoByGenesisHash = (chainMap: Record<string, _ChainInfo>,
 
   return null;
 };
+
+export const findChainInfoByChainId = (chainMap: Record<string, _ChainInfo>, chainId?: number): _ChainInfo | null => {
+  if (!chainId) {
+    return null;
+  }
+
+  for (const chainInfo of Object.values(chainMap)) {
+    if (chainInfo.evmInfo?.evmChainId === chainId) {
+      return chainInfo;
+    }
+  }
+
+  return null;
+};

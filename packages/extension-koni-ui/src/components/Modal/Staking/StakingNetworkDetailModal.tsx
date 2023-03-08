@@ -70,7 +70,6 @@ function Component ({ className,
           </div>
         </MetaInfo.Default>
 
-
         <MetaInfo.Number
           label={t('Estimated earning')}
           suffix={'%'}

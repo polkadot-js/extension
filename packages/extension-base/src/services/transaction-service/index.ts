@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ChainType, EvmSendTransactionRequest, ExtrinsicStatus, TransactionErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, TransactionErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';

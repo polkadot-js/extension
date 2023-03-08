@@ -91,7 +91,7 @@ const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps
   '.confirmation-content': {
     flex: '1 1 auto',
     overflow: 'auto',
-    padding: `0 ${token.paddingSM}px`,
+    padding: `0 ${token.padding}px`,
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--content-gap)',
@@ -105,10 +105,9 @@ const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps
   '.confirmation-footer': {
     display: 'flex',
     flexWrap: 'wrap',
-    padding: token.paddingSM,
+    padding: token.padding,
     gap: token.sizeSM,
-    marginBottom: token.marginMD,
-    marginTop: token.marginXS,
+    marginBottom: token.margin,
 
     '.ant-btn': {
       flex: '1 1 auto',

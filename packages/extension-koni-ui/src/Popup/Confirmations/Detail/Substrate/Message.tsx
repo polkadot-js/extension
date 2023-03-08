@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
@@ -26,33 +27,19 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 
   return (
-    <div className={CN(className)}>
-      <div className='data-container'>
-        <div className='data-title'>
-          {t('Raw data')}
-        </div>
-        <div className='data-value'>
-          {bytes}
-        </div>
-      </div>
-      <div className='data-container'>
-        <div className='data-title'>
-          {t('Message')}
-        </div>
-        <div className='data-value'>
-          {message}
-        </div>
-      </div>
-    </div>
+    <MetaInfo className={CN(className)}>
+      <MetaInfo.Data label={t('Raw data')}>
+        {bytes}
+      </MetaInfo.Data>
+      <MetaInfo.Data label={t('Message')}>
+        {message}
+      </MetaInfo.Data>
+    </MetaInfo>
   );
 };
 
 const SubstrateMessageDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  return {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: token.size
-  };
+  return {};
 });
 
 export default SubstrateMessageDetail;

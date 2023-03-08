@@ -58,11 +58,27 @@ const Component: React.FC<Props> = (props: Props) => {
     if (isArray(data)) {
       if (typeof data[0] !== 'object') {
         return (
-          <>
+          <div className='array-value'>
             {
-              data.map((datum) => datum as string)
+              data.map((datum, index) => (
+                <div key={index}>
+                  {datum as string}
+                </div>
+              ))
             }
-          </>
+          </div>
+        );
+      } else {
+        return (
+          <div className='array-value'>
+            <div className='__label'>[</div>
+            {data.map((datum, index) => (
+              <React.Fragment key={index}>
+                {renderData(datum, needFilter)}
+              </React.Fragment>
+            ))}
+            <div className='__label'>]</div>
+          </div>
         );
       }
     }
@@ -70,9 +86,7 @@ const Component: React.FC<Props> = (props: Props) => {
     if (typeof data !== 'object') {
       const raw = data as string;
 
-      return isAscii(raw)
-        ? u8aToString(u8aUnwrapBytes(raw))
-        : raw;
+      return isAscii(raw) ? u8aToString(u8aUnwrapBytes(raw)) : raw;
     } else {
       return (
         <>
@@ -109,17 +123,14 @@ const Component: React.FC<Props> = (props: Props) => {
         {
           data.map((value, index) => {
             return (
-              <div
-                className='data-container'
+              <MetaInfo.Default
+                className='node-leaf right'
                 key={index}
+                label={value.name}
+                labelAlign='top'
               >
-                <div className='data-title'>
-                  {value.name}
-                </div>
-                <div className='data-value'>
-                  {value.value as string}
-                </div>
-              </div>
+                {value.value as string}
+              </MetaInfo.Default>
             );
           })
         }
@@ -181,6 +192,10 @@ const EvmMessageDetail = styled(Component)<Props>(({ theme: { token } }: Props) 
     flexDirection: 'column',
     gap: token.size,
 
+    '.__label': {
+      fontFamily: token.fontFamily
+    },
+
     '.node': {
       overflow: 'hidden',
       position: 'relative',
@@ -191,13 +206,27 @@ const EvmMessageDetail = styled(Component)<Props>(({ theme: { token } }: Props) 
       '.-to-right': {
         marginTop: '0 !important',
         width: '100%',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        maxWidth: token.controlHeightLG * 5,
+        flex: 2
+      },
+
+      '&.right': {
+        '.-to-right': {
+          textAlign: 'right'
+        }
       },
 
       '.__value': {
         overflow: 'hidden',
         width: '100%'
       }
+    },
+
+    '.array-value': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.sizeSM
     }
   };
 });

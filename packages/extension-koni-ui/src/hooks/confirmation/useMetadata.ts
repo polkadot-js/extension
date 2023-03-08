@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Chain } from '@subwallet/extension-chains/types';
+
 import { getMetadata } from '@subwallet/extension-koni-ui/messaging';
-
 import { useEffect, useState } from 'react';
-
 
 export default function useMetadata (genesisHash?: string | null, isPartial?: boolean): Chain | null {
   const [chain, setChain] = useState<Chain | null>(null);

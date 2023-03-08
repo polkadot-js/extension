@@ -318,7 +318,7 @@ export interface NetworkJson {
   crowdloanUrl?: string;
 
   // Ethereum related information for predefined network only
-  isEthereum?: boolean; // Only show network with isEthereum=true when select one EVM account // user input
+  isEthereum?: boolean; // Only show network with isEthereum=true when select one Evm account // user input
   evmChainId?: number;
 
   isHybrid?: boolean;
@@ -1105,6 +1105,8 @@ export interface EvmSignatureRequest extends EvmSignRequest {
 
 export interface EvmSendTransactionRequest extends TransactionConfig, EvmSignRequest {
   estimateGas: string;
+  parseData: EvmTransactionData;
+  isToContract: boolean;
 }
 
 export interface ConfirmationsQueueItemOptions {
@@ -1132,7 +1134,7 @@ export interface EvmSendTransactionRequestExternal extends EvmSendTransactionReq
 
 export interface EvmSignatureRequestExternal extends EvmSignatureRequest, EvmRequestExternal {}
 
-export interface AddNetworkRequestExternal { // currently only support adding pure EVM network
+export interface AddNetworkRequestExternal { // currently only support adding pure Evm network
   chainId: string,
   rpcUrls: string[],
   chainName: string,
@@ -1223,33 +1225,35 @@ export interface SingleModeJson {
   autoTriggerDomain: string // Regex for auto trigger single mode
 }
 
-/// EVM transaction
+/// Evm transaction
 
 export type NestedArray<T> = T | NestedArray<T>[];
 
-/// EVM Contract Input
+/// Evm Contract Input
 
-export interface EVMTransactionArg {
+export interface EvmTransactionArg {
   name: string;
   type: string;
   value: string;
-  children?: EVMTransactionArg[];
+  children?: EvmTransactionArg[];
 }
 
-export interface ParseEVMTransactionData{
+export interface ParseEvmTransactionData {
   method: string;
   methodName: string;
-  args: EVMTransactionArg[];
+  args: EvmTransactionArg[];
 }
 
-export interface RequestParseEVMContractInput {
+export interface RequestParseEvmContractInput {
   data: string;
   contract: string;
   chainId: number;
 }
 
-export interface ResponseParseEVMContractInput {
-  result: ParseEVMTransactionData | string
+export type EvmTransactionData = ParseEvmTransactionData | string;
+
+export interface ResponseParseEvmContractInput {
+  result: EvmTransactionData;
 }
 
 /// Ledger
@@ -1303,14 +1307,14 @@ export interface RequestParseTransactionSubstrate {
   networkKey: string;
 }
 
-// Parse EVM
+// Parse Evm
 
 export interface RequestQrParseRLP {
   data: string;
 }
 
 export interface ResponseQrParseRLP {
-  data: ParseEVMTransactionData | string;
+  data: EvmTransactionData;
   input: string;
   nonce: number;
   to: string;
@@ -1344,14 +1348,14 @@ export interface ResponseQrSignSubstrate {
   signature: string;
 }
 
-export interface RequestQrSignEVM {
+export interface RequestQrSignEvm {
   address: string;
   message: string;
   type: 'message' | 'transaction'
   chainId?: number;
 }
 
-export interface ResponseQrSignEVM {
+export interface ResponseQrSignEvm {
   signature: string;
 }
 
@@ -1542,7 +1546,7 @@ export type RequestCrossChainTransferExternal = InternalRequestSign<RequestCheck
 
 export type RequestNftTransferExternalSubstrate = InternalRequestSign<SubstrateNftSubmitTransaction>;
 
-export type RequestNftTransferExternalEVM = InternalRequestSign<EvmNftSubmitTransaction>;
+export type RequestNftTransferExternalEvm = InternalRequestSign<EvmNftSubmitTransaction>;
 
 // Stake
 
@@ -1577,12 +1581,12 @@ export enum ChainEditStandard {
   EVM = 'EVM',
   SUBSTRATE = 'SUBSTRATE',
   UNKNOWN = 'UNKNOWN',
-  MIXED = 'MIXED' // takes root in a standard (Substrate, EVM,...) but also compatible with other standards
+  MIXED = 'MIXED' // takes root in a standard (Substrate, Evm,...) but also compatible with other standards
 }
 
 // ChainService
 // for custom network
-export type ChainEditInfo = { // only support pure substrate or EVM network
+export type ChainEditInfo = { // only support pure substrate or Evm network
   slug: string;
   currentProvider: string;
   providers: Record<string, string>;
@@ -1600,8 +1604,8 @@ export interface ChainSpecInfo {
   genesisHash: string,
   paraId: number | null,
 
-  // EVM
-  evmChainId: number | null // null means not EVM
+  // Evm
+  evmChainId: number | null // null means not Evm
 
   // Common
   existentialDeposit: string,
@@ -1794,25 +1798,25 @@ export interface KoniRequestSignatures {
   'pri(qr.transaction.parse.substrate)': [RequestParseTransactionSubstrate, ResponseParseTransactionSubstrate];
   'pri(qr.transaction.parse.evm)': [RequestQrParseRLP, ResponseQrParseRLP];
   'pri(qr.sign.substrate)': [RequestQrSignSubstrate, ResponseQrSignSubstrate];
-  'pri(qr.sign.evm)': [RequestQrSignEVM, ResponseQrSignEVM];
+  'pri(qr.sign.evm)': [RequestQrSignEvm, ResponseQrSignEvm];
 
   // External account request
   'pri(account.external.reject)': [RequestRejectExternalRequest, ResponseRejectExternalRequest];
   'pri(account.external.resolve)': [RequestResolveExternalRequest, ResponseResolveExternalRequest];
 
-  // EVM
+  // Evm
   'evm(events.subscribe)': [RequestEvmEvents, boolean, EvmEvent];
   'evm(request)': [RequestArguments, unknown];
   'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
 
-  // EVM Transaction
-  'pri(evm.transaction.parse.input)': [RequestParseEVMContractInput, ResponseParseEVMContractInput];
+  // Evm Transaction
+  'pri(evm.transaction.parse.input)': [RequestParseEvmContractInput, ResponseParseEvmContractInput];
 
   // Create qr request
   'pri(accounts.transfer.qr.create)': [RequestTransferExternal, BasicTxResponse, BasicTxResponse];
   'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferExternal, BasicTxResponse, BasicTxResponse];
   'pri(nft.transfer.qr.create.substrate)': [RequestNftTransferExternalSubstrate, NftTransactionResponse, NftTransactionResponse];
-  'pri(nft.transfer.qr.create.evm)': [RequestNftTransferExternalEVM, NftTransactionResponse, NftTransactionResponse];
+  'pri(nft.transfer.qr.create.evm)': [RequestNftTransferExternalEvm, NftTransactionResponse, NftTransactionResponse];
   'pri(stake.qr.create)': [RequestStakeExternal, BasicTxResponse, BasicTxResponse];
   'pri(unStake.qr.create)': [RequestUnStakeExternal, BasicTxResponse, BasicTxResponse];
   'pri(withdrawStake.qr.create)': [RequestWithdrawStakeExternal, BasicTxResponse, BasicTxResponse];

@@ -12,6 +12,7 @@ import useOpenDetailModal from '@subwallet/extension-koni-ui/hooks/confirmation/
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
 import BaseDetailModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/BaseDetailModal';
+import SubstrateExtrinsic from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/Substrate/Extrinsic';
 import SubstrateMessageDetail from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/Substrate/Message';
 import DisplayPayloadModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload';
 import SubstrateQr from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload/Substrate';
@@ -30,6 +31,7 @@ import styled from 'styled-components';
 
 import { TypeRegistry } from '@polkadot/types';
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
+import { SignerPayloadJSON } from '@polkadot/types/types';
 
 interface Props extends ThemeProps {
   request: SigningRequest;
@@ -265,6 +267,13 @@ function Component ({ className, request }: Props) {
         title={hexBytes ? t('Message details') : t('Transaction details')}
       >
         {hexBytes && (<SubstrateMessageDetail bytes={hexBytes} />)}
+        {payload && (
+          <SubstrateExtrinsic
+            account={account}
+            payload={payload}
+            request={request.request.payload as SignerPayloadJSON}
+          />
+        )}
       </BaseDetailModal>
       {
         signMode === SIGN_MODE.QR && (

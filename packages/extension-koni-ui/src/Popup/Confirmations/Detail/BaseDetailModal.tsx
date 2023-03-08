@@ -51,9 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
       onCancel={onClose}
       title={title}
     >
-      <div className='detail-container'>
-        {children}
-      </div>
+      {children}
     </SwModal>
   );
 };
@@ -61,40 +59,12 @@ const Component: React.FC<Props> = (props: Props) => {
 const BaseDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.ant-sw-modal-footer': {
-      borderTop: 'none',
-      marginTop: 0,
-      paddingTop: 0
+      borderTop: 'none'
     },
 
-    '.data-container': {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: token.size,
-
-      '&.data-row': {
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-      }
-    },
-
-    '.data-title': {
-      fontSize: token.fontSizeHeading6,
-      lineHeight: token.lineHeightHeading6,
-      color: token.colorTextBase,
-      fontWeight: token.fontWeightStrong
-    },
-
-    '.data-value': {
-      fontSize: token.fontSizeHeading6,
-      lineHeight: token.lineHeightHeading6,
-      color: token.colorTextDescription,
-
-      '&.highlight': {
-        color: token.colorSecondary,
-        fontWeight: token.fontWeightStrong
-      }
+    '.__label': {
+      textTransform: 'capitalize'
     }
-
   };
 });
 

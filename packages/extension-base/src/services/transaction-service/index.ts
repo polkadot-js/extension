@@ -225,7 +225,7 @@ export default class TransactionService {
           let signedTransaction: string | undefined;
 
           if (!payload) {
-            throw new EvmRpcError('UNAUTHORIZED', 'Bad signature');
+            throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');
           }
 
           const web3Api = this.chainService.getEvmApi(chain).api;
@@ -238,7 +238,7 @@ export default class TransactionService {
             const recover = web3Api.eth.accounts.recoverTransaction(signed);
 
             if (recover.toLowerCase() !== account.address.toLowerCase()) {
-              throw new EvmRpcError('UNAUTHORIZED', 'Bad signature');
+              throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');
             }
 
             signedTransaction = signed;

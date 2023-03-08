@@ -149,10 +149,6 @@ const DeriveAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
       }
     },
 
-    '.ant-sw-modal-body': {
-      padding: 0
-    },
-
     '.disabled': {
       opacity: 0.4,
 

@@ -99,7 +99,7 @@ export interface MetadataRequest extends ConfirmationRequestBase{
   request: MetadataDef;
 }
 
-export interface SigningRequest extends ConfirmationRequestBase{
+export interface SigningRequest extends ConfirmationRequestBase {
   account: AccountJson;
   request: RequestSign;
 }

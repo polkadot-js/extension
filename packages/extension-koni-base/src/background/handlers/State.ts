@@ -6,7 +6,7 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TransactionErrorType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TransactionErrorType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
@@ -25,6 +25,7 @@ import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/store
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
+import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { decodePair } from '@subwallet/keyring/pair/decode';
@@ -1602,10 +1603,10 @@ export default class KoniState {
         if (!account.isExternal) {
           canSign = true;
         }
+
         break;
       default:
         throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found sign method');
-        break;
     }
 
     const signPayload: EvmSignatureRequest = {
@@ -1666,6 +1667,7 @@ export default class KoniState {
 
   public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
     const evmApi = this.getEvmApi(networkKey);
+    const evmNetwork = this.getChainInfo(networkKey);
     const web3 = evmApi.api;
 
     const autoFormatNumber = (val?: string | number): string | undefined => {
@@ -1732,11 +1734,19 @@ export default class KoniState {
     transaction.nonce = await web3.eth.getTransactionCount(fromAddress);
 
     const hashPayload = this.generateHashPayload(networkKey, transaction);
+    const isToContract = await isContractAddress(transaction.to || '', evmApi);
+    const parseData = isToContract
+      ? transaction.data
+        ? (await parseContractInput(transaction.data, transaction.to || '', evmNetwork)).result
+        : ''
+      : transaction.data || '';
 
-    const requestPayload = {
+    const requestPayload: EvmSendTransactionRequest = {
       ...transaction,
       estimateGas,
       hashPayload,
+      isToContract,
+      parseData: parseData,
       account: account,
       canSign: true
     };

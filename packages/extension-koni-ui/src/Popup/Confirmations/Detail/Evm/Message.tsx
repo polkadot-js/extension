@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EvmSignatureRequest } from '@subwallet/extension-base/background/KoniTypes';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
+import { isArray, isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   payload: EvmSignatureRequest;
@@ -17,8 +18,16 @@ interface Props extends ThemeProps {
 interface SignTypedDataObjectV1 {
   type: string;
   name: string;
-  value: any;
+  value: unknown;
 }
+
+const checkIsLeaf = (data: unknown): boolean => {
+  if (isArray(data)) {
+    return typeof data[0] === 'object';
+  } else {
+    return typeof data === 'object';
+  }
+};
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, payload: { payload, type } } = props;
@@ -45,49 +54,54 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const rawData = useMemo(() => typeof payload === 'string' ? payload : JSON.parse(JSON.stringify(payload)) as object, [payload]);
 
-  const renderData = useCallback((data: any, needFilter?: boolean) => {
+  const renderData = useCallback((data: unknown, needFilter?: boolean): React.ReactNode => {
+    if (isArray(data)) {
+      if (typeof data[0] !== 'object') {
+        return (
+          <>
+            {
+              data.map((datum) => datum as string)
+            }
+          </>
+        );
+      }
+    }
+
     if (typeof data !== 'object') {
       const raw = data as string;
-      const text = isAscii(raw)
+
+      return isAscii(raw)
         ? u8aToString(u8aUnwrapBytes(raw))
         : raw;
-
-      return (
-        <div className='data-container'>
-          <div className='data-title'>
-            {t('Message')}
-          </div>
-          <div className='data-value'>
-            {text}
-          </div>
-        </div>
-      );
     } else {
       return (
         <>
           {
             Object.entries(data as object).map(([key, datum], index) => {
-              const isLeaf = typeof datum !== 'object';
+              const isLeaf = checkIsLeaf(datum);
 
               if (needFilter && key.toLowerCase() !== 'message') {
                 return null;
               }
 
+              const RenderComponent = isLeaf ? MetaInfo.Data : MetaInfo.Default;
+
               return (
-                <div
+                <RenderComponent
+                  {...{ labelAlign: 'top' }}
                   className={CN('node', { 'node-leaf': isLeaf })}
                   key={index}
+                  label={key}
                 >
-                  <div className={CN('title')}>{key}:</div>
                   {renderData(datum)}
-                </div>
+                </RenderComponent>
               );
             })
           }
         </>
       );
     }
-  }, [t]);
+  }, []);
 
   const handlerRenderV1 = useCallback((data: SignTypedDataObjectV1[]) => {
     return (
@@ -121,30 +135,42 @@ const Component: React.FC<Props> = (props: Props) => {
     switch (type) {
       case 'eth_signTypedData_v3':
       case 'eth_signTypedData_v4':
-        return renderData(rawData, true);
+        return (
+          <MetaInfo.Data label={t('Raw data')}>
+            {renderData(rawData, true)}
+          </MetaInfo.Data>
+        );
       case 'eth_signTypedData_v1':
       case 'eth_signTypedData':
-        return handlerRenderV1(rawData as unknown as SignTypedDataObjectV1[]);
+        return (
+          <MetaInfo.Data label={t('Raw data')}>
+            {handlerRenderV1(rawData as unknown as SignTypedDataObjectV1[])}
+          </MetaInfo.Data>
+        );
       default:
-        return renderData(rawData);
+        return (
+          <MetaInfo.Data
+            label={t('Message')}
+          >
+            {renderData(rawData)}
+          </MetaInfo.Data>
+        );
     }
-  }, [renderData, rawData, type, handlerRenderV1]);
+  }, [renderData, rawData, type, handlerRenderV1, t]);
 
   return (
     <div className={CN(className)}>
-      {
-        signMethod && (
-          <div className={CN('data-container', 'data-row')}>
-            <div className='data-title'>
-              {t('Sign method')}
-            </div>
-            <div className={CN('data-value', 'highlight')}>
-              {signMethod}
-            </div>
-          </div>
-        )
-      }
-      {handlerRenderContent()}
+      <MetaInfo>
+        {
+          signMethod && (
+            <MetaInfo.DisplayType
+              label={t('Sign method')}
+              typeName={signMethod}
+            />
+          )
+        }
+        {handlerRenderContent()}
+      </MetaInfo>
     </div>
   );
 };
@@ -153,7 +179,26 @@ const EvmMessageDetail = styled(Component)<Props>(({ theme: { token } }: Props) 
   return {
     display: 'flex',
     flexDirection: 'column',
-    gap: token.size
+    gap: token.size,
+
+    '.node': {
+      overflow: 'hidden',
+      position: 'relative',
+      marginLeft: token.marginXS
+    },
+
+    '.node-leaf': {
+      '.-to-right': {
+        marginTop: '0 !important',
+        width: '100%',
+        overflow: 'hidden'
+      },
+
+      '.__value': {
+        overflow: 'hidden',
+        width: '100%'
+      }
+    }
   };
 });
 

@@ -76,28 +76,26 @@ const deepRemoveUnwantedArrayProperties = (arr: any[] | Result): any[] => {
 };
 
 // remove 0x from addresses
-function deepStripTupleAddresses (input: any[], tupleTypes: AbiInput[]): any[] {
-  return input.map((item, i) => {
-    // We find tupleTypes to not be an array where internalType is present in the ABI indicating item is a structure
-    const type = tupleTypes[i] ? tupleTypes[i].type : null;
+const deepStripTupleAddresses = (input: any[], tupleTypes: AbiInput[]): any[] => input.map((item, i) => {
+  // We find tupleTypes to not be an array where internalType is present in the ABI indicating item is a structure
+  const type = tupleTypes[i] ? tupleTypes[i].type : null;
 
-    if (type === 'address' && typeof item === 'string') {
-      return item;
-    }
-
-    if (type === 'address[]' && Array.isArray(item)) {
-      return item.map((a) => a as string);
-    }
-
-    if (Array.isArray(item)) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return deepStripTupleAddresses(item, tupleTypes);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  if (type === 'address' && typeof item === 'string') {
     return item;
-  });
-}
+  }
+
+  if (type === 'address[]' && Array.isArray(item)) {
+    return item.map((a) => a as string);
+  }
+
+  if (Array.isArray(item)) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return deepStripTupleAddresses(item, tupleTypes);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return item;
+});
 
 const toHexString = (byteArray: Buffer) => {
   return Array.from(byteArray, function (byte) {

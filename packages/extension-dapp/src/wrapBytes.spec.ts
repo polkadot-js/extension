@@ -6,7 +6,7 @@
 
 import { u8aConcat, u8aEq, u8aToString } from '@polkadot/util';
 
-import { ETHEREUM, POSTFIX, PREFIX, unwrapBytes, wrapBytes } from './wrapBytes';
+import { ETHEREUM, POSTFIX, PREFIX, unwrapBytes, wrapBytes } from './wrapBytes.js';
 
 const TEST_DATA = 'this is just some random message that we expect to be wrapped along the way';
 const TEST_ETH = u8aConcat(ETHEREUM, TEST_DATA);

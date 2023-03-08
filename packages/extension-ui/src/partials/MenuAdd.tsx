@@ -1,19 +1,19 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../types.js';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCodeBranch, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext } from 'react';
 
-import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem } from '../components';
-import useIsPopup from '../hooks/useIsPopup';
-import { useLedger } from '../hooks/useLedger';
-import useTranslation from '../hooks/useTranslation';
-import { windowOpen } from '../messaging';
-import { styled } from '../styled';
+import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem } from '../components/index.js';
+import useIsPopup from '../hooks/useIsPopup.js';
+import { useLedger } from '../hooks/useLedger.js';
+import useTranslation from '../hooks/useTranslation.js';
+import { windowOpen } from '../messaging.js';
+import { styled } from '../styled.js';
 
 interface Props extends ThemeProps {
   className?: string;

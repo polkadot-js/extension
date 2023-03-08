@@ -1,14 +1,14 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useRef, useState } from 'react';
 
 import arrow from '../../assets/arrow-down.svg';
-import { Address } from '../../components';
-import useOutsideClick from '../../hooks/useOutsideClick';
-import { styled } from '../../styled';
+import { Address } from '../../components/index.js';
+import useOutsideClick from '../../hooks/useOutsideClick.js';
+import { styled } from '../../styled.js';
 
 interface Props {
   allAddresses: [string, string | null][];

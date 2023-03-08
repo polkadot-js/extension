@@ -6,7 +6,7 @@ import { initReactI18next } from 'react-i18next';
 
 import uiSettings from '@polkadot/ui-settings';
 
-import Backend from './Backend';
+import Backend from './Backend.js';
 
 i18next
   .use(initReactI18next)

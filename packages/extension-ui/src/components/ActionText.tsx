@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../types.js';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { MouseEventHandler } from 'react';
 
-import { styled } from '../styled';
+import { styled } from '../styled.js';
 
 interface Props {
   className?: string;

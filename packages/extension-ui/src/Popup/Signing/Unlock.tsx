@@ -3,8 +3,8 @@
 
 import React, { useCallback } from 'react';
 
-import { InputWithLabel, Warning } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
+import { InputWithLabel, Warning } from '../../components/index.js';
+import useTranslation from '../../hooks/useTranslation.js';
 
 interface Props {
   className?: string;

@@ -8,12 +8,12 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { canDerive } from '@polkadot/extension-base/utils';
 import { ThemeProps } from '@polkadot/extension-ui/types';
 
-import { AccountContext, Address, Checkbox, Dropdown, Link, MenuDivider } from '../../components';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
-import useTranslation from '../../hooks/useTranslation';
-import { editAccount, tieAccount } from '../../messaging';
-import { Name } from '../../partials';
-import { styled } from '../../styled';
+import { AccountContext, Address, Checkbox, Dropdown, Link, MenuDivider } from '../../components/index.js';
+import useGenesisHashOptions from '../../hooks/useGenesisHashOptions.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { editAccount, tieAccount } from '../../messaging.js';
+import { Name } from '../../partials/index.js';
+import { styled } from '../../styled.js';
 
 interface Props extends AccountJson {
   className?: string;

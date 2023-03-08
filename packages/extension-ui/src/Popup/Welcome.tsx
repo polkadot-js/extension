@@ -1,14 +1,14 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../types.js';
 
 import React, { useCallback, useContext } from 'react';
 
-import { ActionContext, Box, Button, ButtonArea, List, VerticalSpace } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import { Header } from '../partials';
-import { styled } from '../styled';
+import { ActionContext, Box, Button, ButtonArea, List, VerticalSpace } from '../components/index.js';
+import useTranslation from '../hooks/useTranslation.js';
+import { Header } from '../partials/index.js';
+import { styled } from '../styled.js';
 
 interface Props extends ThemeProps {
   className?: string;

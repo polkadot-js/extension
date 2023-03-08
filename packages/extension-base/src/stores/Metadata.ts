@@ -3,8 +3,8 @@
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 
-import { EXTENSION_PREFIX } from '../defaults';
-import BaseStore from './Base';
+import { EXTENSION_PREFIX } from '../defaults.js';
+import BaseStore from './Base.js';
 
 export default class MetadataStore extends BaseStore<MetadataDef> {
   constructor () {

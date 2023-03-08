@@ -1,15 +1,15 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../types.js';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
 
-import { AccountContext, Checkbox, Warning } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import AccountsTree from '../Popup/Accounts/AccountsTree';
-import { styled } from '../styled';
+import { AccountContext, Checkbox, Warning } from '../components/index.js';
+import useTranslation from '../hooks/useTranslation.js';
+import AccountsTree from '../Popup/Accounts/AccountsTree.js';
+import { styled } from '../styled.js';
 
 interface Props extends ThemeProps {
   className?: string;

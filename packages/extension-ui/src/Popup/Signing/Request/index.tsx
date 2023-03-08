@@ -10,14 +10,14 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { TypeRegistry } from '@polkadot/types';
 
-import { ActionContext, Address, VerticalSpace, Warning } from '../../../components';
-import { useTranslation } from '../../../components/translate';
-import { approveSignSignature } from '../../../messaging';
-import Bytes from '../Bytes';
-import Extrinsic from '../Extrinsic';
-import LedgerSign from '../LedgerSign';
-import Qr from '../Qr';
-import SignArea from './SignArea';
+import { ActionContext, Address, VerticalSpace, Warning } from '../../../components/index.js';
+import { useTranslation } from '../../../components/translate.js';
+import { approveSignSignature } from '../../../messaging.js';
+import Bytes from '../Bytes.js';
+import Extrinsic from '../Extrinsic.js';
+import LedgerSign from '../LedgerSign.js';
+import Qr from '../Qr.js';
+import SignArea from './SignArea.js';
 
 interface Props {
   account: AccountJson;

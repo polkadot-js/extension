@@ -6,11 +6,11 @@ import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, Injec
 import { isPromise, objectSpread, u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import { documentReadyPromise } from './util';
+import { documentReadyPromise } from './util.js';
 
 // expose utility functions
-export { packageInfo } from './packageInfo';
-export { unwrapBytes, wrapBytes } from './wrapBytes';
+export { packageInfo } from './packageInfo.js';
+export { unwrapBytes, wrapBytes } from './wrapBytes.js';
 
 // just a helper (otherwise we cast all-over, so shorter and more readable)
 const win = window as Window & InjectedWindow;

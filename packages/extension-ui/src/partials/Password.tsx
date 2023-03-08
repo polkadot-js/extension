@@ -3,9 +3,9 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { InputWithLabel, ValidatedInput } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import { allOf, isNotShorterThan, isSameAs, Validator } from '../util/validators';
+import { InputWithLabel, ValidatedInput } from '../components/index.js';
+import useTranslation from '../hooks/useTranslation.js';
+import { allOf, isNotShorterThan, isSameAs, Validator } from '../util/validators.js';
 
 interface Props {
   isFocussed?: boolean;

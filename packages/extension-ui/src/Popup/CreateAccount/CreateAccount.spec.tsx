@@ -14,11 +14,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
 
-import { ActionContext, ActionText, Button, themes } from '../../components';
-import * as messaging from '../../messaging';
-import { Header } from '../../partials';
-import { flushAllPromises } from '../../testHelpers';
-import CreateAccount from '.';
+import { ActionContext, ActionText, Button, themes } from '../../components/index.js';
+import * as messaging from '../../messaging.js';
+import { Header } from '../../partials/index.js';
+import { flushAllPromises } from '../../testHelpers.js';
+import CreateAccount from './index.js';
 
 const { configure, mount } = enzyme;
 

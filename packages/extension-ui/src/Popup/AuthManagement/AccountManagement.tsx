@@ -1,16 +1,16 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useParams } from 'react-router';
 
-import { AccountContext, ActionContext, Button } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { getAuthList, updateAuthorization } from '../../messaging';
-import { AccountSelection, Header } from '../../partials';
-import { styled } from '../../styled';
+import { AccountContext, ActionContext, Button } from '../../components/index.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { getAuthList, updateAuthorization } from '../../messaging.js';
+import { AccountSelection, Header } from '../../partials/index.js';
+import { styled } from '../../styled.js';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -37,7 +37,7 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
   const _onApprove = useCallback(
     (): void => {
       updateAuthorization(selectedAccounts, url)
-        .then(() => onAction('..'))
+        .then(() => onAction('../index.js'))
         .catch(console.error);
     },
     [onAction, selectedAccounts, url]

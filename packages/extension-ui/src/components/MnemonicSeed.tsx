@@ -1,15 +1,15 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../types.js';
 
 import { faCopy } from '@fortawesome/free-regular-svg-icons';
 import React, { MouseEventHandler } from 'react';
 
-import useTranslation from '../hooks/useTranslation';
-import { styled } from '../styled';
-import ActionText from './ActionText';
-import TextAreaWithLabel from './TextAreaWithLabel';
+import useTranslation from '../hooks/useTranslation.js';
+import { styled } from '../styled.js';
+import ActionText from './ActionText.js';
+import TextAreaWithLabel from './TextAreaWithLabel.js';
 
 interface Props {
   seed: string;

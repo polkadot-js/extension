@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { ThemeProps } from '../../types';
-import type { AccountInfo } from '.';
+import type { ThemeProps } from '../../types.js';
+import type { AccountInfo } from './index.js';
 
 import { faCaretDown, faCaretRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,10 +12,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { validateSeed } from '@polkadot/extension-ui/messaging';
 import { objectSpread } from '@polkadot/util';
 
-import { ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
-import useTranslation from '../../hooks/useTranslation';
-import { styled } from '../../styled';
+import { ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components/index.js';
+import useGenesisHashOptions from '../../hooks/useGenesisHashOptions.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { styled } from '../../styled.js';
 
 interface Props {
   className?: string;

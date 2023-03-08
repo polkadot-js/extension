@@ -5,9 +5,9 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useRef } from 'react';
 
-import { styled } from '../styled';
-import { ThemeProps } from '../types';
-import { Input } from './TextInputs';
+import { styled } from '../styled.js';
+import { ThemeProps } from '../types.js';
+import { Input } from './TextInputs.js';
 
 interface Props extends ThemeProps {
   className?: string;

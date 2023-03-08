@@ -5,12 +5,12 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 
 import { canDerive } from '@polkadot/extension-base/utils';
 
-import { AccountContext, ActionContext, Address, ButtonArea, InputWithLabel, Label, NextStepButton, VerticalSpace, Warning } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { validateAccount, validateDerivationPath } from '../../messaging';
-import { nextDerivationPath } from '../../util/nextDerivationPath';
-import AddressDropdown from './AddressDropdown';
-import DerivationPath from './DerivationPath';
+import { AccountContext, ActionContext, Address, ButtonArea, InputWithLabel, Label, NextStepButton, VerticalSpace, Warning } from '../../components/index.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { validateAccount, validateDerivationPath } from '../../messaging.js';
+import { nextDerivationPath } from '../../util/nextDerivationPath.js';
+import AddressDropdown from './AddressDropdown.js';
+import DerivationPath from './DerivationPath.js';
 
 interface Props {
   className?: string;

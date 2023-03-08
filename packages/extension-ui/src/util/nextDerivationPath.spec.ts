@@ -4,7 +4,7 @@
 // eslint-disable-next-line spaced-comment
 /// <reference types="@polkadot/dev/node/test/node" />
 
-import { nextDerivationPath } from './nextDerivationPath';
+import { nextDerivationPath } from './nextDerivationPath.js';
 
 describe('Generate Derivation Path', () => {
   const acc = (address: string, parentAddress?: string): {

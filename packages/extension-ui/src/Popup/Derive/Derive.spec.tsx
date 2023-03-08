@@ -16,12 +16,12 @@ import { act } from 'react-dom/test-utils';
 import { MemoryRouter, Route } from 'react-router';
 import { ThemeProvider } from 'styled-components';
 
-import { AccountContext, ActionContext, themes } from '../../components';
-import * as messaging from '../../messaging';
-import { flushAllPromises } from '../../testHelpers';
-import { buildHierarchy } from '../../util/buildHierarchy';
-import AddressDropdown from './AddressDropdown';
-import Derive from '.';
+import { AccountContext, ActionContext, themes } from '../../components/index.js';
+import * as messaging from '../../messaging.js';
+import { flushAllPromises } from '../../testHelpers.js';
+import { buildHierarchy } from '../../util/buildHierarchy.js';
+import AddressDropdown from './AddressDropdown.js';
+import Derive from './index.js';
 
 const { configure, mount } = enzyme;
 

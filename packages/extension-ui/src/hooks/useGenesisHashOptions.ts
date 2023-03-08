@@ -3,9 +3,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { getAllMetadata } from '../messaging';
-import chains from '../util/chains';
-import useTranslation from './useTranslation';
+import { getAllMetadata } from '../messaging.js';
+import chains from '../util/chains.js';
+import useTranslation from './useTranslation.js';
 
 interface Option {
   text: string;

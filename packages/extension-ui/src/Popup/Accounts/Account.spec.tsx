@@ -15,10 +15,10 @@ import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 import { ThemeProvider } from 'styled-components';
 
-import { Theme, themes } from '../../components';
-import * as messaging from '../../messaging';
-import { flushAllPromises } from '../../testHelpers';
-import Account from './Account';
+import { Theme, themes } from '../../components/index.js';
+import * as messaging from '../../messaging.js';
+import { flushAllPromises } from '../../testHelpers.js';
+import Account from './Account.js';
 
 const { configure, mount } = enzyme;
 

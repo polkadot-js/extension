@@ -1,16 +1,16 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../types.js';
 
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { ActionBar, ActionContext, ActionText, Address, Button, Warning } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import { forgetAccount } from '../messaging';
-import { Header } from '../partials';
-import { styled } from '../styled';
+import { ActionBar, ActionContext, ActionText, Address, Button, Warning } from '../components/index.js';
+import useTranslation from '../hooks/useTranslation.js';
+import { forgetAccount } from '../messaging.js';
+import { Header } from '../partials/index.js';
+import { styled } from '../styled.js';
 
 interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;

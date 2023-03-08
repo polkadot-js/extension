@@ -5,8 +5,8 @@ import type { AccountWithChildren } from '@polkadot/extension-base/background/ty
 
 import React from 'react';
 
-import { styled } from '../../styled';
-import Account from './Account';
+import { styled } from '../../styled.js';
+import Account from './Account.js';
 
 interface Props extends AccountWithChildren {
   className?: string

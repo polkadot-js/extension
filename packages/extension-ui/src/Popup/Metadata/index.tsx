@@ -3,10 +3,10 @@
 
 import React, { useContext } from 'react';
 
-import { Loading, MetadataReqContext } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { Header } from '../../partials';
-import Request from './Request';
+import { Loading, MetadataReqContext } from '../../components/index.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { Header } from '../../partials/index.js';
+import Request from './Request.js';
 
 export default function Metadata (): React.ReactElement {
   const { t } = useTranslation();

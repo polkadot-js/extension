@@ -4,7 +4,7 @@
 import type { InjectedProvider, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { ProviderInterfaceEmitCb, ProviderInterfaceEmitted } from '@polkadot/rpc-provider/types';
 import type { AnyFunction } from '@polkadot/types/types';
-import type { SendRequest } from './types';
+import type { SendRequest } from './types.js';
 
 import EventEmitter from 'eventemitter3';
 

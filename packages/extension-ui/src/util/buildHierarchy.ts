@@ -3,7 +3,7 @@
 
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 
-import getNetworkMap from './getNetworkMap';
+import getNetworkMap from './getNetworkMap.js';
 
 type ChildFilter = (account: AccountJson) => AccountWithChildren;
 

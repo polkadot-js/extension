@@ -1,15 +1,15 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import type { ThemeProps } from '../../types.js';
 
 import { faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { Button, InputWithLabel } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { styled } from '../../styled';
+import { Button, InputWithLabel } from '../../components/index.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { styled } from '../../styled.js';
 
 interface Props extends ThemeProps{
   className?: string;

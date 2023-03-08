@@ -1,18 +1,18 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { InputFilter } from '@polkadot/extension-ui/components';
 
-import useTranslation from '../../hooks/useTranslation';
-import { getAuthList, removeAuthorization } from '../../messaging';
-import { Header } from '../../partials';
-import { styled } from '../../styled';
-import WebsiteEntry from './WebsiteEntry';
+import useTranslation from '../../hooks/useTranslation.js';
+import { getAuthList, removeAuthorization } from '../../messaging.js';
+import { Header } from '../../partials/index.js';
+import { styled } from '../../styled.js';
+import WebsiteEntry from './WebsiteEntry.js';
 
 interface Props extends ThemeProps {
   className?: string;

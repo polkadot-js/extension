@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Theme, ThemeProps } from '../types';
+import type { Theme, ThemeProps } from '../types.js';
 
 import { faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -9,12 +9,12 @@ import { ThemeContext } from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
-import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components';
-import useIsPopup from '../hooks/useIsPopup';
-import useTranslation from '../hooks/useTranslation';
-import { setNotification, windowOpen } from '../messaging';
-import { styled } from '../styled';
-import getLanguageOptions from '../util/getLanguageOptions';
+import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components/index.js';
+import useIsPopup from '../hooks/useIsPopup.js';
+import useTranslation from '../hooks/useTranslation.js';
+import { setNotification, windowOpen } from '../messaging.js';
+import { styled } from '../styled.js';
+import getLanguageOptions from '../util/getLanguageOptions.js';
 
 interface Option {
   text: string;

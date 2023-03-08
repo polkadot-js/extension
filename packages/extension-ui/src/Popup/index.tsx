@@ -11,28 +11,28 @@ import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import uiSettings from '@polkadot/ui-settings';
 
-import { ErrorBoundary, Loading } from '../components';
-import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
-import ToastProvider from '../components/Toast/ToastProvider';
-import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
-import { buildHierarchy } from '../util/buildHierarchy';
-import AccountManagement from './AuthManagement/AccountManagement';
-import Accounts from './Accounts';
-import AuthList from './AuthManagement';
-import Authorize from './Authorize';
-import CreateAccount from './CreateAccount';
-import Derive from './Derive';
-import Export from './Export';
-import ExportAll from './ExportAll';
-import Forget from './Forget';
-import ImportLedger from './ImportLedger';
-import ImportQr from './ImportQr';
-import ImportSeed from './ImportSeed';
-import Metadata from './Metadata';
-import PhishingDetected from './PhishingDetected';
-import RestoreJson from './RestoreJson';
-import Signing from './Signing';
-import Welcome from './Welcome';
+import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts.js';
+import { ErrorBoundary, Loading } from '../components/index.js';
+import ToastProvider from '../components/Toast/ToastProvider.js';
+import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging.js';
+import { buildHierarchy } from '../util/buildHierarchy.js';
+import Accounts from './Accounts/index.js';
+import AccountManagement from './AuthManagement/AccountManagement.js';
+import AuthList from './AuthManagement/index.js';
+import Authorize from './Authorize/index.js';
+import CreateAccount from './CreateAccount/index.js';
+import Derive from './Derive/index.js';
+import ImportSeed from './ImportSeed/index.js';
+import Metadata from './Metadata/index.js';
+import Signing from './Signing/index.js';
+import Export from './Export.js';
+import ExportAll from './ExportAll.js';
+import Forget from './Forget.js';
+import ImportLedger from './ImportLedger.js';
+import ImportQr from './ImportQr.js';
+import PhishingDetected from './PhishingDetected.js';
+import RestoreJson from './RestoreJson.js';
+import Welcome from './Welcome.js';
 
 const startSettings = uiSettings.get();
 
@@ -87,7 +87,7 @@ export default function Popup (): React.ReactElement {
         return;
       }
 
-      to === '..'
+      to === '../index.js'
         // if we can't go gack from there, go to the home
         ? history.length === 1
           ? history.push('/')

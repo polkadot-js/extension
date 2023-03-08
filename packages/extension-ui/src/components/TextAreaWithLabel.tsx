@@ -3,8 +3,8 @@
 
 import React, { useCallback } from 'react';
 
-import Label from './Label';
-import { TextArea } from './TextInputs';
+import Label from './Label.js';
+import { TextArea } from './TextInputs.js';
 
 interface Props {
   className?: string;

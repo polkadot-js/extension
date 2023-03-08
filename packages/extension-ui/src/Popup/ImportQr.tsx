@@ -5,11 +5,11 @@ import React, { useCallback, useContext, useState } from 'react';
 
 import { QrScanAddress } from '@polkadot/react-qr';
 
-import { ActionContext, Address, ButtonArea, NextStepButton, VerticalSpace } from '../components';
-import AccountNamePasswordCreation from '../components/AccountNamePasswordCreation';
-import useTranslation from '../hooks/useTranslation';
-import { createAccountExternal, createAccountSuri, createSeed } from '../messaging';
-import { Header, Name } from '../partials';
+import AccountNamePasswordCreation from '../components/AccountNamePasswordCreation.js';
+import { ActionContext, Address, ButtonArea, NextStepButton, VerticalSpace } from '../components/index.js';
+import useTranslation from '../hooks/useTranslation.js';
+import { createAccountExternal, createAccountSuri, createSeed } from '../messaging.js';
+import { Header, Name } from '../partials/index.js';
 
 interface QrAccount {
   content: string;

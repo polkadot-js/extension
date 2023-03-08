@@ -3,16 +3,16 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { ActionContext, Address, Dropdown, Loading } from '../../components';
-import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
-import useMetadata from '../../hooks/useMetadata';
-import useTranslation from '../../hooks/useTranslation';
-import { createAccountSuri, createSeed, validateSeed } from '../../messaging';
-import { HeaderWithSteps } from '../../partials';
-import { styled } from '../../styled';
-import { DEFAULT_TYPE } from '../../util/defaultType';
-import Mnemonic from './Mnemonic';
+import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation.js';
+import { ActionContext, Address, Dropdown, Loading } from '../../components/index.js';
+import useGenesisHashOptions from '../../hooks/useGenesisHashOptions.js';
+import useMetadata from '../../hooks/useMetadata.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { createAccountSuri, createSeed, validateSeed } from '../../messaging.js';
+import { HeaderWithSteps } from '../../partials/index.js';
+import { styled } from '../../styled.js';
+import { DEFAULT_TYPE } from '../../util/defaultType.js';
+import Mnemonic from './Mnemonic.js';
 
 interface Props {
   className?: string;

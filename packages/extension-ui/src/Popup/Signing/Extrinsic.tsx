@@ -10,9 +10,9 @@ import React, { useMemo, useRef } from 'react';
 
 import { BN, bnToBn, formatNumber } from '@polkadot/util';
 
-import { Table } from '../../components';
-import useMetadata from '../../hooks/useMetadata';
-import useTranslation from '../../hooks/useTranslation';
+import { Table } from '../../components/index.js';
+import useMetadata from '../../hooks/useMetadata.js';
+import useTranslation from '../../hooks/useTranslation.js';
 
 interface Decoded {
   args: AnyJson | null;

@@ -10,7 +10,7 @@ import Web3 from 'web3';
 
 import { assert } from '@polkadot/util';
 
-export { packageInfo } from './packageInfo';
+export { packageInfo } from './packageInfo.js';
 
 interface RequestArguments {
   method: string;

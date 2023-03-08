@@ -7,14 +7,14 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 
 import settings from '@polkadot/ui-settings';
 
-import { ActionContext, Address, Button, ButtonArea, Dropdown, VerticalSpace, Warning } from '../components';
-import { useLedger } from '../hooks/useLedger';
-import useTranslation from '../hooks/useTranslation';
-import { createAccountHardware } from '../messaging';
-import { Header, Name } from '../partials';
-import { styled } from '../styled';
-import { ThemeProps } from '../types';
-import ledgerChains from '../util/legerChains';
+import { ActionContext, Address, Button, ButtonArea, Dropdown, VerticalSpace, Warning } from '../components/index.js';
+import { useLedger } from '../hooks/useLedger.js';
+import useTranslation from '../hooks/useTranslation.js';
+import { createAccountHardware } from '../messaging.js';
+import { Header, Name } from '../partials/index.js';
+import { styled } from '../styled.js';
+import { ThemeProps } from '../types.js';
+import ledgerChains from '../util/legerChains.js';
 
 interface AccOption {
   text: string;

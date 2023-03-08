@@ -5,11 +5,11 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
 
-import { ActionBar, ActionContext, Button, ButtonArea, Checkbox, Link } from '../../../components';
-import useTranslation from '../../../hooks/useTranslation';
-import { approveSignPassword, cancelSignRequest, isSignLocked } from '../../../messaging';
-import { styled } from '../../../styled';
-import Unlock from '../Unlock';
+import { ActionBar, ActionContext, Button, ButtonArea, Checkbox, Link } from '../../../components/index.js';
+import useTranslation from '../../../hooks/useTranslation.js';
+import { approveSignPassword, cancelSignRequest, isSignLocked } from '../../../messaging.js';
+import { styled } from '../../../styled.js';
+import Unlock from '../Unlock.js';
 
 interface Props {
   buttonText: string;

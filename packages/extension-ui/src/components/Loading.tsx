@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-import useTranslation from '../hooks/useTranslation';
+import useTranslation from '../hooks/useTranslation.js';
 
 interface Props {
   children?: React.ReactNode;

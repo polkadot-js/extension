@@ -3,9 +3,9 @@
 
 import type { MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, RequestTypes, ResponseTypes, SubscriptionMessageTypes, TransportRequestMessage, TransportResponseMessage } from '../background/types';
 
-import { MESSAGE_ORIGIN_PAGE } from '../defaults';
-import { getId } from '../utils/getId';
-import Injected from './Injected';
+import { MESSAGE_ORIGIN_PAGE } from '../defaults.js';
+import { getId } from '../utils/getId.js';
+import Injected from './Injected.js';
 
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader

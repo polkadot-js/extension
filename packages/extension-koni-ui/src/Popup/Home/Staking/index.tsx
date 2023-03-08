@@ -125,7 +125,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <SwStakingItem
         className='staking-item'
         decimals={item.decimals}
-        key={item.staking.chain}
+        key={`${item.staking.chain}-${item.staking.type}`}
         onClickItem={onClickItem}
         onClickRightIcon={onClickRightIcon}
         priceMap={priceMap}

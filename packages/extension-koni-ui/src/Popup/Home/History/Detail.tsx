@@ -1,16 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AmountData, ExtrinsicStatus, ExtrinsicType, TransactionAdditionalInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicStatus, ExtrinsicType, TransactionAdditionalInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainName } from '@subwallet/extension-base/services/chain-service/utils';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/Popup/Home/History/index';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
+import { formatAmount } from '@subwallet/extension-koni-ui/util/amount';
 import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
 import { Button, Icon, Logo, SwIconProps } from '@subwallet/react-ui';
-import { balanceFormatter, formatNumber } from '@subwallet/react-ui/es/_util/number';
 import SwModal from '@subwallet/react-ui/es/sw-modal';
 import { ArrowSquareUpRight, CheckCircle, ProhibitInset, Spinner, StopCircle, XCircle } from 'phosphor-react';
 import React, { useMemo } from 'react';
@@ -218,17 +218,6 @@ function DisplayTypeItem ({ label, typeName }: DisplayTypeInfoItem): React.React
       </div>
     </div>
   );
-}
-
-function formatAmount (amountData?: AmountData): string {
-  if (!amountData) {
-    return '';
-  }
-
-  const { decimals, symbol, value } = amountData;
-  const displayValue = formatNumber(value, decimals, balanceFormatter);
-
-  return `${displayValue} ${symbol}`;
 }
 
 function Component ({ className = '', data, id, onCancel }: Props): React.ReactElement<Props> {

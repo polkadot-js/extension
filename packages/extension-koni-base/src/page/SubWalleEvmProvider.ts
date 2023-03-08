@@ -4,7 +4,7 @@
 import type { EvmProvider } from '@subwallet/extension-inject/types';
 
 import SafeEventEmitter from '@metamask/safe-event-emitter';
-import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
+import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { SendRequest } from '@subwallet/extension-base/page/types';
 import { JsonRpcRequest, JsonRpcResponse, JsonRpcSuccess } from 'json-rpc-engine';
 import { RequestArguments } from 'web3-core';
@@ -82,10 +82,10 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
                 .then((accounts) => {
                   // @ts-ignore
                   resolve(accounts);
-                }).catch((e: EvmRpcError) => {
+                }).catch((e: EvmProviderError) => {
                   reject(e);
                 });
-            }).catch((e: EvmRpcError) => {
+            }).catch((e: EvmProviderError) => {
               reject(e);
             });
         });
@@ -96,7 +96,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
             .then((result) => {
               resolve(result as T);
             })
-            .catch((e: EvmRpcError) => {
+            .catch((e: EvmProviderError) => {
               reject(e);
             });
         });
@@ -149,7 +149,7 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
         // @ts-ignore
         callback(null, { result });
       })
-      .catch((e: EvmRpcError) => {
+      .catch((e: EvmProviderError) => {
         callback(e);
       });
   }

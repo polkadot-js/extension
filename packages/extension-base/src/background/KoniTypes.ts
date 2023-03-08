@@ -422,17 +422,44 @@ export interface RandomTestRequest {
   end: number;
 }
 
-// TODO: support more history types
-export enum TxHistoryType {
+export enum TransactionDirection {
   SEND = 'send',
   RECEIVED = 'received'
+}
+
+export enum ChainType {
+  EVM = 'evm',
+  SUBSTRATE = 'substrate'
+}
+
+export enum ExtrinsicType {
+  TRANSFER_BALANCE = 'transfer.balance',
+  TRANSFER_TOKEN = 'transfer.token',
+  TRANSFER_XCM = 'transfer.xcm',
+  SEND_NFT = 'send_nft',
+  CROWDLOAN = 'crowdloan',
+  STAKING_STAKE = 'staking.stake',
+  STAKING_UNSTAKE = 'staking.unstake',
+  STAKING_BOND = 'staking.bond',
+  STAKING_UNBOND = 'staking.unbond',
+  STAKING_CLAIM_REWARD = 'staking.claim_reward',
+  STAKING_WITHDRAW = 'staking.withdraw',
+  STAKING_COMPOUNDING = 'staking.compounding',
+  EVM_EXECUTE = 'evm.smart_contract',
+}
+
+export enum ExtrinsicStatus {
+  SUCCESS = 'success',
+  FAIL = 'fail',
+  PROCESSING = 'processing',
+  UNKNOWN = 'unknown'
 }
 
 export interface TxHistoryItem {
   time: number | string;
   networkKey: string;
   isSuccess: boolean;
-  action: TxHistoryType;
+  action: TransactionDirection;
   extrinsicHash: string;
 
   change?: string;
@@ -449,47 +476,78 @@ export interface TransactionHistoryItemJson {
   total: number
 }
 
-export interface HistoryItemBase<T = 'transfer' | 'nft' | 'staking' | 'claim_reward' | 'crowdloan'> {
-  type: T,
+export interface AmountData {
+  value: string,
+  decimals: number,
+  symbol: string
+}
+
+export interface XCMTransactionAdditionalInfo {
+  destinationChain: string,
+  fee: AmountData
+}
+
+export interface NFTTransactionAdditionalInfo {
+  collectionName: string
+}
+
+export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends ExtrinsicType.TRANSFER_XCM
+  ? XCMTransactionAdditionalInfo
+  : T extends ExtrinsicType.SEND_NFT
+    ? NFTTransactionAdditionalInfo
+    : undefined;
+export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType.TRANSFER_BALANCE> {
+  origin?: string, // 'app' or history source
+  callhash?: string,
+  signature?: string,
   chain: string,
-  senderAddress: string,
-  senderName?: string,
-  recipientAddress: string,
-  recipientName?: string,
-  status: 'completed' | 'processing' | 'failed' | 'cancelled',
+  chainType?: ChainType,
+  chainName?: string,
+  direction: TransactionDirection,
+  type: ExtrinsicType,
+  from: string,
+  fromName?: string,
+  to: string,
+  toName?: string,
+  address: string,
+  status: ExtrinsicStatus,
   extrinsicHash: string,
   time: number,
-  chainFee: string,
-  symbol: string,
-  amount: string,
+  data?: string,
+  blockNumber: number,
+  blockHash: string,
+  amount?: AmountData,
+  tip?: AmountData,
+  fee?: AmountData,
+  explorerUrl?: string,
+
+  additionalInfo?: TransactionAdditionalInfo<ET>
 }
 
-export interface TransferHistoryItem extends HistoryItemBase<'transfer'> {
-  isReceived?: boolean,
-  destinationChainInfo?: {
-    slug: string,
-    fee: string,
-    symbol: string,
-  }
+export interface SWError extends Error {
+  code?: number;
+  errorType: string;
+  data?: unknown;
 }
 
-export interface NftHistoryItem extends HistoryItemBase<'nft'> {
-  collectionName: string,
+export enum TransactionErrorType {
+  NOT_ENOUGH_BALANCE = 'NOT_ENOUGH_BALANCE',
+  CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
+  INVALID_PARAMS = 'INVALID_PARAMS',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
+  DUPLICATE_TRANSACTION = 'DUPLICATE_TRANSACTION',
+  UNABLE_TO_SIGN = 'UNABLE_TO_SIGN',
+  USER_REJECT_SIGN = 'USER_REJECT_SIGN',
+  UNABLE_TO_SEND = 'UNABLE_TO_SEND',
+  SEND_TRANSACTION_FAILED = 'SEND_TRANSACTION_FAILED',
 }
 
-export interface StakingHistoryItem extends HistoryItemBase<'staking'> {
-  stakingType: 'stake' | 'unstake' | 'withdraw' | 'compounding',
+export enum ProviderErrorType {
+  CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
+  INVALID_PARAMS = 'INVALID_PARAMS',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
+  USER_REJECT = 'USER_REJECT',
 }
-
-export type ClaimRewardHistoryItem = HistoryItemBase<'claim_reward'>;
-
-export type CrowdloanHistoryItem = HistoryItemBase<'crowdloan'>;
-
-export type HistoryItem = TransferHistoryItem
-| NftHistoryItem
-| StakingHistoryItem
-| ClaimRewardHistoryItem
-| CrowdloanHistoryItem;
 
 export interface RequestTransactionHistoryAdd {
   address: string;
@@ -994,16 +1052,15 @@ export interface ResponseEvmProviderSend {
   result?: JsonRpcResponse;
 }
 
-export interface SubWalletProviderErrorInterface extends Error{
-  code?: number;
-  data?: unknown;
+export enum EvmProviderErrorType {
+  USER_REJECTED_REQUEST = 'USER_REJECTED_REQUEST',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  UNSUPPORTED_METHOD = 'UNSUPPORTED_METHOD',
+  DISCONNECTED = 'DISCONNECTED',
+  CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
+  INVALID_PARAMS = 'INVALID_PARAMS',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
 }
-
-export interface EvmProviderRpcErrorInterface extends SubWalletProviderErrorInterface{
-  code: number;
-}
-
-export type EvmRpcErrorHelperMap = Record<'USER_REJECTED_REQUEST'| 'UNAUTHORIZED'| 'UNSUPPORTED_METHOD'| 'DISCONNECTED'| 'CHAIN_DISCONNECTED'| 'INVALID_PARAMS'| 'INTERNAL_ERROR', [number, string]>;
 
 export interface EvmSendTransactionParams {
   from: string;
@@ -1694,8 +1751,8 @@ export interface KoniRequestSignatures {
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
 
   // Subscription
-  'pri(transaction.history.getSubscription)': [null, TxHistoryItem[], TxHistoryItem[]];
-  'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TxHistoryItem[]];
+  'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];
+  // 'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItem[]];
   'pri(transfer.checkReferenceCount)': [RequestTransferCheckReferenceCount, boolean];
   'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, SupportTransferResponse];
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];

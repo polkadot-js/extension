@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
-import { EvmRpcError } from '@subwallet/extension-base/background/errors/EvmRpcError';
-import { ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
+import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
+import { ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, EvmProviderErrorType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
 import { Resolver } from '@subwallet/extension-base/background/types';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
@@ -69,7 +69,7 @@ export default class EvmRequestHandler {
     const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));
 
     if (duplicated) {
-      throw new EvmRpcError('INVALID_PARAMS', 'Duplicate request information');
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Duplicate request information');
     }
 
     confirmationType[id] = {
@@ -127,7 +127,7 @@ export default class EvmRequestHandler {
       case 'eth_signTypedData_v4':
         return await pair.evmSigner.signMessage(payload, type);
       default:
-        throw new EvmRpcError('INVALID_PARAMS', 'Not found sign method');
+        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found sign method');
     }
   }
 

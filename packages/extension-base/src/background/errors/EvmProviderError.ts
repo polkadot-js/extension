@@ -4,24 +4,45 @@
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { EvmProviderErrorType } from '@subwallet/extension-base/background/KoniTypes';
 
-const EVM_PROVIDER_RPC_ERRORS_MAP = {
-  [EvmProviderErrorType.USER_REJECTED_REQUEST]: [4001, 'User Rejected Request'],
-  [EvmProviderErrorType.UNAUTHORIZED]: [4100, 'Unauthorized'],
-  [EvmProviderErrorType.UNSUPPORTED_METHOD]: [4200, 'Unsupported Method'],
-  [EvmProviderErrorType.DISCONNECTED]: [4900, 'Disconnected'],
-  [EvmProviderErrorType.CHAIN_DISCONNECTED]: [4901, 'Chain Disconnected'],
-  [EvmProviderErrorType.INVALID_PARAMS]: [-32602, 'Invalid Params'],
-  [EvmProviderErrorType.INTERNAL_ERROR]: [-32603, 'Internal Error']
-} as Record<EvmProviderErrorType, [number, string]>;
+const defaultErrorMap: Record<EvmProviderErrorType, { message: string, code?: number }> = {
+  USER_REJECTED_REQUEST: {
+    message: 'User Rejected Request',
+    code: 4001
+  },
+  UNAUTHORIZED: {
+    message: 'Unauthorized',
+    code: 4100
+  },
+  UNSUPPORTED_METHOD: {
+    message: 'Unsupported Method',
+    code: 4200
+  },
+  DISCONNECTED: {
+    message: 'Disconnected',
+    code: 4900
+  },
+  CHAIN_DISCONNECTED: {
+    message: 'Chain Disconnected',
+    code: 4901
+  },
+  INVALID_PARAMS: {
+    message: 'Invalid Params',
+    code: -32602
+  },
+  INTERNAL_ERROR: {
+    message: 'Internal Error',
+    code: -32603
+  }
+};
 
 export class EvmProviderError extends SWError {
   override errorType: EvmProviderErrorType;
 
-  constructor (errorType: EvmProviderErrorType, message?: string, data?: unknown) {
-    const [code, prefix] = EVM_PROVIDER_RPC_ERRORS_MAP[errorType];
-    const errMessage = message ? `${prefix}: ${message}` : prefix;
+  constructor (errorType: EvmProviderErrorType, errMessage?: string, data?: unknown) {
+    const { code, message } = defaultErrorMap[errorType];
+    const finalMessage = errMessage ? `${message}: ${errMessage}` : message;
 
-    super(errorType, errMessage, code, data);
+    super(errorType, finalMessage, code, data);
     this.errorType = errorType;
   }
 }

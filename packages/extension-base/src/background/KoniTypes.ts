@@ -449,9 +449,10 @@ export enum ExtrinsicType {
 }
 
 export enum ExtrinsicStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
   SUCCESS = 'success',
   FAIL = 'fail',
-  PROCESSING = 'processing',
   UNKNOWN = 'unknown'
 }
 
@@ -537,7 +538,7 @@ export enum TransactionErrorType {
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   DUPLICATE_TRANSACTION = 'DUPLICATE_TRANSACTION',
   UNABLE_TO_SIGN = 'UNABLE_TO_SIGN',
-  USER_REJECT_SIGN = 'USER_REJECT_SIGN',
+  USER_REJECT_REQUEST = 'USER_REJECT_REQUEST',
   UNABLE_TO_SEND = 'UNABLE_TO_SEND',
   SEND_TRANSACTION_FAILED = 'SEND_TRANSACTION_FAILED',
 }

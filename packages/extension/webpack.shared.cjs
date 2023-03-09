@@ -96,6 +96,9 @@ module.exports = (entry, alias = {}) => ({
       ...alias,
       [`@polkadot/${p}`]: path.resolve(__dirname, `../${p}/src`)
     }), alias),
+    extensionAlias: {
+      '.js': ['.ts', '.tsx', '.js']
+    },
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     fallback: {
       crypto: require.resolve('crypto-browserify'),

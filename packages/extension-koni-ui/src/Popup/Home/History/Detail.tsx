@@ -139,8 +139,6 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
 
   const transactionType = data.type;
 
-  console.log('data', data);
-
   return (
     <SwModal
       className={className}
@@ -271,6 +269,32 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
             suffix={fee?.symbol || undefined}
             value={fee?.value || '0'}
           />
+
+          {(() => {
+            if (isTypeTransfer(transactionType) && data.additionalInfo && transactionType === ExtrinsicType.TRANSFER_XCM) {
+              const xcmInfo = data.additionalInfo as TransactionAdditionalInfo<ExtrinsicType.TRANSFER_XCM>;
+
+              return (
+                <>
+                  <MetaInfo.Number
+                    decimals={fee?.decimals || undefined}
+                    label={t('Origin Chain fee')}
+                    suffix={fee?.symbol || undefined}
+                    value={fee?.value || '0'}
+                  />
+
+                  <MetaInfo.Number
+                    decimals={xcmInfo.fee?.decimals || undefined}
+                    label={t('Destination fee')}
+                    suffix={xcmInfo.fee?.symbol || undefined}
+                    value={xcmInfo.fee?.value || '0'}
+                  />
+                </>
+              );
+            }
+
+            return null;
+          })()}
         </MetaInfo>
       </div>
     </SwModal>

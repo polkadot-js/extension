@@ -1,4 +1,4 @@
-     594	Jaco                          	Use .js imports in src (#1224)
+     595	Jaco                          	Align tsconfig to allow moduleResolution: nodenext (#1225)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

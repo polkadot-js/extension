@@ -6,7 +6,7 @@ import type { ProviderInterfaceEmitCb, ProviderInterfaceEmitted } from '@polkado
 import type { AnyFunction } from '@polkadot/types/types';
 import type { SendRequest } from './types.js';
 
-import EventEmitter from 'eventemitter3';
+import { EventEmitter } from 'eventemitter3';
 
 import { isUndefined, logger } from '@polkadot/util';
 

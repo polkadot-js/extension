@@ -7,9 +7,8 @@ import { t } from 'i18next';
 import React, { useCallback } from 'react';
 import { Trans } from 'react-i18next';
 
-import { Button, Warning } from '@polkadot/extension-ui/components';
-import { deleteAuthRequest } from '@polkadot/extension-ui/messaging';
-
+import { Button, Warning } from '../../components/index.js';
+import { deleteAuthRequest } from '../../messaging.js';
 import { styled } from '../../styled.js';
 
 interface Props extends ThemeProps {

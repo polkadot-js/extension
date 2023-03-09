@@ -6,8 +6,8 @@ import type { ThemeProps } from '../../types.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { InputFilter } from '@polkadot/extension-ui/components';
 
+import InputFilter from '../../components/InputFilter.js';
 import useTranslation from '../../hooks/useTranslation.js';
 import { getAuthList, removeAuthorization } from '../../messaging.js';
 import { Header } from '../../partials/index.js';

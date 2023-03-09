@@ -8,7 +8,7 @@ import '@polkadot/extension-mocks/chrome';
 import type { ReactWrapper } from 'enzyme';
 import type { AccountJson } from '@polkadot/extension-base/background/types';
 import type { IconTheme } from '@polkadot/react-identicon/types';
-import type { Props as AddressComponentProps } from './Address';
+import type { Props as AddressComponentProps } from './Address.js';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import enzyme from 'enzyme';

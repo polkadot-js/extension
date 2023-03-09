@@ -7,9 +7,9 @@ import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 import { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
-import { RemoveAuth } from '@polkadot/extension-ui/components';
 import { useTranslation } from '@polkadot/extension-ui/components/translate';
 
+import RemoveAuth from '../../components/RemoveAuth.js';
 import { styled } from '../../styled.js';
 
 interface Props extends ThemeProps {

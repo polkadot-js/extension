@@ -132,16 +132,17 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
       commission: 0,
       expectedReturn: 0,
       address: dappAddress,
-      totalStake: totalStake / 10 ** decimals,
-      ownStake: 0,
-      otherStake: totalStake / 10 ** decimals,
+      totalStake: (totalStake / 10 ** decimals).toString(),
+      ownStake: '0',
+      otherStake: (totalStake / 10 ** decimals).toString(),
       nominatorCount: stakerCount,
       blocked: false,
       isVerified: false,
-      minBond: (minStake / 10 ** decimals),
+      minBond: (minStake / 10 ** decimals).toString(),
       isNominated: stakedDappsList.includes(dappAddress.toLowerCase()),
       icon: dappIcon,
-      identity: dappName
+      identity: dappName,
+      chain: networkKey
     });
   }));
 

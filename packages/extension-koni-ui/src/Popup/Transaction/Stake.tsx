@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import PoolSelector from '@subwallet/extension-koni-ui/components/Field/PoolSelector';
@@ -43,15 +44,27 @@ const Component: React.FC<Props> = (props: Props) => {
     from: transactionContext.from,
     value: '0'
   };
+
   const { inactiveModal } = useContext(ModalContext);
 
   useEffect(() => {
-    transactionContext.setTransactionType('stake');
+    transactionContext.setTransactionType(ExtrinsicType.STAKING_STAKE);
+    transactionContext.setShowRightBtn(true);
   }, [transactionContext]);
 
-  const onFieldsChange = useCallback(({ from }: Partial<StakeFromProps>, values: StakeFromProps) => {
+  const onFieldsChange = useCallback(({ from, token }: Partial<StakeFromProps>, values: StakeFromProps) => {
     // TODO: field change
-  }, []);
+    if (from) {
+      transactionContext.setFrom(from);
+    }
+
+    if (token) {
+      const chain = token.split('-')[0];
+
+      transactionContext.setChain(chain);
+      form.setFieldValue('token', token);
+    }
+  }, [form, transactionContext]);
 
   const tokenList = useMemo<TokenItemType[]>(() => (
     Object.values(assetRegistry).map(({ name, originChain, slug, symbol }) => ({ name, slug, originChain, symbol }))
@@ -73,8 +86,9 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <MetaInfo.Default
           label={t('Estimated earnings:')}
-          value={'15% / year'}
-        />
+        >
+          {'15% / year'}
+        </MetaInfo.Default>
 
         <MetaInfo.Number
           label={t('Minimum active:')}
@@ -128,7 +142,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 </Form.Item>}
 
-                <Form.Item name={'value'}>
+                <Form.Item name={'value'} rules={[{ required: true }]} hideError>
                   <AmountInput
                     decimals={10}
                     maxValue={'10000'}

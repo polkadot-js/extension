@@ -39,7 +39,8 @@ export interface TransactionContextProps extends TransactionFormBaseProps {
   setChain: Dispatch<SetStateAction<string>>,
   freeBalance: string | undefined,
   onDone: (extrinsicHash: string) => void,
-  onClickRightBtn: () => void
+  onClickRightBtn: () => void,
+  setShowRightBtn: Dispatch<SetStateAction<boolean>>
 }
 
 export const TransactionContext = React.createContext<TransactionContextProps>({
@@ -57,7 +58,9 @@ export const TransactionContext = React.createContext<TransactionContextProps>({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   onDone: (extrinsicHash) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onClickRightBtn: () => {}
+  onClickRightBtn: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setShowRightBtn: (value) => {}
 });
 
 function Component ({ className }: Props) {
@@ -69,11 +72,13 @@ function Component ({ className }: Props) {
   const [chain, setChain] = useState('');
   const [transactionType, setTransactionType] = useState<ExtrinsicType>(ExtrinsicType.TRANSFER_BALANCE);
   const [freeBalance, setFreeBalance] = useState<string | undefined>();
+  const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
   const titleMap = useMemo<Record<string, string>>(() => ({
-    transfer: t('Transfer'),
-    stake: t('Add to Bond')
+    [ExtrinsicType.TRANSFER_BALANCE]: t('Transfer'),
+    [ExtrinsicType.STAKING_STAKE]: t('Add to Bond'),
+    [ExtrinsicType.STAKING_UNSTAKE]: t('Remove Bond')
   }), [t]);
-  const { goHome } = useDefaultNavigate();
+  const { goBack } = useDefaultNavigate();
 
   useEffect(() => {
     let cancel = false;
@@ -102,30 +107,32 @@ function Component ({ className }: Props) {
   );
 
   const onClickRightBtn = useCallback(() => {
-    if (transactionType === 'stake') {
+    if (transactionType === ExtrinsicType.STAKING_STAKE) {
       activeModal(StakingNetworkDetailModalId);
     }
   }, [activeModal, transactionType]);
 
   const subHeaderButton: ButtonProps[] = useMemo(() => {
-    return [
-      {
-        icon: <Icon phosphorIcon={Info} />,
-        onClick: () => onClickRightBtn()
-      }
-    ];
-  }, [onClickRightBtn]);
+    return showRightBtn
+      ? [
+        {
+          icon: <Icon phosphorIcon={Info} />,
+          onClick: () => onClickRightBtn()
+        }
+      ]
+      : [];
+  }, [onClickRightBtn, showRightBtn]);
 
   return (
     <Layout.Home showTabBar={false}>
-      <TransactionContext.Provider value={{ transactionType, from, setFrom, freeBalance, chain, setChain, setTransactionType, onDone, onClickRightBtn }}>
+      <TransactionContext.Provider value={{ transactionType, from, setFrom, freeBalance, chain, setChain, setTransactionType, onDone, onClickRightBtn, setShowRightBtn }}>
         <PageWrapper>
           <div className={CN(className, 'transaction-wrapper')}>
             <SwSubHeader
               background={'transparent'}
               center
               className={'transaction-header'}
-              onBack={goHome}
+              onBack={goBack}
               rightButtons={subHeaderButton}
               showBackButton
               title={titleMap[transactionType]}

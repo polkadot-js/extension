@@ -7,6 +7,7 @@ import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { Alarm, ArrowCircleDown, IconProps, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps
@@ -25,13 +26,13 @@ const ACTION_LIST: ActionListType[] = [
     backgroundIconColor: 'green-6',
     icon: PlusCircle,
     label: 'Stake more',
-    value: '/'
+    value: '/transaction/stake'
   },
   {
     backgroundIconColor: 'magenta-6',
     icon: MinusCircle,
     label: 'Unstake funds',
-    value: '/'
+    value: '/transaction/unstake'
   },
   {
     backgroundIconColor: 'geekblue-6',
@@ -56,6 +57,7 @@ const ACTION_LIST: ActionListType[] = [
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { inactiveModal } = useContext(ModalContext);
+  const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
 
@@ -72,6 +74,8 @@ const Component: React.FC<Props> = (props: Props) => {
     >
       {ACTION_LIST.map((item) => (
         <SettingItem
+          // eslint-disable-next-line react/jsx-no-bind
+          onPressItem={() => navigate(item.value)}
           className='action-more-item'
           key={item.label}
           leftItemIcon={<BackgroundIcon

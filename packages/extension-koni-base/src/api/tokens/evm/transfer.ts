@@ -3,7 +3,7 @@
 
 import Common from '@ethereumjs/common';
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
+import { ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransactionResponse, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { _BALANCE_PARSING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -23,7 +23,7 @@ interface HandleTransferBalanceResultProps {
   changeValue: string;
   networkKey: string;
   receipt: TransactionReceipt;
-  response: BasicTxResponse;
+  response: TransactionResponse;
   updateState?: (promise: Partial<ExternalRequestPromise>) => void;
 }
 
@@ -54,7 +54,7 @@ export const handleTransferBalanceResult = ({ callback,
 
 interface HandleTransferProps {
   address: string;
-  callback: (data: BasicTxResponse) => void;
+  callback: (data: TransactionResponse) => void;
   changeValue: string;
   chainInfo: _ChainInfo;
   transactionObject: TransactionConfig;
@@ -107,7 +107,7 @@ export async function handleTransfer ({ address,
 
   const callHash = pair.evmSigner.signTransaction(tx);
 
-  const response: BasicTxResponse = {
+  const response: TransactionResponse = {
     errors: []
   };
 
@@ -129,7 +129,7 @@ export async function handleTransfer ({ address,
       }).catch((e) => {
         response.status = false;
         response.errors?.push({
-          code: TransferErrorCode.TRANSFER_ERROR,
+          errorType: TransferTxErrorType.TRANSFER_ERROR,
           message: (e as Error).message
         });
         callback(response);
@@ -138,7 +138,7 @@ export async function handleTransfer ({ address,
     response.status = false;
     response.txError = true;
     response.errors?.push({
-      code: TransferErrorCode.TRANSFER_ERROR,
+      errorType: TransferTxErrorType.TRANSFER_ERROR,
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       message: error.message
@@ -174,7 +174,7 @@ export async function getEVMTransactionObject (
 
 interface EVMTransferProps {
   from: string;
-  callback: (data: BasicTxResponse) => void;
+  callback: (data: TransactionResponse) => void;
   chainInfo: _ChainInfo;
   to: string;
   transferAll: boolean;
@@ -255,7 +255,7 @@ export async function getERC20TransactionObject (
 
 interface ERC20TransferProps {
   assetAddress: string;
-  callback: (data: BasicTxResponse) => void;
+  callback: (data: TransactionResponse) => void;
   from: string;
   chainInfo: _ChainInfo;
   to: string;

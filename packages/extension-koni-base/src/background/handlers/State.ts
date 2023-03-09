@@ -6,7 +6,7 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ChainType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TransactionErrorType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
@@ -19,7 +19,7 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
-import { SWTransactionInput, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
@@ -153,8 +153,8 @@ export default class KoniState {
   private ready = false;
   private readonly settingService: SettingService;
   private readonly requestService: RequestService;
-  private readonly transactionService: TransactionService;
 
+  readonly transactionService: TransactionService;
   readonly historyService: HistoryService;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1798,13 +1798,13 @@ export default class KoniState {
 
       // Mapping error for evmProvider
       transactionEmitter.on('error', (rs: TransactionEventResponse) => {
-        let evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Internal error');
+        let evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR);
 
-        const errorType = rs.error?.errorType || TransactionErrorType.INTERNAL_ERROR;
+        const errorType = (rs.error?.errorType || BasicTxErrorType.INTERNAL_ERROR);
 
-        if ([TransactionErrorType.USER_REJECT_REQUEST, TransactionErrorType.UNABLE_TO_SIGN].includes(errorType)) {
-          evmProviderError = new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST, 'User reject request');
-        } else if (errorType === TransactionErrorType.UNABLE_TO_SEND) {
+        if (errorType === BasicTxErrorType.USER_REJECT_REQUEST || errorType === BasicTxErrorType.UNABLE_TO_SIGN) {
+          evmProviderError = new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
+        } else if (errorType === BasicTxErrorType.UNABLE_TO_SEND) {
           evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, rs.error?.message);
         }
 
@@ -1905,10 +1905,5 @@ export default class KoniState {
 
   public async getExtraDelegationInfo (networkKey: string, address: string) {
     return await this.dbService.getExtraDelegationInfo(networkKey, address);
-  }
-
-  // New Transaction Handler
-  public async addTransaction (transaction: SWTransactionInput) {
-    return await this.transactionService.addTransaction(transaction);
   }
 }

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -29,8 +30,8 @@ export interface TransactionFormBaseProps {
 }
 
 export interface TransactionContextProps extends TransactionFormBaseProps {
-  transactionType: string,
-  setTransactionType: Dispatch<SetStateAction<string>>,
+  transactionType: ExtrinsicType,
+  setTransactionType: Dispatch<SetStateAction<ExtrinsicType>>,
   setFrom: Dispatch<SetStateAction<string>>,
   setChain: Dispatch<SetStateAction<string>>,
   freeBalance: string | undefined
@@ -38,7 +39,7 @@ export interface TransactionContextProps extends TransactionFormBaseProps {
 }
 
 export const TransactionContext = React.createContext<TransactionContextProps>({
-  transactionType: 'transfer',
+  transactionType: ExtrinsicType.TRANSFER_BALANCE,
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   setTransactionType: (value) => {},
   from: '',
@@ -59,7 +60,7 @@ function Component ({ className }: Props) {
   const { currentAccount, isAllAccount } = useSelector((root: RootState) => root.accountState);
   const [from, setFrom] = useState(!isAllAccount ? currentAccount?.address || '' : '');
   const [chain, setChain] = useState('');
-  const [transactionType, setTransactionType] = useState('transfer');
+  const [transactionType, setTransactionType] = useState<ExtrinsicType>(ExtrinsicType.TRANSFER_BALANCE);
   const [freeBalance, setFreeBalance] = useState<string | undefined>();
   const titleMap = useMemo<Record<string, string>>(() => ({
     transfer: t('Transfer')

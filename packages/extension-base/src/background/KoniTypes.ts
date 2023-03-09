@@ -1355,15 +1355,7 @@ export interface RequestCheckCrossChainTransfer extends BaseRequestSign {
 
 export type RequestCrossChainTransfer = InternalRequestSign<RequestCheckCrossChainTransfer>;
 
-export interface ResponseCheckCrossChainTransfer {
-  errors?: TransactionError[],
-  feeString?: string,
-  estimatedFee: string,
-  feeSymbol: string
-}
-
 /// Stake
-
 // Bonding
 export interface NominatorInfo {
   chain: string,
@@ -1743,7 +1735,7 @@ export interface KoniRequestSignatures {
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ValidateTransactionResponse];
   'pri(accounts.transfer)': [RequestTransfer, TransactionResponse];
 
-  'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
+  'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ValidateTransactionResponse];
   'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, TransactionResponse];
 
   // Confirmation Queues

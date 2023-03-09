@@ -6,7 +6,6 @@ import { TransactionResponse } from '@subwallet/extension-base/background/KoniTy
 import { _XCM_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isNativeToken, _isXcmPathSupported } from '@subwallet/extension-base/services/chain-service/utils';
-import { getUnsupportedResponse } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { astarEstimateCrossChainFee, astarGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/astar';
 import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/moonbeamXcm';
 import { statemintEstimateCrossChainFee, statemintGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/statemintXcm';
@@ -25,11 +24,11 @@ export async function estimateCrossChainFee (
   chainInfoMap: Record<string, _ChainInfo>,
   substrateApiMap: Record<string, _SubstrateApi>,
   assetRefMap: Record<string, _AssetRef>
-): Promise<[string, string | undefined]> {
+): Promise<string> {
   if (!_isXcmPathSupported(originTokenInfo.slug, destinationTokenInfo.slug, assetRefMap)) {
     console.log('Unsupported xcm');
 
-    return ['0', ''];
+    return '0';
   }
 
   const originNetworkKey = originTokenInfo.originChain;
@@ -108,32 +107,31 @@ export async function makeCrossChainTransfer ({ assetRefMap,
   sender,
   sendingValue,
   substrateApiMap }: MakeCrossChainTransferProps): Promise<void> {
-  const txState: TransactionResponse = {};
+  // const txState: TransactionResponse = {};
+  //
+  // const originNetworkKey = originTokenInfo.originChain;
+  //
+  // if (!_isXcmPathSupported(originTokenInfo.slug, destinationTokenInfo.slug, assetRefMap)) {
+  //   callback(getUnsupportedResponse());
+  //
+  //   return;
+  // }
 
-  const originNetworkKey = originTokenInfo.originChain;
+  // const substrateApi = await substrateApiMap[originNetworkKey].isReady;
+  //
+  // const extrinsic = await createXcmExtrinsic({
+  //   destinationTokenInfo,
+  //   originTokenInfo,
+  //   sendingValue: sendingValue,
+  //   recipient: recipient,
+  //   chainInfoMap: chainInfoMap,
+  //   substrateApiMap: substrateApiMap
+  // });
+  //
+  // const updateResponseTxResult = (response: TransactionResponse, records: EventRecord[]) => {
+  //   updateXcmResponseTxResult(originNetworkKey, originTokenInfo, response, records);
+  // };
 
-  if (!_isXcmPathSupported(originTokenInfo.slug, destinationTokenInfo.slug, assetRefMap)) {
-    callback(getUnsupportedResponse());
-
-    return;
-  }
-
-  const substrateApi = await substrateApiMap[originNetworkKey].isReady;
-
-  const extrinsic = await createXcmExtrinsic({
-    destinationTokenInfo,
-    originTokenInfo,
-    sendingValue: sendingValue,
-    recipient: recipient,
-    chainInfoMap: chainInfoMap,
-    substrateApiMap: substrateApiMap
-  });
-
-  const updateResponseTxResult = (response: TransactionResponse, records: EventRecord[]) => {
-    updateXcmResponseTxResult(originNetworkKey, originTokenInfo, response, records);
-  };
-
-  // Todo: Handle EVM Transaction Here
   // await signAndSendExtrinsic({
   //   type: SignerType.PASSWORD,
   //   substrateApi: substrateApi,

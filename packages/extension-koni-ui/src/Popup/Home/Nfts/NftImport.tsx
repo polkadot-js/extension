@@ -100,8 +100,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       assetType: formValues.type,
       metadata: _parseMetadataForSmartContractAsset(formValues.contractAddress),
       multiChainAsset: null,
-      hasValue: _isChainTestNet(chainInfoMap[formValues.chain]),
-      logo: null
+      hasValue: _isChainTestNet(chainInfoMap[formValues.chain])
     })
       .then((result) => {
         setLoading(false);

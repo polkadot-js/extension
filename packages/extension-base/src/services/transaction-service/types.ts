@@ -21,7 +21,7 @@ export interface SWTransaction {
   createdAt: Date;
   updatedAt: Date;
   errors?: string[];
-  transaction: SubmittableExtrinsic | EvmSendTransactionRequest;
+  transaction: SubmittableExtrinsic | Omit<EvmSendTransactionRequest, 'hashPayload'>;
 }
 
 export type SWTransactionResult = Omit<SWTransaction, 'transaction' | 'data'>

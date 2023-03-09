@@ -17,8 +17,6 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import StakingValidatorItem from '../StakingItem/StakingValidatorItem';
-
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
   onClickBookBtn?: (e: SyntheticEvent) => void;
@@ -101,15 +99,16 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const renderItem = useCallback((item: ValidatorDataType) => {
     return (
-      <StakingValidatorItem
-        address={item.address}
-        className={'pool-item'}
-        identity={item.identity}
-        symbol={item.symbol}
-        commission={item.commission}
-        // eslint-disable-next-line @typescript-eslint/no-empty-function,react/jsx-no-bind
-        onClickMoreBtn={() => {}}
-      />
+      // <StakingValidatorItem
+      //   address={item.address}
+      //   className={'pool-item'}
+      //   identity={item.identity}
+      //   symbol={item.symbol}
+      //   commission={item.commission}
+      //   // eslint-disable-next-line @typescript-eslint/no-empty-function,react/jsx-no-bind
+      //   onClickMoreBtn={() => {}}
+      // />
+      <div>Need update this component</div>
     );
   }, []);
 

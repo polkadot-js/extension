@@ -4,17 +4,24 @@
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainType, EvmSendTransactionRequest, ExtrinsicStatus, TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { getTransactionId } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { SendTransactionEvents, SWTransaction, SWTransactionInput, TransactionEmitter, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { Web3Transaction } from '@subwallet/extension-base/signers/types';
+import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import EventEmitter from 'eventemitter3';
+import RLP, { Input } from 'rlp';
 import { BehaviorSubject } from 'rxjs';
+import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { Signer, SignerResult } from '@polkadot/api/types';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
+import { u8aToHex } from '@polkadot/util';
+import { HexString } from '@polkadot/util/types';
 
 export default class TransactionService {
   private readonly chainService: ChainService;
@@ -195,6 +202,37 @@ export default class TransactionService {
     console.error(error);
   }
 
+  private generateHashPayload (chain: string, transaction: TransactionConfig): HexString {
+    const chainInfo = this.chainService.getChainInfoByKey(chain);
+
+    const txObject: Web3Transaction = {
+      nonce: transaction.nonce || 1,
+      from: transaction.from as string,
+      gasPrice: anyNumberToBN(transaction.gasPrice).toNumber(),
+      gasLimit: anyNumberToBN(transaction.gas).toNumber(),
+      to: transaction.to !== undefined ? transaction.to : '',
+      value: anyNumberToBN(transaction.value).toNumber(),
+      data: transaction.data ? transaction.data : '',
+      chainId: _getEvmChainId(chainInfo)
+    };
+
+    const data: Input = [
+      txObject.nonce,
+      txObject.gasPrice,
+      txObject.gasLimit,
+      txObject.to,
+      txObject.value,
+      txObject.data,
+      txObject.chainId,
+      new Uint8Array([0x00]),
+      new Uint8Array([0x00])
+    ];
+
+    const encoded = RLP.encode(data);
+
+    return u8aToHex(encoded);
+  }
+
   private async signAndSendEvmTransaction ({ address, chain, id, transaction, url }: SWTransaction): Promise<TransactionEmitter> {
     const payload = (transaction as EvmSendTransactionRequest);
 
@@ -215,6 +253,9 @@ export default class TransactionService {
     if (!payload.from) {
       payload.from = address;
     }
+
+    // generate hashPayload for EVM transaction
+    payload.hashPayload = this.generateHashPayload(chain, payload);
 
     const emitter = new EventEmitter<SendTransactionEvents, TransactionEventResponse>();
 
@@ -264,7 +305,7 @@ export default class TransactionService {
         }
       } as Signer
     }).then((rs) => {
-      // Todo: Handle and emit event from runningTransaction
+      // Handle and emit event from runningTransaction
       rs.send().then((result) => {
         emitter.emit('extrinsicHash', { id, extrinsicHash: result.toHex() });
       }).then(() => {
@@ -272,6 +313,7 @@ export default class TransactionService {
       }).catch((e: Error) => {
         emitter.emit('error', { id, error: e });
       });
+      // Todo add more event listener to handle and update history for XCM transaction
     }).catch((e: Error) => {
       this.removeTransaction(id);
       emitter.emit('error', { id, error: e });

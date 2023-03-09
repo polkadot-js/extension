@@ -45,11 +45,12 @@ export async function getRelayChainBondingBasics (networkKey: string, substrateA
   const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, networkKey);
   const stakedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, networkKey);
 
+  // Todo: Update this part later
   return {
     isMaxNominators: maxNominator !== -1 ? nominatorCount >= maxNominator : false,
     estimatedReturn: stakedReturn,
     validatorCount: eraStakers.length
-  } as ChainBondingInfo;
+  } as unknown as ChainBondingInfo;
 }
 
 export async function getRelayValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {
@@ -117,6 +118,7 @@ export async function getRelayValidatorsInfo (networkKey: string, substrateApi: 
 
     allValidators.push(validatorAddress);
 
+    // Todo: Update this part later
     result.push({
       address: validatorAddress,
       totalStake: bnTotalStake.div(bnDecimals).toNumber(),
@@ -130,7 +132,7 @@ export async function getRelayValidatorsInfo (networkKey: string, substrateApi: 
       isVerified: false,
       minBond: (minBond / 10 ** decimals),
       isNominated: bondedValidators.includes(validatorAddress)
-    } as ValidatorInfo);
+    } as unknown as ValidatorInfo);
   }
 
   const extraInfoMap: Record<string, ValidatorExtraInfo> = {};

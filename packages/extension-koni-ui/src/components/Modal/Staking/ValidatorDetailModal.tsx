@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import MetaInfo, { InfoItemBase } from '@subwallet/extension-koni-ui/components/MetaInfo';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
+import { InfoItemBase } from '@subwallet/extension-koni-ui/components/MetaInfo/parts/types';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwModal, SwNumberProps } from '@subwallet/react-ui';

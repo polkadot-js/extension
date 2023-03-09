@@ -137,6 +137,7 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
       otherStake: (totalStake / 10 ** decimals).toString(),
       nominatorCount: stakerCount,
       blocked: false,
+      chain: '',
       isVerified: false,
       minBond: (minStake / 10 ** decimals).toString(),
       isNominated: stakedDappsList.includes(dappAddress.toLowerCase()),

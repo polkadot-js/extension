@@ -8,7 +8,7 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/bonding';
+import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/staking/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
 import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';

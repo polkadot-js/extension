@@ -7,7 +7,7 @@ import { _PARACHAIN_INFLATION_DISTRIBUTION, _STAKING_CHAIN_GROUP, _STAKING_ERA_L
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
-import { BOND_LESS_ACTION, calculateChainStakedReturn, getParaCurrentInflation, InflationConfig, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/bonding/utils';
+import { BOND_LESS_ACTION, calculateChainStakedReturn, getParaCurrentInflation, InflationConfig, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 
 import { BN, BN_ZERO } from '@polkadot/util';

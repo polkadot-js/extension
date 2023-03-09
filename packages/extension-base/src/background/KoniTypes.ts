@@ -1141,41 +1141,6 @@ export type RequestConfirmationComplete = {
   [CT in ConfirmationType]?: ConfirmationDefinitions[CT][1];
 }
 
-export interface ValidatorInfo {
-  address: string;
-  chain: string;
-
-  totalStake: string;
-  ownStake: string;
-  otherStake: string;
-
-  minBond: string;
-  nominatorCount: number;
-  commission: number; // in %
-  expectedReturn: number; // in %, annually
-
-  blocked: boolean;
-  identity?: string;
-  isVerified: boolean;
-  isNominated: boolean; // this validator has been staked to before
-  icon?: string;
-  hasScheduledRequest?: boolean; // for parachain, can't stake more on a collator that has existing scheduled request
-}
-
-export interface NominationPoolInfo {
-  id: string,
-  identity?: string,
-  address: string,
-  memberCount: number,
-  bondedAmount: string
-}
-
-export interface ExtraDelegationInfo {
-  chain: string;
-  address: string;
-  collatorAddress: string;
-}
-
 export interface BasicTxInfo {
   fee: string,
   balanceError: boolean,
@@ -1363,6 +1328,77 @@ export interface ResponseCheckCrossChainTransfer {
 }
 
 /// Stake
+
+// Staking & Bonding
+export interface ChainStakingMetadata {
+  chain: string;
+  type: StakingType;
+
+  expectedReturn: number; // in %, annually
+  minStake: string;
+  maxValidatorPerNominator: number;
+  maxWithdrawalRequestPerValidator: number;
+  allowCancelUnstaking: boolean;
+}
+
+export interface NominationInfo {
+  chain: string;
+  validatorAddress: string;
+  validatorIdentity?: string;
+  activeStake: string;
+}
+
+export interface UnstakingInfo {
+  chain: string;
+  validatorAddress: string;
+  withdrawal: string; // amount to be withdrawn
+  unstakeTime: number;
+  withdrawalTime: number;
+}
+
+export interface NominatorMetadata {
+  chain: string;
+  type: StakingType;
+  nominatorAddress: string;
+
+  nominations: NominationInfo[],
+  unstakings: UnstakingInfo[]
+}
+
+export interface ValidatorInfo {
+  address: string;
+  chain: string;
+
+  totalStake: string;
+  ownStake: string;
+  otherStake: string;
+
+  minBond: string;
+  nominatorCount: number;
+  commission: number; // in %
+  expectedReturn: number; // in %, annually
+
+  blocked: boolean;
+  identity?: string;
+  isVerified: boolean;
+  isNominated: boolean; // this validator has been staked to before
+  icon?: string;
+  hasScheduledRequest?: boolean; // for parachain, can't stake more on a collator that has existing scheduled request
+}
+
+export interface NominationPoolMetadata {
+  id: string,
+  identity?: string,
+  address: string,
+  memberCount: number,
+  bondedAmount: string
+}
+
+export interface ExtraDelegationInfo {
+  chain: string;
+  address: string;
+  collatorAddress: string;
+}
 
 // Bonding
 export interface NominatorInfo {

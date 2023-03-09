@@ -48,30 +48,27 @@ function Component ({ className,
         spaceSize={'xs'}
         valueColorScheme={'light'}
       >
-        <MetaInfo.Default
-          label={t('Active nominators')}
-          value={(
-            <div className={'__active-nominators-value'}>
-              <Number
-                className={'__current-nominator-count'}
-                decimal={0}
-                decimalOpacity={1}
-                intOpacity={1}
-                unitOpacity={1}
-                value={currentNominatorCount}
-              />
-              <span className={'__slash'}>/</span>
-              <Number
-                className={'__total-nominator-count'}
-                decimal={0}
-                decimalOpacity={1}
-                intOpacity={1}
-                unitOpacity={1}
-                value={totalNominatorCount}
-              />
-            </div>
-          )}
-        />
+        <MetaInfo.Default label={t('Active nominators')}>
+          <div className={'__active-nominators-value'}>
+            <Number
+              className={'__current-nominator-count'}
+              decimal={0}
+              decimalOpacity={1}
+              intOpacity={1}
+              unitOpacity={1}
+              value={currentNominatorCount}
+            />
+            <span className={'__slash'}>/</span>
+            <Number
+              className={'__total-nominator-count'}
+              decimal={0}
+              decimalOpacity={1}
+              intOpacity={1}
+              unitOpacity={1}
+              value={totalNominatorCount}
+            />
+          </div>
+        </MetaInfo.Default>
 
         <MetaInfo.Number
           label={t('Estimated earning')}
@@ -88,10 +85,9 @@ function Component ({ className,
           valueColorSchema={'even-odd'}
         />
 
-        <MetaInfo.Default
-          label={t('Active nominators')}
-          value={unstakingPeriod}
-        />
+        <MetaInfo.Default label={t('Active nominators')}>
+          {unstakingPeriod}
+        </MetaInfo.Default>
       </MetaInfo>
     </SwModal>
   );

@@ -1,19 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import Common from '@ethereumjs/common';
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransactionResponse, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { _BALANCE_PARSING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
-import { keyring } from '@subwallet/ui-keyring';
-import BigN from 'bignumber.js';
-import BNEther from 'bn.js';
-import { Transaction } from 'ethereumjs-tx';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { BN, hexToBn } from '@polkadot/util';
@@ -52,101 +47,6 @@ export const handleTransferBalanceResult = ({ callback,
   callback(response);
 };
 
-interface HandleTransferProps {
-  address: string;
-  callback: (data: TransactionResponse) => void;
-  changeValue: string;
-  chainInfo: _ChainInfo;
-  transactionObject: TransactionConfig;
-  evmApiMap: Record<string, _EvmApi>;
-}
-
-const convertValueToNumber = (value?: number | string | BNEther): number => {
-  if (!value) {
-    return 0;
-  }
-
-  if (typeof value === 'string' || typeof value === 'number') {
-    return new BigN(value).toNumber();
-  } else {
-    return value.toNumber();
-  }
-};
-
-export async function handleTransfer ({ address,
-  callback,
-  chainInfo,
-  changeValue,
-  evmApiMap,
-  transactionObject }: HandleTransferProps) {
-  const networkKey = chainInfo.slug;
-  const web3Api = evmApiMap[networkKey];
-  const nonce = await web3Api.api.eth.getTransactionCount(address);
-
-  const common = Common.forCustomChain('mainnet', {
-    name: networkKey,
-    networkId: _getEvmChainId(chainInfo),
-    chainId: _getEvmChainId(chainInfo)
-  }, 'petersburg');
-  const txObject: TransactionConfig = {
-    gasPrice: convertValueToNumber(transactionObject.gasPrice),
-    to: transactionObject.to,
-    value: convertValueToNumber(transactionObject.value),
-    data: transactionObject.data,
-    gas: convertValueToNumber(transactionObject.gas),
-    nonce: nonce
-  };
-  // @ts-ignore
-  const tx = new Transaction(txObject, { common });
-
-  const pair = keyring.getPair(address);
-
-  if (pair.isLocked) {
-    keyring.unlockPair(pair.address);
-  }
-
-  const callHash = pair.evmSigner.signTransaction(tx);
-
-  const response: TransactionResponse = {
-    errors: []
-  };
-
-  try {
-    web3Api.api.eth.sendSignedTransaction(callHash)
-      .on('transactionHash', function (hash: string) {
-        console.log('transactionHash', hash);
-        response.extrinsicHash = hash;
-        callback(response);
-      })
-      // .on('confirmation', function (confirmationNumber, receipt) {
-      //   console.log('confirmation', confirmationNumber, receipt);
-      //   response.step = TransferStep.PROCESSING;
-      //   response.data = receipt;
-      //   callback(response);
-      // })
-      .on('receipt', function (receipt: TransactionReceipt) {
-        handleTransferBalanceResult({ receipt: receipt, response: response, callback: callback, networkKey: networkKey, changeValue: changeValue });
-      }).catch((e) => {
-        response.status = false;
-        response.errors?.push({
-          errorType: TransferTxErrorType.TRANSFER_ERROR,
-          message: (e as Error).message
-        });
-        callback(response);
-      });
-  } catch (error) {
-    response.status = false;
-    response.txError = true;
-    response.errors?.push({
-      errorType: TransferTxErrorType.TRANSFER_ERROR,
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      message: error.message
-    });
-    callback(response);
-  }
-}
-
 export async function getEVMTransactionObject (
   chainInfo: _ChainInfo,
   to: string,
@@ -170,35 +70,6 @@ export async function getEVMTransactionObject (
   transactionObject.value = transferAll ? new BN(value).add(new BN(estimateFee).neg()) : value;
 
   return [transactionObject, transactionObject.value.toString(), estimateFee.toString()];
-}
-
-interface EVMTransferProps {
-  from: string;
-  callback: (data: TransactionResponse) => void;
-  chainInfo: _ChainInfo;
-  to: string;
-  transferAll: boolean;
-  value: string;
-  evmApiMap: Record<string, _EvmApi>;
-}
-
-export async function makeEVMTransfer ({ callback,
-  chainInfo,
-  evmApiMap,
-  from,
-  to,
-  transferAll,
-  value }: EVMTransferProps): Promise<void> {
-  const [transactionObject, changeValue] = await getEVMTransactionObject(chainInfo, to, value, transferAll, evmApiMap);
-
-  await handleTransfer({
-    address: from,
-    callback: callback,
-    changeValue: changeValue,
-    chainInfo: chainInfo,
-    evmApiMap: evmApiMap,
-    transactionObject: transactionObject
-  });
 }
 
 export async function getERC20TransactionObject (
@@ -251,37 +122,6 @@ export async function getERC20TransactionObject (
   }
 
   return [transactionObject, transferValue, estimateFee.toString()];
-}
-
-interface ERC20TransferProps {
-  assetAddress: string;
-  callback: (data: TransactionResponse) => void;
-  from: string;
-  chainInfo: _ChainInfo;
-  to: string;
-  transferAll: boolean;
-  value: string;
-  evmApiMap: Record<string, _EvmApi>;
-}
-
-export async function makeERC20Transfer ({ assetAddress,
-  callback,
-  chainInfo,
-  evmApiMap,
-  from,
-  to,
-  transferAll,
-  value }: ERC20TransferProps) {
-  const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, chainInfo, from, to, value, transferAll, evmApiMap);
-
-  await handleTransfer({
-    address: from,
-    callback: callback,
-    changeValue: changeValue,
-    chainInfo: chainInfo,
-    evmApiMap: evmApiMap,
-    transactionObject: transactionObject
-  });
 }
 
 export async function getERC721Transaction (

@@ -20,11 +20,9 @@ import SettingService from '@subwallet/extension-base/services/setting-service/S
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
-import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { decodePair } from '@subwallet/keyring/pair/decode';
@@ -32,13 +30,12 @@ import { KeyringPair$Meta } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import SimpleKeyring from 'eth-simple-keyring';
-import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
-import { HexString, Logger } from '@polkadot/util/types';
+import { Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -632,115 +629,6 @@ export default class KoniState {
   public subscribeStakingReward () {
     return this.stakingRewardSubject;
   }
-
-  // public setHistory (address: string, network: string, item: TxHistoryItem | TxHistoryItem[], callback?: (items: TxHistoryItem[]) => void): void {
-  //   let items: TxHistoryItem[];
-  //   const nativeTokenInfo = this.chainService.getNativeTokenInfo(network);
-  //
-  //   if (!nativeTokenInfo) {
-  //     return;
-  //   }
-  //
-  //   if (item && !Array.isArray(item)) {
-  //     item.origin = 'app';
-  //     items = [item];
-  //   } else {
-  //     items = item;
-  //   }
-  //
-  //   items.forEach((item) => {
-  //     item.feeSymbol = nativeTokenInfo.symbol;
-  //
-  //     if (!item.changeSymbol) {
-  //       item.changeSymbol = nativeTokenInfo.symbol;
-  //     }
-  //   });
-  //
-  //   if (items.length) {
-  //     this.getAccountAddress().then((currentAddress) => {
-  //       if (currentAddress === address) {
-  //         const oldItems = this.historyMap || [];
-  //
-  //         this.historyMap = this.combineHistories(oldItems, items);
-  //         this.saveHistoryToStorage(address, network, this.historyMap);
-  //         callback && callback(this.historyMap);
-  //
-  //         this.lazyNext('setHistory', () => {
-  //           this.publishHistory();
-  //         });
-  //       } else {
-  //         this.saveHistoryToStorage(address, network, items);
-  //         callback && callback(this.historyMap);
-  //       }
-  //     }).catch((e) => this.logger.warn(e));
-  //   }
-  // }
-
-  // public getTransactionHistory (address: string, networkKey: string, update: (items: TxHistoryItem[]) => void): void {
-  //   const items = this.historyMap;
-  //
-  //   if (!items) {
-  //     update([]);
-  //   } else {
-  //     update(items);
-  //   }
-  // }
-
-  // public subscribeHistory () {
-  //   return this.historySubject;
-  // }
-  //
-  // public getHistoryMap (): TxHistoryItem[] {
-  //   return this.removeInactiveTxHistoryByChain(this.historyMap);
-  // }
-  //
-  // private removeInactiveTxHistoryByChain (historyList: TxHistoryItem[]) {
-  //   const activeData: TxHistoryItem[] = [];
-  //
-  //   historyList.forEach((item) => {
-  //     if (this.chainService.getChainStateByKey(item.networkKey) && this.chainService.getChainStateByKey(item.networkKey).active) {
-  //       activeData.push(item);
-  //     }
-  //   });
-  //
-  //   return activeData;
-  // }
-  //
-  // public async resetHistoryMap (newAddress: string): Promise<void> {
-  //   this.historyMap = [];
-  //
-  //   const storedData = await this.getStoredHistories(newAddress);
-  //
-  //   if (storedData) {
-  //     this.historyMap = storedData;
-  //   }
-  //
-  //   this.publishHistory();
-  // }
-  //
-  // public async getStoredHistories (address: string) {
-  //   const items = await this.dbService.stores.transaction.getHistoies({address});
-  //
-  //   return items || [];
-  // }
-  //
-  // private saveHistoryToStorage (address: string, network: string, items: TxHistoryItem[]) {
-  //   this.dbService.upsertHistory(network, address, items).catch((e) => this.logger.warn(e));
-  // }
-  //
-  // private combineHistories (oldItems: TxHistoryItem[], newItems: TxHistoryItem[]): TxHistoryItem[] {
-  //   const newHistories = newItems.filter((item) => !oldItems.some((old) => this.isSameHistory(old, item)));
-  //
-  //   return [...oldItems, ...newHistories].filter((his) => his.origin === 'app');
-  // }
-  //
-  // public isSameHistory (oldItem: TxHistoryItem, newItem: TxHistoryItem): boolean {
-  //   if (oldItem.extrinsicHash === newItem.extrinsicHash && oldItem.action === newItem.action) {
-  //     return oldItem.origin === 'app';
-  //   }
-  //
-  //   return false;
-  // }
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
     this.currentAccountStore.get('CurrentAccountInfo', update);
@@ -1675,37 +1563,6 @@ export default class KoniState {
     }
   }
 
-  public generateHashPayload (networkKey: string, transaction: TransactionConfig): HexString {
-    const chainInfo = this.getChainInfo(networkKey);
-
-    const txObject: Web3Transaction = {
-      nonce: transaction.nonce || 1,
-      from: transaction.from as string,
-      gasPrice: anyNumberToBN(transaction.gasPrice).toNumber(),
-      gasLimit: anyNumberToBN(transaction.gas).toNumber(),
-      to: transaction.to !== undefined ? transaction.to : '',
-      value: anyNumberToBN(transaction.value).toNumber(),
-      data: transaction.data ? transaction.data : '',
-      chainId: _getEvmChainId(chainInfo)
-    };
-
-    const data: Input = [
-      txObject.nonce,
-      txObject.gasPrice,
-      txObject.gasLimit,
-      txObject.to,
-      txObject.value,
-      txObject.data,
-      txObject.chainId,
-      new Uint8Array([0x00]),
-      new Uint8Array([0x00])
-    ];
-
-    const encoded = RLP.encode(data);
-
-    return u8aToHex(encoded);
-  }
-
   public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
     const evmApi = this.getEvmApi(networkKey);
     const web3 = evmApi.api;
@@ -1756,16 +1613,12 @@ export default class KoniState {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'From address is not in available for ' + url);
     }
 
-    let meta: KeyringPair$Meta;
-
     try {
       const pair = keyring.getPair(fromAddress);
 
       if (!pair) {
         throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Cannot find pair with address: ' + fromAddress);
       }
-
-      meta = pair.meta;
     } catch (e) {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Cannot find pair with address: ' + fromAddress);
     }
@@ -1777,9 +1630,7 @@ export default class KoniState {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Balance can be not enough to send transaction');
     }
 
-    const hashPayload = meta.external ? this.generateHashPayload(networkKey, transaction) : '';
-
-    const requestPayload = { ...transaction, estimateGas, hashPayload };
+    const requestPayload = { ...transaction, estimateGas };
     const transactionEmitter = await this.transactionService.addTransaction({
       transaction: requestPayload,
       address: requestPayload.from as string,

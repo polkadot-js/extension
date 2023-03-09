@@ -48,7 +48,7 @@ export default class DatabaseService {
   async removeFromBalanceStore (assets: string[]) {
     this.logger.log('Bulk removing AssetStore');
 
-    return this.stores.balance.removeBySlugs(assets);
+    return await this.stores.balance.removeBySlugs(assets);
   }
 
   // Crowdloan

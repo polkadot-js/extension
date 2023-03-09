@@ -171,8 +171,7 @@ export class ChainService {
       priceId: '',
       slug: '',
       symbol: '',
-      hasValue: true,
-      logo: null
+      hasValue: true
     };
 
     for (const assetInfo of Object.values(this.getAssetRegistry())) {
@@ -620,7 +619,6 @@ export class ChainService {
             deprecatedChains.push(storedSlug);
           } else {
             mergedChainInfoMap[storedSlug] = {
-              logo: null,
               slug: storedSlug,
               name: storedChainInfo.name,
               providers: storedChainInfo.providers,
@@ -821,8 +819,7 @@ export class ChainService {
       substrateInfo,
       evmInfo,
       isTestnet: false,
-      chainStatus: _ChainStatus.ACTIVE,
-      logo: null
+      chainStatus: _ChainStatus.ACTIVE
     };
 
     // insert new chainInfo
@@ -851,8 +848,7 @@ export class ChainService {
       priceId: null,
       slug: '',
       symbol: params.chainEditInfo.symbol as string,
-      hasValue: true,
-      logo: null
+      hasValue: true
     });
 
     // update subscription

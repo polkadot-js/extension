@@ -52,11 +52,13 @@ export async function getAmplitudeBondingBasics (networkKey: string, substrateAp
   //
   // const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
 
+  // Todo: Update this part later
   return {
+    chain: networkKey,
     isMaxNominators: false,
     estimatedReturn: 0,
     validatorCount: _allCollators.length
-  } as ChainBondingInfo;
+  } as unknown as ChainBondingInfo;
 }
 
 export async function getAmplitudeCollatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string, extraCollatorAddress?: string) {
@@ -92,17 +94,17 @@ export async function getAmplitudeCollatorsInfo (networkKey: string, substrateAp
     if (typeof collatorInfo.status === 'string' && collatorInfo.status.toLowerCase() === 'active') {
       allCollators.push({
         address: collatorInfo.id,
-        totalStake: parseRawNumber(collatorInfo.total) / 10 ** decimals,
-        ownStake: parseRawNumber(collatorInfo.stake) / 10 ** decimals,
-        otherStake: (parseRawNumber(collatorInfo.total) - parseRawNumber(collatorInfo.stake)) / 10 ** decimals,
-
+        totalStake: (parseRawNumber(collatorInfo.total) / 10 ** decimals).toString(),
+        ownStake: (parseRawNumber(collatorInfo.stake) / 10 ** decimals).toString(),
+        otherStake: ((parseRawNumber(collatorInfo.total) - parseRawNumber(collatorInfo.stake)) / 10 ** decimals).toString(),
         nominatorCount: collatorInfo.delegators.length,
         commission: 0,
         expectedReturn: delegatorReturn,
         blocked: false,
         isVerified: false,
-        minBond: chainMinDelegation,
-        isNominated: false
+        minBond: chainMinDelegation.toString(),
+        isNominated: false,
+        chain: networkKey
       });
     }
   }

@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, RequestTypes, ResponseTypes, SubscriptionMessageTypes } from '../background/types';
+import type { MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, RequestTypes, ResponseTypes, SubscriptionMessageTypes } from '../background/types.js';
 
 export interface SendRequest {
   <TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;

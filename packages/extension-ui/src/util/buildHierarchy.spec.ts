@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev/node/test/node" />
+/// <reference types="@polkadot/dev/node/test/node.d.ts" />
 
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 

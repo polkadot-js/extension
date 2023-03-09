@@ -298,5 +298,10 @@
   "create an account": "",
   "Connect": "",
   "You have been redirected because the Aleph Zero Signer extension believes that this website could compromise the security of your accounts and your tokens.": "",
-  "more": ""
+  "more": "",
+  "Disconnect": "",
+  "Disconnect app": "",
+  "Disconnecting app": "",
+  "You're about to disconnect an app from the Signer. This will result in disconnecting all connected accounts from this app.": "",
+  "App disconnected": ""
 }

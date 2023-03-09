@@ -238,7 +238,7 @@ export default class State {
     const complete = (authorizedAccounts: string[] = []) => {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
-      this.#authUrls[url] = {
+      this.#authUrls[decodeURIComponent(url)] = {
         authorizedAccounts,
         count: 0,
         id: idStr,
@@ -270,7 +270,7 @@ export default class State {
 
       // the assert in stripUrl may throw for new tabs with "chrome://newtab/"
       try {
-        strippedUrl = url;
+        strippedUrl = decodeURIComponent(url);
       } catch (e) {
         console.error(e);
       }
@@ -393,7 +393,7 @@ export default class State {
   }
 
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<AuthResponse> {
-    const idStr = url;
+    const idStr = decodeURIComponent(url);
 
     // Do not enqueue duplicate authorization requests.
     const isDuplicate = Object

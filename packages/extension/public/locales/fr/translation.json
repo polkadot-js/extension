@@ -252,5 +252,9 @@
   "Choose accounts to use with this app. It will access addresses, balances, activities and request transactions to sign.": "",
   "App connected": "",
   "What are trusted apps?": "",
-  "Connected accounts": ""
+  "Connected accounts": "",
+  "Disconnect": "",
+  "Disconnect app": "",
+  "Disconnecting app": "",
+  "You're about to disconnect an app from the Signer. This will result in disconnecting all connected accounts from this app.": ""
 }

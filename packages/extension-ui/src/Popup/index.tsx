@@ -40,6 +40,7 @@ import EditAccountMenu from './Accounts/EditAccountMenu';
 import EditName from './Accounts/EditName';
 import EditNetwork from './Accounts/EditNetwork';
 import AccountManagement from './AuthManagement/AccountManagement';
+import DisconnectApp from './AuthManagement/DisconnectApp';
 import RestoreJson from './Restore/RestoreJson';
 import TransactionStatus from './Signing/TransactionStatus';
 import About from './About';
@@ -229,6 +230,9 @@ export default function Popup(): React.ReactElement {
                             </Route>
                             <Route path='/url/manage'>
                               {wrapWithErrorBoundary(<AccountManagement />, 'manage-url')}
+                            </Route>
+                            <Route path='/url/disconnect/:url'>
+                              {wrapWithErrorBoundary(<DisconnectApp />, 'disconnect-url')}
                             </Route>
                             <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>
                               {wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}

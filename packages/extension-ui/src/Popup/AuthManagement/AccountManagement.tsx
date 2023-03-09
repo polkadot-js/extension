@@ -3,24 +3,14 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
-import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-
-import {
-  AccountContext,
-  ActionContext,
-  Button,
-  ButtonArea,
-  FaviconBox,
-  RemoveAuth,
-  VerticalSpace
-} from '../../components';
+import { AccountContext, ActionContext, Button, ButtonArea, RemoveAuth, VerticalSpace } from '../../components';
 import Checkbox from '../../components/Checkbox';
 import useTranslation from '../../hooks/useTranslation';
-import { getAuthList, removeAuthorization, updateAuthorization } from '../../messaging';
+import { getAuthList, updateAuthorization } from '../../messaging';
 import { AccountSelection, Header } from '../../partials';
 
 interface Props extends RouteComponentProps, ThemeProps {
@@ -38,22 +28,6 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
   const onAction = useContext(ActionContext);
   const searchParams = new URLSearchParams(search);
   const url = searchParams.get('url');
-
-  const [authList, setAuthList] = useState<AuthUrls | null>(null);
-
-  useEffect(() => {
-    getAuthList()
-      .then(({ list }) => setAuthList(list))
-      .catch((e) => console.error(e));
-  }, []);
-
-  const removeAuth = useCallback((url: string) => {
-    removeAuthorization(url)
-      .then(({ list }) => setAuthList(list))
-      .catch(console.error);
-  }, []);
-
-  const _removeAuth = useCallback(() => url && removeAuth(url), [removeAuth, url]);
 
   useEffect(() => {
     getAuthList()
@@ -75,12 +49,12 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
     }
 
     updateAuthorization(selectedAccounts, url)
-      .then(() => onAction('..'))
+      .then(() => onAction('/auth-list'))
       .catch(console.error);
   }, [onAction, selectedAccounts, url]);
 
   const _onCancel = useCallback((): void => {
-    onAction('..');
+    onAction('/auth-list');
   }, [onAction]);
 
   return (
@@ -93,9 +67,7 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
       <div className={className}>
         {url && (
           <>
-            <FaviconBox url={url} />
-            {/* TODO: make disconection flow, NEXT PR */}
-            <RemoveAuth onRemove={_removeAuth} />
+            <RemoveAuth url={url} />
             <AccountSelection
               className='accountSelection'
               origin={origin}
@@ -127,6 +99,7 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
 
 export default withRouter(styled(AccountManagement)`
   margin-top: -16px;
+  overflow: hidden;
   .accountSelection{
     ${Checkbox} {
         margin-right: 16px;

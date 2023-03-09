@@ -117,7 +117,7 @@ function Header({
                 className='connectedAccounts'
                 to={
                   connectedTabsUrl.length === 1
-                    ? `/url/manage?url=${encodeURIComponent(connectedTabsUrl[0])}`
+                    ? `/url/manage?url=${encodeURIComponent(decodeURIComponent(connectedTabsUrl[0]))}`
                     : '/auth-list'
                 }
               >

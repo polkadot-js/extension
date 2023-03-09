@@ -101,7 +101,7 @@ export default styled(Toast)(
   .snackbar-end-group {
     display: flex;
     flex-direction: row;
-    gap: 4px;
+    gap: 8px;
   }
 
   .snackbar-content {

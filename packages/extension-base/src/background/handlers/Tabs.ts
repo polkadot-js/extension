@@ -51,7 +51,7 @@ export default class Tabs {
   }
 
   private filterForAuthorizedAccounts (accounts: InjectedAccount[], url: string): InjectedAccount[] {
-    const auth = this.#state.authUrls[url];
+    const auth = this.#state.authUrls[decodeURIComponent(url)];
 
     return accounts.filter(
       (allAcc) =>

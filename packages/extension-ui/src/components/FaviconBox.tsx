@@ -10,11 +10,13 @@ import { getFaviconUrl } from '../util/getFaviconUrl';
 interface Props extends ThemeProps {
   className?: string;
   url: string;
+  disconnectElement?: React.ReactNode;
 }
 
-const FaviconBox: React.FC<Props> = function ({ className, url }: Props) {
+const FaviconBox: React.FC<Props> = function ({ className, disconnectElement, url }: Props) {
   const [favicon, setFavicon] = useState<string>('');
-  const origin = new URL(url).origin;
+
+  const origin = new URL(decodeURIComponent(url)).origin;
 
   useEffect(() => {
     async function fetchFavicon() {
@@ -33,6 +35,7 @@ const FaviconBox: React.FC<Props> = function ({ className, url }: Props) {
         src={favicon}
       />
       <span>{origin}</span>
+      {disconnectElement}
     </div>
   );
 };

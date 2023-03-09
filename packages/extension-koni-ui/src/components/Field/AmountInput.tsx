@@ -19,7 +19,7 @@ const isValidInput = (input: string) => {
 };
 
 // @ts-ignore
-const getInputValuesFromString: (input: string, power: number) => string = (input: string, power: number) => {
+export const getInputValuesFromString: (input: string, power: number) => string = (input: string, power: number) => {
   const intValue = input.split('.')[0];
   let valueBigN = new BigN(isValidInput(intValue) ? intValue : '0');
 

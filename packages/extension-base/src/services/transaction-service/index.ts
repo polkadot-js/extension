@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ChainType, EvmSendTransactionRequest, ExtrinsicStatus, TransactionErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainType, EvmSendTransactionRequest, ExtrinsicStatus, TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
@@ -15,14 +15,10 @@ import { BehaviorSubject } from 'rxjs';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { Signer, SignerResult } from '@polkadot/api/types';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
-import { logger as createLogger } from '@polkadot/util/logger';
-import { Logger } from '@polkadot/util/types';
 
 export default class TransactionService {
   private readonly chainService: ChainService;
   private readonly requestService: RequestService;
-  private readonly logger: Logger;
-
   public readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
 
   private get transactions (): Record<string, SWTransaction> {
@@ -32,8 +28,6 @@ export default class TransactionService {
   constructor (chainService: ChainService, requestService: RequestService) {
     this.chainService = chainService;
     this.requestService = requestService;
-
-    this.logger = createLogger('TransactionService');
   }
 
   private get allTransactions (): SWTransaction[] {
@@ -54,15 +48,11 @@ export default class TransactionService {
       .filter((item) => item.address === transaction.address && item.chain === transaction.chain);
 
     if (existed.length > 0) {
-      throw new TransactionError(TransactionErrorType.DUPLICATE_TRANSACTION);
+      throw new TransactionError(BasicTxErrorType.DUPLICATE_TRANSACTION);
     }
   }
 
-  public notice (message: string): void {
-    this.logger.log(message);
-  }
-
-  fillTransactionDefaultInfo (transaction: SWTransactionInput): SWTransaction {
+  private fillTransactionDefaultInfo (transaction: SWTransactionInput): SWTransaction {
     const isInternal = !transaction.url;
 
     return {
@@ -92,7 +82,34 @@ export default class TransactionService {
     return await this.sendTransaction(transaction);
   }
 
-  public async sendTransaction (transaction: SWTransaction): Promise<TransactionEmitter> {
+  public async handleTransaction (transaction: SWTransactionInput, existedState: TransactionResponse = {}): Promise<TransactionResponse> {
+    const txState: TransactionResponse = existedState;
+
+    try {
+      const emitter = await this.addTransaction(transaction);
+
+      await new Promise((resolve) => {
+        emitter.on('extrinsicHash', (data: TransactionEventResponse) => {
+          txState.extrinsicHash = data.extrinsicHash;
+        });
+
+        emitter.on('error', (data: TransactionEventResponse) => {
+          if (data.error) {
+            resolve(txState);
+          }
+        });
+      });
+
+      return txState;
+    } catch (e) {
+      txState.txError = true;
+      txState.errors = [e] as TransactionError[];
+
+      return txState;
+    }
+  }
+
+  private async sendTransaction (transaction: SWTransaction): Promise<TransactionEmitter> {
     // Send Transaction
     const emitter = transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : (await this.signAndSendEvmTransaction(transaction));
 
@@ -105,20 +122,20 @@ export default class TransactionService {
     });
 
     emitter.on('error', (data: TransactionEventResponse) => {
-      this.onFailed({ ...data, error: data.error || new TransactionError(TransactionErrorType.INTERNAL_ERROR) });
+      this.onFailed({ ...data, error: data.error || new TransactionError(BasicTxErrorType.INTERNAL_ERROR) });
     });
 
     return emitter;
   }
 
-  public removeTransaction (id: string): void {
+  private removeTransaction (id: string): void {
     if (this.transactions[id]) {
       delete this.transactions[id];
       this.transactionSubject.next({ ...this.transactions });
     }
   }
 
-  public updateTransaction (id: string, data: Partial<Omit<SWTransaction, 'id'>>): void {
+  private updateTransaction (id: string, data: Partial<Omit<SWTransaction, 'id'>>): void {
     const transaction = this.transactions[id];
 
     if (transaction) {
@@ -212,19 +229,19 @@ export default class TransactionService {
               emitter.emit('success', { id, transactionHash: rs.transactionHash });
             })
             .once('error', (e) => {
-              emitter.emit('error', { id, error: new TransactionError(TransactionErrorType.SEND_TRANSACTION_FAILED, e.message) });
+              emitter.emit('error', { id, error: new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, e.message) });
             })
             .catch((e: Error) => {
-              emitter.emit('error', { id, error: new TransactionError(TransactionErrorType.UNABLE_TO_SEND, e.message) });
+              emitter.emit('error', { id, error: new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, e.message) });
             });
         } else {
           this.removeTransaction(id);
-          emitter.emit('error', new TransactionError(TransactionErrorType.USER_REJECT_REQUEST, 'User Rejected'));
+          emitter.emit('error', new TransactionError(BasicTxErrorType.USER_REJECT_REQUEST, 'User Rejected'));
         }
       })
       .catch((e: Error) => {
         this.removeTransaction(id);
-        const error = new TransactionError(TransactionErrorType.UNABLE_TO_SIGN, e.message);
+        const error = new TransactionError(BasicTxErrorType.UNABLE_TO_SIGN, e.message);
 
         emitter.emit('error', { id, error: error });
       });

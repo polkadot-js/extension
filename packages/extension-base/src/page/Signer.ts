@@ -3,7 +3,7 @@
 
 import type { Signer as SignerInterface, SignerResult } from '@polkadot/api/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
-import type { SendRequest } from './types';
+import type { SendRequest } from './types.js';
 
 // External to class, this.# is not private enough (yet)
 let sendRequest: SendRequest;

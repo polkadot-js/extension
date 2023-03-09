@@ -3,11 +3,11 @@
 
 import React, { useCallback, useState } from 'react';
 
-import useTranslation from '../hooks/useTranslation';
-import { styled } from '../styled';
-import Label from './Label';
-import { Input } from './TextInputs';
-import Warning from './Warning';
+import useTranslation from '../hooks/useTranslation.js';
+import { styled } from '../styled.js';
+import Label from './Label.js';
+import { Input } from './TextInputs.js';
+import Warning from './Warning.js';
 
 interface Props {
   className?: string;

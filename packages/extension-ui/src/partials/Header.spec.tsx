@@ -13,9 +13,9 @@ import React from 'react';
 import { MemoryRouter } from 'react-router';
 import { ThemeProvider } from 'styled-components';
 
-import { themes } from '../components';
-import Header from './Header';
-import Settings from './MenuSettings';
+import { themes } from '../components/index.js';
+import Header from './Header.js';
+import Settings from './MenuSettings.js';
 
 const { configure, mount } = enzyme;
 

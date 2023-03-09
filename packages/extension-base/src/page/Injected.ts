@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Injected } from '@polkadot/extension-inject/types';
-import type { SendRequest } from './types';
+import type { SendRequest } from './types.js';
 
-import Accounts from './Accounts';
-import Metadata from './Metadata';
-import PostMessageProvider from './PostMessageProvider';
-import Signer from './Signer';
+import Accounts from './Accounts.js';
+import Metadata from './Metadata.js';
+import PostMessageProvider from './PostMessageProvider.js';
+import Signer from './Signer.js';
 
 export default class implements Injected {
   public readonly accounts: Accounts;

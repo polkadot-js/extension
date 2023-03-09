@@ -3,8 +3,8 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { ToastContext } from '..';
-import Toast from './Toast';
+import { ToastContext } from '../index.js';
+import Toast from './Toast.js';
 
 interface ToastProviderProps {
   children?: React.ReactNode;

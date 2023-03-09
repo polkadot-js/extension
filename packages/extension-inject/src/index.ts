@@ -4,4 +4,4 @@
 // Since we inject into pages, we skip this
 // import './detectPackage';
 
-export * from './bundle';
+export * from './bundle.js';

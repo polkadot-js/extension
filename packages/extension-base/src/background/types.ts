@@ -11,8 +11,8 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { ALLOWED_PATH } from '../defaults';
-import { AuthResponse, AuthUrls } from './handlers/State';
+import { ALLOWED_PATH } from '../defaults.js';
+import { AuthResponse, AuthUrls } from './handlers/State.js';
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K

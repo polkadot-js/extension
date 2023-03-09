@@ -3,9 +3,9 @@
 
 import React, { useEffect, useState } from 'react';
 
-import useIsMounted from '../hooks/useIsMounted';
-import { Result, Validator } from '../util/validators';
-import Warning from './Warning';
+import useIsMounted from '../hooks/useIsMounted.js';
+import { Result, Validator } from '../util/validators.js';
+import Warning from './Warning.js';
 
 interface BasicProps {
   isError?: boolean;

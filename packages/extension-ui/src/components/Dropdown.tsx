@@ -1,13 +1,13 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../types.js';
 
 import React, { useCallback } from 'react';
 
 import arrow from '../assets/arrow-down.svg';
-import { styled } from '../styled';
-import Label from './Label';
+import { styled } from '../styled.js';
+import Label from './Label.js';
 
 interface DropdownOption {
   text: string;

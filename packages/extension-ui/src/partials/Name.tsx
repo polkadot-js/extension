@@ -3,9 +3,9 @@
 
 import React, { useContext, useMemo } from 'react';
 
-import { AccountContext, InputWithLabel, ValidatedInput } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import { isNotShorterThan } from '../util/validators';
+import { AccountContext, InputWithLabel, ValidatedInput } from '../components/index.js';
+import useTranslation from '../hooks/useTranslation.js';
+import { isNotShorterThan } from '../util/validators.js';
 
 interface Props {
   address?: string;

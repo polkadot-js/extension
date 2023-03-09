@@ -13,12 +13,12 @@ import enzyme from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { AccountContext, AuthorizeReqContext, themes, Warning } from '../../components';
-import { Header } from '../../partials';
-import { buildHierarchy } from '../../util/buildHierarchy';
-import Account from '../Accounts/Account';
-import Request from './Request';
-import Authorize from '.';
+import { AccountContext, AuthorizeReqContext, themes, Warning } from '../../components/index.js';
+import { Header } from '../../partials/index.js';
+import { buildHierarchy } from '../../util/buildHierarchy.js';
+import Account from '../Accounts/Account.js';
+import Authorize from './index.js';
+import Request from './Request.js';
 
 const { configure, mount } = enzyme;
 

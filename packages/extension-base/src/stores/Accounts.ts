@@ -3,8 +3,8 @@
 
 import type { KeyringJson, KeyringStore } from '@polkadot/ui-keyring/types';
 
-import { EXTENSION_PREFIX } from '../defaults';
-import BaseStore from './Base';
+import { EXTENSION_PREFIX } from '../defaults.js';
+import BaseStore from './Base.js';
 
 export default class AccountsStore extends BaseStore<KeyringJson> implements KeyringStore {
   constructor () {

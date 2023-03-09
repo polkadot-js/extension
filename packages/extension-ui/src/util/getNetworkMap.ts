@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import chains from './chains';
+import chains from './chains.js';
 
 export default function getNetworkMap (): Map<string, string> {
   const res = new Map<string, string>();

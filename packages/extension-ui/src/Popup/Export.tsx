@@ -1,17 +1,17 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../types.js';
 
 import fileSaver from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { ActionBar, ActionContext, ActionText, Address, Button, InputWithLabel, Warning } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import { exportAccount } from '../messaging';
-import { Header } from '../partials';
-import { styled } from '../styled';
+import { ActionBar, ActionContext, ActionText, Address, Button, InputWithLabel, Warning } from '../components/index.js';
+import useTranslation from '../hooks/useTranslation.js';
+import { exportAccount } from '../messaging.js';
+import { Header } from '../partials/index.js';
+import { styled } from '../styled.js';
 
 const MIN_LENGTH = 6;
 

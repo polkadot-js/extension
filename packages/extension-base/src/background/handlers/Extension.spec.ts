@@ -16,10 +16,10 @@ import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
-import { AccountsStore } from '../../stores';
-import Extension from './Extension';
-import State, { AuthUrls } from './State';
-import Tabs from './Tabs';
+import { AccountsStore } from '../../stores/index.js';
+import Extension from './Extension.js';
+import State, { AuthUrls } from './State.js';
+import Tabs from './Tabs.js';
 
 describe('Extension', () => {
   let extension: Extension;

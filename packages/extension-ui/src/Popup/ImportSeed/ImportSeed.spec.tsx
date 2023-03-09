@@ -13,10 +13,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 
-import { ActionContext, Button, Warning } from '../../components';
-import * as messaging from '../../messaging';
-import { flushAllPromises } from '../../testHelpers';
-import ImportSeed from './';
+import { ActionContext, Button, Warning } from '../../components/index.js';
+import * as messaging from '../../messaging.js';
+import { flushAllPromises } from '../../testHelpers.js';
+import ImportSeed from './index.js';
 
 const { configure, mount } = enzyme;
 

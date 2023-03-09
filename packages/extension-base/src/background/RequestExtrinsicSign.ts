@@ -4,7 +4,7 @@
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { SignerPayloadJSON } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
-import type { RequestSign } from './types';
+import type { RequestSign } from './types.js';
 
 import { TypeRegistry } from '@polkadot/types';
 

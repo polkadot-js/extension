@@ -5,11 +5,11 @@ import type { SignerPayloadJSON } from '@polkadot/types/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { Loading, SigningReqContext } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { Header } from '../../partials';
-import Request from './Request';
-import TransactionIndex from './TransactionIndex';
+import { Loading, SigningReqContext } from '../../components/index.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { Header } from '../../partials/index.js';
+import Request from './Request/index.js';
+import TransactionIndex from './TransactionIndex.js';
 
 export default function Signing (): React.ReactElement {
   const { t } = useTranslation();

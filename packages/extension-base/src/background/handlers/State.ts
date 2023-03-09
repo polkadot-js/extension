@@ -3,7 +3,7 @@
 
 import type { MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import type { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
+import type { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types.js';
 
 import { BehaviorSubject } from 'rxjs';
 
@@ -13,8 +13,8 @@ import { knownGenesis } from '@polkadot/networks/defaults';
 import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
-import { MetadataStore } from '../../stores';
-import { withErrorLog } from './helpers';
+import { MetadataStore } from '../../stores/index.js';
+import { withErrorLog } from './helpers.js';
 
 interface Resolver<T> {
   reject: (error: Error) => void;

@@ -5,7 +5,7 @@
 
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 
-import { buildHierarchy } from './buildHierarchy';
+import { buildHierarchy } from './buildHierarchy.js';
 
 const genesisExample = {
   KUSAMA: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',

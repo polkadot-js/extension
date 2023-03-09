@@ -3,14 +3,14 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { AccountContext, ActionContext, Address } from '../../components';
-import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
-import useMetadata from '../../hooks/useMetadata';
-import useTranslation from '../../hooks/useTranslation';
-import { createAccountSuri } from '../../messaging';
-import { HeaderWithSteps } from '../../partials';
-import { DEFAULT_TYPE } from '../../util/defaultType';
-import SeedAndPath from './SeedAndPath';
+import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation.js';
+import { AccountContext, ActionContext, Address } from '../../components/index.js';
+import useMetadata from '../../hooks/useMetadata.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { createAccountSuri } from '../../messaging.js';
+import { HeaderWithSteps } from '../../partials/index.js';
+import { DEFAULT_TYPE } from '../../util/defaultType.js';
+import SeedAndPath from './SeedAndPath.js';
 
 export interface AccountInfo {
   address: string;

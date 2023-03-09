@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import type { ThemeProps } from '../../types.js';
 
 import { t } from 'i18next';
 import React, { useCallback } from 'react';
@@ -10,7 +10,7 @@ import { Trans } from 'react-i18next';
 import { Button, Warning } from '@polkadot/extension-ui/components';
 import { deleteAuthRequest } from '@polkadot/extension-ui/messaging';
 
-import { styled } from '../../styled';
+import { styled } from '../../styled.js';
 
 interface Props extends ThemeProps {
   authId: string;

@@ -8,8 +8,8 @@ import { Network } from '@polkadot/networks/types';
 import uiSettings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
-import ledgerChains from '../util/legerChains';
-import useTranslation from './useTranslation';
+import ledgerChains from '../util/legerChains.js';
+import useTranslation from './useTranslation.js';
 
 interface StateBase {
   isLedgerCapable: boolean;

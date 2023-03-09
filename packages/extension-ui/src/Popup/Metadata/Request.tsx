@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
-import type { ThemeProps } from '../../types';
+import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext } from 'react';
 
-import { ActionBar, ActionContext, Button, Link, Table, Warning } from '../../components';
-import useMetadata from '../../hooks/useMetadata';
-import useTranslation from '../../hooks/useTranslation';
-import { approveMetaRequest, rejectMetaRequest } from '../../messaging';
-import { styled } from '../../styled';
+import { ActionBar, ActionContext, Button, Link, Table, Warning } from '../../components/index.js';
+import useMetadata from '../../hooks/useMetadata.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { approveMetaRequest, rejectMetaRequest } from '../../messaging.js';
+import { styled } from '../../styled.js';
 
 interface Props {
   className?: string;

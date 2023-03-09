@@ -14,8 +14,8 @@ import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { MetadataDef } from '@polkadot/extension-inject/types';
 
-import allChains from './util/chains';
-import { getSavedMeta, setSavedMeta } from './MetadataCache';
+import allChains from './util/chains.js';
+import { getSavedMeta, setSavedMeta } from './MetadataCache.js';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

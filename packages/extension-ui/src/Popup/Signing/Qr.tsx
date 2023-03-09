@@ -9,10 +9,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { wrapBytes } from '@polkadot/extension-dapp/wrapBytes';
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
 
-import { Button } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { styled } from '../../styled';
-import { CMD_MORTAL, CMD_SIGN_MESSAGE } from './Request';
+import { Button } from '../../components/index.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { styled } from '../../styled.js';
+import { CMD_MORTAL, CMD_SIGN_MESSAGE } from './Request/index.js';
 
 interface Props {
   address: string;

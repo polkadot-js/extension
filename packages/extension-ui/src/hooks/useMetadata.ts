@@ -5,7 +5,7 @@ import type { Chain } from '@polkadot/extension-chains/types';
 
 import { useEffect, useState } from 'react';
 
-import { getMetadata } from '../messaging';
+import { getMetadata } from '../messaging.js';
 
 export default function useMetadata (genesisHash?: string | null, isPartial?: boolean): Chain | null {
   const [chain, setChain] = useState<Chain | null>(null);

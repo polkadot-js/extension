@@ -1,22 +1,22 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../types.js';
 
 import { faArrowLeft, faCog, faPlusCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import logo from '../assets/pjs.svg';
-import { ActionContext } from '../components';
-import InputFilter from '../components/InputFilter';
-import Link from '../components/Link';
-import useOutsideClick from '../hooks/useOutsideClick';
-import useTranslation from '../hooks/useTranslation';
-import { getConnectedTabsUrl } from '../messaging';
-import { styled } from '../styled';
-import MenuAdd from './MenuAdd';
-import MenuSettings from './MenuSettings';
+import { ActionContext } from '../components/index.js';
+import InputFilter from '../components/InputFilter.js';
+import Link from '../components/Link.js';
+import useOutsideClick from '../hooks/useOutsideClick.js';
+import useTranslation from '../hooks/useTranslation.js';
+import { getConnectedTabsUrl } from '../messaging.js';
+import { styled } from '../styled.js';
+import MenuAdd from './MenuAdd.js';
+import MenuSettings from './MenuSettings.js';
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -94,7 +94,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
   );
 
   const _onBackArrowClick = useCallback(
-    () => onAction('..')
+    () => onAction('../index.js')
     , [onAction]);
 
   return (

@@ -6,7 +6,7 @@ import type { Chain } from '@polkadot/extension-chains/types';
 import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../types.js';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
@@ -18,18 +18,18 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import details from '../assets/details.svg';
-import useMetadata from '../hooks/useMetadata';
-import useOutsideClick from '../hooks/useOutsideClick';
-import useToast from '../hooks/useToast';
-import useTranslation from '../hooks/useTranslation';
-import { showAccount } from '../messaging';
-import { styled } from '../styled';
-import { DEFAULT_TYPE } from '../util/defaultType';
-import getParentNameSuri from '../util/getParentNameSuri';
-import { AccountContext, SettingsContext } from './contexts';
-import Identicon from './Identicon';
-import Menu from './Menu';
-import Svg from './Svg';
+import useMetadata from '../hooks/useMetadata.js';
+import useOutsideClick from '../hooks/useOutsideClick.js';
+import useToast from '../hooks/useToast.js';
+import useTranslation from '../hooks/useTranslation.js';
+import { showAccount } from '../messaging.js';
+import { styled } from '../styled.js';
+import { DEFAULT_TYPE } from '../util/defaultType.js';
+import getParentNameSuri from '../util/getParentNameSuri.js';
+import { AccountContext, SettingsContext } from './contexts.js';
+import Identicon from './Identicon.js';
+import Menu from './Menu.js';
+import Svg from './Svg.js';
 
 export interface Props {
   actions?: React.ReactNode;

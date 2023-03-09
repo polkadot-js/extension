@@ -1,11 +1,11 @@
 // Copyright 2019-2023 @polkadot/extension-inject authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Injected, InjectedExtension, InjectedWindow, InjectOptions } from './types';
+import type { Injected, InjectedExtension, InjectedWindow, InjectOptions } from './types.js';
 
-import { cyrb53 } from './cyrb53';
+import { cyrb53 } from './cyrb53.js';
 
-export { packageInfo } from './packageInfo';
+export { packageInfo } from './packageInfo.js';
 
 // setting for new-style connect (more-secure with no details exposed without
 // user acknowledgement, however slightly less-compatible with all dapps, some

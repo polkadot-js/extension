@@ -4,11 +4,11 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 
-import { AccountContext, AccountNamePasswordCreation, ActionContext, Address } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { deriveAccount } from '../../messaging';
-import { HeaderWithSteps } from '../../partials';
-import SelectParent from './SelectParent';
+import { AccountContext, AccountNamePasswordCreation, ActionContext, Address } from '../../components/index.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { deriveAccount } from '../../messaging.js';
+import { HeaderWithSteps } from '../../partials/index.js';
+import SelectParent from './SelectParent.js';
 
 interface Props {
   isLocked?: boolean;

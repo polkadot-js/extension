@@ -4,11 +4,11 @@
 import React from 'react';
 import { WithTranslation } from 'react-i18next';
 
-import Header from '../partials/Header';
-import Button from './Button';
-import ButtonArea from './ButtonArea';
-import translate from './translate';
-import VerticalSpace from './VerticalSpace';
+import Header from '../partials/Header.js';
+import Button from './Button.js';
+import ButtonArea from './ButtonArea.js';
+import translate from './translate.js';
+import VerticalSpace from './VerticalSpace.js';
 
 interface Props extends WithTranslation {
   children: React.ReactNode;

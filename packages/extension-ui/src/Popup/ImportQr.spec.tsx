@@ -13,10 +13,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 
-import { Button } from '../components';
-import * as messaging from '../messaging';
-import { flushAllPromises } from '../testHelpers';
-import ImportQr from './ImportQr';
+import { Button } from '../components/index.js';
+import * as messaging from '../messaging.js';
+import { flushAllPromises } from '../testHelpers.js';
+import ImportQr from './ImportQr.js';
 
 const { configure, mount } = enzyme;
 

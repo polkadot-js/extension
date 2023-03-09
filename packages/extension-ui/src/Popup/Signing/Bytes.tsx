@@ -1,14 +1,14 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import type { ThemeProps } from '../../types.js';
 
 import React, { useMemo } from 'react';
 
 import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
 
-import useTranslation from '../../hooks/useTranslation';
-import { styled } from '../../styled';
+import useTranslation from '../../hooks/useTranslation.js';
+import { styled } from '../../styled.js';
 
 interface Props {
   className?: string;

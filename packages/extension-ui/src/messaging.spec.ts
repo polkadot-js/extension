@@ -8,7 +8,7 @@ import '@polkadot/extension-mocks/chrome';
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import enzyme from 'enzyme';
 
-import { exportAccount } from './messaging';
+import { exportAccount } from './messaging.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 enzyme.configure({ adapter: new Adapter() });

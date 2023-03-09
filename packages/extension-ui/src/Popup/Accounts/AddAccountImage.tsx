@@ -7,11 +7,11 @@
 /* eslint-disable react/jsx-sort-props */
 /* eslint-disable react/jsx-max-props-per-line */
 
-import type { ThemeProps } from '../../types';
+import type { ThemeProps } from '../../types.js';
 
 import React from 'react';
 
-import { styled } from '../../styled';
+import { styled } from '../../styled.js';
 
 interface Props extends ThemeProps {
   className?: string;

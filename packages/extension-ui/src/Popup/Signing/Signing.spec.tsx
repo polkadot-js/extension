@@ -15,16 +15,16 @@ import React, { useState } from 'react';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
 
-import { ActionContext, Address, Button, Input, SigningReqContext, themes } from '../../components';
-import * as messaging from '../../messaging';
-import * as MetadataCache from '../../MetadataCache';
-import { flushAllPromises } from '../../testHelpers';
-import Extrinsic from './Extrinsic';
-import { westendMetadata } from './metadataMock';
-import Qr from './Qr';
-import Request from './Request';
-import TransactionIndex from './TransactionIndex';
-import Signing from '.';
+import { ActionContext, Address, Button, Input, SigningReqContext, themes } from '../../components/index.js';
+import * as messaging from '../../messaging.js';
+import * as MetadataCache from '../../MetadataCache.js';
+import { flushAllPromises } from '../../testHelpers.js';
+import Request from './Request/index.js';
+import Extrinsic from './Extrinsic.js';
+import Signing from './index.js';
+import { westendMetadata } from './metadataMock.js';
+import Qr from './Qr.js';
+import TransactionIndex from './TransactionIndex.js';
 
 const { configure, mount } = enzyme;
 

@@ -8,10 +8,10 @@ import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { Button, Warning } from '../../components';
-import { useLedger } from '../../hooks/useLedger';
-import useTranslation from '../../hooks/useTranslation';
-import { styled } from '../../styled';
+import { Button, Warning } from '../../components/index.js';
+import { useLedger } from '../../hooks/useLedger.js';
+import useTranslation from '../../hooks/useTranslation.js';
+import { styled } from '../../styled.js';
 
 interface Props {
   accountIndex?: number;

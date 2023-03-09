@@ -8,7 +8,7 @@ import { MESSAGE_ORIGIN_CONTENT } from '@polkadot/extension-base/defaults';
 import { enable, handleResponse, redirectIfPhishing } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
 
-import { packageInfo } from './packageInfo';
+import { packageInfo } from './packageInfo.js';
 
 function inject () {
   injectExtension(enable, {

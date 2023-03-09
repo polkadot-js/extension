@@ -3,8 +3,8 @@
 
 import React from 'react';
 
-import { styled } from '../styled';
-import { Button } from '.';
+import { styled } from '../styled.js';
+import { Button } from './index.js';
 
 interface ButtonWithSubtitleProps {
   title: string;

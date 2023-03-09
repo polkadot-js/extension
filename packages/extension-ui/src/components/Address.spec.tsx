@@ -15,14 +15,14 @@ import enzyme from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import * as messaging from '../messaging';
-import * as MetadataCache from '../MetadataCache';
-import { westendMetadata } from '../Popup/Signing/metadataMock';
-import { flushAllPromises } from '../testHelpers';
-import { buildHierarchy } from '../util/buildHierarchy';
-import { DEFAULT_TYPE } from '../util/defaultType';
-import getParentNameSuri from '../util/getParentNameSuri';
-import { AccountContext, Address } from '.';
+import * as messaging from '../messaging.js';
+import * as MetadataCache from '../MetadataCache.js';
+import { westendMetadata } from '../Popup/Signing/metadataMock.js';
+import { flushAllPromises } from '../testHelpers.js';
+import { buildHierarchy } from '../util/buildHierarchy.js';
+import { DEFAULT_TYPE } from '../util/defaultType.js';
+import getParentNameSuri from '../util/getParentNameSuri.js';
+import { AccountContext, Address } from './index.js';
 
 const { configure, mount } = enzyme;
 

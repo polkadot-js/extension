@@ -3,9 +3,9 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { ButtonArea, Checkbox, MnemonicSeed, NextStepButton, VerticalSpace, Warning } from '../../components';
-import useToast from '../../hooks/useToast';
-import useTranslation from '../../hooks/useTranslation';
+import { ButtonArea, Checkbox, MnemonicSeed, NextStepButton, VerticalSpace, Warning } from '../../components/index.js';
+import useToast from '../../hooks/useToast.js';
+import useTranslation from '../../hooks/useTranslation.js';
 
 interface Props {
   onNextStep: () => void;

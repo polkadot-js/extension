@@ -23,7 +23,6 @@ import { TransactionEventResponse } from '@subwallet/extension-base/services/tra
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
-import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
@@ -1613,7 +1612,7 @@ export default class KoniState {
 
     transaction.nonce = await web3.eth.getTransactionCount(fromAddress);
 
-    const hashPayload = this.generateHashPayload(networkKey, transaction);
+    const hashPayload = this.transactionService.generateHashPayload(networkKey, transaction);
     const isToContract = await isContractAddress(transaction.to || '', evmApi);
     const parseData = isToContract
       ? transaction.data

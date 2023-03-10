@@ -1,18 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_ChainAsset, _ChainInfo} from '@subwallet/chain-list/types';
-import {_SubstrateApi} from '@subwallet/extension-base/services/chain-service/types';
-import {
-  _getSubstrateParaId,
-  _getXcmAssetMultilocation,
-  _isChainEvmCompatible,
-  _isSubstrateRelayChain
-} from '@subwallet/extension-base/services/chain-service/utils';
-import {KeyringPair} from '@subwallet/keyring/types';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getSubstrateParaId, _getXcmAssetMultilocation, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { KeyringPair } from '@subwallet/keyring/types';
 
-import {ApiPromise} from '@polkadot/api';
-import {decodeAddress} from '@polkadot/util-crypto';
+import { ApiPromise } from '@polkadot/api';
+import { decodeAddress } from '@polkadot/util-crypto';
 
 // const ASSET_TO_LOCATION_MAP: Record<string, Record<string, Record<string, any>>> = {
 //   astar: {

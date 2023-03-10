@@ -1699,6 +1699,8 @@ export default class KoniExtension {
       const evmApiMap = this.#koniState.getEvmApiMap();
       const chainId = chainInfo?.evmInfo?.evmChainId || 1;
 
+      const fromPair = keyring.getPair(from);
+
       const account: AccountJson = { address: fromPair?.address || from, ...fromPair?.meta };
 
       swTransactionInput.chainType = ChainType.EVM;
@@ -1708,13 +1710,16 @@ export default class KoniExtension {
         const assetAddress = _getContractAddressOfToken(tokenInfo);
 
         const [transaction, , estimateFee] = await getERC20TransactionObject(assetAddress, chainInfo, from, to, transferVal, isTransferAll, evmApiMap);
+        const parseData = transaction.data ? (await parseContractInput(transaction.data, transaction.to || '', chainInfo)).result : '';
 
         swTransactionInput.transaction = {
           ...transaction,
           account: account,
           canSign: true,
           chainId,
-          estimateGas: estimateFee
+          estimateGas: estimateFee,
+          parseData: parseData,
+          isToContract: true
         };
       } else {
         swTransactionInput.extrinsicType = ExtrinsicType.TRANSFER_BALANCE;
@@ -1727,7 +1732,9 @@ export default class KoniExtension {
           canSign: true,
           chainId,
           from: from,
-          estimateGas: estimateFee
+          estimateGas: estimateFee,
+          parseData: '',
+          isToContract: true
         };
       }
     } else {

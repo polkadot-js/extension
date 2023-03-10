@@ -208,7 +208,7 @@ export default class TransactionService {
     console.error(error);
   }
 
-  private generateHashPayload (chain: string, transaction: TransactionConfig): HexString {
+  public generateHashPayload (chain: string, transaction: TransactionConfig): HexString {
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
     const txObject: Web3Transaction = {

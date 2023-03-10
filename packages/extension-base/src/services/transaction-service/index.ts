@@ -45,8 +45,12 @@ export default class TransactionService {
     return this.allTransactions.filter((t) => t.status === ExtrinsicStatus.PENDING || t.status === ExtrinsicStatus.PROCESSING);
   }
 
-  private getTransaction (id: string) {
+  public getTransaction (id: string) {
     return this.transactions[id];
+  }
+
+  public getTransactionSubject () {
+    return this.transactionSubject;
   }
 
   private validateTransaction (transaction: SWTransaction) {

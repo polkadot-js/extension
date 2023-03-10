@@ -21,6 +21,7 @@ import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
+import {SWTransactionResult} from "@subwallet/extension-base/services/transaction-service/types";
 
 export interface ServiceInfo {
   chainInfoMap: Record<string, _ChainInfo>;
@@ -1609,6 +1610,10 @@ export interface AssetSettingUpdateReq {
   assetSetting: AssetSetting
 }
 
+export interface RequestGetTransaction {
+  id: string;
+}
+
 export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, TransactionResponse];
@@ -1784,6 +1789,11 @@ export interface KoniRequestSignatures {
   'pri(derivation.getList)': [RequestGetDeriveAccounts, ResponseGetDeriveAccounts];
   'pri(derivation.create.multiple)': [RequestDeriveCreateMultiple, boolean];
   'pri(derivation.createV3)': [RequestDeriveCreateV3, boolean];
+
+  // Transaction
+  // Get Transaction
+  'pri(transactions.getOne)': [RequestGetTransaction, SWTransactionResult];
+  'pri(transactions.subscribe)': [null, Record<string, SWTransactionResult>, Record<string, SWTransactionResult>];
 }
 
 export interface ApplicationMetadataType {

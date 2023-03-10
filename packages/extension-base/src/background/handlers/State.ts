@@ -238,7 +238,9 @@ export default class State {
     const complete = (authorizedAccounts: string[] = []) => {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
-      this.#authUrls[decodeURIComponent(url)] = {
+      const URLorigin = new URL(url).origin;
+
+      this.#authUrls[URLorigin] = {
         authorizedAccounts,
         count: 0,
         id: idStr,

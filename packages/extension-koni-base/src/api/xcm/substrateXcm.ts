@@ -4,8 +4,7 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _XCM_CHAIN_GROUP, _XCM_CHAIN_USE_LIMITED_WEIGHT } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
-import { parseNumberToDisplay } from '@subwallet/extension-base/utils';
+import { _getSubstrateParaId, _getXcmAssetMultilocation, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
@@ -43,14 +42,12 @@ export async function substrateEstimateCrossChainFee (
   substrateApiMap: Record<string, _SubstrateApi>,
   originTokenInfo: _ChainAsset,
   chainInfoMap: Record<string, _ChainInfo>
-): Promise<[string, string | undefined]> {
+): Promise<string> {
   const substrateApi = await substrateApiMap[originNetworkKey].isReady;
   const api = substrateApi.api;
   let fee = '0';
-  let feeString = '';
   const originChainInfo = chainInfoMap[originNetworkKey];
   const destinationChainInfo = chainInfoMap[destinationNetworkKey];
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(originChainInfo);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const tokenIdentity = _getXcmAssetMultilocation(originTokenInfo);
   const weightParam = _XCM_CHAIN_USE_LIMITED_WEIGHT.includes(originNetworkKey) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
@@ -69,10 +66,8 @@ export async function substrateEstimateCrossChainFee (
         const paymentInfo = await extrinsic.paymentInfo(sender.address);
 
         fee = paymentInfo.partialFee.toString();
-
-        feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
       } catch (e) {
-        feeString = `0.0000 ${symbol}`;
+        console.error(e);
       }
 
       console.log('substrate xcm tx p-p or p-r here', extrinsic.toHex());
@@ -113,7 +108,6 @@ export async function substrateEstimateCrossChainFee (
         const paymentInfo = await extrinsic.paymentInfo(sender);
 
         fee = paymentInfo.partialFee.toString();
-        feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
 
         console.log('substrate xcm teleport asset tx r-p here', extrinsic.toHex());
       } else {
@@ -150,20 +144,15 @@ export async function substrateEstimateCrossChainFee (
         const paymentInfo = await extrinsic.paymentInfo(sender);
 
         fee = paymentInfo.partialFee.toString();
-        feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
 
         console.log('substrate xcm reserve transfer tx r-p here', extrinsic.toHex());
       }
     }
-
-    return [fee, feeString];
   } catch (e) {
     console.error('error parsing xcm transaction', e);
-
-    feeString = `0.0000 ${symbol}`;
-
-    return [fee, feeString];
   }
+
+  return fee;
 }
 
 export function substrateGetXcmExtrinsic (

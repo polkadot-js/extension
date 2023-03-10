@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetRef, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { _XCM_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isNativeToken, _isXcmPathSupported } from '@subwallet/extension-base/services/chain-service/utils';
-import { SignerType } from '@subwallet/extension-base/signers/types';
-import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
-import { getUnsupportedResponse } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { astarEstimateCrossChainFee, astarGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/astar';
 import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/moonbeamXcm';
 import { statemintEstimateCrossChainFee, statemintGetXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm/statemintXcm';
@@ -27,11 +24,11 @@ export async function estimateCrossChainFee (
   chainInfoMap: Record<string, _ChainInfo>,
   substrateApiMap: Record<string, _SubstrateApi>,
   assetRefMap: Record<string, _AssetRef>
-): Promise<[string, string | undefined]> {
+): Promise<string> {
   if (!_isXcmPathSupported(originTokenInfo.slug, destinationTokenInfo.slug, assetRefMap)) {
     console.log('Unsupported xcm');
 
-    return ['0', ''];
+    return '0';
   }
 
   const originNetworkKey = originTokenInfo.originChain;
@@ -98,7 +95,7 @@ interface MakeCrossChainTransferProps {
   substrateApiMap: Record<string, _SubstrateApi>;
   chainInfoMap: Record<string, _ChainInfo>;
   assetRefMap: Record<string, _AssetRef>;
-  callback: (data: BasicTxResponse) => void;
+  callback: (data: TransactionResponse) => void;
 }
 
 export async function makeCrossChainTransfer ({ assetRefMap,
@@ -110,48 +107,48 @@ export async function makeCrossChainTransfer ({ assetRefMap,
   sender,
   sendingValue,
   substrateApiMap }: MakeCrossChainTransferProps): Promise<void> {
-  const txState: BasicTxResponse = {};
+  // const txState: TransactionResponse = {};
+  //
+  // const originNetworkKey = originTokenInfo.originChain;
+  //
+  // if (!_isXcmPathSupported(originTokenInfo.slug, destinationTokenInfo.slug, assetRefMap)) {
+  //   callback(getUnsupportedResponse());
+  //
+  //   return;
+  // }
 
-  const originNetworkKey = originTokenInfo.originChain;
+  // const substrateApi = await substrateApiMap[originNetworkKey].isReady;
+  //
+  // const extrinsic = await createXcmExtrinsic({
+  //   destinationTokenInfo,
+  //   originTokenInfo,
+  //   sendingValue: sendingValue,
+  //   recipient: recipient,
+  //   chainInfoMap: chainInfoMap,
+  //   substrateApiMap: substrateApiMap
+  // });
+  //
+  // const updateResponseTxResult = (response: TransactionResponse, records: EventRecord[]) => {
+  //   updateXcmResponseTxResult(originNetworkKey, originTokenInfo, response, records);
+  // };
 
-  if (!_isXcmPathSupported(originTokenInfo.slug, destinationTokenInfo.slug, assetRefMap)) {
-    callback(getUnsupportedResponse());
-
-    return;
-  }
-
-  const substrateApi = await substrateApiMap[originNetworkKey].isReady;
-
-  const extrinsic = await createXcmExtrinsic({
-    destinationTokenInfo,
-    originTokenInfo,
-    sendingValue: sendingValue,
-    recipient: recipient,
-    chainInfoMap: chainInfoMap,
-    substrateApiMap: substrateApiMap
-  });
-
-  const updateResponseTxResult = (response: BasicTxResponse, records: EventRecord[]) => {
-    updateXcmResponseTxResult(originNetworkKey, originTokenInfo, response, records);
-  };
-
-  await signAndSendExtrinsic({
-    type: SignerType.PASSWORD,
-    substrateApi: substrateApi,
-    callback: callback,
-    extrinsic: extrinsic,
-    txState: txState,
-    address: sender.address,
-    updateResponseTxResult: updateResponseTxResult,
-    errorMessage: 'error xcm transfer'
-  });
+  // await signAndSendExtrinsic({
+  //   type: SignerType.PASSWORD,
+  //   substrateApi: substrateApi,
+  //   callback: callback,
+  //   extrinsic: extrinsic,
+  //   txState: txState,
+  //   address: sender.address,
+  //   updateResponseTxResult: updateResponseTxResult,
+  //   errorMessage: 'error xcm transfer'
+  // });
 }
 
 // TODO: add + refine logic for more chains
 export function updateXcmResponseTxResult (
   networkKey: string,
   tokenInfo: _ChainAsset,
-  response: BasicTxResponse,
+  response: TransactionResponse,
   records: EventRecord[]
 ) {
   if (!response.txResult) {

@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxResponse, ExternalRequestPromise, ExternalRequestPromiseStatus, SupportTransferResponse, TransferErrorCode } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { BasicTxErrorType, SupportTransferResponse, TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { _BALANCE_TOKEN_GROUP, _TRANSFER_CHAIN_GROUP, _TRANSFER_NOT_SUPPORTED_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
@@ -10,26 +11,8 @@ import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/toke
 import { KeyringPair } from '@subwallet/keyring/types';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
+import { AccountInfoWithProviders, AccountInfoWithRefCount } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
-
-// to be removed
-// export async function getExistentialDeposit (networkKey: string, token: string, substrateApiMap: Record<string, _SubstrateApi>): Promise<string> {
-//   const chainApi = await substrateApiMap[networkKey].isReady;
-//   const api = chainApi.api;
-//
-//   const tokenInfo = await getTokenInfo(networkKey, api, token);
-//
-//   if (tokenInfo && tokenInfo.isMainToken) {
-//     if (api?.consts?.balances?.existentialDeposit) {
-//       return api.consts.balances.existentialDeposit.toString();
-//     } else if (api?.consts?.eqBalances?.existentialDeposit) {
-//       return api.consts.eqBalances.existentialDeposit.toString();
-//     }
-//   }
-//
-//   return '0';
-// }
 
 function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount): accountInfo is AccountInfoWithRefCount {
   return !!(accountInfo as AccountInfoWithRefCount).refcount;
@@ -216,219 +199,11 @@ export async function estimateFee (
   return [fee, feeSymbol];
 }
 
-export function getUnsupportedResponse (): BasicTxResponse {
+export function getUnsupportedResponse (): TransactionResponse {
   return {
     status: false,
-    errors: [
-      {
-        code: TransferErrorCode.UNSUPPORTED,
-        message: 'The transaction of current network is unsupported'
-      }
-    ]
+    errors: [new TransactionError(BasicTxErrorType.UNSUPPORTED, 'The transaction of current network is unsupported')]
   };
-}
-
-export function updateTransferResponseTxResult (
-  networkKey: string,
-  tokenInfo: _ChainAsset,
-  response: BasicTxResponse,
-  records: EventRecord[],
-  transferAmount?: string): void {
-  if (!response.txResult) {
-    if (_isTokenWasmSmartContract(tokenInfo)) {
-      response.txResult = { change: transferAmount || '0' };
-    } else {
-      response.txResult = { change: '0' };
-    }
-  }
-
-  let isFeeUseMainTokenSymbol = true;
-
-  for (let index = 0; index < records.length; index++) {
-    const record = records[index];
-
-    if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo)) {
-      if (record.event.section === 'currencies' &&
-        record.event.method.toLowerCase() === 'transferred') {
-        if (index === 0) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          response.txResult.fee = record.event.data[3]?.toString() || '0';
-          response.txResult.feeSymbol = tokenInfo.symbol;
-
-          isFeeUseMainTokenSymbol = false;
-        } else {
-          response.txResult.change = record.event.data[3]?.toString() || '0';
-          response.txResult.changeSymbol = tokenInfo.symbol;
-        }
-      }
-    } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo)) {
-      if (record.event.section === 'tokens' &&
-        record.event.method.toLowerCase() === 'transfer') {
-        response.txResult.change = record.event.data[3]?.toString() || '0';
-        response.txResult.changeSymbol = tokenInfo.symbol;
-      }
-    } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo)) {
-      if (record.event.section === 'eqBalances' &&
-        record.event.method.toLowerCase() === 'transfer') {
-        response.txResult.change = record.event.data[3]?.toString() || '0';
-        response.txResult.changeSymbol = tokenInfo.symbol;
-      } else if (record.event.section === 'transactionPayment' &&
-        record.event.method.toLowerCase() === 'transactionfeepaid') {
-        response.txResult.fee = record.event.data[1]?.toString() || '0';
-        response.txResult.feeSymbol = tokenInfo.symbol;
-      }
-    } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && !_isNativeToken(tokenInfo)) {
-      if (record.event.section === 'tokens' &&
-        record.event.method.toLowerCase() === 'transfer') {
-        response.txResult.change = record.event.data[3]?.toString() || '0';
-        response.txResult.changeSymbol = tokenInfo.symbol;
-      }
-    } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
-      if (record.event.section === 'assets' &&
-        record.event.method.toLowerCase() === 'transferred') {
-        response.txResult.change = record.event.data[3]?.toString() || '0';
-        response.txResult.changeSymbol = tokenInfo.symbol;
-      }
-    } else {
-      if (record.event.section === 'balances' &&
-        record.event.method.toLowerCase() === 'transfer') {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        response.txResult.change = record.event.data[2]?.toString() || '0';
-      } else if (record.event.section === 'xTokens' &&
-        record.event.method.toLowerCase() === 'transferred') {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        response.txResult.change = record.event.data[2]?.toString() || '0';
-      }
-    }
-
-    if (isFeeUseMainTokenSymbol && record.event.section === 'balances' &&
-      record.event.method.toLowerCase() === 'withdraw') {
-      if (!response.txResult.fee) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        response.txResult.fee = record.event.data[1]?.toString() || '0';
-      }
-    }
-  }
-}
-
-export interface TransferDoSignAndSendProps {
-  substrateApi: _SubstrateApi;
-  networkKey: string;
-  tokenInfo: _ChainAsset;
-  extrinsic: SubmittableExtrinsic;
-  _updateResponseTxResult: (
-    networkKey: string,
-    tokenInfo: _ChainAsset,
-    response: BasicTxResponse,
-    records: EventRecord[],
-    transferAmount?: string) => void
-  callback: (data: BasicTxResponse) => void;
-  transferAmount?: string;
-  signFunction: () => Promise<void>;
-  updateState?: (promise: Partial<ExternalRequestPromise>) => void;
-}
-
-export async function doSignAndSend ({ _updateResponseTxResult,
-  callback,
-  extrinsic,
-  networkKey,
-  signFunction,
-  substrateApi,
-  tokenInfo,
-  transferAmount,
-  updateState }: TransferDoSignAndSendProps) {
-  const api = substrateApi.api;
-  const response: BasicTxResponse = {
-    errors: []
-  };
-
-  function updateResponseByEvents (response: BasicTxResponse, records: EventRecord[]) {
-    records.forEach((record) => {
-      const { event: { method, section, data: [error] } } = record;
-
-      // @ts-ignore
-      const isFailed = section === 'system' && method === 'ExtrinsicFailed';
-      // @ts-ignore
-      const isSuccess = section === 'system' && method === 'ExtrinsicSuccess';
-
-      console.log('Transaction final: ', isFailed, isSuccess);
-
-      if (isFailed) {
-        response.status = false;
-        response.txError = true;
-
-        // @ts-ignore
-        if (error.isModule) {
-          // @ts-ignore
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          const decoded = api.registry.findMetaError(error.asModule);
-          const { docs, method, section } = decoded;
-
-          const errorMessage = docs.join(' ');
-
-          console.log(`${section}.${method}: ${errorMessage}`);
-          // response.data = {
-          //   section,
-          //   method,
-          //   message: errorMessage
-          // };
-          response.errors?.push({
-            code: TransferErrorCode.TRANSFER_ERROR,
-            message: errorMessage
-          });
-        } else {
-          // Other, CannotLookup, BadOrigin, no extra info
-          console.log(error.toString());
-          response.errors?.push({
-            code: TransferErrorCode.TRANSFER_ERROR,
-            message: error.toString()
-          });
-        }
-      } else if (isSuccess) {
-        response.status = true;
-      }
-    });
-
-    _updateResponseTxResult(networkKey, tokenInfo, response, records, transferAmount);
-  }
-
-  await signFunction();
-
-  await extrinsic.send(({ events = [], status }) => {
-    console.log('Transaction status:', status.type, status.hash.toHex());
-
-    if (status.isInBlock) {
-      callback(response);
-
-      updateResponseByEvents(response, events);
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-      response.extrinsicHash = extrinsic.hash.toHex();
-      callback(response);
-
-      // const extrinsicIndex = parseInt(events[0]?.phase.asApplyExtrinsic.toString());
-      //
-      // // Get extrinsic hash from network
-      // api.rpc.chain.getBlock(blockHash)
-      //   .then((blockQuery: SignedBlockWithJustifications) => {
-      //     response.extrinsicHash = blockQuery.block.extrinsics[extrinsicIndex].hash.toHex();
-      //     callback(response);
-      //   })
-      //   .catch((e) => {
-      //     console.error('Transaction errors:', e);
-      //     callback(response);
-      //   });
-
-      if (response.status !== undefined) {
-        updateState && updateState({ status: response.status ? ExternalRequestPromiseStatus.COMPLETED : ExternalRequestPromiseStatus.FAILED });
-      }
-    } else if (status.isFinalized) {
-      response.isFinalized = true;
-      callback(response);
-    } else {
-      callback(response);
-    }
-  });
 }
 
 interface CreateTransferExtrinsicProps {

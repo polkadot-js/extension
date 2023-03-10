@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { ExternalState, LedgerState, QrState } from '@subwallet/extension-base/signers/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { SingleAddress } from '@subwallet/ui-keyring/observable/types';
@@ -19,6 +19,9 @@ import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 import { SignerResult } from '@polkadot/types/types/extrinsic';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
+
+import { TransactionWarning } from './warnings/TransactionWarning';
+import {SWTransactionResult} from "@subwallet/extension-base/services/transaction-service/types";
 
 export interface ServiceInfo {
   chainInfoMap: Record<string, _ChainInfo>;
@@ -166,7 +169,6 @@ export interface StakeUnlockingJson {
   details: UnlockingStakeInfo[]
 }
 
-// TODO: refactor this
 export interface PriceJson {
   ready?: boolean,
   currency: string,
@@ -445,6 +447,7 @@ export enum ExtrinsicType {
   STAKING_CLAIM_REWARD = 'staking.claim_reward',
   STAKING_WITHDRAW = 'staking.withdraw',
   STAKING_COMPOUNDING = 'staking.compounding',
+  STAKING_CANCEL_COMPOUNDING = 'staking.cancel_compounding',
   EVM_EXECUTE = 'evm.smart_contract',
 }
 
@@ -531,17 +534,78 @@ export interface SWError extends Error {
   data?: unknown;
 }
 
-export enum TransactionErrorType {
+export interface SWWarning {
+  errorType: string;
+  code?: number;
+  message: string;
+  data?: unknown;
+}
+
+export enum BasicTxErrorType {
+  NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
   NOT_ENOUGH_BALANCE = 'NOT_ENOUGH_BALANCE',
   CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
   INVALID_PARAMS = 'INVALID_PARAMS',
-  INTERNAL_ERROR = 'INTERNAL_ERROR',
   DUPLICATE_TRANSACTION = 'DUPLICATE_TRANSACTION',
   UNABLE_TO_SIGN = 'UNABLE_TO_SIGN',
   USER_REJECT_REQUEST = 'USER_REJECT_REQUEST',
   UNABLE_TO_SEND = 'UNABLE_TO_SEND',
   SEND_TRANSACTION_FAILED = 'SEND_TRANSACTION_FAILED',
+  INTERNAL_ERROR = 'INTERNAL_ERROR',
+  UNSUPPORTED = 'UNSUPPORTED',
 }
+
+export enum StakingTxErrorType {
+  STAKING_ERROR = 'stakingError',
+  UN_STAKING_ERROR = 'unStakingError',
+  WITHDRAW_STAKING_ERROR = 'withdrawStakingError',
+  CLAIM_REWARD_ERROR = 'claimRewardError',
+  CREATE_COMPOUND_ERROR = 'createCompoundError',
+  CANCEL_COMPOUND_ERROR = 'cancelCompoundError',
+}
+
+export enum TransferTxErrorType {
+  NOT_ENOUGH_VALUE = 'NOT_ENOUGH_VALUE',
+  NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
+  INVALID_TOKEN = 'INVALID_TOKEN',
+  TRANSFER_ERROR = 'TRANSFER_ERROR',
+}
+
+export type TransactionErrorType = BasicTxErrorType | TransferTxErrorType | StakingTxErrorType
+export enum BasicTxWarningCode {
+  NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'notEnoughExistentialDeposit'
+}
+
+export type BasicTxError = {
+  errorType: TxErrorCode,
+  data?: object,
+  message: string
+}
+
+export type BasicTxWarning = {
+  warningType: TransactionWarningType,
+  data?: object,
+  message: string
+}
+
+export interface TransactionResponse {
+  extrinsicHash?: string;
+  txError?: boolean;
+  errors?: TransactionError[];
+  status?: boolean;
+  txResult?: TxResultType
+  passwordError?: string | null;
+}
+
+export interface NftTransactionResponse extends TransactionResponse {
+  isSendingSelf: boolean;
+}
+
+export type HandleBasicTx = (data: TransactionResponse) => void;
+
+export type TxErrorCode = TransferTxErrorType | TransactionErrorType
+
+export type TransactionWarningType = BasicTxWarningCode
 
 export enum ProviderErrorType {
   CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
@@ -550,14 +614,7 @@ export enum ProviderErrorType {
   USER_REJECT = 'USER_REJECT',
 }
 
-export interface RequestTransactionHistoryAdd {
-  address: string;
-  networkKey: string;
-  item: TxHistoryItem;
-}
-
-/// Manage account
-
+// Manage account
 // Export private key
 
 export interface RequestAccountExportPrivateKey {
@@ -852,85 +909,11 @@ export enum NETWORK_STATUS {
   PENDING = 'pending'
 }
 
-export enum TransferErrorCode {
-  NOT_ENOUGH_VALUE = 'notEnoughValue',
-  NOT_ENOUGH_FEE = 'notEnoughValue',
-  INVALID_VALUE = 'invalidValue',
-  INVALID_TOKEN = 'invalidToken',
-  TRANSFER_ERROR = 'transferError',
-  UNSUPPORTED = 'unsupported'
-}
-
-export enum BasicTxErrorCode {
-  INVALID_PARAM = 'invalidParam',
-  KEYRING_ERROR = 'keyringError',
-  STAKING_ERROR = 'stakingError',
-  UN_STAKING_ERROR = 'unStakingError',
-  WITHDRAW_STAKING_ERROR = 'withdrawStakingError',
-  CLAIM_REWARD_ERROR = 'claimRewardError',
-  CREATE_COMPOUND_ERROR = 'createCompoundError',
-  CANCEL_COMPOUND_ERROR = 'cancelCompoundError',
-  TIMEOUT = 'timeout',
-  BALANCE_TO_LOW = 'balanceTooLow1',
-  UNKNOWN_ERROR = 'unknownError'
-}
-
-export enum BasicTxWarningCode {
-  NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'notEnoughExistentialDeposit'
-}
-
-export type TxErrorCode = TransferErrorCode | BasicTxErrorCode
-
-export type TxWarningCode = BasicTxWarningCode
-
-export type BasicTxError = {
-  code: TxErrorCode,
-  data?: object,
-  message: string
-}
-
-export type BasicTxWarning = {
-  code: TxWarningCode,
-  data?: object,
-  message: string
-}
-
-export interface BasicTxResponse {
-  passwordError?: string | null;
-  callHash?: string;
-  status?: boolean;
-  extrinsicHash?: string;
-  txError?: boolean;
-  errors?: BasicTxError[];
-  externalState?: ExternalState;
-  qrState?: QrState;
-  ledgerState?: LedgerState;
-  isBusy?: boolean;
-  txResult?: TxResultType,
-  isFinalized?: boolean
-}
-
-export interface NftTransactionResponse extends BasicTxResponse {
-  isSendingSelf: boolean;
-}
-
-export type HandleBasicTx = (data: BasicTxResponse) => void;
-export type HandleTxResponse<T extends BasicTxResponse> = (data: T) => void;
-
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type BaseRequestSign = {};
 
 // Internal request: request from extension, not dApp.
 export type InternalRequestSign<T extends BaseRequestSign> = Omit<T, 'password'>;
-
-export enum TransferStep {
-  READY = 'ready',
-  SIGNING = 'signing',
-  START = 'start',
-  PROCESSING = 'processing',
-  SUCCESS = 'success',
-  ERROR = 'error'
-}
 
 export type TxResultType = {
   change: string;
@@ -1377,13 +1360,10 @@ export interface RequestCheckTransfer extends BaseRequestSign{
   tokenSlug: string
 }
 
-export interface ResponseCheckTransfer{
-  errors?: Array<BasicTxError>,
-  warnings?: Array<BasicTxWarning>,
-  fromAccountFree: string,
-  toAccountFree: string,
-  estimateFee?: string,
-  feeSymbol?: string // if undefined => use main token
+export interface ValidateTransactionResponse {
+  errors?: TransactionError[],
+  warnings?: TransactionWarning[],
+  estimateFee?: AmountData
 }
 
 export type RequestTransfer = InternalRequestSign<RequestCheckTransfer>
@@ -1400,15 +1380,7 @@ export interface RequestCheckCrossChainTransfer extends BaseRequestSign {
 
 export type RequestCrossChainTransfer = InternalRequestSign<RequestCheckCrossChainTransfer>;
 
-export interface ResponseCheckCrossChainTransfer {
-  errors?: Array<BasicTxError>,
-  feeString?: string,
-  estimatedFee: string,
-  feeSymbol: string
-}
-
 /// Stake
-
 // Bonding
 export interface NominatorInfo {
   chain: string,
@@ -1662,23 +1634,27 @@ export interface AssetSettingUpdateReq {
   assetSetting: AssetSetting
 }
 
+export interface RequestGetTransaction {
+  id: string;
+}
+
 export interface KoniRequestSignatures {
   // Bonding functions
-  'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, BasicTxResponse, BasicTxResponse];
+  'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, TransactionResponse];
   'pri(staking.turingCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxInfo];
   'pri(staking.checkTuringCompoundTask)': [CheckExistingTuringCompoundParams, ExistingTuringCompoundTask];
-  'pri(staking.submitTuringCompound)': [RequestTuringStakeCompound, BasicTxResponse, BasicTxResponse];
+  'pri(staking.submitTuringCompound)': [RequestTuringStakeCompound, TransactionResponse];
   'pri(staking.turingCompound)': [TuringStakeCompoundParams, TuringStakeCompoundResp];
   'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
-  'pri(staking.submitClaimReward)': [RequestStakeClaimReward, BasicTxResponse, BasicTxResponse];
+  'pri(staking.submitClaimReward)': [RequestStakeClaimReward, TransactionResponse];
   'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];
-  'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, BasicTxResponse, BasicTxResponse];
+  'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, TransactionResponse];
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
   'pri(unbonding.subscribeUnlockingInfo)': [null, StakeUnlockingJson, StakeUnlockingJson];
-  'pri(unbonding.submitTransaction)': [RequestUnbondingSubmit, BasicTxResponse, BasicTxResponse];
+  'pri(unbonding.submitTransaction)': [RequestUnbondingSubmit, TransactionResponse];
   'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
   'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];
-  'pri(bonding.submitTransaction)': [RequestBondingSubmit, BasicTxResponse, BasicTxResponse];
+  'pri(bonding.submitTransaction)': [RequestBondingSubmit, TransactionResponse];
   'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingInfo>, Record<string, ChainBondingInfo>];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
 
@@ -1705,9 +1681,9 @@ export interface KoniRequestSignatures {
   'pri(assetSetting.update)': [AssetSettingUpdateReq, boolean];
 
   // NFT functions
-  'pri(evmNft.submitTransaction)': [RequestEvmNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
+  'pri(evmNft.submitTransaction)': [RequestEvmNftSubmitTransaction, NftTransactionResponse];
   'pri(evmNft.getTransaction)': [NftTransactionRequest, EvmNftTransaction];
-  'pri(substrateNft.submitTransaction)': [RequestSubstrateNftSubmitTransaction, NftTransactionResponse, NftTransactionResponse];
+  'pri(substrateNft.submitTransaction)': [RequestSubstrateNftSubmitTransaction, NftTransactionResponse];
   'pri(substrateNft.getTransaction)': [NftTransactionRequest, SubstrateNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
   'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];
@@ -1786,11 +1762,11 @@ export interface KoniRequestSignatures {
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
 
   // Transfer
-  'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
-  'pri(accounts.transfer)': [RequestTransfer, BasicTxResponse];
+  'pri(accounts.checkTransfer)': [RequestCheckTransfer, ValidateTransactionResponse];
+  'pri(accounts.transfer)': [RequestTransfer, TransactionResponse];
 
-  'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ResponseCheckCrossChainTransfer];
-  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, BasicTxResponse, BasicTxResponse];
+  'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ValidateTransactionResponse];
+  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, TransactionResponse];
 
   // Confirmation Queues
   'pri(confirmations.subscribe)': [RequestConfirmationsSubscribe, ConfirmationsQueue, ConfirmationsQueue];
@@ -1819,29 +1795,6 @@ export interface KoniRequestSignatures {
   // Evm Transaction
   'pri(evm.transaction.parse.input)': [RequestParseEvmContractInput, ResponseParseEvmContractInput];
 
-  // Create qr request
-  'pri(accounts.transfer.qr.create)': [RequestTransferExternal, BasicTxResponse, BasicTxResponse];
-  'pri(accounts.cross.transfer.qr.create)': [RequestCrossChainTransferExternal, BasicTxResponse, BasicTxResponse];
-  'pri(nft.transfer.qr.create.substrate)': [RequestNftTransferExternalSubstrate, NftTransactionResponse, NftTransactionResponse];
-  'pri(nft.transfer.qr.create.evm)': [RequestNftTransferExternalEvm, NftTransactionResponse, NftTransactionResponse];
-  'pri(stake.qr.create)': [RequestStakeExternal, BasicTxResponse, BasicTxResponse];
-  'pri(unStake.qr.create)': [RequestUnStakeExternal, BasicTxResponse, BasicTxResponse];
-  'pri(withdrawStake.qr.create)': [RequestWithdrawStakeExternal, BasicTxResponse, BasicTxResponse];
-  'pri(claimReward.qr.create)': [RequestClaimRewardExternal, BasicTxResponse, BasicTxResponse];
-  'pri(createCompound.qr.create)': [RequestCreateCompoundStakeExternal, BasicTxResponse, BasicTxResponse];
-  'pri(cancelCompound.qr.create)': [RequestCancelCompoundStakeExternal, BasicTxResponse, BasicTxResponse];
-
-  // Create ledger request
-  'pri(accounts.transfer.ledger.create)': [RequestTransferExternal, BasicTxResponse, BasicTxResponse];
-  'pri(accounts.cross.transfer.ledger.create)': [RequestCrossChainTransferExternal, BasicTxResponse, BasicTxResponse];
-  'pri(nft.transfer.ledger.create.substrate)': [RequestNftTransferExternalSubstrate, NftTransactionResponse, NftTransactionResponse];
-  'pri(stake.ledger.create)': [RequestStakeExternal, BasicTxResponse, BasicTxResponse];
-  'pri(unStake.ledger.create)': [RequestUnStakeExternal, BasicTxResponse, BasicTxResponse];
-  'pri(withdrawStake.ledger.create)': [RequestWithdrawStakeExternal, BasicTxResponse, BasicTxResponse];
-  'pri(claimReward.ledger.create)': [RequestClaimRewardExternal, BasicTxResponse, BasicTxResponse];
-  'pri(createCompound.ledger.create)': [RequestCreateCompoundStakeExternal, BasicTxResponse, BasicTxResponse];
-  'pri(cancelCompound.ledger.create)': [RequestCancelCompoundStakeExternal, BasicTxResponse, BasicTxResponse];
-
   // Authorize
   'pri(authorize.subscribe)': [null, AuthUrls, AuthUrls];
 
@@ -1861,6 +1814,11 @@ export interface KoniRequestSignatures {
   'pri(derivation.getList)': [RequestGetDeriveAccounts, ResponseGetDeriveAccounts];
   'pri(derivation.create.multiple)': [RequestDeriveCreateMultiple, boolean];
   'pri(derivation.createV3)': [RequestDeriveCreateV3, boolean];
+
+  // Transaction
+  // Get Transaction
+  'pri(transactions.getOne)': [RequestGetTransaction, SWTransactionResult];
+  'pri(transactions.subscribe)': [null, Record<string, SWTransactionResult>, Record<string, SWTransactionResult>];
 }
 
 export interface ApplicationMetadataType {

@@ -5,7 +5,7 @@ import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { TransactionErrorType } from '@subwallet/extension-base/background/KoniTypes';
 
 // Todo: finish this map in the future
-const defaultErrorMap: Record<TransactionErrorType, { message: string, code?: number }> = {
+const defaultErrorMap = {
   NOT_ENOUGH_BALANCE: {
     message: 'Not enough balance',
     code: undefined
@@ -42,15 +42,15 @@ const defaultErrorMap: Record<TransactionErrorType, { message: string, code?: nu
     message: 'Send transaction failed',
     code: undefined
   }
-};
+} as Record<TransactionErrorType, { message: string, code?: number }>;
 
 export class TransactionError extends SWError {
   override errorType: TransactionErrorType;
 
   constructor (errorType: TransactionErrorType, errMessage?: string, data?: unknown) {
-    const { code, message } = defaultErrorMap[errorType];
+    const defaultErr = defaultErrorMap[errorType];
 
-    super(errorType, errMessage || message, code, data);
+    super(errorType, errMessage || defaultErr?.message || errorType, defaultErr?.code, data);
     this.errorType = errorType;
   }
 }

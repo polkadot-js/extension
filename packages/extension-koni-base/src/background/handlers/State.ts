@@ -6,7 +6,7 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TransactionErrorType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
@@ -19,8 +19,7 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
-import { SWTransactionInput, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { Web3Transaction } from '@subwallet/extension-base/signers/types';
+import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
@@ -32,13 +31,12 @@ import { decodePair } from '@subwallet/keyring/pair/decode';
 import { keyring } from '@subwallet/ui-keyring';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import SimpleKeyring from 'eth-simple-keyring';
-import RLP, { Input } from 'rlp';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
-import { HexString, Logger } from '@polkadot/util/types';
+import { Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -135,8 +133,8 @@ export default class KoniState {
   private ready = false;
   private readonly settingService: SettingService;
   private readonly requestService: RequestService;
-  private readonly transactionService: TransactionService;
 
+  readonly transactionService: TransactionService;
   readonly historyService: HistoryService;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -614,115 +612,6 @@ export default class KoniState {
   public subscribeStakingReward () {
     return this.stakingRewardSubject;
   }
-
-  // public setHistory (address: string, network: string, item: TxHistoryItem | TxHistoryItem[], callback?: (items: TxHistoryItem[]) => void): void {
-  //   let items: TxHistoryItem[];
-  //   const nativeTokenInfo = this.chainService.getNativeTokenInfo(network);
-  //
-  //   if (!nativeTokenInfo) {
-  //     return;
-  //   }
-  //
-  //   if (item && !Array.isArray(item)) {
-  //     item.origin = 'app';
-  //     items = [item];
-  //   } else {
-  //     items = item;
-  //   }
-  //
-  //   items.forEach((item) => {
-  //     item.feeSymbol = nativeTokenInfo.symbol;
-  //
-  //     if (!item.changeSymbol) {
-  //       item.changeSymbol = nativeTokenInfo.symbol;
-  //     }
-  //   });
-  //
-  //   if (items.length) {
-  //     this.getAccountAddress().then((currentAddress) => {
-  //       if (currentAddress === address) {
-  //         const oldItems = this.historyMap || [];
-  //
-  //         this.historyMap = this.combineHistories(oldItems, items);
-  //         this.saveHistoryToStorage(address, network, this.historyMap);
-  //         callback && callback(this.historyMap);
-  //
-  //         this.lazyNext('setHistory', () => {
-  //           this.publishHistory();
-  //         });
-  //       } else {
-  //         this.saveHistoryToStorage(address, network, items);
-  //         callback && callback(this.historyMap);
-  //       }
-  //     }).catch((e) => this.logger.warn(e));
-  //   }
-  // }
-
-  // public getTransactionHistory (address: string, networkKey: string, update: (items: TxHistoryItem[]) => void): void {
-  //   const items = this.historyMap;
-  //
-  //   if (!items) {
-  //     update([]);
-  //   } else {
-  //     update(items);
-  //   }
-  // }
-
-  // public subscribeHistory () {
-  //   return this.historySubject;
-  // }
-  //
-  // public getHistoryMap (): TxHistoryItem[] {
-  //   return this.removeInactiveTxHistoryByChain(this.historyMap);
-  // }
-  //
-  // private removeInactiveTxHistoryByChain (historyList: TxHistoryItem[]) {
-  //   const activeData: TxHistoryItem[] = [];
-  //
-  //   historyList.forEach((item) => {
-  //     if (this.chainService.getChainStateByKey(item.networkKey) && this.chainService.getChainStateByKey(item.networkKey).active) {
-  //       activeData.push(item);
-  //     }
-  //   });
-  //
-  //   return activeData;
-  // }
-  //
-  // public async resetHistoryMap (newAddress: string): Promise<void> {
-  //   this.historyMap = [];
-  //
-  //   const storedData = await this.getStoredHistories(newAddress);
-  //
-  //   if (storedData) {
-  //     this.historyMap = storedData;
-  //   }
-  //
-  //   this.publishHistory();
-  // }
-  //
-  // public async getStoredHistories (address: string) {
-  //   const items = await this.dbService.stores.transaction.getHistoies({address});
-  //
-  //   return items || [];
-  // }
-  //
-  // private saveHistoryToStorage (address: string, network: string, items: TxHistoryItem[]) {
-  //   this.dbService.upsertHistory(network, address, items).catch((e) => this.logger.warn(e));
-  // }
-  //
-  // private combineHistories (oldItems: TxHistoryItem[], newItems: TxHistoryItem[]): TxHistoryItem[] {
-  //   const newHistories = newItems.filter((item) => !oldItems.some((old) => this.isSameHistory(old, item)));
-  //
-  //   return [...oldItems, ...newHistories].filter((his) => his.origin === 'app');
-  // }
-  //
-  // public isSameHistory (oldItem: TxHistoryItem, newItem: TxHistoryItem): boolean {
-  //   if (oldItem.extrinsicHash === newItem.extrinsicHash && oldItem.action === newItem.action) {
-  //     return oldItem.origin === 'app';
-  //   }
-  //
-  //   return false;
-  // }
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
     this.currentAccountStore.get('CurrentAccountInfo', update);
@@ -1656,37 +1545,6 @@ export default class KoniState {
       });
   }
 
-  public generateHashPayload (networkKey: string, transaction: TransactionConfig): HexString {
-    const chainInfo = this.getChainInfo(networkKey);
-
-    const txObject: Web3Transaction = {
-      nonce: transaction.nonce || 1,
-      from: transaction.from as string,
-      gasPrice: anyNumberToBN(transaction.gasPrice).toNumber(),
-      gasLimit: anyNumberToBN(transaction.gas).toNumber(),
-      to: transaction.to !== undefined ? transaction.to : '',
-      value: anyNumberToBN(transaction.value).toNumber(),
-      data: transaction.data ? transaction.data : '',
-      chainId: _getEvmChainId(chainInfo)
-    };
-
-    const data: Input = [
-      txObject.nonce,
-      txObject.gasPrice,
-      txObject.gasLimit,
-      txObject.to,
-      txObject.value,
-      txObject.data,
-      txObject.chainId,
-      new Uint8Array([0x00]),
-      new Uint8Array([0x00])
-    ];
-
-    const encoded = RLP.encode(data);
-
-    return u8aToHex(encoded);
-  }
-
   public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
     const evmApi = this.getEvmApi(networkKey);
     const evmNetwork = this.getChainInfo(networkKey);
@@ -1791,13 +1649,13 @@ export default class KoniState {
 
       // Mapping error for evmProvider
       transactionEmitter.on('error', (rs: TransactionEventResponse) => {
-        let evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Internal error');
+        let evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR);
 
-        const errorType = rs.error?.errorType || TransactionErrorType.INTERNAL_ERROR;
+        const errorType = (rs.error?.errorType || BasicTxErrorType.INTERNAL_ERROR);
 
-        if ([TransactionErrorType.USER_REJECT_REQUEST, TransactionErrorType.UNABLE_TO_SIGN].includes(errorType)) {
-          evmProviderError = new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST, 'User reject request');
-        } else if (errorType === TransactionErrorType.UNABLE_TO_SEND) {
+        if (errorType === BasicTxErrorType.USER_REJECT_REQUEST || errorType === BasicTxErrorType.UNABLE_TO_SIGN) {
+          evmProviderError = new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
+        } else if (errorType === BasicTxErrorType.UNABLE_TO_SEND) {
           evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, rs.error?.message);
         }
 
@@ -1898,10 +1756,5 @@ export default class KoniState {
 
   public async getExtraDelegationInfo (networkKey: string, address: string) {
     return await this.dbService.getExtraDelegationInfo(networkKey, address);
-  }
-
-  // New Transaction Handler
-  public async addTransaction (transaction: SWTransactionInput) {
-    return await this.transactionService.addTransaction(transaction);
   }
 }

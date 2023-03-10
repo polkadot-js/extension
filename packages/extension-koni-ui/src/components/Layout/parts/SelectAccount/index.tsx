@@ -9,6 +9,7 @@ import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account
 import { ConnectWebsiteModal } from '@subwallet/extension-koni-ui/components/Layout/parts/ConnectWebsiteModal';
 import SelectAccountFooter from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Footer';
 import { SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
 import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/useGetCurrentTab';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
@@ -25,7 +26,7 @@ import CN from 'classnames';
 import { Plug, Plugs, PlugsConnected } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -58,6 +59,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { goHome } = useDefaultNavigate();
 
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
 
@@ -86,6 +89,22 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           triggerAccountsSubscription().catch((e) => {
             console.error('There is a problem when trigger Accounts Subscription', e);
           });
+          const pathName = location.pathname;
+          const locationPaths = location.pathname.split('/');
+
+          if (locationPaths) {
+            if (locationPaths[1] === 'home') {
+              if (locationPaths.length >= 3) {
+                if (pathName.startsWith('/home/nfts')) {
+                  navigate('/home/nfts/collections');
+                } else {
+                  navigate(`/home/${locationPaths[2]}`);
+                }
+              }
+            } else {
+              goHome();
+            }
+          }
         }).catch((e) => {
           console.error('There is a problem when set Current Account', e);
         });
@@ -93,7 +112,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         console.error('There is a problem when change account');
       }
     }
-  }, [accounts]);
+  }, [accounts, location.pathname, navigate, goHome]);
 
   const onClickDetailAccount = useCallback((address: string) => {
     return () => {

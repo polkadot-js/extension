@@ -831,8 +831,10 @@
   "Message details": "",
   "Transaction details": "",
   "Scan signature": "",
-  "Earning Reward": "",
   "Security settings": "",
   "Camera access": "",
-  "Allow QR camera access": ""
+  "Allow QR camera access": "",
+  "Latest Reward": "",
+  "Earning Reward": "",
+  "Pending": ""
 }

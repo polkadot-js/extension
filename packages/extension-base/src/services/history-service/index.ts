@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { CRON_REFRESH_HISTORY_INTERVAL } from '@subwallet/extension-base/constants';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
@@ -12,15 +13,19 @@ import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
 export class HistoryService {
   private dbService: DatabaseService;
   private chainService: ChainService;
-
   private historySubject: BehaviorSubject<TransactionHistoryItem[]> = new BehaviorSubject([] as TransactionHistoryItem[]);
 
   constructor (dbService: DatabaseService, chainService: ChainService) {
     this.dbService = dbService;
     this.chainService = chainService;
+
+    // Create history interval and refresh it if changes accounts list
+    this.refreshHistoryInterval();
+    accounts.subject.subscribe(this.refreshHistoryInterval.bind(this));
   }
 
   private fetchPromise: Promise<TransactionHistoryItem[]> | null = null;
+  private nextFetch: NodeJS.Timeout | undefined = undefined;
   private async fetchAndLoadHistories (addresses: string[]): Promise<TransactionHistoryItem[]> {
     const chainMap = this.chainService.getChainInfoMap();
 
@@ -55,6 +60,14 @@ export class HistoryService {
 
   public invalidCache () {
     this.fetchPromise = null;
+  }
+
+  public refreshHistoryInterval () {
+    clearTimeout(this.nextFetch);
+    this.invalidCache();
+    this.getHistories().catch(console.error);
+
+    this.nextFetch = setTimeout(this.refreshHistoryInterval.bind(this), CRON_REFRESH_HISTORY_INTERVAL);
   }
 
   public async getHistories () {

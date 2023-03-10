@@ -69,11 +69,13 @@ export async function getParaBondingBasics (networkKey: string, substrateApi: _S
 
   const stakedReturn = calculateChainStakedReturn(rewardPool, totalStake, totalIssuance, networkKey);
 
+  // Todo: Need update this this part
   return {
+    chain: networkKey,
     isMaxNominators: false,
     estimatedReturn: stakedReturn,
     validatorCount: rawAllCollators.length
-  } as ChainBondingInfo;
+  } as unknown as ChainBondingInfo;
 }
 
 export async function getParaCollatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {
@@ -107,14 +109,15 @@ export async function getParaCollatorsInfo (networkKey: string, substrateApi: _S
       commission: 0,
       expectedReturn: 0,
       address: collator.owner,
-      totalStake: parseRawNumber(collator.amount) / 10 ** decimals,
-      ownStake: 0,
-      otherStake: 0,
+      totalStake: (parseRawNumber(collator.amount) / 10 ** decimals).toString(),
+      ownStake: '0',
+      otherStake: '0',
       nominatorCount: 0,
       blocked: false,
       isVerified: false,
-      minBond: 0,
-      isNominated: false
+      minBond: '0',
+      isNominated: false,
+      chain: networkKey
     });
   }
 
@@ -249,12 +252,13 @@ export async function getParaCollatorsInfo (networkKey: string, substrateApi: _S
     }
 
     validator.hasScheduledRequest = existingRequestsMap[validator.address];
-    validator.minBond = extraInfoMap[validator.address].minDelegation;
-    validator.ownStake = extraInfoMap[validator.address].bond;
+    validator.minBond = extraInfoMap[validator.address].minDelegation.toString();
+    validator.ownStake = extraInfoMap[validator.address].bond.toString();
     validator.blocked = !extraInfoMap[validator.address].active;
     validator.identity = extraInfoMap[validator.address].identity;
     validator.isVerified = extraInfoMap[validator.address].isVerified;
-    validator.otherStake = validator.totalStake - validator.ownStake;
+    // @ts-ignore
+    validator.otherStake = (validator.totalStake - validator.ownStake).toString();
     validator.nominatorCount = extraInfoMap[validator.address].delegationCount;
     validator.commission = collatorCommission;
   }

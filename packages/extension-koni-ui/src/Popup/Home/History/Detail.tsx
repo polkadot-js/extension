@@ -225,6 +225,7 @@ function Component ({ className = '', data, id, onCancel }: Props): React.ReactE
   const statusNameMap: Record<ExtrinsicStatus, string> = {
     [ExtrinsicStatus.SUCCESS]: t('Completed'),
     [ExtrinsicStatus.FAIL]: t('Failed'),
+    [ExtrinsicStatus.PENDING]: t('Pending'),
     [ExtrinsicStatus.PROCESSING]: t('Processing'),
     [ExtrinsicStatus.UNKNOWN]: t('Unknown')
   };

@@ -4,8 +4,7 @@
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo, _getXcmAssetId, _getXcmAssetType } from '@subwallet/extension-base/services/chain-service/utils';
-import { parseNumberToDisplay } from '@subwallet/extension-base/utils';
+import { _getXcmAssetId, _getXcmAssetType } from '@subwallet/extension-base/services/chain-service/utils';
 import { FOUR_INSTRUCTIONS_WEIGHT, getMultiLocationFromParachain, POLKADOT_UNLIMITED_WEIGHT } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
@@ -66,9 +65,8 @@ export async function moonbeamEstimateCrossChainFee (
   substrateApiMap: Record<string, _SubstrateApi>,
   originTokenInfo: _ChainAsset,
   chainInfoMap: Record<string, _ChainInfo>
-): Promise<[string, string | undefined]> {
+): Promise<string> {
   const substrateApi = await substrateApiMap[originNetworkKey].isReady;
-  const originChainInfo = chainInfoMap[originNetworkKey];
 
   const tokenType = _getXcmAssetType(originTokenInfo);
   const assetId = _getXcmAssetId(originTokenInfo);
@@ -86,12 +84,9 @@ export async function moonbeamEstimateCrossChainFee (
 
   const paymentInfo = await extrinsic.paymentInfo(sender);
 
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(originChainInfo);
-
   const fee = paymentInfo.partialFee.toString();
-  const feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
 
-  return [fee, feeString];
+  return fee;
 }
 
 export function moonbeamGetXcmExtrinsic (

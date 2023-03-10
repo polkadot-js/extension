@@ -4,12 +4,13 @@
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
+import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Field/MultiValidatorSelector';
 import PoolSelector from '@subwallet/extension-koni-ui/components/Field/PoolSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import ValidatorSelector from '@subwallet/extension-koni-ui/components/Field/ValidatorSelector';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { StakingNetworkDetailModal, StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import ScreenTab from '@subwallet/extension-koni-ui/components/ScreenTab';
+import SelectValidatorInput from '@subwallet/extension-koni-ui/components/SelectValidatorInput';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
@@ -31,6 +32,7 @@ type Props = ThemeProps
 interface StakeFromProps extends TransactionFormBaseProps {
   token: string
   value: string
+  nominate: string
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -45,15 +47,16 @@ const Component: React.FC<Props> = (props: Props) => {
     value: '0'
   };
 
-  const { inactiveModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   useEffect(() => {
     transactionContext.setTransactionType(ExtrinsicType.STAKING_STAKE);
     transactionContext.setShowRightBtn(true);
   }, [transactionContext]);
 
-  const onFieldsChange = useCallback(({ from, token }: Partial<StakeFromProps>, values: StakeFromProps) => {
+  const onFieldsChange = useCallback(({ from, nominate, token }: Partial<StakeFromProps>, values: StakeFromProps) => {
     // TODO: field change
+
     if (from) {
       transactionContext.setFrom(from);
     }
@@ -64,7 +67,13 @@ const Component: React.FC<Props> = (props: Props) => {
       transactionContext.setChain(chain);
       form.setFieldValue('token', token);
     }
+
+    if (nominate) {
+      form.setFieldValue('nominate', nominate);
+    }
   }, [form, transactionContext]);
+
+  console.log('values', form.getFieldsValue().nominate);
 
   const tokenList = useMemo<TokenItemType[]>(() => (
     Object.values(assetRegistry).map(({ name, originChain, slug, symbol }) => ({ name, slug, originChain, symbol }))
@@ -142,7 +151,11 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 </Form.Item>}
 
-                <Form.Item name={'value'} rules={[{ required: true }]} hideError>
+                <Form.Item
+                  hideError
+                  name={'value'}
+                  rules={[{ required: true }]}
+                >
                   <AmountInput
                     decimals={10}
                     maxValue={'10000'}
@@ -206,11 +219,17 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 </Form.Item>
               </div>
+              <SelectValidatorInput
+                label={t('Select validator')}
+                // eslint-disable-next-line react/jsx-no-bind
+                onClick={() => activeModal('multi-validator-selector')}
+                value={form.getFieldsValue().nominate}
+              />
 
               <Form.Item name={'nominate'}>
-                <ValidatorSelector
+                <MultiValidatorSelector
                   chain={'polkadot'}
-                  label={t('Select pool')}
+                  id={'multi-validator-selector'}
                 />
               </Form.Item>
 

@@ -26,7 +26,6 @@ interface Props extends ThemeProps, BasicInputWrapper {
 function Component ({ className = '', disabled, id = 'token-select', items, label, onChange, placeholder, prefixShape, showChainInSelected = true, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-
   const renderTokenSelected = useCallback((item: TokenItemType) => {
     return (
       <div className={'__selected-item'}>

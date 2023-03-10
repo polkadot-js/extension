@@ -2,10 +2,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, ChainType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, ChainType, ExtrinsicStatus, ExtrinsicType, ValidateTransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import EventEmitter from 'eventemitter3';
+import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+
+export interface SWTransactionValidation extends ValidateTransactionResponse{
+  chain: string,
+  chainType: ChainType,
+  address: string,
+  estimateFee: AmountData
+}
+
+export interface SWTransactionValidationInput extends SWTransactionValidation {
+  transaction: SWTransaction['transaction'];
+}
 
 export interface SWTransaction {
   id: string;
@@ -21,13 +33,14 @@ export interface SWTransaction {
   createdAt: Date;
   updatedAt: Date;
   errors?: string[];
-  estimateFee?: AmountData, // Todo: Make this as required field
-  transaction: SubmittableExtrinsic | Omit<EvmSendTransactionRequest, 'hashPayload'>;
+  estimateFee?: AmountData,
+  transaction: SubmittableExtrinsic | TransactionConfig;
+  validateId: string;
 }
 
 export type SWTransactionResult = Omit<SWTransaction, 'transaction'>
 
-export type SWTransactionInput = Pick<SWTransaction, 'address' | 'url' | 'transaction' | 'data' | 'extrinsicType' | 'chain' | 'chainType'>
+export type SWTransactionInput = Pick<SWTransaction, 'address' | 'url' | 'transaction' | 'data' | 'extrinsicType' | 'chain' | 'chainType' | 'validateId'>
 
 export type SendTransactionEvents = 'extrinsicHash' | 'error' | 'success';
 

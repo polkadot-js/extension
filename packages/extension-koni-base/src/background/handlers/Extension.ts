@@ -17,7 +17,7 @@ import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _Valida
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls, SigningRequest } from '@subwallet/extension-base/services/request-service/types';
-import { SWTransaction, SWTransactionInput, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { SWTransaction, SWTransactionInput, SWTransactionResult, SWTransactionValidation, SWTransactionValidationInput } from '@subwallet/extension-base/services/transaction-service/types';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { MetadataDef } from '@subwallet/extension-inject/types';
@@ -1490,7 +1490,7 @@ export default class KoniExtension {
     return [errors, keypair, transferValue, tokenInfo];
   }
 
-  private async checkTransfer ({ from, networkKey, to, tokenSlug, transferAll, value }: RequestCheckTransfer): Promise<ValidateTransactionResponse> {
+  private async checkTransfer ({ from, networkKey, to, tokenSlug, transferAll, value }: RequestCheckTransfer): Promise<SWTransactionValidation> {
     const [errors, fromKeyPair, valueNumber, sendingTokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
 
     const warnings: TransactionWarning[] = [];
@@ -1498,57 +1498,54 @@ export default class KoniExtension {
     const evmApiMap = this.#koniState.getEvmApiMap();
     const chainInfo = this.#koniState.getChainInfo(networkKey);
 
-    let nativeTokenDecimals: number | undefined;
-    let nativeToken: string | undefined;
+    const nativeTokenInfo = this.#koniState.getNativeTokenInfo(networkKey);
+    const nativeTokenSlug: string = nativeTokenInfo.slug;
+    let nativeTokenDecimals: number = nativeTokenInfo.decimals || 0;
+    let nativeToken: string = nativeTokenInfo.symbol;
     let existentialDeposit: string = _getTokenMinAmount(sendingTokenInfo);
+    let chainType = ChainType.SUBSTRATE;
+    let transaction: SWTransactionValidationInput['transaction'];
 
     if (!_isNativeToken(sendingTokenInfo)) {
-      const nativeTokenInfo = this.#koniState.getNativeTokenInfo(networkKey);
-
       nativeToken = nativeTokenInfo.symbol;
       nativeTokenDecimals = nativeTokenInfo.decimals || 0;
       existentialDeposit = _getTokenMinAmount(nativeTokenInfo);
     }
 
     let fee = '0';
-    let feeSymbol;
     let fromAccountFreeBalance = '0';
-    // @ts-ignore
-    let toAccountFreeBalance = '0';
     let fromAccountNativeBalance = '0';
 
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
+      chainType = ChainType.EVM;
       // @ts-ignore
-      [fromAccountFreeBalance, toAccountFreeBalance, fromAccountNativeBalance] = await Promise.all([
+      [fromAccountFreeBalance, , fromAccountNativeBalance] = await Promise.all([
         getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, tokenSlug),
-        getFreeBalance(networkKey, to, substrateApiMap, evmApiMap, tokenSlug),
-        getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, nativeToken)
+        getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, nativeTokenSlug)
       ]);
       const txVal: string = transferAll ? fromAccountFreeBalance : (value || '0');
 
       // Estimate with EVM API
       if (_isTokenEvmSmartContract(sendingTokenInfo)) {
-        [, , fee] = await getERC20TransactionObject(_getContractAddressOfToken(sendingTokenInfo), chainInfo, from, to, txVal, !!transferAll, evmApiMap);
+        [transaction, , fee] = await getERC20TransactionObject(_getContractAddressOfToken(sendingTokenInfo), chainInfo, from, to, txVal, !!transferAll, evmApiMap);
       } else {
-        [, , fee] = await getEVMTransactionObject(chainInfo, to, txVal, !!transferAll, evmApiMap);
+        [transaction, , fee] = await getEVMTransactionObject(chainInfo, to, txVal, !!transferAll, evmApiMap);
       }
     } else {
       // Estimate with DotSama API
       if (!_isNativeToken(sendingTokenInfo)) {
-        [[fee, feeSymbol], fromAccountFreeBalance, toAccountFreeBalance, fromAccountNativeBalance] = await Promise.all(
+        [[fee], fromAccountFreeBalance, fromAccountNativeBalance] = await Promise.all(
           [
             estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, substrateApiMap, sendingTokenInfo),
             getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, tokenSlug),
-            getFreeBalance(networkKey, to, substrateApiMap, evmApiMap, tokenSlug),
-            getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, nativeToken)
+            getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, nativeTokenSlug)
           ]
         );
       } else {
-        [[fee, feeSymbol], fromAccountFreeBalance, toAccountFreeBalance] = await Promise.all(
+        [[fee], fromAccountFreeBalance] = await Promise.all(
           [
             estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, substrateApiMap, sendingTokenInfo),
-            getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, tokenSlug),
-            getFreeBalance(networkKey, to, substrateApiMap, evmApiMap, tokenSlug)
+            getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, tokenSlug)
           ]
         );
       }
@@ -1596,79 +1593,19 @@ export default class KoniExtension {
       }
     }
 
-    return {
+    return this.#koniState.transactionService.generalValidate({
       errors,
       warnings,
       estimateFee: {
         value: fee,
-        decimals: 0, // Todo: update this decimals
-        symbol: feeSymbol
-      }
-    } as ValidateTransactionResponse;
-  }
-
-  private validateCrossChainTransfer (
-    destinationNetworkKey: string,
-    sendingTokenSlug: string,
-    sender: string,
-    sendingValue: string): [TransactionError[], KeyringPair | undefined, BN | undefined, _ChainAsset, _ChainAsset | undefined] {
-    const errors = [] as TransactionError[];
-    const keypair = keyring.getPair(sender);
-    const transferValue = new BN(sendingValue);
-
-    const originTokenInfo = this.#koniState.getAssetBySlug(sendingTokenSlug);
-    const destinationTokenInfo = this.#koniState.getXcmEqualAssetByChain(destinationNetworkKey, sendingTokenSlug);
-
-    if (!destinationTokenInfo) {
-      errors.push(new TransactionError(TransferTxErrorType.INVALID_TOKEN, 'Not found token from registry'));
-    }
-
-    return [errors, keypair, transferValue, originTokenInfo, destinationTokenInfo];
-  }
-
-  private async checkCrossChainTransfer ({ destinationNetworkKey, from, originNetworkKey, sendingTokenSlug, to, value }: RequestCheckCrossChainTransfer): Promise<ValidateTransactionResponse> {
-    const [errors, fromKeyPair, valueNumber, originTokenInfo, destinationTokenInfo] = this.validateCrossChainTransfer(destinationNetworkKey, sendingTokenSlug, from, value);
-    const substrateApiMap = this.#koniState.getSubstrateApiMap();
-    const evmApiMap = this.#koniState.getEvmApiMap();
-    let fee = '0';
-    let fromAccountFree = '0';
-
-    if (destinationTokenInfo && fromKeyPair) {
-      [fee, fromAccountFree] = await Promise.all([
-        estimateCrossChainFee(
-          fromKeyPair,
-          to,
-          value,
-          originTokenInfo,
-          destinationTokenInfo,
-          this.#koniState.getChainInfoMap(),
-          substrateApiMap,
-          this.#koniState.getAssetRefMap()
-        ),
-        getFreeBalance(originNetworkKey, from, substrateApiMap, evmApiMap)
-      ]);
-    }
-
-    const fromAccountFreeNumber = new BN(fromAccountFree);
-    const feeNumber = fee ? new BN(fee) : undefined;
-
-    if (value && feeNumber && valueNumber) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      if (fromAccountFreeNumber.lt(feeNumber.add(valueNumber))) {
-        errors.push(new TransactionError(TransferTxErrorType.NOT_ENOUGH_VALUE, 'Not enough balance free to make transfer'));
-      }
-    }
-
-    const { decimals, symbol } = this.#koniState.getNativeTokenInfo(originNetworkKey);
-
-    return {
-      errors,
-      estimateFee: {
-        value: '0',
-        symbol: symbol || '',
-        decimals: decimals || 0
-      }
-    };
+        decimals: nativeTokenDecimals,
+        symbol: nativeToken
+      },
+      address: from,
+      chain: networkKey,
+      chainType,
+      transaction
+    });
   }
 
   private async makeTransfer (request: RequestTransfer): Promise<TransactionResponse> {
@@ -1767,7 +1704,74 @@ export default class KoniExtension {
     }
   }
 
-  private async makeCrossChainTransfer (id: string, port: chrome.runtime.Port, inputData: RequestCrossChainTransfer): Promise<TransactionResponse> {
+  private validateCrossChainTransfer (
+    destinationNetworkKey: string,
+    sendingTokenSlug: string,
+    sender: string,
+    sendingValue: string): [TransactionError[], KeyringPair | undefined, BN | undefined, _ChainAsset, _ChainAsset | undefined] {
+    const errors = [] as TransactionError[];
+    const keypair = keyring.getPair(sender);
+    const transferValue = new BN(sendingValue);
+
+    const originTokenInfo = this.#koniState.getAssetBySlug(sendingTokenSlug);
+    const destinationTokenInfo = this.#koniState.getXcmEqualAssetByChain(destinationNetworkKey, sendingTokenSlug);
+
+    if (!destinationTokenInfo) {
+      errors.push(new TransactionError(TransferTxErrorType.INVALID_TOKEN, 'Not found token from registry'));
+    }
+
+    return [errors, keypair, transferValue, originTokenInfo, destinationTokenInfo];
+  }
+
+  private async checkCrossChainTransfer ({ destinationNetworkKey, from, originNetworkKey, sendingTokenSlug, to, value }: RequestCheckCrossChainTransfer): Promise<SWTransactionValidation> {
+    const [errors, fromKeyPair, valueNumber, originTokenInfo, destinationTokenInfo] = this.validateCrossChainTransfer(destinationNetworkKey, sendingTokenSlug, from, value);
+    const substrateApiMap = this.#koniState.getSubstrateApiMap();
+    const evmApiMap = this.#koniState.getEvmApiMap();
+    let fee = '0';
+    let fromAccountFree = '0';
+
+    if (destinationTokenInfo && fromKeyPair) {
+      [fee, fromAccountFree] = await Promise.all([
+        estimateCrossChainFee(
+          fromKeyPair,
+          to,
+          value,
+          originTokenInfo,
+          destinationTokenInfo,
+          this.#koniState.getChainInfoMap(),
+          substrateApiMap,
+          this.#koniState.getAssetRefMap()
+        ),
+        getFreeBalance(originNetworkKey, from, substrateApiMap, evmApiMap)
+      ]);
+    }
+
+    const fromAccountFreeNumber = new BN(fromAccountFree);
+    const feeNumber = fee ? new BN(fee) : undefined;
+
+    if (value && feeNumber && valueNumber) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      if (fromAccountFreeNumber.lt(feeNumber.add(valueNumber))) {
+        errors.push(new TransactionError(TransferTxErrorType.NOT_ENOUGH_VALUE, 'Not enough balance free to make transfer'));
+      }
+    }
+
+    const { decimals, symbol } = this.#koniState.getNativeTokenInfo(originNetworkKey);
+
+    return this.#koniState.transactionService.generalValidate({
+      errors,
+      estimateFee: {
+        value: fee,
+        symbol: symbol || '',
+        decimals: decimals || 0
+      },
+      address: from,
+      chain: originNetworkKey,
+      chainType: isEthereumAddress(from) ? ChainType.EVM : ChainType.SUBSTRATE
+    });
+  }
+
+  private async makeCrossChainTransfer (inputData: RequestCrossChainTransfer): Promise<TransactionResponse> {
     const { destinationNetworkKey, from, originNetworkKey, sendingTokenSlug, to, value } = inputData;
     const txState: TransactionResponse = {};
 
@@ -1776,9 +1780,6 @@ export default class KoniExtension {
     if (errors.length) {
       txState.txError = true;
       txState.errors = errors;
-      setTimeout(() => {
-        this.cancelSubscription(id);
-      }, 500);
 
       return txState;
     }
@@ -1804,6 +1805,7 @@ export default class KoniExtension {
       }
 
       return await this.#koniState.transactionService.handleTransaction({
+        url: EXTENSION_REQUEST_URL,
         address: from,
         chain: originNetworkKey,
         transaction: extrinsic,
@@ -1822,24 +1824,26 @@ export default class KoniExtension {
     const chainInfo = this.#koniState.getChainInfo(networkKey);
 
     try {
-      return await getERC721Transaction(this.#koniState.getEvmApiMap(), this.#koniState.getSubstrateApiMap(), chainInfo, networkKey, contractAddress, senderAddress, recipientAddress, tokenId);
+      const { tx, ...validationInfo } = await getERC721Transaction(this.#koniState.getEvmApiMap(), this.#koniState.getSubstrateApiMap(), chainInfo, networkKey, contractAddress, senderAddress, recipientAddress, tokenId);
+      const validationInput = { ...validationInfo, chain: networkKey, chainType: ChainType.EVM, address: senderAddress };
+
+      return { ...this.#koniState.transactionService.generalValidate(validationInput), tx };
     } catch (e) {
       console.error('error handling web3 transfer nft', e);
 
       return {
         tx: null,
-        estimatedFee: null,
-        balanceError: false
+        estimateFee: { value: '0', symbol: '', decimals: 18 },
+        errors: [new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Invalid params')]
       };
     }
   }
 
-  private async evmNftSubmitTransaction (id: string, port: chrome.runtime.Port, inputData: RequestEvmNftSubmitTransaction): Promise<NftTransactionResponse> {
+  private async evmNftSubmitTransaction (inputData: RequestEvmNftSubmitTransaction): Promise<NftTransactionResponse> {
     const { networkKey, rawTransaction, recipientAddress, senderAddress } = inputData;
     const isSendingSelf = isRecipientSelf(senderAddress, recipientAddress);
     const txState = { isSendingSelf: isSendingSelf } as NftTransactionResponse;
 
-    // Todo: estimate fee for this transaction
     const transaction = rawTransaction as EvmSendTransactionRequest;
 
     return (await this.#koniState.transactionService.handleTransaction({
@@ -1960,36 +1964,51 @@ export default class KoniExtension {
     return _getTokenMinAmount(tokenInfo);
   }
 
-  private async substrateNftGetTransaction ({ networkKey, params, recipientAddress, senderAddress }: NftTransactionRequest): Promise<SubstrateNftTransaction> {
+  private async substrateNftGetTransaction ({ networkKey, params, recipientAddress, senderAddress }: NftTransactionRequest): Promise<SWTransactionValidation> {
     const chainInfo = this.#koniState.getChainInfo(networkKey);
+    const validationRs: ValidateTransactionResponse = {
+      estimateFee: { ..._getChainNativeTokenBasicInfo(chainInfo), value: '0' },
+      errors: []
+    };
+    let fee = '0';
+    const api = this.#koniState.getSubstrateApi(networkKey).api;
 
-    switch (networkKey) {
-      case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.acala:
-        return await acalaTransferHandler(networkKey, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), senderAddress, recipientAddress, params, chainInfo);
-      case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.karura:
-        return await acalaTransferHandler(networkKey, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), senderAddress, recipientAddress, params, chainInfo);
-      case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.kusama:
-        return await rmrkTransferHandler(networkKey, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), senderAddress, recipientAddress, params, chainInfo);
-      case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.uniqueNft:
-        return await uniqueTransferHandler(networkKey, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), senderAddress, recipientAddress, params, chainInfo);
-      case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.quartz:
-        return await quartzTransferHandler(networkKey, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), senderAddress, recipientAddress, params, chainInfo);
-      case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.opal:
-        return await quartzTransferHandler(networkKey, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), senderAddress, recipientAddress, params, chainInfo);
-      case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemine:
-        return await statemineTransferHandler(networkKey, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), senderAddress, recipientAddress, params, chainInfo);
-      case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemint:
-        return await statemineTransferHandler(networkKey, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), senderAddress, recipientAddress, params, chainInfo);
-      case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.bitcountry:
-        return await acalaTransferHandler(networkKey, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), senderAddress, recipientAddress, params, chainInfo);
-      case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.pioneer:
-        return await acalaTransferHandler(networkKey, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), senderAddress, recipientAddress, params, chainInfo);
+    const acalaHandleList: string[] = [SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.acala, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.karura, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.bitcountry, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.pioneer];
+    const rmrkHandleList: string[] = [SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.kusama];
+    const uniqueHandleList: string[] = [SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.uniqueNft];
+    const quartzHandleList: string[] = [SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.quartz, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.opal];
+    const statemintHandleList: string[] = [SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemint, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemine];
+
+    try {
+      if (acalaHandleList.includes(networkKey)) {
+        fee = await acalaTransferHandler(api, senderAddress, recipientAddress, params);
+      } else if (rmrkHandleList.includes(networkKey)) {
+        [fee, validationRs.errors] = await rmrkTransferHandler(api, senderAddress, recipientAddress, params);
+      } else if (uniqueHandleList.includes(networkKey)) {
+        fee = await uniqueTransferHandler(api, senderAddress, recipientAddress, params);
+      } else if (quartzHandleList.includes(networkKey)) {
+        fee = await quartzTransferHandler(api, senderAddress, recipientAddress, params);
+      } else if (statemintHandleList.includes(networkKey)) {
+        fee = await statemineTransferHandler(api, senderAddress, recipientAddress, params);
+      } else {
+        validationRs.errors?.push(new TransactionError(BasicTxErrorType.UNSUPPORTED, `This feature is not supported on ${chainInfo.name}`));
+      }
+    } catch (e) {
+      if ((e as Error).toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
+        validationRs.errors?.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS));
+      } else {
+        validationRs.errors?.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+      }
     }
 
-    return {
-      error: true,
-      balanceError: false
-    };
+    validationRs.estimateFee.value = fee;
+
+    return this.#koniState.transactionService.generalValidate({
+      ...validationRs,
+      chain: networkKey,
+      chainType: ChainType.SUBSTRATE,
+      address: senderAddress
+    });
   }
 
   private async substrateNftSubmitTransaction (id: string, port: chrome.runtime.Port, inputData: RequestSubstrateNftSubmitTransaction): Promise<NftTransactionResponse> {
@@ -3490,7 +3509,7 @@ export default class KoniExtension {
       case 'pri(evmNft.getTransaction)':
         return this.evmNftGetTransaction(request as NftTransactionRequest);
       case 'pri(evmNft.submitTransaction)':
-        return this.evmNftSubmitTransaction(id, port, request as RequestEvmNftSubmitTransaction);
+        return this.evmNftSubmitTransaction(request as RequestEvmNftSubmitTransaction);
 
       case 'pri(substrateNft.getTransaction)':
         return await this.substrateNftGetTransaction(request as NftTransactionRequest);
@@ -3505,7 +3524,7 @@ export default class KoniExtension {
       case 'pri(accounts.checkCrossChainTransfer)':
         return await this.checkCrossChainTransfer(request as RequestCheckCrossChainTransfer);
       case 'pri(accounts.crossChainTransfer)':
-        return await this.makeCrossChainTransfer(id, port, request as RequestCrossChainTransfer);
+        return await this.makeCrossChainTransfer(request as RequestCrossChainTransfer);
 
       /// Sign QR
       case 'pri(qr.transaction.parse.substrate)':

@@ -10,7 +10,7 @@ import NotificationService from '@subwallet/extension-base/services/notification
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { getTransactionId } from '@subwallet/extension-base/services/transaction-service/helpers';
-import { SendTransactionEvents, SWTransaction, SWTransactionInput, TransactionEmitter, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { SendTransactionEvents, SWTransaction, SWTransactionInput, SWTransactionValidation, SWTransactionValidationInput, TransactionEmitter, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { parseTxAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
@@ -28,7 +28,7 @@ import { HexString } from '@polkadot/util/types';
 export default class TransactionService {
   private readonly chainService: ChainService;
   private readonly requestService: RequestService;
-  public readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
+  private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
 
   private get transactions (): Record<string, SWTransaction> {
     return this.transactionSubject.getValue();
@@ -51,11 +51,20 @@ export default class TransactionService {
     return this.transactions[id];
   }
 
+  public generalValidate (validationInput: SWTransactionValidationInput): SWTransactionValidation {
+    // Todo: Validate balance here
+    // Todo: Return error for read-only account
+    // Todo: Estimate fee
+    const { transaction, ...validation } = validationInput;
+
+    return validation;
+  }
+
   public getTransactionSubject () {
     return this.transactionSubject;
   }
 
-  private validateTransaction (transaction: SWTransaction) {
+  private checkDuplicate (transaction: SWTransaction) {
     // Check duplicated transaction
     const existed = this.processingTransactions
       .filter((item) => item.address === transaction.address && item.chain === transaction.chain);
@@ -85,7 +94,7 @@ export default class TransactionService {
     const transaction = this.fillTransactionDefaultInfo(inputTransaction);
 
     // Validate Transaction
-    this.validateTransaction(transaction);
+    this.checkDuplicate(transaction);
 
     // Add Transaction
     this.transactions[transaction.id] = transaction;
@@ -239,8 +248,13 @@ export default class TransactionService {
     return u8aToHex(encoded);
   }
 
-  private async signAndSendEvmTransaction ({ address, chain, id, transaction, url }: SWTransaction): Promise<TransactionEmitter> {
+  private async signAndSendEvmTransaction ({ address,
+    chain,
+    id,
+    transaction,
+    url }: SWTransaction): Promise<TransactionEmitter> {
     const payload = (transaction as EvmSendTransactionRequest);
+    const chainInfo = this.chainService.getChainInfoByKey(chain);
 
     const { account } = payload;
 
@@ -252,8 +266,6 @@ export default class TransactionService {
     }
 
     if (!payload.chainId) {
-      const chainInfo = this.chainService.getChainInfoByKey(chain);
-
       payload.chainId = chainInfo.evmInfo?.evmChainId ?? 1;
     }
 
@@ -313,7 +325,10 @@ export default class TransactionService {
               emitter.emit('success', { id, transactionHash: rs.transactionHash });
             })
             .once('error', (e) => {
-              emitter.emit('error', { id, error: new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, e.message) });
+              emitter.emit('error', {
+                id,
+                error: new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, e.message)
+              });
             })
             .catch((e: Error) => {
               emitter.emit('error', { id, error: new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, e.message) });

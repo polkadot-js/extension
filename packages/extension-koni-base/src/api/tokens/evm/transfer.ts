@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { EvmNftTransaction, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransactionResponse, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { _BALANCE_PARSING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -132,7 +133,7 @@ export async function getERC721Transaction (
   contractAddress: string,
   senderAddress: string,
   recipientAddress: string,
-  tokenId: string) {
+  tokenId: string): Promise<EvmNftTransaction> {
   const web3 = evmApiMap[networkKey];
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const contract = new web3.api.eth.Contract(_ERC721_ABI, contractAddress);
@@ -166,16 +167,18 @@ export async function getERC721Transaction (
   };
   const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
   const rawFee = gasLimit * parseFloat(gasPriceGwei);
-  const estimatedFee = rawFee / (10 ** decimals);
-  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-  const feeString = estimatedFee.toString() + ' ' + symbol;
 
   const binaryFee = new BN(rawFee.toString());
   const balanceError = binaryFee.gt(binaryFreeBalance);
+  const errors = balanceError ? [new TransactionError(TransferTxErrorType.NOT_ENOUGH_FEE)] : [];
 
   return {
     tx: rawTransaction,
-    estimatedFee: feeString,
-    balanceError
+    estimateFee: {
+      value: rawFee.toString(),
+      decimals,
+      symbol
+    },
+    errors
   };
 }

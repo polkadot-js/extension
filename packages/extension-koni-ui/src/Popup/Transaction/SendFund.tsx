@@ -78,7 +78,9 @@ const _SendFund: React.FC = () => {
         to: to,
         tokenSlug: token,
         value: value
-      }).then(({ errors }) => {
+      }).then((rs) => {
+        const { errors } = rs;
+
         if (errors?.length) {
           setLoading(false);
           setErrors(errors.map((e) => e.message));

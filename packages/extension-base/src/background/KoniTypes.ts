@@ -7,7 +7,7 @@ import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handler
 import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import {SWTransactionResult, SWTransactionValidation} from '@subwallet/extension-base/services/transaction-service/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { SingleAddress } from '@subwallet/ui-keyring/observable/types';
@@ -929,16 +929,15 @@ export interface NftTransactionRequest {
   params: Record<string, any>
 }
 
-export interface EvmNftTransaction {
-  tx: Record<string, any> | null,
-  estimatedFee: string | null,
-  balanceError: boolean
+export interface EvmNftTransaction extends ValidateTransactionResponse {
+  tx: Record<string, any> | null
 }
 
 export interface EvmNftSubmitTransaction extends BaseRequestSign {
   senderAddress: string,
   recipientAddress: string,
   networkKey: string,
+  estimateGas: string,
   rawTransaction: Record<string, any>
 }
 
@@ -1011,8 +1010,8 @@ export interface SubstrateNftSubmitTransaction extends BaseRequestSign {
   recipientAddress: string;
 }
 
-export type RequestSubstrateNftSubmitTransaction = InternalRequestSign<SubstrateNftSubmitTransaction>
-export type RequestEvmNftSubmitTransaction = InternalRequestSign<EvmNftSubmitTransaction>
+export type RequestSubstrateNftSubmitTransaction = InternalRequestSign<SubstrateNftSubmitTransaction> ;
+export type RequestEvmNftSubmitTransaction = InternalRequestSign<EvmNftSubmitTransaction> ;
 
 export interface RequestAccountMeta{
   address: string | Uint8Array;
@@ -1351,7 +1350,7 @@ export interface ResponseQrSignEvm {
 
 /// Transfer
 
-export interface RequestCheckTransfer extends BaseRequestSign{
+export interface RequestCheckTransfer extends BaseRequestSign {
   networkKey: string,
   from: string,
   to: string,
@@ -1362,11 +1361,10 @@ export interface RequestCheckTransfer extends BaseRequestSign{
 
 export interface ValidateTransactionResponse {
   errors?: TransactionError[],
-  warnings?: TransactionWarning[],
-  estimateFee?: AmountData
+  warnings?: TransactionWarning[]
 }
 
-export type RequestTransfer = InternalRequestSign<RequestCheckTransfer>
+export type RequestTransfer = InternalRequestSign<RequestCheckTransfer> ;
 
 export interface RequestCheckCrossChainTransfer extends BaseRequestSign {
   originNetworkKey: string,
@@ -1378,7 +1376,7 @@ export interface RequestCheckCrossChainTransfer extends BaseRequestSign {
   sendingTokenSlug: string
 }
 
-export type RequestCrossChainTransfer = InternalRequestSign<RequestCheckCrossChainTransfer>;
+export type RequestCrossChainTransfer = InternalRequestSign<RequestCheckCrossChainTransfer> ;
 
 /// Stake
 // Bonding
@@ -1762,7 +1760,7 @@ export interface KoniRequestSignatures {
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
 
   // Transfer
-  'pri(accounts.checkTransfer)': [RequestCheckTransfer, ValidateTransactionResponse];
+  'pri(accounts.checkTransfer)': [RequestCheckTransfer, SWTransactionValidation];
   'pri(accounts.transfer)': [RequestTransfer, TransactionResponse];
 
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ValidateTransactionResponse];

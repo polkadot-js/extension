@@ -79,7 +79,7 @@ function EditMenuCard({
             {title}
           </div>
           <div className='description'>
-            {description}
+            <span className='description-text'>{description}</span>
             {toggle && <div className='extra'>{toggle}</div>}
             {!toggle && (
               <div className='extra'>
@@ -165,6 +165,14 @@ export default styled(EditMenuCard)(
     white-space: pre-line;
     gap: 14px;
     color: ${theme.subTextColor};
+
+    .description-text {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      width: 75px;
+      text-align: right;
+    }
   }
 
   .icon, .forgetIcon {

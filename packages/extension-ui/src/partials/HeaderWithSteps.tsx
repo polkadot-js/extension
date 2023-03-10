@@ -33,6 +33,8 @@ const Steps = styled.div`
   justify-content: center;
   margin: 0px -16px 0;
   gap: 8px;
+  position: sticky;
+  top: 56px;
 
   :first-child {
     margin-left: 0px;

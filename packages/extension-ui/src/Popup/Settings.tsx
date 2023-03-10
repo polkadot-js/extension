@@ -18,7 +18,10 @@ interface Props extends ThemeProps {
 }
 
 const SettingsMenuCard = styled(EditMenuCard)`
-margin-bottom: 16px;
+  margin-bottom: 4px;
+  .description {
+    width: 24px
+  }
 `;
 
 function Settings({ className }: Props): React.ReactElement<Props> {

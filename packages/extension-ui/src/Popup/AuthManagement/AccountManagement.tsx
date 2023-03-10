@@ -100,14 +100,13 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
 export default withRouter(styled(AccountManagement)`
   margin-top: -16px;
   overflow: hidden;
-  .accountSelection{
+  .accountSelection {
     ${Checkbox} {
         margin-right: 16px;
       }
-    .accountList{
+    .accountList {
       height: 350px;
       padding: 0px 8px;
-
     }
   }
   .acceptButton {

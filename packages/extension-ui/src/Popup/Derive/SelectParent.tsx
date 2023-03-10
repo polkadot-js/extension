@@ -46,7 +46,8 @@ interface Props extends ThemeProps {
 const singleSlashRegex = /([^/]|^)\/([^/]|$)/;
 
 const StyledFooter = styled(HelperFooter)`
-gap: 8px;`;
+  gap: 8px;
+`;
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -169,6 +170,12 @@ function SelectParent({
   return (
     <>
       <div className={className}>
+        <div className='text'>
+          <span className='heading'>{t<string>('Add sub-account')}</span>
+          <span className='subtitle'>
+            {t<string>('Choose a sub-account derivation path for additional account organization.')}
+          </span>
+        </div>
         {isLocked ? (
           <Address
             address={parentAddress}
@@ -254,7 +261,37 @@ function SelectParent({
 }
 
 export default React.memo(
-  styled(SelectParent)`
+  styled(SelectParent)(
+    ({ theme }: Props) => `
     margin-top: 24px;
+
+    .text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      gap: 8px;
+
+      .heading {
+        font-family: ${theme.secondaryFontFamily};
+        color: ${theme.textColor};
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 125%;
+        text-align: center;
+        letter-spacing: 0.06em;
+      }
+
+      .subtitle {
+        color: ${theme.subTextColor};
+        font-size: 14px;
+        line-height: 145%;
+        text-align: center;
+        letter-spacing: 0.07em;
+        white-space: pre-line;
+      }
+    }
 `
+  )
 );

@@ -1,6 +1,6 @@
 {
   "author": "Aleph Zero",
-  "description": "Manage your Polkadot accounts outside of dapps. Injects the accounts and allows signing transactions for a specific account.",
+  "description": "Manage your Aleph Zero accounts and sign dApp transactions in a user-friendly way.",
   "homepage_url": "https://alephzero.org/",
   "name": "Aleph Zero Signer",
   "short_name": "Aleph Zero Signer",

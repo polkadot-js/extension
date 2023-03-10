@@ -147,7 +147,12 @@ function Address({
               title={t('external account')}
             />
           ))}
-        <span title={displayName}>{displayName}</span>
+        <span
+          className='name'
+          title={displayName}
+        >
+          {displayName}
+        </span>
       </>
     );
   };
@@ -170,7 +175,7 @@ function Address({
         <div className='info'>
           {parentName ? (
             <>
-              <div className='banner'>
+              <div className='name-banner'>
                 <FontAwesomeIcon
                   className='deriveIcon'
                   icon={faCodeBranch}
@@ -184,7 +189,7 @@ function Address({
                     className='subaccount-icon'
                     src={subAccountIcon}
                   />
-                  {parentNameSuri}
+                  <span>{parentNameSuri}</span>
                 </div>
               </div>
               <div className='name displaced'>
@@ -270,17 +275,23 @@ export default styled(Address)(
   .banner {
     font-size: 12px;
     line-height: 16px;
+    max-width: 200px;
+  }
+
+  .name-banner{
     position: absolute;
     top: 0;
-
-    &.chain {
-      background: ${theme.boxBorderColor};
-      border-radius: 0px 8px;
-      color: ${theme.subTextColor};
-      padding: 0.1rem 0.5rem 0.1rem 0.75rem;
-      right: 0;
-      z-index: ${Z_INDEX.ADDRESS};
-    }
+  }
+  
+  .chain {
+    position: absolute;
+    bottom: 0;
+    background: ${theme.boxBorderColor};
+    border-radius: 8px 0px;
+    color: ${theme.subTextColor};
+    padding: 2px 8px;
+    right: 0;
+    z-index: ${Z_INDEX.ADDRESS};
   }
 
   .addressDisplay {
@@ -385,6 +396,8 @@ export default styled(Address)(
     width: 300px;
     white-space: nowrap;
     color: ${theme.textColor};
+    width: 190px;
+    margin-right: 4px;
   } 
 
     &.displaced {
@@ -405,9 +418,6 @@ export default styled(Address)(
     top: -6px;
     color: ${theme.labelColor};
     font-size: ${theme.inputLabelFontSize};
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     background: ${theme.menuBackground};
     border: 1px solid ${theme.boxBorderColor};
     border-radius: 2px;
@@ -421,6 +431,13 @@ export default styled(Address)(
       width: 14px;
       height: 14px;
       background: ${theme.iconNeutralColor};
+    }
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 150px;
     }
   }
 
@@ -442,6 +459,10 @@ export default styled(Address)(
 
     &.active {
       background: ${theme.accountDotsIconColor};
+    }
+
+    &:hover {
+      background: ${theme.headerIconBackgroundHover};
     }
   }
 

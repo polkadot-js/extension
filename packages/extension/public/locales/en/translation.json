@@ -303,5 +303,7 @@
   "Disconnect app": "",
   "Disconnecting app": "",
   "You're about to disconnect an app from the Signer. This will result in disconnecting all connected accounts from this app.": "",
-  "App disconnected": ""
+  "App disconnected": "",
+  "Add sub-account": "",
+  "Choose a sub-account derivation path for additional account organization.": "Choose a sub-account derivation path\nfor additional account organization."
 }

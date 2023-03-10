@@ -11,6 +11,7 @@ import { HeaderWithSteps } from '../../partials';
 import SelectParent from './SelectParent';
 
 interface Props {
+  className?: string;
   isLocked?: boolean;
 }
 
@@ -45,6 +46,11 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
 
   const parentIsExternal = useMemo(
     () => accounts.find((a) => a.address === parentAddress)?.isExternal || 'false',
+    [accounts, parentAddress]
+  );
+
+  const parentName = useMemo(
+    () => accounts.find((a) => a.address === parentAddress)?.name || null,
     [accounts, parentAddress]
   );
 
@@ -102,6 +108,7 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
           onBackClick={goTo(`/account/edit-menu/${parentAddress}?isExternal=${parentIsExternal?.toString()}`)}
           onCreate={_onCreate}
           onNameChange={setName}
+          parentName={parentName}
         />
       )}
     </>

@@ -27,6 +27,7 @@ interface Props {
   onPasswordChange?: (password: string) => void;
   isDeriving?: boolean;
   isImporting?: boolean;
+  parentName?: string;
 }
 
 const CustomFooter = styled(HelperFooter)`
@@ -55,6 +56,7 @@ function AccountNamePasswordCreation({
   onCreate,
   onNameChange,
   onPasswordChange,
+  parentName,
   setGenesis
 }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
@@ -133,6 +135,7 @@ function AccountNamePasswordCreation({
             address={address}
             genesisHash={genesisHash}
             name={name}
+            parentName={parentName}
           />
           <Name
             isFocused

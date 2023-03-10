@@ -203,5 +203,7 @@
   "Disconnect": "",
   "Disconnect app": "",
   "Disconnecting app": "",
-  "You're about to disconnect an app from the Signer. This will result in disconnecting all connected accounts from this app.": ""
+  "You're about to disconnect an app from the Signer. This will result in disconnecting all connected accounts from this app.": "",
+  "Add sub-account": "",
+  "Choose a sub-account derivation path for additional account organization.": ""
 }

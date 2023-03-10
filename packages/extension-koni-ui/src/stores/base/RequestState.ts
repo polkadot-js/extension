@@ -37,8 +37,8 @@ export const CONFIRMATIONS_FIELDS: Array<keyof RequestState> = [
 ];
 
 export interface ConfirmationQueueItem {
-  type: ConfirmationType,
-  item: ConfirmationRequestBase
+  type: ConfirmationType;
+  item: ConfirmationRequestBase;
 }
 
 export type ConfirmationType = typeof CONFIRMATIONS_FIELDS[number];

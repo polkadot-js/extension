@@ -10,8 +10,12 @@ import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 
 const registry = new TypeRegistry();
 
-const useParseSubstrateRequestPayload = (request: RequestSign): ExtrinsicPayload | string => {
+const useParseSubstrateRequestPayload = (request?: RequestSign): ExtrinsicPayload | string => {
   return useMemo(() => {
+    if (!request) {
+      return '';
+    }
+
     const payload = request.payload;
 
     if (isRawPayload(payload)) {
@@ -21,7 +25,7 @@ const useParseSubstrateRequestPayload = (request: RequestSign): ExtrinsicPayload
 
       return registry.createType('ExtrinsicPayload', payload, { version: payload.version });
     }
-  }, [request.payload]);
+  }, [request]);
 };
 
 export default useParseSubstrateRequestPayload;

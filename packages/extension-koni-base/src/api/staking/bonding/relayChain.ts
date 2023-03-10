@@ -2,34 +2,31 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, ChainBondingInfo, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxInfo, ChainStakingMetadata, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-base/utils';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
 
-export async function getRelayChainBondingBasics (networkKey: string, substrateApi: _SubstrateApi) {
+export async function getRelayChainStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   const chainApi = await substrateApi.isReady;
   const _era = await chainApi.api.query.staking.currentEra();
   const currentEra = _era.toString();
+  const maxNominations = chainApi.api.consts.staking.maxNominations.toString();
+  const maxUnlockingChunks = chainApi.api.consts.staking.maxUnlockingChunks.toString();
 
-  const [_totalEraStake, _totalIssuance, _auctionCounter, _maxNominator, _nominatorCount, _eraStakers] = await Promise.all([
+  const [_totalEraStake, _totalIssuance, _auctionCounter, _minimumActiveStake] = await Promise.all([
     chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
     chainApi.api.query.balances.totalIssuance(),
     chainApi.api.query.auctions?.auctionCounter(),
-    chainApi.api.query.staking.maxNominatorsCount(),
-    chainApi.api.query.staking.counterForNominators(),
-    chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra))
+    chainApi.api.query.staking.minimumActiveStake()
   ]);
 
-  const eraStakers = _eraStakers as any[];
-
-  const rawMaxNominator = _maxNominator.toHuman() as string;
-  const rawNominatorCount = _nominatorCount.toHuman() as string;
+  const minStake = _minimumActiveStake.toString();
 
   const rawTotalEraStake = _totalEraStake.toString();
   const rawTotalIssuance = _totalIssuance.toString();
@@ -39,18 +36,20 @@ export async function getRelayChainBondingBasics (networkKey: string, substrateA
   const bnTotalEraStake = new BN(rawTotalEraStake);
   const bnTotalIssuance = new BN(rawTotalIssuance);
 
-  const maxNominator = rawMaxNominator !== null ? parseFloat(rawMaxNominator.replaceAll(',', '')) : -1;
-  const nominatorCount = parseFloat(rawNominatorCount.replaceAll(',', ''));
+  const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chain);
+  const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chain);
 
-  const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, networkKey);
-  const stakedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, networkKey);
-
-  // Todo: Update this part later
   return {
-    isMaxNominators: maxNominator !== -1 ? nominatorCount >= maxNominator : false,
-    estimatedReturn: stakedReturn,
-    validatorCount: eraStakers.length
-  } as unknown as ChainBondingInfo;
+    chain,
+    type: StakingType.NOMINATED,
+    era: parseInt(currentEra),
+    expectedReturn, // in %, annually
+    inflation,
+    minStake,
+    maxValidatorPerNominator: parseInt(maxNominations),
+    maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
+    allowCancelUnstaking: true
+  } as ChainStakingMetadata;
 }
 
 export async function getRelayValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {

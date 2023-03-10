@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, DelegationItem, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxInfo, ChainStakingMetadata, DelegationItem, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -13,16 +13,9 @@ import fetch from 'cross-fetch';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { BN } from '@polkadot/util';
 
-export async function getAstarBondingBasics (networkKey: string) {
+export async function getAstarStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   const aprPromise = new Promise(function (resolve) {
-    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/apr`, {
-      method: 'GET'
-    }).then((resp) => {
-      resolve(resp.json());
-    }).catch(console.error);
-  });
-  const dappInfoPromise = new Promise(function (resolve) {
-    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/dapps`, {
+    fetch(`https://api.astar.network/api/v1/${chain}/dapps-staking/apr`, {
       method: 'GET'
     }).then((resp) => {
       resolve(resp.json());
@@ -33,7 +26,7 @@ export async function getAstarBondingBasics (networkKey: string) {
     const id = setTimeout(() => {
       clearTimeout(id);
       resolve(null);
-    }, 5000);
+    }, 8000);
   });
 
   const aprRacePromise = Promise.race([
@@ -41,37 +34,24 @@ export async function getAstarBondingBasics (networkKey: string) {
     aprPromise
   ]); // need race because API often timeout
 
-  const dappRacePromise = Promise.race([
-    timeout,
-    dappInfoPromise
-  ]); // need race because API often timeout
-
-  const [aprInfo, _dappInfo] = await Promise.all([
+  const [aprInfo, chainApi] = await Promise.all([
     aprRacePromise,
-    dappRacePromise
+    substrateApi.isReady
   ]);
 
-  let validatorCount = 0;
-
-  if (_dappInfo !== null) {
-    const allDapps = _dappInfo as Record<string, any>[];
-
-    validatorCount = allDapps.length;
-  }
-
-  if (aprInfo !== null) {
-    return {
-      isMaxNominators: false,
-      stakedReturn: aprInfo as number,
-      validatorCount
-    };
-  }
+  const era = (await chainApi.api.query.dappsStaking.currentEra()).toString();
+  const minDelegatorStake = chainApi.api.consts.dappsStaking.minimumStakingAmount.toString();
 
   return {
-    isMaxNominators: false,
-    stakedReturn: 0,
-    validatorCount
-  };
+    chain,
+    type: StakingType.NOMINATED,
+    expectedReturn: aprInfo !== null ? aprInfo as number : undefined,
+    era: parseInt(era),
+    minStake: minDelegatorStake,
+    maxValidatorPerNominator: 100, // temporary fix for Astar, there's no limit for now
+    maxWithdrawalRequestPerValidator: 1, // by default
+    allowCancelUnstaking: true
+  } as ChainStakingMetadata;
 }
 
 export async function getAstarDappsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {
@@ -137,7 +117,6 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
       otherStake: (totalStake / 10 ** decimals).toString(),
       nominatorCount: stakerCount,
       blocked: false,
-      chain: '',
       isVerified: false,
       minBond: (minStake / 10 ** decimals).toString(),
       isNominated: stakedDappsList.includes(dappAddress.toLowerCase()),

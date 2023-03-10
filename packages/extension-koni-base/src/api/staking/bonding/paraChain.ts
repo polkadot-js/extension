@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, ChainBondingInfo, DelegationItem, StakingType, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { _PARACHAIN_INFLATION_DISTRIBUTION, _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { BasicTxInfo, ChainStakingMetadata, DelegationItem, StakingType, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
-import { BOND_LESS_ACTION, calculateChainStakedReturn, getParaCurrentInflation, InflationConfig, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { BOND_LESS_ACTION, getParaCurrentInflation, InflationConfig, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
@@ -26,26 +26,24 @@ interface CollatorInfo {
   amount: string;
 }
 
-export async function getParaBondingBasics (networkKey: string, substrateApi: _SubstrateApi) {
-  const apiProps = await substrateApi.isReady;
+export async function getParaChainStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
+  const chainApi = await substrateApi.isReady;
 
-  const _round = (await apiProps.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
+  const _round = (await chainApi.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
   const round = parseRawNumber(_round.current);
+  const maxDelegations = chainApi.api.consts.parachainStaking.maxDelegationsPerDelegator.toString();
 
   let _unvestedAllocation;
 
-  if (apiProps.api.query.vesting && apiProps.api.query.vesting.totalUnvestedAllocation) {
-    _unvestedAllocation = await apiProps.api.query.vesting.totalUnvestedAllocation();
+  if (chainApi.api.query.vesting && chainApi.api.query.vesting.totalUnvestedAllocation) {
+    _unvestedAllocation = await chainApi.api.query.vesting.totalUnvestedAllocation();
   }
 
-  const [_totalStake, _totalIssuance, _inflation, _allCollators] = await Promise.all([
-    apiProps.api.query.parachainStaking.staked(round),
-    apiProps.api.query.balances.totalIssuance(),
-    apiProps.api.query.parachainStaking.inflationConfig(),
-    apiProps.api.query.parachainStaking.candidatePool()
+  const [_totalStake, _totalIssuance, _inflation] = await Promise.all([
+    chainApi.api.query.parachainStaking.staked(round),
+    chainApi.api.query.balances.totalIssuance(),
+    chainApi.api.query.parachainStaking.inflationConfig()
   ]);
-
-  const rawAllCollators = _allCollators.toHuman() as unknown as CollatorInfo[];
 
   let unvestedAllocation;
 
@@ -63,19 +61,18 @@ export async function getParaBondingBasics (networkKey: string, substrateApi: _S
   }
 
   const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
-  const currentInflation = getParaCurrentInflation(parseRawNumber(totalStake.toString()), inflationConfig);
-  const rewardDistribution = _PARACHAIN_INFLATION_DISTRIBUTION[networkKey] ? _PARACHAIN_INFLATION_DISTRIBUTION[networkKey].reward : _PARACHAIN_INFLATION_DISTRIBUTION.default.reward;
-  const rewardPool = currentInflation * rewardDistribution;
+  const inflation = getParaCurrentInflation(parseRawNumber(totalStake.toString()), inflationConfig);
 
-  const stakedReturn = calculateChainStakedReturn(rewardPool, totalStake, totalIssuance, networkKey);
-
-  // Todo: Need update this this part
   return {
-    chain: networkKey,
-    isMaxNominators: false,
-    estimatedReturn: stakedReturn,
-    validatorCount: rawAllCollators.length
-  } as unknown as ChainBondingInfo;
+    chain,
+    type: StakingType.NOMINATED,
+    era: round,
+    inflation,
+    minStake: '0',
+    maxValidatorPerNominator: parseInt(maxDelegations),
+    maxWithdrawalRequestPerValidator: 1, // by default
+    allowCancelUnstaking: true
+  } as ChainStakingMetadata;
 }
 
 export async function getParaCollatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {

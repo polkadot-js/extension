@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, ChainBondingInfo, DelegationItem, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxInfo, ChainStakingMetadata, DelegationItem, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -36,29 +36,23 @@ interface CollatorInfo {
   status: string | Record<string, string>
 }
 
-export async function getAmplitudeBondingBasics (networkKey: string, substrateApi: _SubstrateApi) {
+export async function getAmplitudeStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   const chainApi = await substrateApi.isReady;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_totalStake, _totalIssuance, _inflation, _allCollators] = await Promise.all([
-    chainApi.api.query.parachainStaking.totalCollatorStake(),
-    chainApi.api.query.balances.totalIssuance(),
-    chainApi.api.query.parachainStaking.inflationConfig(),
-    chainApi.api.query.parachainStaking.candidatePool.entries()
-  ]);
+  const _round = (await chainApi.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
+  const round = parseRawNumber(_round.current);
+  const maxDelegations = chainApi.api.consts.parachainStaking.maxDelegationsPerRound.toString();
+  const minDelegatorStake = chainApi.api.consts.parachainStaking.minDelegatorStake.toString();
 
-  // const totalStake = _totalStake ? new BN(_totalStake.toString()) : BN_ZERO;
-  // const totalIssuance = new BN(_totalIssuance.toString());
-  //
-  // const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
-
-  // Todo: Update this part later
   return {
-    chain: networkKey,
-    isMaxNominators: false,
-    estimatedReturn: 0,
-    validatorCount: _allCollators.length
-  } as unknown as ChainBondingInfo;
+    chain,
+    type: StakingType.NOMINATED,
+    era: round,
+    minStake: minDelegatorStake,
+    maxValidatorPerNominator: parseInt(maxDelegations),
+    maxWithdrawalRequestPerValidator: 1, // by default
+    allowCancelUnstaking: true
+  } as ChainStakingMetadata;
 }
 
 export async function getAmplitudeCollatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string, extraCollatorAddress?: string) {

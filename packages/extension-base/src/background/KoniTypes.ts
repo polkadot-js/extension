@@ -1334,11 +1334,14 @@ export interface ChainStakingMetadata {
   chain: string;
   type: StakingType;
 
-  expectedReturn: number; // in %, annually
+  era: number, // also round for parachains
+  expectedReturn?: number; // in %, annually
+  inflation?: number; // in %, annually
   minStake: string;
   maxValidatorPerNominator: number;
   maxWithdrawalRequestPerValidator: number;
   allowCancelUnstaking: boolean;
+  unstakingPeriod: number; // in hours
 }
 
 export interface NominationInfo {

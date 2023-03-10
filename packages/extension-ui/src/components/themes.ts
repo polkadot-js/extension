@@ -96,6 +96,7 @@ const darkTheme = {
     '0px 24px 38px rgba(12, 19, 26, 0.14), 0px 9px 46px rgba(12, 19, 26, 0.12), 0px 11px 15px rgba(12, 19, 26, 0.2);',
   toastCriticalBackground: '#FF5E5C',
   toastInfoBackground: '#6D95E3',
+  trustedBackground: '#6D95E3',
   toastSuccessBackground: '#66D16F',
   toastTextColor: '#111B24',
   toastWarningBackground: '#FFD23F',

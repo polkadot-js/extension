@@ -8,6 +8,7 @@ import styled from 'styled-components';
 
 import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 
+import animTrusted from '../../assets/anim_trusted.svg';
 import helpIcon from '../../assets/help.svg';
 import { ButtonArea, Svg, VerticalSpace } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
@@ -68,7 +69,18 @@ function AuthManagement({ className }: Props): React.ReactElement<Props> {
       />
       <div className={className}>
         {!authList || !hasAuthList ? (
-          <div className='empty-list'>{t<string>('No website request yet!')}</div>
+          <div className='empty-list'>
+            <Svg
+              className='animated-trusted'
+              src={animTrusted}
+            />
+            <span className='heading'>{t<string>('No app request yet')}</span>
+            <span className='subtitle'>
+              {t<string>(
+                'This view will contain a list of apps and associated accounts that you have granted the Trusted status. The requests are initiated by apps.'
+              )}
+            </span>
+          </div>
         ) : (
           <>
             <div className='website-list'>
@@ -93,14 +105,45 @@ export default styled(AuthManagement)`
   height: calc(100vh - 2px);
   overflow-y: auto;
 
-  .empty-list{
+  .empty-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
+    gap: 16px;
+    margin-top: 56px;
   }
 
-  .inputFilter{
+  .inputFilter {
     margin-bottom: 0.8rem;
     padding: 0 !important;
   }
+
+  .animated-trusted {
+    width: 96px;
+    height: 96px;
+    background: ${({ theme }: ThemeProps) => theme.trustedBackground};
+  }
+  
+
+  .heading {
+      font-weight: 700;
+      font-size: 24px;
+      line-height: 118%;
+      letter-spacing: 0.03em;
+      font-family: ${({ theme }: ThemeProps) => theme.secondaryFontFamily};
+
+    }
+
+    .subtitle {
+      font-weight: 300;
+      font-size: 14px;
+      line-height: 145%;
+      text-align: center;
+      letter-spacing: 0.07em; 
+      color: ${({ theme }: ThemeProps) => theme.subTextColor};
+      padding: 0 8px;
+    }
 
   .website-list {
     margin-top: 4px;

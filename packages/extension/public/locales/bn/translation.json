@@ -263,6 +263,8 @@
   "Disconnect app": "",
   "Disconnecting app": "",
   "You're about to disconnect an app from the Signer. This will result in disconnecting all connected accounts from this app.": "",
+  "No app request yet": "",
+  "This view will contain a list of apps and associated accounts that you have granted the Trusted status. The requests are initiated by apps.": "",
   "Add sub-account": "",
   "Choose a sub-account derivation path for additional account organization.": ""
 

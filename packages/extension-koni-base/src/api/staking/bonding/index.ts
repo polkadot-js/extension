@@ -17,7 +17,7 @@ export const CHAIN_TYPES: Record<string, string[]> = {
   amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine']
 };
 
-export async function getChainBondingBasics (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
+export async function getChainStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
     return getAstarStakingMetadata(chain, substrateApi);
   } else if (_STAKING_CHAIN_GROUP.para.includes(chain)) {

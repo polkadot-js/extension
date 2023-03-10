@@ -8,10 +8,10 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import { getUnlockingInfo } from '@subwallet/extension-koni-base/api/staking/bonding';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
 import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
+import { getChainStakingMetadata, getUnlockingInfo } from '@subwallet/extension-koni-base/api/staking/bonding';
 import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-koni-base/api/staking/paraChain';
 import { nftHandler } from '@subwallet/extension-koni-base/background/handlers';
 import { Subscription } from 'rxjs';
@@ -368,5 +368,17 @@ export class KoniSubscription {
       timestamp: +new Date(),
       details: stakeUnlockingInfo
     });
+  }
+
+  async fetchChainStakingMetadata (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
+    await Promise.all(Object.values(chainInfoMap).map(async (chainInfo) => {
+      const chainState = chainStateMap[chainInfo.slug];
+
+      if (chainState?.active && _isChainSupportSubstrateStaking(chainInfo)) {
+        const chainStakingMetadata = await getChainStakingMetadata(chainInfo.slug, substrateApiMap[chainInfo.slug]);
+
+        this.state.updateChainStakingMetadata(chainStakingMetadata);
+      }
+    }));
   }
 }

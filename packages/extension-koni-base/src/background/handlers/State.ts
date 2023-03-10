@@ -479,6 +479,10 @@ export default class KoniState {
     this.dbService.updateStaking(networkKey, item.address, item).catch((e) => this.logger.warn(e));
   }
 
+  public updateChainStakingMetadata (item: ChainStakingMetadata) {
+    this.dbService.updateChainStakingMetadata(item).catch((e) => this.logger.warn(e));
+  }
+
   public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {
     this.nftTransferState = data;
 

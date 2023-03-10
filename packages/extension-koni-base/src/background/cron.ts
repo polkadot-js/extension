@@ -3,8 +3,8 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ApiMap, NftTransferExtra, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { ALL_ACCOUNT_KEY, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKE_UNLOCKING_INFO, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-base/constants';
-import { _ChainConnectionStatus, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { ALL_ACCOUNT_KEY, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_DATA, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-base/constants';
+import { _ChainConnectionStatus, _ChainState, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
@@ -87,6 +87,7 @@ export class KoniCron {
         this.refreshStakingReward(currentAccountInfo.address);
         this.refreshStakingRewardFastInterval(currentAccountInfo.address);
         this.refreshStakeUnlockingInfo(currentAccountInfo.address, this.state.getChainInfoMap(), this.state.getSubstrateApiMap());
+        this.updateChainStakingMetadata(this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap());
       } else {
         this.setStakingRewardReady();
       }
@@ -112,7 +113,8 @@ export class KoniCron {
         this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
-        this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(currentAccountInfo.address, this.state.getChainInfoMap(), this.state.getSubstrateApiMap()), CRON_REFRESH_STAKE_UNLOCKING_INFO);
+        this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(currentAccountInfo.address, this.state.getChainInfoMap(), this.state.getSubstrateApiMap()), CRON_REFRESH_STAKING_DATA);
+        this.addCron('updateChainStakingMetadata', this.updateChainStakingMetadata(this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap()), CRON_REFRESH_CHAIN_STAKING_METADATA);
       } else {
         this.setStakingRewardReady();
       }
@@ -142,7 +144,8 @@ export class KoniCron {
           this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
           this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
           this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
-          this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(address, serviceInfo.chainInfoMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_STAKE_UNLOCKING_INFO);
+          this.addCron('refreshStakeUnlockingInfo', this.refreshStakeUnlockingInfo(address, serviceInfo.chainInfoMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_STAKING_DATA);
+          this.addCron('updateChainStakingMetadata', this.updateChainStakingMetadata(serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_CHAIN_STAKING_METADATA);
         } else {
           this.setStakingRewardReady();
         }
@@ -295,5 +298,15 @@ export class KoniCron {
 
   checkNetworkAvailable = (serviceInfo: ServiceInfo): boolean => {
     return Object.keys(serviceInfo.chainApiMap.substrate).length > 0 || Object.keys(serviceInfo.chainApiMap.evm).length > 0;
+  };
+
+  updateChainStakingMetadata = (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) => {
+    return () => {
+      this.logger.log('Fetching chain staking metadata');
+
+      this.subscriptions.fetchChainStakingMetadata(chainInfoMap, chainStateMap, substrateApiMap)
+        .then(() => this.logger.log('Updated chain staking metadata'))
+        .catch(this.logger.error);
+    };
   };
 }

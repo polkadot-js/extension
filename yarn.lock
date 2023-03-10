@@ -2114,17 +2114,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chrome@npm:*":
-  version: 0.0.219
-  resolution: "@types/chrome@npm:0.0.219"
-  dependencies:
-    "@types/filesystem": "*"
-    "@types/har-format": "*"
-  checksum: 3247d205e24d83f3574584e77681ca4ddaa38fdc19b5721dc2a7425952205d8e7de448d089462968d1046d5360092797e70254d54fa757c8df7b13007104a008
-  languageName: node
-  linkType: hard
-
-"@types/chrome@npm:^0.0.220":
+"@types/chrome@npm:*, @types/chrome@npm:^0.0.220":
   version: 0.0.220
   resolution: "@types/chrome@npm:0.0.220"
   dependencies:
@@ -2336,10 +2326,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*":
-  version: 18.14.5
-  resolution: "@types/node@npm:18.14.5"
-  checksum: 415fb0edc132baa9580f1b7a381a3f10b662f5d7a7d11641917fa0961788ccede3272badc414aadc47306e9fc35c5f6c59159ac470b46d3f3a15fb0446224c8c
+"@types/node@npm:*, @types/node@npm:^18.15.0":
+  version: 18.15.0
+  resolution: "@types/node@npm:18.15.0"
+  checksum: d81372276dd5053b1743338b61a2178ff9722dc609189d01fc7d1c2acd539414039e0e4780678730514390dad3f29c366a28c29e8dbd5b0025651181f6dd6669
   languageName: node
   linkType: hard
 
@@ -2361,13 +2351,6 @@ __metadata:
   version: 12.20.23
   resolution: "@types/node@npm:12.20.23"
   checksum: 037cc9821981b598caa9021ae8ee7de9c23d2332dd72b1099ff49bcef21206da2b63acbc1bbac7bfa68891abd49757d245b0fce1410bcdd0454f438404fb9b2a
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^18.15.0":
-  version: 18.15.0
-  resolution: "@types/node@npm:18.15.0"
-  checksum: d81372276dd5053b1743338b61a2178ff9722dc609189d01fc7d1c2acd539414039e0e4780678730514390dad3f29c366a28c29e8dbd5b0025651181f6dd6669
   languageName: node
   linkType: hard
 
@@ -8738,16 +8721,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"i18next@npm:*":
-  version: 22.4.10
-  resolution: "i18next@npm:22.4.10"
-  dependencies:
-    "@babel/runtime": ^7.20.6
-  checksum: 731423e3fafe4ecaf0fc3c5867b69ae5c35c9021f7b5aad8392a9bf5cf56fbf1503376ba5aa935f2b21e12a97862fa31be0e4b35e98eefb747e2008b5808e35c
-  languageName: node
-  linkType: hard
-
-"i18next@npm:^22.4.11":
+"i18next@npm:*, i18next@npm:^22.4.11":
   version: 22.4.11
   resolution: "i18next@npm:22.4.11"
   dependencies:

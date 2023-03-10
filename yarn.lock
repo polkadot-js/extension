@@ -1102,9 +1102,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.71.1":
-  version: 0.71.1
-  resolution: "@polkadot/dev@npm:0.71.1"
+"@polkadot/dev@npm:^0.71.3":
+  version: 0.71.3
+  resolution: "@polkadot/dev@npm:0.71.3"
   dependencies:
     "@eslint/js": ^8.35.0
     "@rollup/plugin-alias": ^4.0.3
@@ -1169,7 +1169,7 @@ __metadata:
     polkadot-exec-rollup: scripts/polkadot-exec-rollup.mjs
     polkadot-exec-tsc: scripts/polkadot-exec-tsc.mjs
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.mjs
-  checksum: 18505f604cd99a6fa858fe0dd6f9f09f6ae46bc3428616dd8df6f4533b4854de1c517f1c0ede5f7c11a881ffea2175ffd48c8526ea16f7da3320595d0ae67cf8
+  checksum: ff7791efc27b11521753eb1175694b12e54fc7f3b3641ad7fbd1c7d2cc8b11a205b804fc1a313eeb6dedee015e7f6b381b0630d71ce530bd2bf38b30fe647079
   languageName: node
   linkType: hard
 
@@ -1251,7 +1251,7 @@ __metadata:
     "@polkadot/util": ^11.0.1
     "@polkadot/util-crypto": ^11.0.1
     "@polkadot/x-global": ^11.0.1
-    "@types/chrome": ^0.0.219
+    "@types/chrome": ^0.0.220
     "@types/firefox-webext-browser": ^109.0.0
     tslib: ^2.5.0
   peerDependencies:
@@ -1306,7 +1306,7 @@ __metadata:
     enzyme: ^3.11.0
     enzyme-adapter-react-16: ^1.15.7
     file-saver: ^2.0.5
-    i18next: ^22.4.10
+    i18next: ^22.4.11
     react: ^18.2.0
     react-dom: ^18.2.0
     react-dropzone: ^11.7.1
@@ -1324,7 +1324,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
-    "@polkadot/dev": ^0.71.1
+    "@polkadot/dev": ^0.71.3
     "@polkadot/extension-base": ^0.45.2-5-x
     "@polkadot/extension-inject": ^0.45.2-5-x
     "@polkadot/extension-ui": ^0.45.2-5-x
@@ -2114,13 +2114,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chrome@npm:*, @types/chrome@npm:^0.0.219":
-  version: 0.0.219
-  resolution: "@types/chrome@npm:0.0.219"
+"@types/chrome@npm:*, @types/chrome@npm:^0.0.220":
+  version: 0.0.220
+  resolution: "@types/chrome@npm:0.0.220"
   dependencies:
     "@types/filesystem": "*"
     "@types/har-format": "*"
-  checksum: 3247d205e24d83f3574584e77681ca4ddaa38fdc19b5721dc2a7425952205d8e7de448d089462968d1046d5360092797e70254d54fa757c8df7b13007104a008
+  checksum: 774c722daecb84ecf86d7128ed8747a560085012cc4e564179fad75838c536cded1e5d54aea359b25ad488bd21a826d2fee511495279f71286c3f7a370fb24e6
   languageName: node
   linkType: hard
 
@@ -2326,10 +2326,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^18.14.5":
-  version: 18.14.5
-  resolution: "@types/node@npm:18.14.5"
-  checksum: 415fb0edc132baa9580f1b7a381a3f10b662f5d7a7d11641917fa0961788ccede3272badc414aadc47306e9fc35c5f6c59159ac470b46d3f3a15fb0446224c8c
+"@types/node@npm:*, @types/node@npm:^18.15.0":
+  version: 18.15.0
+  resolution: "@types/node@npm:18.15.0"
+  checksum: d81372276dd5053b1743338b61a2178ff9722dc609189d01fc7d1c2acd539414039e0e4780678730514390dad3f29c366a28c29e8dbd5b0025651181f6dd6669
   languageName: node
   linkType: hard
 
@@ -8721,12 +8721,12 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"i18next@npm:*, i18next@npm:^22.4.10":
-  version: 22.4.10
-  resolution: "i18next@npm:22.4.10"
+"i18next@npm:*, i18next@npm:^22.4.11":
+  version: 22.4.11
+  resolution: "i18next@npm:22.4.11"
   dependencies:
     "@babel/runtime": ^7.20.6
-  checksum: 731423e3fafe4ecaf0fc3c5867b69ae5c35c9021f7b5aad8392a9bf5cf56fbf1503376ba5aa935f2b21e12a97862fa31be0e4b35e98eefb747e2008b5808e35c
+  checksum: 7f68c6801eb1eff240953066841d507cb00ce3eb6e2a8a6446f9a16453aab168352a36fdfe62c88e04795b1bc0a47439b2d463ed67e1c6bf19e0fb3a57fa457a
   languageName: node
   linkType: hard
 
@@ -12777,8 +12777,8 @@ fsevents@~2.3.2:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@babel/core": ^7.21.0
-    "@polkadot/dev": ^0.71.1
-    "@types/node": ^18.14.5
+    "@polkadot/dev": ^0.71.3
+    "@types/node": ^18.15.0
     i18next-scanner: ^4.1.1
     sinon-chrome: ^3.0.1
   languageName: unknown

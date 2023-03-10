@@ -1673,7 +1673,7 @@ export interface KoniRequestSignatures {
   'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
   'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];
   'pri(bonding.submitTransaction)': [RequestBondingSubmit, TransactionResponse];
-  'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingInfo>, Record<string, ChainBondingInfo>];
+  'pri(bonding.subscribeChainStakingMetadata)': [null, ChainStakingMetadata[], ChainStakingMetadata[]];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
 
   // Chains, assets functions

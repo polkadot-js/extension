@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
+import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
 import { Subscription } from 'dexie';
 
@@ -15,6 +16,7 @@ export default class DatabaseService {
   private _db: KoniDatabase;
   public stores;
   private logger: Logger;
+  // TODO: might remove this
   private nftSubscription: Subscription | undefined;
   private stakingSubscription: Subscription | undefined;
 
@@ -32,7 +34,10 @@ export default class DatabaseService {
       extraDelegationInfo: new ExtraDelegationInfoStore(this._db.extraDelegationInfo),
 
       chain: new ChainStore(this._db.chain),
-      asset: new AssetStore(this._db.asset)
+      asset: new AssetStore(this._db.asset),
+
+      // staking
+      chainStakingMetadata: new ChainStakingMetadataStore(this._db.chainStakingMetadata)
     };
   }
 
@@ -97,6 +102,12 @@ export default class DatabaseService {
     });
 
     return this.stakingSubscription;
+  }
+
+  subscribeChainStakingMetadata (chains: string[], callback: (data: ChainStakingMetadata[]) => void) {
+    this.stores.chainStakingMetadata.subscribeByChain(chains).subscribe(({
+      next: (data) => callback && callback(data)
+    }));
   }
 
   // Transaction histories
@@ -228,5 +239,16 @@ export default class DatabaseService {
     this.logger.log('Bulk removing AssetStore');
 
     return this.stores.asset.removeAssets(items);
+  }
+
+  // Staking
+  async updateChainStakingMetadata (item: ChainStakingMetadata) {
+    this.logger.log('Update ChainStakingMetadata: ', item);
+
+    return this.stores.chainStakingMetadata.upsert(item);
+  }
+
+  async getChainStakingMetadata () {
+    return this.stores.chainStakingMetadata.getAll();
   }
 }

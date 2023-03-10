@@ -290,7 +290,7 @@ template {
   display: none;
 }
 
-[hidden] {
+.hidden, [hidden] {
   display: none !important;
 }
 

@@ -172,6 +172,7 @@ function Component (): React.ReactElement {
           className={'__static-block'}
           isShrink={isShrink}
           onClickBack={goBack}
+          sendFundSlug={currentTokenSlug || currentTokenGroup}
           symbol={symbol}
         />
       </div>

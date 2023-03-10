@@ -96,6 +96,11 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
       icon: Spinner,
       name: t('Processing')
     },
+    [ExtrinsicStatus.PENDING]: {
+      schema: 'gold',
+      icon: Spinner,
+      name: t('Pending')
+    },
     [ExtrinsicStatus.UNKNOWN]: {
       schema: 'danger',
       icon: StopCircle,

@@ -10,9 +10,9 @@ interface Props extends ThemeProps {
   errors: string[]
 }
 
-const Component = ({ children, errors }: Props) => {
+const Component = ({ children, className = '', errors }: Props) => {
   return (
-    <div className='transaction-footer'>
+    <div className={`transaction-footer ${className}`}>
       {errors.length > 0 && <div className='error-messages'>
         {errors.map((e) => (
           <div key={e}>{e}</div>

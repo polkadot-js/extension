@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { _getAssetSymbol, _getMultiChainAsset, _isAssetFungibleToken, _isNativeTokenBySlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getMultiChainAsset, _isNativeTokenBySlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AssetRegistryStore } from '@subwallet/extension-koni-ui/stores/types';
 import { TokenGroupHookType } from '@subwallet/extension-koni-ui/types/hook';
+import { isAvailableTokenAsset } from '@subwallet/extension-koni-ui/util/chainAndAsset';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -63,10 +64,8 @@ function getTokenGroup (assetRegistryMap: AssetRegistryStore['assetRegistry'], f
       return;
     }
 
-    const token = _getAssetSymbol(chainAsset);
-
     const multiChainAsset = _getMultiChainAsset(chainAsset);
-    const tokenGroupKey = multiChainAsset || `${token}-${chain}`;
+    const tokenGroupKey = multiChainAsset || chainAsset.slug;
 
     if (result.tokenGroupMap[tokenGroupKey]) {
       result.tokenGroupMap[tokenGroupKey].push(chainAsset.slug);
@@ -96,13 +95,7 @@ export default function useTokenGroup (filteredChains?: string[]): TokenGroupHoo
     const filteredAssetRegistryMap: Record<string, _ChainAsset> = {};
 
     Object.values(assetRegistryMap).forEach((chainAsset) => {
-      const assetSetting = assetSettingMap[chainAsset.slug];
-
-      const isAssetVisible = assetSetting && assetSetting.visible;
-      const isAssetFungible = _isAssetFungibleToken(chainAsset);
-      const isAssetActive = chainStateMap[chainAsset.originChain].active;
-
-      if (isAssetActive && isAssetFungible && isAssetVisible) {
+      if (isAvailableTokenAsset(chainAsset, assetSettingMap, chainStateMap)) {
         filteredAssetRegistryMap[chainAsset.slug] = chainAsset;
       }
     });

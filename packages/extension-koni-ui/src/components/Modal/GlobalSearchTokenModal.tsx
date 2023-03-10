@@ -96,8 +96,7 @@ export const GlobalSearchTokenModal = styled(Component)<Props>(({ theme: { token
   return ({
     '.ant-sw-modal-body': {
       padding: 0,
-      display: 'flex',
-      minHeight: '50vh'
+      display: 'flex'
     },
 
     '.ant-sw-list-section': {

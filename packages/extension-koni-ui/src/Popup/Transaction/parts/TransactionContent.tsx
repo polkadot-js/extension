@@ -9,9 +9,9 @@ interface Props extends ThemeProps {
   children: React.ReactNode
 }
 
-const Component = ({ children }: Props) => {
+const Component = ({ children, className = '' }: Props) => {
   return (
-    <div className='transaction-content'>
+    <div className={`transaction-content ${className}`}>
       {children}
     </div>
   );

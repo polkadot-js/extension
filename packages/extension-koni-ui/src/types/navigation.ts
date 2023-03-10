@@ -17,6 +17,12 @@ export type ManageWebsiteAccessDetailParam = {
   accountAuthType: string,
 };
 
+// transfer
+
+export type SendFundParam = {
+  slug: string, // multiChainAsset slug or token slug
+}
+
 // buy tokens
 
 export type BuyTokensParam = {

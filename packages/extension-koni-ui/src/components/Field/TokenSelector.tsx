@@ -22,7 +22,7 @@ interface Props extends ThemeProps, BasicInputWrapper {
   showChainInSelected?: boolean,
 }
 
-function Component ({ className = '', disabled, id = 'token-select', items, label, onChange, placeholder, showChainInSelected = true, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ className = '', disabled, id = 'token-select', items, label, onChange, placeholder, showChainInSelected = false, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 
@@ -30,7 +30,7 @@ function Component ({ className = '', disabled, id = 'token-select', items, labe
     return (
       <div className={'__selected-item'}>
         {item.symbol}
-        {showChainInSelected && (<>({item.originChain})</>)}
+        {showChainInSelected && (<span className={'ml-xxs'}>({item.originChain})</span>)}
       </div>
     );
   }, [showChainInSelected]);

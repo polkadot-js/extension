@@ -145,12 +145,14 @@ export const updateChainInfoMap = (data: Record<string, _ChainInfo>) => {
 export const subscribeChainInfoMap = lazySubscribeMessage('pri(chainService.subscribeChainInfoMap)', null, updateChainInfoMap, updateChainInfoMap);
 
 export const updateChainStateMap = (data: Record<string, _ChainState>) => {
+  // TODO useTokenGroup
   store.dispatch({ type: 'chainStore/updateChainStateMap', payload: data });
 };
 
 export const subscribeChainStateMap = lazySubscribeMessage('pri(chainService.subscribeChainStateMap)', null, updateChainStateMap, updateChainStateMap);
 
 export const updateAssetRegistry = (data: Record<string, _ChainAsset>) => {
+  // TODO useTokenGroup
   store.dispatch({ type: 'assetRegistry/updateAssetRegistry', payload: data });
 };
 

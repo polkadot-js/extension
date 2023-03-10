@@ -63,7 +63,7 @@ function Component ({ className }: Props) {
   const [transactionType, setTransactionType] = useState<ExtrinsicType>(ExtrinsicType.TRANSFER_BALANCE);
   const [freeBalance, setFreeBalance] = useState<string | undefined>();
   const titleMap = useMemo<Record<string, string>>(() => ({
-    transfer: t('Transfer')
+    [ExtrinsicType.TRANSFER_BALANCE]: t('Transfer')
   }), [t]);
   const { goHome } = useDefaultNavigate();
 
@@ -102,6 +102,7 @@ function Component ({ className }: Props) {
               background={'transparent'}
               center
               className={'transaction-header'}
+              // paddingVertical
               onBack={goHome}
               showBackButton
               title={titleMap[transactionType]}
@@ -123,20 +124,22 @@ const Transaction = styled(Component)(({ theme }) => {
     flexDirection: 'column',
 
     '.transaction-header': {
-      paddingTop: token.paddingXS,
-      paddingBottom: token.paddingXS
+      paddingTop: token.paddingSM,
+      paddingBottom: token.paddingSM,
+      flexShrink: 0
     },
 
     '.transaction-content': {
       flex: '1 1 400px',
-      padding: token.paddingMD,
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
       overflow: 'auto'
     },
 
     '.transaction-footer': {
       display: 'flex',
       flexWrap: 'wrap',
-      padding: token.paddingMD,
+      padding: token.padding,
       paddingBottom: token.paddingLG,
       gap: token.paddingXS,
 

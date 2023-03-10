@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExternalState } from '@subwallet/extension-base/signers/types';
-import { SigData } from '@subwallet/extension-koni-ui/types/accountExternalRequest';
+import { SigData } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useReducer } from 'react';
 
 import { SignerResult } from '@polkadot/types/types/extrinsic';

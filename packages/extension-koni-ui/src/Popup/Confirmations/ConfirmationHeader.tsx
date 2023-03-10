@@ -3,7 +3,6 @@
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, SwSubHeader } from '@subwallet/react-ui';
-import { ButtonProps } from '@subwallet/react-ui/es/button';
 import CN from 'classnames';
 import { CaretRight } from 'phosphor-react';
 import React from 'react';
@@ -18,16 +17,6 @@ interface Props extends ThemeProps {
 }
 
 function Component ({ className, index, numberOfConfirmations, onClickNext, onClickPrev, title }: Props) {
-  const rightButtons: ButtonProps[] = ([{
-    className: CN('__right-block', { hidden: index === (numberOfConfirmations - 1) }),
-    onClick: onClickNext,
-    size: 'xs',
-    icon: (<Icon
-      phosphorIcon={CaretRight}
-      size='sm'
-    />)
-  }]);
-
   return (
     <SwSubHeader
       background='transparent'
@@ -35,7 +24,19 @@ function Component ({ className, index, numberOfConfirmations, onClickNext, onCl
       className={CN(className)}
       onBack={onClickPrev}
       paddingVertical={true}
-      rightButtons={rightButtons}
+      rightButtons={(index === (numberOfConfirmations - 1) || numberOfConfirmations === 1)
+        ? undefined
+        : [
+          {
+            className: CN('__right-block'),
+            onClick: onClickNext,
+            size: 'xs',
+            icon: (<Icon
+              phosphorIcon={CaretRight}
+              size='sm'
+            />)
+          }
+        ]}
       showBackButton={index > 0}
       title={title}
     />

@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { EVMTransactionArg, NestedArray, ParseEVMTransactionData, ResponseParseEVMContractInput, ResponseQrParseRLP } from '@subwallet/extension-base/background/KoniTypes';
+import { EvmTransactionArg, EvmTransactionData, NestedArray, ParseEvmTransactionData, ResponseParseEvmContractInput, ResponseQrParseRLP } from '@subwallet/extension-base/background/KoniTypes';
 import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmAbiExplorer, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { createTransactionFromRLP, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
-import { InputDataDecoder } from '@subwallet/extension-base/utils/eth/parseTransactionData';
+import { InputDataDecoder } from '@subwallet/extension-base/utils/eth/parseTransaction/base';
 import axios from 'axios';
 import BigN from 'bignumber.js';
 
@@ -84,14 +84,14 @@ const parseType = (_types: string): NestedArray<string> => {
   }
 };
 
-const parseResult = (type: string, input: NestedArray<any>, name: NestedArray<string>): EVMTransactionArg => {
+const parseResult = (type: string, input: NestedArray<any>, name: NestedArray<string>): EvmTransactionArg => {
   const types = parseType(type);
 
   if (Array.isArray(types)) {
     const inputs = input as NestedArray<any>[];
     const _name = (name as NestedArray<string>[])[0] as string;
     const names = (name as NestedArray<string>[])[1];
-    const children: EVMTransactionArg[] = [];
+    const children: EvmTransactionArg[] = [];
 
     types.forEach((type, index) => {
       children.push(parseResult(type as string, inputs[index], names[index]));
@@ -112,7 +112,7 @@ const parseResult = (type: string, input: NestedArray<any>, name: NestedArray<st
   }
 };
 
-const isContractAddress = async (address: string, evmApi: _EvmApi): Promise<boolean> => {
+export const isContractAddress = async (address: string, evmApi: _EvmApi): Promise<boolean> => {
   if (!evmApi) {
     return false;
   } else {
@@ -122,8 +122,8 @@ const isContractAddress = async (address: string, evmApi: _EvmApi): Promise<bool
   }
 };
 
-export const parseContractInput = async (input: string, contractAddress: string, network: _ChainInfo | null): Promise<ResponseParseEVMContractInput> => {
-  let result: ParseEVMTransactionData | string = input;
+export const parseContractInput = async (input: string, contractAddress: string, network: _ChainInfo | null): Promise<ResponseParseEvmContractInput> => {
+  let result: EvmTransactionData = input;
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const _ABIs: any[] = [...ABIs];
@@ -149,7 +149,7 @@ export const parseContractInput = async (input: string, contractAddress: string,
     const raw = decoder.decodeData(input);
 
     if (raw.method && raw.methodName) {
-      const temp: ParseEVMTransactionData = {
+      const temp: ParseEvmTransactionData = {
         method: raw.method,
         methodName: raw.methodName,
         args: []
@@ -169,7 +169,7 @@ export const parseContractInput = async (input: string, contractAddress: string,
   };
 };
 
-const getNetworkJsonByChainId = (networkMap: Record<string, _ChainInfo>, chainId: number): _ChainInfo | null => {
+const getChainInfoByChainId = (networkMap: Record<string, _ChainInfo>, chainId: number): _ChainInfo | null => {
   if (!chainId) {
     for (const n in networkMap) {
       if (!Object.prototype.hasOwnProperty.call(networkMap, n)) {
@@ -218,7 +218,7 @@ export const parseEvmRlp = async (data: string, networkMap: Record<string, _Chai
     nonce: new BigN(tx.nonce).toNumber()
   };
 
-  const network: _ChainInfo | null = getNetworkJsonByChainId(networkMap, parseInt(tx.ethereumChainId));
+  const network: _ChainInfo | null = getChainInfoByChainId(networkMap, parseInt(tx.ethereumChainId));
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const _ABIs: any[] = [...ABIs];
@@ -246,7 +246,7 @@ export const parseEvmRlp = async (data: string, networkMap: Record<string, _Chai
     const raw = decoder.decodeData(tx.data);
 
     if (raw.method && raw.methodName) {
-      const temp: ParseEVMTransactionData = {
+      const temp: ParseEvmTransactionData = {
         method: raw.method,
         methodName: raw.methodName,
         args: []

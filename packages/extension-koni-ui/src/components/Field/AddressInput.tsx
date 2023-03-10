@@ -20,9 +20,9 @@ interface Props extends BasicInputWrapper, ThemeProps {
   showScanner?: boolean;
 }
 
-const MODAL_ID = 'input-address';
+const modalId = 'input-account-address-modal';
 
-function Component ({ className = '', label, onChange, placeholder, showAddressBook = false, showScanner = true, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ className = '', label, onChange, placeholder, value, id = modalId, showAddressBook, showScanner }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -34,21 +34,21 @@ function Component ({ className = '', label, onChange, placeholder, showAddressB
   }, [onChange]);
 
   const onOpenScanner = useCallback(() => {
-    activeModal(MODAL_ID);
-  }, [activeModal]);
+    activeModal(id);
+  }, [activeModal, id]);
 
   const onCloseScanner = useCallback(() => {
-    inactiveModal(MODAL_ID);
-  }, [inactiveModal]);
+    inactiveModal(id);
+  }, [inactiveModal, id]);
 
   const onScanError = useCallback(() => {
     // do something
   }, []);
 
   const onSuccess = useCallback((result: ScannerResult) => {
-    inactiveModal(MODAL_ID);
+    inactiveModal(id);
     onChange && onChange({ target: { value: result.text } });
-  }, [inactiveModal, onChange]);
+  }, [inactiveModal, id, onChange]);
 
   // todo: Will work with "Manage address book" feature later
   return (
@@ -113,7 +113,7 @@ function Component ({ className = '', label, onChange, placeholder, showAddressB
 
       <SwQrScanner
         className={className}
-        id={MODAL_ID}
+        id={id}
         onClose={onCloseScanner}
         onError={onScanError}
         onSuccess={onSuccess}

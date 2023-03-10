@@ -7,6 +7,7 @@ import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handler
 import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { SingleAddress } from '@subwallet/ui-keyring/observable/types';
@@ -21,7 +22,6 @@ import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
-import {SWTransactionResult} from "@subwallet/extension-base/services/transaction-service/types";
 
 export interface ServiceInfo {
   chainInfoMap: Record<string, _ChainInfo>;
@@ -320,7 +320,7 @@ export interface NetworkJson {
   crowdloanUrl?: string;
 
   // Ethereum related information for predefined network only
-  isEthereum?: boolean; // Only show network with isEthereum=true when select one EVM account // user input
+  isEthereum?: boolean; // Only show network with isEthereum=true when select one Evm account // user input
   evmChainId?: number;
 
   isHybrid?: boolean;
@@ -783,6 +783,19 @@ export interface RequestAccountCreateHardwareV2 {
   isAllowed?: boolean;
 }
 
+export interface CreateHardwareAccountItem {
+  accountIndex: number;
+  address: string;
+  addressOffset: number;
+  genesisHash: string;
+  hardwareType: string;
+  name: string;
+}
+
+export interface RequestAccountCreateHardwareMultiple {
+  accounts: CreateHardwareAccountItem[];
+}
+
 // Restore account with public and secret key
 
 export interface RequestAccountCreateWithSecretKey {
@@ -1062,10 +1075,21 @@ export interface SwitchNetworkRequest {
   address?: string;
 }
 
-export interface EvmSignatureRequest {
-  address: string,
+export interface EvmSignRequest {
+  account: AccountJson;
+  hashPayload: string;
+  canSign: boolean;
+}
+
+export interface EvmSignatureRequest extends EvmSignRequest {
   type: string;
-  payload: unknown
+  payload: unknown;
+}
+
+export interface EvmSendTransactionRequest extends TransactionConfig, EvmSignRequest {
+  estimateGas: string;
+  parseData: EvmTransactionData;
+  isToContract: boolean;
 }
 
 export interface ConfirmationsQueueItemOptions {
@@ -1074,7 +1098,7 @@ export interface ConfirmationsQueueItemOptions {
   networkKey?: string;
 }
 
-export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions, ConfirmationRequestBase{
+export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions, ConfirmationRequestBase {
   payload: T;
   payloadJson: string;
 }
@@ -1082,14 +1106,6 @@ export interface ConfirmationsQueueItem<T> extends ConfirmationsQueueItemOptions
 export interface ConfirmationResult<T> extends ConfirmationRequestBase {
   isApproved: boolean;
   payload?: T;
-}
-export interface ConfirmationResultExternal<T> extends ConfirmationResult<T>{
-  signature: `0x${string}`;
-}
-
-export interface EvmSendTransactionRequest extends TransactionConfig {
-  estimateGas: string;
-  hashPayload: string;
 }
 
 export interface EvmRequestExternal {
@@ -1101,7 +1117,7 @@ export interface EvmSendTransactionRequestExternal extends EvmSendTransactionReq
 
 export interface EvmSignatureRequestExternal extends EvmSignatureRequest, EvmRequestExternal {}
 
-export interface AddNetworkRequestExternal { // currently only support adding pure EVM network
+export interface AddNetworkRequestExternal { // currently only support adding pure Evm network
   chainId: string,
   rpcUrls: string[],
   chainName: string,
@@ -1109,24 +1125,29 @@ export interface AddNetworkRequestExternal { // currently only support adding pu
   requestId?: string
 }
 
-export interface AddTokenRequestExternal {
-  contractAddress: string,
-  originChain: string,
-  type: string,
+export interface AddNetworkExternalRequest { // currently only support adding pure Evm network
+  chainId: string;
+  rpcUrl: string;
+  chainName: string;
+  blockExplorerUrl: string;
+  requestId: string;
+}
 
-  name: string,
-  symbol: string,
-  decimals: number
+export interface AddTokenRequestExternal {
+  contractAddress: string;
+  originChain: string;
+  type: _AssetType;
+  name: string;
+  symbol: string;
+  decimals: number;
 }
 
 export interface ConfirmationDefinitions {
-  addNetworkRequest: [ConfirmationsQueueItem<AddNetworkRequestExternal>, ConfirmationResult<AddNetworkRequestExternal>],
+  addNetworkRequest: [ConfirmationsQueueItem<_NetworkUpsertParams>, ConfirmationResult<null>],
   addTokenRequest: [ConfirmationsQueueItem<AddTokenRequestExternal>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
-  evmSignatureRequestExternal: [ConfirmationsQueueItem<EvmSignatureRequestExternal>, ConfirmationResultExternal<string>],
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<string>]
-  evmSendTransactionRequestExternal: [ConfirmationsQueueItem<EvmSendTransactionRequestExternal>, ConfirmationResultExternal<string>]
 }
 
 export type ConfirmationType = keyof ConfirmationDefinitions;
@@ -1194,33 +1215,35 @@ export interface SingleModeJson {
   autoTriggerDomain: string // Regex for auto trigger single mode
 }
 
-/// EVM transaction
+/// Evm transaction
 
 export type NestedArray<T> = T | NestedArray<T>[];
 
-/// EVM Contract Input
+/// Evm Contract Input
 
-export interface EVMTransactionArg {
+export interface EvmTransactionArg {
   name: string;
   type: string;
   value: string;
-  children?: EVMTransactionArg[];
+  children?: EvmTransactionArg[];
 }
 
-export interface ParseEVMTransactionData{
+export interface ParseEvmTransactionData {
   method: string;
   methodName: string;
-  args: EVMTransactionArg[];
+  args: EvmTransactionArg[];
 }
 
-export interface RequestParseEVMContractInput {
+export interface RequestParseEvmContractInput {
   data: string;
   contract: string;
   chainId: number;
 }
 
-export interface ResponseParseEVMContractInput {
-  result: ParseEVMTransactionData | string
+export type EvmTransactionData = ParseEvmTransactionData | string;
+
+export interface ResponseParseEvmContractInput {
+  result: EvmTransactionData;
 }
 
 /// Ledger
@@ -1228,7 +1251,8 @@ export interface ResponseParseEVMContractInput {
 export interface LedgerNetwork {
   genesisHash: string;
   displayName: string;
-  network: string;
+  network: string; // network is predefined in ledger lib
+  slug: string; // slug in chain list
   icon: 'substrate' | 'ethereum';
   isDevMode: boolean;
 }
@@ -1273,14 +1297,14 @@ export interface RequestParseTransactionSubstrate {
   networkKey: string;
 }
 
-// Parse EVM
+// Parse Evm
 
 export interface RequestQrParseRLP {
   data: string;
 }
 
 export interface ResponseQrParseRLP {
-  data: ParseEVMTransactionData | string;
+  data: EvmTransactionData;
   input: string;
   nonce: number;
   to: string;
@@ -1314,14 +1338,14 @@ export interface ResponseQrSignSubstrate {
   signature: string;
 }
 
-export interface RequestQrSignEVM {
+export interface RequestQrSignEvm {
   address: string;
   message: string;
   type: 'message' | 'transaction'
   chainId?: number;
 }
 
-export interface ResponseQrSignEVM {
+export interface ResponseQrSignEvm {
   signature: string;
 }
 
@@ -1501,7 +1525,7 @@ export type RequestCrossChainTransferExternal = InternalRequestSign<RequestCheck
 
 export type RequestNftTransferExternalSubstrate = InternalRequestSign<SubstrateNftSubmitTransaction>;
 
-export type RequestNftTransferExternalEVM = InternalRequestSign<EvmNftSubmitTransaction>;
+export type RequestNftTransferExternalEvm = InternalRequestSign<EvmNftSubmitTransaction>;
 
 // Stake
 
@@ -1536,12 +1560,12 @@ export enum ChainEditStandard {
   EVM = 'EVM',
   SUBSTRATE = 'SUBSTRATE',
   UNKNOWN = 'UNKNOWN',
-  MIXED = 'MIXED' // takes root in a standard (Substrate, EVM,...) but also compatible with other standards
+  MIXED = 'MIXED' // takes root in a standard (Substrate, Evm,...) but also compatible with other standards
 }
 
 // ChainService
 // for custom network
-export type ChainEditInfo = { // only support pure substrate or EVM network
+export type ChainEditInfo = { // only support pure substrate or Evm network
   slug: string;
   currentProvider: string;
   providers: Record<string, string>;
@@ -1559,8 +1583,8 @@ export interface ChainSpecInfo {
   genesisHash: string,
   paraId: number | null,
 
-  // EVM
-  evmChainId: number | null // null means not EVM
+  // Evm
+  evmChainId: number | null // null means not Evm
 
   // Common
   existentialDeposit: string,
@@ -1706,6 +1730,7 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
   'pri(accounts.create.externalV2)': [RequestAccountCreateExternalV2, AccountExternalError[]];
   'pri(accounts.create.hardwareV2)': [RequestAccountCreateHardwareV2, boolean];
+  'pri(accounts.create.hardwareMultiple)': [RequestAccountCreateHardwareMultiple, boolean];
   'pri(accounts.create.withSecret)': [RequestAccountCreateWithSecretKey, ResponseAccountCreateWithSecretKey];
   'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean]; // Substrate
   'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
@@ -1756,19 +1781,19 @@ export interface KoniRequestSignatures {
   'pri(qr.transaction.parse.substrate)': [RequestParseTransactionSubstrate, ResponseParseTransactionSubstrate];
   'pri(qr.transaction.parse.evm)': [RequestQrParseRLP, ResponseQrParseRLP];
   'pri(qr.sign.substrate)': [RequestQrSignSubstrate, ResponseQrSignSubstrate];
-  'pri(qr.sign.evm)': [RequestQrSignEVM, ResponseQrSignEVM];
+  'pri(qr.sign.evm)': [RequestQrSignEvm, ResponseQrSignEvm];
 
   // External account request
   'pri(account.external.reject)': [RequestRejectExternalRequest, ResponseRejectExternalRequest];
   'pri(account.external.resolve)': [RequestResolveExternalRequest, ResponseResolveExternalRequest];
 
-  // EVM
+  // Evm
   'evm(events.subscribe)': [RequestEvmEvents, boolean, EvmEvent];
   'evm(request)': [RequestArguments, unknown];
   'evm(provider.send)': [RequestEvmProviderSend, string | number, ResponseEvmProviderSend]
 
-  // EVM Transaction
-  'pri(evm.transaction.parse.input)': [RequestParseEVMContractInput, ResponseParseEVMContractInput];
+  // Evm Transaction
+  'pri(evm.transaction.parse.input)': [RequestParseEvmContractInput, ResponseParseEvmContractInput];
 
   // Authorize
   'pri(authorize.subscribe)': [null, AuthUrls, AuthUrls];

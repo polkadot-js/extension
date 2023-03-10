@@ -13,6 +13,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
+import { detectThemeAvatar } from '@subwallet/extension-koni-ui/util';
 import { ButtonProps, Col, Field, Form, Image, Input, NetworkItem, Row, SelectModal } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import Icon from '@subwallet/react-ui/es/icon';
@@ -292,7 +293,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const contractAddressIcon = useCallback(() => {
     const contractAddress = formRef.current?.getFieldValue('contractAddress') as string;
-    const theme = isEthereumAddress(contractAddress) ? 'ethereum' : 'polkadot';
+    const theme = detectThemeAvatar(contractAddress);
 
     if (contractAddress) {
       return (

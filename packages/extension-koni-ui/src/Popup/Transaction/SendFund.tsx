@@ -3,7 +3,7 @@
 
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
-import { ChainItemType, ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
+import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import { checkTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
@@ -11,6 +11,7 @@ import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/p
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
 import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
 import { Button, Form, Input } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
 import React, { useCallback, useContext, useMemo, useState } from 'react';

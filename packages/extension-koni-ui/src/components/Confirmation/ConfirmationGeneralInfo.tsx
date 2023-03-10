@@ -27,18 +27,18 @@ function Component ({ className, linkIcon, linkIconBg, request }: Props) {
   return (
     <div className={CN(className, 'confirmation-general-info-container')}>
       <DualLogo
-        leftLogo={<Image
+        leftLogo={<Logo
+          network={'subwallet'}
+          shape='squircle'
+          size={56}
+        />}
+        linkIcon={linkIcon}
+        linkIconBg={linkIconBg}
+        rightLogo={<Image
           height={56}
           shape='squircle'
           src={leftLogoUrl}
           width={56}
-        />}
-        linkIcon={linkIcon}
-        linkIconBg={linkIconBg}
-        rightLogo={<Logo
-          network={'subwallet'}
-          shape='squircle'
-          size={56}
         />}
       />
       <Typography.Paragraph className={'text-tertiary __domain'}>
@@ -48,8 +48,12 @@ function Component ({ className, linkIcon, linkIconBg, request }: Props) {
   );
 }
 
-const ConfirmationGeneralInfo = styled(Component)<Props>(({ theme }) => ({
-  textAlign: 'center'
+const ConfirmationGeneralInfo = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  textAlign: 'center',
+
+  '.__domain': {
+    marginTop: `calc((var(--content-gap) - ${token.size}px))`
+  }
 }));
 
 export default ConfirmationGeneralInfo;

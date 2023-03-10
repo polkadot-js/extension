@@ -34,8 +34,10 @@ const FungibleTokenImport = React.lazy(() => import('@subwallet/extension-koni-u
 const TokenDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/TokenDetail'));
 const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
 const TokenDetailList = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailList'));
-const ManageWebsiteAccess = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/ManageWebsiteAccess'));
-const ManageWebsiteAccessDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/ManageWebsiteAccess/Detail'));
+
+const SecurityList = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Security'));
+const ManageWebsiteAccess = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Security/ManageWebsiteAccess'));
+const ManageWebsiteAccessDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Security/ManageWebsiteAccess/Detail'));
 
 const NewSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/NewSeedPhrase'));
 const ImportSeedPhrase = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportSeedPhrase'));
@@ -81,241 +83,249 @@ export function Example () {
 }
 
 // Todo: Create error page
-export const router = createHashRouter([{
-  path: '/',
-  loader: () => i18nPromise,
-  element: <Root />,
-  errorElement: <ErrorFallback />,
-  children: [
-    {
-      path: '/welcome',
-      element: <Welcome title={'Welcome Content'} />
-    },
-    {
-      path: '/buy-tokens',
-      element: <BuyTokens />
-    },
-    {
-      path: '/home',
-      element: <Home />,
-      children: [
-        {
-          path: 'tokens',
-          element: <Tokens />
-        },
-        {
-          path: 'token-detail-list',
-          element: <TokenDetailList />
-        },
-        {
-          path: 'nfts',
-          element: <Outlet />,
-          children: [
-            {
-              path: 'collections',
-              element: <NftCollections />
-            },
-            {
-              path: 'collection-detail',
-              element: <NftCollectionDetail />
-            },
-            {
-              path: 'item-detail',
-              element: <NftItemDetail />
-            }
-          ]
-        },
-        {
-          path: 'crowdloans',
-          element: <Crowdloans />
-        },
-        {
-          path: 'staking',
-          element: <Staking />
-        },
-        {
-          path: 'history',
-          element: <History />
-        }]
-    },
-    {
-      path: '/transaction',
-      element: <Transaction />,
-      children: [
-        {
-          path: 'send-fund',
-          element: <SendFund />
-        },
-        {
-          path: 'send-nft',
-          element: <Example />
-        },
-        {
-          path: 'stake',
-          element: <Example />
-        },
-        {
-          path: 'unstake',
-          element: <Example />
-        },
-        {
-          path: 'withdraw',
-          element: <Example />
-        },
-        {
-          path: 'claim-reward',
-          element: <Example />
-        },
-        {
-          path: 'compound',
-          element: <Example />
-        },
-        {
-          path: 'done/:chainType/:chain/:extrinsicHash',
-          element: <TransactionDone />
-        }
-      ]
-    },
-    {
-      path: '/keyring',
-      element: <Outlet />,
-      children: [
-        {
-          path: 'login',
-          element: <Login />
-        },
-        {
-          path: 'create-password',
-          element: <CreatePassword />
-        },
-        {
-          path: 'change-password',
-          element: <ChangePassword />
-        },
-        {
-          path: 'migrate-password',
-          element: <ApplyMasterPassword />
-        }
-      ]
-    },
-    {
-      path: '/settings',
-      element: <Outlet />,
-      children: [
-        {
-          path: 'list',
-          element: <Settings />
-        }, {
-          path: 'general',
-          element: <GeneralSetting />
-        }, {
-          path: 'dapp-access',
-          element: <ManageWebsiteAccess />
-        }, {
-          path: 'dapp-access-edit',
-          element: <ManageWebsiteAccessDetail />
-        },
-        {
-          path: 'chains',
-          element: <Outlet />,
-          children: [
-            {
-              path: 'manage',
-              element: <ManageChains />
-            },
-            {
-              path: 'import',
-              element: <ChainImport />
-            },
-            {
-              path: 'detail',
-              element: <ChainDetail />
-            },
-            {
-              path: 'add-provider',
-              element: <AddProvider />
-            }
-          ]
-        },
-        {
-          path: 'tokens',
-          element: <Outlet />,
-          children: [
-            {
-              path: 'manage',
-              element: <ManageTokens />
-            },
-            {
-              path: 'import-token',
-              element: <FungibleTokenImport />
-            },
-            {
-              path: 'detail',
-              element: <TokenDetail />
-            },
-            {
-              path: 'import-nft',
-              element: <NftImport />
-            }
-          ]
-        },
-        {
-          path: 'master-password',
-          element: <Example />
-        }
-      ]
-    },
-    {
-      path: 'accounts',
-      element: <Outlet />,
-      children: [
-        {
-          path: 'new-seed-phrase',
-          element: <NewSeedPhrase />
-        },
-        {
-          path: 'import-seed-phrase',
-          element: <ImportSeedPhrase />
-        },
-        {
-          path: 'import-private-key',
-          element: <ImportPrivateKey />
-        },
-        {
-          path: 'restore-json',
-          element: <RestoreJson />
-        },
-        {
-          path: 'import-by-qr',
-          element: <ImportQrCode />
-        },
-        {
-          path: 'attach-read-only',
-          element: <AttachReadOnly />
-        },
-        {
-          path: 'connect-parity-signer',
-          element: <ConnectParitySigner />
-        },
-        {
-          path: 'connect-keystone',
-          element: <ConnectKeystone />
-        },
-        {
-          path: 'connect-ledger',
-          element: <ConnectLedger />
-        },
-        {
-          path: 'detail/:accountAddress',
-          element: <AccountDetail />
-        },
-        {
-          path: 'export/:accountAddress',
-          element: <AccountExport />
-        }
-      ]
-    }
-  ]
-},
-{ path: `${PHISHING_PAGE_REDIRECT}/:website`, element: <PhishingDetected /> }
+export const router = createHashRouter([
+  {
+    path: '/',
+    loader: () => i18nPromise,
+    element: <Root />,
+    errorElement: <ErrorFallback />,
+    children: [
+      {
+        path: '/welcome',
+        element: <Welcome title={'Welcome Content'} />
+      },
+      {
+        path: '/buy-tokens',
+        element: <BuyTokens />
+      },
+      {
+        path: '/home',
+        element: <Home />,
+        children: [
+          {
+            path: 'tokens',
+            element: <Tokens />
+          },
+          {
+            path: 'token-detail-list',
+            element: <TokenDetailList />
+          },
+          {
+            path: 'nfts',
+            element: <Outlet />,
+            children: [
+              {
+                path: 'collections',
+                element: <NftCollections />
+              },
+              {
+                path: 'collection-detail',
+                element: <NftCollectionDetail />
+              },
+              {
+                path: 'item-detail',
+                element: <NftItemDetail />
+              }
+            ]
+          },
+          {
+            path: 'crowdloans',
+            element: <Crowdloans />
+          },
+          {
+            path: 'staking',
+            element: <Staking />
+          },
+          {
+            path: 'history',
+            element: <History />
+          }
+        ]
+      },
+      {
+        path: '/transaction',
+        element: <Transaction />,
+        children: [
+          {
+            path: 'send-fund',
+            element: <SendFund />
+          },
+          {
+            path: 'send-nft',
+            element: <Example />
+          },
+          {
+            path: 'stake',
+            element: <Example />
+          },
+          {
+            path: 'unstake',
+            element: <Example />
+          },
+          {
+            path: 'withdraw',
+            element: <Example />
+          },
+          {
+            path: 'claim-reward',
+            element: <Example />
+          },
+          {
+            path: 'compound',
+            element: <Example />
+          },
+          {
+            path: 'done/:chainType/:chain/:extrinsicHash',
+            element: <TransactionDone />
+          }
+        ]
+      },
+      {
+        path: '/keyring',
+        element: <Outlet />,
+        children: [
+          {
+            path: 'login',
+            element: <Login />
+          },
+          {
+            path: 'create-password',
+            element: <CreatePassword />
+          },
+          {
+            path: 'change-password',
+            element: <ChangePassword />
+          },
+          {
+            path: 'migrate-password',
+            element: <ApplyMasterPassword />
+          }
+        ]
+      },
+      {
+        path: '/settings',
+        element: <Outlet />,
+        children: [
+          {
+            path: 'list',
+            element: <Settings />
+          },
+          {
+            path: 'general',
+            element: <GeneralSetting />
+          },
+          {
+            path: 'security',
+            element: <SecurityList />
+          },
+          {
+            path: 'dapp-access',
+            element: <ManageWebsiteAccess />
+          },
+          {
+            path: 'dapp-access-edit',
+            element: <ManageWebsiteAccessDetail />
+          },
+          {
+            path: 'chains',
+            element: <Outlet />,
+            children: [
+              {
+                path: 'manage',
+                element: <ManageChains />
+              },
+              {
+                path: 'import',
+                element: <ChainImport />
+              },
+              {
+                path: 'detail',
+                element: <ChainDetail />
+              },
+              {
+                path: 'add-provider',
+                element: <AddProvider />
+              }
+            ]
+          },
+          {
+            path: 'tokens',
+            element: <Outlet />,
+            children: [
+              {
+                path: 'manage',
+                element: <ManageTokens />
+              },
+              {
+                path: 'import-token',
+                element: <FungibleTokenImport />
+              },
+              {
+                path: 'detail',
+                element: <TokenDetail />
+              },
+              {
+                path: 'import-nft',
+                element: <NftImport />
+              }
+            ]
+          }
+        ]
+      },
+      {
+        path: 'accounts',
+        element: <Outlet />,
+        children: [
+          {
+            path: 'new-seed-phrase',
+            element: <NewSeedPhrase />
+          },
+          {
+            path: 'import-seed-phrase',
+            element: <ImportSeedPhrase />
+          },
+          {
+            path: 'import-private-key',
+            element: <ImportPrivateKey />
+          },
+          {
+            path: 'restore-json',
+            element: <RestoreJson />
+          },
+          {
+            path: 'import-by-qr',
+            element: <ImportQrCode />
+          },
+          {
+            path: 'attach-read-only',
+            element: <AttachReadOnly />
+          },
+          {
+            path: 'connect-parity-signer',
+            element: <ConnectParitySigner />
+          },
+          {
+            path: 'connect-keystone',
+            element: <ConnectKeystone />
+          },
+          {
+            path: 'connect-ledger',
+            element: <ConnectLedger />
+          },
+          {
+            path: 'detail/:accountAddress',
+            element: <AccountDetail />
+          },
+          {
+            path: 'export/:accountAddress',
+            element: <AccountExport />
+          }
+        ]
+      }
+    ]
+  },
+  {
+    path: `${PHISHING_PAGE_REDIRECT}/:website`,
+    element: <PhishingDetected />
+  }
 ]);

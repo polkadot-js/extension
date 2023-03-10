@@ -137,6 +137,10 @@ const DeriveAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
   return {
     '--row-gap': token.sizeXS,
 
+    '.ant-sw-modal-body': {
+      padding: `${token.padding}px 0`
+    },
+
     '.ant-web3-block': {
       display: 'flex !important',
 
@@ -147,10 +151,6 @@ const DeriveAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
           animation: 'spinner-loading 1s infinite linear'
         }
       }
-    },
-
-    '.ant-sw-modal-body': {
-      padding: 0
     },
 
     '.disabled': {

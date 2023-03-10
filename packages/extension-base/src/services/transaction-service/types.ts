@@ -2,13 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import {
-  AmountData,
-  ChainType,
-  EvmSendTransactionRequest,
-  ExtrinsicStatus,
-  ExtrinsicType
-} from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, ChainType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import EventEmitter from 'eventemitter3';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';

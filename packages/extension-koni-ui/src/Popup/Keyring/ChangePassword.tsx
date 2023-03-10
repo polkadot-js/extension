@@ -13,6 +13,7 @@ import CN from 'classnames';
 import { Info, ShieldCheck } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -34,13 +35,18 @@ const confirmPasswordRules = renderBaseConfirmPasswordRules(FormFieldName.PASSWO
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
-  const goHome = useDefaultNavigate().goHome;
+  const navigate = useNavigate();
+  const { goHome } = useDefaultNavigate();
 
   const [form] = Form.useForm<ChangePasswordFormState>();
   const [isDisabled, setIsDisable] = useState(true);
   const [submitError, setSubmitError] = useState('');
 
   const [loading, setLoading] = useState(false);
+
+  const goBack = useCallback(() => {
+    navigate('/settings/security');
+  }, [navigate]);
 
   const onSubmit: Callbacks<ChangePasswordFormState>['onFinish'] = useCallback((values: ChangePasswordFormState) => {
     const password = values[FormFieldName.PASSWORD];
@@ -91,6 +97,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         onClick: goHome,
         disabled: loading
       }}
+      onBack={goBack}
       rightFooterButton={{
         children: t('Save'),
         onClick: form.submit,

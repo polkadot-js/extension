@@ -11,124 +11,12 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import {
-  AccountExternalError,
-  AccountsWithCurrentAddress,
-  AssetSettingUpdateReq,
-  BalanceJson,
-  BasicTxInfo,
-  BondingOptionInfo,
-  BondingSubmitParams,
-  BrowserConfirmationType,
-  ChainBondingInfo,
-  CheckExistingTuringCompoundParams,
-  ConfirmationDefinitions,
-  ConfirmationsQueue,
-  ConfirmationType,
-  CrowdloanJson,
-  CurrentAccountInfo,
-  DelegationItem,
-  EvmNftTransaction,
-  ExistingTuringCompoundTask,
-  KeyringState,
-  NetworkJson,
-  NftCollection,
-  NftJson,
-  NftTransactionRequest,
-  NftTransactionResponse,
-  NftTransferExtra,
-  OptionInputAddress,
-  PriceJson,
-  RequestAccountCreateExternalV2,
-  RequestAccountCreateHardwareV2,
-  RequestAccountCreateSuriV2,
-  RequestAccountCreateWithSecretKey,
-  RequestAccountMeta,
-  RequestAuthorizationBlock,
-  RequestAuthorizationPerSite,
-  RequestBondingSubmit,
-  RequestChangeMasterPassword,
-  RequestCheckCrossChainTransfer,
-  RequestCheckTransfer,
-  RequestCrossChainTransfer,
-  RequestDeriveCreateMultiple,
-  RequestDeriveCreateV3,
-  RequestDeriveValidateV2,
-  RequestEvmNftSubmitTransaction,
-  RequestFreeBalance,
-  RequestGetDeriveAccounts,
-  RequestGetTransaction,
-  RequestJsonRestoreV2,
-  RequestKeyringExportMnemonic,
-  RequestMigratePassword,
-  RequestNftForceUpdate,
-  RequestParseEVMContractInput,
-  RequestParseTransactionSubstrate,
-  RequestQrSignEVM,
-  RequestQrSignSubstrate,
-  RequestSettingsType,
-  RequestSigningApprovePasswordV2,
-  RequestStakeClaimReward,
-  RequestStakeWithdrawal,
-  RequestSubscribeBalance,
-  RequestSubscribeBalancesVisibility,
-  RequestSubscribeCrowdloan,
-  RequestSubscribeNft,
-  RequestSubscribePrice,
-  RequestSubscribeStaking,
-  RequestSubscribeStakingReward,
-  RequestSubstrateNftSubmitTransaction,
-  RequestTransfer,
-  RequestTransferCheckReferenceCount,
-  RequestTransferCheckSupporting,
-  RequestTransferExistentialDeposit,
-  RequestTuringCancelStakeCompound,
-  RequestTuringStakeCompound,
-  RequestUnbondingSubmit,
-  RequestUnlockKeyring,
-  ResponseAccountCreateSuriV2,
-  ResponseAccountCreateWithSecretKey,
-  ResponseAccountExportPrivateKey,
-  ResponseAccountIsLocked,
-  ResponseAccountMeta,
-  ResponseChangeMasterPassword,
-  ResponseCheckPublicAndSecretKey,
-  ResponseDeriveValidateV2,
-  ResponseGetDeriveAccounts,
-  ResponseKeyringExportMnemonic,
-  ResponseMigratePassword,
-  ResponseParseEVMContractInput,
-  ResponseParseTransactionSubstrate,
-  ResponsePrivateKeyValidateV2,
-  ResponseQrParseRLP,
-  ResponseQrSignEVM,
-  ResponseQrSignSubstrate,
-  ResponseSeedCreateV2,
-  ResponseSeedValidateV2,
-  ResponseUnlockKeyring,
-  StakeClaimRewardParams,
-  StakeDelegationRequest,
-  StakeUnlockingJson,
-  StakeWithdrawalParams,
-  StakingJson,
-  StakingRewardJson,
-  SubstrateNftTransaction,
-  SupportTransferResponse,
-  ThemeNames,
-  TransactionHistoryItem,
-  TransactionResponse,
-  TuringCancelStakeCompoundParams,
-  TuringStakeCompoundParams,
-  TuringStakeCompoundResp,
-  UiSettings,
-  UnbondingSubmitParams,
-  ValidateNetworkResponse,
-  ValidateTransactionResponse
-} from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountsWithCurrentAddress, AssetSettingUpdateReq, BalanceJson, BasicTxInfo, BondingOptionInfo, BondingSubmitParams, BrowserConfirmationType, ChainBondingInfo, CheckExistingTuringCompoundParams, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, DelegationItem, EvmNftTransaction, ExistingTuringCompoundTask, KeyringState, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestChangeMasterPassword, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestEvmNftSubmitTransaction, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestNftForceUpdate, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrSignEvm, RequestQrSignSubstrate, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeClaimReward, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TuringStakeCompoundResp, UiSettings, UnbondingSubmitParams, ValidateNetworkResponse, ValidateTransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
+import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
@@ -136,7 +24,6 @@ import { SingleAddress } from '@subwallet/ui-keyring/observable/types';
 
 import { _getKnownHashes, _getKnownNetworks } from './util/defaultChains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
-import {SWTransactionResult} from "@subwallet/extension-base/services/transaction-service/types";
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -350,6 +237,10 @@ export async function createAccountHardware (address: string, hardwareType: stri
 
 export async function createAccountHardwareV2 (request: RequestAccountCreateHardwareV2): Promise<boolean> {
   return sendMessage('pri(accounts.create.hardwareV2)', request);
+}
+
+export async function createAccountHardwareMultiple (request: RequestAccountCreateHardwareMultiple): Promise<boolean> {
+  return sendMessage('pri(accounts.create.hardwareMultiple)', request);
 }
 
 export async function createAccountSuri (name: string, password: string, suri: string, type?: KeypairType, genesisHash?: string): Promise<boolean> {
@@ -813,7 +704,7 @@ export async function qrSignSubstrate (request: RequestQrSignSubstrate): Promise
   return sendMessage('pri(qr.sign.substrate)', request);
 }
 
-export async function qrSignEvm (request: RequestQrSignEVM): Promise<ResponseQrSignEVM> {
+export async function qrSignEvm (request: RequestQrSignEvm): Promise<ResponseQrSignEvm> {
   return sendMessage('pri(qr.sign.evm)', request);
 }
 
@@ -885,7 +776,7 @@ export async function getStakeDelegationInfo (params: StakeDelegationRequest): P
   return sendMessage('pri(staking.delegationInfo)', params);
 }
 
-export async function parseEVMTransactionInput (request: RequestParseEVMContractInput): Promise<ResponseParseEVMContractInput> {
+export async function parseEVMTransactionInput (request: RequestParseEvmContractInput): Promise<ResponseParseEvmContractInput> {
   return sendMessage('pri(evm.transaction.parse.input)', request);
 }
 

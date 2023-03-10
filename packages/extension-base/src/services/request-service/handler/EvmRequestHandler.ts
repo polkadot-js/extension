@@ -26,9 +26,7 @@ export default class EvmRequestHandler {
     addTokenRequest: {},
     switchNetworkRequest: {},
     evmSignatureRequest: {},
-    evmSignatureRequestExternal: {},
-    evmSendTransactionRequest: {},
-    evmSendTransactionRequestExternal: {}
+    evmSendTransactionRequest: {}
   });
 
   private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};
@@ -111,7 +109,8 @@ export default class EvmRequestHandler {
   }
 
   private async signMessage (confirmation: ConfirmationDefinitions['evmSignatureRequest'][0]): Promise<string> {
-    const { address, payload, type } = confirmation.payload;
+    const { account, payload, type } = confirmation.payload;
+    const address = account.address;
     const pair = keyring.getPair(address);
 
     if (pair.isLocked) {

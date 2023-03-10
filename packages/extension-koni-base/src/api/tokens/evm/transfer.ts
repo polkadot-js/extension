@@ -54,7 +54,7 @@ export async function getEVMTransactionObject (
   value: string,
   transferAll: boolean,
   evmApiMap: Record<string, _EvmApi>
-): Promise<[TransactionConfig, string, string]> {
+): Promise<[TransactionConfig, string]> {
   const networkKey = chainInfo.slug;
   const web3Api = evmApiMap[networkKey];
   const gasPrice = await web3Api.api.eth.getGasPrice();
@@ -70,7 +70,7 @@ export async function getEVMTransactionObject (
 
   transactionObject.value = transferAll ? new BN(value).add(new BN(estimateFee).neg()) : value;
 
-  return [transactionObject, transactionObject.value.toString(), estimateFee.toString()];
+  return [transactionObject, transactionObject.value.toString()];
 }
 
 export async function getERC20TransactionObject (
@@ -81,7 +81,7 @@ export async function getERC20TransactionObject (
   value: string,
   transferAll: boolean,
   evmApiMap: Record<string, _EvmApi>
-): Promise<[TransactionConfig, string, string]> {
+): Promise<[TransactionConfig, string]> {
   const networkKey = chainInfo.slug;
   const evmApi = evmApiMap[networkKey];
   const erc20Contract = getERC20Contract(networkKey, assetAddress, evmApiMap);
@@ -111,18 +111,12 @@ export async function getERC20TransactionObject (
     data: transferData
   } as TransactionConfig;
 
-  const gasLimit = await evmApi.api.eth.estimateGas(transactionObject);
-
-  transactionObject.gas = gasLimit;
-
-  const estimateFee = parseInt(gasPrice) * gasLimit;
-
   if (transferAll) {
     transferValue = new BN(freeAmount).toString();
     transactionObject.data = generateTransferData(to, transferValue);
   }
 
-  return [transactionObject, transferValue, estimateFee.toString()];
+  return [transactionObject, transferValue];
 }
 
 export async function getERC721Transaction (

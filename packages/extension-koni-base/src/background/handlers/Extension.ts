@@ -7,7 +7,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BasicTxInfo, BasicTxWarningCode, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, BrowserConfirmationType, ChainBondingInfo, ChainType, CheckExistingTuringCompoundParams, CreateDeriveAccountInfo, CrowdloanJson, CurrentAccountInfo, DelegationItem, DeriveAccountInfo, EvmNftTransaction, EvmSendTransactionRequest, ExistingTuringCompoundTask, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestChangeMasterPassword, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestEvmNftSubmitTransaction, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestNftForceUpdate, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeClaimReward, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateNetworkRequest, ValidateNetworkResponse, ValidateTransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AmountData, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BasicTxInfo, BasicTxWarningCode, BondingOptionInfo, BondingOptionParams, BondingSubmitParams, BrowserConfirmationType, ChainBondingInfo, ChainType, CheckExistingTuringCompoundParams, CreateDeriveAccountInfo, CrowdloanJson, CurrentAccountInfo, DelegationItem, DeriveAccountInfo, EvmNftTransaction, EvmSendTransactionRequest, ExistingTuringCompoundTask, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestChangeMasterPassword, RequestCheckCrossChainTransfer, RequestCheckPublicAndSecretKey, RequestCheckTransfer, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestEvmNftSubmitTransaction, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestNftForceUpdate, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeClaimReward, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, UnbondingSubmitParams, ValidateNetworkRequest, ValidateNetworkResponse, ValidateTransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeCancel, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApproveSignature, RequestSigningCancel, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseType } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
@@ -1491,7 +1491,7 @@ export default class KoniExtension {
   }
 
   private async checkTransfer ({ from, networkKey, to, tokenSlug, transferAll, value }: RequestCheckTransfer): Promise<SWTransactionValidation> {
-    const [errors, fromKeyPair, valueNumber, sendingTokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
+    const [errors, , , tokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
 
     const warnings: TransactionWarning[] = [];
     const substrateApiMap = this.#koniState.getSubstrateApiMap();
@@ -1500,110 +1500,52 @@ export default class KoniExtension {
 
     const nativeTokenInfo = this.#koniState.getNativeTokenInfo(networkKey);
     const nativeTokenSlug: string = nativeTokenInfo.slug;
-    let nativeTokenDecimals: number = nativeTokenInfo.decimals || 0;
-    let nativeToken: string = nativeTokenInfo.symbol;
-    let existentialDeposit: string = _getTokenMinAmount(sendingTokenInfo);
+    const isTransferNativeToken = nativeTokenSlug === tokenSlug;
     let chainType = ChainType.SUBSTRATE;
+
+    const tokenBaseAmount: AmountData = { value: '0', symbol: tokenInfo.symbol, decimals: tokenInfo.decimals || 0 };
+    const transferAmount: AmountData = { ...tokenBaseAmount };
+
     let transaction: SWTransactionValidationInput['transaction'];
 
-    if (!_isNativeToken(sendingTokenInfo)) {
-      nativeToken = nativeTokenInfo.symbol;
-      nativeTokenDecimals = nativeTokenInfo.decimals || 0;
-      existentialDeposit = _getTokenMinAmount(nativeTokenInfo);
-    }
-
-    let fee = '0';
-    let fromAccountFreeBalance = '0';
-    let fromAccountNativeBalance = '0';
+    // Get native token amount
+    const freeBalance = await getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, tokenSlug);
 
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
       chainType = ChainType.EVM;
-      // @ts-ignore
-      [fromAccountFreeBalance, , fromAccountNativeBalance] = await Promise.all([
-        getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, tokenSlug),
-        getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, nativeTokenSlug)
-      ]);
-      const txVal: string = transferAll ? fromAccountFreeBalance : (value || '0');
+      const txVal: string = transferAll ? freeBalance : (value || '0');
 
       // Estimate with EVM API
-      if (_isTokenEvmSmartContract(sendingTokenInfo)) {
-        [transaction, , fee] = await getERC20TransactionObject(_getContractAddressOfToken(sendingTokenInfo), chainInfo, from, to, txVal, !!transferAll, evmApiMap);
+      if (_isTokenEvmSmartContract(tokenInfo)) {
+        [transaction, transferAmount.value] = await getERC20TransactionObject(_getContractAddressOfToken(tokenInfo), chainInfo, from, to, txVal, !!transferAll, evmApiMap);
       } else {
-        [transaction, , fee] = await getEVMTransactionObject(chainInfo, to, txVal, !!transferAll, evmApiMap);
+        [transaction, transferAmount.value] = await getEVMTransactionObject(chainInfo, to, txVal, !!transferAll, evmApiMap);
       }
     } else {
-      // Estimate with DotSama API
-      if (!_isNativeToken(sendingTokenInfo)) {
-        [[fee], fromAccountFreeBalance, fromAccountNativeBalance] = await Promise.all(
-          [
-            estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, substrateApiMap, sendingTokenInfo),
-            getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, tokenSlug),
-            getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, nativeTokenSlug)
-          ]
-        );
-      } else {
-        [[fee], fromAccountFreeBalance] = await Promise.all(
-          [
-            estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, substrateApiMap, sendingTokenInfo),
-            getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, tokenSlug)
-          ]
-        );
-      }
+      const substrateApi = this.#koniState.getSubstrateApi(networkKey);
+
+      [transaction, transferAmount.value] = await createTransferExtrinsic({
+        transferAll: !!transferAll,
+        value: value || '0',
+        from: from,
+        networkKey,
+        tokenInfo,
+        to: to,
+        substrateApi
+      });
     }
 
-    const fromAccountFreeNumber = new BN(fromAccountFreeBalance);
-    const feeNumber = fee ? new BN(fee) : undefined;
-    const fromAccountNativeBalanceNumber = new BN(fromAccountNativeBalance);
-    const existentialDepositNumber = new BN(existentialDeposit);
-    const rawExistentialDeposit = Number(existentialDeposit) / Math.pow(10, (nativeTokenDecimals || sendingTokenInfo?.decimals || 0));
-
-    if (!transferAll && value && feeNumber && valueNumber) {
-      if (_isNativeToken(sendingTokenInfo)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        if (fromAccountFreeNumber.gt(valueNumber)) {
-          if (!fromAccountFreeNumber.gte((valueNumber.add(feeNumber)).add(existentialDepositNumber))) {
-            if (existentialDepositNumber.gt(BN_ZERO)) {
-              warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `Beware! This transaction might cause a total loss of assets in this account because it would lower your balance below the minimum threshold of ${rawExistentialDeposit} ${sendingTokenInfo.symbol}`));
-            }
-
-            const isEnoughBalanceToSend = fromAccountFreeNumber.gte(valueNumber.add(feeNumber));
-
-            if (!isEnoughBalanceToSend) {
-              errors.push(new TransactionError(TransferTxErrorType.NOT_ENOUGH_FEE, `Not enough ${sendingTokenInfo.symbol} to pay the network fee`));
-            }
-          }
-        } else {
-          errors.push(new TransactionError(TransferTxErrorType.NOT_ENOUGH_VALUE, 'Not enough balance free to make transfer'));
-        }
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        if (fromAccountFreeNumber.gte(valueNumber)) {
-          if (!fromAccountNativeBalanceNumber.gte(existentialDepositNumber.add(feeNumber))) {
-            if (existentialDepositNumber.gt(BN_ZERO)) {
-              warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `Beware! This transaction might cause a total loss of assets in this account because it would lower your balance below the minimum threshold of ${rawExistentialDeposit} ${nativeToken || ''}`));
-            }
-
-            if (!fromAccountNativeBalanceNumber.gte(feeNumber)) {
-              errors.push(new TransactionError(TransferTxErrorType.NOT_ENOUGH_FEE, `Not enough ${nativeToken || ''} to pay the network fee`));
-            }
-          }
-        } else {
-          errors.push(new TransactionError(TransferTxErrorType.NOT_ENOUGH_VALUE, 'Not enough balance free to make transfer'));
-        }
-      }
+    if (new BN(freeBalance).lt(new BN(transferAmount.value))) {
+      errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, 'Insufficient balance'));
     }
 
     return this.#koniState.transactionService.generalValidate({
       errors,
       warnings,
-      estimateFee: {
-        value: fee,
-        decimals: nativeTokenDecimals,
-        symbol: nativeToken
-      },
       address: from,
       chain: networkKey,
       chainType,
+      transferNativeAmount: isTransferNativeToken ? transferAmount.value : '0',
       transaction
     });
   }
@@ -1618,8 +1560,6 @@ export default class KoniExtension {
     if (errors.length) {
       txState.txError = true;
       txState.errors = errors;
-      // Remove fromKeyPair lock because migrate to master password
-      // fromKeyPair && fromKeyPair.lock();
 
       return txState;
     }

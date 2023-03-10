@@ -15,8 +15,8 @@ export interface SWTransactionValidation extends ValidateTransactionResponse{
   estimateFee: AmountData
 }
 
-export interface SWTransactionValidationInput extends SWTransactionValidation {
-  transaction: SWTransaction['transaction'];
+export interface SWTransactionValidationInput extends Omit<SWTransactionValidation, 'estimateFee'> {
+  transaction: SWTransaction['transaction'] | null;
 }
 
 export interface SWTransaction {

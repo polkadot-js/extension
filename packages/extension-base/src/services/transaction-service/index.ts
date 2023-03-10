@@ -1,29 +1,44 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
-import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
+import {EvmProviderError} from '@subwallet/extension-base/background/errors/EvmProviderError';
+import {TransactionError} from '@subwallet/extension-base/background/errors/TransactionError';
+import {
+  BasicTxErrorType,
+  ChainType,
+  EvmProviderErrorType,
+  EvmSendTransactionRequest,
+  ExtrinsicStatus,
+  TransactionResponse
+} from '@subwallet/extension-base/background/KoniTypes';
+import {ChainService} from '@subwallet/extension-base/services/chain-service';
+import {_getEvmChainId} from '@subwallet/extension-base/services/chain-service/utils';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
-import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
-import { getTransactionId } from '@subwallet/extension-base/services/transaction-service/helpers';
-import { SendTransactionEvents, SWTransaction, SWTransactionInput, SWTransactionValidation, SWTransactionValidationInput, TransactionEmitter, TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { Web3Transaction } from '@subwallet/extension-base/signers/types';
-import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
-import { parseTxAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
+import {EXTENSION_REQUEST_URL} from '@subwallet/extension-base/services/request-service/constants';
+import {getTransactionId} from '@subwallet/extension-base/services/transaction-service/helpers';
+import {
+  SendTransactionEvents,
+  SWTransaction,
+  SWTransactionInput,
+  SWTransactionValidation,
+  SWTransactionValidationInput,
+  TransactionEmitter,
+  TransactionEventResponse
+} from '@subwallet/extension-base/services/transaction-service/types';
+import {Web3Transaction} from '@subwallet/extension-base/signers/types';
+import {anyNumberToBN} from '@subwallet/extension-base/utils/eth';
+import {parseTxAndSignature} from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import EventEmitter from 'eventemitter3';
-import RLP, { Input } from 'rlp';
-import { BehaviorSubject } from 'rxjs';
-import { TransactionConfig } from 'web3-core';
+import RLP, {Input} from 'rlp';
+import {BehaviorSubject} from 'rxjs';
+import {TransactionConfig} from 'web3-core';
 
-import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { Signer, SignerResult } from '@polkadot/api/types';
-import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
-import { u8aToHex } from '@polkadot/util';
-import { HexString } from '@polkadot/util/types';
+import {SubmittableExtrinsic} from '@polkadot/api/promise/types';
+import {Signer, SignerResult} from '@polkadot/api/types';
+import {SignerPayloadJSON} from '@polkadot/types/types/extrinsic';
+import {u8aToHex} from '@polkadot/util';
+import {HexString} from '@polkadot/util/types';
 
 export default class TransactionService {
   private readonly chainService: ChainService;
@@ -55,7 +70,15 @@ export default class TransactionService {
     // Todo: Validate balance here
     // Todo: Return error for read-only account
     // Todo: Estimate fee
+    // Todo: Create ED warning
     const { transaction, ...validation } = validationInput;
+
+    validation.errors = validation.errors || [];
+
+    // Return unsupported error if not found transaction
+    if (!transaction) {
+      validation.errors.push(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+    }
 
     return validation;
   }

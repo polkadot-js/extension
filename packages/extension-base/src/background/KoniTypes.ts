@@ -1361,7 +1361,8 @@ export interface RequestCheckTransfer extends BaseRequestSign {
 
 export interface ValidateTransactionResponse {
   errors?: TransactionError[],
-  warnings?: TransactionWarning[]
+  warnings?: TransactionWarning[],
+  transferNativeAmount?: string
 }
 
 export type RequestTransfer = InternalRequestSign<RequestCheckTransfer> ;

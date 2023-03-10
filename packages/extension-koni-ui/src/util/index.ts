@@ -218,3 +218,4 @@ export const detectThemeAvatar = (address?: string) => isEthereumAddress(address
 
 export { toAddress } from './toAddress';
 export { openInNewTab } from '@subwallet/extension-koni-ui/util/browser';
+export { isSubstrateMessage, isEvmMessage } from './confirmation';

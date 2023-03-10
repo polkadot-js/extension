@@ -12,7 +12,7 @@ import MetadataConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmatio
 import SignConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/SignConfirmation';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -45,35 +45,41 @@ const Component = function ({ className }: Props) {
     setIndex((val) => Math.max(0, val - 1));
   }, []);
 
-  return <div className={className}>
-    <ConfirmationHeader
-      index={index}
-      numberOfConfirmations={confirmationData.numberOfConfirmations}
-      onClickNext={nextConfirmation}
-      onClickPrev={prevConfirmation}
-      title={t(titleMap[confirmation?.type] || '')}
-    />
-    {confirmation?.type === 'authorizeRequest' &&
-      <AuthorizeConfirmation request={confirmation.item as AuthorizeRequest} />}
-    {confirmation?.type === 'metadataRequest' &&
-      <MetadataConfirmation request={confirmation.item as MetadataRequest} />}
-    {confirmation?.type === 'signingRequest' &&
-      <SignConfirmation request={confirmation.item as SigningRequest} />}
-    {confirmation?.type === 'evmSendTransactionRequest' &&
-      <EvmSignatureConfirmation
-        request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]}
-        type={confirmation.type}
-      />}
-    {confirmation?.type === 'evmSignatureRequest' &&
-      <EvmSignatureConfirmation
-        request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]}
-        type={confirmation.type}
-      />}
-    {confirmation?.type === 'addTokenRequest' &&
-      <AddTokenConfirmation request={confirmation.item as ConfirmationDefinitions['addTokenRequest'][0]} />}
-    {confirmation?.type === 'addNetworkRequest' &&
-      <AddNetworkConfirmation request={confirmation.item as ConfirmationDefinitions['addNetworkRequest'][0]} />}
-  </div>;
+  useEffect(() => {
+
+  }, []);
+
+  return (
+    <div className={className}>
+      <ConfirmationHeader
+        index={index}
+        numberOfConfirmations={confirmationData.numberOfConfirmations}
+        onClickNext={nextConfirmation}
+        onClickPrev={prevConfirmation}
+        title={t(titleMap[confirmation?.type] || '')}
+      />
+      {confirmation?.type === 'authorizeRequest' &&
+        <AuthorizeConfirmation request={confirmation.item as AuthorizeRequest} />}
+      {confirmation?.type === 'metadataRequest' &&
+        <MetadataConfirmation request={confirmation.item as MetadataRequest} />}
+      {confirmation?.type === 'signingRequest' &&
+        <SignConfirmation request={confirmation.item as SigningRequest} />}
+      {confirmation?.type === 'evmSendTransactionRequest' &&
+        <EvmSignatureConfirmation
+          request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]}
+          type={confirmation.type}
+        />}
+      {confirmation?.type === 'evmSignatureRequest' &&
+        <EvmSignatureConfirmation
+          request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]}
+          type={confirmation.type}
+        />}
+      {confirmation?.type === 'addTokenRequest' &&
+        <AddTokenConfirmation request={confirmation.item as ConfirmationDefinitions['addTokenRequest'][0]} />}
+      {confirmation?.type === 'addNetworkRequest' &&
+        <AddNetworkConfirmation request={confirmation.item as ConfirmationDefinitions['addNetworkRequest'][0]} />}
+    </div>
+  );
 };
 
 const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => ({

@@ -91,11 +91,11 @@ export interface ConfirmationRequestBase {
   isInternal?: boolean;
 }
 
-export interface AuthorizeRequest extends ConfirmationRequestBase{
+export interface AuthorizeRequest extends ConfirmationRequestBase {
   request: RequestAuthorizeTab;
 }
 
-export interface MetadataRequest extends ConfirmationRequestBase{
+export interface MetadataRequest extends ConfirmationRequestBase {
   request: MetadataDef;
 }
 

@@ -11,7 +11,7 @@ import { Recoded } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util/accountAll';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 
-import { decodeAddress } from '@polkadot/util-crypto';
+import { decodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 export * from './common';
@@ -213,6 +213,8 @@ export function getScanExplorerAddressInfoUrl (networkKey: string, address: stri
 
   return `${subscanByNetworkKey[networkKey]}/account/${address}`;
 }
+
+export const detectThemeAvatar = (address?: string) => isEthereumAddress(address) ? 'ethereum' : 'polkadot';
 
 export { toAddress } from './toAddress';
 export { openInNewTab } from '@subwallet/extension-koni-ui/util/browser';

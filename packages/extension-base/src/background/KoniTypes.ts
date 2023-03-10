@@ -1142,18 +1142,25 @@ export interface AddNetworkRequestExternal { // currently only support adding pu
   requestId?: string
 }
 
-export interface AddTokenRequestExternal {
-  contractAddress: string,
-  originChain: string,
-  type: string,
+export interface AddNetworkExternalRequest { // currently only support adding pure Evm network
+  chainId: string;
+  rpcUrl: string;
+  chainName: string;
+  blockExplorerUrl: string;
+  requestId: string;
+}
 
-  name: string,
-  symbol: string,
-  decimals: number
+export interface AddTokenRequestExternal {
+  contractAddress: string;
+  originChain: string;
+  type: _AssetType;
+  name: string;
+  symbol: string;
+  decimals: number;
 }
 
 export interface ConfirmationDefinitions {
-  addNetworkRequest: [ConfirmationsQueueItem<AddNetworkRequestExternal>, ConfirmationResult<AddNetworkRequestExternal>],
+  addNetworkRequest: [ConfirmationsQueueItem<_NetworkUpsertParams>, ConfirmationResult<null>],
   addTokenRequest: [ConfirmationsQueueItem<AddTokenRequestExternal>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],

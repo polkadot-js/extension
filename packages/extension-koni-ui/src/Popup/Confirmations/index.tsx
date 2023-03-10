@@ -4,6 +4,8 @@
 import { ConfirmationDefinitions } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import useConfirmationsInfo from '@subwallet/extension-koni-ui/hooks/screen/confirmation/useConfirmationInfo';
+import AddNetworkConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AddNetworkConfirmation';
+import AddTokenConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AddTokenConfirmation';
 import AuthorizeConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AuthorizeConfirmation';
 import EvmSignatureConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/EvmSignatureConfirmation';
 import MetadataConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/MetadataConfirmation';
@@ -67,6 +69,10 @@ const Component = function ({ className }: Props) {
         request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]}
         type={confirmation.type}
       />}
+    {confirmation?.type === 'addTokenRequest' &&
+      <AddTokenConfirmation request={confirmation.item as ConfirmationDefinitions['addTokenRequest'][0]} />}
+    {confirmation?.type === 'addNetworkRequest' &&
+      <AddNetworkConfirmation request={confirmation.item as ConfirmationDefinitions['addNetworkRequest'][0]} />}
   </div>;
 };
 
@@ -110,7 +116,7 @@ const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps
     marginBottom: token.margin,
 
     '.ant-btn': {
-      flex: '1 1 auto',
+      flex: 1,
 
       '&.icon-btn': {
         flex: '0 0 52px'

@@ -6,13 +6,13 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TransactionErrorType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BrowserConfirmationType, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, TransactionErrorType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParachain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
@@ -830,19 +830,41 @@ export default class KoniState {
       });
   }
 
-  public async addNetworkConfirm (id: string, url: string, networkData: AddNetworkRequestExternal) {
-    networkData.requestId = id;
-
+  public async addNetworkConfirm (id: string, url: string, networkData: _NetworkUpsertParams) {
     return this.requestService.addConfirmation(id, url, 'addNetworkRequest', networkData)
       .then(({ isApproved }) => {
-        return isApproved;
+        if (isApproved) {
+          this.chainService.upsertChain(networkData);
+
+          return null;
+        } else {
+          throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
+        }
       });
   }
 
   public async addTokenConfirm (id: string, url: string, tokenInfo: AddTokenRequestExternal) {
     return this.requestService.addConfirmation(id, url, 'addTokenRequest', tokenInfo)
       .then(({ isApproved }) => {
-        return isApproved;
+        if (isApproved) {
+          this.chainService.upsertCustomToken({
+            originChain: tokenInfo.originChain,
+            slug: '',
+            name: tokenInfo.name,
+            symbol: tokenInfo.symbol,
+            decimals: tokenInfo.decimals,
+            priceId: null,
+            minAmount: null,
+            assetType: tokenInfo.type,
+            metadata: _parseMetadataForSmartContractAsset(tokenInfo.contractAddress),
+            multiChainAsset: null,
+            hasValue: _isChainTestNet(this.chainService.getChainInfoByKey(tokenInfo.originChain))
+          });
+
+          return isApproved;
+        } else {
+          throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
+        }
       });
   }
 

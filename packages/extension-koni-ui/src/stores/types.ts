@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { AddNetworkRequestExternal, AssetSetting, BalanceItem, ChainBondingInfo, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, NominationPoolInfo, NominatorInfo, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AssetSetting, BalanceItem, ChainBondingInfo, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, NominationPoolInfo, NominatorInfo, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
@@ -28,12 +28,6 @@ export type TransferNftParams = {
 
 export type TokenConfigParams = {
   data: _ChainAsset
-}
-
-export type NetworkConfigParams = {
-  mode: 'create' | 'edit' | 'init',
-  data?: _ChainInfo;
-  externalData?: AddNetworkRequestExternal;
 }
 
 export type BondingParams = {

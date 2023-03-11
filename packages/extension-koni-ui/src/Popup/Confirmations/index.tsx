@@ -67,14 +67,7 @@ const Component = function ({ className }: Props) {
       {
         confirmation?.item.isInternal
           ? (
-            <>
-              {confirmation?.type === 'signingRequest' && <TransactionConfirmation confirmation={confirmation} />}
-              {confirmation?.type === 'evmSendTransactionRequest' && <EvmTransactionConfirmation
-                request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]}
-                type={confirmation.type}
-              />}
-            </>
-
+            <TransactionConfirmation confirmation={confirmation} />
           )
           : (
             <>

@@ -8,8 +8,8 @@ export class SWError extends Error implements SWErrorType {
   code: number | undefined;
   data: unknown | undefined;
 
-  constructor (errorType: string, message: string, code?: number, data?: unknown) {
-    super(message);
+  constructor (errorType: string, message?: string, code?: number, data?: unknown) {
+    super(message || errorType);
 
     this.errorType = errorType;
     this.code = code;

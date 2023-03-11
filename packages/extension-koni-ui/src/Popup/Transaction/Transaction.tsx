@@ -178,6 +178,11 @@ const Transaction = styled(Component)(({ theme }) => {
         color: token.colorError
       },
 
+      '.warning-messages': {
+        width: '100%',
+        color: token.colorWarning
+      },
+
       '.ant-btn': {
         flex: 1
       },

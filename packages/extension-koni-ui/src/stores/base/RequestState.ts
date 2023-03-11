@@ -4,12 +4,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
+import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { ReduxStatus, RequestState } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState: RequestState = {
   authorizeRequest: {},
   metadataRequest: {},
   signingRequest: {},
+  transactionRequest: {},
 
   // Type of confirmation requets
   addNetworkRequest: {},
@@ -95,6 +97,9 @@ const requestStateSlice = createSlice({
       Object.assign(state, action.payload);
       readyMap.updateConfirmationRequests = true;
       computeStateSummary(state);
+    },
+    updateTransactionRequests (state, { payload }: PayloadAction<Record<string, SWTransactionResult>>) {
+      state.transactionRequest = payload;
     }
   }
 });

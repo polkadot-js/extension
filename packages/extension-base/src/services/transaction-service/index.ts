@@ -157,7 +157,6 @@ export default class TransactionService {
       validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
     } else {
       if (balanceNum - (transferNativeNum + feeNum) <= edNum) {
-        // Todo add message
         validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
       }
     }
@@ -502,10 +501,12 @@ export default class TransactionService {
       warnings: []
     };
 
+    console.debug(address, transaction);
+
     (transaction as SubmittableExtrinsic).signAsync(address, {
       signer: {
         signPayload: async (payload: SignerPayloadJSON) => {
-          const signing = await this.requestService.signInternalTransaction(id, url || EXTENSION_REQUEST_URL, address, payload);
+          const signing = await this.requestService.signInternalTransaction(id, address, url || EXTENSION_REQUEST_URL, payload);
 
           return {
             id: (new Date()).getTime(),
@@ -527,7 +528,7 @@ export default class TransactionService {
       // Todo add more event listener to handle and update history for XCM transaction
     }).catch((e: Error) => {
       this.removeTransaction(id);
-      eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, e.message));
+      eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SIGN, e.message));
       emitter.emit('error', eventData);
     });
 

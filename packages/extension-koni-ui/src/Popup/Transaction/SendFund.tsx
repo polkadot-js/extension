@@ -185,13 +185,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const transactionContext = useContext(TransactionContext);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const [form] = useForm<TransferFromProps>();
   const formDefault = {
     from: transactionContext.from,
     chain: transactionContext.chain,
     destChain: '',
     token: '',
-    to: '0xe7a9a370747aab5e7ff1C621a9C337Ca5b8dEbAd',
+    to: '',
     value: ''
   };
 
@@ -295,6 +296,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     [assetRegistryMap, form, transactionContext]
   );
 
+  // Submit transaction
   const submitTransaction = useCallback(
     () => {
       form.validateFields().then((values) => {
@@ -309,11 +311,13 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             tokenSlug: token,
             value: value
           }).then((rs) => {
+            console.log(rs);
             const { errors, extrinsicHash, warnings } = rs;
 
             if (errors.length || warnings.length) {
               setLoading(false);
               setErrors(errors.map((e) => e.message));
+              setWarnings(warnings.map((e) => e.message));
             } else if (extrinsicHash) {
               transactionContext.onDone(extrinsicHash);
             }
@@ -434,7 +438,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             ]}
             validateTrigger='onBlur'
           >
-            <AddressInput label={t('Send to account')} />
+            <AddressInput showScanner={true} label={t('Send to account')} />
           </Form.Item>
         </Form>
 
@@ -443,6 +447,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       <TransactionFooter
         className={`${className} -transaction-footer`}
         errors={errors}
+        warnings={warnings}
       >
         <Button
           icon={(

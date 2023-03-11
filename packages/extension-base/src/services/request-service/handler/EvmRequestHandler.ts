@@ -61,7 +61,7 @@ export default class EvmRequestHandler {
     const confirmations = this.confirmationsQueueSubject.getValue();
     const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
     const payloadJson = JSON.stringify(payload);
-    const isInternal = url === EXTENSION_REQUEST_URL;
+    const isInternal = isInternalRequest(url);
 
     // Check duplicate request
     const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));

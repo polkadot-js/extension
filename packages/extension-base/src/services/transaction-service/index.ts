@@ -4,6 +4,7 @@
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
@@ -374,7 +375,8 @@ export default class TransactionService {
     const evmApi = this.chainService.getEvmApi(chain);
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
-    const { account } = payload;
+    const accountPair = keyring.getPair(address);
+    const account: AccountJson = { address, ...accountPair.meta };
 
     if (!payload.account) {
       payload.account = account;

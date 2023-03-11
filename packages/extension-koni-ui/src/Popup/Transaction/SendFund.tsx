@@ -7,10 +7,11 @@ import { _ChainState } from '@subwallet/extension-base/services/chain-service/ty
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
+import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { checkTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
@@ -21,7 +22,9 @@ import { SendFundParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
 import { isAvailableTokenAsset } from '@subwallet/extension-koni-ui/util/chainAndAsset';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
+import { Rule } from '@subwallet/react-ui/es/form';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PaperPlaneTilt } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -30,7 +33,7 @@ import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
+import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 interface TransferFromProps extends TransactionFormBaseProps {
   to: string
@@ -188,20 +191,16 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     chain: transactionContext.chain,
     destChain: '',
     token: '',
-    to: '',
-    value: '0'
+    to: '0xe7a9a370747aab5e7ff1C621a9C337Ca5b8dEbAd',
+    value: ''
   };
-
-  console.log('errors', errors);
 
   // note: any value below may be undefined
   const fromAddress = Form.useWatch('from', form);
-  const toAddress = Form.useWatch('to', form);
   const originChain = Form.useWatch('chain', form);
 
-  // todo
-  // if on chain: from =/= to
-  // if x chain: from same origin, to same dest
+  const chainInfo = useMemo(() => (originChain ? chainInfoMap[originChain] : null), [chainInfoMap, originChain]);
+  // const isZeroFreeBalance = (new BigN(transactionContext.freeBalance || '0')).eq(new BigN(0));
 
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getDestinationChainItems(originChain, chainInfoMap);
@@ -219,17 +218,68 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     );
   }, [assetRegistryMap, assetSettingMap, chainInfoMap, chainStateMap, fromAddress, multiChainAssetMap, sendFundSlug]);
 
+  const validateRecipientAddress = useCallback((rule: Rule, _recipientAddress: string): Promise<void> => {
+    if (!_recipientAddress) {
+      return Promise.reject(t('Recipient address is required'));
+    }
+
+    if (!isAddress(_recipientAddress)) {
+      return Promise.reject(t('Invalid Recipient address'));
+    }
+
+    const { chain, destChain, from } = form.getFieldsValue();
+
+    const isOnChain = chain === destChain;
+
+    if (isOnChain) {
+      if (from === _recipientAddress) {
+        // todo: change message later
+        return Promise.reject(t('On Chain: The recipient address can not be the same as the sender address'));
+      }
+
+      const isNotSameAddressType = (isEthereumAddress(from) && !!_recipientAddress && !isEthereumAddress(_recipientAddress)) ||
+        (!isEthereumAddress(from) && !!_recipientAddress && isEthereumAddress(_recipientAddress));
+
+      if (isNotSameAddressType) {
+        // todo: change message later
+        return Promise.reject(t('On Chain: The recipient address must be same type as the current account address.'));
+      }
+    } else {
+      const isDestChainEvmCompatible = _isChainEvmCompatible(chainInfoMap[destChain]);
+
+      if (isDestChainEvmCompatible !== isEthereumAddress(destChain)) {
+        // todo: change message later
+        return Promise.reject(t(`Cross chain: The recipient address must be ${isDestChainEvmCompatible ? 'EVM' : 'substrate'} type`));
+      }
+    }
+
+    return Promise.resolve();
+  }, [chainInfoMap, form, t]);
+
+  const validateAmount = useCallback((rule: Rule, amount: string): Promise<void> => {
+    if (!amount) {
+      return Promise.reject(t('Amount is required'));
+    }
+
+    if ((new BigN(amount)).eq(new BigN(0))) {
+      return Promise.reject(t('Amount must be greater than 0'));
+    }
+
+    return Promise.resolve();
+  }, [t]);
+
   const onFieldsChange = useCallback(
     (part: Partial<TransferFromProps>, values: TransferFromProps) => {
+      if (part.from || part.token || part.destChain) {
+        form.resetFields(['to']);
+      }
+
       if (part.from) {
         transactionContext.setFrom(part.from);
       }
 
-      if (part.chain) {
-        transactionContext.setChain(part.chain);
-      }
-
       if (part.token) {
+        form.resetFields(['value']);
         const chain = assetRegistryMap[part.token].originChain;
 
         form.setFieldsValue({
@@ -240,84 +290,41 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         transactionContext.setChain(chain);
       }
 
-      const { chain,
-        destChain,
-        from,
-        to } = values;
-
-      const isOnChain = chain === destChain;
-
-      const _errors: string[] = [];
-
-      if (isOnChain) {
-        if (from === to) {
-          _errors.push(t('The recipient address can not be the same as the sender address'));
-        }
-
-        const isNotSameAddressType = (isEthereumAddress(from) && !!to && !isEthereumAddress(to)) ||
-          (!isEthereumAddress(from) && !!to && isEthereumAddress(to));
-
-        if (isNotSameAddressType) {
-          _errors.push(t<string>('The recipient address must be same type as the current account address.'));
-        }
-      } else {
-        const isDestChainEvmCompatible = _isChainEvmCompatible(chainInfoMap[destChain]);
-
-        if (isDestChainEvmCompatible !== isEthereumAddress(destChain)) {
-          _errors.push(
-            t<string>(`The recipient address must be ${isDestChainEvmCompatible ? 'EVM' : 'substrate'} type`)
-          );
-        }
-      }
-
-      if (_errors.length) {
-        setErrors(_errors);
-      } else {
-        setErrors([]);
-      }
+      setErrors([]);
     },
-    [assetRegistryMap, chainInfoMap, form, t, transactionContext]
+    [assetRegistryMap, form, transactionContext]
   );
 
   const submitTransaction = useCallback(
     () => {
-      setLoading(true);
-      const { chain, from, to, token, value } = form.getFieldsValue();
+      form.validateFields().then((values) => {
+        setLoading(true);
+        const { chain, destChain, from, to, token, value } = values;
 
-      checkTransfer({
-        from,
-        networkKey: chain,
-        to: to,
-        tokenSlug: token,
-        value: value
-      }).then((rs) => {
-        const { errors } = rs;
-
-        if (errors?.length) {
-          console.log('errors1', errors);
-          setLoading(false);
-          setErrors(errors.map((e) => e.message));
-        } else {
+        if (chain === destChain) {
           makeTransfer({
             from,
             networkKey: chain,
             to: to,
             tokenSlug: token,
             value: value
-          }).then(({ errors, extrinsicHash }) => {
-            setLoading(false);
+          }).then((rs) => {
+            const { errors, extrinsicHash, warnings } = rs;
 
-            if (errors?.length) {
+            if (errors.length || warnings.length) {
+              setLoading(false);
               setErrors(errors.map((e) => e.message));
             } else if (extrinsicHash) {
               transactionContext.onDone(extrinsicHash);
             }
-          }).catch(console.error);
+          }).catch((e: Error) => {
+            setLoading(false);
+            setErrors([e.message]);
+          });
+        } else {
+          // todo: cross chain here
         }
-      }).catch((e: Error) => {
-        setLoading(false);
-        setErrors([e.message]);
-      });
+      }).catch(console.log);
     },
     [form, transactionContext]
   );
@@ -354,11 +361,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }
   }, [tokenItems, assetRegistryMap, form, transactionContext]);
 
-  const isAllowToSubmit = !errors.length && fromAddress && toAddress && originChain;
-
   return (
     <>
-      <TransactionContent className={`${className} -transaction-content`}>
+      <TransactionContent className={CN(`${className} -transaction-content`)}>
         <div className={'__brief common-text text-light-4 text-center'}>
           {t('You are doing a token transfer with the following information')}
         </div>
@@ -388,9 +393,18 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               />
             </Form.Item>
 
-            <Form.Item name={'value'}>
-              <Input
-                placeholder={t('value')}
+            <Form.Item
+              name={'value'}
+              rules={[
+                {
+                  validator: validateAmount
+                }
+              ]}
+              validateTrigger='onBlur'
+            >
+              <AmountInput
+                decimals={chainInfo?.substrateInfo?.decimals || chainInfo?.evmInfo?.decimals || 18}
+                maxValue={transactionContext.freeBalance || '0'}
               />
             </Form.Item>
           </div>
@@ -411,7 +425,15 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             />
           </Form.Item>
 
-          <Form.Item name={'to'}>
+          <Form.Item
+            name={'to'}
+            rules={[
+              {
+                validator: validateRecipientAddress
+              }
+            ]}
+            validateTrigger='onBlur'
+          >
             <AddressInput label={t('Send to account')} />
           </Form.Item>
         </Form>
@@ -423,7 +445,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         errors={errors}
       >
         <Button
-          disabled={!isAllowToSubmit}
           icon={(
             <Icon
               phosphorIcon={PaperPlaneTilt}
@@ -448,6 +469,14 @@ const SendFund = styled(_SendFund)(({ theme }) => {
       paddingLeft: token.padding,
       paddingRight: token.padding,
       marginBottom: token.marginLG
+    },
+
+    '&.-transaction-content.-is-zero-balance': {
+      '.free-balance .ant-number': {
+        '.ant-number-integer, .ant-number-decimal': {
+          color: `${token.colorError} !important`
+        }
+      }
     }
   });
 });

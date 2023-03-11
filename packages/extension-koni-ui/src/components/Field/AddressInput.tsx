@@ -22,7 +22,7 @@ interface Props extends BasicInputWrapper, ThemeProps {
 
 const modalId = 'input-account-address-modal';
 
-function Component ({ className = '', label, onChange, placeholder, value, id = modalId, showAddressBook, showScanner }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ className = '', label, onChange, onBlur, placeholder, value, id = modalId, showAddressBook, showScanner }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -58,6 +58,7 @@ function Component ({ className = '', label, onChange, placeholder, value, id = 
           '-is-valid-address': isAddress(value)
         })}
         label={label || t('Account address')}
+        onBlur={onBlur}
         onChange={_onChange}
         placeholder={placeholder || t('Please type or paste an address')}
         prefix={
@@ -69,7 +70,8 @@ function Component ({ className = '', label, onChange, placeholder, value, id = 
                     {toShort(value, 6, 6)}
                   </div>
 
-                  <div className={'__address common-text'}>
+                  {/* todo: make this visible later, if add manage address book feature */}
+                  <div className={'__address common-text hidden'}>
                     ({toShort(value, 4, 4)})
                   </div>
                 </div>

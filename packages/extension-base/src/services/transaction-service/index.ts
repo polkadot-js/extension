@@ -4,6 +4,7 @@
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
@@ -14,6 +15,7 @@ import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEm
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { parseTxAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
+import keyring from '@subwallet/ui-keyring';
 import EventEmitter from 'eventemitter3';
 import RLP, { Input } from 'rlp';
 import { BehaviorSubject } from 'rxjs';
@@ -63,12 +65,12 @@ export default class TransactionService {
     return [];
   }
 
-  public generalValidate (validationInput: SWTransactionInput): SWTransactionResponse {
-    // Todo: Validate balance here
+  public async generalValidate (validationInput: SWTransactionInput): Promise<SWTransactionResponse> {
     // Todo: Return error for read-only account
     // Todo: Estimate fee
     // Todo: Create ED warning
-    const { transaction, validateMethod, ...validation } = validationInput;
+    // Todo: Validate balance here
+    const { additionalValidator, ...validation } = validationInput;
 
     validation.errors = validation.errors || [];
     validation.warnings = validation.warnings || [];
@@ -77,14 +79,16 @@ export default class TransactionService {
     validation.errors.push(...this.checkDuplicate(validationInput));
 
     // Return unsupported error if not found transaction
-    if (!transaction) {
+    if (!validation.transaction) {
       validation.errors.push(new TransactionError(BasicTxErrorType.UNSUPPORTED));
     }
 
-    // Validate transaction with validate method
-    validateMethod && validateMethod(validationInput);
+    const validationResponse = validation as SWTransactionResponse;
 
-    return validation as SWTransactionResponse;
+    // Validate transaction with additionalValidator method
+    additionalValidator && await additionalValidator(validationResponse);
+
+    return validationResponse;
   }
 
   public getTransactionSubject () {
@@ -109,19 +113,22 @@ export default class TransactionService {
   }
 
   public async addTransaction (inputTransaction: SWTransactionInput): Promise<TransactionEmitter> {
+    const transactions = this.transactions;
     // Fill transaction default info
     const transaction = this.fillTransactionDefaultInfo(inputTransaction);
 
     // Add Transaction
-    this.transactions[transaction.id] = transaction;
-    this.transactionSubject.next({ ...this.transactions });
+    transactions[transaction.id] = transaction;
+    this.transactionSubject.next({ ...transactions });
+
+    console.log(transaction);
 
     // Send transaction
     return await this.sendTransaction(transaction);
   }
 
   public async handleTransaction (transaction: SWTransactionInput): Promise<SWTransactionResponse> {
-    const validatedTransaction = this.generalValidate(transaction);
+    const validatedTransaction = await this.generalValidate(transaction);
     const stopByErrors = validatedTransaction.errors.length > 0;
     const stopByWarnings = validatedTransaction.warnings.length > 0 && !validatedTransaction.ignoreWarnings;
 
@@ -163,6 +170,8 @@ export default class TransactionService {
     emitter.on('error', (data: TransactionEventResponse) => {
       this.onFailed({ ...data, errors: [...data.errors, new TransactionError(BasicTxErrorType.INTERNAL_ERROR)] });
     });
+
+    // Todo: handle any event with transaction.eventsHandler
 
     return emitter;
   }
@@ -273,7 +282,9 @@ export default class TransactionService {
     const payload = (transaction as EvmSendTransactionRequest);
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
-    const { account } = payload;
+    // Fill account info
+    const accountPair = keyring.getPair(address);
+    const account = { address, ...accountPair.meta } as AccountJson;
 
     // Set unique nonce to avoid transaction errors
     if (!payload.nonce) {

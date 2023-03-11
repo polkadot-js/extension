@@ -17,13 +17,7 @@ import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _Valida
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls, SigningRequest } from '@subwallet/extension-base/services/request-service/types';
-import {
-  SWTransaction,
-  SWTransactionInput,
-  SWTransactionResponse,
-  SWTransactionResult,
-  ValidateTransactionResponseInput
-} from '@subwallet/extension-base/services/transaction-service/types';
+import { SWTransaction, SWTransactionInput, SWTransactionResponse, SWTransactionResult, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { MetadataDef } from '@subwallet/extension-inject/types';
@@ -51,6 +45,7 @@ import { TypeRegistry } from '@polkadot/types';
 import { assert, BN, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+import {SubmittableExtrinsic} from "@polkadot/api/types";
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -1542,9 +1537,14 @@ export default class KoniExtension {
       });
     }
 
-    if (new BN(freeBalance).lt(new BN(transferAmount.value))) {
-      errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, 'Insufficient balance'));
-    }
+    // Additional validator
+    const additionalValidator = (swTran: SWTransactionResponse) => {
+      if (new BN(freeBalance).lt(new BN(transferAmount.value))) {
+        swTran.errors?.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+      }
+
+      return Promise.resolve();
+    };
 
     return this.#koniState.transactionService.handleTransaction({
       errors,
@@ -1555,103 +1555,10 @@ export default class KoniExtension {
       transferNativeAmount: isTransferNativeToken ? transferAmount.value : '0',
       transaction,
       data: inputData,
+      additionalValidator,
       extrinsicType: isTransferNativeToken ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.TRANSFER_TOKEN
     });
   }
-
-  // private async makeTransfer (request: RequestTransfer): Promise<TransactionResponse> {
-  //   const { from, networkKey, to, tokenSlug, transferAll, value } = request;
-  //   const [errors, , , tokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
-  //   const txState: TransactionResponse = { errors: [] };
-  //   const isTransferAll = !!transferAll;
-  //   const transferVal = value || '0';
-  //
-  //   if (errors.length) {
-  //     txState.txError = true;
-  //     txState.errors = errors;
-  //
-  //     return txState;
-  //   }
-  //
-  //   const swTransactionInput = {
-  //     data: request,
-  //     address: from,
-  //     chain: networkKey
-  //   } as SWTransactionInput;
-  //
-  //   if (isEthereumAddress(from) && isEthereumAddress(to)) {
-  //     // Make transfer with EVM API
-  //     const chainInfo = this.#koniState.getChainInfo(networkKey);
-  //     const evmApiMap = this.#koniState.getEvmApiMap();
-  //     const chainId = chainInfo?.evmInfo?.evmChainId || 1;
-  //
-  //     const fromPair = keyring.getPair(from);
-  //
-  //     const account: AccountJson = { address: fromPair?.address || from, ...fromPair?.meta };
-  //
-  //     swTransactionInput.chainType = ChainType.EVM;
-  //
-  //     if (_isTokenEvmSmartContract(tokenInfo)) {
-  //       swTransactionInput.extrinsicType = ExtrinsicType.TRANSFER_TOKEN;
-  //       const assetAddress = _getContractAddressOfToken(tokenInfo);
-  //
-  //       const [transaction, , estimateFee] = await getERC20TransactionObject(assetAddress, chainInfo, from, to, transferVal, isTransferAll, evmApiMap);
-  //       const parseData = transaction.data ? (await parseContractInput(transaction.data, transaction.to || '', chainInfo)).result : '';
-  //
-  //       swTransactionInput.transaction = {
-  //         ...transaction,
-  //         account: account,
-  //         canSign: true,
-  //         chainId,
-  //         estimateGas: estimateFee,
-  //         parseData: parseData,
-  //         isToContract: true
-  //       };
-  //     } else {
-  //       swTransactionInput.extrinsicType = ExtrinsicType.TRANSFER_BALANCE;
-  //
-  //       const [transaction, , estimateFee] = await getEVMTransactionObject(chainInfo, to, transferVal, isTransferAll, evmApiMap);
-  //
-  //       swTransactionInput.transaction = {
-  //         ...transaction,
-  //         account: account,
-  //         canSign: true,
-  //         chainId,
-  //         from: from,
-  //         estimateGas: estimateFee,
-  //         parseData: '',
-  //         isToContract: true
-  //       };
-  //     }
-  //   } else {
-  //     const substrateApi = this.#koniState.getSubstrateApi(networkKey);
-  //
-  //     // Make transfer with Dotsama API
-  //     const [transaction] = await createTransferExtrinsic({
-  //       transferAll: isTransferAll,
-  //       value: transferVal,
-  //       from: from,
-  //       networkKey: networkKey,
-  //       tokenInfo: tokenInfo,
-  //       to: to,
-  //       substrateApi
-  //     });
-  //
-  //     if (transaction) {
-  //       swTransactionInput.extrinsicType = ExtrinsicType.TRANSFER_BALANCE;
-  //       swTransactionInput.chainType = ChainType.SUBSTRATE;
-  //       swTransactionInput.transaction = transaction;
-  //     }
-  //   }
-  //
-  //   if (swTransactionInput.transaction) {
-  //     return await this.#koniState.transactionService.handleTransaction(swTransactionInput);
-  //   } else {
-  //     txState.errors?.push(new TransactionError(BasicTxErrorType.UNSUPPORTED, 'Unsupported transfer'));
-  //
-  //     return txState;
-  //   }
-  // }
 
   private validateCrossChainTransfer (
     destinationNetworkKey: string,
@@ -1672,72 +1579,16 @@ export default class KoniExtension {
     return [errors, keypair, transferValue, originTokenInfo, destinationTokenInfo];
   }
 
-  private async checkCrossChainTransfer ({ destinationNetworkKey, from, originNetworkKey, sendingTokenSlug, to, value }: RequestCheckCrossChainTransfer): Promise<ValidateTransactionResponse> {
-    const [errors, fromKeyPair, valueNumber, originTokenInfo, destinationTokenInfo] = this.validateCrossChainTransfer(destinationNetworkKey, sendingTokenSlug, from, value);
-    const substrateApiMap = this.#koniState.getSubstrateApiMap();
-    const evmApiMap = this.#koniState.getEvmApiMap();
-    let fee = '0';
-    let fromAccountFree = '0';
-
-    if (destinationTokenInfo && fromKeyPair) {
-      [fee, fromAccountFree] = await Promise.all([
-        estimateCrossChainFee(
-          fromKeyPair,
-          to,
-          value,
-          originTokenInfo,
-          destinationTokenInfo,
-          this.#koniState.getChainInfoMap(),
-          substrateApiMap,
-          this.#koniState.getAssetRefMap()
-        ),
-        getFreeBalance(originNetworkKey, from, substrateApiMap, evmApiMap)
-      ]);
-    }
-
-    const fromAccountFreeNumber = new BN(fromAccountFree);
-    const feeNumber = fee ? new BN(fee) : undefined;
-
-    if (value && feeNumber && valueNumber) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      if (fromAccountFreeNumber.lt(feeNumber.add(valueNumber))) {
-        errors.push(new TransactionError(TransferTxErrorType.NOT_ENOUGH_VALUE, 'Not enough balance free to make transfer'));
-      }
-    }
-
-    const { decimals, symbol } = this.#koniState.getNativeTokenInfo(originNetworkKey);
-
-    return this.#koniState.transactionService.generalValidate({
-      errors,
-      estimateFee: {
-        value: fee,
-        symbol: symbol || '',
-        decimals: decimals || 0
-      },
-      address: from,
-      chain: originNetworkKey,
-      chainType: isEthereumAddress(from) ? ChainType.EVM : ChainType.SUBSTRATE
-    });
-  }
-
-  private async makeCrossChainTransfer (inputData: RequestCrossChainTransfer): Promise<TransactionResponse> {
+  private async makeCrossChainTransfer (inputData: RequestCrossChainTransfer): Promise<SWTransactionResponse> {
     const { destinationNetworkKey, from, originNetworkKey, sendingTokenSlug, to, value } = inputData;
-    const txState: TransactionResponse = {};
-
     const [errors, fromKeyPair, , originTokenInfo, destinationTokenInfo] = this.validateCrossChainTransfer(destinationNetworkKey, sendingTokenSlug, from, value);
-
-    if (errors.length) {
-      txState.txError = true;
-      txState.errors = errors;
-
-      return txState;
-    }
+    let extrinsic: SubmittableExtrinsic<'promise'> | null = null;
 
     if (fromKeyPair && destinationTokenInfo) {
       const substrateApiMap = this.#koniState.getSubstrateApiMap();
       const chainInfoMap = this.#koniState.getChainInfoMap();
 
-      const extrinsic = await createXcmExtrinsic({
+      extrinsic = await createXcmExtrinsic({
         destinationTokenInfo,
         originTokenInfo,
         sendingValue: value || '0',
@@ -1745,26 +1596,19 @@ export default class KoniExtension {
         chainInfoMap: chainInfoMap,
         substrateApiMap: substrateApiMap
       });
-
-      if (!extrinsic) {
-        txState.txError = true;
-        txState.errors = [new TransactionError(BasicTxErrorType.UNSUPPORTED, 'Unsupported cross-chain transfer')];
-
-        return txState;
-      }
-
-      return await this.#koniState.transactionService.handleTransaction({
-        url: EXTENSION_REQUEST_URL,
-        address: from,
-        chain: originNetworkKey,
-        transaction: extrinsic,
-        data: inputData,
-        extrinsicType: ExtrinsicType.STAKING_WITHDRAW,
-        chainType: ChainType.SUBSTRATE
-      }, txState);
     }
 
-    return txState;
+    return await this.#koniState.transactionService.handleTransaction({
+      url: EXTENSION_REQUEST_URL,
+      address: from,
+      chain: originNetworkKey,
+      transaction: extrinsic,
+      data: inputData,
+      extrinsicType: ExtrinsicType.TRANSFER_XCM,
+      chainType: ChainType.SUBSTRATE,
+      transferNativeAmount: _isNativeToken(originTokenInfo) ? value : '0',
+      errors
+    });
   }
 
   private async evmNftGetTransaction ({ networkKey, params, recipientAddress, senderAddress }: NftTransactionRequest): Promise<EvmNftTransaction> {

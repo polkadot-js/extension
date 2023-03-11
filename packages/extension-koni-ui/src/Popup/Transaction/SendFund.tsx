@@ -5,7 +5,7 @@ import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/A
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { checkTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
@@ -72,34 +72,20 @@ const _SendFund: React.FC = () => {
       setLoading(true);
       const { chain, from, to, token, value } = form.getFieldsValue();
 
-      checkTransfer({
+      makeTransfer({
         from,
         networkKey: chain,
         to: to,
         tokenSlug: token,
         value: value
       }).then((rs) => {
-        const { errors } = rs;
+        const { errors, extrinsicHash, warnings } = rs;
 
-        if (errors?.length) {
+        if (errors.length || warnings.length) {
           setLoading(false);
           setErrors(errors.map((e) => e.message));
-        } else {
-          makeTransfer({
-            from,
-            networkKey: chain,
-            to: to,
-            tokenSlug: token,
-            value: value
-          }).then(({ errors, extrinsicHash }) => {
-            setLoading(false);
-
-            if (errors?.length) {
-              setErrors(errors.map((e) => e.message));
-            } else if (extrinsicHash) {
-              transactionContext.onDone(extrinsicHash);
-            }
-          }).catch(console.error);
+        } else if (extrinsicHash) {
+          transactionContext.onDone(extrinsicHash);
         }
       }).catch((e: Error) => {
         setLoading(false);

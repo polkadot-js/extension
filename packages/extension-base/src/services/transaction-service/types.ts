@@ -23,12 +23,13 @@ export interface SWTransaction extends ValidateTransactionResponse {
   ignoreWarnings?: boolean;
   estimateFee?: AmountData,
   transaction: SubmittableExtrinsic | TransactionConfig;
-  validateMethod?: (inputTransaction: SWTransactionInput) => Promise<void>;
+  additionalValidator?: (inputTransaction: SWTransactionResponse) => Promise<void>;
+  eventsHandler?: (eventEmitter: TransactionEmitter) => void;
 }
 
 export type SWTransactionResult = Omit<SWTransaction, 'transaction'>
 
-type SwInputBase = Pick<SWTransaction, 'address' | 'url' | 'data' | 'extrinsicType' | 'chain' | 'chainType' | 'validateMethod' | 'ignoreWarnings' | 'transferNativeAmount'>;
+type SwInputBase = Pick<SWTransaction, 'address' | 'url' | 'data' | 'extrinsicType' | 'chain' | 'chainType' | 'additionalValidator' | 'ignoreWarnings' | 'transferNativeAmount'>;
 export interface SWTransactionInput extends SwInputBase {
   transaction?: SWTransaction['transaction'] | null;
   warnings?: SWTransaction['warnings'];

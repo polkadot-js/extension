@@ -28,7 +28,7 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
     case ExtrinsicType.TRANSFER_TOKEN:
     case ExtrinsicType.TRANSFER_XCM:
       return TransferBlock;
-    case ExtrinsicType.STAKING_STAKE:
+    case ExtrinsicType.STAKING_BOND:
       return StakeTransactionConfirmation;
     default:
       return BaseTransactionConfirmation;
@@ -82,7 +82,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const TransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--content-gap': 0
+    '--content-gap': 0,
+    paddingTop: token.padding
   };
 });
 

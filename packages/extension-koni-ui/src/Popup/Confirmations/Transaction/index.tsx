@@ -16,6 +16,7 @@ import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import {TransferBlock} from "@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/TransferBlock";
 
 interface Props extends ThemeProps {
   confirmation: ConfirmationQueueItem;
@@ -23,6 +24,10 @@ interface Props extends ThemeProps {
 
 const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTransactionConfirmation => {
   switch (extrinsicType) {
+    case ExtrinsicType.TRANSFER_BALANCE:
+    case ExtrinsicType.TRANSFER_TOKEN:
+    case ExtrinsicType.TRANSFER_XCM:
+      return TransferBlock;
     case ExtrinsicType.STAKING_STAKE:
       return StakeTransactionConfirmation;
     default:
@@ -76,7 +81,9 @@ const Component: React.FC<Props> = (props: Props) => {
 };
 
 const TransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  return {};
+  return {
+    '--content-gap': 0
+  };
 });
 
 export default TransactionConfirmation;

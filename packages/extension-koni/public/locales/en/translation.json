@@ -836,5 +836,22 @@
   "Allow QR camera access": "",
   "Latest Reward": "",
   "Earning Reward": "",
-  "Pending": ""
+  "Pending": "",
+  "Method": "",
+  "Arguments": "",
+  "To": "",
+  "From": "",
+  "Estimate gas": "",
+  "Hex data": "",
+  "Method data": "",
+  "Info": "",
+  "Lifetime": "",
+  "GenesisHash": "",
+  "Version": "",
+  "Nonce": "",
+  "Tip": "",
+  "From account": "",
+  "To contract": "",
+  "To account": "",
+  "Estimated gas": ""
 }

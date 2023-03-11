@@ -7,11 +7,7 @@ import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handler
 import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import {
-  SWTransactionResponse,
-  SWTransactionResult,
-  ValidateTransactionResponse
-} from '@subwallet/extension-base/services/transaction-service/types';
+import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { SingleAddress } from '@subwallet/ui-keyring/observable/types';
@@ -453,6 +449,7 @@ export enum ExtrinsicType {
   STAKING_COMPOUNDING = 'staking.compounding',
   STAKING_CANCEL_COMPOUNDING = 'staking.cancel_compounding',
   EVM_EXECUTE = 'evm.smart_contract',
+  UNKNOWN = 'unknown'
 }
 
 export enum ExtrinsicStatus {
@@ -601,7 +598,7 @@ export interface TransactionResponse {
   passwordError?: string | null;
 }
 
-export interface NftTransactionResponse extends TransactionResponse {
+export interface NftTransactionResponse extends SWTransactionResponse {
   isSendingSelf: boolean;
 }
 
@@ -1643,21 +1640,21 @@ export interface RequestGetTransaction {
 
 export interface KoniRequestSignatures {
   // Bonding functions
-  'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, TransactionResponse];
+  'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, SWTransactionResponse];
   'pri(staking.turingCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxInfo];
   'pri(staking.checkTuringCompoundTask)': [CheckExistingTuringCompoundParams, ExistingTuringCompoundTask];
-  'pri(staking.submitTuringCompound)': [RequestTuringStakeCompound, TransactionResponse];
+  'pri(staking.submitTuringCompound)': [RequestTuringStakeCompound, SWTransactionResponse];
   'pri(staking.turingCompound)': [TuringStakeCompoundParams, TuringStakeCompoundResp];
   'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
-  'pri(staking.submitClaimReward)': [RequestStakeClaimReward, TransactionResponse];
+  'pri(staking.submitClaimReward)': [RequestStakeClaimReward, SWTransactionResponse];
   'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];
-  'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, TransactionResponse];
+  'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, SWTransactionResponse];
   'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
   'pri(unbonding.subscribeUnlockingInfo)': [null, StakeUnlockingJson, StakeUnlockingJson];
-  'pri(unbonding.submitTransaction)': [RequestUnbondingSubmit, TransactionResponse];
+  'pri(unbonding.submitTransaction)': [RequestUnbondingSubmit, SWTransactionResponse];
   'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
   'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];
-  'pri(bonding.submitTransaction)': [RequestBondingSubmit, TransactionResponse];
+  'pri(bonding.submitTransaction)': [RequestBondingSubmit, SWTransactionResponse];
   'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingInfo>, Record<string, ChainBondingInfo>];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
 
@@ -1684,7 +1681,7 @@ export interface KoniRequestSignatures {
   'pri(assetSetting.update)': [AssetSettingUpdateReq, boolean];
 
   // NFT functions
-  'pri(evmNft.submitTransaction)': [RequestEvmNftSubmitTransaction, NftTransactionResponse];
+  'pri(evmNft.submitTransaction)': [NftTransactionRequest, SWTransactionResponse];
   'pri(evmNft.getTransaction)': [NftTransactionRequest, EvmNftTransaction];
   'pri(substrateNft.submitTransaction)': [RequestSubstrateNftSubmitTransaction, NftTransactionResponse];
   'pri(substrateNft.getTransaction)': [NftTransactionRequest, SubstrateNftTransaction];

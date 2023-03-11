@@ -4,14 +4,9 @@
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { AssetSetting, BalanceItem, ChainBondingInfo, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, NominationPoolInfo, NominatorInfo, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import {
-  AccountJson,
-  AccountsContext,
-  AuthorizeRequest,
-  MetadataRequest,
-  SigningRequest
-} from '@subwallet/extension-base/background/types';
+import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
@@ -93,12 +88,13 @@ export interface AccountState extends AccountsContext, KeyringState, BaseReduxSt
 }
 
 export interface RequestState extends ConfirmationsQueue, BaseReduxStore {
-  authorizeRequest: Record<string, AuthorizeRequest>
-  metadataRequest: Record<string, MetadataRequest>
-  signingRequest: Record<string, SigningRequest>
-  hasConfirmations: boolean
-  hasInternalConfirmations: boolean
-  numberOfConfirmations: number
+  authorizeRequest: Record<string, AuthorizeRequest>;
+  metadataRequest: Record<string, MetadataRequest>;
+  signingRequest: Record<string, SigningRequest>;
+  hasConfirmations: boolean;
+  hasInternalConfirmations: boolean;
+  numberOfConfirmations: number;
+  transactionRequest: Record<string, SWTransactionResult>;
 }
 
 export interface UpdateConfirmationsQueueRequest extends BaseReduxStore {

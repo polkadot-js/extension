@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { persistor, store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import { subscribeAccountsData, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeConfirmationRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeSigningRequests, subscribeStakeUnlockingInfo, subscribeStaking, subscribeStakingReward, subscribeTxHistory, subscribeUiSettings } from '@subwallet/extension-koni-ui/stores/utils';
+import { subscribeAccountsData, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeConfirmationRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeSigningRequests, subscribeStakeUnlockingInfo, subscribeStaking, subscribeStakingReward, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings } from '@subwallet/extension-koni-ui/stores/utils';
 import Bowser from 'bowser';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -193,6 +193,7 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   _DataContext.addHandler({ ...subscribeMetadataRequests, name: 'subscribeMetadataRequests', relatedStores: ['requestState'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeSigningRequests, name: 'subscribeSigningRequests', relatedStores: ['requestState'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeConfirmationRequests, name: 'subscribeConfirmationRequests', relatedStores: ['requestState'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeTransactionRequests, name: 'subscribeTransactionRequests', relatedStores: ['requestState'], isStartImmediately: true });
 
   // Features
   _DataContext.addHandler({ ...subscribePrice, name: 'subscribePrice', relatedStores: ['price'] });

@@ -144,7 +144,8 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.__label': {
       fontSize: token.fontSize,
-      lineHeight: token.lineHeight
+      lineHeight: token.lineHeight,
+      textAlign: 'left'
     },
 
     '.__value': {

@@ -116,17 +116,16 @@ export default class TransactionService {
 
         if (!web3) {
           validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED));
-          break;
+        } else {
+          const gasPrice = await web3.api.eth.getGasPrice();
+          const gasLimit = await web3.api.eth.estimateGas(transaction);
+
+          estimateFee.value = (gasLimit * parseInt(gasPrice)).toString();
         }
-
-        const gasPrice = await web3.api.eth.getGasPrice();
-        const gasLimit = await web3.api.eth.estimateGas(transaction);
-
-        estimateFee.value = (gasLimit * parseInt(gasPrice)).toString();
       }
     }
 
-    validationResponse.estimateFee = estimateFee
+    validationResponse.estimateFee = estimateFee;
 
     // Read-only account
     const pair = keyring.getPair(address);

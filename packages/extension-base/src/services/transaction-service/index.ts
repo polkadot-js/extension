@@ -3,7 +3,7 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
@@ -125,6 +125,21 @@ export default class TransactionService {
 
     // Send transaction
     return await this.sendTransaction(transaction);
+  }
+
+  public generateBeforeHandleResponseErrors (errors: TransactionError[]): SWTransactionResponse {
+    return {
+      errors,
+      additionalValidator: undefined,
+      address: '',
+      chain: '',
+      chainType: ChainType.SUBSTRATE,
+      data: undefined,
+      extrinsicType: ExtrinsicType.UNKNOWN,
+      transferNativeAmount: undefined,
+      url: undefined,
+      warnings: []
+    };
   }
 
   public async handleTransaction (transaction: SWTransactionInput): Promise<SWTransactionResponse> {

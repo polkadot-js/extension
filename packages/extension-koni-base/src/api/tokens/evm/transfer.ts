@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { EvmNftTransaction, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransactionResponse, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { _BALANCE_PARSING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
@@ -127,52 +124,18 @@ export async function getERC721Transaction (
   contractAddress: string,
   senderAddress: string,
   recipientAddress: string,
-  tokenId: string): Promise<EvmNftTransaction> {
+  tokenId: string): Promise<TransactionConfig> {
   const web3 = evmApiMap[networkKey];
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const contract = new web3.api.eth.Contract(_ERC721_ABI, contractAddress);
+  const gasPrice = await web3.api.eth.getGasPrice();
 
-  const [fromAccountTxCount, gasPriceGwei, freeBalance] = await Promise.all([
-    web3.api.eth.getTransactionCount(senderAddress),
-    web3.api.eth.getGasPrice(),
-    getFreeBalance(networkKey, senderAddress, substrateApiMap, evmApiMap)
-  ]);
-
-  const binaryFreeBalance = new BN(freeBalance);
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-  const gasLimit = await contract.methods.safeTransferFrom(
-    senderAddress,
-    recipientAddress,
-    tokenId
-  ).estimateGas({
-    from: senderAddress
-  });
-
-  const rawTransaction = {
-    nonce: '0x' + fromAccountTxCount.toString(16),
+  return {
     from: senderAddress,
-    gasPrice: web3.api.utils.toHex(gasPriceGwei),
-    gasLimit: web3.api.utils.toHex(gasLimit as number),
+    gasPrice,
     to: contractAddress,
     value: '0x00',
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
-  };
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-  const rawFee = gasLimit * parseFloat(gasPriceGwei);
-
-  const binaryFee = new BN(rawFee.toString());
-  const balanceError = binaryFee.gt(binaryFreeBalance);
-  const errors = balanceError ? [new TransactionError(TransferTxErrorType.NOT_ENOUGH_FEE)] : [];
-
-  return {
-    tx: rawTransaction,
-    estimateFee: {
-      value: rawFee.toString(),
-      decimals,
-      symbol
-    },
-    errors
   };
 }

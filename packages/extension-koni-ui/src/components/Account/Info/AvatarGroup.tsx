@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-interface BaseAccountInfo {
+export interface BaseAccountInfo {
   address: string;
   name?: string;
   type?: KeypairType;

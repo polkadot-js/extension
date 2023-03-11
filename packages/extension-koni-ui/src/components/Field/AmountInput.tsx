@@ -3,9 +3,9 @@
 
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Input } from '@subwallet/react-ui';
+import { Button, Input, InputRef } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import React, { ChangeEventHandler, SyntheticEvent, useCallback, useState } from 'react';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -28,7 +28,7 @@ export const getInputValuesFromString: (input: string, power: number) => string 
   return valueBigN.toFixed();
 };
 
-const getOutputValuesFromString: (input: string, power: number) => string = (input: string, power: number) => {
+export const getOutputValuesFromString: (input: string, power: number) => string = (input: string, power: number) => {
   if (!isValidInput(input)) {
     return '';
   }
@@ -40,8 +40,8 @@ const getOutputValuesFromString: (input: string, power: number) => string = (inp
   return valueBigN.toFixed().split('.')[0];
 };
 
-const Component: React.FC<Props> = (props: Props) => {
-  const { className, decimals, maxValue, onChange } = props;
+const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
+  const { className, decimals, disabled, maxValue, onChange } = props;
   const [inputValue, setInputValue] = useState('');
 
   const { t } = useTranslation();
@@ -89,6 +89,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <Input
       className={className}
+      disabled={disabled}
       maxLength={5}
       onChange={onChangeInput}
       placeholder={t('Amount')}
@@ -99,8 +100,12 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const AmountInput = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const AmountInput = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
+    '.ant-input-affix-wrapper, input': {
+      overflow: 'hidden'
+    },
+
     '.max-btn-text': {
       color: token.colorSuccess
     }

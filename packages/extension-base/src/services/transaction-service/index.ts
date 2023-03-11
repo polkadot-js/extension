@@ -99,28 +99,28 @@ export default class TransactionService {
 
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
-    if (chainInfo) {
+    if (!chainInfo) {
       validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, "Can't find network"));
-    }
+    } else {
+      const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
-    const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
+      estimateFee.decimals = decimals;
+      estimateFee.symbol = symbol;
 
-    estimateFee.decimals = decimals;
-    estimateFee.symbol = symbol;
-
-    if (transaction) {
-      if (isSubstrateTransaction(transaction)) {
-        estimateFee.value = (await transaction.paymentInfo(address)).partialFee.toString();
-      } else {
-        const web3 = this.chainService.getEvmApi(chain);
-
-        if (!web3) {
-          validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED));
+      if (transaction) {
+        if (isSubstrateTransaction(transaction)) {
+          estimateFee.value = (await transaction.paymentInfo(address)).partialFee.toString();
         } else {
-          const gasPrice = await web3.api.eth.getGasPrice();
-          const gasLimit = await web3.api.eth.estimateGas(transaction);
+          const web3 = this.chainService.getEvmApi(chain);
 
-          estimateFee.value = (gasLimit * parseInt(gasPrice)).toString();
+          if (!web3) {
+            validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED));
+          } else {
+            const gasPrice = await web3.api.eth.getGasPrice();
+            const gasLimit = await web3.api.eth.estimateGas(transaction);
+
+            estimateFee.value = (gasLimit * parseInt(gasPrice)).toString();
+          }
         }
       }
     }
@@ -154,7 +154,7 @@ export default class TransactionService {
     if (transferNativeNum + feeNum > balanceNum) {
       validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
     } else {
-      if (balanceNum - (transferNativeNum + feeNum) > edNum) {
+      if (balanceNum - (transferNativeNum + feeNum) <= edNum) {
         // Todo add message
         validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
       }

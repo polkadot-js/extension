@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { EvmNftTransaction, ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, TransactionResponse, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { _BALANCE_PARSING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -53,7 +54,7 @@ export async function getEVMTransactionObject (
   value: string,
   transferAll: boolean,
   evmApiMap: Record<string, _EvmApi>
-): Promise<[TransactionConfig, string, string]> {
+): Promise<[TransactionConfig, string]> {
   const networkKey = chainInfo.slug;
   const web3Api = evmApiMap[networkKey];
   const gasPrice = await web3Api.api.eth.getGasPrice();
@@ -69,7 +70,7 @@ export async function getEVMTransactionObject (
 
   transactionObject.value = transferAll ? new BN(value).add(new BN(estimateFee).neg()) : value;
 
-  return [transactionObject, transactionObject.value.toString(), estimateFee.toString()];
+  return [transactionObject, transactionObject.value.toString()];
 }
 
 export async function getERC20TransactionObject (
@@ -80,7 +81,7 @@ export async function getERC20TransactionObject (
   value: string,
   transferAll: boolean,
   evmApiMap: Record<string, _EvmApi>
-): Promise<[TransactionConfig, string, string]> {
+): Promise<[TransactionConfig, string]> {
   const networkKey = chainInfo.slug;
   const evmApi = evmApiMap[networkKey];
   const erc20Contract = getERC20Contract(networkKey, assetAddress, evmApiMap);
@@ -110,18 +111,12 @@ export async function getERC20TransactionObject (
     data: transferData
   } as TransactionConfig;
 
-  const gasLimit = await evmApi.api.eth.estimateGas(transactionObject);
-
-  transactionObject.gas = gasLimit;
-
-  const estimateFee = parseInt(gasPrice) * gasLimit;
-
   if (transferAll) {
     transferValue = new BN(freeAmount).toString();
     transactionObject.data = generateTransferData(to, transferValue);
   }
 
-  return [transactionObject, transferValue, estimateFee.toString()];
+  return [transactionObject, transferValue];
 }
 
 export async function getERC721Transaction (
@@ -132,7 +127,7 @@ export async function getERC721Transaction (
   contractAddress: string,
   senderAddress: string,
   recipientAddress: string,
-  tokenId: string) {
+  tokenId: string): Promise<EvmNftTransaction> {
   const web3 = evmApiMap[networkKey];
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const contract = new web3.api.eth.Contract(_ERC721_ABI, contractAddress);
@@ -166,16 +161,18 @@ export async function getERC721Transaction (
   };
   const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
   const rawFee = gasLimit * parseFloat(gasPriceGwei);
-  const estimatedFee = rawFee / (10 ** decimals);
-  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-  const feeString = estimatedFee.toString() + ' ' + symbol;
 
   const binaryFee = new BN(rawFee.toString());
   const balanceError = binaryFee.gt(binaryFreeBalance);
+  const errors = balanceError ? [new TransactionError(TransferTxErrorType.NOT_ENOUGH_FEE)] : [];
 
   return {
     tx: rawTransaction,
-    estimatedFee: feeString,
-    balanceError
+    estimateFee: {
+      value: rawFee.toString(),
+      decimals,
+      symbol
+    },
+    errors
   };
 }

@@ -290,7 +290,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         to: to,
         tokenSlug: token,
         value: value
-      }).then(({ errors }) => {
+      }).then((rs) => {
+        const { errors } = rs;
+
         if (errors?.length) {
           console.log('errors1', errors);
           setLoading(false);

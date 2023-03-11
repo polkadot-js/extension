@@ -1630,6 +1630,7 @@ export default class KoniState {
       canSign: true
     };
 
+    // Todo: Convert this to handle transaction
     const transactionEmitter = await this.transactionService.addTransaction({
       transaction: requestPayload,
       address: requestPayload.from as string,
@@ -1650,12 +1651,12 @@ export default class KoniState {
       transactionEmitter.on('error', (rs: TransactionEventResponse) => {
         let evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR);
 
-        const errorType = (rs.error?.errorType || BasicTxErrorType.INTERNAL_ERROR);
+        const errorType = (rs.errors[0]?.errorType || BasicTxErrorType.INTERNAL_ERROR);
 
         if (errorType === BasicTxErrorType.USER_REJECT_REQUEST || errorType === BasicTxErrorType.UNABLE_TO_SIGN) {
           evmProviderError = new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
         } else if (errorType === BasicTxErrorType.UNABLE_TO_SEND) {
-          evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, rs.error?.message);
+          evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, rs.errors[0]?.message);
         }
 
         reject(evmProviderError);

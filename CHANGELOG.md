@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.45.2 Mar 11, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Use consistent `.js` imports in source files (TS moduleResolution)
+- Updated to `@polkadot/api` 10.1.1
+- Updated to `@polkadot/util` 11.0.2
+
 ## 0.45.1 Mar 5, 2023
 
 - **Important** Not published to the stores, aligns with latest released packages.

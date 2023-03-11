@@ -1,23 +1,20 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
+import { BaseTransactionConfirmationProps } from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/Base';
 import { TransferData } from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/type';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-type Props = ThemeProps & {
-  transactionResult: SWTransactionResult
-};
+type Props = BaseTransactionConfirmationProps;
 
-const Component: React.FC<Props> = ({ transactionResult }: Props) => {
+const Component: React.FC<Props> = ({ transaction }: Props) => {
   const { t } = useTranslation();
-  const data = transactionResult.data as TransferData;
+  const data = transaction.data as TransferData;
   const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
   const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
   const symbol = assetRegistryMap[data.tokenSlug].symbol;
@@ -53,7 +50,7 @@ const Component: React.FC<Props> = ({ transactionResult }: Props) => {
           decimals={chainInfo?.substrateInfo?.decimals || chainInfo?.evmInfo?.decimals || 18}
           label={t('Estimated fee')}
           suffix={symbol}
-          value={transactionResult.estimateFee?.value || 0}
+          value={transaction.estimateFee?.value || 0}
         />
       </MetaInfo>
     </>

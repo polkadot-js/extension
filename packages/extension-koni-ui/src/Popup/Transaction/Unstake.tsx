@@ -93,7 +93,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <div className={'text-light-4'}>{t('Once unbonded, your funds to become available after 28 days.')}</div>
         </Form>
       </TransactionContent>
-      <TransactionFooter errors={[]}>
+      <TransactionFooter errors={[]} warnings={[]}>
         <Button
           icon={<Icon
             phosphorIcon={MinusCircle}

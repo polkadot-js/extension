@@ -240,7 +240,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </TransactionContent>
         </ScreenTab.SwTabPanel>
       </ScreenTab>
-      <TransactionFooter errors={[]}>
+      <TransactionFooter errors={[]} warnings={[]}>
         <Button
           icon={<Icon
             phosphorIcon={PlusCircle}

@@ -81,8 +81,8 @@ const TransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: 
   return {
     '--content-gap': 0,
 
-    '.confirmation-content': {
-      textAlign: 'center'
+    '&.confirmation-content.confirmation-content': {
+      textAlign: 'left'
     }
   };
 });

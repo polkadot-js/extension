@@ -54,8 +54,8 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const CommonAddressInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const CommonTransactionInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {};
 });
 
-export default CommonAddressInfo;
+export default CommonTransactionInfo;

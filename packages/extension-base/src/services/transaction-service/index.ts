@@ -3,14 +3,16 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
+import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
-import { getTransactionId } from '@subwallet/extension-base/services/transaction-service/helpers';
+import { getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEmitter, TransactionEventMap, TransactionEventResponse, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
@@ -31,15 +33,18 @@ import { HexString } from '@polkadot/util/types';
 export default class TransactionService {
   private readonly chainService: ChainService;
   private readonly requestService: RequestService;
+
+  readonly #balanceService: BalanceService;
   private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
 
   private get transactions (): Record<string, SWTransaction> {
     return this.transactionSubject.getValue();
   }
 
-  constructor (chainService: ChainService, requestService: RequestService) {
+  constructor (chainService: ChainService, requestService: RequestService, balanceService: BalanceService) {
     this.chainService = chainService;
     this.requestService = requestService;
+    this.#balanceService = balanceService;
   }
 
   private get allTransactions (): SWTransaction[] {
@@ -67,24 +72,95 @@ export default class TransactionService {
   }
 
   public async generalValidate (validationInput: SWTransactionInput): Promise<SWTransactionResponse> {
-    // Todo: Return error for read-only account
-    // Todo: Estimate fee
-    // Todo: Create ED warning
-    // Todo: Validate balance here
-    const { additionalValidator, ...validation } = validationInput;
-
-    validation.errors = validation.errors || [];
-    validation.warnings = validation.warnings || [];
+    const validation = {
+      ...validationInput,
+      errors: validationInput.errors || [],
+      warnings: validationInput.warnings || []
+    };
+    const { additionalValidator, address, chain, transaction } = validation;
 
     // Check duplicate transaction
     validation.errors.push(...this.checkDuplicate(validationInput));
 
     // Return unsupported error if not found transaction
-    if (!validation.transaction) {
+    if (!transaction) {
       validation.errors.push(new TransactionError(BasicTxErrorType.UNSUPPORTED));
     }
 
-    const validationResponse = validation as SWTransactionResponse;
+    const validationResponse: SWTransactionResponse = {
+      status: undefined,
+      ...validation
+    };
+
+    // Estimate fee
+    const estimateFee: AmountData = {
+      symbol: '',
+      decimals: 0,
+      value: ''
+    };
+
+    const chainInfo = this.chainService.getChainInfoByKey(chain);
+
+    if (!chainInfo) {
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, "Can't find network"));
+    } else {
+      const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
+
+      estimateFee.decimals = decimals;
+      estimateFee.symbol = symbol;
+
+      if (transaction) {
+        if (isSubstrateTransaction(transaction)) {
+          estimateFee.value = (await transaction.paymentInfo(address)).partialFee.toString();
+        } else {
+          const web3 = this.chainService.getEvmApi(chain);
+
+          if (!web3) {
+            validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED));
+          } else {
+            const gasPrice = await web3.api.eth.getGasPrice();
+            const gasLimit = await web3.api.eth.estimateGas(transaction);
+
+            estimateFee.value = (gasLimit * parseInt(gasPrice)).toString();
+          }
+        }
+      }
+    }
+
+    validationResponse.estimateFee = estimateFee;
+
+    // Read-only account
+    const pair = keyring.getPair(address);
+
+    if (!pair) {
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'Can\'t find account'));
+    } else {
+      if (pair.meta?.isReadOnly) {
+        validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'This is read-only account'));
+      }
+    }
+
+    // Balance
+    const transferNative = validationResponse.transferNativeAmount || '0';
+    const nativeTokenInfo = this.chainService.getNativeTokenInfo(chain);
+
+    const balance = await this.#balanceService.getFreeBalance(chain, address, this.chainService.getSubstrateApiMap(), this.chainService.getEvmApiMap());
+
+    const existentialDeposit = nativeTokenInfo.minAmount || '0';
+
+    const feeNum = parseInt(estimateFee.value);
+    const balanceNum = parseInt(balance);
+    const edNum = parseInt(existentialDeposit);
+    const transferNativeNum = parseInt(transferNative);
+
+    if (transferNativeNum + feeNum > balanceNum) {
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+    } else {
+      if (balanceNum - (transferNativeNum + feeNum) <= edNum) {
+        // Todo add message
+        validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+      }
+    }
 
     // Validate transaction with additionalValidator method
     additionalValidator && await additionalValidator(validationResponse);
@@ -299,9 +375,8 @@ export default class TransactionService {
     const evmApi = this.chainService.getEvmApi(chain);
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
-    // Fill account info
     const accountPair = keyring.getPair(address);
-    const account = { address, ...accountPair.meta } as AccountJson;
+    const account: AccountJson = { address, ...accountPair.meta };
 
     if (!payload.account) {
       payload.account = account;
@@ -333,7 +408,7 @@ export default class TransactionService {
       payload.chainId = chainInfo.evmInfo?.evmChainId ?? 1;
     }
 
-    // Auto fill from
+    // Autofill from
     if (!payload.from) {
       payload.from = address;
     }

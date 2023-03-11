@@ -29,14 +29,15 @@ export interface SWTransaction extends ValidateTransactionResponse {
 
 export type SWTransactionResult = Omit<SWTransaction, 'transaction'>
 
-type SwInputBase = Pick<SWTransaction, 'address' | 'url' | 'data' | 'extrinsicType' | 'chain' | 'chainType' | 'additionalValidator' | 'ignoreWarnings' | 'transferNativeAmount'>;
+type SwInputBase = Pick<SWTransaction, 'address' | 'url' | 'data' | 'extrinsicType' | 'chain' | 'chainType' | 'ignoreWarnings' | 'transferNativeAmount'>
+& Partial<Pick<SWTransaction, 'additionalValidator'>>;
 export interface SWTransactionInput extends SwInputBase {
   transaction?: SWTransaction['transaction'] | null;
   warnings?: SWTransaction['warnings'];
   errors?: SWTransaction['errors'];
 }
 
-export type SWTransactionResponse = SwInputBase & Pick<SWTransaction, 'warnings' | 'errors'> & Partial<Pick<SWTransaction, 'id' | 'extrinsicHash' | 'status'>>;
+export type SWTransactionResponse = SwInputBase & Pick<SWTransaction, 'warnings' | 'errors'> & Partial<Pick<SWTransaction, 'id' | 'extrinsicHash' | 'status' | 'estimateFee'>>;
 
 export type ValidateTransactionResponseInput = SWTransactionInput;
 

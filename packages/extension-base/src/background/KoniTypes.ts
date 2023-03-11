@@ -1082,6 +1082,7 @@ export interface EvmSignRequest {
 }
 
 export interface EvmSignatureRequest extends EvmSignRequest {
+  id: string;
   type: string;
   payload: unknown;
 }

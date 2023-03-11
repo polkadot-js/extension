@@ -20,12 +20,12 @@ export type TokenItemType = {
 interface Props extends ThemeProps, BasicInputWrapper {
   items: TokenItemType[],
   showChainInSelected?: boolean,
+  prefixShape?: 'circle' | 'none' | 'squircle' | 'square';
 }
 
-function Component ({ className = '', disabled, id = 'token-select', items, label, onChange, placeholder, showChainInSelected = true, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ className = '', disabled, id = 'token-select', items, label, onChange, placeholder, prefixShape, showChainInSelected = true, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-
   const renderTokenSelected = useCallback((item: TokenItemType) => {
     return (
       <div className={'__selected-item'}>
@@ -55,6 +55,7 @@ function Component ({ className = '', disabled, id = 'token-select', items, labe
 
     return tokenInfo && <Logo
       isShowSubLogo={true}
+      shape={'square'}
       size={token.controlHeightSM}
       subNetwork={tokenInfo.originChain}
       token={tokenInfo.symbol.toLowerCase()}

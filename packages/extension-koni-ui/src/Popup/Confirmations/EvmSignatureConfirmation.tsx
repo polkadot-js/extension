@@ -1,17 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ConfirmationDefinitions, EvmSendTransactionRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { ConfirmationsQueueItem, EvmSignatureRequest } from '@subwallet/extension-base/background/KoniTypes';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
 import ViewDetailIcon from '@subwallet/extension-koni-ui/components/Icon/ViewDetailIcon';
-import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
-import useGetChainInfoByChainId from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByChainId';
 import useOpenDetailModal from '@subwallet/extension-koni-ui/hooks/confirmation/useOpenDetailModal';
 import BaseDetailModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/BaseDetailModal';
 import EvmMessageDetail from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/Evm/Message';
-import EvmTransactionDetail from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/Evm/Transaction';
 import EvmSignArea from '@subwallet/extension-koni-ui/Popup/Confirmations/Sign/Evm';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { EvmSignatureSupportType } from '@subwallet/extension-koni-ui/types/confirmation';
@@ -24,26 +20,13 @@ import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   type: EvmSignatureSupportType
-  request: ConfirmationDefinitions[EvmSignatureSupportType][0]
+  request: ConfirmationsQueueItem<EvmSignatureRequest>
 }
 
-const convertToBigN = (num: EvmSendTransactionRequest['value']): string | number | undefined => {
-  if (typeof num === 'object') {
-    return num.toNumber();
-  } else {
-    return num;
-  }
-};
-
 function Component ({ className, request, type }: Props) {
-  const { id, payload: { account } } = request;
+  const { id, payload } = request;
   const { t } = useTranslation();
-
-  const chainId = (request.payload as EvmSendTransactionRequest).chainId;
-  const chainInfo = useGetChainInfoByChainId(chainId);
-
-  const recipientAddress = (request.payload as EvmSendTransactionRequest).to;
-  const recipient = useGetAccountByAddress(recipientAddress);
+  const { account } = payload;
 
   const isMessage = isEvmMessage(request);
 
@@ -56,49 +39,16 @@ function Component ({ className, request, type }: Props) {
         <div className='title'>
           {isMessage ? t('Signature request') : t('Approve Request')}
         </div>
-        {
-          isMessage
-            ? (
-              <>
-                <div className='description'>
-                  {t('You are approving a request with account')}
-                </div>
-                <AccountItemWithName
-                  accountName={account.name}
-                  address={account.address}
-                  avatarSize={24}
-                  className='account-item'
-                  isSelected={true}
-                />
-              </>
-            )
-            : (
-              <MetaInfo>
-                <MetaInfo.Number
-                  decimals={chainInfo?.evmInfo?.decimals}
-                  label={t('Amount')}
-                  suffix={chainInfo?.evmInfo?.symbol}
-                  value={convertToBigN(request.payload.value) || 0}
-                />
-                <MetaInfo.Account
-                  address={account.address}
-                  label={t('From account')}
-                  name={account.name}
-                />
-                <MetaInfo.Account
-                  address={recipient?.address || recipientAddress || ''}
-                  label={request.payload.isToContract ? t('To contract') : t('To account')}
-                  name={recipient?.name}
-                />
-                <MetaInfo.Number
-                  decimals={chainInfo?.evmInfo?.decimals}
-                  label={t('Estimated gas')}
-                  suffix={chainInfo?.evmInfo?.symbol}
-                  value={request.payload.estimateGas}
-                />
-              </MetaInfo>
-            )
-        }
+        <div className='description'>
+          {t('You are approving a request with account')}
+        </div>
+        <AccountItemWithName
+          accountName={account.name}
+          address={account.address}
+          avatarSize={24}
+          className='account-item'
+          isSelected={true}
+        />
         <div>
           <Button
             icon={<ViewDetailIcon />}
@@ -116,23 +66,9 @@ function Component ({ className, request, type }: Props) {
         type={type}
       />
       <BaseDetailModal
-        title={isMessage ? t('Message details') : t('Transaction details')}
+        title={t('Message details')}
       >
-        {
-          isMessage &&
-            (
-              <EvmMessageDetail payload={request.payload} />
-            )
-        }
-        {
-          !isMessage &&
-            (
-              <EvmTransactionDetail
-                account={account}
-                request={request.payload}
-              />
-            )
-        }
+        <EvmMessageDetail payload={request.payload} />
       </BaseDetailModal>
     </>
   );

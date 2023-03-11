@@ -16,6 +16,7 @@ import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEm
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { parseTxAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
+import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import keyring from '@subwallet/ui-keyring';
 import EventEmitter from 'eventemitter3';
 import RLP, { Input } from 'rlp';
@@ -370,9 +371,29 @@ export default class TransactionService {
     transaction,
     url }: SWTransaction): Promise<TransactionEmitter> {
     const payload = (transaction as EvmSendTransactionRequest);
+    const evmApi = this.chainService.getEvmApi(chain);
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
     const { account } = payload;
+
+    if (!payload.account) {
+      payload.account = account;
+    }
+
+    // Allow sign transaction
+    payload.canSign = true;
+
+    // Fill contract info
+    if (!payload.parseData) {
+      const isToContract = await isContractAddress(payload.to || '', evmApi);
+
+      payload.isToContract = isToContract;
+      payload.parseData = isToContract
+        ? payload.data
+          ? (await parseContractInput(payload.data || '', payload.to || '', chainInfo)).result
+          : ''
+        : payload.data || '';
+    }
 
     // Set unique nonce to avoid transaction errors
     if (!payload.nonce) {

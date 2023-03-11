@@ -1082,6 +1082,7 @@ export interface EvmSignRequest {
 }
 
 export interface EvmSignatureRequest extends EvmSignRequest {
+  id: string;
   type: string;
   payload: unknown;
 }
@@ -1641,19 +1642,12 @@ export interface RequestGetTransaction {
 export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, SWTransactionResponse];
-  'pri(staking.turingCancelCompound)': [TuringCancelStakeCompoundParams, BasicTxInfo];
-  'pri(staking.checkTuringCompoundTask)': [CheckExistingTuringCompoundParams, ExistingTuringCompoundTask];
   'pri(staking.submitTuringCompound)': [RequestTuringStakeCompound, SWTransactionResponse];
-  'pri(staking.turingCompound)': [TuringStakeCompoundParams, TuringStakeCompoundResp];
   'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
   'pri(staking.submitClaimReward)': [RequestStakeClaimReward, SWTransactionResponse];
-  'pri(staking.claimRewardTxInfo)': [StakeClaimRewardParams, BasicTxInfo];
   'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, SWTransactionResponse];
-  'pri(unbonding.withdrawalTxInfo)': [StakeWithdrawalParams, BasicTxInfo];
   'pri(unbonding.subscribeUnlockingInfo)': [null, StakeUnlockingJson, StakeUnlockingJson];
   'pri(unbonding.submitTransaction)': [RequestUnbondingSubmit, SWTransactionResponse];
-  'pri(unbonding.txInfo)': [UnbondingSubmitParams, BasicTxInfo];
-  'pri(bonding.txInfo)': [BondingSubmitParams, BasicTxInfo];
   'pri(bonding.submitTransaction)': [RequestBondingSubmit, SWTransactionResponse];
   'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingInfo>, Record<string, ChainBondingInfo>];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];

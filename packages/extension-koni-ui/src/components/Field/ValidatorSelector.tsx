@@ -8,10 +8,10 @@ import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/Sort
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, SelectModal, useExcludeModal } from '@subwallet/react-ui';
+import { Button, Icon, InputRef, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { Book, CaretLeft, Lightning, SortAscending } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useState } from 'react';
+import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -71,7 +71,7 @@ const getFilteredList = (items: ValidatorDataType[], filters: string[]) => {
   return filteredList;
 };
 
-const Component: React.FC<Props> = (props: Props) => {
+const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', disabled, id = 'validator-selector', label, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
   const items = useGetValidatorList(chain, 'nominate') as ValidatorDataType[];
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -218,7 +218,7 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const ValidatorSelector = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
     '&.validator-selector-input': {
       '.__selected-item': {

@@ -1528,7 +1528,8 @@ export default class KoniState {
       type: method,
       payload: payload as unknown,
       hashPayload: qrPayload,
-      canSign: canSign
+      canSign: canSign,
+      id
     };
 
     return this.requestService.addConfirmation(id, url, 'evmSignatureRequest', signPayload, {

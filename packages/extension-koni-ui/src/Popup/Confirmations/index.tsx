@@ -8,6 +8,7 @@ import AddNetworkConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmat
 import AddTokenConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AddTokenConfirmation';
 import AuthorizeConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AuthorizeConfirmation';
 import EvmSignatureConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/EvmSignatureConfirmation';
+import EvmTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/EvmTransactionConfirmation';
 import MetadataConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/MetadataConfirmation';
 import SignConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/SignConfirmation';
 import TransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction';
@@ -66,7 +67,14 @@ const Component = function ({ className }: Props) {
       {
         confirmation?.item.isInternal
           ? (
-            <TransactionConfirmation confirmation={confirmation} />
+            <>
+              {confirmation?.type === 'signingRequest' && <TransactionConfirmation confirmation={confirmation} />}
+              {confirmation?.type === 'evmSendTransactionRequest' && <EvmTransactionConfirmation
+                request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]}
+                type={confirmation.type}
+              />}
+            </>
+
           )
           : (
             <>
@@ -87,7 +95,7 @@ const Component = function ({ className }: Props) {
               }
               {
                 confirmation?.type === 'evmSendTransactionRequest' && (
-                  <EvmSignatureConfirmation
+                  <EvmTransactionConfirmation
                     request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]}
                     type={confirmation.type}
                   />

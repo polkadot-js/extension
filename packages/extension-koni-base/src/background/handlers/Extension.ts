@@ -1583,6 +1583,10 @@ export default class KoniExtension {
     const [errors, fromKeyPair, , originTokenInfo, destinationTokenInfo] = this.validateCrossChainTransfer(destinationNetworkKey, sendingTokenSlug, from, value);
     let extrinsic: SubmittableExtrinsic<'promise'> | null = null;
 
+    if (errors) {
+      return this.#koniState.transactionService.generateBeforeHandleResponseErrors(errors);
+    }
+
     if (fromKeyPair && destinationTokenInfo) {
       const substrateApiMap = this.#koniState.getSubstrateApiMap();
       const chainInfoMap = this.#koniState.getChainInfoMap();

@@ -15,13 +15,13 @@ const Component = ({ children, className = '', errors, warnings }: Props) => {
   return (
     <div className={`transaction-footer ${className}`}>
       {errors.length > 0 && <div className='error-messages'>
-        {errors.map((e) => (
-          <div key={e}>{e}</div>
+        {errors.map((e, index) => (
+          <div key={index}>{e}</div>
         ))}
       </div>}
       {warnings.length > 0 && <div className='warning-messages'>
-        {warnings.map((e) => (
-          <div key={e}>{e}</div>
+        {warnings.map((w, index) => (
+          <div key={index}>{w}</div>
         ))}
       </div>}
       {children}

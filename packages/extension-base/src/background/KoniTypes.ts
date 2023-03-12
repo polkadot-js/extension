@@ -1760,7 +1760,7 @@ export interface KoniRequestSignatures {
   'pri(accounts.transfer)': [RequestTransfer, SWTransactionResponse];
 
   'pri(accounts.checkCrossChainTransfer)': [RequestCheckCrossChainTransfer, ValidateTransactionResponse];
-  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, TransactionResponse];
+  'pri(accounts.crossChainTransfer)': [RequestCrossChainTransfer, SWTransactionResponse];
 
   // Confirmation Queues
   'pri(confirmations.subscribe)': [RequestConfirmationsSubscribe, ConfirmationsQueue, ConfirmationsQueue];

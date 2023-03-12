@@ -5,13 +5,14 @@ import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
@@ -303,31 +304,46 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         setLoading(true);
         const { chain, destChain, from, to, token, value } = values;
 
+        let sendPromise: Promise<SWTransactionResponse>;
+
         if (chain === destChain) {
-          makeTransfer({
+          // Transfer token or send fund
+          sendPromise = makeTransfer({
             from,
             networkKey: chain,
             to: to,
             tokenSlug: token,
             value: value
-          }).then((rs) => {
-            console.log(rs);
-            const { errors, extrinsicHash, warnings } = rs;
-
-            if (errors.length || warnings.length) {
-              setLoading(false);
-              setErrors(errors.map((e) => e.message));
-              setWarnings(warnings.map((e) => e.message));
-            } else if (extrinsicHash) {
-              transactionContext.onDone(extrinsicHash);
-            }
-          }).catch((e: Error) => {
-            setLoading(false);
-            setErrors([e.message]);
           });
         } else {
-          // todo: cross chain here
+          // Make cross chain transfer
+          sendPromise = makeCrossChainTransfer({
+            destinationNetworkKey: destChain,
+            from,
+            originNetworkKey: chain,
+            sendingTokenSlug: token,
+            to,
+            value
+          });
         }
+
+        // Handle transfer action
+        sendPromise.then((rs) => {
+          const { errors, extrinsicHash, warnings } = rs;
+
+          console.debug(rs);
+
+          if (errors.length || warnings.length) {
+            setLoading(false);
+            setErrors(errors.map((e) => e.message));
+            setWarnings(warnings.map((w) => w.message));
+          } else if (extrinsicHash) {
+            transactionContext.onDone(extrinsicHash);
+          }
+        }).catch((e: Error) => {
+          setLoading(false);
+          setErrors([e.message]);
+        });
       }).catch(console.log);
     },
     [form, transactionContext]
@@ -438,7 +454,10 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             ]}
             validateTrigger='onBlur'
           >
-            <AddressInput showScanner={true} label={t('Send to account')} />
+            <AddressInput
+              label={t('Send to account')}
+              showScanner={true}
+            />
           </Form.Item>
         </Form>
 

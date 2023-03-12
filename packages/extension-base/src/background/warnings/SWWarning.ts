@@ -7,8 +7,8 @@ export class SWWarning {
   message: string;
   data: unknown | undefined;
 
-  constructor (warningType: string, message?: string, code?: number, data?: unknown) {
-    this.message = message || warningType;
+  constructor (warningType: string, message: string, code?: number, data?: unknown) {
+    this.message = message;
     this.warningType = warningType;
     this.code = code;
     this.data = data;

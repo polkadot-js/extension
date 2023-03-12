@@ -9,6 +9,7 @@ import EvmSignArea from '@subwallet/extension-koni-ui/Popup/Confirmations/Sign/E
 import SubstrateSignArea from '@subwallet/extension-koni-ui/Popup/Confirmations/Sign/Substrate';
 import BaseTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/Base';
 import StakeTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/Stake';
+import { TransferBlock } from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/TransferBlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ConfirmationQueueItem } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -16,7 +17,6 @@ import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {TransferBlock} from "@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/TransferBlock";
 
 interface Props extends ThemeProps {
   confirmation: ConfirmationQueueItem;

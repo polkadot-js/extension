@@ -117,18 +117,14 @@ export async function getERC20TransactionObject (
 }
 
 export async function getERC721Transaction (
-  evmApiMap: Record<string, _EvmApi>,
-  substrateApiMap: Record<string, _SubstrateApi>,
-  chainInfo: _ChainInfo,
-  networkKey: string,
+  web3Api: _EvmApi,
   contractAddress: string,
   senderAddress: string,
   recipientAddress: string,
   tokenId: string): Promise<TransactionConfig> {
-  const web3 = evmApiMap[networkKey];
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const contract = new web3.api.eth.Contract(_ERC721_ABI, contractAddress);
-  const gasPrice = await web3.api.eth.getGasPrice();
+  const contract = new web3Api.api.eth.Contract(_ERC721_ABI, contractAddress);
+  const gasPrice = await web3Api.api.eth.getGasPrice();
 
   return {
     from: senderAddress,

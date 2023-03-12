@@ -1687,7 +1687,6 @@ export interface KoniRequestSignatures {
   'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson];
   'pri(nftCollection.getNftCollection)': [null, NftCollectionJson];
   'pri(nftCollection.getSubscription)': [null, NftCollection[], NftCollection[]];
-  'pri(wasmNft.getTransaction)': [NftTransactionRequest, SubstrateNftTransaction];
 
   // Staking functions
   'pri(staking.getStaking)': [null, StakingJson];

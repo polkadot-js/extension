@@ -11,7 +11,6 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
@@ -36,7 +35,7 @@ import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
-interface TransferFromProps extends TransactionFormBaseProps {
+interface TransferFormProps extends TransactionFormBaseProps {
   to: string
   chain: string
   destChain: string
@@ -179,15 +178,12 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const assetSettingMap = useSelector((state: RootState) => state.assetRegistry.assetSettingMap);
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const chainStateMap = useSelector((state: RootState) => state.chainStore.chainStateMap);
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
-  const [currentAddress] = useState<string | undefined>(currentAccount?.address);
-  const { goBack } = useDefaultNavigate();
   const transactionContext = useContext(TransactionContext);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [form] = useForm<TransferFromProps>();
+  const [form] = useForm<TransferFormProps>();
   const formDefault = {
     from: transactionContext.from,
     chain: transactionContext.chain,
@@ -271,7 +267,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   }, [t]);
 
   const onFieldsChange = useCallback(
-    (part: Partial<TransferFromProps>, values: TransferFromProps) => {
+    (part: Partial<TransferFormProps>, values: TransferFormProps) => {
       if (part.from || part.token || part.destChain) {
         form.resetFields(['to']);
       }
@@ -348,12 +344,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     },
     [form, transactionContext]
   );
-
-  useEffect(() => {
-    if (currentAddress !== currentAccount?.address) {
-      goBack();
-    }
-  }, [currentAccount?.address, currentAddress, goBack]);
 
   useEffect(() => {
     if (tokenItems.length) {

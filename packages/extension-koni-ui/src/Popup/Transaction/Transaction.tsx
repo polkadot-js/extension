@@ -75,6 +75,7 @@ function Component ({ className }: Props) {
   const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
   const titleMap = useMemo<Record<string, string>>(() => ({
     [ExtrinsicType.TRANSFER_BALANCE]: t('Transfer'),
+    [ExtrinsicType.SEND_NFT]: t('Transfer NFT'),
     [ExtrinsicType.STAKING_STAKE]: t('Add to Bond'),
     [ExtrinsicType.STAKING_UNSTAKE]: t('Remove Bond')
   }), [t]);

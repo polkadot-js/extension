@@ -4,7 +4,6 @@
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import BuyTokens from '@subwallet/extension-koni-ui/Popup/BuyTokens';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
-import SendFund from '@subwallet/extension-koni-ui/Popup/Transaction/SendFund';
 import { i18nPromise } from '@subwallet/extension-koni-ui/util/i18n';
 import React from 'react';
 import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
@@ -19,9 +18,6 @@ const NftItemDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popu
 const NftCollections = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollections'));
 const NftCollectionDetail = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollectionDetail'));
 const NftImport = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftImport'));
-
-const Stake = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Stake'));
-const Unstake = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Unstake'));
 
 const History = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
@@ -62,6 +58,10 @@ const AccountExport = React.lazy(() => import('@subwallet/extension-koni-ui/Popu
 
 const Transaction = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Transaction'));
 const TransactionDone = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Transaction/TransactionDone'));
+const SendFund = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Transaction/SendFund'));
+const SendNFT = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Transaction/SendNFT'));
+const Stake = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Stake'));
+const Unstake = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Unstake'));
 
 const ErrorFallback = () => {
   const error = useRouteError();
@@ -155,7 +155,7 @@ export const router = createHashRouter([
           },
           {
             path: 'send-nft',
-            element: <Example />
+            element: <SendNFT />
           },
           {
             path: 'stake',

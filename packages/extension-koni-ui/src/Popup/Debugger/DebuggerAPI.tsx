@@ -180,7 +180,6 @@ const API_LIST = [
   'pri(staking.checkTuringCompoundTask)',
   'pri(staking.turingCancelCompound)',
   'pri(staking.submitTuringCancelCompound)',
-  'pri(wasmNft.getTransaction)',
   'pri(keyring.subscribe)',
   'pri(keyring.change)',
   'pri(keyring.migrate)',

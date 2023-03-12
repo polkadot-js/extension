@@ -1618,9 +1618,8 @@ export default class KoniExtension {
     const { networkKey, params, recipientAddress, senderAddress } = inputData;
     const contractAddress = params.contractAddress as string;
     const tokenId = params.tokenId as string;
-    const chainInfo = this.#koniState.getChainInfo(networkKey);
-
-    const transaction = await getERC721Transaction(this.#koniState.getEvmApiMap(), this.#koniState.getSubstrateApiMap(), chainInfo, networkKey, contractAddress, senderAddress, recipientAddress, tokenId);
+    console.log(inputData);
+    const transaction = await getERC721Transaction(this.#koniState.getEvmApi(networkKey), contractAddress, senderAddress, recipientAddress, tokenId);
 
     return await this.#koniState.transactionService.handleTransaction({
       address: senderAddress,

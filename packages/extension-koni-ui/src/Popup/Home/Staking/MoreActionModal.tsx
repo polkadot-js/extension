@@ -5,7 +5,7 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, SettingItem, SwModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { Alarm, ArrowCircleDown, IconProps, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -61,6 +61,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
 
+  const onClickItem = useCallback((path: string) => {
+    return () => {
+      navigate(path);
+    };
+  }, [navigate]);
+
   return (
     <SwModal
       className={className}
@@ -75,18 +81,20 @@ const Component: React.FC<Props> = (props: Props) => {
       {ACTION_LIST.map((item) => (
         <SettingItem
           // eslint-disable-next-line react/jsx-no-bind
-          onPressItem={() => navigate(item.value)}
           className='action-more-item'
           key={item.label}
-          leftItemIcon={<BackgroundIcon
-            // @ts-ignore
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            backgroundColor={token[`${item.backgroundIconColor}`]}
-            phosphorIcon={item.icon}
-            size={'sm'}
-            weight='fill'
-          />}
+          leftItemIcon={(
+            <BackgroundIcon
+              // @ts-ignore
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              backgroundColor={token[`${item.backgroundIconColor}`]}
+              phosphorIcon={item.icon}
+              size={'sm'}
+              weight='fill'
+            />
+          )}
           name={item.label}
+          onPressItem={onClickItem(item.value)}
         />
       ))}
     </SwModal>

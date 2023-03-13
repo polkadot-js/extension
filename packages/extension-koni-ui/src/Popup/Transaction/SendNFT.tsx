@@ -105,7 +105,7 @@ const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
         });
       }).catch(console.log);
     },
-    [form, from, nftItem, onDone]
+    [chain, form, from, nftItem, onDone]
   );
 
   useEffect(() => {

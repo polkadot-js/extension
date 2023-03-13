@@ -2,13 +2,29 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, ChainStakingMetadata, DelegationItem, StakingType, TuringStakeCompoundResp, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  BasicTxInfo,
+  ChainStakingMetadata,
+  DelegationItem, NominationInfo,
+  NominatorMetadata,
+  StakingType,
+  TuringStakeCompoundResp,
+  UnlockingStakeInfo, UnstakingInfo, UnstakingStatus,
+  ValidatorInfo
+} from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { BOND_LESS_ACTION, getParaCurrentInflation, InflationConfig, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
+import {
+  BOND_LESS_ACTION,
+  getParaCurrentInflation,
+  InflationConfig, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest,
+  PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity,
+  REVOKE_ACTION,
+  TuringOptimalCompoundFormat
+} from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
@@ -73,6 +89,93 @@ export async function getParaChainStakingMetadata (chain: string, substrateApi: 
     maxWithdrawalRequestPerValidator: 1, // by default
     allowCancelUnstaking: true
   } as ChainStakingMetadata;
+}
+
+export async function getParaChainNominatorMetadata (chain: string, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+  const chainApi = await substrateApi.isReady;
+
+  const nominationList: NominationInfo[] = [];
+    const unstakingMap: Record<string, UnstakingInfo> = {};
+
+    const _delegatorState = await chainApi.api.query.parachainStaking.delegatorState(address);
+
+    const delegatorState = _delegatorState.toPrimitive() as unknown as PalletParachainStakingDelegator;
+
+    if (delegatorState) {
+      let bnTotalActiveStake = BN_ZERO;
+      await Promise.all(delegatorState.delegations.map(async (delegation) => {
+        const [_delegationScheduledRequests, _identity, _roundInfo] = await Promise.all([
+          chainApi.api.query.parachainStaking.delegationScheduledRequests(delegation.owner),
+          chainApi.api.query.identity.identityOf(delegation.owner),
+          chainApi.api.query.parachainStaking.round()
+        ]);
+
+        const identityInfo = _identity.toHuman() as unknown as PalletIdentityRegistration;
+        const roundInfo = _roundInfo.toPrimitive() as Record<string, number>;
+        const delegationScheduledRequests =  _delegationScheduledRequests.toPrimitive() as unknown as PalletParachainStakingDelegationRequestsScheduledRequest[];
+
+        const currentRound = roundInfo.current;
+        const identity = parseIdentity(identityInfo);
+        let hasUnstaking = false;
+
+        // parse unstaking info
+        if (delegationScheduledRequests) {
+          for (const scheduledRequest of delegationScheduledRequests) {
+            if (reformatAddress(scheduledRequest.delegator, 0) === reformatAddress(address, 0)) { // add network prefix
+              const isClaimable = scheduledRequest.whenExecutable - currentRound <= 0;
+              const remainingEra = scheduledRequest.whenExecutable - (currentRound + 1);
+              const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+              const claimable = Object.values(scheduledRequest.action)[0];
+
+              unstakingMap[delegation.owner] = {
+                chain,
+                status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+                validatorAddress: delegation.owner,
+                claimable: claimable.toString(),
+                waitingTime: waitingTime > 0 ? waitingTime : 0
+              } as UnstakingInfo;
+
+              hasUnstaking = true;
+              break; // only handle 1 scheduledRequest per collator
+            }
+          }
+        }
+
+        const bnStake = new BN(delegation.amount);
+        const bnUnstakeBalance = unstakingMap[delegation.owner] ? new BN(unstakingMap[delegation.owner].claimable) : BN_ZERO;
+
+        const bnActiveStake = bnStake.sub(bnUnstakeBalance);
+
+        bnTotalActiveStake = bnTotalActiveStake.add(bnActiveStake);
+
+        nominationList.push({
+          chain,
+          validatorAddress: delegation.owner,
+          validatorIdentity: identity,
+          activeStake: bnActiveStake.toString(),
+          hasUnstaking
+        });
+      }));
+
+      await Promise.all(nominationList.map(async (nomination) => {
+        const _collatorInfo = await chainApi.api.query.parachainStaking.candidateInfo(nomination.validatorAddress);
+        const collatorInfo = _collatorInfo.toPrimitive() as unknown as ParachainStakingCandidateMetadata;
+
+        nomination.validatorMinStake = collatorInfo.lowestTopDelegationAmount.toString();
+      }));
+
+      return {
+        chain,
+        type: StakingType.NOMINATED,
+        nominatorAddress: address,
+        activeStake: bnTotalActiveStake.toString(),
+
+        nominations: nominationList,
+        unstakings: Object.values(unstakingMap)
+      } as NominatorMetadata;
+    }
+
+    return;
 }
 
 export async function getParaCollatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {

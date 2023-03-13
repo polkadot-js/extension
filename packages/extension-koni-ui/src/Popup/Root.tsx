@@ -20,7 +20,7 @@ import styled from 'styled-components';
 changeHeaderLogo(<Logo2D />);
 
 export const RouteState = {
-  prevDiffirentPathNum: -1,
+  prevDifferentPathNum: -1,
   lastPathName: '/'
 };
 
@@ -43,9 +43,9 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   // Update goBack number
   useEffect(() => {
     if (location.pathname === RouteState.lastPathName) {
-      RouteState.prevDiffirentPathNum -= 1;
+      RouteState.prevDifferentPathNum -= 1;
     } else {
-      RouteState.prevDiffirentPathNum = -1;
+      RouteState.prevDifferentPathNum = -1;
     }
 
     RouteState.lastPathName = location.pathname;

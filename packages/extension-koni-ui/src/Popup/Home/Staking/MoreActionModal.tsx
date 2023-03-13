@@ -76,7 +76,6 @@ const Component: React.FC<Props> = (props: Props) => {
       id={MORE_ACTION_MODAL}
       // eslint-disable-next-line react/jsx-no-bind
       onCancel={() => inactiveModal(MORE_ACTION_MODAL)}
-
     >
       {ACTION_LIST.map((item) => (
         <SettingItem

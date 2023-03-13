@@ -3,12 +3,16 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { BackgroundIcon, Icon, SettingItem, Switch } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Camera, CaretRight, GlobeHemisphereEast, Key } from 'phosphor-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -50,6 +54,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  const { goBack } = useDefaultNavigate();
+
+  const { accounts } = useSelector((state: RootState) => state.accountState);
+
+  const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
+
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [loading, setLoading] = useState(false);
 
@@ -63,10 +73,6 @@ const Component: React.FC<Props> = (props: Props) => {
       }, 300);
     };
   }, []);
-
-  const goBack = useCallback(() => {
-    navigate('/settings/list');
-  }, [navigate]);
 
   const onClickItem = useCallback((url: string) => {
     return () => {
@@ -85,7 +91,13 @@ const Component: React.FC<Props> = (props: Props) => {
             {
               items.map((item) => (
                 <SettingItem
-                  className={CN('security-item', `security-type-${item.key}`)}
+                  className={CN(
+                    'security-item',
+                    `security-type-${item.key}`,
+                    {
+                      disabled: noAccount
+                    }
+                  )}
                   key={item.key}
                   leftItemIcon={(
                     <BackgroundIcon
@@ -97,7 +109,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     />
                   )}
                   name={t(item.title)}
-                  onPressItem={onClickItem(item.url)}
+                  onPressItem={noAccount ? undefined : onClickItem(item.url)}
                   rightItem={(
                     <Icon
                       className='security-item-right-icon'
@@ -186,6 +198,14 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '&:hover': {
         '.ant-web3-block-right-item': {
           color: token['gray-6']
+        }
+      },
+
+      '&.disabled': {
+        opacity: 0.4,
+
+        '.ant-setting-item-content': {
+          cursor: 'not-allowed'
         }
       }
     },

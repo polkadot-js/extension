@@ -23,7 +23,6 @@ interface URLState {
 }
 
 const CustomFaviconBox = styled(FaviconBox)`
-    width: 270px;
     box-sizing: border-box;
     margin: 0 auto;
     margin-top: 16px;

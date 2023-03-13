@@ -9,10 +9,10 @@ import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, SelectModal, useExcludeModal } from '@subwallet/react-ui';
+import { Button, Icon, InputRef, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { Book, CaretLeft, Lightning, SortAscending } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useState } from 'react';
+import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -72,7 +72,7 @@ const getFilteredList = (items: NominationPoolDataType[], filters: string[]) => 
   return filteredList;
 };
 
-const Component: React.FC<Props> = (props: Props) => {
+const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', disabled, id = 'pool-selector', label, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
   const items = useGetValidatorList(chain, 'pool') as NominationPoolDataType[];
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -220,7 +220,7 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const PoolSelector = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
     '&.pool-selector-input': {
       '.__selected-item': {
@@ -238,7 +238,8 @@ const PoolSelector = styled(Component)<Props>(({ theme: { token } }: Props) => {
       },
       '.__selected-item-right-part': {
         color: token.colorTextLight4,
-        paddingLeft: token.sizeXXS
+        paddingLeft: token.sizeXXS,
+        marginRight: `-${token.marginSM - 2}px`
       }
     },
 

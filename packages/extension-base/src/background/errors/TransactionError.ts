@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
-import { TransactionErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, TransactionErrorType } from '@subwallet/extension-base/background/KoniTypes';
 
 // Todo: finish this map in the future
 const defaultErrorMap = {
@@ -41,6 +41,10 @@ const defaultErrorMap = {
   SEND_TRANSACTION_FAILED: {
     message: 'Send transaction failed',
     code: undefined
+  },
+  [BasicTxErrorType.UNSUPPORTED]: {
+    message: 'This transaction is not supported',
+    code: undefined
   }
 } as Record<TransactionErrorType, { message: string, code?: number }>;
 
@@ -49,8 +53,9 @@ export class TransactionError extends SWError {
 
   constructor (errorType: TransactionErrorType, errMessage?: string, data?: unknown) {
     const defaultErr = defaultErrorMap[errorType];
+    const message = errMessage || defaultErr?.message || errorType;
 
-    super(errorType, errMessage || defaultErr?.message || errorType, defaultErr?.code, data);
+    super(errorType, message, defaultErr?.code, data);
     this.errorType = errorType;
   }
 }

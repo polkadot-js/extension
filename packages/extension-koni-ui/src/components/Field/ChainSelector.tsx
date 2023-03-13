@@ -4,21 +4,17 @@
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
 import { Icon, InputRef, Logo, NetworkItem, SelectModal } from '@subwallet/react-ui';
 import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
-export type ChainItemType = {
-  name: string,
-  slug: string,
-};
-
 interface Props extends ThemeProps, BasicInputWrapper {
   items: ChainItemType[]
 }
 
-function Component ({ className = '', id = 'address-input', items, label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ className = '', disabled, id = 'address-input', items, label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 
@@ -73,6 +69,7 @@ function Component ({ className = '', id = 'address-input', items, label, onChan
   return (
     <SelectModal
       className={`${className} chain-selector-modal`}
+      disabled={disabled}
       id={id}
       inputClassName={`${className} chain-selector-input`}
       itemKey={'slug'}

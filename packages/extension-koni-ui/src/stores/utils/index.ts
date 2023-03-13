@@ -6,6 +6,7 @@ import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { AccountsWithCurrentAddress, AssetSetting, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
@@ -95,6 +96,14 @@ export const updateConfirmationRequests = (data: ConfirmationsQueue) => {
 
 export const subscribeConfirmationRequests = lazySubscribeMessage('pri(confirmations.subscribe)', null, updateConfirmationRequests, updateConfirmationRequests);
 
+export const updateTransactionRequests = (data: Record<string, SWTransactionResult>) => {
+  // Convert data to object with key as id
+
+  store.dispatch({ type: 'requestState/updateTransactionRequests', payload: data });
+};
+
+export const subscribeTransactionRequests = lazySubscribeMessage('pri(transactions.subscribe)', null, updateTransactionRequests, updateTransactionRequests);
+
 // Settings Store
 export const updateTheme = (theme: ThemeNames) => {
   store.dispatch({ type: 'settings/updateTheme', payload: theme });
@@ -145,12 +154,14 @@ export const updateChainInfoMap = (data: Record<string, _ChainInfo>) => {
 export const subscribeChainInfoMap = lazySubscribeMessage('pri(chainService.subscribeChainInfoMap)', null, updateChainInfoMap, updateChainInfoMap);
 
 export const updateChainStateMap = (data: Record<string, _ChainState>) => {
+  // TODO useTokenGroup
   store.dispatch({ type: 'chainStore/updateChainStateMap', payload: data });
 };
 
 export const subscribeChainStateMap = lazySubscribeMessage('pri(chainService.subscribeChainStateMap)', null, updateChainStateMap, updateChainStateMap);
 
 export const updateAssetRegistry = (data: Record<string, _ChainAsset>) => {
+  // TODO useTokenGroup
   store.dispatch({ type: 'assetRegistry/updateAssetRegistry', payload: data });
 };
 

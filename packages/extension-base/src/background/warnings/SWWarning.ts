@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-export class SWWarning implements SWWarning {
+export class SWWarning {
   warningType: string;
   code: number | undefined;
   message: string;

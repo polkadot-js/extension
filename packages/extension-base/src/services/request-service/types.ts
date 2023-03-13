@@ -4,17 +4,6 @@
 import { AccountAuthType, AccountJson, RequestSign, Resolver, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 
-export interface SigningRequest {
-  account: AccountJson;
-  id: string;
-  request: RequestSign;
-  url: string;
-}
-
-export interface InternalSigningRequest extends SigningRequest {
-  internalData: any;
-}
-
 export interface SignRequest extends Resolver<ResponseSigning> {
   account: AccountJson;
   id: string;

@@ -25,7 +25,7 @@ function defaultFiler (account: AccountJson): boolean {
   return !isAccountAll(account.address);
 }
 
-const Component = ({ className = '', disabled, filter, id = 'account-selector', label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
+const Component = ({ className = '', disabled, filter, id = 'account-selector', label, onChange, placeholder, readOnly, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
   const items = useSelector((state: RootState) => state.accountState.accounts)
     .filter(filter || defaultFiler);
   const { t } = useTranslation();
@@ -73,7 +73,7 @@ const Component = ({ className = '', disabled, filter, id = 'account-selector', 
     <>
       <SelectModal
         className={`${className} account-selector-modal`}
-        disabled={disabled}
+        disabled={disabled || readOnly}
         id={id}
         inputClassName={`${className} account-selector-input`}
         itemKey={'address'}

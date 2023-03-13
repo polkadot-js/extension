@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthRequestV2, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestSign, ResponseSigning } from '@subwallet/extension-base/background/types';
+import { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestSign, ResponseSigning, SigningRequest } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import AuthRequestHandler from '@subwallet/extension-base/services/request-service/handler/AuthRequestHandler';
 import EvmRequestHandler from '@subwallet/extension-base/services/request-service/handler/EvmRequestHandler';
 import MetadataRequestHandler from '@subwallet/extension-base/services/request-service/handler/MetadataRequestHandler';
 import PopupHandler from '@subwallet/extension-base/services/request-service/handler/PopupHandler';
 import SubstrateRequestHandler from '@subwallet/extension-base/services/request-service/handler/SubstrateRequestHandler';
-import { AuthUrls, MetaRequest, SigningRequest } from '@subwallet/extension-base/services/request-service/types';
+import { AuthUrls, MetaRequest } from '@subwallet/extension-base/services/request-service/types';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject, Subject } from 'rxjs';

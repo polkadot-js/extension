@@ -3,8 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
-import { parseNumberToDisplay } from '@subwallet/extension-base/utils';
+import { _getSubstrateParaId, _getXcmAssetMultilocation, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { getReceiverLocation, POLKADOT_UNLIMITED_WEIGHT } from '@subwallet/extension-koni-base/api/xcm/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
@@ -32,16 +31,11 @@ export async function statemintEstimateCrossChainFee (
   substrateApiMap: Record<string, _SubstrateApi>,
   originTokenInfo: _ChainAsset,
   chainInfoMap: Record<string, _ChainInfo>
-): Promise<[string, string | undefined]> {
+): Promise<string> {
   const substrateApi = await substrateApiMap[originNetworkKey].isReady;
   let fee = '0';
-  let feeString = '';
-
-  const originChainInfo = chainInfoMap[originNetworkKey];
   const destinationChainInfo = chainInfoMap[destinationNetworkKey];
-
   const receiverLocation: Record<string, any> = getReceiverLocation(originNetworkKey, destinationNetworkKey, chainInfoMap, recipient);
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(originChainInfo);
 
   try {
     if (_isSubstrateParaChain(destinationChainInfo)) {
@@ -91,7 +85,6 @@ export async function statemintEstimateCrossChainFee (
       const paymentInfo = await extrinsic.paymentInfo(sender);
 
       fee = paymentInfo.partialFee.toString();
-      feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
     } else {
       const extrinsic = substrateApi.api.tx.polkadotXcm.limitedTeleportAssets(
         {
@@ -130,16 +123,13 @@ export async function statemintEstimateCrossChainFee (
       const paymentInfo = await extrinsic.paymentInfo(sender);
 
       fee = paymentInfo.partialFee.toString();
-      feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
     }
 
-    return [fee, feeString];
+    return fee;
   } catch (e) {
     console.error('error parsing xcm transaction', e);
 
-    feeString = `0.0000 ${symbol}`;
-
-    return [fee, feeString];
+    return '0';
   }
 }
 

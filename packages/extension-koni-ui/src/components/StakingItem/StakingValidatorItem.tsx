@@ -2,74 +2,153 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, Web3Block } from '@subwallet/react-ui';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { BackgroundIcon, Button, Icon, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import { DotsThree } from 'phosphor-react';
-import React from 'react';
+import { CheckCircle, DotsThree, Medal } from 'phosphor-react';
+import React, { SyntheticEvent, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-type Props = ValidatorDataType & ThemeProps & {
-  onClickMoreBtn: () => void;
+type Props = ThemeProps & {
+  validatorInfo: ValidatorDataType;
+  onClick: (value: string) => void;
+  onClickMoreBtn: (e: SyntheticEvent) => void;
+  apy: string;
+  isSelected: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { address, className, commission, identity, onClickMoreBtn } = props;
+  const { apy, className, isSelected, onClick, onClickMoreBtn, validatorInfo } = props;
+  const { token } = useTheme() as Theme;
 
   const { t } = useTranslation();
 
-  return (
-    <Web3Block
-      className={className}
-      leftItem={
-        <SwAvatar
-          identPrefix={42}
-          size={40}
-          theme={isEthereumAddress(address) ? 'ethereum' : 'polkadot'}
-          value={address}
-        />
-      }
-      middleItem={
-        <div className={'middle-item'}>
-          <div className={'middle-item__name'}>{identity}</div>
-          <div className={'middle-item__commission'}>
-            {t(`Commission ${commission} %`)}
-          </div>
-        </div>
-      }
+  const _onSelect = useCallback(() => {
+    onClick(`${validatorInfo.address}-${validatorInfo.identity || ''}`);
+  },
+  [onClick, validatorInfo.address, validatorInfo.identity]
+  );
 
-      rightItem={
-        <Button
-          icon={
-            <Icon phosphorIcon={DotsThree} />
-          }
-          onClick={onClickMoreBtn}
-          size='xs'
-          type='ghost'
-        />
-      }
-    />
+  return (
+    <div
+      className={className}
+      onClick={_onSelect}
+    >
+      <Web3Block
+        className={'validator-item-content'}
+        leftItem={
+          <SwAvatar
+            identPrefix={42}
+            isShowSubIcon={validatorInfo.isVerified}
+            size={40}
+            subIcon={<BackgroundIcon
+              backgroundColor={token.colorSuccess}
+              phosphorIcon={CheckCircle}
+              size={'xs'}
+              weight={'fill'}
+            />}
+            theme={isEthereumAddress(validatorInfo.address) ? 'ethereum' : 'polkadot'}
+            value={validatorInfo.address}
+          />
+        }
+        middleItem={
+          <>
+            <div className={'middle-item__name-wrapper'}>
+              <div className={'middle-item__name'}>{validatorInfo.identity}</div>
+              <Icon
+                iconColor={token.colorSuccess}
+                phosphorIcon={Medal}
+                size={'xs'}
+                weight={'fill'}
+              />
+            </div>
+
+            <div className={'middle-item__info'}>
+              <span className={'middle-item__commission'}>
+                {t(`Commission: ${validatorInfo.commission} %`)}
+              </span>
+              -
+              <span className={'middle-item__apy'}>
+                {t(`APY: ${apy}%`)}
+              </span>
+            </div>
+          </>
+        }
+
+        rightItem={
+          <>
+            <Icon
+              className={'right-item__select-icon'}
+              iconColor={isSelected ? token.colorSuccess : token.colorTextLight4}
+              phosphorIcon={CheckCircle}
+              size={'sm'}
+              weight={'fill'}
+            />
+            <Button
+              icon={
+                <Icon phosphorIcon={DotsThree} />
+              }
+              onClick={onClickMoreBtn}
+              size='xs'
+              type='ghost'
+            />
+          </>
+        }
+      />
+    </div>
   );
 };
 
 const StakingValidatorItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    padding: token.paddingSM,
+    // padding: token.paddingSM,
     borderRadius: token.borderRadiusLG,
     background: token.colorBgSecondary,
 
-    '.middle-item__name': {
-      fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG
+    '.validator-item-content': {
+      borderRadius: token.borderRadiusLG
     },
 
-    '.middle-item__commission': {
+    '.ant-web3-block-middle-item': {
+      paddingRight: token.padding
+    },
+
+    '.middle-item__name-wrapper': {
+      display: 'flex',
+      alignItems: 'center'
+    },
+
+    '.middle-item__name': {
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      paddingRight: token.paddingXXS,
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap'
+    },
+
+    '.middle-item__info': {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
       color: token.colorTextLight4
+    },
+
+    '.middle-item__commission': {
+      color: token.colorTextLight4,
+      paddingRight: token.paddingXXS
+    },
+
+    '.middle-item__apy': {
+      color: token.colorSuccess,
+      paddingLeft: token.paddingXXS
+    },
+
+    '.right-item__select-icon': {
+      paddingLeft: token.paddingSM - 2,
+      paddingRight: token.paddingSM - 2
     }
   };
 });

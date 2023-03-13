@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
-import { AccountJson, RequestSign, Resolver, ResponseSigning } from '@subwallet/extension-base/background/types';
+import { AccountJson, RequestSign, Resolver, ResponseSigning, SigningRequest } from '@subwallet/extension-base/background/types';
 import RequestService from '@subwallet/extension-base/services/request-service';
-import { SigningRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
+import { SignRequest } from '@subwallet/extension-base/services/request-service/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
+import { isInternalRequest } from '@subwallet/extension-base/utils/request';
 import keyring from '@subwallet/ui-keyring';
 import { BehaviorSubject } from 'rxjs';
 
@@ -31,7 +32,7 @@ export default class SubstrateRequestHandler {
   public get allSubstrateRequests (): SigningRequest[] {
     return Object
       .values(this.#substrateRequests)
-      .map(({ account, id, request, url }): SigningRequest => ({ account, id, request, url }));
+      .map(({ account, id, request, url }) => ({ account, id, request, url, isInternal: isInternalRequest(url) }));
   }
 
   private updateIconSign (shouldClose?: boolean): void {
@@ -93,7 +94,10 @@ export default class SubstrateRequestHandler {
       };
 
       this.updateIconSign();
-      this.#requestService.popupOpen();
+
+      if (!isInternalRequest(url)) {
+        this.#requestService.popupOpen();
+      }
     });
   }
 }

@@ -216,7 +216,7 @@ interface CreateTransferExtrinsicProps {
   tokenInfo: _ChainAsset,
 }
 
-export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, to, tokenInfo, transferAll, value }: CreateTransferExtrinsicProps): Promise<[SubmittableExtrinsic | null, string?]> => {
+export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, to, tokenInfo, transferAll, value }: CreateTransferExtrinsicProps): Promise<[SubmittableExtrinsic | null, string]> => {
   const api = substrateApi.api;
 
   // @ts-ignore
@@ -273,5 +273,5 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     }
   }
 
-  return [transfer, transferAmount];
+  return [transfer, transferAmount || value];
 };

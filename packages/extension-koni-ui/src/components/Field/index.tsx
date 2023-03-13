@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { InputProps } from '@subwallet/react-ui';
+
 export interface BasicInputEvent<T = string> {
   target: {
     value: T
@@ -15,5 +17,7 @@ export interface BasicInputWrapper<T = string> {
   placeholder?: string
   value?: T,
   disabled?: boolean,
-  onChange?: BasicOnChangeFunction<T>
+  onChange?: BasicOnChangeFunction<T>,
+  onBlur?: InputProps['onBlur'],
+  readOnly?: boolean,
 }

@@ -1,11 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountsContext, AuthorizeRequest, MetadataRequest } from '@subwallet/extension-base/background/types';
+import type {
+  AccountsContext,
+  AuthorizeRequest,
+  MetadataRequest,
+  SigningRequest
+} from '@subwallet/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
-import { SigningRequest } from '@subwallet/extension-base/services/request-service/types';
 import React from 'react';
 
 import settings from '@polkadot/ui-settings';
@@ -25,9 +29,7 @@ const ConfirmationsQueueContext = React.createContext<ConfirmationsQueue>({
   addTokenRequest: {},
   switchNetworkRequest: {},
   evmSignatureRequest: {},
-  evmSignatureRequestExternal: {},
-  evmSendTransactionRequest: {},
-  evmSendTransactionRequestExternal: {}
+  evmSendTransactionRequest: {}
 });
 
 const SettingsContext = React.createContext<SettingsStruct>(settings.get());

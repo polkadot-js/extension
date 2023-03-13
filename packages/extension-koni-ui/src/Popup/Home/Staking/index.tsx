@@ -20,6 +20,7 @@ import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -77,15 +78,16 @@ function getFilteredList (items: StakingDataType[], filters: string[]) {
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { data, priceMap } = useGetStakingList();
   const [{ chain, stakingType }, setSelectedItem] = useState<{ chain: string | undefined, stakingType: StakingType | undefined }>({ chain: undefined, stakingType: undefined });
   const { changeFilters, filteredList, onApplyFilter, onChangeFilterOpt } = useFilterModal(data, FILTER_MODAL_ID, getFilteredList);
   const { hasMore, lazyItems, loadMoreItems } = useLazyList(filteredList);
 
-  const onClickActionBtn = () => {
+  const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
-  };
+  }, [activeModal]);
 
   const closeFilterModal = useCallback(() => {
     inactiveModal(FILTER_MODAL_ID);
@@ -109,7 +111,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     {
       icon: rightIcon,
       onClick: () => {
-        // TODO: Add navigation to Bond screen
+        navigate('/transaction/stake');
       }
     }
   ];
@@ -163,7 +165,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           enableSearchInput={true}
           list={lazyItems}
-          // eslint-disable-next-line react/jsx-no-bind
           onClickActionBtn={onClickActionBtn}
           pagination={{
             hasMore,
@@ -171,7 +172,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           }}
           renderItem={renderItem}
           renderOnScoll={true}
-          // eslint-disable-next-line react/jsx-no-bind
           renderWhenEmpty={emptyStakingList}
           searchFunction={searchFunction}
           searchMinCharactersCount={1}

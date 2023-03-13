@@ -15,29 +15,40 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 import { InfoItemBase } from './types';
 
 export interface TransferInfoItem extends Omit<InfoItemBase, 'label'> {
-  senderAddress: string,
-  senderName?: string,
-  recipientAddress: string,
-  recipientName?: string,
-  originChain?: ChainInfo,
-  destinationChain?: ChainInfo,
+  senderAddress: string;
+  senderName?: string;
+  senderLabel?: string;
+  recipientAddress: string;
+  recipientName?: string;
+  recipientLabel?: string;
+  originChain?: ChainInfo;
+  destinationChain?: ChainInfo;
 }
 
 const Component: React.FC<TransferInfoItem> = (props: TransferInfoItem) => {
-  const { className, destinationChain, originChain, recipientAddress, recipientName, senderAddress, senderName, valueColorSchema = 'default' } = props;
+  const { className,
+    destinationChain,
+    originChain,
+    recipientAddress,
+    recipientLabel,
+    recipientName,
+    senderAddress,
+    senderLabel,
+    senderName,
+    valueColorSchema = 'default' } = props;
 
   const { t } = useTranslation();
 
   const genAccountBlock = (address: string, name?: string) => {
     return (
-      <div className={`__account-item __value -schema-${valueColorSchema}`}>
+      <div className={`__account-item __value -is-wrapper -schema-${valueColorSchema}`}>
         <Avatar
           className={'__account-avatar'}
           size={24}
           theme={address ? isEthereumAddress(address) ? 'ethereum' : 'polkadot' : undefined}
           value={address}
         />
-        <div className={'__account-name'}>
+        <div className={'__account-name ml-xs'}>
           {name || toShort(address)}
         </div>
       </div>
@@ -63,13 +74,13 @@ const Component: React.FC<TransferInfoItem> = (props: TransferInfoItem) => {
   return (
     <div className={CN(className, '__row -type-transfer')}>
       <div className={'__col'}>
-        <div className={'__label'}>{t('Sender')}</div>
+        <div className={'__label'}>{senderLabel || t('Sender')}</div>
 
         {genAccountBlock(senderAddress, senderName)}
         {!!originChain && genChainBlock(originChain)}
       </div>
       <div className={'__col'}>
-        <div className={'__label'}>{t('Recipient')}</div>
+        <div className={'__label'}>{recipientLabel || t('Recipient')}</div>
 
         {genAccountBlock(recipientAddress, recipientName)}
         {!!destinationChain && genChainBlock(destinationChain)}

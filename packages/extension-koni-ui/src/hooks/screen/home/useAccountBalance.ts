@@ -56,16 +56,17 @@ function getDefaultBalanceItem (
 
 function getDefaultTokenGroupBalance (
   tokenGroupKey: string,
+  assetRegistryMap: AssetRegistryStore['assetRegistry'],
   multiChainAsset?: _MultiChainAsset
 ): TokenBalanceItemType {
   let symbol: string;
 
-  // note: tokenGroupKey is either multiChainAsset or a custom key
+  // note: tokenGroupKey is either multiChainAsset or a tokenSlug
   // Thus, multiChainAsset may be undefined
   if (multiChainAsset) {
     symbol = _getMultiChainAssetSymbol(multiChainAsset);
   } else {
-    symbol = tokenGroupKey.split('-')[0];
+    symbol = _getAssetSymbol(assetRegistryMap[tokenGroupKey]);
   }
 
   return getDefaultBalanceItem(tokenGroupKey, symbol, symbol.toLowerCase());
@@ -103,9 +104,9 @@ function getAccountBalance (
 
   Object.keys(tokenGroupMap).forEach((tokenGroupKey) => {
     let isTokenGroupBalanceReady = false;
-    // note: multiChainAsset may be undefined due to tokenGroupKey may be a custom key
+    // note: multiChainAsset may be undefined due to tokenGroupKey may be a tokenSlug
     const multiChainAsset: _MultiChainAsset | undefined = multiChainAssetMap[tokenGroupKey];
-    const tokenGroupBalance = getDefaultTokenGroupBalance(tokenGroupKey, multiChainAsset);
+    const tokenGroupBalance = getDefaultTokenGroupBalance(tokenGroupKey, assetRegistryMap, multiChainAsset);
 
     tokenGroupMap[tokenGroupKey].forEach((tokenSlug) => {
       const chainAsset = assetRegistryMap[tokenSlug];
@@ -201,29 +202,18 @@ function getAccountBalance (
       return;
     }
 
-    const tokenGroupPriceId = multiChainAsset ? _getMultiChainAssetPriceId(multiChainAsset) : '';
+    const tokenGroupPriceId = multiChainAsset ? _getMultiChainAssetPriceId(multiChainAsset) : _getAssetPriceId(assetRegistryMap[tokenGroupKey]);
 
-    if (tokenGroupPriceId) {
-      const priceValue = priceMap[tokenGroupPriceId] || 0;
-      const price24hValue = price24hMap[tokenGroupPriceId] || 0;
+    const priceValue = priceMap[tokenGroupPriceId] || 0;
+    const price24hValue = price24hMap[tokenGroupPriceId] || 0;
 
-      tokenGroupBalance.priceValue = priceValue;
-      tokenGroupBalance.price24hValue = price24hValue;
+    tokenGroupBalance.priceValue = priceValue;
+    tokenGroupBalance.price24hValue = price24hValue;
 
-      if (priceValue > price24hValue) {
-        tokenGroupBalance.priceChangeStatus = 'increase';
-      } else if (priceValue < price24hValue) {
-        tokenGroupBalance.priceChangeStatus = 'decrease';
-      }
-    } else if (tokenGroupMap[tokenGroupKey].length === 1) {
-      // in this case token Group key is a custom key,
-      // we just have to get the price info from its only child
-
-      const tokenBalance = tokenBalanceMap[tokenGroupMap[tokenGroupKey][0]];
-
-      tokenGroupBalance.priceValue = tokenBalance.priceValue;
-      tokenGroupBalance.price24hValue = tokenBalance.price24hValue;
-      tokenGroupBalance.priceChangeStatus = tokenBalance.priceChangeStatus;
+    if (priceValue > price24hValue) {
+      tokenGroupBalance.priceChangeStatus = 'increase';
+    } else if (priceValue < price24hValue) {
+      tokenGroupBalance.priceChangeStatus = 'decrease';
     }
 
     tokenGroupBalanceMap[tokenGroupKey] = tokenGroupBalance;

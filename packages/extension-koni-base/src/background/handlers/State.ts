@@ -6,13 +6,14 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddNetworkRequestExternal, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequestExternal, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
+import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isSubstrateParachain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParachain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
@@ -23,10 +24,11 @@ import { TransactionEventResponse } from '@subwallet/extension-base/services/tra
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
+import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
+import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { decodePair } from '@subwallet/keyring/pair/decode';
-import { KeyringPair$Meta } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import SimpleKeyring from 'eth-simple-keyring';
@@ -72,24 +74,6 @@ const generateDefaultCrowdloanMap = (): Record<string, CrowdloanItem> => {
   });
 
   return crowdloanMap;
-};
-
-const createValidateConfirmationResponsePayload = <CT extends ConfirmationType> (fromAddress: string): (result: ConfirmationDefinitions[CT][1]) => Error | undefined => {
-  return (result: ConfirmationDefinitions[CT][1]) => {
-    if (result.isApproved) {
-      const pair = keyring.getPair(fromAddress);
-
-      if (pair.isLocked) {
-        keyring.unlockPair(pair.address);
-      }
-
-      if (pair.isLocked) {
-        return Error('Cannot unlock pair');
-      }
-    }
-
-    return undefined;
-  };
 };
 
 export default class KoniState {
@@ -154,6 +138,7 @@ export default class KoniState {
 
   readonly transactionService: TransactionService;
   readonly historyService: HistoryService;
+  readonly balanceSevirce: BalanceService;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor (providers: Providers = {}) {
@@ -164,7 +149,8 @@ export default class KoniState {
     this.chainService = new ChainService(this.dbService);
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService);
-    this.transactionService = new TransactionService(this.chainService, this.requestService);
+    this.balanceSevirce = new BalanceService(getFreeBalance);
+    this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceSevirce);
     this.historyService = new HistoryService(this.dbService, this.chainService);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
@@ -759,19 +745,41 @@ export default class KoniState {
       });
   }
 
-  public async addNetworkConfirm (id: string, url: string, networkData: AddNetworkRequestExternal) {
-    networkData.requestId = id;
-
+  public async addNetworkConfirm (id: string, url: string, networkData: _NetworkUpsertParams) {
     return this.requestService.addConfirmation(id, url, 'addNetworkRequest', networkData)
       .then(({ isApproved }) => {
-        return isApproved;
+        if (isApproved) {
+          this.chainService.upsertChain(networkData);
+
+          return null;
+        } else {
+          throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
+        }
       });
   }
 
   public async addTokenConfirm (id: string, url: string, tokenInfo: AddTokenRequestExternal) {
     return this.requestService.addConfirmation(id, url, 'addTokenRequest', tokenInfo)
       .then(({ isApproved }) => {
-        return isApproved;
+        if (isApproved) {
+          this.chainService.upsertCustomToken({
+            originChain: tokenInfo.originChain,
+            slug: '',
+            name: tokenInfo.name,
+            symbol: tokenInfo.symbol,
+            decimals: tokenInfo.decimals,
+            priceId: null,
+            minAmount: null,
+            assetType: tokenInfo.type,
+            metadata: _parseMetadataForSmartContractAsset(tokenInfo.contractAddress),
+            multiChainAsset: null,
+            hasValue: _isChainTestNet(this.chainService.getChainInfoByKey(tokenInfo.originChain))
+          });
+
+          return isApproved;
+        } else {
+          throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
+        }
       });
   }
 
@@ -1508,86 +1516,65 @@ export default class KoniState {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Account ' + address + ' not in allowed list');
     }
 
-    const validateConfirmationResponsePayload = createValidateConfirmationResponsePayload<'evmSignatureRequest'>(address);
+    const pair = keyring.getPair(address);
 
-    let meta: KeyringPair$Meta;
-
-    try {
-      const pair = keyring.getPair(address);
-
-      if (!pair) {
-        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Cannot find pair with address: ' + address);
-      }
-
-      meta = pair.meta;
-    } catch (e) {
+    if (!pair) {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Cannot find pair with address: ' + address);
     }
 
-    if (!meta.isExternal) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const signPayload = { address, type: method, payload };
+    const account: AccountJson = { address: pair.address, ...pair.meta };
 
-      return this.requestService.addConfirmation(id, url, 'evmSignatureRequest', signPayload, {
-        requiredPassword: false,
-        address
-      }, validateConfirmationResponsePayload)
-        .then(async ({ isApproved }) => {
-          if (isApproved) {
-            const pair = keyring.getPair(address);
+    let qrPayload = '';
+    let canSign = false;
 
-            switch (method) {
-              case 'eth_sign':
-              case 'personal_sign':
-              case 'eth_signTypedData':
-              case 'eth_signTypedData_v1':
-              case 'eth_signTypedData_v3':
-              case 'eth_signTypedData_v4':
-                return await pair.evmSigner.signMessage(payload, method);
-              default:
-                throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found sign method');
-            }
-          } else {
-            throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
-          }
-        });
-    } else {
-      let qrPayload = '';
-      let canSign = false;
-
-      switch (method) {
-        case 'personal_sign':
+    switch (method) {
+      case 'personal_sign':
+        canSign = true;
+        qrPayload = payload as string;
+        break;
+      case 'eth_sign':
+      case 'eth_signTypedData':
+      case 'eth_signTypedData_v1':
+      case 'eth_signTypedData_v3':
+      case 'eth_signTypedData_v4':
+        if (!account.isExternal) {
           canSign = true;
-          qrPayload = payload as string;
-          break;
-        default:
-          break;
-      }
+        }
 
-      const signPayload: EvmSignatureRequestExternal = {
-        address,
-        type: method,
-        payload: payload as unknown,
-        hashPayload: qrPayload,
-        canSign: canSign
-      };
-
-      return this.requestService.addConfirmation(id, url, 'evmSignatureRequestExternal', signPayload, {
-        requiredPassword: false,
-        address
-      })
-        .then(({ isApproved, signature }) => {
-          if (isApproved) {
-            return signature;
-          } else {
-            throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
-          }
-        });
+        break;
+      default:
+        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found sign method');
     }
+
+    const signPayload: EvmSignatureRequest = {
+      account: account,
+      type: method,
+      payload: payload as unknown,
+      hashPayload: qrPayload,
+      canSign: canSign,
+      id
+    };
+
+    return this.requestService.addConfirmation(id, url, 'evmSignatureRequest', signPayload, {
+      requiredPassword: false,
+      address
+    })
+      .then(({ isApproved, payload }) => {
+        if (isApproved) {
+          if (payload) {
+            return payload;
+          } else {
+            throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found signature');
+          }
+        } else {
+          throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
+        }
+      });
   }
 
   public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
     const evmApi = this.getEvmApi(networkKey);
+    const evmNetwork = this.getChainInfo(networkKey);
     const web3 = evmApi.api;
 
     const autoFormatNumber = (val?: string | number): string | undefined => {
@@ -1636,15 +1623,13 @@ export default class KoniState {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'From address is not in available for ' + url);
     }
 
-    try {
-      const pair = keyring.getPair(fromAddress);
+    const pair = keyring.getPair(fromAddress);
 
-      if (!pair) {
-        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Cannot find pair with address: ' + fromAddress);
-      }
-    } catch (e) {
+    if (!pair) {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Cannot find pair with address: ' + fromAddress);
     }
+
+    const account: AccountJson = { address: pair.address, ...pair.meta };
 
     // Validate balance
     const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
@@ -1653,7 +1638,27 @@ export default class KoniState {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Balance can be not enough to send transaction');
     }
 
-    const requestPayload = { ...transaction, estimateGas };
+    transaction.nonce = await web3.eth.getTransactionCount(fromAddress);
+
+    const hashPayload = this.transactionService.generateHashPayload(networkKey, transaction);
+    const isToContract = await isContractAddress(transaction.to || '', evmApi);
+    const parseData = isToContract
+      ? transaction.data
+        ? (await parseContractInput(transaction.data, transaction.to || '', evmNetwork)).result
+        : ''
+      : transaction.data || '';
+
+    const requestPayload: EvmSendTransactionRequest = {
+      ...transaction,
+      estimateGas,
+      hashPayload,
+      isToContract,
+      parseData: parseData,
+      account: account,
+      canSign: true
+    };
+
+    // Todo: Convert this to handle transaction
     const transactionEmitter = await this.transactionService.addTransaction({
       transaction: requestPayload,
       address: requestPayload.from as string,
@@ -1674,12 +1679,12 @@ export default class KoniState {
       transactionEmitter.on('error', (rs: TransactionEventResponse) => {
         let evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR);
 
-        const errorType = (rs.error?.errorType || BasicTxErrorType.INTERNAL_ERROR);
+        const errorType = (rs.errors[0]?.errorType || BasicTxErrorType.INTERNAL_ERROR);
 
         if (errorType === BasicTxErrorType.USER_REJECT_REQUEST || errorType === BasicTxErrorType.UNABLE_TO_SIGN) {
           evmProviderError = new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
         } else if (errorType === BasicTxErrorType.UNABLE_TO_SEND) {
-          evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, rs.error?.message);
+          evmProviderError = new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, rs.errors[0]?.message);
         }
 
         reject(evmProviderError);

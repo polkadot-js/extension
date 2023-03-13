@@ -32,6 +32,8 @@ const FooterIcon = (
   />
 );
 
+const modalId = 'attach-read-only-scanner-modal';
+
 interface ReadOnlyAccountInput {
   address?: string
 }
@@ -40,7 +42,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
-  const goHome = useDefaultNavigate().goHome;
+  const { goHome } = useDefaultNavigate();
 
   const [reformatAddress, setReformatAddress] = useState('');
   const [loading, setLoading] = useState(false);
@@ -187,7 +189,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               }
             ]}
           >
-            <AddressInput placeholder={t('Please type or paste account address')} />
+            <AddressInput
+              id={modalId}
+              placeholder={t('Please type or paste account address')}
+              showScanner={true}
+            />
           </Form.Item>
           <Form.Item
             help={validateState.message}

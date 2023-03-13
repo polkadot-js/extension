@@ -15,6 +15,7 @@ type Props = ThemeProps & {
   balanceValue: SwNumberProps['value'];
   symbol: string;
   isShrink: boolean;
+  sendFundSlug?: string;
   onClickBack: () => void;
 };
 
@@ -27,12 +28,13 @@ function Component (
     className = '',
     isShrink,
     onClickBack,
+    sendFundSlug,
     symbol }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const openSendFund = useCallback(() => {
-    navigate('/transaction/send-fund');
+    navigate('/transaction/send-fund', sendFundSlug ? ({ state: { slug: sendFundSlug } }) : undefined);
   },
-  [navigate]
+  [navigate, sendFundSlug]
   );
 
   const openBuyTokens = useCallback(() => {

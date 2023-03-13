@@ -11,9 +11,11 @@ import React, { useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 
-type Props = ThemeProps
+type Props = ThemeProps & {
+  label?: string;
+}
 
-const Component = ({ className }: Props) => {
+const Component = ({ className, label }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
@@ -22,7 +24,7 @@ const Component = ({ className }: Props) => {
 
   return (
     <Typography.Paragraph className={CN(className, 'free-balance')}>
-      {t('Sender available balance:')}
+      {label || t('Sender available balance:')}
       <Number
         decimal={chainInfo?.substrateInfo?.decimals || chainInfo?.evmInfo?.decimals || 18}
         decimalColor={token.colorTextTertiary}

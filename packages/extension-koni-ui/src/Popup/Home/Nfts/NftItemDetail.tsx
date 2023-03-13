@@ -50,14 +50,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const accountExternalUrl = useScanExplorerAddressUrl(nftItem.chain, nftItem.owner);
 
   const onClickSend = useCallback(() => {
-    navigate('/transaction/send-nft', { state: nftItem });
-  }, [navigate, nftItem]);
+    navigate('/transaction/send-nft', { state: { collectionInfo, nftItem } });
+  }, [collectionInfo, navigate, nftItem]);
 
   const subHeaderRightButton: ButtonProps[] = [
     {
       children: t<string>('Send'),
       onClick: () => {
-        navigate('/transaction/send-nft', { state: nftItem });
+        navigate('/transaction/send-nft', { state: { collectionInfo, nftItem } });
       }
     }
   ];
@@ -272,7 +272,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <pre>{nftItem.description}</pre>
               </div>
             </div>
-
           </div>
         </SwModal>
       </Layout.Base>

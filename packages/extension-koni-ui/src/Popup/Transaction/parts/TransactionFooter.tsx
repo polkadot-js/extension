@@ -8,14 +8,20 @@ import styled from 'styled-components';
 interface Props extends ThemeProps {
   children: React.ReactNode
   errors: string[]
+  warnings: string[]
 }
 
-const Component = ({ children, errors }: Props) => {
+const Component = ({ children, className = '', errors, warnings }: Props) => {
   return (
-    <div className='transaction-footer'>
+    <div className={`transaction-footer ${className}`}>
       {errors.length > 0 && <div className='error-messages'>
-        {errors.map((e) => (
-          <div key={e}>{e}</div>
+        {errors.map((e, index) => (
+          <div key={index}>{e}</div>
+        ))}
+      </div>}
+      {warnings.length > 0 && <div className='warning-messages'>
+        {warnings.map((w, index) => (
+          <div key={index}>{w}</div>
         ))}
       </div>}
       {children}

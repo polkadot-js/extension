@@ -3,7 +3,7 @@
 
 import type { InjectedAccount } from '@subwallet/extension-inject/types';
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
@@ -14,6 +14,7 @@ import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestEx
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
+import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
@@ -346,10 +347,10 @@ export default class KoniTabs {
       }
     };
 
-    const tokenType = input?.type?.toLowerCase() || '';
+    const _tokenType = input?.type?.toLowerCase() || '';
 
-    if (tokenType !== 'erc20' && tokenType !== 'erc721') {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, `Assets type ${tokenType} is not supported`);
+    if (_tokenType !== 'erc20' && _tokenType !== 'erc721') {
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, `Assets type ${_tokenType} is not supported`);
     }
 
     if (!input?.options?.address || !input?.options?.symbol) {
@@ -363,20 +364,30 @@ export default class KoniTabs {
       throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current chain is not available');
     }
 
-    try {
-      const tokenInfo: AddTokenRequestExternal = {
-        type: tokenType,
-        name: input.options?.symbol,
-        contractAddress: input.options?.address,
-        symbol: input.options?.symbol,
-        decimals: input.options?.decimals,
-        originChain: chain
-      };
+    const tokenType = _tokenType === 'erc20' ? _AssetType.ERC20 : _AssetType.ERC721;
 
-      return await this.#koniState.addTokenConfirm(id, url, tokenInfo);
-    } catch (e) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid assets params');
+    const validate = await this.#koniState.validateCustomAsset({
+      type: tokenType,
+      contractAddress: input.options.address,
+      originChain: chain
+    });
+
+    if (validate.isExist) {
+      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current token is existed');
+    } else if (validate.contractError) {
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Contract address is invalid');
     }
+
+    const tokenInfo: AddTokenRequestExternal = {
+      type: tokenType,
+      name: validate.name,
+      contractAddress: input.options.address,
+      symbol: validate.symbol,
+      decimals: validate.decimals,
+      originChain: chain
+    };
+
+    return await this.#koniState.addTokenConfirm(id, url, tokenInfo);
   }
 
   private async addEvmChain (id: string, url: string, { params }: RequestArguments) {
@@ -394,16 +405,52 @@ export default class KoniTabs {
         }
 
         if (rpcUrls && chainName) {
-          const ok = await this.#koniState.addNetworkConfirm(id, url, {
-            chainName,
-            chainId: chainIdNum.toString(),
-            rpcUrls,
-            blockExplorerUrls
+          const filteredUrls = rpcUrls.filter((targetString) => {
+            let url;
+
+            try {
+              url = new URL(targetString);
+            } catch (_) {
+              return false;
+            }
+
+            return url.protocol === 'http:' || url.protocol === 'https:';
           });
 
-          if (!ok) {
-            throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
+          if (!filteredUrls.length) {
+            throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Currently HTTP provider for EVM network');
           }
+
+          const provider = filteredUrls[0];
+
+          const chainInfo = await this.#koniState.validateCustomChain(provider);
+
+          if (!chainInfo.success) {
+            throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid provider');
+          }
+
+          const newProviderKey = _generateCustomProviderKey(0);
+
+          return await this.#koniState.addNetworkConfirm(id, url, {
+            mode: 'insert',
+            chainSpec: {
+              evmChainId: chainInfo.evmChainId,
+              decimals: chainInfo.decimals,
+              existentialDeposit: chainInfo.existentialDeposit,
+              genesisHash: chainInfo.genesisHash,
+              paraId: chainInfo.paraId,
+              addressPrefix: chainInfo.addressPrefix ? parseInt(chainInfo.addressPrefix) : 0
+            },
+            chainEditInfo: {
+              blockExplorer: blockExplorerUrls?.[0],
+              slug: '',
+              currentProvider: newProviderKey,
+              providers: { [newProviderKey]: provider },
+              symbol: chainInfo.symbol,
+              chainType: 'EVM',
+              name: chainInfo.name
+            }
+          });
         }
       }
     }

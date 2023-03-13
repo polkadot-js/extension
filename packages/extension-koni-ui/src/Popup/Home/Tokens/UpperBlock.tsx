@@ -30,7 +30,6 @@ function Component (
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const navigate = useNavigate();
   const openSendFund = useCallback(() => {
-    console.log('Running....');
     navigate('/transaction/send-fund');
   },
   [navigate]

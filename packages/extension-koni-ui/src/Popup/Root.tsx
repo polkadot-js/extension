@@ -54,15 +54,15 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   useEffect(() => {
     const pathName = location.pathname;
 
-    if (pathName === DEFAULT_ROUTER_PATH) {
+    if (needMigrate) {
+      navigate('/keyring/migrate-password');
+    } else if (pathName === DEFAULT_ROUTER_PATH) {
       if (isNoAccount(accounts)) {
         navigate('/welcome');
       } else if (!hasMasterPassword) {
         navigate('/keyring/create-password');
       } else if (isLocked) {
         navigate('/keyring/login');
-      } else if (needMigrate) {
-        navigate('/keyring/migrate-password');
       } else if (hasConfirmations) {
         openPModal('confirmations');
       } else {

@@ -3,7 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
-import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/QrScanner/ErrorNotice';
+import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -37,21 +37,21 @@ interface Props extends ThemeProps {
   logoUrl: string;
 }
 
-const MODAL_ID = 'connect-qr-signer';
+const modalId = 'attach-qr-signer-scanner-modal';
 
 const Component: React.FC<Props> = (props: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { className, description, instructionUrl, logoUrl, subTitle, title } = props;
   const { t } = useTranslation();
-  const goHome = useDefaultNavigate().goHome;
+  const { goHome } = useDefaultNavigate();
 
   const accountName = useGetDefaultAccountName();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [loading, setLoading] = useState(false);
   const [account, setAccount] = useState<QrAccount | null>(null);
-  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const handleResult = useCallback((val: string): QrAccount | null => {
     const result = qrSignerScan(val);
@@ -88,7 +88,7 @@ const Component: React.FC<Props> = (props: Props) => {
               status: 'error'
             });
           } else {
-            inactiveModal(MODAL_ID);
+            inactiveModal(modalId);
             setValidateState({});
             goHome();
           }
@@ -108,12 +108,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [account, accountName, goHome, inactiveModal]);
 
   const openCamera = useCallback(() => {
-    activeModal(MODAL_ID);
+    activeModal(modalId);
   }, [activeModal]);
-
-  const closeCamera = useCallback(() => {
-    inactiveModal(MODAL_ID);
-  }, [inactiveModal]);
 
   const onSuccess = useCallback((result: ScannerResult) => {
     if (!loading) {
@@ -196,9 +192,8 @@ const Component: React.FC<Props> = (props: Props) => {
         />
         <SwQrScanner
           className={className}
-          id={MODAL_ID}
+          id={modalId}
           isError={!!validateState.status}
-          onClose={closeCamera}
           onError={onError}
           onSuccess={onSuccess}
           overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}

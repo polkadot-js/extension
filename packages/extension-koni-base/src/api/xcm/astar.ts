@@ -3,8 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo, _getSubstrateParaId, _getXcmAssetMultilocation, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
-import { parseNumberToDisplay } from '@subwallet/extension-base/utils';
+import { _getSubstrateParaId, _getXcmAssetMultilocation, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 
 import { ApiPromise } from '@polkadot/api';
@@ -38,10 +37,8 @@ export async function astarEstimateCrossChainFee (
   substrateApiMap: Record<string, _SubstrateApi>,
   originTokenInfo: _ChainAsset,
   chainInfoMap: Record<string, _ChainInfo>
-): Promise<[string, string | undefined]> {
+): Promise<string> {
   const substrateApi = await substrateApiMap[originNetworkKey].isReady;
-
-  const originChainInfo = chainInfoMap[originNetworkKey];
   const destinationChainInfo = chainInfoMap[destinationNetworkKey];
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -98,12 +95,7 @@ export async function astarEstimateCrossChainFee (
 
   const paymentInfo = await extrinsic.paymentInfo(sender);
 
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(originChainInfo);
-
-  const fee = paymentInfo.partialFee.toString();
-  const feeString = parseNumberToDisplay(paymentInfo.partialFee, decimals) + ` ${symbol}`;
-
-  return [fee, feeString];
+  return paymentInfo.partialFee.toString();
 }
 
 export function astarGetXcmExtrinsic (

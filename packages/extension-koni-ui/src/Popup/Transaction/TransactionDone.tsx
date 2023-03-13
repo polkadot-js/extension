@@ -86,7 +86,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
         </div>
       </TransactionContent>
-      <TransactionFooter errors={[]}>
+      <TransactionFooter errors={[]} warnings={[]}>
         <Button
           block={true}
           className={'full-width'}

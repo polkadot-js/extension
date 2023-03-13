@@ -9,7 +9,7 @@ import { approveAuthRequestV2, cancelAuthRequestV2, rejectAuthRequestV2 } from '
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { Button, Icon, Typography } from '@subwallet/react-ui';
+import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ShieldSlash, UserPlus } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -140,34 +140,46 @@ function Component ({ className, request }: Props) {
     <>
       <div className={CN('confirmation-content', className)}>
         <ConfirmationGeneralInfo request={request} />
-        {visibleAccounts.length === 0 && <div className={'account-list text-center'}>
-          <Typography.Title level={4}>
-            {t('Don\'t have any suitable accounts')}
-          </Typography.Title>
-          <Typography.Paragraph className='text-tertiary'>
-            {t('Don\'t have any suitable accounts to connect, please create a new account')}
-          </Typography.Paragraph>
-        </div>}
-        {visibleAccounts.length > 0 && <div className={'account-list'}>
-          <Typography.Paragraph>
-            {t('Choose the account(s) you’d like to connect')}
-          </Typography.Paragraph>
-          {visibleAccounts.map((item) => (
-            <AccountItemWithName
-              accountName={item.name}
-              address={item.address}
-              avatarSize={24}
-              genesisHash={item.genesisHash}
-              isSelected={selectedMap[item.address]}
-              key={item.address}
-              onClick={onAccountSelect(item.address)}
-              showUnselectIcon
-            />
-          ))}
-          <Typography.Paragraph className='text-tertiary text-center'>
-            {t('Make sure you trust this site before connecting')}
-          </Typography.Paragraph>
-        </div>}
+        <div
+          className={CN(
+            'title',
+            {
+              'sub-title': visibleAccounts.length > 0
+            }
+          )}
+        >
+          {
+            visibleAccounts.length === 0
+              ? t("'Don't have any suitable accounts'")
+              : t('Choose the account(s) you’d like to connect')
+          }
+        </div>
+        {
+          !!visibleAccounts.length && (
+            <div className='account-list'>
+              {visibleAccounts.map((item) => (
+                <AccountItemWithName
+                  accountName={item.name}
+                  address={item.address}
+                  avatarSize={24}
+                  genesisHash={item.genesisHash}
+                  isSelected={selectedMap[item.address]}
+                  key={item.address}
+                  onClick={onAccountSelect(item.address)}
+                  showUnselectIcon
+                />
+
+              ))}
+            </div>
+          )
+        }
+        <div className='description'>
+          {
+            visibleAccounts.length === 0
+              ? t("'Don't have any suitable accounts to connect, please create a new account'")
+              : t('Make sure you trust this site before connecting')
+          }
+        </div>
       </div>
       <div className='confirmation-footer'>
         {visibleAccounts.length > 0 && <>
@@ -205,10 +217,18 @@ function Component ({ className, request }: Props) {
 }
 
 const AuthorizeConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => ({
+  '--content-gap': token.size,
+
+  '.title.sub-title': {
+    fontSize: token.fontSizeHeading6,
+    lineHeight: token.lineHeightHeading6,
+    textAlign: 'start'
+  },
+
   '.account-list': {
-    '.account-item-with-name': {
-      marginBottom: token.marginXS
-    }
+    display: 'flex',
+    flexDirection: 'column',
+    gap: token.sizeXS
   }
 }));
 

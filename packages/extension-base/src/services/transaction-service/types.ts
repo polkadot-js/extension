@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ChainType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, ChainType, ExtrinsicStatus, ExtrinsicType, ValidateTransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import EventEmitter from 'eventemitter3';
+import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
-export interface SWTransaction {
+export interface SWTransaction extends ValidateTransactionResponse {
   id: string;
   url?: string;
   isInternal: boolean,
@@ -20,26 +20,35 @@ export interface SWTransaction {
   extrinsicType: ExtrinsicType;
   createdAt: Date;
   updatedAt: Date;
-  errors?: string[];
-  transaction: SubmittableExtrinsic | Omit<EvmSendTransactionRequest, 'hashPayload'>;
+  ignoreWarnings?: boolean;
+  estimateFee?: AmountData,
+  transaction: SubmittableExtrinsic | TransactionConfig;
+  additionalValidator?: (inputTransaction: SWTransactionResponse) => Promise<void>;
+  eventsHandler?: (eventEmitter: TransactionEmitter) => void;
 }
 
-export type SWTransactionResult = Omit<SWTransaction, 'transaction' | 'data'>
+export type SWTransactionResult = Omit<SWTransaction, 'transaction'>
 
-export type SWTransactionInput = Pick<SWTransaction, 'address' | 'url' | 'transaction' | 'data' | 'extrinsicType' | 'chain' | 'chainType'>
+type SwInputBase = Pick<SWTransaction, 'address' | 'url' | 'data' | 'extrinsicType' | 'chain' | 'chainType' | 'ignoreWarnings' | 'transferNativeAmount'>
+& Partial<Pick<SWTransaction, 'additionalValidator'>>;
+export interface SWTransactionInput extends SwInputBase {
+  transaction?: SWTransaction['transaction'] | null;
+  warnings?: SWTransaction['warnings'];
+  errors?: SWTransaction['errors'];
+}
 
-export type SendTransactionEvents = 'extrinsicHash' | 'error' | 'success';
+export type SWTransactionResponse = SwInputBase & Pick<SWTransaction, 'warnings' | 'errors'> & Partial<Pick<SWTransaction, 'id' | 'extrinsicHash' | 'status' | 'estimateFee'>>;
 
-export type TransactionEmitter = EventEmitter<SendTransactionEvents, TransactionEventResponse>;
+export type ValidateTransactionResponseInput = SWTransactionInput;
 
-export interface TransactionEventResponse {
+export type TransactionEmitter = EventEmitter<TransactionEventMap>;
+
+export interface TransactionEventResponse extends ValidateTransactionResponse {
   id: string,
-  extrinsicHash?: string,
-  error?: TransactionError
+  extrinsicHash?: string
 }
-
-export interface PrepareInternalRequest {
-  id: string;
-  addTransaction: (transaction: SWTransaction) => void;
-  convertToRequest: () => void;
+export interface TransactionEventMap {
+  extrinsicHash: (response: TransactionEventResponse) => void;
+  error: (response: TransactionEventResponse) => void;
+  success: (response: TransactionEventResponse) => void;
 }

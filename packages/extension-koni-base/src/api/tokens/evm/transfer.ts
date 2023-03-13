@@ -6,8 +6,6 @@ import { ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, Tr
 import { _BALANCE_PARSING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
@@ -53,7 +51,7 @@ export async function getEVMTransactionObject (
   value: string,
   transferAll: boolean,
   evmApiMap: Record<string, _EvmApi>
-): Promise<[TransactionConfig, string, string]> {
+): Promise<[TransactionConfig, string]> {
   const networkKey = chainInfo.slug;
   const web3Api = evmApiMap[networkKey];
   const gasPrice = await web3Api.api.eth.getGasPrice();
@@ -69,7 +67,7 @@ export async function getEVMTransactionObject (
 
   transactionObject.value = transferAll ? new BN(value).add(new BN(estimateFee).neg()) : value;
 
-  return [transactionObject, transactionObject.value.toString(), estimateFee.toString()];
+  return [transactionObject, transactionObject.value.toString()];
 }
 
 export async function getERC20TransactionObject (
@@ -80,7 +78,7 @@ export async function getERC20TransactionObject (
   value: string,
   transferAll: boolean,
   evmApiMap: Record<string, _EvmApi>
-): Promise<[TransactionConfig, string, string]> {
+): Promise<[TransactionConfig, string]> {
   const networkKey = chainInfo.slug;
   const evmApi = evmApiMap[networkKey];
   const erc20Contract = getERC20Contract(networkKey, assetAddress, evmApiMap);
@@ -110,72 +108,30 @@ export async function getERC20TransactionObject (
     data: transferData
   } as TransactionConfig;
 
-  const gasLimit = await evmApi.api.eth.estimateGas(transactionObject);
-
-  transactionObject.gas = gasLimit;
-
-  const estimateFee = parseInt(gasPrice) * gasLimit;
-
   if (transferAll) {
     transferValue = new BN(freeAmount).toString();
     transactionObject.data = generateTransferData(to, transferValue);
   }
 
-  return [transactionObject, transferValue, estimateFee.toString()];
+  return [transactionObject, transferValue];
 }
 
 export async function getERC721Transaction (
-  evmApiMap: Record<string, _EvmApi>,
-  substrateApiMap: Record<string, _SubstrateApi>,
-  chainInfo: _ChainInfo,
-  networkKey: string,
+  web3Api: _EvmApi,
   contractAddress: string,
   senderAddress: string,
   recipientAddress: string,
-  tokenId: string) {
-  const web3 = evmApiMap[networkKey];
+  tokenId: string): Promise<TransactionConfig> {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const contract = new web3.api.eth.Contract(_ERC721_ABI, contractAddress);
+  const contract = new web3Api.api.eth.Contract(_ERC721_ABI, contractAddress);
+  const gasPrice = await web3Api.api.eth.getGasPrice();
 
-  const [fromAccountTxCount, gasPriceGwei, freeBalance] = await Promise.all([
-    web3.api.eth.getTransactionCount(senderAddress),
-    web3.api.eth.getGasPrice(),
-    getFreeBalance(networkKey, senderAddress, substrateApiMap, evmApiMap)
-  ]);
-
-  const binaryFreeBalance = new BN(freeBalance);
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-  const gasLimit = await contract.methods.safeTransferFrom(
-    senderAddress,
-    recipientAddress,
-    tokenId
-  ).estimateGas({
-    from: senderAddress
-  });
-
-  const rawTransaction = {
-    nonce: '0x' + fromAccountTxCount.toString(16),
+  return {
     from: senderAddress,
-    gasPrice: web3.api.utils.toHex(gasPriceGwei),
-    gasLimit: web3.api.utils.toHex(gasLimit as number),
+    gasPrice,
     to: contractAddress,
     value: '0x00',
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
-  };
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-  const rawFee = gasLimit * parseFloat(gasPriceGwei);
-  const estimatedFee = rawFee / (10 ** decimals);
-  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-  const feeString = estimatedFee.toString() + ' ' + symbol;
-
-  const binaryFee = new BN(rawFee.toString());
-  const balanceError = binaryFee.gt(binaryFreeBalance);
-
-  return {
-    tx: rawTransaction,
-    estimatedFee: feeString,
-    balanceError
   };
 }

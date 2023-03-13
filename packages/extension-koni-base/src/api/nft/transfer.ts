@@ -1,236 +1,63 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { SubstrateNftTransaction } from '@subwallet/extension-base/background/KoniTypes';
-import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { parseNumberToDisplay, reformatAddress } from '@subwallet/extension-base/utils';
-import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { reformatAddress } from '@subwallet/extension-base/utils';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-koni-base/api/nft/config';
 
-import { BN } from '@polkadot/util';
+import { ApiPromise } from '@polkadot/api';
 
-export async function acalaTransferHandler (networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, senderAddress: string, recipientAddress: string, params: Record<string, any>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
+export async function acalaTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>): Promise<string> {
+  const itemId = params.itemId as number;
+  const collectionId = params.collectionId as number;
+  const info = await api.tx.nft.transfer(recipientAddress, [collectionId, itemId]).paymentInfo(senderAddress);
 
-  try {
-    const apiProp = substrateApiMap[networkKey];
-    const itemId = params.itemId as number;
-    const collectionId = params.collectionId as number;
-    const [info, balance] = await Promise.all([
-      apiProp.api.tx.nft.transfer(recipientAddress, [collectionId, itemId]).paymentInfo(senderAddress),
-      getFreeBalance(networkKey, senderAddress, substrateApiMap, evmApiMap)
-    ]);
-
-    const binaryBalance = new BN(balance);
-    const balanceError = info.partialFee.gt(binaryBalance);
-
-    const feeString = parseNumberToDisplay(info.partialFee, decimals) + ` ${symbol}`;
-
-    return {
-      error: false,
-      estimatedFee: feeString,
-      balanceError
-    } as SubstrateNftTransaction;
-  } catch (e) {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
-      return {
-        error: false,
-        estimatedFee: `0.0000 ${symbol}`,
-        balanceError: false
-      } as SubstrateNftTransaction;
-    }
-
-    console.error('error handling acala transfer nft', e);
-
-    return {
-      error: true,
-      balanceError: false
-    };
-  }
+  return info.partialFee.toNumber().toString();
 }
 
-export async function rmrkTransferHandler (networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, senderAddress: string, recipientAddress: string, params: Record<string, any>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
+export async function rmrkTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>): Promise<[string, TransactionError[]]> {
+  const remark = params.remark as string;
 
-  try {
-    const apiProp = substrateApiMap[networkKey];
-    const remark = params.remark as string;
-
-    if (!remark) {
-      return { error: true, balanceError: false };
-    }
-
-    const parsedRemark = remark.concat(recipientAddress.replace(
-      /\\s/g,
-      ''
-    ));
-
-    const [info, balance] = await Promise.all([
-      await apiProp.api.tx.system.remark(parsedRemark).paymentInfo(senderAddress),
-      getFreeBalance(networkKey, senderAddress, substrateApiMap, evmApiMap)
-    ]);
-
-    const binaryBalance = new BN(balance);
-    const balanceError = info.partialFee.gt(binaryBalance);
-
-    const feeString = parseNumberToDisplay(info.partialFee, decimals) + ` ${symbol}`;
-
-    return {
-      error: false,
-      estimatedFee: feeString,
-      balanceError
-    } as SubstrateNftTransaction;
-  } catch (e) {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
-      return {
-        error: false,
-        estimatedFee: `0.0000 ${symbol}`,
-        balanceError: false
-      } as SubstrateNftTransaction;
-    }
-
-    console.error('error handling rmrk transfer nft', e);
-
-    return {
-      error: true,
-      balanceError: false
-    };
+  if (!remark) {
+    return ['0', [new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Remark is required')]];
   }
+
+  const parsedRemark = remark.concat(recipientAddress.replace(
+    /\\s/g,
+    ''
+  ));
+
+  const info = await api.tx.system.remark(parsedRemark).paymentInfo(senderAddress);
+
+  return [info.partialFee.toNumber().toString(), []];
 }
 
-export async function uniqueTransferHandler (networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, senderAddress: string, recipientAddress: string, params: Record<string, any>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
+export async function uniqueTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+  const itemId = params.itemId as number;
+  const collectionId = params.collectionId as number;
+  const info = await api.tx.nft.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1).paymentInfo(senderAddress);
 
-  try {
-    const apiProp = substrateApiMap[networkKey];
-    const itemId = params.itemId as number;
-    const collectionId = params.collectionId as number;
-
-    const [info, balance] = await Promise.all([
-      apiProp.api.tx.nft.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1).paymentInfo(senderAddress), // 1 is amount
-      getFreeBalance(networkKey, senderAddress, substrateApiMap, evmApiMap)
-    ]);
-
-    const binaryBalance = new BN(balance);
-    const balanceError = info.partialFee.gt(binaryBalance);
-
-    const feeString = parseNumberToDisplay(info.partialFee, decimals) + ` ${symbol}`;
-
-    return {
-      error: false,
-      estimatedFee: feeString,
-      balanceError
-    } as SubstrateNftTransaction;
-  } catch (e) {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
-      return {
-        error: false,
-        estimatedFee: `0.0000 ${symbol}`,
-        balanceError: false
-      } as SubstrateNftTransaction;
-    }
-
-    console.error('error handling unique transfer nft', e);
-
-    return {
-      error: true,
-      balanceError: false
-    };
-  }
+  return info.partialFee.toNumber().toString();
 }
 
-export async function quartzTransferHandler (networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, senderAddress: string, recipientAddress: string, params: Record<string, any>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
+export async function quartzTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+  const itemId = params.itemId as number;
+  const collectionId = params.collectionId as number;
 
-  try {
-    const apiProp = substrateApiMap[networkKey];
-    const itemId = params.itemId as number;
-    const collectionId = params.collectionId as number;
+  const info = await api.tx.unique.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1).paymentInfo(senderAddress);
 
-    const [info, balance] = await Promise.all([
-      apiProp.api.tx.unique.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1).paymentInfo(senderAddress),
-      getFreeBalance(networkKey, senderAddress, substrateApiMap, evmApiMap)
-    ]);
-
-    const binaryBalance = new BN(balance);
-    const balanceError = info.partialFee.gt(binaryBalance);
-
-    const feeString = parseNumberToDisplay(info.partialFee, decimals) + ` ${symbol}`;
-
-    return {
-      error: false,
-      estimatedFee: feeString,
-      balanceError
-    } as SubstrateNftTransaction;
-  } catch (e) {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
-      return {
-        error: false,
-        estimatedFee: `0.0000 ${symbol}`,
-        balanceError: false
-      } as SubstrateNftTransaction;
-    }
-
-    console.error('error handling quartz transfer nft', e);
-
-    return {
-      error: true,
-      balanceError: false
-    };
-  }
+  return info.partialFee.toNumber().toString();
 }
 
-export async function statemineTransferHandler (networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, senderAddress: string, recipientAddress: string, params: Record<string, any>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
+export async function statemineTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+  const itemId = params.itemId as number;
+  const collectionId = params.collectionId as number;
 
-  try {
-    const apiProp = substrateApiMap[networkKey];
-    const itemId = params.itemId as number;
-    const collectionId = params.collectionId as number;
+  const info = await api.tx.uniques.transfer(collectionId, itemId, recipientAddress).paymentInfo(senderAddress);
 
-    const [info, balance] = await Promise.all([
-      apiProp.api.tx.uniques.transfer(collectionId, itemId, recipientAddress).paymentInfo(senderAddress),
-      getFreeBalance(networkKey, senderAddress, substrateApiMap, evmApiMap)
-    ]);
-
-    const binaryBalance = new BN(balance);
-    const balanceError = info.partialFee.gt(binaryBalance);
-
-    const feeString = parseNumberToDisplay(info.partialFee, decimals) + ` ${symbol}`;
-
-    return {
-      error: false,
-      estimatedFee: feeString,
-      balanceError
-    } as SubstrateNftTransaction;
-  } catch (e) {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
-      return {
-        error: false,
-        estimatedFee: `0.0000 ${symbol}`,
-        balanceError: false
-      } as SubstrateNftTransaction;
-    }
-
-    console.error('error handling statemine transfer nft', e);
-
-    return {
-      error: true,
-      balanceError: false
-    };
-  }
+  return info.partialFee.toNumber().toString();
 }
 
 export function isRecipientSelf (currentAddress: string, recipientAddress: string) {

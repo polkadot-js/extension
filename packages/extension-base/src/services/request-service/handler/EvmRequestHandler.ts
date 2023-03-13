@@ -6,8 +6,8 @@ import { EvmProviderError } from '@subwallet/extension-base/background/errors/Ev
 import { ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, EvmProviderErrorType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
 import { Resolver } from '@subwallet/extension-base/background/types';
 import RequestService from '@subwallet/extension-base/services/request-service';
-import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
+import { isInternalRequest } from '@subwallet/extension-base/utils/request';
 import keyring from '@subwallet/ui-keyring';
 import BN from 'bn.js';
 import { Transaction } from 'ethereumjs-tx';
@@ -26,9 +26,7 @@ export default class EvmRequestHandler {
     addTokenRequest: {},
     switchNetworkRequest: {},
     evmSignatureRequest: {},
-    evmSignatureRequestExternal: {},
-    evmSendTransactionRequest: {},
-    evmSendTransactionRequestExternal: {}
+    evmSendTransactionRequest: {}
   });
 
   private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};
@@ -63,7 +61,7 @@ export default class EvmRequestHandler {
     const confirmations = this.confirmationsQueueSubject.getValue();
     const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
     const payloadJson = JSON.stringify(payload);
-    const isInternal = url === EXTENSION_REQUEST_URL;
+    const isInternal = isInternalRequest(url);
 
     // Check duplicate request
     const duplicated = Object.values(confirmationType).find((c) => (c.url === url) && (c.payloadJson === payloadJson));
@@ -111,7 +109,8 @@ export default class EvmRequestHandler {
   }
 
   private async signMessage (confirmation: ConfirmationDefinitions['evmSignatureRequest'][0]): Promise<string> {
-    const { address, payload, type } = confirmation.payload;
+    const { account, payload, type } = confirmation.payload;
+    const address = account.address;
     const pair = keyring.getPair(address);
 
     if (pair.isLocked) {

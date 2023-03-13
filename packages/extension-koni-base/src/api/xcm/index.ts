@@ -24,11 +24,11 @@ export async function estimateCrossChainFee (
   chainInfoMap: Record<string, _ChainInfo>,
   substrateApiMap: Record<string, _SubstrateApi>,
   assetRefMap: Record<string, _AssetRef>
-): Promise<[string, string | undefined]> {
+): Promise<string> {
   if (!_isXcmPathSupported(originTokenInfo.slug, destinationTokenInfo.slug, assetRefMap)) {
     console.log('Unsupported xcm');
 
-    return ['0', ''];
+    return '0';
   }
 
   const originNetworkKey = originTokenInfo.originChain;

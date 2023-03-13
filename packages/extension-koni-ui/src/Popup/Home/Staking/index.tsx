@@ -85,9 +85,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { changeFilters, filteredList, onApplyFilter, onChangeFilterOpt } = useFilterModal(data, FILTER_MODAL_ID, getFilteredList);
   const { hasMore, lazyItems, loadMoreItems } = useLazyList(filteredList);
 
-  const onClickActionBtn = () => {
+  const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
-  };
+  }, [activeModal]);
 
   const closeFilterModal = useCallback(() => {
     inactiveModal(FILTER_MODAL_ID);
@@ -165,7 +165,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           enableSearchInput={true}
           list={lazyItems}
-          // eslint-disable-next-line react/jsx-no-bind
           onClickActionBtn={onClickActionBtn}
           pagination={{
             hasMore,
@@ -173,7 +172,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           }}
           renderItem={renderItem}
           renderOnScoll={true}
-          // eslint-disable-next-line react/jsx-no-bind
           renderWhenEmpty={emptyStakingList}
           searchFunction={searchFunction}
           searchMinCharactersCount={1}

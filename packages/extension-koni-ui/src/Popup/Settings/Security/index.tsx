@@ -144,7 +144,7 @@ const Component: React.FC<Props> = (props: Props) => {
 const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.body-container': {
-      padding: `${token.paddingLG}px ${token.padding}px`
+      padding: `${token.padding}px ${token.padding}px`
     },
 
     '.items-container': {

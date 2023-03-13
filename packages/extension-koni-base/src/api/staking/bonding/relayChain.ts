@@ -8,7 +8,16 @@ import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-base/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
+import {
+  calculateAlephZeroValidatorReturn,
+  calculateChainStakedReturn,
+  calculateInflation,
+  calculateValidatorStakedReturn,
+  getCommission,
+  PalletIdentityRegistration, parseIdentity,
+  Unlocking,
+  ValidatorExtraInfo
+} from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
 
@@ -71,10 +80,480 @@ export async function getRelayChainStakingMetadata (chain: string, substrateApi:
   } as ChainStakingMetadata;
 }
 
-export async function getRelayChainNominatorMetadata (chain: string, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata> {
-  const chainApi = await substrateApi.isReady;
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
+// SPDX-License-Identifier: Apache-2.0
 
-}
+import {ApiPromise, WsProvider} from "@polkadot/api";
+import {BN, BN_ZERO} from "@polkadot/util";
+import {parseRawNumber, reformatAddress} from "@subwallet/extension-base/utils";
+import {
+  BlockHeader,
+  calculateChainStakedReturn,
+  calculateInflation,
+  getParaCurrentInflation,
+  InflationConfig, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo,
+  PalletIdentityRegistration,
+  PalletParachainStakingDelegationRequestsScheduledRequest,
+  PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, ParachainStakingStakeOption,
+  parseIdentity
+} from "../api/staking/bonding/utils";
+import {PalletStakingNominations, PalletStakingStakingLedger} from "../api/staking/bonding/relayChain";
+import {NominationInfo, UnstakingInfo, UnstakingStatus} from "@subwallet/extension-base/background/KoniTypes";
+import {_STAKING_ERA_LENGTH_MAP} from "@subwallet/extension-base/services/chain-service/constants";
+import fetch from 'cross-fetch';
+
+jest.setTimeout(5000000);
+
+// describe('test staking api v2', () => {
+//   test('test get chainStakingMetadata for relaychain', async () => {
+//     const provider = new WsProvider('wss://polkadot.api.onfinality.io/public-ws');
+//     const apiPromise = new ApiPromise({ provider });
+//     const api = await apiPromise.isReady;
+//     const chain = 'polkadot';
+//
+//     const _era = await api.query.staking.currentEra();
+//     const currentEra = _era.toString();
+//     const maxNominations = api.consts.staking.maxNominations.toString();
+//     const maxUnlockingChunks = api.consts.staking.maxUnlockingChunks.toString();
+//
+//     const [_totalEraStake, _totalIssuance, _auctionCounter, _minimumActiveStake] = await Promise.all([
+//       api.query.staking.erasTotalStake(parseInt(currentEra)),
+//       api.query.balances.totalIssuance(),
+//       api.query.auctions?.auctionCounter(),
+//       api.query.staking.minimumActiveStake()
+//     ]);
+//
+//     const minStake = _minimumActiveStake.toString();
+//
+//     const rawTotalEraStake = _totalEraStake.toString();
+//     const rawTotalIssuance = _totalIssuance.toString();
+//
+//     const numAuctions = _auctionCounter ? _auctionCounter.toHuman() as number : 0;
+//
+//     const bnTotalEraStake = new BN(rawTotalEraStake);
+//     const bnTotalIssuance = new BN(rawTotalIssuance);
+//
+//     const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chain);
+//     const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chain);
+//
+//     console.log('expectedReturn', expectedReturn - inflation);
+//     console.log('minStake', minStake);
+//     console.log('maxValidatorPerNominator', parseInt(maxNominations));
+//     console.log('maxWithdrawalRequestPerValidator', parseInt(maxUnlockingChunks));
+//   });
+//
+//   test('test get chainStakingMetadata for parachain', async () => {
+//     const provider = new WsProvider('wss://moonbeam.unitedbloc.com:3001');
+//     const apiPromise = new ApiPromise({ provider });
+//     const api = await apiPromise.isReady;
+//     const networkKey = 'moonbeam';
+//
+//     const _round = (await api.query.parachainStaking.round()).toHuman() as Record<string, string>;
+//     const round = parseRawNumber(_round.current);
+//     const maxDelegation = api.consts.parachainStaking.maxDelegationsPerDelegator.toString();
+//
+//     let _unvestedAllocation;
+//
+//     if (api.query.vesting && api.query.vesting.totalUnvestedAllocation) {
+//       _unvestedAllocation = await api.query.vesting.totalUnvestedAllocation();
+//     }
+//
+//     const [_totalStake, _totalIssuance, _inflation] = await Promise.all([
+//       api.query.parachainStaking.staked(round),
+//       api.query.balances.totalIssuance(),
+//       api.query.parachainStaking.inflationConfig()
+//     ]);
+//
+//     let unvestedAllocation;
+//
+//     if (_unvestedAllocation) {
+//       const rawUnvestedAllocation = _unvestedAllocation.toString();
+//
+//       unvestedAllocation = new BN(rawUnvestedAllocation);
+//     }
+//
+//     const totalStake = _totalStake ? new BN(_totalStake.toString()) : BN_ZERO;
+//     const totalIssuance = new BN(_totalIssuance.toString());
+//
+//     if (unvestedAllocation) {
+//       totalIssuance.add(unvestedAllocation); // for Turing network, read more at https://hackmd.io/@sbAqOuXkRvyiZPOB3Ryn6Q/Sypr3ZJh5
+//     }
+//
+//     const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
+//     const currentInflation = getParaCurrentInflation(parseRawNumber(totalStake.toString()), inflationConfig);
+//     const rewardDistribution = 0.5;
+//     const rewardPool = currentInflation * rewardDistribution;
+//
+//     const stakedReturn = calculateChainStakedReturn(rewardPool, totalStake, totalIssuance, networkKey);
+//
+//     console.log('currentInflation', currentInflation);
+//     console.log('expectedReturn', stakedReturn);
+//     console.log('minStake', 0); // chain has no requirement for minStake, but collators do
+//     console.log('maxValidatorPerNominator', parseInt(maxDelegation));
+//     console.log('maxWithdrawalRequestPerValidator', 1); // maximum of 1 withdrawal
+//   });
+//
+//   test('test get chainStakingMetadata for amplitude/kilt/pendulum', async () => {
+//     const provider = new WsProvider('wss://rpc-pendulum.prd.pendulumchain.tech');
+//     const apiPromise = new ApiPromise({ provider });
+//     const api = await apiPromise.isReady;
+//
+//     const _round = (await api.query.parachainStaking.round()).toHuman() as Record<string, string>;
+//     const round = parseRawNumber(_round.current);
+//     const maxDelegations = api.consts.parachainStaking.maxDelegationsPerRound.toString();
+//     const minDelegatorStake = api.consts.parachainStaking.minDelegatorStake.toString();
+//
+//     console.log('round', round);
+//     console.log('minStake', minDelegatorStake); // chain has no requirement for minStake, but collators do
+//     console.log('maxValidatorPerNominator', parseInt(maxDelegations));
+//     console.log('maxWithdrawalRequestPerValidator', 1); // maximum of 1 withdrawal
+//   });
+//
+//   test('test get chainStakingMetadata for astar', async () => {
+//     const provider = new WsProvider('wss://1rpc.io/astr');
+//     const apiPromise = new ApiPromise({ provider });
+//     const api = await apiPromise.isReady;
+//
+//     const era = (await api.query.dappsStaking.currentEra()).toString();
+//     const minDelegatorStake = api.consts.dappsStaking.minimumStakingAmount.toString();
+//
+//     console.log('round', era);
+//     console.log('minStake', minDelegatorStake); // chain has no requirement for minStake, but collators do
+//     console.log('maxValidatorPerNominator', 100);
+//     console.log('maxWithdrawalRequestPerValidator', 1); // maximum of 1 withdrawal
+//   });
+//
+//   test('test get nominatorMetadata for relaychain', async () => {
+//     const provider = new WsProvider('wss://rpc.dotters.network/kusama');
+//     const apiPromise = new ApiPromise({ provider });
+//     const api = await apiPromise.isReady;
+//     const address = 'Cr4WJJmiyg6V61MBp55kpinQLYeDtpbV6Pw5etKgcHCN9eB';
+//     // kusama Cr4WJJmiyg6V61MBp55kpinQLYeDtpbV6Pw5etKgcHCN9eB
+//     // westend 5FLkwNNyZAuyzCAKMc7cjDa5i8AxEDEeL4kGoYzaWHtvfKeS
+//     // westend
+//     const chain = 'kusama';
+//
+//     const [_ledger, _nominations, _currentEra] = await Promise.all([
+//       api.query.staking.ledger(address),
+//       api.query.staking.nominators(address),
+//       api.query.staking.currentEra()
+//     ]);
+//
+//     const ledger = _ledger.toJSON() as unknown as PalletStakingStakingLedger;
+//     const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
+//     const currentEra = _currentEra.toString();
+//
+//     if (ledger) {
+//       const activeStake = ledger.active.toString();
+//       const nominationList: NominationInfo[] = [];
+//       const unstakingList: UnstakingInfo[] = [];
+//
+//       if (nominations) {
+//         const validatorList = nominations.targets;
+//
+//         await Promise.all(validatorList.map(async (validatorAddress) => {
+//           const identityInfo = (await api.query.identity.identityOf(validatorAddress)).toHuman() as unknown as PalletIdentityRegistration;
+//           const identity = parseIdentity(identityInfo);
+//
+//           nominationList.push({
+//             chain,
+//             validatorAddress,
+//             validatorIdentity: identity,
+//             activeStake: '0' // relaychain allocates stake accordingly
+//           } as NominationInfo)
+//         }));
+//       }
+//
+//       ledger.unlocking.forEach((unlockingChunk) => {
+//         const isClaimable = unlockingChunk.era - parseInt(currentEra) <= 0;
+//         const remainingEra = unlockingChunk.era - (parseInt(currentEra) + 1);
+//         const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+//
+//         unstakingList.push({
+//           chain,
+//           status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+//           claimable: unlockingChunk.value.toString(),
+//           waitingTime: waitingTime > 0 ? waitingTime : 0
+//         } as UnstakingInfo);
+//       });
+//
+//       console.log('nominations', nominationList);
+//       console.log('activeStake', activeStake);
+//       console.log('unstakingList', unstakingList);
+//     }
+//   });
+//
+//   test('test get nominatorMetadata for parachain', async () => {
+//     const provider = new WsProvider('wss://bifrost-parachain.api.onfinality.io/public-ws');
+//     const apiPromise = new ApiPromise({ provider });
+//     const api = await apiPromise.isReady;
+//     const address = 'fMTxDorgQeKopohrjxcrruWeRRvnrKyeaNGF2Zzv37qFsTu';
+//     const chain = 'moonbeam';
+//
+//     const nominationList: NominationInfo[] = [];
+//     const unstakingMap: Record<string, UnstakingInfo> = {};
+//
+//     const _delegatorState = await api.query.parachainStaking.delegatorState(address);
+//
+//     const delegatorState = _delegatorState.toPrimitive() as unknown as PalletParachainStakingDelegator;
+//
+//     if (delegatorState) {
+//       await Promise.all(delegatorState.delegations.map(async (delegation) => {
+//         const [_delegationScheduledRequests, _identity, _roundInfo] = await Promise.all([
+//           api.query.parachainStaking.delegationScheduledRequests(delegation.owner),
+//           api.query.identity.identityOf(delegation.owner),
+//           api.query.parachainStaking.round()
+//         ]);
+//
+//         const identityInfo = _identity.toHuman() as unknown as PalletIdentityRegistration;
+//         const roundInfo = _roundInfo.toPrimitive() as Record<string, number>;
+//         const delegationScheduledRequests =  _delegationScheduledRequests.toPrimitive() as unknown as PalletParachainStakingDelegationRequestsScheduledRequest[];
+//
+//         const currentRound = roundInfo.current;
+//         const identity = parseIdentity(identityInfo);
+//         let hasUnstaking = false;
+//
+//         // parse unstaking info
+//         if (delegationScheduledRequests) {
+//           for (const scheduledRequest of delegationScheduledRequests) {
+//             if (reformatAddress(scheduledRequest.delegator, 0) === reformatAddress(address, 0)) { // add network prefix
+//               const isClaimable = scheduledRequest.whenExecutable - currentRound <= 0;
+//               const remainingEra = scheduledRequest.whenExecutable - (currentRound + 1);
+//               const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+//               const claimable = Object.values(scheduledRequest.action)[0];
+//
+//               unstakingMap[delegation.owner] = {
+//                 chain,
+//                 status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+//                 validatorAddress: delegation.owner,
+//                 claimable: claimable.toString(),
+//                 waitingTime: waitingTime > 0 ? waitingTime : 0
+//               } as UnstakingInfo;
+//
+//               hasUnstaking = true;
+//               break; // only handle 1 scheduledRequest per collator
+//             }
+//           }
+//         }
+//
+//         const bnTotalStake = new BN(delegation.amount);
+//         const bnUnstakeBalance = unstakingMap[delegation.owner] ? new BN(unstakingMap[delegation.owner].claimable) : BN_ZERO;
+//
+//         const bnActiveStake = bnTotalStake.sub(bnUnstakeBalance);
+//
+//         nominationList.push({
+//           chain,
+//           validatorAddress: delegation.owner,
+//           validatorIdentity: identity,
+//           activeStake: bnActiveStake.toString(),
+//           hasUnstaking
+//         });
+//       }));
+//
+//       await Promise.all(nominationList.map(async (nomination) => {
+//         const _collatorInfo = await api.query.parachainStaking.candidateInfo(nomination.validatorAddress);
+//         const collatorInfo = _collatorInfo.toPrimitive() as unknown as ParachainStakingCandidateMetadata;
+//
+//         nomination.validatorMinStake = collatorInfo.lowestTopDelegationAmount.toString();
+//       }));
+//     }
+//
+//     console.log('nominations', nominationList);
+//     console.log('unstakingList', unstakingMap);
+//   });
+//
+//   test('test get nominatorMetadata for amplitude', async () => {
+//     const provider = new WsProvider('wss://amplitude-rpc.dwellir.com');
+//     const apiPromise = new ApiPromise({ provider });
+//     const api = await apiPromise.isReady;
+//     const address = '6jTLqUgENXNH2vbBoKveevApACnHCpVNEkYj7BkBnwXACjna';
+//     const chain = 'amplitude';
+//
+//     const nominationList: NominationInfo[] = [];
+//     const unstakingList: UnstakingInfo[] = [];
+//
+//     const [_delegatorState, _unstakingInfo] = await Promise.all([
+//       api.query.parachainStaking.delegatorState(address),
+//       api.query.parachainStaking.unstaking(address)
+//     ]);
+//
+//     const delegatorState = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
+//     const unstakingInfo = _unstakingInfo.toPrimitive() as unknown as Record<string, number>;
+//
+//     if (delegatorState) {
+//       const identityInfo = (await api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration;
+//       const identity = parseIdentity(identityInfo);
+//
+//       nominationList.push({
+//         chain,
+//         validatorAddress: delegatorState.owner,
+//         activeStake: delegatorState.amount.toString(),
+//         validatorMinStake: '0',
+//         hasUnstaking: !!unstakingInfo,
+//         validatorIdentity: identity,
+//       });
+//     }
+//
+//
+//     if (unstakingInfo && Object.values(unstakingInfo).length > 0) {
+//       const _currentBlockInfo = await api.rpc.chain.getHeader();
+//
+//       const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;
+//       const currentBlockNumber = currentBlockInfo.number;
+//
+//       const _blockPerRound = api.consts.parachainStaking.defaultBlocksPerRound.toString();
+//       const blockPerRound = parseFloat(_blockPerRound);
+//
+//       const nearestUnstakingBlock = Object.keys(unstakingInfo)[0];
+//       const nearestUnstakingAmount = Object.values(unstakingInfo)[0];
+//
+//       const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
+//
+//       const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber <= 0;
+//       const remainingBlock = parseInt(nearestUnstakingBlock) - (currentBlockNumber + 1);
+//       const waitingTime = remainingBlock * blockDuration;
+//
+//       unstakingList.push({
+//         chain,
+//         status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+//         claimable: nearestUnstakingAmount.toString(),
+//         waitingTime: waitingTime > 0 ? waitingTime : 0,
+//         validatorAddress: delegatorState.owner
+//       });
+//     }
+//
+//     console.log('nominations', nominationList);
+//     console.log('unstakingList', unstakingList);
+//   });
+//
+//   test('test get nominatorMetadata for astar', async () => {
+//     const provider = new WsProvider('wss://shibuya-rpc.dwellir.com');
+//     const apiPromise = new ApiPromise({ provider });
+//     const api = await apiPromise.isReady;
+//     const address = 'bUCi9zVJioiKE8VHmSTa2Kabs585PSwGcqvjvn955GW7w6t';
+//     const chain = 'shibuya';
+//
+//     const nominationList: NominationInfo[] = [];
+//     const unstakingList: UnstakingInfo[] = [];
+//
+//     const allDappsReq = new Promise(function (resolve) {
+//       fetch(`https://api.astar.network/api/v1/${chain}/dapps-staking/dapps`, {
+//         method: 'GET'
+//       }).then((resp) => {
+//         resolve(resp.json());
+//       }).catch(console.error);
+//     });
+//
+//     const [_ledger, _era, _stakerInfo] = await Promise.all([
+//       api.query.dappsStaking.ledger(address),
+//       api.query.dappsStaking.currentEra(),
+//       api.query.dappsStaking.generalStakerInfo.entries(address)
+//     ]);
+//
+//     const ledger = _ledger.toPrimitive() as unknown as PalletDappsStakingAccountLedger;
+//     const currentEra = _era.toString();
+//
+//     if (_stakerInfo.length > 0) {
+//       let dAppInfoMap: Record<string, PalletDappsStakingDappInfo> = {};
+//       const allDapps = await allDappsReq as PalletDappsStakingDappInfo[];
+//
+//       allDapps.forEach((dappInfo) => {
+//         dAppInfoMap[dappInfo.address.toLowerCase()] = dappInfo;
+//       })
+//
+//       for (const item of _stakerInfo) {
+//         const data = item[0].toHuman() as unknown as any[];
+//         const stakedDapp = data[1] as Record<string, string>;
+//         const stakeData = item[1].toPrimitive() as Record<string, Record<string, string>[]>;
+//         const stakeList = stakeData.stakes;
+//
+//         const dappAddress = stakedDapp.Evm.toLowerCase();
+//         let totalStake = stakeList.slice(-1)[0].staked.toString() || '0';
+//
+//         if (parseFloat(totalStake) > 0) {
+//           const dappInfo = dAppInfoMap[dappAddress];
+//
+//           nominationList.push({
+//             chain,
+//             validatorAddress: dappAddress,
+//             activeStake: totalStake,
+//             validatorMinStake: '0',
+//             validatorIdentity: dappInfo?.name,
+//             hasUnstaking: false // cannot get unstaking info by dapp
+//           });
+//         }
+//       }
+//     }
+//
+//     const unlockingChunks = ledger.unbondingInfo.unlockingChunks;
+//
+//     if (unlockingChunks.length > 0) {
+//       const nearestUnstaking = unlockingChunks[0]; // only handle 1 unstaking request at a time, might need to change
+//
+//       const isClaimable = nearestUnstaking.unlockEra - parseInt(currentEra) <= 0;
+//       const remainingEra = nearestUnstaking.unlockEra - (parseInt(currentEra) + 1);
+//       const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+//
+//       unstakingList.push({
+//         chain,
+//         status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+//         claimable: nearestUnstaking.amount.toString(),
+//         waitingTime: waitingTime > 0 ? waitingTime : 0
+//       });
+//     }
+//
+//     console.log('nominations', nominationList);
+//     console.log('unstakingList', unstakingList);
+//   });
+// });
+
+// export async function getRelayChainNominatorMetadata (chain: string, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata> {
+//   const chainApi = await substrateApi.isReady;
+//
+//   const [_ledger, _nominations, _currentEra] = await Promise.all([
+//     api.query.staking.ledger(address),
+//     api.query.staking.nominators(address),
+//     api.query.staking.currentEra()
+//   ]);
+//
+//   const ledger = _ledger.toJSON() as unknown as PalletStakingStakingLedger;
+//   const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
+//   const currentEra = _currentEra.toString();
+//
+//   if (ledger) {
+//     const activeStake = ledger.active.toString();
+//     const nominationList: NominationInfo[] = [];
+//     const unstakingList: UnstakingInfo[] = [];
+//
+//     if (nominations) {
+//       const validatorList = nominations.targets;
+//
+//       await Promise.all(validatorList.map(async (validatorAddress) => {
+//         const identityInfo = (await api.query.identity.identityOf(validatorAddress)).toHuman() as unknown as PalletIdentityRegistration;
+//         const identity = parseIdentity(identityInfo);
+//
+//         nominationList.push({
+//           chain,
+//           validatorAddress,
+//           validatorIdentity: identity,
+//           activeStake: '0' // relaychain allocates stake accordingly
+//         } as NominationInfo)
+//       }));
+//     }
+//
+//     ledger.unlocking.forEach((unlockingChunk) => {
+//       const isClaimable = unlockingChunk.era - parseInt(currentEra) <= 0;
+//       const remainingEra = unlockingChunk.era - (parseInt(currentEra) + 1);
+//       const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+//
+//       unstakingList.push({
+//         chain,
+//         status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+//         claimable: unlockingChunk.value.toString(),
+//         waitingTime: waitingTime > 0 ? waitingTime : 0
+//       } as UnstakingInfo);
+//     });
+// }
 
 export async function getRelayValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {
   const chainApi = await substrateApi.isReady;

@@ -51,17 +51,17 @@ export async function getChainStakingMetadata (chain: string, substrateApi: _Sub
   return getRelayChainStakingMetadata(chain, substrateApi);
 }
 
-export async function getNominatorMetadata (chain: string, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata> {
-  if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
-    return getAstarStakingMetadata(chain, substrateApi);
-  } else if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
-    return getParaChainStakingMetadata(chain, substrateApi);
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
-    return getAmplitudeStakingMetadata(chain, substrateApi);
-  }
-
-  return getRelayChainNominatorMetadata(chain, address, substrateApi);
-}
+// export async function getNominatorMetadata (chain: string, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata> {
+//   if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+//     return getAstarStakingMetadata(chain, substrateApi);
+//   } else if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+//     return getParaChainStakingMetadata(chain, substrateApi);
+//   } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
+//     return getAmplitudeStakingMetadata(chain, substrateApi);
+//   }
+//
+//   return getRelayChainNominatorMetadata(chain, address, substrateApi);
+// }
 
 export async function getValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string, extraCollatorAddress?: string) {
   if (_STAKING_CHAIN_GROUP.para.includes(networkKey)) {

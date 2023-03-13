@@ -76,7 +76,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           icon={(
             <Icon
               className={'icon-submit'}
-              iconColor='var(--icon-color)'
               phosphorIcon={CheckCircle}
               weight='fill'
             />
@@ -96,10 +95,6 @@ const CreateAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
       display: 'flex',
       flexDirection: 'column',
       gap: token.sizeXS
-    },
-
-    '.icon-submit': {
-      '--icon-color': token.colorTextBase
     }
   };
 });

@@ -283,6 +283,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             validateStatus={fileValidateState.status}
           >
             <Upload.SingleFileDragger
+              className='file-selector'
               accept={'application/json'}
               disabled={validating}
               hint={t('Please drag an drop the .json file you exported from Polkadot.js')}
@@ -395,6 +396,12 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-sw-modal-body': {
       padding: `0 0 ${token.padding}px`
+    },
+
+    '.file-selector': {
+      '.ant-upload-drag-single': {
+        padding: `${token.paddingXL - 2}px ${token.padding - 2}px`
+      }
     }
   };
 });

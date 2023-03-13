@@ -162,7 +162,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       textAlign: 'center',
 
       '.logo-container': {
-        paddingTop: token.paddingXL * 3.25,
+        marginTop: token.paddingXL * 3.25 + 2,
         color: token.colorTextBase
       },
 
@@ -182,7 +182,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       },
 
       '.password-input': {
-        marginTop: token.marginLG * 3
+        marginTop: token.marginXS * 11
       },
 
       '.forgot-password': {

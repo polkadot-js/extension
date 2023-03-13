@@ -65,6 +65,7 @@ function Component ({ className = '', disabled, id = 'token-select', items, labe
   const renderItem = useCallback((item: TokenItemType, selected: boolean) => {
     return (
       <TokenItem
+        className={'token-item'}
         isShowSubLogo={true}
         name={item.symbol}
         networkMainLogoShape={'circle'}
@@ -109,6 +110,11 @@ export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { to
   return ({
     '&.chain-selector-input .__selected-item': {
       color: token.colorText
+    },
+
+    // TODO: delete this when fix component in ui-base
+    '.token-item .ant-network-item-sub-name': {
+      display: 'none'
     }
   });
 });

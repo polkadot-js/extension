@@ -12,7 +12,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, InputRef, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { Book, CaretLeft, Lightning, SortAscending } from 'phosphor-react';
-import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useState } from 'react';
+import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -77,7 +77,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const items = useGetValidatorList(chain, 'pool') as NominationPoolDataType[];
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [sortSelection, setSortSelection] = useState<string>('');
-  const { changeFilters, filteredList, onApplyFilter, onChangeFilterOpt } = useFilterModal(items, FILTER_MODAL_ID, getFilteredList);
+  const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(items, FILTER_MODAL_ID);
+  const filteredList = useMemo(() => {
+    return getFilteredList(items, selectedFilters);
+  }, [items, selectedFilters]);
 
   useExcludeModal(id);
 

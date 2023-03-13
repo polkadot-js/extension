@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import { TokenSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenSelectionItem';
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useGetTokensBySettings from '@subwallet/extension-koni-ui/hooks/screen/home/useGetTokensBySettings';
@@ -21,6 +22,8 @@ interface Props extends ThemeProps {
   address?: string,
   onChangeSelectedNetwork?: (value: string) => void;
 }
+
+const renderEmpty = () => <EmptyAccount />;
 
 function Component ({ address, className = '', id, onChangeSelectedNetwork }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -73,7 +76,9 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
         enableSearchInput={true}
         list={items}
         renderItem={renderItem}
+        renderWhenEmpty={renderEmpty}
         searchFunction={searchFunction}
+        searchMinCharactersCount={2}
         searchPlaceholder={t('Search chain')}
       />
     </SwModal>
@@ -83,7 +88,7 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
 export const TokensSelector = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '& .ant-sw-modal-body': {
-      padding: 0,
+      padding: `${token.padding}px 0 0`,
       marginBottom: 0,
       display: 'flex'
     },

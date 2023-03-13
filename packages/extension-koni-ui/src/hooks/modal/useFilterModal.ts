@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
-import { useCallback, useContext, useMemo, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 
-export function useFilterModal<T> (items: T[], modalId: string, getFilteredList: (items: T[], filters: string[]) => T[]) {
+export function useFilterModal<T> (items: T[], modalId: string) {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [changeFilters, setChangeFilters] = useState<string[]>(selectedFilters);
   const { inactiveModal } = useContext(ModalContext);
@@ -29,14 +29,10 @@ export function useFilterModal<T> (items: T[], modalId: string, getFilteredList:
     setSelectedFilters(changeFilters);
   }, [changeFilters, inactiveModal, modalId]);
 
-  const filteredList = useMemo(() => {
-    return getFilteredList(items, selectedFilters);
-  }, [getFilteredList, items, selectedFilters]);
-
   return {
     onChangeFilterOpt,
     onApplyFilter,
-    filteredList,
-    changeFilters
+    changeFilters,
+    selectedFilters
   };
 }

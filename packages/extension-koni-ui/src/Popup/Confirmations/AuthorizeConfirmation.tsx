@@ -9,10 +9,10 @@ import { approveAuthRequestV2, cancelAuthRequestV2, rejectAuthRequestV2 } from '
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ShieldSlash, UserPlus } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -50,6 +50,7 @@ export const filterAuthorizeAccounts = (accounts: AccountJson[], accountAuthType
 
 function Component ({ className, request }: Props) {
   const { t } = useTranslation();
+  const { inactiveModal } = useContext(ModalContext);
   const [loading, setLoading] = useState(false);
   const { accountAuthType, allowedAccounts } = request.request;
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
@@ -88,11 +89,13 @@ function Component ({ className, request }: Props) {
   }, [request]);
 
   const onCancel = useCallback(() => {
+    console.log(12123123123);
+    inactiveModal('confirmation');
     setLoading(true);
     handleCancel(request).finally(() => {
       setLoading(false);
     });
-  }, [request]);
+  }, [inactiveModal, request]);
 
   const onConfirm = useCallback(() => {
     setLoading(true);

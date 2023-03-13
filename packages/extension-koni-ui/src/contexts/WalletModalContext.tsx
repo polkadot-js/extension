@@ -4,9 +4,12 @@
 import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, NewAccountModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components/Modal';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { Debugger } from '@subwallet/extension-koni-ui/Popup/Debugger';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Button, Icon, ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { Bug } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -62,6 +65,7 @@ export const WalletModalContext = ({ children }: Props) => {
   const { activeList, activeModal, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const { openPModal } = usePredefinedModal();
+  const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
 
   const hasActiveModal = useMemo(() => !!activeList.length, [activeList.length]);
 
@@ -118,6 +122,7 @@ export const WalletModalContext = ({ children }: Props) => {
       id={'confirmations'}
       onCancel={onCloseModal}
       transitionName={'fade'}
+      wrapClassName={CN({ 'd-none': !hasConfirmations })}
     >
       <Confirmations />
     </SwModal>

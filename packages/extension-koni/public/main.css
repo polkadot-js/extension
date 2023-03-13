@@ -548,3 +548,7 @@ div#popup-container {
 .ant-sw-modal-root .ant-sw-modal-mask, .ant-sw-modal-root .ant-sw-modal-wrap, .ant-sw-qr-scanner-root .ant-sw-qr-scanner-wrap {
   position: absolute;
 }
+
+.d-none {
+  display: none;
+}

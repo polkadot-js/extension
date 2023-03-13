@@ -94,6 +94,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { currentAccount } = useSelector((root: RootState) => root.accountState);
   const dataContext = useContext(DataContext);
   const [selectedItem, setSelectedItem] = useState<TransactionHistoryDisplayItem | null>(null);
+  const accounts = useSelector((root: RootState) => root.accountState.accounts);
+
+  const accountMap = useMemo(() => {
+    return accounts.reduce((accMap, cur) => {
+      accMap[cur.address.toLowerCase()] = cur.name || '';
+
+      return accMap;
+    }, {} as Record<string, string>);
+  }, [accounts]);
 
   const typeNameMap: Record<string, string> = useMemo(() => ({
     default: t('Transaction'),
@@ -127,7 +136,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   // Fill display data to history list
   const historyList = useMemo(() => {
     const processedList = rawHistoryList.map((item: TransactionHistoryItem) => {
-      return { ...item, displayData: getDisplayData(item, typeNameMap, typeTitleMap) };
+      const fromName = accountMap[item.from.toLowerCase()] || '';
+      const toName = accountMap[item.to.toLowerCase()] || '';
+
+      return { ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) };
     }).sort((a, b) => b.time > a.time ? 1 : -1);
 
     // Filter current account records

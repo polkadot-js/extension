@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AmountData, ChainType, ExtrinsicStatus, ExtrinsicType, ValidateTransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, ChainType, ExtrinsicDataTypeMap, ExtrinsicStatus, ExtrinsicType, ValidateTransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
 import EventEmitter from 'eventemitter3';
 import { TransactionConfig } from 'web3-core';
 
@@ -14,7 +14,7 @@ export interface SWTransaction extends ValidateTransactionResponse {
   chain: string;
   chainType: ChainType;
   address: string;
-  data: any;
+  data: ExtrinsicDataTypeMap[ExtrinsicType];
   status: ExtrinsicStatus;
   extrinsicHash: string;
   extrinsicType: ExtrinsicType;
@@ -45,7 +45,9 @@ export type TransactionEmitter = EventEmitter<TransactionEventMap>;
 
 export interface TransactionEventResponse extends ValidateTransactionResponse {
   id: string,
-  extrinsicHash?: string
+  extrinsicHash?: string,
+  blockHash?: string
+  blockNumber?: number,
 }
 export interface TransactionEventMap {
   extrinsicHash: (response: TransactionEventResponse) => void;

@@ -452,6 +452,24 @@ export enum ExtrinsicType {
   UNKNOWN = 'unknown'
 }
 
+export interface ExtrinsicDataTypeMap {
+  [ExtrinsicType.TRANSFER_BALANCE]: RequestTransfer,
+  [ExtrinsicType.TRANSFER_TOKEN]: RequestTransfer,
+  [ExtrinsicType.TRANSFER_XCM]: RequestCrossChainTransfer,
+  [ExtrinsicType.SEND_NFT]: NftTransactionRequest,
+  [ExtrinsicType.CROWDLOAN]: any,
+  [ExtrinsicType.STAKING_STAKE]: RequestBondingSubmit,
+  [ExtrinsicType.STAKING_UNSTAKE]: RequestUnbondingSubmit,
+  [ExtrinsicType.STAKING_BOND]: RequestBondingSubmit,
+  [ExtrinsicType.STAKING_UNBOND]: RequestUnbondingSubmit,
+  [ExtrinsicType.STAKING_CLAIM_REWARD]: RequestStakeClaimReward,
+  [ExtrinsicType.STAKING_WITHDRAW]: RequestStakeWithdrawal,
+  [ExtrinsicType.STAKING_COMPOUNDING]: RequestTuringStakeCompound,
+  [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: RequestTuringCancelStakeCompound,
+  [ExtrinsicType.EVM_EXECUTE]: any,
+  [ExtrinsicType.UNKNOWN]: any
+}
+
 export enum ExtrinsicStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
@@ -525,7 +543,6 @@ export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType
   tip?: AmountData,
   fee?: AmountData,
   explorerUrl?: string,
-
   additionalInfo?: TransactionAdditionalInfo<ET>
 }
 

@@ -5,7 +5,7 @@ import BaseStoreWithAddressAndChain from '@subwallet/extension-base/services/sto
 
 import { ITransactionHistoryItem } from '../databases';
 
-export interface HistoryQuery {chain?: string, address?: string}
+export interface HistoryQuery {chain?: string, address?: string, extrinsicHash?: string}
 
 export default class TransactionStore extends BaseStoreWithAddressAndChain<ITransactionHistoryItem> {
   async getHistoryByAddressAsObject (address: string) {
@@ -24,6 +24,10 @@ export default class TransactionStore extends BaseStoreWithAddressAndChain<ITran
 
       if (query?.chain) {
         queryObject.chain = query?.chain;
+      }
+
+      if (query?.extrinsicHash) {
+        queryObject.extrinsicHash = query?.extrinsicHash;
       }
 
       if (query?.address) {

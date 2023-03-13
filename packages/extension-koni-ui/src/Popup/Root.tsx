@@ -24,6 +24,12 @@ export const RouteState = {
   lastPathName: '/'
 };
 
+const welcomeUrl = '/welcome';
+const tokenUrl = '/home/tokens';
+const loginUrl = '/keyring/login';
+const createPasswordUrl = '/keyring/create-password';
+const migratePasswordUrl = '/keyring/migrate-password';
+
 function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();
@@ -54,23 +60,23 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   useEffect(() => {
     const pathName = location.pathname;
 
-    if (needMigrate) {
-      navigate('/keyring/migrate-password');
-    } else if (pathName === DEFAULT_ROUTER_PATH) {
+    if (pathName === DEFAULT_ROUTER_PATH) {
       if (isNoAccount(accounts)) {
-        navigate('/welcome');
+        navigate(welcomeUrl);
       } else if (!hasMasterPassword) {
-        navigate('/keyring/create-password');
+        navigate(createPasswordUrl);
       } else if (isLocked) {
-        navigate('/keyring/login');
+        navigate(loginUrl);
+      } else if (needMigrate) {
+        navigate(migratePasswordUrl);
       } else if (hasConfirmations) {
         openPModal('confirmations');
       } else {
-        navigate('/home/tokens');
+        navigate(tokenUrl);
       }
-    } else if (pathName === '/keyring/login' && !isLocked) {
+    } else if (pathName === loginUrl && !isLocked) {
       goHome();
-    } else if (pathName === '/welcome' && !isNoAccount(accounts)) {
+    } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {
       goHome();
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');

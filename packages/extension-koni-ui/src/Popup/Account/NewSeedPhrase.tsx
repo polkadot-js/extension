@@ -4,9 +4,9 @@
 import { Layout, LoadingScreen } from '@subwallet/extension-koni-ui/components';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { createAccountSuriV2, createSeedV2 } from '@subwallet/extension-koni-ui/messaging';
@@ -35,7 +35,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const location = useLocation();
   const notify = useNotification();
-  const goHome = useDefaultNavigate().goHome;
+  const onComplete = useCompleteCreateAccount();
   const [accountTypes] = useState<KeypairType[]>((location.state as NewSeedPhraseState)?.accountTypes || []);
 
   const accountName = useGetDefaultAccountName();
@@ -59,7 +59,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       })
         .then(() => {
           // window.localStorage.setItem('popupNavigation', '/');
-          goHome();
+          onComplete();
         })
         .catch((error: Error): void => {
           // setIsBusy(false);
@@ -72,7 +72,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }, 500);
-  }, [seedPhrase, accountName, accountTypes, goHome, notify]);
+  }, [seedPhrase, accountName, accountTypes, onComplete, notify]);
 
   useEffect((): void => {
     createSeedV2(undefined, undefined, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])

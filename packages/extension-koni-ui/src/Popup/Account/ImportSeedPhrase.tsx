@@ -4,9 +4,9 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -32,8 +32,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const { t } = useTranslation();
   const timeOutRef = useRef<NodeJS.Timer>();
-  const goHome = useDefaultNavigate().goHome;
-
+  const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
 
   const [keyTypes, setKeyTypes] = useState<KeypairType[]>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
@@ -60,7 +59,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         types: keyTypes
       })
         .then(() => {
-          goHome();
+          onComplete();
         })
         .catch((error: Error): void => {
           setValidateState({
@@ -72,7 +71,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setSubmitting(false);
         });
     }
-  }, [seedPhrase, accountName, keyTypes, goHome]);
+  }, [seedPhrase, accountName, keyTypes, onComplete]);
 
   useEffect(() => {
     let amount = true;

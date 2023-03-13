@@ -4,9 +4,9 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
+import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
@@ -44,8 +44,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { className, description, instructionUrl, logoUrl, subTitle, title } = props;
   const { t } = useTranslation();
-  const { goHome } = useDefaultNavigate();
 
+  const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
@@ -90,7 +90,7 @@ const Component: React.FC<Props> = (props: Props) => {
           } else {
             inactiveModal(modalId);
             setValidateState({});
-            goHome();
+            onComplete();
           }
         })
         .catch((error: Error) => {
@@ -105,7 +105,7 @@ const Component: React.FC<Props> = (props: Props) => {
     } else {
       setLoading(false);
     }
-  }, [account, accountName, goHome, inactiveModal]);
+  }, [account, accountName, onComplete, inactiveModal]);
 
   const openCamera = useCallback(() => {
     activeModal(modalId);

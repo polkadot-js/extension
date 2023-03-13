@@ -4,6 +4,7 @@
 import { ResponseJsonGetAccountInfo } from '@subwallet/extension-base/background/types';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
+import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -18,7 +19,7 @@ import AccountCard from '@subwallet/react-ui/es/web3-block/account-card';
 import { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import CN from 'classnames';
 import { DotsThree, FileArrowDown, Info } from 'phosphor-react';
-import React, { ChangeEventHandler, useCallback, useContext, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { u8aToString } from '@polkadot/util';
@@ -34,11 +35,35 @@ const FooterIcon = (
 
 const modalId = 'account-json-modal';
 
+const formName = 'restore-json-file-form';
+const passwordField = 'password';
+
+const focusPassword = () => {
+  setTimeout(() => {
+    const element = document.getElementById(`${formName}_${passwordField}`);
+
+    if (element) {
+      element.focus();
+    }
+  }, 10);
+};
+
+const selectPassword = () => {
+  setTimeout(() => {
+    const element = document.getElementById(`${formName}_${passwordField}`);
+
+    if (element) {
+      (element as HTMLInputElement).select();
+    }
+  }, 10);
+};
+
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
-  const goHome = useDefaultNavigate().goHome;
+  const onComplete = useCompleteCreateAccount();
+  const { goHome } = useDefaultNavigate();
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const [fileValidateState, setFileValidateState] = useState<ValidateState>({});
@@ -158,7 +183,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     setLoading(true);
 
     setTimeout(() => {
-      (isKeyringPairs$Json(jsonFile)
+      const isMultiple = isKeyringPairs$Json(jsonFile);
+
+      (isMultiple
         ? batchRestoreV2(jsonFile, password, accountsInfo, true)
         : jsonRestoreV2({
           file: jsonFile,
@@ -168,19 +195,26 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           withMasterPassword: true
         }))
         .then(() => {
-          goHome();
+          setTimeout(() => {
+            if (isMultiple) {
+              goHome();
+            } else {
+              onComplete();
+            }
+          }, 1000);
         })
         .catch((e: Error) => {
           setSubmitValidateState({
             message: e.message,
             status: 'error'
           });
+          selectPassword();
         })
         .finally(() => {
           setLoading(false);
         });
     }, 500);
-  }, [accountsInfo, goHome, jsonFile, password, requirePassword]);
+  }, [jsonFile, requirePassword, password, accountsInfo, goHome, onComplete]);
 
   const renderItem = useCallback((account: ResponseJsonGetAccountInfo): React.ReactNode => {
     return (
@@ -204,6 +238,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     setSubmitValidateState({});
     setPassword(value);
   }, []);
+
+  useEffect(() => {
+    if (requirePassword) {
+      focusPassword();
+    }
+  }, [requirePassword]);
 
   return (
     <Layout.Base
@@ -235,7 +275,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         <div className='description'>
           {t('Please drag an drop the .json file you exported from Polkadot.js')}
         </div>
-        <Form className='form-container'>
+        <Form
+          className='form-container'
+          name={formName}
+        >
           <Form.Item
             validateStatus={fileValidateState.status}
           >
@@ -274,6 +317,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   {t('Please enter the password you set when creating your polkadot.js account')}
                 </div>
                 <Input
+                  id={`${formName}_${passwordField}`}
                   onChange={onChangePassword}
                   placeholder={t('Current password')}
                   type='password'

@@ -10,7 +10,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Form, Icon, Input } from '@subwallet/react-ui';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import CN from 'classnames';
-import { Info, ShieldCheck } from 'phosphor-react';
+import { FloppyDiskBack, Info, ShieldCheck } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -92,17 +92,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <Layout.Base
       className={CN(className)}
-      leftFooterButton={{
-        children: t('Cancel'),
-        onClick: goHome,
-        disabled: loading
-      }}
       onBack={goBack}
       rightFooterButton={{
         children: t('Save'),
         onClick: form.submit,
         loading: loading,
-        disabled: isDisabled
+        disabled: isDisabled,
+        icon: (
+          <Icon
+            phosphorIcon={FloppyDiskBack}
+            weight='fill'
+          />
+        )
       }}
       showBackButton={true}
       showSubHeader={true}
@@ -113,7 +114,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           icon: (
             <Icon
               phosphorIcon={Info}
-              size='sm'
+              size='md'
             />
           )
         }

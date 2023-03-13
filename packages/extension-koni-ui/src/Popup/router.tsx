@@ -11,6 +11,7 @@ import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-rout
 const PhishingDetected = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
 const PageWrapper = React.lazy(() => import('../components/Layout/PageWrapper'));
 const Welcome = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Welcome'));
+const CreateDone = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/CreateDone'));
 const Tokens = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens'));
 const Staking = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
 
@@ -100,6 +101,10 @@ export const router = createHashRouter([
       {
         path: '/buy-tokens',
         element: <BuyTokens />
+      },
+      {
+        path: '/create-done',
+        element: <CreateDone />
       },
       {
         path: '/home',

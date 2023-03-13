@@ -9,9 +9,9 @@ import AccountWithNameSkeleton from '@subwallet/extension-koni-ui/components/Acc
 import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
+import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/useGetSupportedLedger';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -52,7 +52,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const supportedLedger = useGetSupportedLedger();
-  const { goHome } = useDefaultNavigate();
+  const onComplete = useCompleteCreateAccount();
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
@@ -208,7 +208,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }))
       })
         .then(() => {
-          goHome();
+          onComplete();
         })
         .catch((e: Error) => {
           console.log(e);
@@ -217,7 +217,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setIsSubmitting(false);
         });
     }, 300);
-  }, [selectedAccounts, selectedChain, goHome]);
+  }, [selectedAccounts, selectedChain, onComplete]);
 
   useEffect(() => {
     setSelectedAccounts([]);

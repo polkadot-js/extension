@@ -3,9 +3,9 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
+import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -42,7 +42,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
-  const { goHome } = useDefaultNavigate();
+  const onComplete = useCompleteCreateAccount();
 
   const [reformatAddress, setReformatAddress] = useState('');
   const [loading, setLoading] = useState(false);
@@ -113,7 +113,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             });
           } else {
             setValidateState({});
-            goHome();
+            onComplete();
           }
         })
         .catch((error: Error) => {
@@ -128,7 +128,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     } else {
       setLoading(false);
     }
-  }, [reformatAddress, accountName, isEthereum, goHome]);
+  }, [reformatAddress, accountName, isEthereum, onComplete]);
 
   const isFormValidated = form.getFieldsError().filter(({ errors }) => errors.length).length > 0;
 

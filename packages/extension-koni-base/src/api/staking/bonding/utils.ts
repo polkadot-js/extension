@@ -10,6 +10,87 @@ export const REVOKE_ACTION = 'revoke';
 export const BOND_LESS_ACTION = 'bondLess';
 export const DECREASE_ACTION = 'decrease'; // for bifrost
 
+export interface PalletDappsStakingDappInfo {
+  address: string,
+  name: string,
+  gitHubUrl: string,
+  tags: string[],
+  url: string,
+  imagesUrl: string[]
+}
+export interface PalletDappsStakingUnlockingChunk {
+  amount: number,
+  unlockEra: number
+}
+export interface PalletDappsStakingAccountLedger {
+  locked: number,
+  unbondingInfo: {
+    unlockingChunks: PalletDappsStakingUnlockingChunk[]
+  }
+}
+export interface BlockHeader {
+  parentHash: string,
+  number: number,
+  stateRoot: string,
+  extrinsicsRoot: string
+}
+export interface ParachainStakingStakeOption {
+  owner: string,
+  amount: number
+}
+
+export interface ParachainStakingCandidateMetadata {
+  bond: number,
+  delegationCount: number,
+  totalCounted: number,
+  lowestTopDelegationAmount: number,
+  status: any | 'Active'
+}
+
+export enum PalletParachainStakingRequestType {
+  REVOKE = 'revoke',
+  DECREASE = 'decrease',
+  BOND_LESS = 'bondLess'
+}
+
+export interface PalletParachainStakingDelegationRequestsScheduledRequest {
+  delegator: string,
+  whenExecutable: number,
+  action: Record<PalletParachainStakingRequestType, number>
+}
+
+export interface PalletParachainStakingDelegationInfo {
+  owner: string,
+  amount: number
+}
+
+export interface PalletParachainStakingDelegator {
+  id: string,
+  delegations: PalletParachainStakingDelegationInfo[],
+  total: number,
+  lessTotal: number,
+  status: number
+}
+
+export interface PalletIdentityRegistration {
+  judgements: any[],
+  deposit: number,
+  info: {
+    display: {
+      Raw: string
+    },
+    web: {
+      Raw: string
+    },
+    twitter: {
+      Raw: string
+    },
+    riot: {
+      Raw: string
+    }
+  }
+}
+
 export interface ValidatorExtraInfo {
   commission: string,
   blocked: false,
@@ -20,6 +101,26 @@ export interface ValidatorExtraInfo {
 export interface Unlocking {
   remainingEras: BN;
   value: BN;
+}
+
+export function parseIdentity (identityInfo: PalletIdentityRegistration | null): string | undefined {
+  let identity;
+
+  if (identityInfo !== null) {
+    const displayName = identityInfo?.info?.display?.Raw;
+    const web = identityInfo?.info?.web?.Raw;
+    const riot = identityInfo?.info?.riot?.Raw;
+    const twitter = identityInfo?.info?.twitter?.Raw;
+
+    if (displayName && !displayName.startsWith('0x')) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      identity = displayName;
+    } else {
+      identity = twitter || web || riot;
+    }
+  }
+
+  return identity;
 }
 
 export function getInflationParams (networkKey: string): _SubstrateInflationParams {

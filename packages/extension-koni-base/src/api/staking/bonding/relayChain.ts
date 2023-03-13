@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, ChainStakingMetadata, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxInfo, ChainStakingMetadata, NominatorMetadata, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -11,6 +11,25 @@ import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balan
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
+
+export interface PalletStakingNominations {
+  targets: string[],
+  submittedIn: number,
+  suppressed: boolean
+}
+
+export interface UnlockingChunk {
+  value: number,
+  era: number
+}
+
+export interface PalletStakingStakingLedger {
+  stash: string,
+  total: number,
+  active: number,
+  unlocking: UnlockingChunk[],
+  claimedRewards: number[]
+}
 
 export async function getRelayChainStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   const chainApi = await substrateApi.isReady;
@@ -50,6 +69,11 @@ export async function getRelayChainStakingMetadata (chain: string, substrateApi:
     maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
     allowCancelUnstaking: true
   } as ChainStakingMetadata;
+}
+
+export async function getRelayChainNominatorMetadata (chain: string, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata> {
+  const chainApi = await substrateApi.isReady;
+
 }
 
 export async function getRelayValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {

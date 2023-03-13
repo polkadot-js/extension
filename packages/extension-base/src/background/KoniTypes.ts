@@ -1344,25 +1344,36 @@ export interface ChainStakingMetadata {
   unstakingPeriod: number; // in hours
 }
 
+// TODO: has overlap info with ValidatorInfo
 export interface NominationInfo {
   chain: string;
   validatorAddress: string;
   validatorIdentity?: string;
   activeStake: string;
+
+  // For some chains (parachains,...)
+  hasUnstaking?: boolean;
+  validatorMinStake?: string;
+}
+
+export enum UnstakingStatus {
+  CLAIMABLE = 'CLAIMABLE',
+  UNLOCKING = 'UNLOCKING'
 }
 
 export interface UnstakingInfo {
   chain: string;
-  validatorAddress: string;
-  withdrawal: string; // amount to be withdrawn
-  unstakeTime: number;
-  withdrawalTime: number;
+  status: UnstakingStatus;
+  claimable: string; // amount to be withdrawn
+  waitingTime: number; // in hours
+  validatorAddress?: string; // might unstake from a validator or not
 }
 
 export interface NominatorMetadata {
   chain: string;
   type: StakingType;
   nominatorAddress: string;
+  activeStake: string;
 
   nominations: NominationInfo[],
   unstakings: UnstakingInfo[]

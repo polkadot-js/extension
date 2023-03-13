@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import plusIcon from '../assets/add.svg';
@@ -36,7 +36,9 @@ function AccounSelection({
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts, hierarchy, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
+  const [isIndeterminate, setIsIndeterminate] = useState(false);
   const allVisibleAccounts = useMemo(() => accounts.filter(({ isHidden }) => !isHidden), [accounts]);
+  const noAccountSelected = useMemo(() => selectedAccounts.length === 0, [selectedAccounts.length]);
   const allDisplayedAddresses = useMemo(
     () => (showHidden ? accounts.map(({ address }) => address) : allVisibleAccounts.map(({ address }) => address)),
     [accounts, allVisibleAccounts, showHidden]
@@ -45,6 +47,12 @@ function AccounSelection({
     () => selectedAccounts.length === allDisplayedAddresses.length,
     [allDisplayedAddresses.length, selectedAccounts.length]
   );
+
+  useEffect(() => {
+    const nextIndeterminateState = !noAccountSelected && !areAllAccountsSelected;
+
+    setIsIndeterminate(nextIndeterminateState);
+  }, [areAllAccountsSelected, noAccountSelected]);
 
   const _onSelectAllToggle = useCallback(() => {
     if (areAllAccountsSelected) {
@@ -80,6 +88,7 @@ function AccounSelection({
       <StyledCheckbox
         checked={areAllAccountsSelected}
         className='accountTree-checkbox'
+        indeterminate={isIndeterminate}
         label={t('Select all')}
         onChange={_onSelectAllToggle}
       />

@@ -38,7 +38,7 @@ export default styled(Label)(
     position: absolute;
     top: ${active ? '8px' : '26px'};
     left: 16px;
-    transition: all 0.2s ease-out;
+    transition: all 0.2s ease;
     pointer-events: none;
   }
 `

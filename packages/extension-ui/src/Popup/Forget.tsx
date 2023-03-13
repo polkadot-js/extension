@@ -20,6 +20,12 @@ interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
 }
 
+const StyledAddress = styled(Address)`
+  .name {
+    width: 150px;
+  }
+`;
+
 function Forget({
   className,
   match: {
@@ -84,7 +90,7 @@ function Forget({
             {t<string>('Not sure if you have it? You can export JSON file and use it as well.')}
           </span>
         </div>
-        <Address
+        <StyledAddress
           address={address}
           withExport
         />

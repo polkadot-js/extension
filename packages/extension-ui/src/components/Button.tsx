@@ -90,12 +90,12 @@ export default styled(Button)(
   position: relative;
   text-align: center;
   letter-spacing: 0.05em;
-  transition: .2s ease-in-out;
+  transition: 0.2s ease;
 
   &:disabled {
     cursor: default;
     pointer-events: none;
-    color: ${isSuccess ? theme.buttonTextColor : isBusy ? 'transparent' : theme.disabledTextColor};
+    color: ${isSuccess ? theme.buttonTextColor : isBusy ? 'transparent' : theme.buttonTextColor};
     background: ${
       isDanger
         ? theme.buttonBackgroundDangerDisabled

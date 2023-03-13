@@ -7,6 +7,7 @@ import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import Checkmark from '../assets/checkmark.svg';
+import Subtract from '../assets/subtract.svg';
 
 interface Props {
   checked: boolean;
@@ -44,7 +45,7 @@ function Checkbox({ checked, className, indeterminate, label, onChange, onClick 
           ref={checkboxRef}
           type='checkbox'
         />
-        <span />
+        <span className={`${indeterminate ? 'indeterminate' : ''}`} />
       </label>
     </div>
   );
@@ -114,7 +115,18 @@ export default styled(Checkbox)(
     }
 
     input:indeterminate ~ span {
-      background: ${theme.primaryColor}
+      background: ${theme.primaryColor};
+      &:after {
+        content: '';
+        display: block;
+        width: 13px;
+        height: 10px;
+        position: absolute;
+        left: 1px;
+        top: 2px;
+        mask: url(${Subtract});
+        mask-size: cover;
+      }
     }
   }
 `

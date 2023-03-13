@@ -112,11 +112,23 @@ export default styled(EditMenuCard)(
       ? '8px'
       : '2px'
   };
+  transition: 0.2s ease;
 
   &:hover {
+    background: ${theme.editCardBackgroundHover};
+
     ${Svg}:not(.icon):not(.forgetIcon) {
       background: ${theme.headerIconBackgroundHover};
     }
+
+    .forgetIcon {
+      background: ${theme.buttonBackgroundDangerHover};
+    }
+
+    .danger {
+      color: ${theme.buttonBackgroundDangerHover};
+    }
+    
   
     .chevron path{
       fill: ${theme.headerIconBackgroundHover};

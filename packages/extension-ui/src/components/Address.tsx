@@ -271,6 +271,15 @@ export default styled(Address)(
   border-radius: 8px;
   margin-bottom: 8px;
   position: relative;
+  transition: background 0.2s ease;
+
+  :hover {
+    background: ${theme.menuBackground};
+
+    .detailsIcon {
+      background: ${theme.headerIconBackgroundHover};
+    }
+  }
 
   .banner {
     font-size: 12px;
@@ -363,7 +372,7 @@ export default styled(Address)(
       letter-spacing: 0.06em;
       gap: 8px;
       position: absolute;
-      right: 28px;
+      right: 16px;
       display: flex;
       justify-content: center;
       align-items: center;

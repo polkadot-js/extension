@@ -73,7 +73,7 @@ export default styled(Switch)(
     bottom: 0;
     width: 40px;
     height: 14px;
-    transition: background ease 0.3s;
+    transition: background ease 0.2s;
     border-radius: 16px;
     border: 1px solid ${theme.boxBorderColor};
 

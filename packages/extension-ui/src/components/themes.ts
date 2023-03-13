@@ -52,6 +52,7 @@ const darkTheme = {
   connectedIndicator: '#14202A',
   dangerBackground: '#FF5E5C',
   disabledTextColor: '#2F4252',
+  editCardBackgroundHover: '#1B2B38',
   errorBorderColor: '#7E3530',
   errorColor: '#E42F2F',
   fileNameBackground: '#16232E',

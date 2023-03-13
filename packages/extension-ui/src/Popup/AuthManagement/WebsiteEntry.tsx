@@ -76,9 +76,17 @@ export default styled(WebsiteEntry)(
   padding: 0px 16px;
   background: ${theme.menuBackground};
   height: 48px;
+  transition: 0.2s ease;
+
+  
 
   &:hover {
     cursor: pointer;
+    background: ${theme.editCardBackgroundHover};
+  
+    .chevron path{
+      fill: ${theme.headerIconBackgroundHover};
+    }
   }
 
   .url {

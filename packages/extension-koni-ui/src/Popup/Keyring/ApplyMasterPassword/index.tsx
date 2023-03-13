@@ -55,6 +55,28 @@ const removeIcon = (
   />
 );
 
+const formName = 'migrate-password-form';
+
+const focusPassword = () => {
+  setTimeout(() => {
+    const element = document.getElementById(`${formName}_${FormFieldName.PASSWORD}`);
+
+    if (element) {
+      element.focus();
+    }
+  }, 10);
+};
+
+const selectPassword = () => {
+  setTimeout(() => {
+    const element = document.getElementById(`${formName}_${FormFieldName.PASSWORD}`);
+
+    if (element) {
+      (element as HTMLInputElement).select();
+    }
+  }, 10);
+};
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { t } = useTranslation();
@@ -109,6 +131,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }).then((res) => {
           if (!res.status) {
             form.setFields([{ name: FormFieldName.PASSWORD, errors: [res.errors[0]] }]);
+            selectPassword();
             setIsError(true);
           } else {
             setIsError(false);
@@ -116,6 +139,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }).catch((e: Error) => {
           setIsError(true);
           form.setFields([{ name: FormFieldName.PASSWORD, errors: [e.message] }]);
+          selectPassword();
         }).finally(() => {
           setLoading(false);
         });
@@ -210,30 +234,37 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [needMigrate.length, deleting]);
 
   useEffect(() => {
-    setCurrentAccount((prevState) => {
-      if (deleting) {
-        return prevState;
-      }
-
-      if (!prevState) {
-        setIsDisable(true);
-        form.resetFields();
-
-        return needMigrate[0];
-      } else {
-        const exists = needMigrate.find((acc) => acc.address === prevState.address);
-
-        if (exists) {
+    if (step === 'Migrate') {
+      setCurrentAccount((prevState) => {
+        if (deleting) {
           return prevState;
-        } else {
-          setIsDisable(true);
+        }
+
+        if (!prevState) {
           form.resetFields();
+          setIsDisable(true);
 
           return needMigrate[0];
+        } else {
+          const exists = needMigrate.find((acc) => acc.address === prevState.address);
+
+          form.resetFields();
+          setIsDisable(true);
+
+          if (exists) {
+            return prevState;
+          } else {
+            return needMigrate[0];
+          }
         }
-      }
-    });
-  }, [form, needMigrate, deleting]);
+      });
+
+      focusPassword();
+    } else {
+      form.resetFields();
+      setIsDisable(true);
+    }
+  }, [form, needMigrate, deleting, step]);
 
   return (
     <Layout.WithSubHeaderOnly
@@ -241,7 +272,7 @@ const Component: React.FC<Props> = (props: Props) => {
       onBack={onBack}
       rightFooterButton={{
         ...footerButton,
-        disabled: step === 'Migrate' && isDisabled && deleting,
+        disabled: step === 'Migrate' && (isDisabled || deleting),
         loading: step === 'Migrate' && loading
       }}
       showBackButton={step !== 'Introduction'}
@@ -250,7 +281,7 @@ const Component: React.FC<Props> = (props: Props) => {
           icon: (
             <Icon
               phosphorIcon={Info}
-              size='sm'
+              size='md'
             />
           )
         }
@@ -273,7 +304,7 @@ const Component: React.FC<Props> = (props: Props) => {
             initialValues={{
               [FormFieldName.PASSWORD]: ''
             }}
-            name='migrate-password-form'
+            name={formName}
             onFieldsChange={onUpdate}
             onFinish={onSubmit}
           >

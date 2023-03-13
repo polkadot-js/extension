@@ -81,7 +81,7 @@ const MigrateDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
       fontWeight: token.fontWeightStrong,
       fontSize: token.fontSizeHeading3,
       lineHeight: token.lineHeightHeading3,
-      color: token.colorTextBase
+      color: token.colorText
     },
 
     '.description': {

@@ -115,7 +115,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     } else {
       goHome();
     }
-  }, [goHome, navigate, previousInfo.prevPathname, previousInfo.prevState]);
+  }, [goHome, navigate, previousInfo?.prevPathname, previousInfo?.prevState]);
 
   useEffect(() => {
     if (!noAccount) {

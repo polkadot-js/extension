@@ -275,7 +275,7 @@ export function getScanExplorerAddressInfoUrl (networkKey: string, address: stri
   }
 
   if (networkKey === 'subspace_gemini_3c') {
-    return `${subscanByNetworkKey[networkKey]}/accounts/${address}`
+    return `${subscanByNetworkKey[networkKey]}/accounts/${address}`;
   }
 
   return `${subscanByNetworkKey[networkKey]}/account/${address}`;

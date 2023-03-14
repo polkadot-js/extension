@@ -173,6 +173,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           renderOnScroll={true}
           renderWhenEmpty={emptyNft}
           searchFunction={searchNft}
+          searchMinCharactersCount={2}
           searchPlaceholder={t<string>('Search Nft name or ID')}
         />
       </Layout.Base>

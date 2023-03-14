@@ -14,7 +14,7 @@ import { Button, Checkbox, CrowdloanItem, Icon, SwList, SwModal, Tag } from '@su
 import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -139,7 +139,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [allCrowdloanList, hasMore, paging]);
 
   // filter
-  const onClickActionBtn = () => {
+  const onClickActionBtn = (e?: SyntheticEvent) => {
+    e && e.stopPropagation();
     activeModal(FILTER_MODAL_ID);
   };
 
@@ -274,7 +275,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           // eslint-disable-next-line react/jsx-no-bind
           renderWhenEmpty={emptyCrowdloanList}
           searchFunction={searchFunction}
-          searchMinCharactersCount={1}
+          searchMinCharactersCount={2}
           searchPlaceholder={t('Search project')}
           showActionBtn
         />

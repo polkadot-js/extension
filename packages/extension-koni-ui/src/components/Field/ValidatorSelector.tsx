@@ -78,7 +78,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const [sortSelection, setSortSelection] = useState<string>('');
   const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(items, FILTER_MODAL_ID);
   const filteredList = useMemo(() => {
-    return getFilteredList(items, selectedFilters);
+    return getFilteredList(items, selectedFilters as string[]);
   }, [items, selectedFilters]);
 
   useExcludeModal(id);
@@ -119,45 +119,54 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     inactiveModal(FILTER_MODAL_ID);
   };
 
-  const closeSortingModal = () => {
-    inactiveModal(SORTING_MODAL_ID);
-  };
+  const closeSortingModal = useCallback(
+    () => {
+      inactiveModal(SORTING_MODAL_ID);
+    },
+    [inactiveModal]
+  );
 
-  const renderSelected = (item: ValidatorDataType) => {
-    return (
-      <div className={'__selected-item'}>
-        <div className={'__selected-item-name common-text'}>
-          {item.identity}
+  const renderSelected = useCallback(
+    (item: ValidatorDataType) => {
+      return (
+        <div className={'__selected-item'}>
+          <div className={'__selected-item-name common-text'}>
+            {item.identity}
+          </div>
+
+          <div className={'__selected-item-right-part common-text'}>
+            <Button
+              icon={<Icon
+                phosphorIcon={Book}
+                size='sm'
+              />}
+              onClick={onClickBookBtn}
+              size='xs'
+              type='ghost'
+            />
+            <Button
+              icon={<Icon
+                phosphorIcon={Lightning}
+                size='sm'
+              />}
+              onClick={onClickLightningBtn}
+              size='xs'
+              type='ghost'
+            />
+          </div>
         </div>
+      );
+    },
+    [onClickBookBtn, onClickLightningBtn]
+  );
 
-        <div className={'__selected-item-right-part common-text'}>
-          <Button
-            icon={<Icon
-              phosphorIcon={Book}
-              size='sm'
-            />}
-            onClick={onClickBookBtn}
-            size='xs'
-            type='ghost'
-          />
-          <Button
-            icon={<Icon
-              phosphorIcon={Lightning}
-              size='sm'
-            />}
-            onClick={onClickLightningBtn}
-            size='xs'
-            type='ghost'
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const onChangeSortOpt = (value: string) => {
-    setSortSelection(value);
-    closeSortingModal();
-  };
+  const onChangeSortOpt = useCallback(
+    (value: string) => {
+      setSortSelection(value);
+      closeSortingModal();
+    },
+    [closeSortingModal]
+  );
 
   return (
     <>
@@ -183,7 +192,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           />
         }
         renderItem={renderItem}
-        // eslint-disable-next-line react/jsx-no-bind
         renderSelected={renderSelected}
         rightIconProps={{
           icon: <Icon phosphorIcon={SortAscending} />,
@@ -210,9 +218,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       <SortingModal
         id={SORTING_MODAL_ID}
-        // eslint-disable-next-line react/jsx-no-bind
         onCancel={closeSortingModal}
-        // eslint-disable-next-line react/jsx-no-bind
         onChangeOption={onChangeSortOpt}
         optionSelection={sortSelection}
         options={sortingOptions}

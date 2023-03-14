@@ -4,13 +4,15 @@
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
-import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useContext } from 'react';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useContext, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
@@ -24,8 +26,13 @@ const modalId = 'input-account-address-modal';
 
 function Component ({ className = '', label, onChange, onBlur, placeholder, value, id = modalId, showAddressBook, showScanner }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
-
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const accounts = useSelector((root: RootState) => root.accountState.accounts);
+  const accountName = useMemo(() => {
+    const account = accounts.find((acc) => acc.address.toLowerCase() === value?.toLowerCase());
+
+    return account?.name;
+  }, [accounts, value]);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     const val = event.target.value;
@@ -66,14 +73,12 @@ function Component ({ className = '', label, onChange, onBlur, placeholder, valu
             {
               value && isAddress(value) && (
                 <div className={'__overlay'}>
-                  <div className={'__name common-text'}>
-                    {toShort(value, 6, 6)}
+                  <div className={CN('__name common-text', { 'limit-width': !!accountName })}>
+                    {accountName || toShort(value, 9, 9)}
                   </div>
-
-                  {/* todo: make this visible later, if add manage address book feature */}
-                  <div className={'__address common-text hidden'}>
+                  {accountName && <div className={'__address common-text'}>
                     ({toShort(value, 4, 4)})
-                  </div>
+                  </div>}
                 </div>
               )
             }
@@ -113,13 +118,13 @@ function Component ({ className = '', label, onChange, onBlur, placeholder, valu
         value={value}
       />
 
-      <SwQrScanner
+      {showScanner && <SwQrScanner
         className={className}
         id={id}
         onClose={onCloseScanner}
         onError={onScanError}
         onSuccess={onSuccess}
-      />
+      />}
     </>
   );
 }
@@ -145,7 +150,11 @@ export const AddressInput = styled(forwardRef(Component))<Props>(({ theme: { tok
     '.__name': {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      color: token.colorTextLight1
+      color: token.colorTextLight1,
+
+      '&.limit-width': {
+        maxWidth: 136
+      }
     },
 
     '.__address': {

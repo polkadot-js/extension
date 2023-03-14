@@ -84,6 +84,7 @@ function Component ({ className = '', disabled, id = 'address-input', items, lab
       searchPlaceholder={t('Search chain')}
       searchableMinCharactersCount={2}
       selected={value || ''}
+      title={label}
     />
   );
 }

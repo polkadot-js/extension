@@ -30,7 +30,7 @@ function Component ({ className = '', disabled, id = 'token-select', items, labe
     return (
       <div className={'__selected-item'}>
         {item.symbol}
-        {showChainInSelected && (<span className={'ml-xxs'}>({item.originChain})</span>)}
+        {showChainInSelected}
       </div>
     );
   }, [showChainInSelected]);
@@ -77,7 +77,7 @@ function Component ({ className = '', disabled, id = 'token-select', items, labe
           type='phosphor'
           weight={'fill'}
         />}
-        subName={item.originChain}
+        subName={''}
         subNetworkKey={item.originChain}
         symbol={item.symbol.toLowerCase()}
       />
@@ -102,6 +102,7 @@ function Component ({ className = '', disabled, id = 'token-select', items, labe
       searchPlaceholder={t('Search chain')}
       searchableMinCharactersCount={2}
       selected={value || ''}
+      title={label}
     />
   );
 }

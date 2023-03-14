@@ -32,6 +32,7 @@ export async function getParaChainStakingMetadata (chain: string, substrateApi: 
   const _round = (await chainApi.api.query.parachainStaking.round()).toHuman() as Record<string, string>;
   const round = parseRawNumber(_round.current);
   const maxDelegations = chainApi.api.consts.parachainStaking.maxDelegationsPerDelegator.toString();
+  const unstakingDelay = chainApi.api.consts.parachainStaking.delegationBondLessDelay.toString();
 
   let _unvestedAllocation;
 
@@ -62,6 +63,7 @@ export async function getParaChainStakingMetadata (chain: string, substrateApi: 
 
   const inflationConfig = _inflation.toHuman() as unknown as InflationConfig;
   const inflation = getParaCurrentInflation(parseRawNumber(totalStake.toString()), inflationConfig);
+  const unstakingPeriod = parseInt(unstakingDelay) * _STAKING_ERA_LENGTH_MAP[chain];
 
   return {
     chain,
@@ -71,7 +73,8 @@ export async function getParaChainStakingMetadata (chain: string, substrateApi: 
     minStake: '0',
     maxValidatorPerNominator: parseInt(maxDelegations),
     maxWithdrawalRequestPerValidator: 1, // by default
-    allowCancelUnstaking: true
+    allowCancelUnstaking: true,
+    unstakingPeriod
   } as ChainStakingMetadata;
 }
 

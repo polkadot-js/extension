@@ -42,6 +42,9 @@ export async function getAstarStakingMetadata (chain: string, substrateApi: _Sub
 
   const era = (await chainApi.api.query.dappsStaking.currentEra()).toString();
   const minDelegatorStake = chainApi.api.consts.dappsStaking.minimumStakingAmount.toString();
+  const unstakingDelay = chainApi.api.consts.dappsStaking.unbondingPeriod.toString();
+
+  const unstakingPeriod = parseInt(unstakingDelay) * _STAKING_ERA_LENGTH_MAP[chain];
 
   return {
     chain,
@@ -51,7 +54,8 @@ export async function getAstarStakingMetadata (chain: string, substrateApi: _Sub
     minStake: minDelegatorStake,
     maxValidatorPerNominator: 100, // temporary fix for Astar, there's no limit for now
     maxWithdrawalRequestPerValidator: 1, // by default
-    allowCancelUnstaking: true
+    allowCancelUnstaking: true,
+    unstakingPeriod
   } as ChainStakingMetadata;
 }
 

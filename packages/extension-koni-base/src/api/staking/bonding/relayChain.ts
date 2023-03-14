@@ -37,6 +37,7 @@ export async function getRelayChainStakingMetadata (chain: string, substrateApi:
   const currentEra = _era.toString();
   const maxNominations = chainApi.api.consts.staking.maxNominations.toString();
   const maxUnlockingChunks = chainApi.api.consts.staking.maxUnlockingChunks.toString();
+  const unlockingEras = chainApi.api.consts.staking.bondingDuration.toString();
 
   const [_totalEraStake, _totalIssuance, _auctionCounter, _minimumActiveStake] = await Promise.all([
     chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
@@ -57,6 +58,7 @@ export async function getRelayChainStakingMetadata (chain: string, substrateApi:
 
   const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chain);
   const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chain);
+  const unlockingPeriod = parseInt(unlockingEras) * _STAKING_ERA_LENGTH_MAP[chain]; // in hours
 
   return {
     chain,
@@ -67,7 +69,8 @@ export async function getRelayChainStakingMetadata (chain: string, substrateApi:
     minStake,
     maxValidatorPerNominator: parseInt(maxNominations),
     maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
-    allowCancelUnstaking: true
+    allowCancelUnstaking: true,
+    unstakingPeriod: unlockingPeriod
   } as ChainStakingMetadata;
 }
 

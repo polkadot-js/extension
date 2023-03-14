@@ -44,6 +44,12 @@ export async function getAmplitudeStakingMetadata (chain: string, substrateApi: 
   const round = parseRawNumber(_round.current);
   const maxDelegations = chainApi.api.consts.parachainStaking.maxDelegationsPerRound.toString();
   const minDelegatorStake = chainApi.api.consts.parachainStaking.minDelegatorStake.toString();
+  const unstakingDelay = chainApi.api.consts.parachainStaking.stakeDuration.toString();
+  const _blockPerRound = chainApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
+  const blockPerRound = parseFloat(_blockPerRound);
+
+  const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
+  const unstakingPeriod = blockDuration * parseInt(unstakingDelay);
 
   return {
     chain,
@@ -52,7 +58,8 @@ export async function getAmplitudeStakingMetadata (chain: string, substrateApi: 
     minStake: minDelegatorStake,
     maxValidatorPerNominator: parseInt(maxDelegations),
     maxWithdrawalRequestPerValidator: 1, // by default
-    allowCancelUnstaking: true
+    allowCancelUnstaking: true,
+    unstakingPeriod
   } as ChainStakingMetadata;
 }
 

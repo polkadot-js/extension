@@ -5,16 +5,16 @@ import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { subscribeFreeBalance } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, SwSubHeader } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import CN from 'classnames';
 import { Info } from 'phosphor-react';
-import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -37,7 +37,6 @@ export interface TransactionContextProps extends TransactionFormBaseProps {
   setTransactionType: Dispatch<SetStateAction<ExtrinsicType>>,
   setFrom: Dispatch<SetStateAction<string>>,
   setChain: Dispatch<SetStateAction<string>>,
-  freeBalance: string | undefined,
   onDone: (extrinsicHash: string) => void,
   onClickRightBtn: () => void,
   setShowRightBtn: Dispatch<SetStateAction<boolean>>
@@ -54,8 +53,6 @@ export const TransactionContext = React.createContext<TransactionContextProps>({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   setChain: (value) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  freeBalance: '0',
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onDone: (extrinsicHash) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   onClickRightBtn: () => {},
@@ -67,11 +64,11 @@ function Component ({ className }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeModal } = useContext(ModalContext);
+  const dataContext = useContext(DataContext);
   const { currentAccount, isAllAccount } = useSelector((root: RootState) => root.accountState);
   const [from, setFrom] = useState(!isAllAccount ? currentAccount?.address || '' : '');
   const [chain, setChain] = useState('');
   const [transactionType, setTransactionType] = useState<ExtrinsicType>(ExtrinsicType.TRANSFER_BALANCE);
-  const [freeBalance, setFreeBalance] = useState<string | undefined>();
   const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
   const titleMap = useMemo<Record<string, string>>(() => ({
     [ExtrinsicType.TRANSFER_BALANCE]: t('Transfer'),
@@ -80,22 +77,6 @@ function Component ({ className }: Props) {
     [ExtrinsicType.STAKING_UNSTAKE]: t('Remove Bond')
   }), [t]);
   const { goBack } = useDefaultNavigate();
-
-  useEffect(() => {
-    let cancel = false;
-
-    if (chain && from && chain !== '' && from !== '') {
-      subscribeFreeBalance({ address: from, networkKey: chain }, (free) => {
-        if (!cancel) {
-          !cancel && setFreeBalance(free);
-        }
-      }).catch(console.error);
-    }
-
-    return () => {
-      cancel = true;
-    };
-  }, [from, chain]);
 
   // Navigate to finish page
   const onDone = useCallback(
@@ -126,8 +107,8 @@ function Component ({ className }: Props) {
 
   return (
     <Layout.Home showTabBar={false}>
-      <TransactionContext.Provider value={{ transactionType, from, setFrom, freeBalance, chain, setChain, setTransactionType, onDone, onClickRightBtn, setShowRightBtn }}>
-        <PageWrapper>
+      <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, setTransactionType, onDone, onClickRightBtn, setShowRightBtn }}>
+        <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
             <SwSubHeader
               background={'transparent'}

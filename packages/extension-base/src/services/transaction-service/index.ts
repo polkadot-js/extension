@@ -3,17 +3,19 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
+import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEmitter, TransactionEventMap, TransactionEventResponse, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
+import { getTransactionLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { parseTxAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
@@ -33,18 +35,19 @@ import { HexString } from '@polkadot/util/types';
 export default class TransactionService {
   private readonly chainService: ChainService;
   private readonly requestService: RequestService;
-
-  readonly #balanceService: BalanceService;
+  private readonly balanceService: BalanceService;
+  private readonly historyService: HistoryService;
   private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
 
   private get transactions (): Record<string, SWTransaction> {
     return this.transactionSubject.getValue();
   }
 
-  constructor (chainService: ChainService, requestService: RequestService, balanceService: BalanceService) {
+  constructor (chainService: ChainService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService) {
     this.chainService = chainService;
     this.requestService = requestService;
-    this.#balanceService = balanceService;
+    this.balanceService = balanceService;
+    this.historyService = historyService;
   }
 
   private get allTransactions (): SWTransaction[] {
@@ -144,7 +147,7 @@ export default class TransactionService {
     const transferNative = validationResponse.transferNativeAmount || '0';
     const nativeTokenInfo = this.chainService.getNativeTokenInfo(chain);
 
-    const balance = await this.#balanceService.getFreeBalance(chain, address, this.chainService.getSubstrateApiMap(), this.chainService.getEvmApiMap());
+    const balance = await this.balanceService.getFreeBalance(chain, address, this.chainService.getSubstrateApiMap(), this.chainService.getEvmApiMap());
 
     const existentialDeposit = nativeTokenInfo.minAmount || '0';
 
@@ -289,48 +292,150 @@ export default class TransactionService {
     const transaction = this.getTransaction(id);
     const chainInfo = this.chainService.getChainInfoByKey(transaction.chain);
 
-    if (transaction.chainType === ChainType.EVM) {
-      const explorerLink = chainInfo?.evmInfo?.blockExplorer;
+    return getTransactionLink(chainInfo, transaction.extrinsicHash);
+  }
 
-      if (explorerLink) {
-        return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}tx/${transaction.extrinsicHash}`);
-      }
-    } else {
-      const explorerLink = chainInfo?.substrateInfo?.blockExplorer;
+  private transactionToHistory (id: string): TransactionHistoryItem {
+    const transaction = this.getTransaction(id);
+    const historyItem: TransactionHistoryItem = {
+      chain: transaction.chain,
+      direction: TransactionDirection.SEND,
+      type: transaction.extrinsicType,
+      from: transaction.address,
+      to: '',
+      chainType: transaction.chainType,
+      address: transaction.address,
+      status: ExtrinsicStatus.PROCESSING,
+      extrinsicHash: transaction.extrinsicHash,
+      time: transaction.createdAt.getTime(),
+      fee: transaction.estimateFee,
+      blockNumber: 0,
+      blockHash: ''
+    };
 
-      if (explorerLink) {
-        return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}extrinsic/${transaction.extrinsicHash}`);
+    const chainInfo = this.chainService.getChainInfoByKey(transaction.chain);
+    const nativeAsset = _getChainNativeTokenBasicInfo(chainInfo);
+    const baseNativeAmount = { value: '0', decimals: nativeAsset.decimals, symbol: nativeAsset.symbol };
+
+    // Fill data by extrinsicType
+    switch (transaction.extrinsicType) {
+      case ExtrinsicType.TRANSFER_BALANCE:
+      case ExtrinsicType.TRANSFER_TOKEN: {
+        const data = parseTransactionData<ExtrinsicType.TRANSFER_BALANCE>(transaction.data);
+
+        historyItem.to = data.to;
+        const { decimals, symbol } = this.chainService.getAssetBySlug(data.tokenSlug);
+
+        historyItem.amount = { value: data.value || '0', decimals: decimals || 0, symbol };
       }
+
+        break;
+      case ExtrinsicType.TRANSFER_XCM: {
+        const data = parseTransactionData<ExtrinsicType.TRANSFER_XCM>(transaction.data);
+
+        historyItem.to = data.to;
+        const { decimals, symbol } = this.chainService.getAssetBySlug(data.sendingTokenSlug);
+
+        historyItem.amount = { value: data.value || '0', decimals: decimals || 0, symbol };
+      }
+
+        break;
+      case ExtrinsicType.SEND_NFT: {
+        const data = parseTransactionData<ExtrinsicType.SEND_NFT>(transaction.data);
+
+        historyItem.to = data.recipientAddress;
+      }
+
+        break;
+      case ExtrinsicType.CROWDLOAN:
+        break;
+      case ExtrinsicType.STAKING_BOND:
+      case ExtrinsicType.STAKING_STAKE: {
+        const data = parseTransactionData<ExtrinsicType.STAKING_STAKE>(transaction.data);
+
+        historyItem.amount = { ...baseNativeAmount, value: data.amount.toString() || '0' };
+        historyItem.to = data.nominatorAddress;
+      }
+
+        break;
+      case ExtrinsicType.STAKING_UNBOND:
+      case ExtrinsicType.STAKING_UNSTAKE: {
+        const data = parseTransactionData<ExtrinsicType.STAKING_UNSTAKE>(transaction.data);
+
+        historyItem.to = data.validatorAddress || '';
+        historyItem.amount = { ...baseNativeAmount, value: data.amount.toString() || '0' };
+      }
+
+        break;
+      case ExtrinsicType.STAKING_CLAIM_REWARD: {
+        const data = parseTransactionData<ExtrinsicType.STAKING_CLAIM_REWARD>(transaction.data);
+
+        historyItem.to = data.validatorAddress || '';
+      }
+
+        break;
+      case ExtrinsicType.STAKING_WITHDRAW: {
+        const data = parseTransactionData<ExtrinsicType.STAKING_WITHDRAW>(transaction.data);
+
+        historyItem.to = data.validatorAddress || '';
+      }
+
+        break;
+      case ExtrinsicType.STAKING_COMPOUNDING:
+        break;
+      case ExtrinsicType.STAKING_CANCEL_COMPOUNDING:
+        break;
+      case ExtrinsicType.EVM_EXECUTE:
+        // Todo: Update historyItem.to
+        break;
+      case ExtrinsicType.UNKNOWN:
+        break;
     }
 
-    return undefined;
+    return historyItem;
   }
 
   private onHasTransactionHash ({ extrinsicHash, id }: TransactionEventResponse) {
-    // Todo: Write pending transaction history
+    // Write processing transaction history
     this.updateTransaction(id, { extrinsicHash, status: ExtrinsicStatus.PROCESSING });
+    this.historyService.insertHistory(this.transactionToHistory(id)).catch(console.error);
     console.log(`Transaction "${id}" is submitted with hash ${extrinsicHash || ''}`);
   }
 
-  private onSuccess ({ id }: TransactionEventResponse) {
-    // Todo: Write success transaction history
+  private onSuccess ({ blockHash, blockNumber, id }: TransactionEventResponse) {
     const transaction = this.getTransaction(id);
 
     this.updateTransaction(id, { status: ExtrinsicStatus.SUCCESS });
     console.log('Transaction completed', id, transaction.extrinsicHash);
+
+    // Write success transaction history
+    this.historyService.updateHistory(transaction.chain, transaction.extrinsicHash, {
+      status: ExtrinsicStatus.SUCCESS,
+      blockNumber: blockNumber || 0,
+      blockHash: blockHash || ''
+    }).catch(console.error);
+
     NotificationService.createNotification('Transaction completed', `Transaction ${transaction?.extrinsicHash} completed`, this.getTransactionLink(id));
   }
 
-  private onFailed ({ errors, id }: TransactionEventResponse) {
-    // Todo: Write failed transaction history
+  private onFailed ({ blockHash, blockNumber, errors, id }: TransactionEventResponse) {
     const transaction = this.getTransaction(id);
 
     if (transaction) {
       this.updateTransaction(id, { status: ExtrinsicStatus.FAIL, errors });
       console.log('Transaction failed', id, transaction.extrinsicHash);
+
+      // Write failed transaction history
+      this.historyService.updateHistory(transaction.chain, transaction.extrinsicHash, {
+        status: ExtrinsicStatus.FAIL,
+        blockNumber: blockNumber || 0,
+        blockHash: blockHash || ''
+      }).catch(console.error);
+
       NotificationService.createNotification('Transaction failed', `Transaction ${transaction?.extrinsicHash} failed`, this.getTransactionLink(id));
     }
 
+    // Log transaction errors
     console.error(errors);
   }
 
@@ -467,6 +572,8 @@ export default class TransactionService {
               emitter.emit('extrinsicHash', eventData);
             })
             .once('receipt', (rs) => {
+              eventData.blockHash = rs.blockHash;
+              eventData.blockNumber = rs.blockNumber;
               emitter.emit('success', eventData);
             })
             .once('error', (e) => {

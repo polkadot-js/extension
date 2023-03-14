@@ -139,7 +139,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           renderOnScroll={true}
           renderWhenEmpty={emptyNft}
           searchFunction={searchCollection}
-          searchMinCharactersCount={1}
+          searchMinCharactersCount={2}
           searchPlaceholder={t<string>('Search collection name')}
         />
       </Layout.Base>

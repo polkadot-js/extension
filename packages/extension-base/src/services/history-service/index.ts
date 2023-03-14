@@ -88,6 +88,20 @@ export class HistoryService {
     return this.historySubject;
   }
 
+  async insertHistory (historyItem: TransactionHistoryItem) {
+    await this.dbService.upsertHistory([historyItem]);
+    this.historySubject.next(await this.dbService.getHistories());
+  }
+
+  async updateHistory (chain: string, extrinsicHash: string, historyItem: Partial<TransactionHistoryItem>) {
+    const existedRecords = await this.dbService.getHistories({ chain, extrinsicHash });
+    const updatedRecords = existedRecords.map((r) => {
+      return { ...r, ...historyItem };
+    });
+
+    await this.addHistoryItems(updatedRecords);
+  }
+
   async addHistoryItems (historyItems: TransactionHistoryItem[]) {
     await this.dbService.upsertHistory(historyItems);
     this.historySubject.next(await this.dbService.getHistories());

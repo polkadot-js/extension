@@ -13,7 +13,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, InputRef, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
-import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useState } from 'react';
+import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -77,7 +77,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
-  const { changeFilters, filteredList, onApplyFilter, onChangeFilterOpt } = useFilterModal(items, FILTER_MODAL_ID, getFilteredList);
+  const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(items, FILTER_MODAL_ID);
+  const filteredList = useMemo(() => {
+    return getFilteredList(items, selectedFilters);
+  }, [items, selectedFilters]);
   const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator } = useSelectValidators(filteredList, id, onChange);
 
   const { t } = useTranslation();
@@ -178,7 +181,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           renderItem={renderItem}
           searchFunction={searchFunction}
           searchPlaceholder={t('Search validator')}
-          searchableMinCharactersCount={1}
+          searchableMinCharactersCount={2}
           showActionBtn
         />
       </SwModal>

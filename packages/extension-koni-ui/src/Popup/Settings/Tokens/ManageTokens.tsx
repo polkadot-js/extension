@@ -4,33 +4,29 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
+import TokenToggleItem from '@subwallet/extension-koni-ui/components/TokenItem/TokenToggleItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
+import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyList';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import TokenItemFooter from '@subwallet/extension-koni-ui/Popup/Settings/Tokens/component/TokenItemFooter';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Checkbox, SwList } from '@subwallet/react-ui';
-import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ButtonProps, SwList } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
-import SwModal from '@subwallet/react-ui/es/sw-modal';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
-import TokenItem from '@subwallet/react-ui/es/web3-block/token-item';
-import CN from 'classnames';
 import { Coin, FadersHorizontal, Plus } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import Layout from '../../../components/Layout';
 
 type Props = ThemeProps
-
-const TOKENS_PER_PAGE = 10;
-
 enum FilterValue {
   ENABLED = 'enabled',
   DISABLED = 'disabled',
@@ -43,7 +39,7 @@ const FILTER_OPTIONS = [
   { label: 'Custom tokens', value: FilterValue.CUSTOM }
 ];
 
-function filterFungibleTokens (assetRegistry: Record<string, _ChainAsset>, assetSettingMap: Record<string, AssetSetting>, filters: FilterValue[]): _ChainAsset[] {
+function filterFungibleTokens (assetRegistry: Record<string, _ChainAsset>, assetSettingMap: Record<string, AssetSetting>, filters: string[]): _ChainAsset[] {
   const filteredTokenList: _ChainAsset[] = [];
 
   Object.values(assetRegistry).forEach((chainAsset) => {
@@ -83,41 +79,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const goBack = useDefaultNavigate().goBack;
   const dataContext = useContext(DataContext);
-  const { token } = useTheme() as Theme;
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const [selectedFilters, setSelectedFilters] = useState<FilterValue[]>([]);
-  const [changeFilters, setChangeFilters] = useState<FilterValue[]>(selectedFilters);
-
   const { assetRegistry, assetSettingMap } = useSelector((state: RootState) => state.assetRegistry);
-
-  const [fungibleTokenList, setFungibleTokenList] = useState<_ChainAsset[]>([]);
+  const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(Object.values(assetRegistry), 'filterTokenModal');
   const allFungibleTokens = useMemo(() => {
     return filterFungibleTokens(assetRegistry, assetSettingMap, selectedFilters);
   }, [assetRegistry, assetSettingMap, selectedFilters]);
-
-  const [paging, setPaging] = useState(TOKENS_PER_PAGE);
-
-  useEffect(() => {
-    setFungibleTokenList(allFungibleTokens.slice(0, TOKENS_PER_PAGE));
-    setPaging(TOKENS_PER_PAGE);
-  }, [allFungibleTokens]);
-
-  const hasMore = useMemo(() => {
-    return allFungibleTokens.length > fungibleTokenList.length;
-  }, [allFungibleTokens.length, fungibleTokenList.length]);
-
-  const loadMoreTokens = useCallback(() => {
-    setTimeout(() => { // delayed to avoid lagging on scroll
-      if (hasMore) {
-        const nextPaging = paging + TOKENS_PER_PAGE;
-        const to = nextPaging > allFungibleTokens.length ? allFungibleTokens.length : nextPaging;
-
-        setFungibleTokenList(allFungibleTokens.slice(0, to));
-        setPaging(nextPaging);
-      }
-    }, 50);
-  }, [allFungibleTokens, hasMore, paging]);
+  const { hasMore, lazyItems, loadMoreItems } = useLazyList(allFungibleTokens);
 
   const searchToken = useCallback((token: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -128,53 +97,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
-  const renderTokenRightItem = useCallback((tokenInfo: _ChainAsset) => {
-    const assetSetting = assetSettingMap[tokenInfo.slug];
-
+  const renderTokenItem = useCallback((tokenInfo: _ChainAsset) => {
     return (
-      <TokenItemFooter
-        assetSetting={assetSetting}
-        navigate={navigate}
+      <TokenToggleItem
+        assetSettingMap={assetSettingMap}
         tokenInfo={tokenInfo}
       />
     );
-  }, [assetSettingMap, navigate]);
-
-  const renderTokenItem = useCallback((tokenInfo: _ChainAsset) => {
-    return (
-      <TokenItem
-        isShowSubLogo={true}
-        key={tokenInfo.slug}
-        name={tokenInfo.symbol}
-        rightItem={renderTokenRightItem(tokenInfo)}
-        subName={tokenInfo.originChain}
-        subNetworkKey={tokenInfo.originChain}
-        symbol={tokenInfo.symbol.toLowerCase()}
-        withDivider={true}
-      />
-    );
-  }, [renderTokenRightItem]);
+  }, [assetSettingMap]);
 
   const emptyTokenList = useCallback(() => {
     return (
-      <div className={'manage_tokens__empty_container'}>
-        <div className={'manage_tokens__empty_icon_wrapper'}>
-          <PageIcon
-            color={token['gray-3']}
-            iconProps={{
-              phosphorIcon: Coin,
-              weight: 'fill'
-            }}
-          />
-        </div>
-
-        <div className={'manage_tokens__empty_text_container'}>
-          <div className={'manage_tokens__empty_title'}>{t<string>('No token')}</div>
-          <div className={'manage_tokens__empty_subtitle'}>{t<string>('Your token will appear here.')}</div>
-        </div>
-      </div>
+      <EmptyList
+        emptyMessage={t<string>('Your token will appear here.')}
+        emptyTitle={t<string>('No token')}
+        phosphorIcon={Coin}
+      />
     );
-  }, [t, token]);
+  }, [t]);
 
   const subHeaderButton: ButtonProps[] = useMemo(() => {
     return [
@@ -191,52 +131,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     ];
   }, [navigate]);
 
-  const openFilterModal = useCallback(() => {
+  const openFilterModal = useCallback((e?: SyntheticEvent) => {
+    e && e.stopPropagation();
     activeModal('filterTokenModal');
   }, [activeModal]);
 
   const closeFilterModal = useCallback(() => {
     inactiveModal('filterTokenModal');
   }, [inactiveModal]);
-
-  const onApplyFilter = useCallback(() => {
-    inactiveModal('filterTokenModal');
-    setSelectedFilters(changeFilters);
-  }, [changeFilters, inactiveModal]);
-
-  const filterModalFooter = useCallback(() => {
-    return (
-      <Button
-        block={true}
-        icon={<Icon
-          phosphorIcon={FadersHorizontal}
-          type='phosphor'
-          weight={'bold'}
-        />}
-        onClick={onApplyFilter}
-      >
-        <span className={'manage_tokens__token_filter_button'}>{t('Apply filter')}</span>
-      </Button>
-    );
-  }, [t, onApplyFilter]);
-
-  const onChangeFilterOption = useCallback((e: CheckboxChangeEvent) => {
-    const changedValue = e.target.value as FilterValue;
-
-    if (e.target.checked) {
-      setChangeFilters([...changeFilters, changedValue]);
-    } else {
-      const newSelectedFilters: FilterValue[] = [];
-
-      changeFilters.forEach((filterValue) => {
-        if (filterValue !== changedValue) {
-          newSelectedFilters.push(filterValue);
-        }
-      });
-
-      setChangeFilters(newSelectedFilters);
-    }
-  }, [changeFilters]);
 
   return (
     <PageWrapper
@@ -264,51 +166,32 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           className={'manage_tokens__container'}
           enableSearchInput={true}
           gridGap={'14px'}
-          list={fungibleTokenList}
+          ignoreScrollbar={lazyItems.length > 2}
+          list={lazyItems}
           minColumnWidth={'172px'}
+          mode={'boxed'}
           onClickActionBtn={openFilterModal}
           pagination={{
             hasMore,
-            loadMore: loadMoreTokens
+            loadMore: loadMoreItems
           }}
           renderItem={renderTokenItem}
           renderOnScroll={false}
           renderWhenEmpty={emptyTokenList}
           searchFunction={searchToken}
+          searchMinCharactersCount={2}
           searchPlaceholder={t<string>('Search token')}
           showActionBtn={true}
         />
 
-        <SwModal
-          className={CN('manage_tokens__token_filter_modal')}
-          footer={filterModalFooter()}
+        <FilterModal
           id={'filterTokenModal'}
+          onApplyFilter={onApplyFilter}
           onCancel={closeFilterModal}
-          onOk={closeFilterModal}
-          title={t<string>('Filter')}
-          wrapClassName={className}
-        >
-          <div className={'manage_tokens__filter_option_wrapper'}>
-            {
-              FILTER_OPTIONS.map((filterOption) => {
-                return (
-                  <div
-                    className={'manage_tokens__filter_option'}
-                    key={filterOption.label}
-                  >
-                    <Checkbox
-                      checked={changeFilters.includes(filterOption.value)}
-                      onChange={onChangeFilterOption}
-                      value={filterOption.value}
-                    >
-                      <span className={'manage_tokens__filter_option_label'}>{filterOption.label}</span>
-                    </Checkbox>
-                  </div>
-                );
-              })
-            }
-          </div>
-        </SwModal>
+          onChangeOption={onChangeFilterOpt}
+          optionSelection={changeFilters}
+          options={FILTER_OPTIONS}
+        />
       </Layout.Base>
     </PageWrapper>
   );
@@ -316,6 +199,30 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
 const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '.ant-sw-screen-layout-body': {
+      display: 'flex'
+    },
+
+    '.ant-sw-list-wrapper.ant-sw-list-wrapper:before': {
+      zIndex: 0,
+      borderRadius: token.borderRadiusLG
+    },
+
+    '.ant-sw-list-section.-boxed-mode .ant-sw-list': {
+      paddingLeft: token.padding,
+      paddingTop: token.paddingXS,
+      paddingBottom: token.paddingXS
+    },
+
+    '.ant-sw-list-section.-boxed-mode .ant-sw-list.-ignore-scrollbar': {
+      paddingRight: token.padding + 6
+    },
+
+    '.ant-network-item.-with-divider': {
+      position: 'relative',
+      zIndex: 1
+    },
+
     '&__inner': {
       display: 'flex',
       flexDirection: 'column',
@@ -323,73 +230,9 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.manage_tokens__container': {
-      paddingTop: 14,
+      paddingTop: token.padding,
+      paddingBottom: token.paddingSM,
       flex: 1
-    },
-
-    '.manage_tokens__empty_container': {
-      marginTop: 44,
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: token.padding,
-      flexDirection: 'column',
-      alignContent: 'center'
-    },
-
-    '.manage_tokens__empty_text_container': {
-      display: 'flex',
-      flexDirection: 'column',
-      alignContent: 'center',
-      justifyContent: 'center',
-      flexWrap: 'wrap'
-    },
-
-    '.manage_tokens__empty_title': {
-      fontWeight: token.headingFontWeight,
-      textAlign: 'center',
-      fontSize: token.fontSizeLG,
-      color: token.colorText
-    },
-
-    '.manage_tokens__empty_subtitle': {
-      marginTop: 6,
-      textAlign: 'center',
-      color: token.colorTextTertiary
-    },
-
-    '.manage_tokens__empty_icon_wrapper': {
-      display: 'flex',
-      justifyContent: 'center'
-    },
-
-    '.manage_tokens__token_filter_button': {
-      fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG,
-      fontWeight: token.headingFontWeight
-    },
-
-    '.manage_tokens__filter_option_wrapper': {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: token.marginLG
-    },
-
-    '.manage_tokens__filter_option': {
-      width: '100%'
-    },
-
-    '.manage_tokens__filter_option_label': {
-      color: token.colorTextLight1
-    },
-
-    '.ant-web3-block': {
-      cursor: 'default'
-    },
-
-    '.manage_tokens__right_item_container': {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
     }
   });
 });

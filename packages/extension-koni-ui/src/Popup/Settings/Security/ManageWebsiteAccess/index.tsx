@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
+import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { ActionItemType, ActionModal } from '@subwallet/extension-koni-ui/components/Modal/ActionModal';
 import { WebsiteAccessItem } from '@subwallet/extension-koni-ui/components/Setting/WebsiteAccessItem';
@@ -13,7 +14,7 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ManageWebsiteAccessDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { Icon, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
-import { GearSix, Plugs, PlugsConnected, X } from 'phosphor-react';
+import { GearSix, GlobeHemisphereWest, Plugs, PlugsConnected, X } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -114,6 +115,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [onClickItem]
   );
 
+  const renderEmptyList = useCallback(() => {
+    return (
+      <EmptyList
+        emptyMessage={t('Your list of approved dApps will appear here.')}
+        emptyTitle={t('No dApps found')}
+        phosphorIcon={GlobeHemisphereWest}
+      />
+    );
+  }, [t]);
+
   const searchFunc = useCallback((item: AuthUrlInfo, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
@@ -152,6 +163,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         enableSearchInput
         list={websiteAccessItems}
         renderItem={renderItem}
+        renderWhenEmpty={renderEmptyList}
         rowGap = {'8px'}
         searchFunction={searchFunc}
         searchMinCharactersCount={2}

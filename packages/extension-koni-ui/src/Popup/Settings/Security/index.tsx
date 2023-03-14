@@ -3,7 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
@@ -54,14 +54,20 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { goBack } = useDefaultNavigate();
-
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
 
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [loading, setLoading] = useState(false);
+
+  const goBack = useCallback(() => {
+    if (noAccount) {
+      navigate(DEFAULT_ROUTER_PATH);
+    } else {
+      navigate('/settings/list');
+    }
+  }, [navigate, noAccount]);
 
   const updateCamera = useCallback((currentValue: boolean) => {
     return () => {

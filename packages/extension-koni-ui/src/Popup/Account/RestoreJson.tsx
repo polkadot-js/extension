@@ -248,7 +248,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         rightFooterButton={{
           children: t('Import from Json'),
           icon: FooterIcon,
@@ -256,21 +256,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
           loading: validating || loading
         }}
-        showBackButton={true}
-        showSubHeader={true}
-        subHeaderBackground='transparent'
-        subHeaderCenter={true}
         subHeaderIcons={[
           {
             icon: (
               <Icon
                 phosphorIcon={Info}
-                size='sm'
+                size='md'
               />
             )
           }
         ]}
-        subHeaderPaddingVertical={true}
         title={t<string>('Import from Json')}
       >
         <div className={CN('container')}>
@@ -282,6 +277,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             name={formName}
           >
             <Form.Item
+              help={fileValidateState.message}
               validateStatus={fileValidateState.status}
             >
               <Upload.SingleFileDragger
@@ -296,24 +292,37 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             {
               !!accountsInfo.length && (
                 <Form.Item>
-                  <SettingItem
-                    className='account-list-item'
-                    leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
-                    name={t(`Import ${String(accountsInfo.length).padStart(2, '0')} accounts`)}
-                    onPressItem={openModal}
-                    rightItem={(
-                      <Icon
-                        phosphorIcon={DotsThree}
-                        size='sm'
-                      />
-                    )}
-                  />
+                  {
+                    accountsInfo.length > 1
+                      ? (
+                        <SettingItem
+                          className='account-list-item'
+                          leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
+                          name={t(`Import ${String(accountsInfo.length).padStart(2, '0')} accounts`)}
+                          onPressItem={openModal}
+                          rightItem={(
+                            <Icon
+                              phosphorIcon={DotsThree}
+                              size='sm'
+                            />
+                          )}
+                        />
+                      )
+                      : (
+                        <SettingItem
+                          className='account-list-item'
+                          leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
+                          name={accountsInfo[0].name}
+                        />
+                      )
+                  }
                 </Form.Item>
               )
             }
             {
               requirePassword && (
                 <Form.Item
+                  help={submitValidateState.message}
                   validateStatus={submitValidateState.status}
                 >
                   <div className='input-label'>
@@ -329,15 +338,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 </Form.Item>
               )
             }
-
-            <Form.Item
-              help={fileValidateState.message}
-              validateStatus={fileValidateState.status}
-            />
-            <Form.Item
-              help={submitValidateState.message}
-              validateStatus={submitValidateState.status}
-            />
           </Form>
           <SwModal
             className={className}
@@ -347,13 +347,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           >
             <SwList.Section
               displayRow={true}
-              ignoreScrollbar={accountsInfo.length > 5}list={accountsInfo}
+              ignoreScrollbar={accountsInfo.length > 5}
+              list={accountsInfo}
               renderItem={renderItem}
               rowGap='var(--row-gap)'
             />
           </SwModal>
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 };
@@ -363,7 +364,8 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '--row-gap': token.sizeXS,
 
     '.container': {
-      padding: token.padding
+      padding: token.padding,
+      paddingBottom: 0
     },
 
     '.description': {
@@ -376,6 +378,10 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.form-container': {
       marginTop: token.margin
+    },
+
+    '.ant-form-item:last-child': {
+      marginBottom: 0
     },
 
     '.input-label': {
@@ -398,16 +404,21 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.ant-sw-modal-body': {
-      padding: `${token.padding}px 0 0`
+      padding: `${token.padding}px 0 ${token.padding}px`,
+      flexDirection: 'column',
+      display: 'flex'
     },
 
-    '.ant-sw-list': {
-      maxHeight: 450
+    '.ant-sw-list-wrapper': {
+      overflow: 'hidden',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column'
     },
 
     '.file-selector': {
       '.ant-upload-drag-single': {
-        padding: `${token.paddingXL - 2}px ${token.padding - 2}px`
+        height: 168
       }
     }
   };

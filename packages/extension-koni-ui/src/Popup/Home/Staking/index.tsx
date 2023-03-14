@@ -19,7 +19,7 @@ import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useState } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -82,7 +82,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { data, priceMap } = useGetStakingList();
   const [{ chain, stakingType }, setSelectedItem] = useState<{ chain: string | undefined, stakingType: StakingType | undefined }>({ chain: undefined, stakingType: undefined });
-  const { changeFilters, filteredList, onApplyFilter, onChangeFilterOpt } = useFilterModal(data, FILTER_MODAL_ID, getFilteredList);
+  const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(data, FILTER_MODAL_ID);
+  const filteredList = useMemo(() => {
+    return getFilteredList(data, selectedFilters);
+  }, [data, selectedFilters]);
   const { hasMore, lazyItems, loadMoreItems } = useLazyList(filteredList);
 
   const onClickActionBtn = useCallback(() => {
@@ -174,7 +177,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           renderOnScoll={true}
           renderWhenEmpty={emptyStakingList}
           searchFunction={searchFunction}
-          searchMinCharactersCount={1}
+          searchMinCharactersCount={2}
           searchPlaceholder={t('Search project')}
           showActionBtn
         />

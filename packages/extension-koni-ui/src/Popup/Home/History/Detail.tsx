@@ -3,6 +3,7 @@
 
 import { ExtrinsicStatus, ExtrinsicType, TransactionAdditionalInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainName } from '@subwallet/extension-base/services/chain-service/utils';
+import { getTransactionLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { InfoItemBase } from '@subwallet/extension-koni-ui/components/MetaInfo/parts/types';
 import { TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/Popup/Home/History/index';
@@ -13,7 +14,7 @@ import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormat
 import { Button, Icon, SwIconProps } from '@subwallet/react-ui';
 import SwModal from '@subwallet/react-ui/es/sw-modal';
 import { ArrowSquareUpRight, CheckCircle, ProhibitInset, Spinner, StopCircle, XCircle } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -51,6 +52,7 @@ export const HistoryDetailModalId = 'historyDetailModalId';
 
 function Component ({ className = '', data, onCancel }: Props): React.ReactElement<Props> {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
+  const chainInfo = chainInfoMap[data.chain];
   const { t } = useTranslation();
   const { title } = data.displayData;
   const { amount, fee } = data;
@@ -108,6 +110,17 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
     }
   }), [t]);
 
+  const openBlockExplorer = useCallback(
+    () => {
+      if (data.extrinsicHash && data.extrinsicHash !== '') {
+        const link = getTransactionLink(chainInfo, data.extrinsicHash);
+
+        window.open(link, '_blank');
+      }
+    },
+    [chainInfo, data.extrinsicHash]
+  );
+
   const modalFooter = useMemo<React.ReactNode>(() => {
     if (data.status === 'processing') {
       return (
@@ -136,11 +149,12 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
             weight={'fill'}
           />
         }
+        onClick={openBlockExplorer}
       >
         {t('View on explorer')}
       </Button>
     );
-  }, [data.status, onCancel, t]);
+  }, [data.status, onCancel, openBlockExplorer, t]);
 
   const transactionType = data.type;
 
@@ -171,7 +185,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
                   }}
                   originChain={{
                     slug: data.chain,
-                    name: _getChainName(chainInfoMap[data.chain])
+                    name: _getChainName(chainInfo)
                   }}
                   recipientAddress={data.to}
                   recipientName={data.toName}
@@ -185,7 +199,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
               <>
                 <MetaInfo.Chain
                   chain={data.chain}
-                  chainName={_getChainName(chainInfoMap[data.chain])}
+                  chainName={_getChainName(chainInfo)}
                   label={t('Network')}
                 />
 
@@ -200,7 +214,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
           })()}
 
           <MetaInfo.Status
-            label={t('Extrinsic Hash')}
+            label={t('Transaction status')}
             statusIcon={statusMap[data.status].icon}
             statusName={statusMap[data.status].name}
             valueColorSchema={statusMap[data.status].schema}

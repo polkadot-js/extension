@@ -4,6 +4,7 @@
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
+import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { ActionItemType, ActionModal } from '@subwallet/extension-koni-ui/components/Modal/ActionModal';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -15,7 +16,7 @@ import { ManageWebsiteAccessDetailParam } from '@subwallet/extension-koni-ui/typ
 import { filterNotReadOnlyAccount } from '@subwallet/extension-koni-ui/util/account';
 import { Icon, Switch, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
-import { GearSix, Plugs, PlugsConnected, ShieldCheck, ShieldSlash, X } from 'phosphor-react';
+import { GearSix, MagnifyingGlass, Plugs, PlugsConnected, ShieldCheck, ShieldSlash, X } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -180,6 +181,16 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
     });
   }, [authInfo]);
 
+  const renderEmptyList = useCallback(() => {
+    return (
+      <EmptyList
+        emptyMessage={t('Your accounts will appear here.')}
+        emptyTitle={t('No account found')}
+        phosphorIcon={MagnifyingGlass}
+      />
+    );
+  }, [t]);
+
   return (
     <PageWrapper className={`manage-website-access-detail ${className}`}>
       <SwSubHeader
@@ -209,6 +220,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
         enableSearchInput
         list={accountItems}
         renderItem={renderItem}
+        renderWhenEmpty={renderEmptyList}
         rowGap = {'8px'}
         searchFunction={searchFunc}
         searchMinCharactersCount={2}

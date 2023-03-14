@@ -379,7 +379,7 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       fontWeight: token.bodyFontWeight,
       fontSize: token.fontSizeHeading6,
       color: token.colorTextTertiary,
-      wordBreak: 'break-all'
+      wordBreak: 'break-word'
     },
 
     '.nft_item_detail__nft_image': {

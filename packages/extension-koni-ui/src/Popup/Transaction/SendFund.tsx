@@ -179,6 +179,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const chainStateMap = useSelector((state: RootState) => state.chainStore.chainStateMap);
   const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
+  const balanceMap = useSelector((state: RootState) => state.balance.balanceMap);
   const transactionContext = useContext(TransactionContext);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
@@ -193,20 +194,13 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     value: ''
   };
 
-  // note: any value below may be undefined
-  const fromAddress = Form.useWatch('from', form);
-  const originChain = Form.useWatch('chain', form);
-
-  const chainInfo = useMemo(() => (originChain ? chainInfoMap[originChain] : null), [chainInfoMap, originChain]);
-  // const isZeroFreeBalance = (new BigN(transactionContext.freeBalance || '0')).eq(new BigN(0));
-
   const destChainItems = useMemo<ChainItemType[]>(() => {
-    return getDestinationChainItems(originChain, chainInfoMap);
-  }, [chainInfoMap, originChain]);
+    return getDestinationChainItems(transactionContext.chain, chainInfoMap);
+  }, [chainInfoMap, transactionContext.chain]);
 
   const tokenItems = useMemo<TokenItemType[]>(() => {
     return getTokenItems(
-      fromAddress,
+      transactionContext.from,
       chainInfoMap,
       chainStateMap,
       assetRegistryMap,
@@ -214,7 +208,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       multiChainAssetMap,
       sendFundSlug
     );
-  }, [assetRegistryMap, assetSettingMap, chainInfoMap, chainStateMap, fromAddress, multiChainAssetMap, sendFundSlug]);
+  }, [assetRegistryMap, assetSettingMap, chainInfoMap, chainStateMap, transactionContext.from, multiChainAssetMap, sendFundSlug]);
 
   const validateRecipientAddress = useCallback((rule: Rule, _recipientAddress: string): Promise<void> => {
     if (!_recipientAddress) {
@@ -327,8 +321,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         sendPromise.then((rs) => {
           const { errors, extrinsicHash, warnings } = rs;
 
-          console.debug(rs);
-
           if (errors.length || warnings.length) {
             setLoading(false);
             setErrors(errors.map((e) => e.message));
@@ -344,6 +336,19 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     },
     [form, transactionContext]
   );
+
+  const currentTokenSlug = Form.useWatch('token', form);
+  const currentChainAsset = useMemo(() => {
+    return currentTokenSlug ? assetRegistryMap[currentTokenSlug] : undefined;
+  }, [assetRegistryMap, currentTokenSlug]);
+
+  const maxTransfer: string = (() => {
+    if (currentTokenSlug && balanceMap[currentTokenSlug]) {
+      return balanceMap[currentTokenSlug].free || '0';
+    }
+
+    return '0';
+  })();
 
   useEffect(() => {
     if (tokenItems.length) {
@@ -413,8 +418,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               validateTrigger='onBlur'
             >
               <AmountInput
-                decimals={chainInfo?.substrateInfo?.decimals || chainInfo?.evmInfo?.decimals || 18}
-                maxValue={transactionContext.freeBalance || '0'}
+                decimals={currentChainAsset?.decimals || 18}
+                maxValue={maxTransfer}
               />
             </Form.Item>
           </div>
@@ -451,7 +456,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           </Form.Item>
         </Form>
 
-        <FreeBalance />
+        <FreeBalance tokenSlug={currentTokenSlug} />
       </TransactionContent>
       <TransactionFooter
         className={`${className} -transaction-footer`}

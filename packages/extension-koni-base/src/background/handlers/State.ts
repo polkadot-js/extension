@@ -150,8 +150,8 @@ export default class KoniState {
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService);
     this.balanceSevirce = new BalanceService(getFreeBalance);
-    this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceSevirce);
     this.historyService = new HistoryService(this.dbService, this.chainService);
+    this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceSevirce, this.historyService);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');

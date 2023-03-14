@@ -171,7 +171,6 @@ const API_LIST = [
   'pri(unbonding.submitWithdrawal)',
   'pri(staking.claimRewardTxInfo)',
   'pri(staking.submitClaimReward)',
-  'pri(staking.delegationInfo)',
   'pri(evm.transaction.parse.input)',
   'pri(authorize.subscribe)',
   'pri(staking.turingCompound)',

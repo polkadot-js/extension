@@ -1188,8 +1188,9 @@ export interface BasicTxInfo {
 }
 
 export interface BondingOptionParams {
-  networkKey: string;
+  chain: string;
   address: string;
+  type: StakingType;
 }
 
 export interface SingleModeJson {
@@ -1453,15 +1454,6 @@ export interface NominatorInfo {
   bondedPool: string[]
 }
 
-export interface BondingOptionInfo {
-  isBondedBefore: boolean,
-  era: number,
-  maxNominations: number,
-  maxNominatorPerValidator: number,
-  validators: ValidatorInfo[],
-  bondedValidators: string[]
-}
-
 export interface ChainBondingInfo {
   chain: string,
   estimatedReturn: number, // yearly
@@ -1704,7 +1696,6 @@ export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, SWTransactionResponse];
   'pri(staking.submitTuringCompound)': [RequestTuringStakeCompound, SWTransactionResponse];
-  'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
   'pri(staking.submitClaimReward)': [RequestStakeClaimReward, SWTransactionResponse];
   'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, SWTransactionResponse];
   'pri(unbonding.subscribeUnlockingInfo)': [null, StakeUnlockingJson, StakeUnlockingJson];
@@ -1712,7 +1703,7 @@ export interface KoniRequestSignatures {
   'pri(bonding.submitTransaction)': [RequestBondingSubmit, SWTransactionResponse];
   'pri(bonding.subscribeChainStakingMetadata)': [null, ChainStakingMetadata[], ChainStakingMetadata[]];
   'pri(bonding.subscribeNominatorMetadata)': [null, NominatorMetadata[], NominatorMetadata[]];
-  'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
+  'pri(bonding.getBondingOptions)': [BondingOptionParams, ValidatorInfo[]];
 
   // Chains, assets functions
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];

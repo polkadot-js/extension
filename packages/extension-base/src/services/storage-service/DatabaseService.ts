@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
 import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
@@ -241,7 +241,7 @@ export default class DatabaseService {
 
   // Staking
   async updateChainStakingMetadata (item: ChainStakingMetadata) {
-    this.logger.log('Update ChainStakingMetadata: ', item);
+    this.logger.log('Update ChainStakingMetadata: ', item.chain);
 
     return this.stores.chainStakingMetadata.upsert(item);
   }
@@ -250,8 +250,12 @@ export default class DatabaseService {
     return this.stores.chainStakingMetadata.getAll();
   }
 
+  async getStakingMetadataByChain (chain: string, type = StakingType.NOMINATED) {
+    return this.stores.chainStakingMetadata.getByChainAndType(chain, type);
+  }
+
   async updateNominatorMetadata (item: NominatorMetadata) {
-    this.logger.log('Update NominatorMetadata: ', item);
+    this.logger.log('Update NominatorMetadata: ', item.address, item.chain);
 
     return this.stores.nominatorMetadata.upsert(item);
   }

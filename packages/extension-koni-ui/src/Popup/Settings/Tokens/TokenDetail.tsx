@@ -192,10 +192,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     <Field
                       content={tokenInfo.symbol}
                       placeholder={t<string>('Symbol')}
-                      prefix={<Logo
-                        token={tokenInfo.symbol.toLowerCase()}
-                        size={20}
-                      />}
+                      prefix={(
+                        <Logo
+                          size={20}
+                          token={tokenInfo.symbol.toLowerCase()}
+                        />
+                      )}
                     />
                   </div>
                 </Tooltip>

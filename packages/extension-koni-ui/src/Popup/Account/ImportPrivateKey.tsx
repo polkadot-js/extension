@@ -165,8 +165,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             name={formName}
           >
             <Form.Item
-              name={fieldName}
               help={validateState.message}
+              name={fieldName}
               validateStatus={validateState.status}
             >
               <Input.TextArea

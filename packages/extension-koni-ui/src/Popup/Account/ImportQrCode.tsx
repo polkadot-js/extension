@@ -124,7 +124,7 @@ const Component: React.FC<Props> = (props: Props) => {
               status: 'error'
             });
           });
-      }, 300)
+      }, 300);
     } else {
       setLoading(false);
     }

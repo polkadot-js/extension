@@ -198,7 +198,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   // render item
-  const getParaStateLabel = (paraState?: CrowdloanParaState) => {
+  const getParaStateLabel = useCallback((paraState?: CrowdloanParaState) => {
     if (!paraState) {
       return '';
     }
@@ -216,7 +216,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     return '';
-  };
+  }, [t]);
 
   const renderItem = useCallback(
     (item: CrowdloanItemType) => {

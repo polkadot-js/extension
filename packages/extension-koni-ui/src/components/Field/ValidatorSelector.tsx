@@ -78,7 +78,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const [sortSelection, setSortSelection] = useState<string>('');
   const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(items, FILTER_MODAL_ID);
   const filteredList = useMemo(() => {
-    return getFilteredList(items, selectedFilters as string[]);
+    return getFilteredList(items, selectedFilters);
   }, [items, selectedFilters]);
 
   useExcludeModal(id);

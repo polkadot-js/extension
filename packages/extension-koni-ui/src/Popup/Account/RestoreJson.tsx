@@ -4,6 +4,7 @@
 import { ResponseJsonGetAccountInfo } from '@subwallet/extension-base/background/types';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
+import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
@@ -246,112 +247,114 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [requirePassword]);
 
   return (
-    <Layout.Base
-      rightFooterButton={{
-        children: t('Import from Json'),
-        icon: FooterIcon,
-        onClick: onSubmit,
-        disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
-        loading: validating || loading
-      }}
-      showBackButton={true}
-      showSubHeader={true}
-      subHeaderBackground='transparent'
-      subHeaderCenter={true}
-      subHeaderIcons={[
-        {
-          icon: (
-            <Icon
-              phosphorIcon={Info}
-              size='sm'
-            />
-          )
-        }
-      ]}
-      subHeaderPaddingVertical={true}
-      title={t<string>('Import from Json')}
-    >
-      <div className={CN(className, 'container')}>
-        <div className='description'>
-          {t('Please drag an drop the .json file you exported from Polkadot.js')}
-        </div>
-        <Form
-          className='form-container'
-          name={formName}
-        >
-          <Form.Item
-            validateStatus={fileValidateState.status}
+    <PageWrapper className={CN(className)}>
+      <Layout.Base
+        rightFooterButton={{
+          children: t('Import from Json'),
+          icon: FooterIcon,
+          onClick: onSubmit,
+          disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
+          loading: validating || loading
+        }}
+        showBackButton={true}
+        showSubHeader={true}
+        subHeaderBackground='transparent'
+        subHeaderCenter={true}
+        subHeaderIcons={[
+          {
+            icon: (
+              <Icon
+                phosphorIcon={Info}
+                size='sm'
+              />
+            )
+          }
+        ]}
+        subHeaderPaddingVertical={true}
+        title={t<string>('Import from Json')}
+      >
+        <div className={CN('container')}>
+          <div className='description'>
+            {t('Please drag an drop the .json file you exported from Polkadot.js')}
+          </div>
+          <Form
+            className='form-container'
+            name={formName}
           >
-            <Upload.SingleFileDragger
-              accept={'application/json'}
-              className='file-selector'
-              disabled={validating}
-              hint={t('Please drag an drop the .json file you exported from Polkadot.js')}
-              onChange={onChange}
-              title={t('Import from Polkadot.js')}
-            />
-          </Form.Item>
-          {
-            !!accountsInfo.length && (
-              <Form.Item>
-                <SettingItem
-                  className='account-list-item'
-                  leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
-                  name={t(`Import ${String(accountsInfo.length).padStart(2, '0')} accounts`)}
-                  onPressItem={openModal}
-                  rightItem={(
-                    <Icon
-                      phosphorIcon={DotsThree}
-                      size='sm'
-                    />
-                  )}
-                />
-              </Form.Item>
-            )
-          }
-          {
-            requirePassword && (
-              <Form.Item
-                validateStatus={submitValidateState.status}
-              >
-                <div className='input-label'>
-                  {t('Please enter the password you set when creating your polkadot.js account')}
-                </div>
-                <Input
-                  id={`${formName}_${passwordField}`}
-                  onChange={onChangePassword}
-                  placeholder={t('Current password')}
-                  type='password'
-                  value={password}
-                />
-              </Form.Item>
-            )
-          }
+            <Form.Item
+              validateStatus={fileValidateState.status}
+            >
+              <Upload.SingleFileDragger
+                accept={'application/json'}
+                className='file-selector'
+                disabled={validating}
+                hint={t('Please drag an drop the .json file you exported from Polkadot.js')}
+                onChange={onChange}
+                title={t('Import from Polkadot.js')}
+              />
+            </Form.Item>
+            {
+              !!accountsInfo.length && (
+                <Form.Item>
+                  <SettingItem
+                    className='account-list-item'
+                    leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
+                    name={t(`Import ${String(accountsInfo.length).padStart(2, '0')} accounts`)}
+                    onPressItem={openModal}
+                    rightItem={(
+                      <Icon
+                        phosphorIcon={DotsThree}
+                        size='sm'
+                      />
+                    )}
+                  />
+                </Form.Item>
+              )
+            }
+            {
+              requirePassword && (
+                <Form.Item
+                  validateStatus={submitValidateState.status}
+                >
+                  <div className='input-label'>
+                    {t('Please enter the password you set when creating your polkadot.js account')}
+                  </div>
+                  <Input
+                    id={`${formName}_${passwordField}`}
+                    onChange={onChangePassword}
+                    placeholder={t('Current password')}
+                    type='password'
+                    value={password}
+                  />
+                </Form.Item>
+              )
+            }
 
-          <Form.Item
-            help={fileValidateState.message}
-            validateStatus={fileValidateState.status}
-          />
-          <Form.Item
-            help={submitValidateState.message}
-            validateStatus={submitValidateState.status}
-          />
-        </Form>
-        <SwModal
-          className={className}
-          id={modalId}
-          onCancel={closeModal}
-          title={t('Import list')}
-        >
-          <SwList.Section
-            displayRow={true}
-            list={accountsInfo}
-            renderItem={renderItem}
-            rowGap='var(--row-gap)'
-          />
-        </SwModal>
-      </div>
-    </Layout.Base>
+            <Form.Item
+              help={fileValidateState.message}
+              validateStatus={fileValidateState.status}
+            />
+            <Form.Item
+              help={submitValidateState.message}
+              validateStatus={submitValidateState.status}
+            />
+          </Form>
+          <SwModal
+            className={className}
+            id={modalId}
+            onCancel={closeModal}
+            title={t('Import list')}
+          >
+            <SwList.Section
+              displayRow={true}
+              list={accountsInfo}
+              renderItem={renderItem}
+              rowGap='var(--row-gap)'
+            />
+          </SwModal>
+        </div>
+      </Layout.Base>
+    </PageWrapper>
   );
 };
 
@@ -359,7 +362,7 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '--row-gap': token.sizeXS,
 
-    '&.container': {
+    '.container': {
       padding: token.padding
     },
 

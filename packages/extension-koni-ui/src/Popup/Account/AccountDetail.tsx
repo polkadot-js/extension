@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
+import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -156,148 +157,149 @@ const Component: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Layout.WithSubHeaderOnly
-      className={CN(className)}
-      subHeaderIcons={[
-        {
-          icon: <Icon
-            phosphorIcon={Info}
-            size='sm'
-          />
-        }
-      ]}
-      title={t('Account detail')}
-    >
-      <div className='body-container'>
-        <div className='account-qr'>
-          <QRCode
-            errorLevel='H'
-            iconSize={token.sizeLG * 1.5}
-            size={token.sizeXL * 3.5}
-            value={account.address}
-          />
-        </div>
-        <Form
-          form={form}
-          initialValues={{
-            [FormFieldName.NAME]: account.name || ''
-          }}
-          name='account-detail-form'
-          onFinish={onSubmit}
-        >
-          <Form.Item
-            className={CN('account-field')}
-            hideError={true}
-            name={FormFieldName.NAME}
-            rules={[
-              {
-                message: 'Wallet name is required',
-                required: true
-              }
-            ]}
+    <PageWrapper className={CN(className)}>
+      <Layout.WithSubHeaderOnly
+        subHeaderIcons={[
+          {
+            icon: <Icon
+              phosphorIcon={Info}
+              size='md'
+            />
+          }
+        ]}
+        title={t('Account detail')}
+      >
+        <div className='body-container'>
+          <div className='account-qr'>
+            <QRCode
+              errorLevel='H'
+              iconSize={token.sizeLG * 1.5}
+              size={token.sizeXL * 3.5}
+              value={account.address}
+            />
+          </div>
+          <Form
+            form={form}
+            initialValues={{
+              [FormFieldName.NAME]: account.name || ''
+            }}
+            name='account-detail-form'
+            onFinish={onSubmit}
           >
-            <Input
-              label={t('Wallet name')}
-              onBlur={form.submit}
-              placeholder={t('Wallet name')}
+            <Form.Item
+              className={CN('account-field')}
+              hideError={true}
+              name={FormFieldName.NAME}
+              rules={[
+                {
+                  message: 'Wallet name is required',
+                  required: true
+                }
+              ]}
+            >
+              <Input
+                label={t('Wallet name')}
+                onBlur={form.submit}
+                placeholder={t('Wallet name')}
+                suffix={(
+                  <Button
+                    icon={(
+                      <Icon
+                        phosphorIcon={FloppyDiskBack}
+                        size='sm'
+                      />
+                    )}
+                    size='xs'
+                    type='ghost'
+                  />
+                )}
+              />
+            </Form.Item>
+          </Form>
+          <div className={CN('account-field', 'mb-lg')}>
+            <Field
+              content={toShort(account.address, 11, 13)}
+              label={t('Wallet address')}
+              placeholder={t('Wallet address')}
+              prefix={(
+                <AccountAvatar
+                  size={token.sizeMD}
+                  value={account.address}
+                />
+              )}
               suffix={(
                 <Button
                   icon={(
                     <Icon
-                      phosphorIcon={FloppyDiskBack}
+                      phosphorIcon={CopySimple}
                       size='sm'
                     />
                   )}
+                  onClick={onCopyAddress}
                   size='xs'
                   type='ghost'
                 />
               )}
             />
-          </Form.Item>
-        </Form>
-        <div className={CN('account-field', 'mb-lg')}>
-          <Field
-            content={toShort(account.address, 11, 13)}
-            label={t('Wallet address')}
-            placeholder={t('Wallet address')}
-            prefix={(
-              <AccountAvatar
-                size={token.sizeMD}
-                value={account.address}
+          </div>
+          <Button
+            block={true}
+            className='account-button'
+            contentAlign='left'
+            disabled={!canDerive}
+            icon={(
+              <BackgroundIcon
+                backgroundColor={token['magenta-7']}
+                phosphorIcon={ShareNetwork}
+                size='sm'
+                weight='fill'
               />
             )}
-            suffix={(
-              <Button
-                icon={(
-                  <Icon
-                    phosphorIcon={CopySimple}
-                    size='sm'
-                  />
-                )}
-                onClick={onCopyAddress}
-                size='xs'
-                type='ghost'
+            loading={deriving}
+            onClick={onDerive}
+            schema='secondary'
+          >
+            {t('Derive account')}
+          </Button>
+          <Button
+            block={true}
+            className='account-button'
+            contentAlign='left'
+            disabled={account.isExternal}
+            icon={(
+              <BackgroundIcon
+                backgroundColor={token['green-6']}
+                phosphorIcon={Export}
+                size='sm'
+                weight='fill'
               />
             )}
-          />
+            onClick={onExport}
+            schema='secondary'
+          >
+            {t('Export account')}
+          </Button>
+          <Button
+            block={true}
+            className={CN('account-button', 'remove-button')}
+            contentAlign='left'
+            icon={(
+              <BackgroundIcon
+                backgroundColor={token.colorError}
+                phosphorIcon={TrashSimple}
+                size='sm'
+                weight='fill'
+              />
+            )}
+            loading={deleting}
+            onClick={onDelete}
+            schema='secondary'
+          >
+            {t('Remove account')}
+          </Button>
         </div>
-        <Button
-          block={true}
-          className='account-button'
-          contentAlign='left'
-          disabled={!canDerive}
-          icon={(
-            <BackgroundIcon
-              backgroundColor={token['magenta-7']}
-              phosphorIcon={ShareNetwork}
-              size='sm'
-              weight='fill'
-            />
-          )}
-          loading={deriving}
-          onClick={onDerive}
-          schema='secondary'
-        >
-          {t('Derive account')}
-        </Button>
-        <Button
-          block={true}
-          className='account-button'
-          contentAlign='left'
-          disabled={account.isExternal}
-          icon={(
-            <BackgroundIcon
-              backgroundColor={token['green-6']}
-              phosphorIcon={Export}
-              size='sm'
-              weight='fill'
-            />
-          )}
-          onClick={onExport}
-          schema='secondary'
-        >
-          {t('Export account')}
-        </Button>
-        <Button
-          block={true}
-          className={CN('account-button', 'remove-button')}
-          contentAlign='left'
-          icon={(
-            <BackgroundIcon
-              backgroundColor={token.colorError}
-              phosphorIcon={TrashSimple}
-              size='sm'
-              weight='fill'
-            />
-          )}
-          loading={deleting}
-          onClick={onDelete}
-          schema='secondary'
-        >
-          {t('Remove account')}
-        </Button>
-      </div>
-    </Layout.WithSubHeaderOnly>
+      </Layout.WithSubHeaderOnly>
+    </PageWrapper>
   );
 };
 

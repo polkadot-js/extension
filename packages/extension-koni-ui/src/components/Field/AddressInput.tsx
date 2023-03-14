@@ -57,6 +57,7 @@ function Component ({ className = '', label, onChange, onBlur, placeholder, valu
         className={CN('address-input', className, {
           '-is-valid-address': isAddress(value)
         })}
+        id={id}
         label={label || t('Account address')}
         onBlur={onBlur}
         onChange={_onChange}

@@ -3,15 +3,18 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
+import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { Form, Icon, Input } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { FileArrowDown, Info } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -26,6 +29,9 @@ const FooterIcon = (
     weight='fill'
   />
 );
+
+const formName = 'import-seed-phrase-form';
+const fieldName = 'seed-phrase';
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
@@ -124,64 +130,72 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     };
   }, [seedPhrase, changed]);
 
-  return (
-    <Layout.Base
-      rightFooterButton={{
-        children: validating ? t('Validating') : t('Import account'),
-        icon: FooterIcon,
-        onClick: onSubmit,
-        disabled: !seedPhrase || !!validateState.status || !keyTypes.length,
-        loading: validating || submitting
-      }}
-      showBackButton={true}
-      showSubHeader={true}
-      subHeaderBackground='transparent'
-      subHeaderCenter={true}
-      subHeaderIcons={[
-        {
-          icon: <Icon
-            phosphorIcon={Info}
-            size='sm'
-          />
-        }
-      ]}
-      subHeaderPaddingVertical={true}
-      title={t<string>('Import from seed phrase')}
-    >
-      <div className={className}>
-        <div className='description'>
-          {t('To import an existing Polkdot wallet, please enter the recovery seed phrase here:')}
-        </div>
-        <Form className='form-container'>
-          <Form.Item validateStatus={validateState.status}>
-            <Input.TextArea
-              className='seed-phrase-input'
-              onChange={onChange}
-              placeholder={t('Secret phrase')}
-            />
-          </Form.Item>
-          <Form.Item>
-            <SelectAccountType
-              selectedItems={keyTypes}
-              setSelectedItems={setKeyTypes}
-              withLabel={true}
-            />
-          </Form.Item>
-          <Form.Item
-            help={validateState.message}
-            validateStatus={validateState.status}
-          />
-        </Form>
+  useFocusFormItem(formName, fieldName);
 
-        {/* <Checkbox className='checkbox'>{t('Import multiple accounts from this seed phrase')}</Checkbox> */}
-      </div>
-    </Layout.Base>
+  return (
+    <PageWrapper className={CN(className)}>
+      <Layout.WithSubHeaderOnly
+        rightFooterButton={{
+          children: validating ? t('Validating') : t('Import account'),
+          icon: FooterIcon,
+          onClick: onSubmit,
+          disabled: !seedPhrase || !!validateState.status || !keyTypes.length,
+          loading: validating || submitting
+        }}
+        subHeaderIcons={[
+          {
+            icon: (
+              <Icon
+                phosphorIcon={Info}
+                size='md'
+              />
+            )
+          }
+        ]}
+        title={t<string>('Import from seed phrase')}
+      >
+        <div className='container'>
+          <div className='description'>
+            {t('To import an existing Polkdot wallet, please enter the recovery seed phrase here:')}
+          </div>
+          <Form
+            className='form-container'
+            name={formName}
+          >
+            <Form.Item
+              help={validateState.message}
+              name={fieldName}
+              validateStatus={validateState.status}
+            >
+              <Input.TextArea
+                className='seed-phrase-input'
+                onChange={onChange}
+                placeholder={t('Secret phrase')}
+              />
+            </Form.Item>
+            <Form.Item>
+              <SelectAccountType
+                selectedItems={keyTypes}
+                setSelectedItems={setKeyTypes}
+                withLabel={true}
+              />
+            </Form.Item>
+          </Form>
+        </div>
+      </Layout.WithSubHeaderOnly>
+    </PageWrapper>
   );
 };
 
 const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    padding: token.padding,
+    '.container': {
+      padding: token.padding
+    },
+
+    '.ant-form-item:last-child': {
+      marginBottom: 0
+    },
 
     '.description': {
       padding: `0 ${token.padding}px`,

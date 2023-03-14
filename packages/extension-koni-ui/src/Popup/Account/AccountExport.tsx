@@ -6,7 +6,7 @@ import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
-import useFocusInput from '@subwallet/extension-koni-ui/hooks/form/useFocusInput';
+import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -272,7 +272,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [account?.address, form]);
 
-  useFocusInput(formName, FormFieldName.PASSWORD);
+  useFocusFormItem(formName, FormFieldName.PASSWORD);
 
   if (!account) {
     return null;
@@ -419,6 +419,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     <div className='result-title'>{t(titleMap[ExportType.QR_CODE])}</div>
                     <div className='qr-area'>
                       <QRCode
+                        errorLevel='Q'
                         size={264}
                         value={qrData}
                       />

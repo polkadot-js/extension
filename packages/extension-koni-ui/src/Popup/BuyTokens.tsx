@@ -106,9 +106,11 @@ function Component ({ className }: Props) {
 
     if (service === 'transak') {
       const [token, chain, transaKNetwork] = tokenKey.split('|');
+      const networkPrefix = chainInfoMap[chain].substrateInfo?.addressPrefix;
+
       const walletAddress = tokenKeyMapIsEthereum[tokenKey]
         ? address
-        : reformatAddress(address, chainInfoMap[chain].substrateInfo?.addressPrefix || 42);
+        : reformatAddress(address, networkPrefix === undefined ? -1 : networkPrefix);
 
       const params = {
         apiKey: '4b3bfb00-7f7c-44b3-844f-d4504f1065be',
@@ -188,7 +190,12 @@ function Component ({ className }: Props) {
             form={form}
             initialValues={formDefault}
           >
-            <Form.Item name={'address'}>
+            <Form.Item
+              className={CN({
+                hidden: !isAllAccount
+              })}
+              name={'address'}
+            >
               <AccountSelector
                 disabled={!isAllAccount}
                 filter={accountsFilter}

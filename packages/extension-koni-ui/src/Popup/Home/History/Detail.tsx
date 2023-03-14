@@ -3,6 +3,7 @@
 
 import { ExtrinsicStatus, ExtrinsicType, TransactionAdditionalInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainName } from '@subwallet/extension-base/services/chain-service/utils';
+import { getTransactionLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { InfoItemBase } from '@subwallet/extension-koni-ui/components/MetaInfo/parts/types';
 import { TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/Popup/Home/History/index';
@@ -13,11 +14,10 @@ import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormat
 import { Button, Icon, SwIconProps } from '@subwallet/react-ui';
 import SwModal from '@subwallet/react-ui/es/sw-modal';
 import { ArrowSquareUpRight, CheckCircle, ProhibitInset, Spinner, StopCircle, XCircle } from 'phosphor-react';
-import React, {useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {getTransactionLink} from "@subwallet/extension-base/services/transaction-service/utils";
 
 type Props = ThemeProps & {
   onCancel: () => void,
@@ -113,13 +113,13 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
   const openBlockExplorer = useCallback(
     () => {
       if (data.extrinsicHash && data.extrinsicHash !== '') {
-        const link = getTransactionLink(chainInfo, data.extrinsicHash)
+        const link = getTransactionLink(chainInfo, data.extrinsicHash);
+
         window.open(link, '_blank');
       }
     },
-    [chainInfo, data.extrinsicHash],
+    [chainInfo, data.extrinsicHash]
   );
-
 
   const modalFooter = useMemo<React.ReactNode>(() => {
     if (data.status === 'processing') {
@@ -154,7 +154,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
         {t('View on explorer')}
       </Button>
     );
-  }, [data.status, onCancel, t]);
+  }, [data.status, onCancel, openBlockExplorer, t]);
 
   const transactionType = data.type;
 

@@ -81,7 +81,10 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </Form.Item>
 
-          <FreeBalance className={'free-balance'} label={t('Transferable:')} />
+          <FreeBalance
+            className={'free-balance'}
+            label={t('Transferable:')}
+          />
 
           <Form.Item name={'value'}>
             <AmountInput
@@ -93,7 +96,10 @@ const Component: React.FC<Props> = (props: Props) => {
           <div className={'text-light-4'}>{t('Once unbonded, your funds to become available after 28 days.')}</div>
         </Form>
       </TransactionContent>
-      <TransactionFooter errors={[]} warnings={[]}>
+      <TransactionFooter
+        errors={[]}
+        warnings={[]}
+      >
         <Button
           icon={<Icon
             phosphorIcon={MinusCircle}

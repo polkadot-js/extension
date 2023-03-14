@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicDataTypeMap, ExtrinsicType} from '@subwallet/extension-base/background/KoniTypes';
-import {_ChainInfo} from "@subwallet/chain-list/types";
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 
 export function parseTransactionData<T extends ExtrinsicType> (data: unknown): ExtrinsicDataTypeMap[T] {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -10,19 +10,19 @@ export function parseTransactionData<T extends ExtrinsicType> (data: unknown): E
 }
 
 export function getTransactionLink (chainInfo: _ChainInfo, extrinsicHash: string): string | undefined {
-    if (chainInfo.evmInfo) {
-      const explorerLink = chainInfo?.evmInfo?.blockExplorer;
+  if (chainInfo.evmInfo) {
+    const explorerLink = chainInfo?.evmInfo?.blockExplorer;
 
-      if (explorerLink) {
-        return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}tx/${extrinsicHash}`);
-      }
-    } else {
-      const explorerLink = chainInfo?.substrateInfo?.blockExplorer;
-
-      if (explorerLink) {
-        return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}extrinsic/${extrinsicHash}`);
-      }
+    if (explorerLink) {
+      return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}tx/${extrinsicHash}`);
     }
+  } else {
+    const explorerLink = chainInfo?.substrateInfo?.blockExplorer;
 
-    return undefined;
+    if (explorerLink) {
+      return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}extrinsic/${extrinsicHash}`);
+    }
   }
+
+  return undefined;
+}

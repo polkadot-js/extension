@@ -152,7 +152,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     return processedList;
-  }, [rawHistoryList, typeNameMap, typeTitleMap, currentAccount?.address]);
+  }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap, currentAccount?.address]);
 
   const onOpenDetail = useCallback((item: TransactionHistoryDisplayItem) => {
     return () => {

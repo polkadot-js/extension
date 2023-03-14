@@ -11,6 +11,10 @@ export default function useScanExplorerAddressUrl (networkKey: string, hash: str
   const blockExplorer = networkMap[networkKey]?.blockExplorer;
 
   if (blockExplorer) {
+    if (networkKey === 'subspace_gemini_3c') {
+      return `${blockExplorer}/accounts/${hash}`
+    }
+
     return `${blockExplorer}/account/${hash}`;
   } else {
     return getScanExplorerAddressInfoUrl(networkKey, hash);

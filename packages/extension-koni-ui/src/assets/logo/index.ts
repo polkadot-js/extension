@@ -325,8 +325,6 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subspace_gemini_2a: require('./46.Subspace.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  subspace_gemini_3a: require('./46.Subspace.png'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subspace_gemini_3c: require('./46.Subspace.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subspace_test: require('./46.Subspace.png'),

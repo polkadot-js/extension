@@ -46,7 +46,8 @@ function ImportJsonConfirmStep({
   requirePassword
 }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
+  const [isDisabled, setIsDisabled] = useState<boolean>(true);
 
   const _handleInputTypeChange = useCallback(() => {
     setIsPasswordVisible(!isPasswordVisible);
@@ -54,6 +55,18 @@ function ImportJsonConfirmStep({
 
   const MIN_LENGTH = 6;
   const isPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')), [t]);
+
+  const _onChangePass = useCallback(
+    (pass: string) => {
+      if (!onChangePass) {
+        return;
+      }
+
+      onChangePass(pass);
+      setIsDisabled(false);
+    },
+    [onChangePass]
+  );
 
   return (
     <>
@@ -74,7 +87,7 @@ function ImportJsonConfirmStep({
               <ValidatedInput
                 component={InputWithLabel}
                 label={t<string>('Password')}
-                onValidatedChange={onChangePass}
+                onValidatedChange={_onChangePass}
                 showPasswordElement={
                   <div className='password-icon'>
                     <img
@@ -101,7 +114,12 @@ function ImportJsonConfirmStep({
       <VerticalSpace />
       <ButtonArea>
         <BackButton onClick={onPreviousStep} />
-        <Button onClick={onNextStep}>{t<string>('Import')}</Button>
+        <Button
+          isDisabled={isDisabled}
+          onClick={onNextStep}
+        >
+          {t<string>('Import')}
+        </Button>
       </ButtonArea>
     </>
   );

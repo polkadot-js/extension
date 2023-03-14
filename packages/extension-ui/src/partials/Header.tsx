@@ -29,17 +29,17 @@ interface Props extends ThemeProps {
   smallMargin?: boolean;
   text?: React.ReactNode;
   withStepper?: boolean;
-  withGoToRoot?: boolean;
+  goToFnOverride?: () => void;
 }
 
 function Header({
   children,
   className = '',
+  goToFnOverride,
   smallMargin = false,
   text,
   withBackArrow,
   withConnectedAccounts,
-  withGoToRoot = false,
   withHelp,
   withSettings
 }: Props): React.ReactElement<Props> {
@@ -60,7 +60,6 @@ function Header({
   }, [withConnectedAccounts]);
 
   const _onBackArrowClick = useCallback(() => onAction('..'), [onAction]);
-  const _goToRoot = useCallback(() => onAction('/'), [onAction]);
 
   return (
     <>
@@ -71,7 +70,7 @@ function Header({
               <FontAwesomeIcon
                 className='arrowLeftIcon'
                 icon={faArrowLeft}
-                onClick={withGoToRoot ? _goToRoot : _onBackArrowClick}
+                onClick={goToFnOverride || _onBackArrowClick}
               />
             ) : (
               <div className='flex'>

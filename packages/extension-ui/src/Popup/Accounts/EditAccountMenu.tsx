@@ -17,7 +17,8 @@ import exportAccountIcon from '../../assets/export.svg';
 import subAccountIcon from '../../assets/subAccount.svg';
 import forgetIcon from '../../assets/vanish.svg';
 import { Svg } from '../../components';
-import { AccountContext, ActionContext, SettingsContext } from '../../components/contexts';
+import { AccountContext, SettingsContext } from '../../components/contexts';
+import { useGoTo } from '../../hooks/useGoTo';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import Header from '../../partials/Header';
@@ -39,7 +40,7 @@ function EditAccountMenu({
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts, master } = useContext(AccountContext);
-  const onAction = useContext(ActionContext);
+
   const { show } = useToast();
 
   const searchParams = new URLSearchParams(search);
@@ -59,7 +60,7 @@ function EditAccountMenu({
 
   const _onCopy = useCallback(() => show(t<string>('Public address copied to your clipboard'), 'success'), [show, t]);
 
-  const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
+  const { goTo } = useGoTo();
 
   const { account: recodedAccount, formatted } = useMemo(
     () => recodeAddress(address, accounts, chain, settings),
@@ -69,9 +70,9 @@ function EditAccountMenu({
   return (
     <>
       <Header
+        goToFnOverride={goTo('/')}
         text={t<string>('Edit Account')}
         withBackArrow
-        withGoToRoot
         withHelp
       />
       <div className={className}>

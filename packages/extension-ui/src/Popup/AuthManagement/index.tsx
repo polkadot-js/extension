@@ -12,6 +12,7 @@ import animTrusted from '../../assets/anim_trusted.svg';
 import helpIcon from '../../assets/help.svg';
 import { ButtonArea, Svg, VerticalSpace } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
+import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
 import { getAuthList } from '../../messaging';
 import { Header } from '../../partials';
@@ -37,6 +38,7 @@ const CustomFooter = styled(HelperFooter)`
 function AuthManagement({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [authList, setAuthList] = useState<AuthUrls | null>(null);
+  const { goTo } = useGoTo();
 
   useEffect(() => {
     getAuthList()
@@ -62,6 +64,7 @@ function AuthManagement({ className }: Props): React.ReactElement<Props> {
   return (
     <>
       <Header
+        goToFnOverride={goTo('/account/settings')}
         smallMargin
         text={t<string>('Trusted Apps')}
         withBackArrow

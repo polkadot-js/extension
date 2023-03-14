@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import animatedRemove from '../../assets/anim_unlink.svg';
 import { Button, ButtonArea, FaviconBox, Svg, VerticalSpace } from '../../components';
 import { ActionContext } from '../../components/contexts';
+import { useGoTo } from '../../hooks/useGoTo';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { removeAuthorization } from '../../messaging';
@@ -35,15 +36,15 @@ function DisconnectApp({ className }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const { show } = useToast();
 
-  const goToAuthList = useCallback(() => onAction('/auth-list'), [onAction]);
+  const { goTo } = useGoTo();
 
   const handleDisconnect = useCallback(() => {
     show(t<string>('App disconnected'), 'success', () => {
       removeAuthorization(decodedUrl)
-        .then(() => goToAuthList())
+        .then(() => onAction('/auth-list'))
         .catch(console.error);
     });
-  }, [decodedUrl, goToAuthList, show, t]);
+  }, [decodedUrl, onAction, show, t]);
 
   return (
     <>
@@ -70,7 +71,7 @@ function DisconnectApp({ className }: Props): React.ReactElement<Props> {
       <VerticalSpace />
       <ButtonArea>
         <Button
-          onClick={goToAuthList}
+          onClick={goTo(`/url/manage?url=${url}`)}
           secondary
         >
           {t<string>('Cancel')}

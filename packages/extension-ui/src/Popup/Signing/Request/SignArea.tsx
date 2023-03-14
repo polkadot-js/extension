@@ -122,6 +122,7 @@ function SignArea({ buttonText, className, error, isExternal, isFirst, setError,
         <Button
           data-decline-transaction
           isDanger
+          isDisabled={!isFirst}
           onClick={_onCancel}
           secondary
         >

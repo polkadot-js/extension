@@ -24,8 +24,8 @@ function ToastCloseIcon({ animationDurationInSeconds = 1500, className }: Props)
       xmlns='http://www.w3.org/2000/svg'
     >
       <circle
-        cx='14'
-        cy='14'
+        cx='16'
+        cy='16'
         fill='none'
         id='grey-circle'
         r='14'

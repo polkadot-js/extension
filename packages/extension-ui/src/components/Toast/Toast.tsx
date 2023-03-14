@@ -18,12 +18,30 @@ interface Props extends ThemeProps {
   type: SnackbarTypes;
   visible: boolean;
   undoTimeout?: NodeJS.Timeout | undefined;
+  toastTimeout?: NodeJS.Timeout | undefined;
   onUndoClick?: (shouldRedirectBack: boolean) => void;
+  setVisible?: (visible: boolean) => void;
 }
 
-function Toast({ className, content, onUndoClick, type, undoTimeout }: Props): React.ReactElement<Props> {
+function Toast({
+  className,
+  content,
+  onUndoClick,
+  setVisible,
+  toastTimeout,
+  type,
+  undoTimeout
+}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const _getIconByType = useCallback((type: SnackbarTypes): string => icons?.[type] ?? icons.info, []);
+
+  const _closeToast = useCallback(() => {
+    if (setVisible) {
+      setVisible(false);
+    }
+
+    clearTimeout(toastTimeout);
+  }, [setVisible, toastTimeout]);
 
   const _onUndoClick = useCallback(() => {
     if (onUndoClick) {
@@ -49,7 +67,10 @@ function Toast({ className, content, onUndoClick, type, undoTimeout }: Props): R
             {t<string>('Undo')}
           </div>
         )}
-        <div className='snackbar-close'>
+        <div
+          className='snackbar-close'
+          onClick={_closeToast}
+        >
           <ToastCloseIcon animationDurationInSeconds={TOAST_TIMEOUT / 1000} />
         </div>
       </div>
@@ -88,7 +109,9 @@ export default styled(Toast)(
     transform: translateY(0);
   }
 }
-
+  .snackbar-close {
+    cursor: pointer;
+  }
   .snackbar-undo {
     display: flex;
     width: fit-content;

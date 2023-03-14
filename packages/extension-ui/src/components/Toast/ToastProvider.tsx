@@ -20,6 +20,7 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
   const [visible, setVisible] = useState(false);
   const [type, setType] = useState<SnackbarTypes>('info');
   const method = useRef<NodeJS.Timeout>();
+  const [timerId, setTimerId] = useState<NodeJS.Timeout>();
   const onAction = useContext(ActionContext);
 
   const cancelCallback = useCallback(
@@ -47,6 +48,7 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
         cancelCallback(false);
       }, TOAST_TIMEOUT);
 
+      setTimerId(timerId);
       setContent(message);
       setVisible(true);
 
@@ -68,6 +70,8 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
       <Toast
         content={content}
         onUndoClick={cancelCallback}
+        setVisible={setVisible}
+        toastTimeout={timerId}
         type={type}
         undoTimeout={method.current}
         visible={visible}

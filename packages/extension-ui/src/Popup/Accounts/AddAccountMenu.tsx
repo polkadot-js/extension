@@ -3,14 +3,15 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { MenuCard } from '@polkadot/extension-ui/components';
 
 import addIcon from '../../assets/add.svg';
 import uploadIcon from '../../assets/upload.svg';
-import { ActionContext, Button, ButtonArea } from '../../components';
+import { Button, ButtonArea } from '../../components';
+import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
 import Header from '../../partials/Header';
 
@@ -20,9 +21,7 @@ interface Props extends ThemeProps {
 
 function AddAccountMenu({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const onAction = useContext(ActionContext);
-
-  const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
+  const { goTo } = useGoTo();
 
   return (
     <>

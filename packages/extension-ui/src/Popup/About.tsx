@@ -3,12 +3,12 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import alephMark from '../assets/alephMark.png';
 import { EditMenuCard } from '../components';
-import { ActionContext } from '../components/contexts';
+import { useGoTo } from '../hooks/useGoTo';
 import useTranslation from '../hooks/useTranslation';
 import Header from '../partials/Header';
 
@@ -24,9 +24,8 @@ border-radius: 8px;
 
 function About({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const onAction = useContext(ActionContext);
 
-  const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
+  const { goTo } = useGoTo();
 
   return (
     <>

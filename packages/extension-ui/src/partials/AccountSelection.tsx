@@ -16,9 +16,9 @@ import AccountsTree from '../Popup/Accounts/AccountsTree';
 interface Props extends ThemeProps {
   className?: string;
   url: string;
-
   showHidden?: boolean;
   withWarning?: boolean;
+  onChange?: (value: boolean) => void;
 }
 
 const StyledCheckbox = styled(Checkbox)`
@@ -29,7 +29,7 @@ const StyledCheckbox = styled(Checkbox)`
 
 function AccounSelection({
   className,
-
+  onChange,
   showHidden = false,
   url,
   withWarning = true
@@ -55,6 +55,10 @@ function AccounSelection({
   }, [areAllAccountsSelected, noAccountSelected]);
 
   const _onSelectAllToggle = useCallback(() => {
+    if (onChange) {
+      onChange(true);
+    }
+
     if (areAllAccountsSelected) {
       setSelectedAccounts && setSelectedAccounts([]);
 
@@ -62,7 +66,7 @@ function AccounSelection({
     }
 
     setSelectedAccounts && setSelectedAccounts(allDisplayedAddresses);
-  }, [allDisplayedAddresses, areAllAccountsSelected, setSelectedAccounts]);
+  }, [allDisplayedAddresses, areAllAccountsSelected, onChange, setSelectedAccounts]);
 
   return (
     <div className={className}>
@@ -97,6 +101,7 @@ function AccounSelection({
           (json, index): React.ReactNode => (
             <AccountsTree
               {...json}
+              checkBoxOnChange={onChange}
               isAuthList
               key={`${index}:${json.address}`}
               showHidden={showHidden}

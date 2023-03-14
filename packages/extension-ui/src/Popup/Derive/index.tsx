@@ -5,6 +5,7 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 
 import { AccountContext, AccountNamePasswordCreation, ActionContext } from '../../components';
+import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
 import { deriveAccount } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
@@ -76,7 +77,7 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
     setParentPassword(parentPassword);
   }, []);
 
-  const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
+  const { goTo } = useGoTo();
 
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
 

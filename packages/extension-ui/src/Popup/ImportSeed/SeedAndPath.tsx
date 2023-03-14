@@ -5,7 +5,7 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { validateSeed } from '@polkadot/extension-ui/messaging';
@@ -14,7 +14,6 @@ import { objectSpread } from '@polkadot/util';
 import helpIcon from '../../assets/help.svg';
 import infoIcon from '../../assets/information.svg';
 import {
-  ActionContext,
   Button,
   ButtonArea,
   InputLock,
@@ -26,6 +25,7 @@ import {
   Warning
 } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
+import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props {
@@ -83,9 +83,7 @@ function SeedAndPath({
   const [isLocked, setLocked] = useState<boolean>(true);
   const isValid = !!error && !!seed;
 
-  const onAction = useContext(ActionContext);
-
-  const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
+  const { goTo } = useGoTo();
 
   useEffect(() => {
     // No need to validate an empty seed

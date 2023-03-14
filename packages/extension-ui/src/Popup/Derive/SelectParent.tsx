@@ -25,6 +25,7 @@ import {
   Warning
 } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
+import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
@@ -144,7 +145,7 @@ function SelectParent({
     passwordInputRef.current?.querySelector('input')?.focus();
   }, [_onParentPasswordEnter]);
 
-  const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
+  const { goTo } = useGoTo();
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 

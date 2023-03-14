@@ -43,6 +43,8 @@ function Accounts({ className }: Props): React.ReactElement {
   );
   const [accountsCreatedAfterLastAuth, setAccountsCreatedAfterLastAuth] = useState<AccountJson[] | []>([]);
 
+  console.log(flattened);
+
   useEffect(() => {
     getAuthList()
       .then(({ list }) => setAuthList(list))
@@ -92,6 +94,7 @@ function Accounts({ className }: Props): React.ReactElement {
             <AccountsTree
               {...json}
               key={json.address}
+              parentName={getParentName(json)}
             />
           ))}
           {filterChildren(networkName, defaultNetwork, details).map((json) => (

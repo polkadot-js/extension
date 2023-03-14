@@ -3,13 +3,13 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import infoIcon from '../assets/information.svg';
 import trustedIcon from '../assets/trusted.svg';
 import { EditMenuCard, Svg } from '../components';
-import { ActionContext } from '../components/contexts';
+import { useGoTo } from '../hooks/useGoTo';
 import useTranslation from '../hooks/useTranslation';
 import Header from '../partials/Header';
 
@@ -26,13 +26,12 @@ const SettingsMenuCard = styled(EditMenuCard)`
 
 function Settings({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const onAction = useContext(ActionContext);
-
-  const goTo = useCallback((path: string) => () => onAction(path), [onAction]);
+  const { goTo } = useGoTo();
 
   return (
     <>
       <Header
+        goToFnOverride={goTo('/')}
         text={t<string>('Settings')}
         withBackArrow
         withHelp

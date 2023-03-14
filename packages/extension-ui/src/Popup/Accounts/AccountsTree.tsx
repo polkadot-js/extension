@@ -16,9 +16,11 @@ interface Props extends AccountWithChildren {
   withMenu?: boolean;
   showHidden?: boolean;
   isAuthList?: boolean;
+  checkBoxOnChange?: (value: boolean) => void;
 }
 
 function AccountsTree({
+  checkBoxOnChange,
   className,
   isAuthList = false,
   parentName,
@@ -33,6 +35,7 @@ function AccountsTree({
       {(showHidden || !account.isHidden) && (
         <Account
           {...account}
+          checkBoxOnChange={checkBoxOnChange}
           className={withCheckbox ? 'accountWichCheckbox' : ''}
           parentName={parentName}
           suri={suri}

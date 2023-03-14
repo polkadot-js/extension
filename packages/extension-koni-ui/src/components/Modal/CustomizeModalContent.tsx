@@ -8,10 +8,10 @@ import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFo
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, NetworkItem, SwList } from '@subwallet/react-ui';
+import { NetworkItem, SwList } from '@subwallet/react-ui';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import CN from 'classnames';
-import { MagnifyingGlass, WifiHigh, WifiSlash } from 'phosphor-react';
+import { MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -45,20 +45,10 @@ const Component: React.FC<Props> = (props: Props) => {
     const chainState = chainStateMap[chainInfo.slug];
 
     if (chainState.connectionStatus === _ChainConnectionStatus.CONNECTED) {
-      return (
-        <Icon
-          phosphorIcon={WifiHigh}
-          weight='fill'
-        />
-      );
+      return '__connected__';
     }
 
-    return (
-      <Icon
-        phosphorIcon={WifiSlash}
-        weight='fill'
-      />
-    );
+    return '__disconnected__';
   }, [chainStateMap]);
 
   const renderChainItem = useCallback((chainInfo: _ChainInfo) => {
@@ -71,7 +61,7 @@ const Component: React.FC<Props> = (props: Props) => {
         key={chainInfo.slug}
         name={chainInfo.name}
         rightItem={renderNetworkItem(chainInfo)}
-        subIcon={renderChainConnectionStatus(chainInfo)}
+        subSymbol={renderChainConnectionStatus(chainInfo)}
         symbol={symbol.toLowerCase()}
       />
     );
@@ -111,6 +101,7 @@ const Component: React.FC<Props> = (props: Props) => {
       className={CN(className)}
       displayRow
       enableSearchInput
+      ignoreScrollbar={chainInfoList.length > 5}
       list={chainInfoList}
       renderItem={renderChainItem}
       renderWhenEmpty={emptyChainList}

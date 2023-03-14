@@ -218,6 +218,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
       <SwList.Section
         displayRow
         enableSearchInput
+        ignoreScrollbar={accountItems.length > 7}
         list={accountItems}
         renderItem={renderItem}
         renderWhenEmpty={renderEmptyList}
@@ -267,6 +268,7 @@ function WrapperComponent (props: WrapperProps) {
 
 const ManageWebsiteAccessDetail = styled(WrapperComponent)<Props>(({ theme: { token } }: Props) => {
   return ({
+    paddingBottom: token.paddingMD,
     '&.manage-website-access-detail': {
       height: '100%',
       backgroundColor: token.colorBgDefault,

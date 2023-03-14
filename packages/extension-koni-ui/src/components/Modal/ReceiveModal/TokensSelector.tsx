@@ -74,6 +74,7 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
     >
       <SwList.Section
         enableSearchInput={true}
+        ignoreScrollbar={items.length >= 5}
         list={items}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}

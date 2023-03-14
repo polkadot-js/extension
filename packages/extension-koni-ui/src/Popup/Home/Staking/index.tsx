@@ -167,6 +167,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           enableSearchInput={true}
+          ignoreScrollbar={lazyItems.length > 3}
           list={lazyItems}
           onClickActionBtn={onClickActionBtn}
           pagination={{
@@ -219,6 +220,14 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
     '.staking-item': {
       marginBottom: token.marginXS
+    },
+
+    '.ant-sw-list-section': {
+      height: '100%'
+    },
+
+    '.ant-sw-list': {
+      overflow: 'auto'
     }
   });
 });

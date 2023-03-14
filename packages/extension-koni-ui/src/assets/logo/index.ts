@@ -1031,4 +1031,10 @@ export const TokenLogoMap: Record<string, string> = {
   joy: ProjectLogos.joystream
 };
 
+export const IconMap = {
+  __connected__: './images/icons/__connected__.png',
+  __disconnected__: './images/icons/__disconnected__.png',
+  __qr_code__: './images/icons/__qr_code__.png'
+};
+
 export default ChainLogoMap;

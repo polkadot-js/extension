@@ -300,6 +300,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         >
           <SwList.Section
             displayRow={true}
+            ignoreScrollbar={accountsInfo.length > 5}
             list={accountsInfo}
             renderItem={renderItem}
             rowGap='var(--row-gap)'
@@ -350,7 +351,11 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.ant-sw-modal-body': {
-      padding: `0 0 ${token.padding}px`
+      padding: `${token.padding}px 0 0`
+    },
+
+    '.ant-sw-list': {
+      maxHeight: 450
     }
   };
 });

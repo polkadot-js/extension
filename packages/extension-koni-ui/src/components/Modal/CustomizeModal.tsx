@@ -48,7 +48,7 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
               weight='fill'
             />
           }
-          name={t('Show zero balance')} // todo: i18n this
+          name={t('Show zero balance')}
           rightItem={
             <Switch
               checked={isShowZeroBalance}

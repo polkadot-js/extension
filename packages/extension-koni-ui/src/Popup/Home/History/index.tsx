@@ -241,6 +241,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           enableSearchInput
           groupBy={groupBy}
           groupSeparator={groupSeparator}
+          ignoreScrollbar={historyList.length > 4}
           list={historyList}
           renderItem={renderItem}
           renderWhenEmpty={emptyList}

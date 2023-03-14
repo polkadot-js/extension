@@ -6,7 +6,7 @@ import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainEnabled, _isChainEvmCompatible, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
@@ -362,7 +362,7 @@ export class KoniSubscription {
 
     await Promise.all(addresses.map(async (address) => {
       await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
-        const nominatorMetadata = await getNominatorMetadata(chainInfo.slug, address, substrateApiMap[chainInfo.slug]);
+        const nominatorMetadata = await getNominatorMetadata(chainInfo, address, substrateApiMap[chainInfo.slug]);
 
         if (nominatorMetadata) {
           this.state.updateStakingNominatorMetadata(nominatorMetadata);

@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ChainStakingMetadata, NominatorMetadata, StakingItem, StakingRewardItem, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { ReduxStatus, StakingStore } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = {
   reduxStatus: ReduxStatus.INIT,
   stakingMap: [],
-  stakeUnlockingMap: [],
   stakingRewardMap: [],
   chainStakingMetadataList: [],
   nominatorMetadataList: []
@@ -23,7 +22,6 @@ const stakingSlice = createSlice({
 
       return {
         stakingMap: payload,
-        stakeUnlockingMap: state.stakeUnlockingMap,
         stakingRewardMap: state.stakingRewardMap,
         chainStakingMetadataList: state.chainStakingMetadataList,
         nominatorMetadataList: state.nominatorMetadataList,
@@ -35,20 +33,7 @@ const stakingSlice = createSlice({
 
       return {
         stakingMap: state.stakingMap,
-        stakeUnlockingMap: state.stakeUnlockingMap,
         stakingRewardMap: payload,
-        chainStakingMetadataList: state.chainStakingMetadataList,
-        nominatorMetadataList: state.nominatorMetadataList,
-        reduxStatus: ReduxStatus.READY
-      };
-    },
-    updateStakeUnlockingInfo (state, action: PayloadAction<UnlockingStakeInfo[]>) {
-      const payload = action.payload;
-
-      return {
-        stakingMap: state.stakingMap,
-        stakeUnlockingMap: payload,
-        stakingRewardMap: state.stakingRewardMap,
         chainStakingMetadataList: state.chainStakingMetadataList,
         nominatorMetadataList: state.nominatorMetadataList,
         reduxStatus: ReduxStatus.READY
@@ -59,7 +44,6 @@ const stakingSlice = createSlice({
 
       return {
         stakingMap: state.stakingMap,
-        stakeUnlockingMap: state.stakeUnlockingMap,
         stakingRewardMap: state.stakingRewardMap,
         chainStakingMetadataList: payload,
         nominatorMetadataList: state.nominatorMetadataList,
@@ -71,7 +55,6 @@ const stakingSlice = createSlice({
 
       return {
         stakingMap: state.stakingMap,
-        stakeUnlockingMap: state.stakeUnlockingMap,
         stakingRewardMap: state.stakingRewardMap,
         chainStakingMetadataList: state.chainStakingMetadataList,
         nominatorMetadataList: payload,
@@ -81,5 +64,5 @@ const stakingSlice = createSlice({
   }
 });
 
-export const { updateChainStakingMetadata, updateNominatorMetadata, updateStakeUnlockingInfo, updateStaking, updateStakingReward } = stakingSlice.actions;
+export const { updateChainStakingMetadata, updateNominatorMetadata, updateStaking, updateStakingReward } = stakingSlice.actions;
 export default stakingSlice.reducer;

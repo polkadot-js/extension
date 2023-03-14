@@ -24,16 +24,16 @@ export async function getChainStakingMetadata (chain: string, substrateApi: _Sub
   return getRelayChainStakingMetadata(chain, substrateApi);
 }
 
-export async function getNominatorMetadata (chain: string, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
-  if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
-    return getAstarNominatorMetadata(chain, address, substrateApi);
-  } else if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
-    return getParaChainNominatorMetadata(chain, address, substrateApi);
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
-    return getAmplitudeNominatorMetadata(chain, address, substrateApi);
+export async function getNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+  if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
+    return getAstarNominatorMetadata(chainInfo, address, substrateApi);
+  } else if (_STAKING_CHAIN_GROUP.para.includes(chainInfo.slug)) {
+    return getParaChainNominatorMetadata(chainInfo, address, substrateApi);
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chainInfo.slug)) {
+    return getAmplitudeNominatorMetadata(chainInfo, address, substrateApi);
   }
 
-  return getRelayChainNominatorMetadata(chain, address, substrateApi);
+  return getRelayChainNominatorMetadata(chainInfo, address, substrateApi);
 }
 
 export async function getValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string, extraCollatorAddress?: string) {

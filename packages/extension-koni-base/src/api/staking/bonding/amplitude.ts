@@ -11,6 +11,7 @@ import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balan
 import { BlockHeader, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface InflationConfig {
   collator: {
@@ -63,7 +64,12 @@ export async function getAmplitudeStakingMetadata (chain: string, substrateApi: 
   } as ChainStakingMetadata;
 }
 
-export async function getAmplitudeNominatorMetadata (chain: string, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+  if (isEthereumAddress(address)) {
+    return;
+  }
+
+  const chain = chainInfo.slug;
   const chainApi = await substrateApi.isReady;
 
   const nominationList: NominationInfo[] = [];
@@ -124,6 +130,10 @@ export async function getAmplitudeNominatorMetadata (chain: string, address: str
       waitingTime: waitingTime > 0 ? waitingTime : 0,
       validatorAddress: delegatorState.owner
     });
+  }
+
+  if (nominationList.length === 0 && unstakingList.length === 0) {
+    return;
   }
 
   return {

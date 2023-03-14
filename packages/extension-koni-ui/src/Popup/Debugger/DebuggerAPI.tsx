@@ -167,7 +167,6 @@ const API_LIST = [
   'pri(bonding.txInfo)',
   'pri(unbonding.txInfo)',
   'pri(unbonding.submitTransaction)',
-  'pri(unbonding.subscribeUnlockingInfo)',
   'pri(unbonding.withdrawalTxInfo)',
   'pri(unbonding.submitWithdrawal)',
   'pri(staking.claimRewardTxInfo)',

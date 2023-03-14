@@ -210,10 +210,9 @@ export const _XCM_TYPE = {
 
 export const _DEFAULT_ACTIVE_CHAINS = [
   ..._DEFAULT_CHAINS,
-  'acala',
-  'moonbeam',
+  'westend',
   'alephTest',
-  'astar',
-  'astarEvm',
-  'bitcountry'
+  'shibuya',
+  'amplitude_test',
+  'turingStaging'
 ];

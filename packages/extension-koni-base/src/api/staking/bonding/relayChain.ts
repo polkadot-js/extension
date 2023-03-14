@@ -11,6 +11,7 @@ import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balan
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, parseIdentity, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export interface PalletStakingNominations {
   targets: string[],
@@ -74,7 +75,12 @@ export async function getRelayChainStakingMetadata (chain: string, substrateApi:
   } as ChainStakingMetadata;
 }
 
-export async function getRelayChainNominatorMetadata (chain: string, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+  if (isEthereumAddress(address)) {
+    return;
+  }
+
+  const chain = chainInfo.slug;
   const chainApi = await substrateApi.isReady;
 
   const [_ledger, _nominations, _currentEra] = await Promise.all([

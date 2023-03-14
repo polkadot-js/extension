@@ -13,6 +13,7 @@ import fetch from 'cross-fetch';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { BN, BN_ZERO } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export async function getAstarStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   const aprPromise = new Promise(function (resolve) {
@@ -59,7 +60,12 @@ export async function getAstarStakingMetadata (chain: string, substrateApi: _Sub
   } as ChainStakingMetadata;
 }
 
-export async function getAstarNominatorMetadata (chain: string, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+  if (isEthereumAddress(address)) {
+    return;
+  }
+
+  const chain = chainInfo.slug;
   const chainApi = await substrateApi.isReady;
 
   const nominationList: NominationInfo[] = [];
@@ -134,6 +140,10 @@ export async function getAstarNominatorMetadata (chain: string, address: string,
       claimable: nearestUnstaking.amount.toString(),
       waitingTime: waitingTime > 0 ? waitingTime : 0
     });
+  }
+
+  if (nominationList.length === 0 && unstakingList.length === 0) {
+    return;
   }
 
   return {

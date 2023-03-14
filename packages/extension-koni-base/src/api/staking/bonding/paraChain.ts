@@ -5,12 +5,16 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { BasicTxInfo, ChainStakingMetadata, DelegationItem, NominationInfo, NominatorMetadata, StakingType, TuringStakeCompoundResp, UnlockingStakeInfo, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import {
+  _getChainNativeTokenBasicInfo,
+  _isChainEvmCompatible
+} from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { BOND_LESS_ACTION, getParaCurrentInflation, InflationConfig, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface CollatorExtraInfo {
   active: boolean,
@@ -78,14 +82,18 @@ export async function getParaChainStakingMetadata (chain: string, substrateApi: 
   } as ChainStakingMetadata;
 }
 
-export async function getParaChainNominatorMetadata (chain: string, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+  if (_isChainEvmCompatible(chainInfo) && !isEthereumAddress(address)) {
+    return;
+  }
+
+  const chain = chainInfo.slug;
   const chainApi = await substrateApi.isReady;
 
   const nominationList: NominationInfo[] = [];
   const unstakingMap: Record<string, UnstakingInfo> = {};
 
   const _delegatorState = await chainApi.api.query.parachainStaking.delegatorState(address);
-
   const delegatorState = _delegatorState.toPrimitive() as unknown as PalletParachainStakingDelegator;
 
   if (!delegatorState) {

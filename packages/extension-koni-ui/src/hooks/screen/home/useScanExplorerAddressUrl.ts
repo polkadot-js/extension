@@ -12,7 +12,7 @@ export default function useScanExplorerAddressUrl (networkKey: string, hash: str
 
   if (blockExplorer) {
     if (networkKey === 'subspace_gemini_3c') {
-      return `${blockExplorer}/accounts/${hash}`
+      return `${blockExplorer}/accounts/${hash}`;
     }
 
     return `${blockExplorer}/account/${hash}`;

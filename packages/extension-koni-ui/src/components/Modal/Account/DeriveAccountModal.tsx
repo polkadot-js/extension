@@ -122,6 +122,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <SwList.Section
         displayRow={true}
         enableSearchInput={true}
+        ignoreScrollbar={filtered && filtered.length > 6}
         list={filtered}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}
@@ -138,7 +139,15 @@ const DeriveAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
     '--row-gap': token.sizeXS,
 
     '.ant-sw-modal-body': {
-      padding: `${token.padding}px 0`
+      padding: `${token.padding}px 0 0`
+    },
+
+    '.ant-sw-list-section': {
+      maxHeight: 450
+    },
+
+    '.ant-sw-list-wrapper': {
+      overflow: 'auto'
     },
 
     '.ant-web3-block': {

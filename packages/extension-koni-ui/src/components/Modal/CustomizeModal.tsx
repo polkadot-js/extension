@@ -34,7 +34,7 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
       onCancel={onCancel}
       title={t('Customization')}
     >
-      <div className={'__group-label'}>Balance</div>
+      <div className={'__group-label'}>{t('Balance')}</div>
       <div className={'__group-content'}>
         <SettingItem
           className={'__setting-item'}
@@ -48,7 +48,7 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
               weight='fill'
             />
           }
-          name={'Show zero balance'} // todo: i18n this
+          name={t('Show zero balance')}
           rightItem={
             <Switch
               checked={isShowZeroBalance}
@@ -58,6 +58,8 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
         />
       </div>
 
+      <div className={'__group-label'}>{t('Chains')}</div>
+
       <CustomizeModalContent />
     </SwModal>
   );
@@ -65,8 +67,16 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
 
 export const CustomizeModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '.ant-sw-modal-content': {
+      maxHeight: 586,
+      height: 586,
+      overflow: 'hidden'
+    },
+
     '.ant-sw-modal-body': {
-      padding: 0,
+      paddingLeft: 0,
+      paddingRight: 0,
+      paddingBottom: 0,
       display: 'flex',
       flexDirection: 'column'
     },

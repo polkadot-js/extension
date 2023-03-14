@@ -155,7 +155,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <div className={'token_detail__header_icon_wrapper'}>
               <Logo
                 size={112}
-                token={tokenInfo.symbol}
+                token={tokenInfo.symbol.toLowerCase()}
               />
             </div>
 
@@ -193,7 +193,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       content={tokenInfo.symbol}
                       placeholder={t<string>('Symbol')}
                       prefix={<Logo
-                        network={tokenInfo.symbol}
+                        token={tokenInfo.symbol.toLowerCase()}
                         size={20}
                       />}
                     />

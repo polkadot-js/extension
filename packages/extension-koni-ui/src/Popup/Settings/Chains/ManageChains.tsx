@@ -176,7 +176,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           />}
           className={'manage_chains__container'}
           enableSearchInput={true}
-          ignoreScrollbar={lazyItems.length > 2}
+          ignoreScrollbar={lazyItems.length > 7}
           list={lazyItems}
           mode={'boxed'}
           onClickActionBtn={openFilterModal}

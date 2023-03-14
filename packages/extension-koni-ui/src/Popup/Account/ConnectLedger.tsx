@@ -334,7 +334,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <SwList.Section
                 className='list-container'
                 displayRow={true}
-                list={ledgerAccounts}
+                ignoreScrollbar={ledgerAccounts && ledgerAccounts.length > 5}list={ledgerAccounts}
                 pagination={{
                   hasMore: !isLoadMore,
                   loadMore: () => console.log(12)

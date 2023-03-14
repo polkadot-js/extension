@@ -94,6 +94,7 @@ const Component = ({ className = '', disabled, filter, id = 'account-selector', 
         searchPlaceholder={t('Search name')}
         searchableMinCharactersCount={2}
         selected={value || ''}
+        title={label}
       />
     </>
   );

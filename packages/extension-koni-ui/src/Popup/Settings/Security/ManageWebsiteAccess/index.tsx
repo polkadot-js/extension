@@ -161,6 +161,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <SwList.Section
         displayRow
         enableSearchInput
+        ignoreScrollbar={websiteAccessItems.length > 8}
         list={websiteAccessItems}
         renderItem={renderItem}
         renderWhenEmpty={renderEmptyList}

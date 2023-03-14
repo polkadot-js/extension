@@ -83,6 +83,7 @@ export const createGroupedAccountData = (filteredAccount: AccountWithChildren[])
   }
 
   return {
+    flattened,
     filterChildren,
     getParentName,
     groupedParents

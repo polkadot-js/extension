@@ -6,11 +6,14 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { AccountWithChildren } from '@polkadot/extension-base/background/types';
+import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
+import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
 
 import { AccountContext, AddButton, ButtonArea, ScrollWrapper, VerticalSpace } from '../../components';
+import { ActionContext } from '../../components/contexts';
 import useTranslation from '../../hooks/useTranslation';
+import { getAuthList, getConnectedTabsUrl } from '../../messaging';
 import { Header } from '../../partials';
 import { createGroupedAccountData } from '../../util/createGroupedAccountData';
 import AccountsTree from './AccountsTree';
@@ -28,13 +31,40 @@ function Accounts({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [filter, setFilter] = useState('');
   const [filteredAccount, setFilteredAccount] = useState<AccountWithChildren[]>([]);
+  const [authList, setAuthList] = useState<AuthUrls | null>(null);
+  const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);
   const { hierarchy } = useContext(AccountContext);
+  const onAction = useContext(ActionContext);
   const networkMap = useMemo(() => getNetworkMap(), []);
   const defaultNetwork = 'any';
-  const { filterChildren, getParentName, groupedParents } = useMemo(
+  const { filterChildren, flattened, getParentName, groupedParents } = useMemo(
     () => createGroupedAccountData(filteredAccount),
     [filteredAccount]
   );
+  const [accountsCreatedAfterLastAuth, setAccountsCreatedAfterLastAuth] = useState<AccountJson[] | []>([]);
+
+  useEffect(() => {
+    getAuthList()
+      .then(({ list }) => setAuthList(list))
+      .catch((e) => console.error(e));
+    getConnectedTabsUrl()
+      .then((tabsUrl) => setConnectedTabsUrl(tabsUrl))
+      .catch(console.error);
+  }, [authList]);
+
+  useEffect(() => {
+    if (authList && connectedTabsUrl.length > 0) {
+      setAccountsCreatedAfterLastAuth(
+        flattened.filter(
+          (account) => account?.whenCreated && account?.whenCreated > authList[connectedTabsUrl[0]].lastAuth
+        )
+      );
+    }
+
+    if (accountsCreatedAfterLastAuth.length > 0) {
+      onAction(`/url/new?url=${connectedTabsUrl[0]}`);
+    }
+  }, [accountsCreatedAfterLastAuth.length, authList, connectedTabsUrl, flattened, onAction]);
 
   useEffect(() => {
     setFilteredAccount(
@@ -53,7 +83,6 @@ function Accounts({ className }: Props): React.ReactElement {
   }, []);
 
   const accounts = Object.entries(groupedParents)
-
     .filter(([, details]) => details.length > 0)
     .map(([networkName, details]) => {
       return (

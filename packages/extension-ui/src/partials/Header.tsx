@@ -115,11 +115,7 @@ function Header({
             {isConnected ? (
               <Link
                 className='connectedAccounts'
-                to={
-                  connectedTabsUrl.length === 1
-                    ? `/url/manage?url=${encodeURIComponent(decodeURIComponent(connectedTabsUrl[0]))}`
-                    : '/auth-list'
-                }
+                to={connectedTabsUrl.length === 1 ? `/url/manage?url=${connectedTabsUrl[0]}` : '/auth-list'}
               >
                 <img
                   className='greenDot'

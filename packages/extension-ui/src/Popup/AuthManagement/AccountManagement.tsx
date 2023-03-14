@@ -70,7 +70,6 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
             <RemoveAuth url={url} />
             <AccountSelection
               className='accountSelection'
-              origin={origin}
               showHidden={true}
               url={url}
               withWarning={false}

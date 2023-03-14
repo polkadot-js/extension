@@ -37,6 +37,7 @@ export interface AuthUrlInfo {
   id: string;
   // this is from pre-0.44.1
   isAllowed?: boolean;
+  lastAuth: number;
   origin: string;
   url: string;
   authorizedAccounts: string[];
@@ -244,8 +245,9 @@ export default class State {
         authorizedAccounts,
         count: 0,
         id: idStr,
+        lastAuth: Date.now(),
         origin,
-        url
+        url: URLorigin
       };
 
       this.saveCurrentAuthList();
@@ -272,7 +274,7 @@ export default class State {
 
       // the assert in stripUrl may throw for new tabs with "chrome://newtab/"
       try {
-        strippedUrl = decodeURIComponent(url);
+        strippedUrl = new URL(url).origin;
       } catch (e) {
         console.error(e);
       }
@@ -388,14 +390,22 @@ export default class State {
 
   public updateAuthorizedAccounts (authorizedAccountDiff: AuthorizedAccountsDiff): void {
     authorizedAccountDiff.forEach(([url, authorizedAccountDiff]) => {
-      this.#authUrls[url].authorizedAccounts = authorizedAccountDiff;
+      const origin = new URL(url).origin;
+
+      this.#authUrls[origin] = { ...this.#authUrls[origin], authorizedAccounts: authorizedAccountDiff, lastAuth: Date.now() };
     });
 
     this.saveCurrentAuthList();
   }
 
+  public updateAuthorizedDate (url: string): void {
+    this.#authUrls[new URL(url).origin].lastAuth = Date.now();
+
+    this.saveCurrentAuthList();
+  }
+
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<AuthResponse> {
-    const idStr = decodeURIComponent(url);
+    const idStr = new URL(url).origin;
 
     // Do not enqueue duplicate authorization requests.
     const isDuplicate = Object
@@ -405,7 +415,6 @@ export default class State {
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
 
     if (this.#authUrls[idStr]) {
-      // this url was seen in the past
       assert(this.#authUrls[idStr].authorizedAccounts || this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
       return {
@@ -431,7 +440,7 @@ export default class State {
   }
 
   public ensureUrlAuthorized (url: string): boolean {
-    const entry = this.#authUrls[url];
+    const entry = this.#authUrls[new URL(url).origin];
 
     assert(entry, `The source ${url} has not been enabled yet`);
 

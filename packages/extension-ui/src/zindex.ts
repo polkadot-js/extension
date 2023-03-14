@@ -11,5 +11,6 @@ export const Z_INDEX = {
   MENU: 2,
   SPLASH_HEADER: 101,
   TOAST: 100,
-  TOOLTIP: 99
+  TOOLTIP: 99,
+  NEW_ACCOUNT_RIBBON: 100
 };

@@ -37,6 +37,7 @@ describe('Extension', () => {
       authorizedAccounts: [address],
       count: 0,
       id: '11',
+      lastAuth: Date.now(),
       origin: 'example.com',
       url: 'http://localhost:3000'
     };

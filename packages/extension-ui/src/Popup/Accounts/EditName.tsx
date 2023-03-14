@@ -56,7 +56,10 @@ function EditName({
         withHelp
       />
       <div className={className}>
-        <Address address={address} />
+        <Address
+          address={address}
+          name={editedName}
+        />
         <div className='name'>
           <Name
             label=' '

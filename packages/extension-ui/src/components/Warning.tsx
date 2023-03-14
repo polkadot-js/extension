@@ -32,8 +32,6 @@ export default React.memo(
     ({ isDanger, theme }: Props) => `
   display: flex;
   flex-direction: row;
-  justify-content: center;
-  padding-left: 18px;
   color: ${theme.textColorDanger};
   margin-right: 20px;
   margin-top: 6px;

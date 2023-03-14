@@ -262,5 +262,10 @@
   "Add sub-account": "",
   "Choose a sub-account derivation path for additional account organization.": "",
   "You have been redirected because you've entered a website that could compromise the security of your assets": "",
-  "We have found it on a list of phishing websites that is community-driven and maintained by Parity Technologies. If you think that this website has been flagged incorrectly, open an issue":""
+  "We have found it on a list of phishing websites that is community-driven and maintained by Parity Technologies. If you think that this website has been flagged incorrectly, open an issue":"",
+  "Update connected apps": "",
+  "New account(s) have been added since your last interaction with this app. Update your preferences.": "",
+  "Dismiss": "",
+  "Update": "",
+  "Connected app updated": ""
 }

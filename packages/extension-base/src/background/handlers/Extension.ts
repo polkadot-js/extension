@@ -211,6 +211,10 @@ export default class Extension {
     return this.#state.updateAuthorizedAccounts([[url, authorizedAccounts]]);
   }
 
+  private authorizeDateUpdate (url: string): void {
+    return this.#state.updateAuthorizedDate(url);
+  }
+
   private getAuthList (): ResponseAuthorizeList {
     return { list: this.#state.authUrls };
   }
@@ -546,6 +550,9 @@ export default class Extension {
 
       case 'pri(authorize.update)':
         return this.authorizeUpdate(request as RequestUpdateAuthorizedAccounts);
+
+      case 'pri(authorizeDate.update)':
+        return this.authorizeDateUpdate(request as string);
 
       case 'pri(accounts.create.external)':
         return this.accountsCreateExternal(request as RequestAccountCreateExternal);

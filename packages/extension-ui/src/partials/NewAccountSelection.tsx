@@ -6,19 +6,27 @@ import type { ThemeProps } from '../types';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { AccountJson } from '@polkadot/extension-base/background/types';
+
 import plusIcon from '../assets/add.svg';
+import ribbon from '../assets/ribbon.svg';
 import { AccountContext, FaviconBox, Svg } from '../components';
 import Checkbox from '../components/Checkbox';
 import useTranslation from '../hooks/useTranslation';
 import Account from '../Popup/Accounts/Account';
 import AccountsTree from '../Popup/Accounts/AccountsTree';
+import { createGroupedAccountData } from '../util/createGroupedAccountData';
+import { Z_INDEX } from '../zindex';
 
 interface Props extends ThemeProps {
   className?: string;
   url: string;
-
   showHidden?: boolean;
-  withWarning?: boolean;
+  newAccounts: Array<AccountJson> | [];
+}
+
+interface GroupedData {
+  [key: string]: AccountJson[];
 }
 
 const StyledCheckbox = styled(Checkbox)`
@@ -27,26 +35,17 @@ const StyledCheckbox = styled(Checkbox)`
   margin-right: 8px;
 `;
 
-function AccounSelection({
-  className,
-
-  showHidden = false,
-  url,
-  withWarning = true
-}: Props): React.ReactElement<Props> {
+function NewAccountSelection({ className, newAccounts, showHidden = false, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts, hierarchy, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
-  const allVisibleAccounts = useMemo(() => accounts.filter(({ isHidden }) => !isHidden), [accounts]);
-  const noAccountSelected = useMemo(() => selectedAccounts.length === 0, [selectedAccounts.length]);
-  const allDisplayedAddresses = useMemo(
-    () => (showHidden ? accounts.map(({ address }) => address) : allVisibleAccounts.map(({ address }) => address)),
-    [accounts, allVisibleAccounts, showHidden]
-  );
-  const areAllAccountsSelected = useMemo(
-    () => selectedAccounts.length === allDisplayedAddresses.length,
-    [allDisplayedAddresses.length, selectedAccounts.length]
-  );
+
+  const { flattened, getParentName } = useMemo(() => createGroupedAccountData(hierarchy), [hierarchy]);
+  const noAccountSelected = selectedAccounts.length === 0;
+  const allDisplayedAddresses = showHidden
+    ? accounts.map(({ address }) => address)
+    : accounts.filter(({ isHidden }) => !isHidden).map(({ address }) => address);
+  const areAllAccountsSelected = selectedAccounts.length === allDisplayedAddresses.length;
 
   useEffect(() => {
     const nextIndeterminateState = !noAccountSelected && !areAllAccountsSelected;
@@ -64,27 +63,38 @@ function AccounSelection({
     setSelectedAccounts && setSelectedAccounts(allDisplayedAddresses);
   }, [allDisplayedAddresses, areAllAccountsSelected, setSelectedAccounts]);
 
+  const groupedAccounts = flattened.reduce<GroupedData>(
+    (acc, curr) => {
+      if (newAccounts.some((account) => account.address === curr.address)) {
+        acc = { ...acc, new: [...acc.new, curr] };
+      } else {
+        acc = { ...acc, other: [...acc.other, curr] };
+      }
+
+      return acc;
+    },
+    { new: [], other: [] }
+  );
+
   return (
     <div className={className}>
-      {withWarning && (
-        <div className='withWarning'>
-          <div className='heading'>{t<string>('Connect app')}</div>
-          <FaviconBox url={url} />
-          <div className='separator'>
-            <div className='line'></div>
-            <Svg
-              className='plus-icon'
-              src={plusIcon}
-            />
-            <div className='line'></div>
-          </div>
-          <div className='subtitle'>
-            {t<string>(
-              'Choose accounts to use with this app. It will access addresses, balances, activities and request transactions to sign.'
-            )}
-          </div>
+      <div className='withWarning'>
+        <div className='heading'>{t<string>('Update connected app')}</div>
+        <FaviconBox url={url} />
+        <div className='separator'>
+          <div className='line'></div>
+          <Svg
+            className='plus-icon'
+            src={plusIcon}
+          />
+          <div className='line'></div>
         </div>
-      )}
+        <div className='subtitle'>
+          {t<string>(
+            'New account(s) have been added since your last interaction with this app. Update your preferences.'
+          )}
+        </div>
+      </div>
       <StyledCheckbox
         checked={areAllAccountsSelected}
         className='accountTree-checkbox'
@@ -93,35 +103,82 @@ function AccounSelection({
         onChange={_onSelectAllToggle}
       />
       <div className='accountList'>
-        {hierarchy.map(
-          (json, index): React.ReactNode => (
-            <AccountsTree
-              {...json}
-              isAuthList
-              key={`${index}:${json.address}`}
-              showHidden={showHidden}
-              withCheckbox={true}
-              withMenu={false}
-            />
-          )
-        )}
+        {Object.entries(groupedAccounts).map(([group, accounts]) => {
+          return (
+            <>
+              {group !== 'new' && <span className='separator-heading'>{group}</span>}
+              {accounts.map((json, index) => (
+                <AccountsTree
+                  {...json}
+                  className={group === 'new' ? 'new' : ''}
+                  isAuthList
+                  key={`${group}:${index}:${json.address}`}
+                  parentName={getParentName(json)}
+                  showHidden={showHidden}
+                  withCheckbox={true}
+                  withMenu={false}
+                />
+              ))}
+            </>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-export default styled(AccounSelection)(
+export default styled(NewAccountSelection)(
   ({ theme }: Props) => `
 
   // due to internal padding
   margin: 0px -16px;
 
+  .new {
+    ${Account} {
+      .name {
+        margin: 2px 8px 0px 0px;
+      }
+
+      position: relative;
+      &:before {
+        content: url(${ribbon});
+        display: block;
+        width: 56px;
+        height: 56px;
+        position: absolute;
+        width: 56px;
+        height: 56px;
+        left: 0px;
+        top: 0px;
+        z-index: ${Z_INDEX.NEW_ACCOUNT_RIBBON};
+      }
+    }
+  }
+
+  .separator-heading {
+    display: flex;
+    align-items: center;
+    font-family: ${theme.secondaryFontFamily};
+    font-style: normal;
+    font-weight: 300;
+    font-size: 11px;
+    line-height: 120%;
+    text-align: right;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: ${theme.subTextColor};
+    padding: 8px 0 8px 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid ${theme.boxBorderColor};
+  }
+
   .accountList {
     overflow-x: hidden;
-    height: 190px;
+    height: 240px;
     scrollbar-color: ${theme.boxBorderColor};
     scrollbar-width: 2px;
     padding-right: 2px;
+    padding: 0 16px;
   
     ::-webkit-scrollbar-thumb {
       background:${theme.boxBorderColor};
@@ -134,7 +191,7 @@ export default styled(AccounSelection)(
       width: 4px;
     }
     ${Account} {
-      padding: 0px 4px;
+      padding: 2px 4px;
     }
   }
 

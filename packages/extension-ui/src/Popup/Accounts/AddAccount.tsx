@@ -7,8 +7,9 @@ import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import add from '../../assets/add.svg';
+import animatedBackground from '../../assets/anim_background.svg';
 import helpIcon from '../../assets/help.svg';
-import { ActionContext, Button, ButtonArea, SkeletonCard, Svg } from '../../components';
+import { ActionContext, Button, ButtonArea, Svg } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
 import useTranslation from '../../hooks/useTranslation';
 import Header from '../../partials/Header';
@@ -62,13 +63,7 @@ function AddAccount({ className }: Props): React.ReactElement<Props> {
         withSettings
       />
       <div className={className}>
-        <div className='background'>
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
+        <div className='background'></div>
         <div className='content'>
           <div className='heading'>
             <span>{t<string>('Hello!')}</span>
@@ -100,6 +95,7 @@ export default React.memo(
   z-index: ${Z_INDEX.ADD_ACCOUNT_FOREGROUND};
 
   .background {
+    background: url(${animatedBackground}) no-repeat center;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -111,7 +107,6 @@ export default React.memo(
     z-index: ${Z_INDEX.ADD_ACCOUNT_BACKGROUND};
     margin-left: 16px;
     margin-right: 16px;
-    opacity: 0.5;
   }
 
   .icon {

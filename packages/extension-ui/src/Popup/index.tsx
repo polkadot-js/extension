@@ -39,6 +39,7 @@ import AddAccountMenu from './Accounts/AddAccountMenu';
 import EditAccountMenu from './Accounts/EditAccountMenu';
 import EditName from './Accounts/EditName';
 import EditNetwork from './Accounts/EditNetwork';
+import NewAccount from './Accounts/NewAccount';
 import AccountManagement from './AuthManagement/AccountManagement';
 import DisconnectApp from './AuthManagement/DisconnectApp';
 import RestoreJson from './Restore/RestoreJson';
@@ -231,6 +232,7 @@ export default function Popup(): React.ReactElement {
                             <Route path='/url/manage'>
                               {wrapWithErrorBoundary(<AccountManagement />, 'manage-url')}
                             </Route>
+                            <Route path='/url/new'>{wrapWithErrorBoundary(<NewAccount />, 'manage-url')}</Route>
                             <Route path='/url/disconnect/:url'>
                               {wrapWithErrorBoundary(<DisconnectApp />, 'disconnect-url')}
                             </Route>

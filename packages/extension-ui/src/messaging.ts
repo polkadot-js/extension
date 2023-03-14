@@ -262,6 +262,10 @@ export async function updateAuthorization(authorizedAccounts: string[], url: str
   return sendMessage('pri(authorize.update)', { authorizedAccounts, url });
 }
 
+export async function updateAuthorizationDate(url: string): Promise<void> {
+  return sendMessage('pri(authorizeDate.update)', url);
+}
+
 export async function deleteAuthRequest(requestId: string): Promise<void> {
   return sendMessage('pri(authorize.delete.request)', requestId);
 }

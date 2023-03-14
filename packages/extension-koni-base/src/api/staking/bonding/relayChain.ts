@@ -2,30 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  BasicTxInfo,
-  ChainStakingMetadata,
-  NominationInfo,
-  NominatorMetadata,
-  StakingType,
-  UnlockingStakeInfo, UnstakingInfo, UnstakingStatus,
-  ValidatorInfo
-} from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxInfo, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnlockingStakeInfo, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-base/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import {
-  calculateAlephZeroValidatorReturn,
-  calculateChainStakedReturn,
-  calculateInflation,
-  calculateValidatorStakedReturn,
-  getCommission,
-  PalletIdentityRegistration, parseIdentity,
-  Unlocking,
-  ValidatorExtraInfo
-} from '@subwallet/extension-koni-base/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, parseIdentity, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
 
@@ -101,52 +84,52 @@ export async function getRelayChainNominatorMetadata (chain: string, address: st
   const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
   const currentEra = _currentEra.toString();
 
-  if (ledger) {
-    const activeStake = ledger.active.toString();
-    const nominationList: NominationInfo[] = [];
-    const unstakingList: UnstakingInfo[] = [];
-
-    if (nominations) {
-      const validatorList = nominations.targets;
-
-      await Promise.all(validatorList.map(async (validatorAddress) => {
-        const identityInfo = (await chainApi.api.query.identity.identityOf(validatorAddress)).toHuman() as unknown as PalletIdentityRegistration;
-        const identity = parseIdentity(identityInfo);
-
-        nominationList.push({
-          chain,
-          validatorAddress,
-          validatorIdentity: identity,
-          activeStake: '0' // relaychain allocates stake accordingly
-        } as NominationInfo)
-      }));
-    }
-
-    ledger.unlocking.forEach((unlockingChunk) => {
-      const isClaimable = unlockingChunk.era - parseInt(currentEra) <= 0;
-      const remainingEra = unlockingChunk.era - (parseInt(currentEra) + 1);
-      const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
-
-      unstakingList.push({
-        chain,
-        status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
-        claimable: unlockingChunk.value.toString(),
-        waitingTime: waitingTime > 0 ? waitingTime : 0
-      } as UnstakingInfo);
-    });
-
-    return {
-      chain,
-      type: StakingType.NOMINATED,
-      nominatorAddress: address,
-      activeStake,
-
-      nominations: nominationList,
-      unstakings: unstakingList
-    } as NominatorMetadata;
+  if (!ledger) {
+    return;
   }
 
-  return;
+  const activeStake = ledger.active.toString();
+  const nominationList: NominationInfo[] = [];
+  const unstakingList: UnstakingInfo[] = [];
+
+  if (nominations) {
+    const validatorList = nominations.targets;
+
+    await Promise.all(validatorList.map(async (validatorAddress) => {
+      const identityInfo = (await chainApi.api.query.identity.identityOf(validatorAddress)).toHuman() as unknown as PalletIdentityRegistration;
+      const identity = parseIdentity(identityInfo);
+
+      nominationList.push({
+        chain,
+        validatorAddress,
+        validatorIdentity: identity,
+        activeStake: '0' // relaychain allocates stake accordingly
+      } as NominationInfo);
+    }));
+  }
+
+  ledger.unlocking.forEach((unlockingChunk) => {
+    const isClaimable = unlockingChunk.era - parseInt(currentEra) <= 0;
+    const remainingEra = unlockingChunk.era - (parseInt(currentEra) + 1);
+    const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+
+    unstakingList.push({
+      chain,
+      status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+      claimable: unlockingChunk.value.toString(),
+      waitingTime: waitingTime > 0 ? waitingTime : 0
+    } as UnstakingInfo);
+  });
+
+  return {
+    chain,
+    type: StakingType.NOMINATED,
+    nominatorAddress: address,
+    activeStake,
+
+    nominations: nominationList,
+    unstakings: unstakingList
+  } as NominatorMetadata;
 }
 
 export async function getRelayValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {

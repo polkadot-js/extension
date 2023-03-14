@@ -2,80 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  ChainStakingMetadata,
-  NominatorMetadata,
-  StakingType,
-  UnlockingStakeInfo,
-  ValidatorInfo
-} from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominatorMetadata, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import {
-  getAmplitudeBondingExtrinsic,
-  getAmplitudeClaimRewardExtrinsic,
-  getAmplitudeCollatorsInfo,
-  getAmplitudeDelegationInfo,
-  getAmplitudeNominatorMetadata,
-  getAmplitudeStakingMetadata,
-  getAmplitudeUnbondingExtrinsic,
-  getAmplitudeWithdrawalExtrinsic,
-  handleAmplitudeBondingTxInfo,
-  handleAmplitudeClaimRewardTxInfo,
-  handleAmplitudeUnbondingTxInfo,
-  handleAmplitudeUnlockingInfo,
-  handleAmplitudeWithdrawalTxInfo
-} from '@subwallet/extension-koni-base/api/staking/bonding/amplitude';
-import {
-  getAstarBondingExtrinsic,
-  getAstarClaimRewardExtrinsic,
-  getAstarDappsInfo,
-  getAstarDelegationInfo,
-  getAstarNominatorMetadata,
-  getAstarStakingMetadata,
-  getAstarUnbondingExtrinsic,
-  getAstarWithdrawalExtrinsic,
-  handleAstarBondingTxInfo,
-  handleAstarClaimRewardTxInfo,
-  handleAstarUnbondingTxInfo,
-  handleAstarUnlockingInfo,
-  handleAstarWithdrawalTxInfo
-} from '@subwallet/extension-koni-base/api/staking/bonding/astar';
-import {
-  getParaBondingExtrinsic,
-  getParaChainNominatorMetadata,
-  getParaChainStakingMetadata,
-  getParaCollatorsInfo,
-  getParaDelegationInfo,
-  getParaUnbondingExtrinsic,
-  getParaWithdrawalExtrinsic,
-  handleParaBondingTxInfo,
-  handleParaUnbondingTxInfo,
-  handleParaUnlockingInfo,
-  handleParaWithdrawalTxInfo
-} from '@subwallet/extension-koni-base/api/staking/bonding/paraChain';
-import {
-  getPoolingClaimRewardExtrinsic,
-  getRelayBondingExtrinsic,
-  getRelayChainNominatorMetadata,
-  getRelayChainStakingMetadata,
-  getRelayUnbondingExtrinsic,
-  getRelayValidatorsInfo,
-  getRelayWithdrawalExtrinsic,
-  getTargetValidators,
-  handlePoolingClaimRewardTxInfo,
-  handleRelayBondingTxInfo,
-  handleRelayUnbondingTxInfo,
-  handleRelayUnlockingInfo,
-  handleRelayWithdrawalTxInfo
-} from '@subwallet/extension-koni-base/api/staking/bonding/relayChain';
-
-export const CHAIN_TYPES: Record<string, string[]> = {
-  relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend'],
-  para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari'],
-  astar: ['astar', 'shiden', 'shibuya'],
-  amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine']
-};
+import { getAmplitudeBondingExtrinsic, getAmplitudeClaimRewardExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeDelegationInfo, getAmplitudeNominatorMetadata, getAmplitudeStakingMetadata, getAmplitudeUnbondingExtrinsic, getAmplitudeWithdrawalExtrinsic, handleAmplitudeBondingTxInfo, handleAmplitudeClaimRewardTxInfo, handleAmplitudeUnbondingTxInfo, handleAmplitudeUnlockingInfo, handleAmplitudeWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/staking/bonding/amplitude';
+import { getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarDelegationInfo, getAstarNominatorMetadata, getAstarStakingMetadata, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, handleAstarBondingTxInfo, handleAstarClaimRewardTxInfo, handleAstarUnbondingTxInfo, handleAstarUnlockingInfo, handleAstarWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/staking/bonding/astar';
+import { getParaBondingExtrinsic, getParaChainNominatorMetadata, getParaChainStakingMetadata, getParaCollatorsInfo, getParaDelegationInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, handleParaBondingTxInfo, handleParaUnbondingTxInfo, handleParaUnlockingInfo, handleParaWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/staking/bonding/paraChain';
+import { getPoolingClaimRewardExtrinsic, getRelayBondingExtrinsic, getRelayChainNominatorMetadata, getRelayChainStakingMetadata, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators, handlePoolingClaimRewardTxInfo, handleRelayBondingTxInfo, handleRelayUnbondingTxInfo, handleRelayUnlockingInfo, handleRelayWithdrawalTxInfo } from '@subwallet/extension-koni-base/api/staking/bonding/relayChain';
 
 // all addresses must be converted to its chain format
 

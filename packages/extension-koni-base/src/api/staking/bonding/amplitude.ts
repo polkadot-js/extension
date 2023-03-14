@@ -2,27 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  BasicTxInfo,
-  ChainStakingMetadata,
-  DelegationItem, NominationInfo,
-  NominatorMetadata,
-  StakingType,
-  UnlockingStakeInfo, UnstakingInfo, UnstakingStatus,
-  ValidatorInfo
-} from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxInfo, ChainStakingMetadata, DelegationItem, NominationInfo, NominatorMetadata, StakingType, UnlockingStakeInfo, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-base/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { BlockHeader, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN } from '@polkadot/util';
-import {
-  BlockHeader, PalletIdentityRegistration,
-  ParachainStakingStakeOption,
-  parseIdentity
-} from "@subwallet/extension-koni-base/api/staking/bonding/utils";
 
 interface InflationConfig {
   collator: {
@@ -72,73 +60,73 @@ export async function getAmplitudeNominatorMetadata (chain: string, address: str
   const chainApi = await substrateApi.isReady;
 
   const nominationList: NominationInfo[] = [];
-    const unstakingList: UnstakingInfo[] = [];
+  const unstakingList: UnstakingInfo[] = [];
 
-    const [_delegatorState, _unstakingInfo] = await Promise.all([
-      chainApi.api.query.parachainStaking.delegatorState(address),
-      chainApi.api.query.parachainStaking.unstaking(address)
-    ]);
+  const [_delegatorState, _unstakingInfo] = await Promise.all([
+    chainApi.api.query.parachainStaking.delegatorState(address),
+    chainApi.api.query.parachainStaking.unstaking(address)
+  ]);
 
-    const delegatorState = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
-    const unstakingInfo = _unstakingInfo.toPrimitive() as unknown as Record<string, number>;
+  const delegatorState = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
+  const unstakingInfo = _unstakingInfo.toPrimitive() as unknown as Record<string, number>;
 
-    if (!delegatorState && !unstakingInfo) {
-      return;
-    }
+  if (!delegatorState && !unstakingInfo) {
+    return;
+  }
 
-    let activeStake = '0';
+  let activeStake = '0';
 
-    if (delegatorState) { // delegatorState can be null while unstaking all
-      const identityInfo = (await chainApi.api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration;
-      const identity = parseIdentity(identityInfo);
+  if (delegatorState) { // delegatorState can be null while unstaking all
+    const identityInfo = (await chainApi.api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration;
+    const identity = parseIdentity(identityInfo);
 
-      activeStake = delegatorState.amount.toString();
+    activeStake = delegatorState.amount.toString();
 
-      nominationList.push({
-        chain,
-        validatorAddress: delegatorState.owner,
-        activeStake: delegatorState.amount.toString(),
-        validatorMinStake: '0',
-        hasUnstaking: !!unstakingInfo,
-        validatorIdentity: identity,
-      });
-    }
-
-    if (unstakingInfo && Object.values(unstakingInfo).length > 0) {
-      const _currentBlockInfo = await chainApi.api.rpc.chain.getHeader();
-
-      const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;
-      const currentBlockNumber = currentBlockInfo.number;
-
-      const _blockPerRound = chainApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
-      const blockPerRound = parseFloat(_blockPerRound);
-
-      const nearestUnstakingBlock = Object.keys(unstakingInfo)[0];
-      const nearestUnstakingAmount = Object.values(unstakingInfo)[0];
-
-      const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
-
-      const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber <= 0;
-      const remainingBlock = parseInt(nearestUnstakingBlock) - (currentBlockNumber + 1);
-      const waitingTime = remainingBlock * blockDuration;
-
-      unstakingList.push({
-        chain,
-        status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
-        claimable: nearestUnstakingAmount.toString(),
-        waitingTime: waitingTime > 0 ? waitingTime : 0,
-        validatorAddress: delegatorState.owner
-      });
-    }
-
-    return {
+    nominationList.push({
       chain,
-      type: StakingType.NOMINATED,
-      nominatorAddress: address,
-      activeStake: activeStake,
-      nominations: nominationList,
-      unstakings: unstakingList
-    } as NominatorMetadata;
+      validatorAddress: delegatorState.owner,
+      activeStake: delegatorState.amount.toString(),
+      validatorMinStake: '0',
+      hasUnstaking: !!unstakingInfo,
+      validatorIdentity: identity
+    });
+  }
+
+  if (unstakingInfo && Object.values(unstakingInfo).length > 0) {
+    const _currentBlockInfo = await chainApi.api.rpc.chain.getHeader();
+
+    const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;
+    const currentBlockNumber = currentBlockInfo.number;
+
+    const _blockPerRound = chainApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
+    const blockPerRound = parseFloat(_blockPerRound);
+
+    const nearestUnstakingBlock = Object.keys(unstakingInfo)[0];
+    const nearestUnstakingAmount = Object.values(unstakingInfo)[0];
+
+    const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
+
+    const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber <= 0;
+    const remainingBlock = parseInt(nearestUnstakingBlock) - (currentBlockNumber + 1);
+    const waitingTime = remainingBlock * blockDuration;
+
+    unstakingList.push({
+      chain,
+      status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+      claimable: nearestUnstakingAmount.toString(),
+      waitingTime: waitingTime > 0 ? waitingTime : 0,
+      validatorAddress: delegatorState.owner
+    });
+  }
+
+  return {
+    chain,
+    type: StakingType.NOMINATED,
+    nominatorAddress: address,
+    activeStake: activeStake,
+    nominations: nominationList,
+    unstakings: unstakingList
+  } as NominatorMetadata;
 }
 
 export async function getAmplitudeCollatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string, extraCollatorAddress?: string) {

@@ -21,12 +21,12 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, ValidateTran
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { MetadataDef } from '@subwallet/extension-inject/types';
-import { CHAIN_TYPES, getBondingExtrinsic, getChainBondingBasics, getClaimRewardExtrinsic, getDelegationInfo, getUnbondingExtrinsic, getValidatorsInfo, getWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/bonding';
-import { getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseSubstrateTransaction } from '@subwallet/extension-koni-base/api/dotsama/parseTransaction';
 import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-koni-base/api/nft/transfer';
+import { getBondingExtrinsic, getClaimRewardExtrinsic, getDelegationInfo, getUnbondingExtrinsic, getValidatorsInfo, getWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding';
+import { getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding/paraChain';
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
 import { getPSP34Transaction, getPSP34TransferExtrinsic } from '@subwallet/extension-koni-base/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm';
@@ -2290,7 +2290,7 @@ export default class KoniExtension {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
     }
 
-    if (CHAIN_TYPES.amplitude.includes(networkKey)) {
+    if (_STAKING_CHAIN_GROUP.amplitude.includes(networkKey)) {
       this.#koniState.setExtraDelegationInfo(networkKey, address, validatorAddress as string);
     }
 

@@ -317,10 +317,10 @@ export class KoniCron {
 
   updateNominatorMetadata = (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) => {
     return () => {
-      this.logger.log('Fetching chain staking metadata');
+      this.logger.log('Fetching nominator data', address);
 
       this.subscriptions.fetchNominatorMetadata(address, chainInfoMap, chainStateMap, substrateApiMap)
-        .then(() => this.logger.log('Updated chain staking metadata'))
+        .then(() => this.logger.log('Updated nominator data', address))
         .catch(this.logger.error);
     };
   };

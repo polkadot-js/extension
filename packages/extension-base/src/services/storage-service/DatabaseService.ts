@@ -265,4 +265,8 @@ export default class DatabaseService {
 
     return this.stores.nominatorMetadata.upsert(item);
   }
+
+  async getNominatorMetadata () {
+    return this.stores.nominatorMetadata.getAll();
+  }
 }

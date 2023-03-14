@@ -2226,6 +2226,24 @@ export default class KoniExtension {
     return this.#koniState.getChainStakingMetadata();
   }
 
+  private async subscribeStakingNominatorMetadata (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(bonding.subscribeNominatorMetadata)'>(id, port);
+
+    const nominatorMetadata = this.#koniState.subscribeNominatorMetadata().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, nominatorMetadata.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.getNominatorMetadata();
+  }
+
   private async getBondingOption ({ address, networkKey }: BondingOptionParams): Promise<BondingOptionInfo> {
     const apiProps = this.#koniState.getSubstrateApi(networkKey);
     const chainInfo = this.#koniState.getChainInfo(networkKey);
@@ -3185,6 +3203,8 @@ export default class KoniExtension {
         return await this.getBondingOption(request as BondingOptionParams);
       case 'pri(bonding.subscribeChainStakingMetadata)':
         return await this.subscribeChainStakingMetadata(id, port);
+      case 'pri(bonding.subscribeNominatorMetadata)':
+        return await this.subscribeStakingNominatorMetadata(id, port);
       case 'pri(bonding.submitTransaction)':
         return await this.submitBonding(request as RequestBondingSubmit);
       case 'pri(unbonding.submitTransaction)':

@@ -109,10 +109,13 @@ const groupStakingRewardItems = (stakingRewardItems: StakingRewardItem[]): Staki
 };
 
 export default function useGetStakingList () {
-  const { stakeUnlockingMap, stakingMap, stakingRewardMap } = useSelector((state: RootState) => state.staking);
+  const { chainStakingMetadataList, nominatorMetadataList, stakeUnlockingMap, stakingMap, stakingRewardMap } = useSelector((state: RootState) => state.staking);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+
+  console.log('chainStakingMetadataList', chainStakingMetadataList);
+  console.log('nominatorMetadataList', nominatorMetadataList);
 
   const partResult = useMemo(() => {
     const parsedPriceMap: Record<string, number> = {};

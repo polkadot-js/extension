@@ -5,10 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { BasicTxInfo, ChainStakingMetadata, DelegationItem, NominationInfo, NominatorMetadata, StakingType, TuringStakeCompoundResp, UnlockingStakeInfo, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import {
-  _getChainNativeTokenBasicInfo,
-  _isChainEvmCompatible
-} from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { BOND_LESS_ACTION, getParaCurrentInflation, InflationConfig, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, REVOKE_ACTION, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
@@ -21,13 +18,8 @@ interface CollatorExtraInfo {
   identity?: string,
   isVerified: boolean,
   delegationCount: number,
-  bond: number,
-  minDelegation: number
-}
-
-interface CollatorInfo {
-  owner: string;
-  amount: string;
+  bond: string,
+  minDelegation: string
 }
 
 export async function getParaChainStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
@@ -174,110 +166,38 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
   } as NominatorMetadata;
 }
 
-export async function getParaCollatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {
+export async function getParachainCollatorsInfo (chain: string, substrateApi: _SubstrateApi): Promise<ValidatorInfo[]> {
   const apiProps = await substrateApi.isReady;
 
   const allValidators: ValidatorInfo[] = [];
 
-  const [_allCollators, _delegatorState, _collatorCommission] = await Promise.all([
-    apiProps.api.query.parachainStaking.candidatePool(),
-    apiProps.api.query.parachainStaking.delegatorState(address),
+  const [_allCollators, _collatorCommission] = await Promise.all([
+    apiProps.api.query.parachainStaking.candidateInfo.entries(),
     apiProps.api.query.parachainStaking.collatorCommission()
   ]);
 
-  const _maxDelegatorPerCandidate = apiProps.api.consts.parachainStaking.maxTopDelegationsPerCandidate.toHuman() as string;
-  const maxDelegatorPerCandidate = parseRawNumber(_maxDelegatorPerCandidate);
-
-  const _maxDelegationCount = apiProps.api.consts.parachainStaking.maxDelegationsPerDelegator.toHuman() as string;
-  const maxDelegationCount = parseRawNumber(_maxDelegationCount);
-
-  const _chainMinDelegation = apiProps.api.consts.parachainStaking.minDelegation.toHuman() as string;
-  const chainMinDelegation = parseRawNumber(_chainMinDelegation);
-
-  const rawDelegatorState = _delegatorState.toHuman() as Record<string, any> | null;
-  const rawAllCollators = _allCollators.toHuman() as unknown as CollatorInfo[];
-
+  const maxDelegationPerCollator = apiProps.api.consts.parachainStaking.maxTopDelegationsPerCandidate.toString();
   const rawCollatorCommission = _collatorCommission.toHuman() as string;
   const collatorCommission = parseFloat(rawCollatorCommission.split('%')[0]);
 
-  for (const collator of rawAllCollators) {
+  for (const collator of _allCollators) {
+    const collatorAddress = collator[0].toPrimitive() as string;
+    const collatorInfo = collator[1].toPrimitive() as unknown as ParachainStakingCandidateMetadata;
+
     allValidators.push({
       commission: 0,
       expectedReturn: 0,
-      address: collator.owner,
-      totalStake: (parseRawNumber(collator.amount) / 10 ** decimals).toString(),
-      ownStake: '0',
-      otherStake: '0',
-      nominatorCount: 0,
+      address: collatorAddress,
+      totalStake: collatorInfo.totalCounted.toString(),
+      ownStake: collatorInfo.bond.toString(),
+      otherStake: (collatorInfo.totalCounted - collatorInfo.bond).toString(),
+      nominatorCount: collatorInfo.delegationCount,
       blocked: false,
       isVerified: false,
-      minBond: '0',
-      isNominated: false,
-      chain: networkKey
+      minBond: collatorInfo.lowestTopDelegationAmount.toString(),
+      chain,
+      isCrowded: parseInt(maxDelegationPerCollator) > 0
     });
-  }
-
-  const bondedValidators: string[] = [];
-
-  if (rawDelegatorState !== null) {
-    const validatorList = rawDelegatorState.delegations as Record<string, any>[];
-
-    for (const _validator of validatorList) {
-      bondedValidators.push(_validator.owner as string);
-    }
-  }
-
-  let currentBondingValidators: string[] = [];
-  let existingRequestsMap: Record<string, boolean> = {};
-
-  if (['bifrost', 'bifrost_testnet'].includes(networkKey)) {
-    if (rawDelegatorState !== null) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const unbondingRequests = rawDelegatorState.requests.requests as Record<string, Record<string, string>>;
-
-      const result = getBifrostBondedValidators(bondedValidators, unbondingRequests);
-
-      currentBondingValidators = result.currentBondingValidators;
-      existingRequestsMap = result.existingRequestsMap;
-    } else {
-      currentBondingValidators = bondedValidators;
-    }
-  } else {
-    // double-check bondedValidators to see if exist unbonding request
-    await Promise.all(bondedValidators.map(async (validator) => {
-      const rawScheduledRequests = (await apiProps.api.query.parachainStaking.delegationScheduledRequests(validator)).toHuman() as Record<string, any>[] | null;
-
-      if (rawScheduledRequests === null) {
-        currentBondingValidators.push(validator);
-      } else {
-        let foundRevokeRequest = false;
-
-        for (const scheduledRequest of rawScheduledRequests) {
-          const delegator = scheduledRequest.delegator as string;
-          const formattedDelegator = reformatAddress(delegator, 0);
-          const formattedAddress = reformatAddress(address, 0);
-
-          if (formattedAddress === formattedDelegator) { // returned data might not have the same address format
-            const _action = scheduledRequest.action as Record<string, string>;
-            const action = Object.keys(_action)[0];
-
-            existingRequestsMap[validator] = true;
-
-            if (action.toLowerCase() !== REVOKE_ACTION) {
-              currentBondingValidators.push(validator);
-              break;
-            } else {
-              foundRevokeRequest = true;
-              break;
-            }
-          }
-        }
-
-        if (!foundRevokeRequest) {
-          currentBondingValidators.push(validator);
-        }
-      }
-    }));
   }
 
   const extraInfoMap: Record<string, CollatorExtraInfo> = {};
@@ -289,9 +209,8 @@ export async function getParaCollatorsInfo (networkKey: string, substrateApi: _S
     ]);
 
     const rawInfo = _info.toHuman() as Record<string, any>;
-    const rawIdentity = _identity ? _identity.toHuman() as Record<string, any> | null : null;
+    const rawIdentity = _identity ? _identity.toHuman() as unknown as PalletIdentityRegistration : null;
 
-    const bnDecimals = new BN((10 ** decimals).toString());
     const rawBond = rawInfo?.bond as string;
     const bond = new BN(rawBond.replaceAll(',', ''));
     const delegationCount = parseRawNumber(rawInfo?.delegationCount as string);
@@ -303,51 +222,21 @@ export async function getParaCollatorsInfo (networkKey: string, substrateApi: _S
 
     if (rawIdentity !== null) {
       // Check if identity is eth address
-      const _judgements = rawIdentity.judgements as any[];
-
-      if (_judgements.length > 0) {
-        isReasonable = true;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const displayName = rawIdentity?.info?.display?.Raw as string;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const legal = rawIdentity?.info?.legal?.Raw as string;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const web = rawIdentity?.info?.web?.Raw as string;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const riot = rawIdentity?.info?.riot?.Raw as string;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const email = rawIdentity?.info?.email?.Raw as string;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const twitter = rawIdentity?.info?.twitter?.Raw as string;
-
-      if (displayName && !displayName.startsWith('0x')) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        identity = displayName;
-      } else if (legal && !legal.startsWith('0x')) {
-        identity = legal;
-      } else {
-        identity = twitter || web || email || riot;
-      }
+      isReasonable = rawIdentity.judgements.length > 0;
+      identity = parseIdentity(rawIdentity);
     }
 
     extraInfoMap[validator.address] = {
       identity,
       isVerified: isReasonable,
-      bond: bond.div(bnDecimals).toNumber(),
-      minDelegation: Math.max(minDelegation, chainMinDelegation) / 10 ** decimals,
+      bond: bond.toString(),
+      minDelegation: minDelegation.toString(),
       delegationCount,
       active
     } as CollatorExtraInfo;
   }));
 
   for (const validator of allValidators) {
-    if (currentBondingValidators.includes(validator.address)) {
-      validator.isNominated = true;
-    }
-
-    validator.hasScheduledRequest = existingRequestsMap[validator.address];
     validator.minBond = extraInfoMap[validator.address].minDelegation.toString();
     validator.ownStake = extraInfoMap[validator.address].bond.toString();
     validator.blocked = !extraInfoMap[validator.address].active;
@@ -359,14 +248,7 @@ export async function getParaCollatorsInfo (networkKey: string, substrateApi: _S
     validator.commission = collatorCommission;
   }
 
-  return {
-    maxNominatorPerValidator: maxDelegatorPerCandidate,
-    era: -1,
-    validatorsInfo: allValidators,
-    isBondedBefore: rawDelegatorState !== null,
-    bondedValidators,
-    maxNominations: maxDelegationCount
-  };
+  return allValidators;
 }
 
 export async function getParaBondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo, currentNominationCount: number) {
@@ -832,28 +714,6 @@ async function getBifrostDelegationInfo (substrateApi: _SubstrateApi, address: s
   }
 
   return delegationsList;
-}
-
-function getBifrostBondedValidators (bondedCollators: string[], unbondingRequests: Record<string, Record<string, string>>) {
-  const currentBondingValidators: string[] = [];
-  const existingRequestsMap: Record<string, boolean> = {};
-
-  for (const collator of bondedCollators) {
-    if (collator in unbondingRequests) {
-      existingRequestsMap[collator] = true;
-
-      if (unbondingRequests[collator].action.toLowerCase() !== REVOKE_ACTION) {
-        currentBondingValidators.push(collator);
-      }
-    } else {
-      currentBondingValidators.push(collator);
-    }
-  }
-
-  return {
-    currentBondingValidators,
-    existingRequestsMap
-  };
 }
 
 async function handleBifrostUnlockingInfo (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, networkKey: string, address: string) {

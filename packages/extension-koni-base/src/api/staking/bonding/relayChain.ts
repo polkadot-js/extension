@@ -3,7 +3,7 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { BasicTxInfo, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnlockingStakeInfo, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-base/utils';
@@ -141,41 +141,27 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
   } as NominatorMetadata;
 }
 
-export async function getRelayValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {
+export async function getRelayValidatorsInfo (chain: string, substrateApi: _SubstrateApi, decimals: number, chainStakingMetadata: ChainStakingMetadata): Promise<ValidatorInfo[]> {
   const chainApi = await substrateApi.isReady;
 
   const _era = await chainApi.api.query.staking.currentEra();
   const currentEra = _era.toString();
 
   const allValidators: string[] = [];
-  const result: ValidatorInfo[] = [];
+  const validatorInfoList: ValidatorInfo[] = [];
 
-  const [_totalEraStake, _eraStakers, _totalIssuance, _auctionCounter, _minBond, _existedValidators, _bondedInfo] = await Promise.all([
+  const [_totalEraStake, _eraStakers, _minBond] = await Promise.all([
     chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
     chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra)),
-    chainApi.api.query.balances.totalIssuance(),
-    chainApi.api.query.auctions?.auctionCounter(),
-    chainApi.api.query.staking.minNominatorBond(),
-    chainApi.api.query.staking.nominators(address),
-    chainApi.api.query.staking.bonded(address)
+    chainApi.api.query.staking.minNominatorBond()
   ]);
 
+  const maxNominatorRewarded = chainApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
   const bnTotalEraStake = new BN(_totalEraStake.toString());
-  const bnTotalIssuance = new BN(_totalIssuance.toString());
-
-  const rawMaxNominations = (chainApi.api.consts.staking.maxNominations).toHuman() as string;
-  const maxNominations = parseFloat(rawMaxNominations.replaceAll(',', ''));
-  const rawMaxNominatorPerValidator = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator).toHuman() as string;
-  const maxNominatorPerValidator = parseFloat(rawMaxNominatorPerValidator.replaceAll(',', ''));
-
-  const bondedInfo = _bondedInfo.toHuman();
-  const rawExistedValidators = _existedValidators.toHuman() as Record<string, any>;
-  const bondedValidators = rawExistedValidators ? rawExistedValidators.targets as string[] : [];
   const eraStakers = _eraStakers as any[];
 
-  const numAuctions = _auctionCounter ? _auctionCounter.toHuman() as number : 0;
   const rawMinBond = _minBond.toHuman() as string;
-  const minBond = parseFloat(rawMinBond.replaceAll(',', ''));
+  const minBond = rawMinBond.replaceAll(',', '');
 
   const totalStakeMap: Record<string, BN> = {};
   const bnDecimals = new BN((10 ** decimals).toString());
@@ -206,20 +192,20 @@ export async function getRelayValidatorsInfo (networkKey: string, substrateApi: 
 
     allValidators.push(validatorAddress);
 
-    result.push({
+    validatorInfoList.push({
       address: validatorAddress,
-      totalStake: bnTotalStake.div(bnDecimals).toNumber(),
-      ownStake: bnOwnStake.div(bnDecimals).toNumber(),
-      otherStake: otherStake.div(bnDecimals).toNumber(),
+      totalStake: bnTotalStake.toString(),
+      ownStake: bnOwnStake.toString(),
+      otherStake: otherStake.toString(),
       nominatorCount,
       // to be added later
       commission: 0,
       expectedReturn: 0,
       blocked: false,
       isVerified: false,
-      minBond: (minBond / 10 ** decimals),
-      isNominated: bondedValidators.includes(validatorAddress)
-    } as unknown as ValidatorInfo);
+      minBond,
+      isCrowded: nominatorCount > parseInt(maxNominatorRewarded)
+    } as ValidatorInfo);
   }
 
   const extraInfoMap: Record<string, ValidatorExtraInfo> = {};
@@ -232,75 +218,38 @@ export async function getRelayValidatorsInfo (networkKey: string, substrateApi: 
     ]);
 
     const commissionInfo = _commissionInfo.toHuman() as Record<string, any>;
-    const identityInfo = _identityInfo ? (_identityInfo.toHuman() as Record<string, any> | null) : null;
-    let isReasonable = false;
+    const identityInfo = _identityInfo ? (_identityInfo.toHuman() as unknown as PalletIdentityRegistration) : null;
     let identity;
 
     if (identityInfo !== null) {
-      // Check if identity is eth address
-      const _judgements = identityInfo.judgements as any[];
-
-      if (_judgements.length > 0) {
-        isReasonable = true;
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const displayName = identityInfo?.info?.display?.Raw as string;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const legal = identityInfo?.info?.legal?.Raw as string;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const web = identityInfo?.info?.web?.Raw as string;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const riot = identityInfo?.info?.riot?.Raw as string;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const email = identityInfo?.info?.email?.Raw as string;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const twitter = identityInfo?.info?.twitter?.Raw as string;
-
-      if (displayName && !displayName.startsWith('0x')) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        identity = displayName;
-      } else if (legal && !legal.startsWith('0x')) {
-        identity = legal;
-      } else {
-        identity = twitter || web || email || riot;
-      }
+      identity = parseIdentity(identityInfo);
     }
 
     extraInfoMap[address] = {
       commission: commissionInfo.commission as string,
       blocked: commissionInfo.blocked as boolean,
       identity,
-      isVerified: isReasonable
+      isVerified: identityInfo && identityInfo?.judgements?.length > 0
     } as ValidatorExtraInfo;
   }));
 
-  const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, networkKey);
-  const stakedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, networkKey);
-  const bnAvgStake = bnTotalEraStake.divn(result.length).div(bnDecimals);
+  const bnAvgStake = bnTotalEraStake.divn(validatorInfoList.length).div(bnDecimals);
 
-  for (const validator of result) {
+  for (const validator of validatorInfoList) {
     const commission = extraInfoMap[validator.address].commission;
 
     const bnValidatorStake = totalStakeMap[validator.address].div(bnDecimals);
 
-    validator.expectedReturn = ['aleph', 'alephTest'].includes(networkKey)
-      ? calculateAlephZeroValidatorReturn(stakedReturn, getCommission(commission))
-      : calculateValidatorStakedReturn(stakedReturn, bnValidatorStake, bnAvgStake, getCommission(commission));
+    validator.expectedReturn = _STAKING_CHAIN_GROUP.aleph.includes(chain)
+      ? calculateAlephZeroValidatorReturn(chainStakingMetadata.expectedReturn as number, getCommission(commission))
+      : calculateValidatorStakedReturn(chainStakingMetadata.expectedReturn as number, bnValidatorStake, bnAvgStake, getCommission(commission));
     validator.commission = parseFloat(commission.split('%')[0]);
     validator.blocked = extraInfoMap[validator.address].blocked;
     validator.identity = extraInfoMap[validator.address].identity;
     validator.isVerified = extraInfoMap[validator.address].isVerified;
   }
 
-  return {
-    maxNominatorPerValidator,
-    era: parseInt(currentEra),
-    validatorsInfo: result,
-    isBondedBefore: bondedInfo !== null,
-    bondedValidators,
-    maxNominations
-  };
+  return validatorInfoList;
 }
 
 export async function getRelayBondingTxInfo (substrateApi: _SubstrateApi, controllerId: string, amount: BN, validators: string[], isBondedBefore: boolean, bondDest = 'Staked') {

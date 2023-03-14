@@ -1431,9 +1431,8 @@ export interface ValidatorInfo {
   blocked: boolean;
   identity?: string;
   isVerified: boolean;
-  isNominated: boolean; // this validator has been staked to before
   icon?: string;
-  hasScheduledRequest?: boolean; // for parachain, can't stake more on a collator that has existing scheduled request
+  isCrowded: boolean;
 }
 
 export interface NominationPoolMetadata {

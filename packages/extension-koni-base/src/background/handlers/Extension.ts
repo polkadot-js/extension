@@ -2256,6 +2256,8 @@ export default class KoniExtension {
 
     const res = await getValidatorsInfo(chain, apiProps, decimals, address, chainStakingMetadata);
 
+    console.log('res', res);
+
     return [];
   }
 

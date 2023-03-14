@@ -7,7 +7,7 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { getAmplitudeBondingExtrinsic, getAmplitudeClaimRewardExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeNominatorMetadata, getAmplitudeStakingMetadata, getAmplitudeUnbondingExtrinsic, getAmplitudeWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding/amplitude';
 import { getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarNominatorMetadata, getAstarStakingMetadata, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding/astar';
-import { getParaBondingExtrinsic, getParaChainNominatorMetadata, getParaChainStakingMetadata, getParaCollatorsInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding/paraChain';
+import { getParaBondingExtrinsic, getParaChainNominatorMetadata, getParaChainStakingMetadata, getParachainCollatorsInfo, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding/paraChain';
 import { getPoolingClaimRewardExtrinsic, getRelayBondingExtrinsic, getRelayChainNominatorMetadata, getRelayChainStakingMetadata, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators } from '@subwallet/extension-koni-base/api/staking/bonding/relayChain';
 
 // all addresses must be converted to its chain format
@@ -36,16 +36,16 @@ export async function getNominatorMetadata (chainInfo: _ChainInfo, address: stri
   return getRelayChainNominatorMetadata(chainInfo, address, substrateApi);
 }
 
-export async function getValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string, chainStakingMetadata: ChainStakingMetadata) {
+export async function getValidatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string, chainStakingMetadata: ChainStakingMetadata): Promise<ValidatorInfo[]> {
   if (_STAKING_CHAIN_GROUP.para.includes(networkKey)) {
-    return getParaCollatorsInfo(networkKey, substrateApi, decimals, address);
+    return getParachainCollatorsInfo(networkKey, substrateApi);
   } else if (_STAKING_CHAIN_GROUP.astar.includes(networkKey)) {
-    return getAstarDappsInfo(networkKey, substrateApi, decimals, address);
+    return getAstarDappsInfo(networkKey, substrateApi);
   } else if (_STAKING_CHAIN_GROUP.amplitude.includes(networkKey)) {
-    return getAmplitudeCollatorsInfo(networkKey, substrateApi, decimals, address);
+    return getAmplitudeCollatorsInfo(networkKey, substrateApi);
   }
 
-  return getRelayValidatorsInfo(networkKey, substrateApi, decimals, address, chainStakingMetadata);
+  return getRelayValidatorsInfo(networkKey, substrateApi, decimals, chainStakingMetadata);
 }
 
 export async function getBondingExtrinsic (chainInfo: _ChainInfo, networkKey: string, amount: number, bondedValidators: string[], validatorInfo: ValidatorInfo, isBondedBefore: boolean, nominatorAddress: string, substrateApi: _SubstrateApi) {

@@ -156,13 +156,11 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
   } as NominatorMetadata;
 }
 
-export async function getAstarDappsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {
+export async function getAstarDappsInfo (networkKey: string, substrateApi: _SubstrateApi) {
   const chainApi = await substrateApi.isReady;
   const rawMaxStakerPerContract = (chainApi.api.consts.dappsStaking.maxNumberOfStakersPerContract).toHuman() as string;
-  const rawMinStake = (chainApi.api.consts.dappsStaking.minimumStakingAmount).toHuman() as string;
 
   const allDappsInfo: ValidatorInfo[] = [];
-  const minStake = parseRawNumber(rawMinStake);
   const maxStakerPerContract = parseRawNumber(rawMaxStakerPerContract);
 
   const allDappsReq = new Promise(function (resolve) {
@@ -173,25 +171,10 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
     }).catch(console.error);
   });
 
-  const [_stakedDapps, _era, _allDapps] = await Promise.all([
-    chainApi.api.query.dappsStaking.generalStakerInfo.entries(address),
+  const [_era, _allDapps] = await Promise.all([
     chainApi.api.query.dappsStaking.currentEra(),
     allDappsReq
   ]);
-
-  const stakedDappsList: string[] = [];
-
-  for (const item of _stakedDapps) {
-    const data = item[0].toHuman() as any[];
-    const stakedDapp = data[1] as Record<string, string>;
-    const _stakes = item[1].toHuman() as Record<string, any>;
-    const stakes = _stakes.stakes as Record<string, string>[];
-    const latestStakeInfo = stakes[stakes.length - 1];
-
-    if (latestStakeInfo.staked && parseRawNumber(latestStakeInfo.staked) !== 0) {
-      stakedDappsList.push((stakedDapp.Evm).toLowerCase());
-    }
-  }
 
   const era = parseRawNumber(_era.toHuman() as string);
   const allDapps = _allDapps as Record<string, any>[];
@@ -214,28 +197,21 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
       commission: 0,
       expectedReturn: 0,
       address: dappAddress,
-      totalStake: (totalStake / 10 ** decimals).toString(),
+      totalStake: totalStake.toString(),
       ownStake: '0',
-      otherStake: (totalStake / 10 ** decimals).toString(),
+      otherStake: totalStake.toString(),
       nominatorCount: stakerCount,
       blocked: false,
       isVerified: false,
-      minBond: (minStake / 10 ** decimals).toString(),
-      isNominated: stakedDappsList.includes(dappAddress.toLowerCase()),
+      minBond: '0',
       icon: dappIcon,
       identity: dappName,
-      chain: networkKey
+      chain: networkKey,
+      isCrowded: stakerCount >= maxStakerPerContract
     });
   }));
 
-  return {
-    maxNominatorPerValidator: maxStakerPerContract,
-    era: -1,
-    validatorsInfo: allDappsInfo,
-    isBondedBefore: false, // No need for this on astar
-    bondedValidators: stakedDappsList,
-    maxNominations: 100
-  };
+  return allDappsInfo;
 }
 
 export async function getAstarBondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, stakerAddress: string, amount: number, dappInfo: ValidatorInfo) {

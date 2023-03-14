@@ -146,30 +146,18 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
   } as NominatorMetadata;
 }
 
-export async function getAmplitudeCollatorsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string, extraCollatorAddress?: string) {
+export async function getAmplitudeCollatorsInfo (chain: string, substrateApi: _SubstrateApi): Promise<ValidatorInfo[]> {
   const chainApi = await substrateApi.isReady;
 
-  const [_allCollators, _delegatorState, _unstakingInfo, _inflationConfig] = await Promise.all([
+  const [_allCollators, _inflationConfig] = await Promise.all([
     chainApi.api.query.parachainStaking.candidatePool.entries(),
-    chainApi.api.query.parachainStaking.delegatorState(address),
-    chainApi.api.query.parachainStaking.unstaking(address),
     chainApi.api.query.parachainStaking.inflationConfig()
   ]);
 
+  const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
   const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
   const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
   const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
-  const _maxDelegatorPerCandidate = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toHuman() as string;
-  const maxDelegatorPerCandidate = parseRawNumber(_maxDelegatorPerCandidate);
-
-  const _maxDelegationCount = chainApi.api.consts.parachainStaking.maxDelegationsPerRound.toHuman() as string;
-  const maxDelegationCount = parseRawNumber(_maxDelegationCount);
-
-  const _chainMinDelegation = chainApi.api.consts.parachainStaking.minDelegatorStake.toHuman() as string;
-  const chainMinDelegation = parseRawNumber(_chainMinDelegation) / 10 ** decimals;
-
-  const delegatorState = _delegatorState.toHuman() as Record<string, string> | null;
-  const unstakingInfo = _unstakingInfo.toHuman() as Record<string, string> | null;
 
   const allCollators: ValidatorInfo[] = [];
 
@@ -179,57 +167,22 @@ export async function getAmplitudeCollatorsInfo (networkKey: string, substrateAp
     if (typeof collatorInfo.status === 'string' && collatorInfo.status.toLowerCase() === 'active') {
       allCollators.push({
         address: collatorInfo.id,
-        totalStake: (parseRawNumber(collatorInfo.total) / 10 ** decimals).toString(),
-        ownStake: (parseRawNumber(collatorInfo.stake) / 10 ** decimals).toString(),
-        otherStake: ((parseRawNumber(collatorInfo.total) - parseRawNumber(collatorInfo.stake)) / 10 ** decimals).toString(),
+        totalStake: parseRawNumber(collatorInfo.total).toString(),
+        ownStake: parseRawNumber(collatorInfo.stake).toString(),
+        otherStake: (parseRawNumber(collatorInfo.total) - parseRawNumber(collatorInfo.stake)).toString(),
         nominatorCount: collatorInfo.delegators.length,
         commission: 0,
         expectedReturn: delegatorReturn,
         blocked: false,
         isVerified: false,
-        minBond: chainMinDelegation.toString(),
-        isNominated: false,
-        chain: networkKey
+        minBond: '0',
+        chain,
+        isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
       });
     }
   }
 
-  const bondedCollators: string[] = [];
-
-  if (extraCollatorAddress) {
-    bondedCollators.push(extraCollatorAddress);
-  }
-
-  if (delegatorState !== null) {
-    Object.entries(delegatorState).forEach(([key, value]) => {
-      if (key === 'owner') {
-        bondedCollators.push(value);
-      }
-    });
-  }
-
-  for (const collator of allCollators) {
-    if (bondedCollators.includes(collator.address)) {
-      collator.isNominated = true;
-    }
-  }
-
-  if (unstakingInfo !== null && Object.values(unstakingInfo).length > 0) {
-    for (const collator of allCollators) {
-      if (bondedCollators.includes(collator.address)) {
-        collator.hasScheduledRequest = true;
-      }
-    }
-  }
-
-  return {
-    maxNominatorPerValidator: maxDelegatorPerCandidate,
-    era: -1,
-    validatorsInfo: allCollators,
-    isBondedBefore: delegatorState !== null,
-    bondedValidators: bondedCollators,
-    maxNominations: maxDelegationCount
-  };
+  return allCollators;
 }
 
 export async function getAmplitudeBondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, delegatorAddress: string, amount: number, collatorInfo: ValidatorInfo) {

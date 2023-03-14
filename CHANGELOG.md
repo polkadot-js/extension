@@ -1,7 +1,18 @@
 # CHANGELOG
 
+## 0.8.2 (Koni)
+Build date: Mar 15, 2023.
+
+Update:
+- Update Token's logo of the Equilibrium (#1032)
+- Add support Subspace Gemini 3c (#1077)
+- Temporarily hide Kintsugi in the Origin Chain list (#1086)
+
+Bug fixes:
+- Fix bug XCM for Moonbeam, Bifrost Kusama (#1000)
+
 ## 0.8.1 (Koni)
-Build date: Feb 03, 2022.
+Build date: Feb 03, 2023.
 
 Update:
 - Update RMRK NFT endpoints (#963)
@@ -13,7 +24,7 @@ Bug fixes:
 - Fix bug can not connect to AstarEVM (#1001)
 
 ## 0.7.9 (Koni)
-Build date: Jan 30, 2022.
+Build date: Jan 30, 2023.
 
 Update:
 - Add the coingecko key for Nodle (#983)

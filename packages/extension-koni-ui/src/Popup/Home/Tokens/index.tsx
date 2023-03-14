@@ -17,7 +17,7 @@ import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import classNames from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -119,6 +119,13 @@ function Component (): React.ReactElement {
   const onClickManageToken = useCallback(() => {
     navigate('/settings/tokens/manage');
   }, [navigate]);
+
+  useEffect(() => {
+    setReceiveSelectedResult((prev) => ({
+      ...prev,
+      selectedAcc: currentAccount?.address
+    }));
+  }, [currentAccount?.address]);
 
   return (
     <div

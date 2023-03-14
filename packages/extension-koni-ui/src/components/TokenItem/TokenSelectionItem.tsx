@@ -44,7 +44,7 @@ function Component (
   }, [notify, onClickCopyBtn, t]);
 
   return (
-    <div className={classNames('token-balance-selection-item', className)}>
+    <div className={classNames('token-selection-item', className)}>
       <TokenItem
         {...restProps}
         isShowSubLogo
@@ -60,25 +60,30 @@ function Component (
         }
         name={name}
         networkMainLogoShape='squircle'
+        networkMainLogoSize={40}
         rightItem={
           (
             <>
               <CopyToClipboard text={formattedAddress}>
                 <Button
-                  icon={<Icon
-                    phosphorIcon={Copy}
-                    size='sm'
-                  />}
+                  icon={
+                    <Icon
+                      phosphorIcon={Copy}
+                      size='sm'
+                    />
+                  }
                   onClick={_onCLickCopyBtn}
                   size='xs'
                   type='ghost'
                 />
               </CopyToClipboard>
               <Button
-                icon={<Icon
-                  phosphorIcon={QrCode}
-                  size='sm'
-                />}
+                icon={
+                  <Icon
+                    phosphorIcon={QrCode}
+                    size='sm'
+                  />
+                }
                 onClick={onClickQrBtn}
                 size='xs'
                 type='ghost'
@@ -95,10 +100,46 @@ function Component (
 
 export const TokenSelectionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '.ant-web3-block': {
+      padding: token.paddingSM
+    },
+
+    '.ant-web3-block-middle-item': {
+      '.ant-number': {
+        fontSize: token.fontSizeSM,
+        lineHeight: token.lineHeightSM
+      }
+    },
+
     '.__chain-name': {
       color: token.colorTextLight4,
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM
+    },
+
+    '.ant-loading-icon': {
+      color: 'inherit !important'
+    },
+
+    '.__icon-wrapper': {
+      width: 40,
+      display: 'flex',
+      justifyContent: 'center',
+      color: token.colorTextLight4
+    },
+
+    '.ant-btn-ghost': {
+      color: token.colorTextLight3
+    },
+
+    '.ant-btn-ghost:hover': {
+      color: token.colorTextLight2
+    },
+
+    '.ant-balance-item-content:hover': {
+      '.__icon-wrapper': {
+        color: token.colorTextLight2
+      }
     }
   });
 });

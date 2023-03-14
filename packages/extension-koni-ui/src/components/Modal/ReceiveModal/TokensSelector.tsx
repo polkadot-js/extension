@@ -12,11 +12,6 @@ import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-export type ChainItemType = {
-  name: string,
-  slug: string,
-};
-
 interface Props extends ThemeProps {
   id: string,
   address?: string,
@@ -31,17 +26,25 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
   const items = Object.values(itemsMap);
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const searchFunction = useCallback((item: ChainItemType, searchText: string) => {
+  const searchFunction = useCallback((item: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
     return (
-      item.name.toLowerCase().includes(searchTextLowerCase)
+      item.symbol.toLowerCase().includes(searchTextLowerCase)
     );
   }, []);
 
   const onCancel = useCallback(() => {
     inactiveModal(id);
   }, [id, inactiveModal]);
+
+  const onClickQrBtn = useCallback((chain: string) => {
+    return () => {
+      onChangeSelectedNetwork && onChangeSelectedNetwork(chain);
+      inactiveModal(id);
+      activeModal(RECEIVE_QR_MODAL);
+    };
+  }, [activeModal, id, inactiveModal, onChangeSelectedNetwork]);
 
   const renderItem = useCallback((item: _ChainAsset) => {
     return (
@@ -51,18 +54,14 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
         className={'token-selector-item'}
         key={`${item.symbol}-${item.originChain}`}
         name={item.symbol}
-        // eslint-disable-next-line react/jsx-no-bind
-        onClickQrBtn={() => {
-          onChangeSelectedNetwork && onChangeSelectedNetwork(item.originChain);
-          inactiveModal(id);
-          activeModal(RECEIVE_QR_MODAL);
-        }}
+        onClickQrBtn={onClickQrBtn(item.originChain)}
+        onPressItem={onClickQrBtn(item.originChain)}
         subName={item.name}
         subNetworkKey={item.originChain || ''}
         symbol={item.symbol}
       />
     );
-  }, [activeModal, address, id, inactiveModal, onChangeSelectedNetwork]);
+  }, [address, onClickQrBtn]);
 
   return (
     <SwModal
@@ -74,7 +73,7 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
     >
       <SwList.Section
         enableSearchInput={true}
-        ignoreScrollbar={items.length >= 5}
+        ignoreScrollbar={items.length > 5}
         list={items}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}
@@ -88,14 +87,28 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
 
 export const TokensSelector = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    '& .ant-sw-modal-body': {
-      padding: `${token.padding}px 0 0`,
+    '.ant-sw-modal-content': {
+      minHeight: 474
+    },
+
+    '.ant-sw-list-search-input': {
+      paddingBottom: token.paddingXS
+    },
+
+    '.ant-sw-modal-body': {
+      paddingLeft: 0,
+      paddingRight: 0,
+      paddingBottom: 0,
       marginBottom: 0,
       display: 'flex'
     },
 
     '.ant-sw-list-section': {
       flex: 1
+    },
+
+    '.ant-sw-list-section .ant-sw-list': {
+      paddingBottom: 0
     },
 
     '.token-selector-item': {

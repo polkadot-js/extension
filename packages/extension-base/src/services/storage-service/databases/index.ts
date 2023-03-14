@@ -2,16 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  BalanceItem,
-  ChainStakingMetadata,
-  CrowdloanItem,
-  ExtraDelegationInfo,
-  NftCollection,
-  NftItem,
-  StakingItem,
-  TransactionHistoryItem
-} from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceItem, ChainStakingMetadata, CrowdloanItem, ExtraDelegationInfo, NftCollection, NftItem, NominatorMetadata, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import Dexie, { Table, Transaction } from 'dexie';
 
 const DEFAULT_DATABASE = 'SubWalletDB_v2';
@@ -57,6 +48,7 @@ export default class KoniDatabase extends Dexie {
   public asset!: Table<_ChainAsset, object>;
 
   public chainStakingMetadata!: Table<ChainStakingMetadata, object>;
+  public nominatorMetadata!: Table<NominatorMetadata, object>;
 
   private schemaVersion: number;
 
@@ -74,10 +66,11 @@ export default class KoniDatabase extends Dexie {
       nfts: '[chain+address+collectionId+id], [address+chain], chain, id, address, collectionId, name',
       nftCollections: '[chain+collectionId], chain, collectionId, collectionName',
       crowdloans: '[chain+address], chain, address',
-      stakings: '[chain+address+type], [chain+address], chainHash, chain, address, type',
+      stakings: '[chain+address+type], [chain+address], chain, address, type',
       transactions: '[chain+address+extrinsicHash], &[chain+address+extrinsicHash], chain, address, extrinsicHash, action',
 
       chainStakingMetadata: '[chain+type], chain, type',
+      nominatorMetadata: '[chain+address+type], [chain+address], chain, address, type',
 
       extraDelegationInfo: '[chain+address], &[chain+address], address'
     });

@@ -124,7 +124,7 @@ export async function getRelayChainNominatorMetadata (chain: string, address: st
   return {
     chain,
     type: StakingType.NOMINATED,
-    nominatorAddress: address,
+    address: address,
     activeStake,
 
     nominations: nominationList,

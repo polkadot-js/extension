@@ -1408,7 +1408,7 @@ export interface UnstakingInfo {
 export interface NominatorMetadata {
   chain: string,
   type: StakingType,
-  nominatorAddress: string,
+  address: string,
   activeStake: string,
   nominations: NominationInfo[],
   unstakings: UnstakingInfo[]

@@ -122,7 +122,7 @@ export async function getAmplitudeNominatorMetadata (chain: string, address: str
   return {
     chain,
     type: StakingType.NOMINATED,
-    nominatorAddress: address,
+    address: address,
     activeStake: activeStake,
     nominations: nominationList,
     unstakings: unstakingList

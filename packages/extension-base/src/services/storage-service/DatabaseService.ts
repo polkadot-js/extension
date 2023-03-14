@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
 import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
+import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
 import { Subscription } from 'dexie';
 
@@ -37,7 +38,8 @@ export default class DatabaseService {
       asset: new AssetStore(this._db.asset),
 
       // staking
-      chainStakingMetadata: new ChainStakingMetadataStore(this._db.chainStakingMetadata)
+      chainStakingMetadata: new ChainStakingMetadataStore(this._db.chainStakingMetadata),
+      nominatorMetadata: new NominatorMetadataStore(this._db.nominatorMetadata)
     };
   }
 
@@ -53,7 +55,7 @@ export default class DatabaseService {
   async removeFromBalanceStore (assets: string[]) {
     this.logger.log('Bulk removing AssetStore');
 
-    return await this.stores.balance.removeBySlugs(assets);
+    return this.stores.balance.removeBySlugs(assets);
   }
 
   // Crowdloan
@@ -106,6 +108,12 @@ export default class DatabaseService {
 
   subscribeChainStakingMetadata (chains: string[], callback: (data: ChainStakingMetadata[]) => void) {
     this.stores.chainStakingMetadata.subscribeByChain(chains).subscribe(({
+      next: (data) => callback && callback(data)
+    }));
+  }
+
+  subscribeNominatorMetadata (callback: (data: NominatorMetadata[]) => void) {
+    this.stores.nominatorMetadata.subscribeAll().subscribe(({
       next: (data) => callback && callback(data)
     }));
   }
@@ -250,5 +258,11 @@ export default class DatabaseService {
 
   async getChainStakingMetadata () {
     return this.stores.chainStakingMetadata.getAll();
+  }
+
+  async updateNominatorMetadata (item: NominatorMetadata) {
+    this.logger.log('Update NominatorMetadata: ', item);
+
+    return this.stores.nominatorMetadata.upsert(item);
   }
 }

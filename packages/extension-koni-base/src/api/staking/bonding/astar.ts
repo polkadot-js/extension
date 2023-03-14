@@ -135,7 +135,7 @@ export async function getAstarNominatorMetadata (chain: string, address: string,
   return {
     chain,
     type: StakingType.NOMINATED,
-    nominatorAddress: address,
+    address: address,
     activeStake: bnTotalActiveStake.toString(),
     nominations: nominationList,
     unstakings: unstakingList

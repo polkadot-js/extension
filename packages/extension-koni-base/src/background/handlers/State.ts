@@ -6,7 +6,53 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AccountRefMap,
+  AddTokenRequestExternal,
+  APIItemState,
+  ApiMap,
+  AssetSetting,
+  AuthRequestV2,
+  BalanceItem,
+  BalanceJson,
+  BasicTxErrorType,
+  BrowserConfirmationType,
+  ChainStakingMetadata,
+  ChainType,
+  ConfirmationsQueue,
+  CrowdloanItem,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  EvmProviderErrorType,
+  EvmSendTransactionParams,
+  EvmSendTransactionRequest,
+  EvmSignatureRequest,
+  ExternalRequestPromise,
+  ExternalRequestPromiseStatus,
+  ExtrinsicType,
+  KeyringState,
+  NftCollection,
+  NftItem,
+  NftJson,
+  NftTransferExtra,
+  NominatorMetadata,
+  PriceJson,
+  RequestAccountExportPrivateKey,
+  RequestCheckPublicAndSecretKey,
+  RequestConfirmationComplete,
+  RequestSettingsType,
+  ResponseAccountExportPrivateKey,
+  ResponseCheckPublicAndSecretKey,
+  ServiceInfo,
+  SingleModeJson,
+  StakeUnlockingJson,
+  StakingItem,
+  StakingJson,
+  StakingRewardItem,
+  StakingRewardJson,
+  ThemeNames,
+  UiSettings
+} from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
@@ -113,6 +159,7 @@ export default class KoniState {
   private nftSubject = new Subject<NftJson>();
   private stakingSubject = new Subject<StakingJson>();
   private chainStakingMetadataSubject = new Subject<ChainStakingMetadata[]>();
+  private stakingNominatorMetadataSubject = new Subject<NominatorMetadata[]>();
 
   private stakingRewardSubject = new Subject<StakingRewardJson>();
   private stakingRewardState: StakingRewardJson = {
@@ -323,6 +370,11 @@ export default class KoniState {
       console.log('subscribing chainStakingMetadata');
       this.chainStakingMetadataSubject.next(data);
     });
+
+    this.dbService.subscribeNominatorMetadata((data) => {
+      console.log('subscribing nominatorMetadata');
+      this.stakingNominatorMetadataSubject.next(data);
+    });
   }
 
   public onReady () {
@@ -467,6 +519,10 @@ export default class KoniState {
 
   public updateChainStakingMetadata (item: ChainStakingMetadata) {
     this.dbService.updateChainStakingMetadata(item).catch((e) => this.logger.warn(e));
+  }
+
+  public updateStakingNominatorMetadata (item: NominatorMetadata) {
+    this.dbService.updateNominatorMetadata(item).catch((e) => this.logger.warn(e));
   }
 
   public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {

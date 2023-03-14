@@ -155,7 +155,7 @@ export async function getParaChainNominatorMetadata (chain: string, address: str
   return {
     chain,
     type: StakingType.NOMINATED,
-    nominatorAddress: address,
+    address: address,
     activeStake: bnTotalActiveStake.toString(),
 
     nominations: nominationList,

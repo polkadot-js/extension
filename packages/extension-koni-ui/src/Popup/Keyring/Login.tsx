@@ -2,16 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/form';
 import { Button, Form, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -65,67 +66,64 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }, 500);
   }, [onError]);
 
-  // Auto focus to password field
-  useEffect(() => {
-    (form.getFieldInstance('password') as HTMLInputElement).focus();
-  }, [form]);
+  useFocusById(passwordInputId);
 
   return (
-    <Layout.Base
-      className={CN(className)}
-    >
-      <div className='bg-gradient' />
-      <div className='bg-image' />
-      <div className='body-container'>
-        <div className='logo-container'>
-          <Logo3D />
-        </div>
-        <div className='title'>
-          {t('Welcome back!')}
-        </div>
-        <div className='sub-title'>
-          {t('Enter your password to unlock account')}
-        </div>
-        <Form
-          form={form}
-          initialValues={{ [FormFieldName.PASSWORD]: '' }}
-          onFieldsChange={onUpdate}
-          onFinish={onSubmit}
-        >
-          <Form.Item
-            hideError={true}
-            name={FormFieldName.PASSWORD}
-            rules={[
-              {
-                message: 'Password is required',
-                required: true
-              }
-            ]}
+    <PageWrapper className={CN(className)}>
+      <Layout.Base>
+        <div className='bg-gradient' />
+        <div className='bg-image' />
+        <div className='body-container'>
+          <div className='logo-container'>
+            <Logo3D />
+          </div>
+          <div className='title'>
+            {t('Welcome back!')}
+          </div>
+          <div className='sub-title'>
+            {t('Enter your password to unlock account')}
+          </div>
+          <Form
+            form={form}
+            initialValues={{ [FormFieldName.PASSWORD]: '' }}
+            onFieldsChange={onUpdate}
+            onFinish={onSubmit}
           >
-            <Input.Password
-              containerClassName='password-input'
-              id={passwordInputId}
-              placeholder={t('Password')}
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              block={true}
-              disabled={isDisable}
-              htmlType='submit'
-              loading={loading}
+            <Form.Item
+              hideError={true}
+              name={FormFieldName.PASSWORD}
+              rules={[
+                {
+                  message: 'Password is required',
+                  required: true
+                }
+              ]}
             >
-              {t('Unlock')}
-            </Button>
-          </Form.Item>
-          <Form.Item>
-            <div className='forgot-password'>
-              {t('Forgot password')}
-            </div>
-          </Form.Item>
-        </Form>
-      </div>
-    </Layout.Base>
+              <Input.Password
+                containerClassName='password-input'
+                id={passwordInputId}
+                placeholder={t('Password')}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                block={true}
+                disabled={isDisable}
+                htmlType='submit'
+                loading={loading}
+              >
+                {t('Unlock')}
+              </Button>
+            </Form.Item>
+            <Form.Item>
+              <div className='forgot-password'>
+                {t('Forgot password')}
+              </div>
+            </Form.Item>
+          </Form>
+        </div>
+      </Layout.Base>
+    </PageWrapper>
   );
 };
 

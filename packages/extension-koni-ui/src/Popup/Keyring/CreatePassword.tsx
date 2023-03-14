@@ -1,12 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
 import { REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -44,10 +45,11 @@ const passwordRules = renderBasePasswordRules('Password');
 const confirmPasswordRules = renderBaseConfirmPasswordRules(FormFieldName.PASSWORD);
 
 const modalId = 'create-password-instruction-modal';
+const formName = 'create-password-form';
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const previousInfo = useLocation().state as { prevPathname: string, prevState: any };
 
@@ -120,127 +122,125 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, [activeModal, noAccount]);
 
+  useFocusFormItem(formName, FormFieldName.PASSWORD, !checkActive(REQUEST_CREATE_PASSWORD_MODAL));
+
   return (
-    <Layout.Base
-      className={CN(className)}
-      rightFooterButton={{
-        children: t('Continue'),
-        onClick: form.submit,
-        loading: loading,
-        disabled: isDisabled,
-        icon: FooterIcon
-      }}
-      showBackButton={true}
-      showSubHeader={true}
-      subHeaderBackground='transparent'
-      subHeaderCenter={true}
-      subHeaderIcons={[
-        {
-          icon: (
-            <Icon
-              phosphorIcon={Info}
-              size='md'
-            />
-          ),
-          onClick: openModal
-        }
-      ]}
-      subHeaderPaddingVertical={true}
-      title={t('Create a password')}
-    >
-      <div className='body-container'>
-        <div className='page-icon'>
-          <PageIcon
-            color='var(--page-icon-color)'
-            iconProps={{
-              weight: 'fill',
-              phosphorIcon: ShieldPlus
-            }}
-          />
-        </div>
-        <div className='title'>
-          {t('Create a password')}
-        </div>
-        <Form
-          form={form}
-          initialValues={{
-            [FormFieldName.PASSWORD]: '',
-            [FormFieldName.CONFIRM_PASSWORD]: ''
-          }}
-          name='create-password-form'
-          onFieldsChange={onUpdate}
-          onFinish={onSubmit}
-        >
-          <Form.Item
-            hideError={true}
-            name={FormFieldName.PASSWORD}
-            rules={passwordRules}
-          >
-            <Input
-              onChange={onChangePassword}
-              placeholder={t('Enter password')}
-              type='password'
-            />
-          </Form.Item>
-          <Form.Item
-            hideError={true}
-            name={FormFieldName.CONFIRM_PASSWORD}
-            rules={confirmPasswordRules}
-          >
-            <Input
-              placeholder={t('Confirm password')}
-              type='password'
-            />
-          </Form.Item>
-          <Form.Item>
-            <AlertBox
-              description={t('Recommended security practice')}
-              title={t('Always choose a strong password!')}
-              type='warning'
-            />
-          </Form.Item>
+    <PageWrapper className={CN(className)}>
+      <Layout.WithSubHeaderOnly
+        rightFooterButton={{
+          children: t('Continue'),
+          onClick: form.submit,
+          loading: loading,
+          disabled: isDisabled,
+          icon: FooterIcon
+        }}
+        subHeaderIcons={[
           {
-            submitError && (
-              <Form.Item
-                help={submitError}
-                validateStatus='error'
-              />
-            )
-          }
-        </Form>
-        <SwModal
-          closeIcon={(
-            <Icon
-              phosphorIcon={CaretLeft}
-              size='sm'
-            />
-          )}
-          id={modalId}
-          onCancel={closeModal}
-          rightIconProps={{
             icon: (
               <Icon
                 phosphorIcon={Info}
-                size='sm'
+                size='md'
               />
-            )
-          }}
-          title={t('Instructions')}
-          wrapClassName={className}
-        >
-          <div className='instruction-container'>
-            <AlertBox
-              description={t('For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it.')}
-              title={t('Why do I need to enter a password?')}
-            />
-            <AlertBox
-              description={t('The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!')}
-              title={t('Can I recover a password?')}
+            ),
+            onClick: openModal
+          }
+        ]}
+        title={t('Create a password')}
+      >
+        <div className='body-container'>
+          <div className='page-icon'>
+            <PageIcon
+              color='var(--page-icon-color)'
+              iconProps={{
+                weight: 'fill',
+                phosphorIcon: ShieldPlus
+              }}
             />
           </div>
-        </SwModal>
-      </div>
-    </Layout.Base>
+          <div className='title'>
+            {t('Create a password')}
+          </div>
+          <Form
+            form={form}
+            initialValues={{
+              [FormFieldName.PASSWORD]: '',
+              [FormFieldName.CONFIRM_PASSWORD]: ''
+            }}
+            name={formName}
+            onFieldsChange={onUpdate}
+            onFinish={onSubmit}
+          >
+            <Form.Item
+              hideError={true}
+              name={FormFieldName.PASSWORD}
+              rules={passwordRules}
+            >
+              <Input
+                onChange={onChangePassword}
+                placeholder={t('Enter password')}
+                type='password'
+              />
+            </Form.Item>
+            <Form.Item
+              hideError={true}
+              name={FormFieldName.CONFIRM_PASSWORD}
+              rules={confirmPasswordRules}
+            >
+              <Input
+                placeholder={t('Confirm password')}
+                type='password'
+              />
+            </Form.Item>
+            <Form.Item>
+              <AlertBox
+                description={t('Recommended security practice')}
+                title={t('Always choose a strong password!')}
+                type='warning'
+              />
+            </Form.Item>
+            {
+              submitError && (
+                <Form.Item
+                  help={submitError}
+                  validateStatus='error'
+                />
+              )
+            }
+          </Form>
+          <SwModal
+            closeIcon={(
+              <Icon
+                phosphorIcon={CaretLeft}
+                size='sm'
+              />
+            )}
+            id={modalId}
+            onCancel={closeModal}
+            rightIconProps={{
+              icon: (
+                <Icon
+                  phosphorIcon={Info}
+                  size='sm'
+                />
+              )
+            }}
+            title={t('Instructions')}
+            wrapClassName={className}
+          >
+            <div className='instruction-container'>
+              <AlertBox
+                description={t('For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it.')}
+                title={t('Why do I need to enter a password?')}
+              />
+              <AlertBox
+                description={t('The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!')}
+                title={t('Can I recover a password?')}
+              />
+            </div>
+          </SwModal>
+        </div>
+      </Layout.WithSubHeaderOnly>
+    </PageWrapper>
   );
 };
 

@@ -218,6 +218,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   arctic_testnet: 'https://arctic.subscan.io',
   snow: 'https://snow.subscan.io',
   subspace_gemini_2a: 'https://subspace.subscan.io',
+  subspace_gemini_3c: 'https://subspace.github.io/blockexplorer/#/gemini-3c',
   equilibrium_parachain: 'https://equilibrium.subscan.io',
   polymesh: 'https://polymesh.subscan.io',
   'sora-substrate': 'https://sora.subscan.io',
@@ -271,6 +272,10 @@ export function getScanExplorerAddressInfoUrl (networkKey: string, address: stri
 
   if (!subscanByNetworkKey[networkKey]) {
     return '';
+  }
+
+  if (networkKey === 'subspace_gemini_3c') {
+    return `${subscanByNetworkKey[networkKey]}/accounts/${address}`
   }
 
   return `${subscanByNetworkKey[networkKey]}/account/${address}`;

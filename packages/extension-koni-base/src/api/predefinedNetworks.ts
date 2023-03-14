@@ -1762,7 +1762,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'Europe 0',
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
-    decimals: 18
+    decimals: 18,
+    blockExplorer: 'https://subspace.github.io/blockexplorer/#/gemini-3c'
   },
   origintrail: {
     key: 'origintrail',
@@ -2202,23 +2203,6 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     evmChainId: 688,
     coinGeckoKey: 'watr',
     supportSmartContract: [ContractType.evm]
-  },
-  subspace_gemini_3a: {
-    key: 'subspace_gemini_3a',
-    chain: 'Subspace Gemini 3a',
-    genesisHash: '0x8797298eb8cd5c3b3a08b6c1a6ed7809ee40e7f80fc0acf3cdb3fde00a435b2f',
-    ss58Format: 2254,
-    providers: {
-      'Europe 0': 'wss://eu-0.gemini-3a.subspace.network/ws',
-      'Europe 1': 'wss://eu-1.gemini-3a.subspace.network/ws',
-      'Europe 2': 'wss://eu-2.gemini-3a.subspace.network/ws'
-    },
-    active: false,
-    currentProviderMode: 'ws',
-    currentProvider: 'Europe 0',
-    groups: ['TEST_NET'],
-    nativeToken: 'tSSC',
-    decimals: 18
   },
   fusotao: {
     key: 'fusotao',

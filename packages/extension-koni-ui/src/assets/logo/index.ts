@@ -325,7 +325,7 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subspace_gemini_2a: require('./46.Subspace.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  subspace_gemini_3a: require('./46.Subspace.png'),
+  subspace_gemini_3c: require('./46.Subspace.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subspace_test: require('./46.Subspace.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -552,6 +552,12 @@ const LogosMap: Record<string, string> = {
   pendulum: require('./172.Pendulum.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   tfa: require('./196.tfa.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  eq: require('./197.EQ.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  eqd: require('./198.EQD.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  eqdot: require('./199.EQDOT.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };

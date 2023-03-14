@@ -200,7 +200,6 @@ export async function getRelayValidatorsInfo (networkKey: string, substrateApi: 
 
     allValidators.push(validatorAddress);
 
-    // Todo: Update this part later
     result.push({
       address: validatorAddress,
       totalStake: bnTotalStake.div(bnDecimals).toNumber(),

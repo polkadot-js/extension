@@ -1425,7 +1425,7 @@ export interface ValidatorInfo {
   minBond: string;
   nominatorCount: number;
   commission: number; // in %
-  expectedReturn: number; // in %, annually
+  expectedReturn?: number; // in %, annually
 
   blocked: boolean;
   identity?: string;
@@ -1441,12 +1441,6 @@ export interface NominationPoolMetadata {
   address: string,
   memberCount: number,
   bondedAmount: string
-}
-
-export interface ExtraDelegationInfo {
-  chain: string;
-  address: string;
-  collatorAddress: string;
 }
 
 // Bonding

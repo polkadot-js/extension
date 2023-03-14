@@ -18,6 +18,10 @@ export default class StakingStore extends BaseStoreWithAddressAndChain<StakingIt
     return this.table.filter((item) => (!chainList.length || chainList.includes(item.chain)) && parseFloat(item.balance as string) > 0).toArray();
   }
 
+  getStakingsByChains (chainList: string[]) {
+    return this.table.filter((item) => (chainList.includes(item.chain)) && parseFloat(item.balance as string) > 0).toArray();
+  }
+
   getPooledStakings (addresses: string[], chainList: string[] = []) {
     if (addresses.length) {
       return this.table.where('address').anyOfIgnoreCase(addresses).and((item) =>

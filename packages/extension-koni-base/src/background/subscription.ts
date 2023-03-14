@@ -3,16 +3,15 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { NftTransferExtra, StakingType, UnlockingStakeInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
 import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
-import { getChainStakingMetadata, getNominatorMetadata, getUnlockingInfo } from '@subwallet/extension-koni-base/api/staking/bonding';
+import { getChainStakingMetadata, getNominatorMetadata } from '@subwallet/extension-koni-base/api/staking/bonding';
 import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-koni-base/api/staking/paraChain';
 import { nftHandler } from '@subwallet/extension-koni-base/background/handlers';
 import { Subscription } from 'rxjs';
@@ -332,45 +331,6 @@ export class KoniSubscription {
     this.logger.log('Set staking reward state with fast interval done', result);
   }
 
-  async subscribeStakeUnlockingInfo (address: string, networkMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>) {
-    const addresses = await this.state.getDecodedAddresses(address);
-    const currentAddress = addresses[0]; // only get info for the current account
-
-    const stakeUnlockingInfo: UnlockingStakeInfo[] = [];
-
-    if (!addresses.length) {
-      return;
-    }
-
-    const stakingItems = await this.state.getStakingRecordsByAddress(currentAddress); // only get records of active networks
-
-    await Promise.all(stakingItems.map(async (stakingItem) => {
-      const needUpdateUnlockingStake = parseFloat(stakingItem.balance as string) > 0 && stakingItem.type === StakingType.NOMINATED;
-      const chainInfo = networkMap[stakingItem.chain];
-
-      if (needUpdateUnlockingStake) {
-        let extraCollatorAddress;
-
-        if (_STAKING_CHAIN_GROUP.amplitude.includes(stakingItem.chain)) {
-          const extraDelegationInfo = await this.state.getExtraDelegationInfo(stakingItem.chain, stakingItem.address);
-
-          if (extraDelegationInfo) {
-            extraCollatorAddress = extraDelegationInfo.collatorAddress;
-          }
-        }
-
-        const unlockingInfo = await getUnlockingInfo(substrateApiMap[stakingItem.chain], chainInfo, stakingItem.chain, currentAddress, stakingItem.type, extraCollatorAddress);
-
-        stakeUnlockingInfo.push(unlockingInfo);
-      }
-    }));
-
-    this.state.setStakeUnlockingInfo({
-      timestamp: +new Date(),
-      details: stakeUnlockingInfo
-    });
-  }
-
   async fetchChainStakingMetadata (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
     await Promise.all(Object.values(chainInfoMap).map(async (chainInfo) => {
       const chainState = chainStateMap[chainInfo.slug];
@@ -383,21 +343,31 @@ export class KoniSubscription {
     }));
   }
 
-  async fetchNominatorMetadata (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
-    if (address === ALL_ACCOUNT_KEY) {
-      return;
-    }
+  async fetchNominatorMetadata (currentAddress: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
+    const filteredChainInfoMap: Record<string, _ChainInfo> = {};
 
-    await Promise.all(Object.values(chainInfoMap).map(async (chainInfo) => {
+    Object.values(chainInfoMap).forEach((chainInfo) => {
       const chainState = chainStateMap[chainInfo.slug];
 
       if (chainState?.active && _isChainSupportSubstrateStaking(chainInfo)) {
+        filteredChainInfoMap[chainInfo.slug] = chainInfo;
+      }
+    });
+
+    let addresses = [currentAddress];
+
+    if (currentAddress === ALL_ACCOUNT_KEY) {
+      addresses = await this.state.getStakingOwnersByChains(Object.keys(filteredChainInfoMap));
+    }
+
+    await Promise.all(addresses.map(async (address) => {
+      await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
         const nominatorMetadata = await getNominatorMetadata(chainInfo.slug, address, substrateApiMap[chainInfo.slug]);
 
         if (nominatorMetadata) {
           this.state.updateStakingNominatorMetadata(nominatorMetadata);
         }
-      }
+      }));
     }));
   }
 }

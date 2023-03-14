@@ -4,7 +4,7 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
-import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
+import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
 import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
@@ -32,7 +32,6 @@ export default class DatabaseService {
       staking: new StakingStore(this._db.stakings),
       transaction: new TransactionStore(this._db.transactions),
       migration: new MigrationStore(this._db.migrations),
-      extraDelegationInfo: new ExtraDelegationInfoStore(this._db.extraDelegationInfo),
 
       chain: new ChainStore(this._db.chain),
       asset: new AssetStore(this._db.asset),
@@ -80,12 +79,16 @@ export default class DatabaseService {
     }
   }
 
-  async getStakings (addresses: string[], chainHashes?: string[]) {
-    const stakings = await this.stores.staking.getStakings(addresses, chainHashes);
+  async getStakings (addresses: string[], chains?: string[]) {
+    const stakings = await this.stores.staking.getStakings(addresses, chains);
 
     this.logger.log('Get Stakings: ', stakings);
 
     return stakings;
+  }
+
+  async getStakingsByChains (chains: string[]) {
+    return this.stores.staking.getStakingsByChains(chains);
   }
 
   async getPooledStakings (addresses: string[], chainHashes?: string[]) {
@@ -186,19 +189,6 @@ export default class DatabaseService {
     this.logger.log(`Remove NFTs [${nftIds.join(', ')}]`);
 
     return this.stores.nft.removeNfts(chain, address, collectionId, nftIds);
-  }
-
-  // Delegation info
-  async updateExtraDelegationInfo (chain: string, address: string, collatorAddress: string) {
-    return this.stores.extraDelegationInfo.upsert({ chain, address, collatorAddress });
-  }
-
-  async getExtraDelegationInfo (chain: string, address: string) {
-    const delegationInfo = await this.stores.extraDelegationInfo.getDelegationInfo(chain, address);
-
-    this.logger.log('Get extra delegation info: ', delegationInfo);
-
-    return delegationInfo;
   }
 
   // Chain

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceItem, ChainStakingMetadata, CrowdloanItem, ExtraDelegationInfo, NftCollection, NftItem, NominatorMetadata, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import Dexie, { Table, Transaction } from 'dexie';
 
 const DEFAULT_DATABASE = 'SubWalletDB_v2';
@@ -42,7 +42,6 @@ export default class KoniDatabase extends Dexie {
   public stakings!: Table<StakingItem, object>;
   public transactions!: Table<ITransactionHistoryItem, object>;
   public migrations!: Table<IMigration, object>;
-  public extraDelegationInfo!: Table<ExtraDelegationInfo, object>;
 
   public chain!: Table<IChain, object>;
   public asset!: Table<_ChainAsset, object>;

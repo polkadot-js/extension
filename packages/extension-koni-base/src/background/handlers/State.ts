@@ -6,7 +6,7 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, NominatorMetadata, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, NominatorMetadata, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
@@ -121,9 +121,6 @@ export default class KoniState {
     slowInterval: [],
     fastInterval: []
   } as StakingRewardJson;
-
-  private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
-  private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: [] };
 
   private lazyMap: Record<string, unknown> = {};
 
@@ -428,8 +425,17 @@ export default class KoniState {
     return { ready: true, details: stakings } as StakingJson;
   }
 
-  public async getStakingRecordsByAddress (address: string): Promise<StakingItem[]> {
-    return await this.dbService.getStakings([address], this.activeChainSlugs);
+  public async getStakingOwnersByChains (chains: string[]): Promise<string[]> {
+    const stakings = await this.dbService.getStakingsByChains(chains);
+    const addresses: string[] = [];
+
+    stakings.forEach((staking) => {
+      if (!addresses.includes(staking.address)) {
+        addresses.push(staking.address);
+      }
+    });
+
+    return addresses;
   }
 
   public async getPooledStakingRecordsByAddress (addresses: string[]): Promise<StakingItem[]> {
@@ -442,20 +448,6 @@ export default class KoniState {
   //
   //   return items || {};
   // }
-
-  public getStakeUnlockingInfo () {
-    return this.stakeUnlockingInfo;
-  }
-
-  public setStakeUnlockingInfo (data: StakeUnlockingJson) {
-    this.stakeUnlockingInfo = data;
-
-    this.stakeUnlockingInfoSubject.next(this.stakeUnlockingInfo);
-  }
-
-  public subscribeStakeUnlockingInfo () {
-    return this.stakeUnlockingInfoSubject;
-  }
 
   public subscribeStaking () {
     return this.stakingSubject;
@@ -1792,13 +1784,5 @@ export default class KoniState {
 
   public createUnsubscriptionHandle (id: string, unsubscribe: () => void): void {
     this.unsubscriptionMap[id] = unsubscribe;
-  }
-
-  public setExtraDelegationInfo (networkKey: string, address: string, collatorAddress: string): void {
-    this.dbService.updateExtraDelegationInfo(networkKey, address, collatorAddress).catch((e) => this.logger.warn(e));
-  }
-
-  public async getExtraDelegationInfo (networkKey: string, address: string) {
-    return await this.dbService.getExtraDelegationInfo(networkKey, address);
   }
 }

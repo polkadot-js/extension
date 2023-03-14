@@ -290,19 +290,19 @@ export function _isAssetValuable (assetInfo: _ChainAsset) {
 }
 
 export function _getMultiChainAsset (assetInfo: _ChainAsset) {
-  return assetInfo.multiChainAsset || '';
+  return assetInfo?.multiChainAsset || '';
 }
 
 export function _getAssetPriceId (assetInfo: _ChainAsset) {
-  return assetInfo.priceId || '';
+  return assetInfo?.priceId || '';
 }
 
 export function _getMultiChainAssetPriceId (multiChainAsset: _MultiChainAsset) {
-  return multiChainAsset.priceId || '';
+  return multiChainAsset?.priceId || '';
 }
 
 export function _getAssetSymbol (assetInfo: _ChainAsset) {
-  return assetInfo.symbol;
+  return assetInfo?.symbol || '';
 }
 
 export function _getMultiChainAssetSymbol (multiChainAsset: _MultiChainAsset) {

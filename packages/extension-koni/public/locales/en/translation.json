@@ -872,5 +872,14 @@
   "Remove Bond": "",
   "Transferable:": "",
   "Once unbonded, your funds to become available after 28 days.": "",
-  "Submit": ""
+  "Submit": "",
+  "Address": "",
+  "Estimated fee": "",
+  "Your accounts will appear here.": "",
+  "No account found": "",
+  "Your list of approved dApps will appear here.": "",
+  "No dApps found": "",
+  "and": "",
+  "The recipient address can not be the same as the sender address": "",
+  "Transfer NFT": ""
 }

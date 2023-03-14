@@ -11,8 +11,8 @@ import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/Cha
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/useGetSupportedLedger';
+import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
-import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

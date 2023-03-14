@@ -3,8 +3,8 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
-import useChainInfo from '@subwallet/extension-koni-ui/hooks/useChainInfo';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useChainInfo from '@subwallet/extension-koni-ui/hooks/chain/useChainInfo';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { formatAccountAddress } from '@subwallet/extension-koni-ui/util/account';

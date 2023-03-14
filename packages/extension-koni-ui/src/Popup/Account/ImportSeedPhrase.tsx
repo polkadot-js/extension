@@ -6,8 +6,8 @@ import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/S
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';

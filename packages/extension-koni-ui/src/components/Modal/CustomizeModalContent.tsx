@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, NetworkItem, SwList } from '@subwallet/react-ui';

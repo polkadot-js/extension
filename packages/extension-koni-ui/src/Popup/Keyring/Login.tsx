@@ -4,7 +4,7 @@
 import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';

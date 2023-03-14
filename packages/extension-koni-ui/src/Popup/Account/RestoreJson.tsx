@@ -5,9 +5,9 @@ import { ResponseJsonGetAccountInfo } from '@subwallet/extension-base/background
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
@@ -283,8 +283,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             validateStatus={fileValidateState.status}
           >
             <Upload.SingleFileDragger
-              className='file-selector'
               accept={'application/json'}
+              className='file-selector'
               disabled={validating}
               hint={t('Please drag an drop the .json file you exported from Polkadot.js')}
               onChange={onChange}

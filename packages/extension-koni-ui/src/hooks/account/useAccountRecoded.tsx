@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useChainInfo from '@subwallet/extension-koni-ui/hooks/useChainInfo';
+import useChainInfo from '@subwallet/extension-koni-ui/hooks/chain/useChainInfo';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Recoded } from '@subwallet/extension-koni-ui/types';
 import { recodeAddress } from '@subwallet/extension-koni-ui/util';

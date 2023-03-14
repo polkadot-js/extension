@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, Logo, SettingItem } from '@subwallet/react-ui';
 import CN from 'classnames';

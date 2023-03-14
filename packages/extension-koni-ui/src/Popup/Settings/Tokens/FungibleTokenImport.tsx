@@ -6,10 +6,10 @@ import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmart
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetContractSupportedChains';
-import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';

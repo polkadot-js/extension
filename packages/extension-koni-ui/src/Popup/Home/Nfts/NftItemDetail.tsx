@@ -4,11 +4,11 @@
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetAccountInfoByAddress from '@subwallet/extension-koni-ui/hooks/screen/common/useGetAccountInfoByAddress';
 import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';

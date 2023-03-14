@@ -3,7 +3,7 @@
 
 import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, Number, SwModal, SwNumberProps } from '@subwallet/react-ui';
 import { Info } from 'phosphor-react';

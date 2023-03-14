@@ -9,9 +9,9 @@ import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrap
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import NetworkToggleItem from '@subwallet/extension-koni-ui/components/NetworkToggleItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyList';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, SwList } from '@subwallet/react-ui';

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateShowZeroBalanceState } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';

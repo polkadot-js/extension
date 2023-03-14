@@ -5,7 +5,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByGenesisHash';
-import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
+import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
 import DisplayPayloadModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload';
 import SubstrateQr from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload/Substrate';

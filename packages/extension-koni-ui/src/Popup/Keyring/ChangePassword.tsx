@@ -3,8 +3,8 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Form, Icon, Input } from '@subwallet/react-ui';

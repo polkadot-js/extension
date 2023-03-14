@@ -3,7 +3,7 @@
 
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';

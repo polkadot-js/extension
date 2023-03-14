@@ -107,27 +107,32 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [t, token]);
 
   return (
-    <div className={CN(className)}>
-      {/* // todo: i18n this */}
-      <div className={'__group-label'}>Chains</div>
-
-      <SwList.Section
-        displayRow
-        enableSearchInput
-        list={chainInfoList}
-        renderItem={renderChainItem}
-        renderWhenEmpty={emptyChainList}
-        rowGap={'8px'}
-        searchFunction={chainSearchFunc}
-        searchMinCharactersCount={2}
-        searchPlaceholder='Chain name' // todo: i18n this
-      />
-    </div>
+    <SwList.Section
+      className={CN(className)}
+      displayRow
+      enableSearchInput
+      list={chainInfoList}
+      renderItem={renderChainItem}
+      renderWhenEmpty={emptyChainList}
+      rowGap={'8px'}
+      searchFunction={chainSearchFunc}
+      searchMinCharactersCount={2}
+      searchPlaceholder={t('Chain name')}
+    />
   );
 };
 
 const CustomizeModalContent = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.ant-sw-list-search-input': {
+      paddingBottom: token.paddingXS
+    },
+
+    '.ant-network-item-content': {
+      paddingTop: token.paddingXS,
+      paddingBottom: token.paddingXS
+    },
+
     '.manage_chain__empty_container': {
       marginTop: 20,
       display: 'flex',

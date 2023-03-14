@@ -1,4 +1,4 @@
-     599	Jaco                          	Bump dev (#1229)
+     600	Jaco                          	Remove stale workflow (#1230)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

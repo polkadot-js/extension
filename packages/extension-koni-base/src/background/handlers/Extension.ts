@@ -423,7 +423,7 @@ export default class KoniExtension {
             resolve(accountsWithCurrentAddress);
             cb(accountsWithCurrentAddress);
           });
-        }, 100);
+        }, 300);
       });
 
       this.createUnsubscriptionHandle(id, subscription.unsubscribe);

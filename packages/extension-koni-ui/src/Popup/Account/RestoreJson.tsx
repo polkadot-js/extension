@@ -351,7 +351,7 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.ant-sw-modal-body': {
-      padding: `${token.padding}px 0 0`
+      padding: `${token.padding}px 0`
     },
 
     '.ant-sw-list': {

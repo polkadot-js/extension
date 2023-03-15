@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import PageIcon from '@subwallet/react-ui/lib/page-icon';
 import { MagnifyingGlass } from 'phosphor-react';
@@ -10,6 +11,8 @@ import styled from 'styled-components';
 type Props = ThemeProps;
 
 const Component: React.FC<Props> = ({ className }: Props) => {
+  const { t } = useTranslation();
+
   return (
     <div className={className}>
       <PageIcon
@@ -21,10 +24,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
       />
       <div className='message'>
-        No results found
+        {t('No results found')}
       </div>
       <div className='description'>
-        Please change your search criteria try again
+        {t('Please change your search criteria try again')}
       </div>
     </div>
   );

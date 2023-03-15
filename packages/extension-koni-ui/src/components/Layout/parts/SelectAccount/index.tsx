@@ -343,6 +343,10 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
         marginBottom: 0
       },
 
+      '.ant-sw-list-search-input': {
+        paddingBottom: token.paddingXS
+      },
+
       '.ant-sw-modal-footer': {
         marginTop: 0
       },

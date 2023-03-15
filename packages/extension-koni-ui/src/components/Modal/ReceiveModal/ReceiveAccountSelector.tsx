@@ -99,6 +99,12 @@ function Component ({ className = '', customInput, id, label, onSelectItem, sele
 
 export const ReceiveAccountSelector = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '&.account-selector-modal': {
+      '.ant-sw-list-search-input': {
+        paddingBottom: token.paddingXS
+      }
+    },
+
     '&.account-selector-input': {
       '.__selected-item': {
         display: 'flex',

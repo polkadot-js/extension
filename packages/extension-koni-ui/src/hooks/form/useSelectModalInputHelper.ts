@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field';
-import { InputRef } from '@subwallet/react-ui';
-import { SelectModalProps } from '@subwallet/react-ui/es/select-modal/SelectModal';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { InputRef, ModalContext,SelectModalProps } from '@subwallet/react-ui';
 import { InputFocusOptions } from 'rc-input/es/utils/commonUtils';
 import { ForwardedRef, useCallback, useContext, useEffect, useState } from 'react';
 

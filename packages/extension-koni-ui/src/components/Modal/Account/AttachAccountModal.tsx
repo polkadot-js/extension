@@ -69,12 +69,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [navigate, inactiveModal]);
 
   const onClickLedger = useCallback(() => {
+    inactiveModal(modalId);
+
     if (isPopup) {
       windowOpen('/accounts/connect-ledger').catch(console.error);
     } else {
       navigate('accounts/connect-ledger');
     }
-  }, [isPopup, navigate]);
+  }, [inactiveModal, isPopup, navigate]);
 
   const items = useMemo((): AttachAccountItem[] => ([
     {

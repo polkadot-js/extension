@@ -8,12 +8,15 @@ import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account
 import AccountWithNameSkeleton from '@subwallet/extension-koni-ui/components/Account/Item/AccountWithNameSkeleton';
 import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
+import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
+import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/useGetSupportedLedger';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -51,9 +54,11 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
   const { t } = useTranslation();
+  const { goHome } = useDefaultNavigate();
 
   const supportedLedger = useGetSupportedLedger();
   const onComplete = useCompleteCreateAccount();
+  const onBack = useGoBackFromCreateAccount(ATTACH_ACCOUNT_MODAL);
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
@@ -234,7 +239,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
-        onBack={firstStep ? undefined : onPreviousStep}
+        onBack={firstStep ? onBack : onPreviousStep}
         rightFooterButton={{
           children: t('Connect Ledger device'),
           icon: FooterIcon,
@@ -244,7 +249,8 @@ const Component: React.FC<Props> = (props: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: <InfoIcon />
+            icon: <CloseIcon />,
+            onClick: goHome
           }
         ]}
         title={t('Connect Ledger device')}

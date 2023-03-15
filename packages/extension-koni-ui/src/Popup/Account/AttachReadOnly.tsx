@@ -3,11 +3,14 @@
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
+import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -43,10 +46,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
+  const { goHome } = useDefaultNavigate();
+
   const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
 
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
+
+  const onBack = useGoBackFromCreateAccount(ATTACH_ACCOUNT_MODAL);
 
   const [form] = Form.useForm<ReadOnlyAccountInput>();
 
@@ -138,6 +145,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
+        onBack={onBack}
         rightFooterButton={{
           children: t('Attach read-only account'),
           icon: FooterIcon,
@@ -147,7 +155,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: <InfoIcon />
+            icon: <CloseIcon />,
+            onClick: goHome
           }
         ]}
         title={t<string>('Attach watch-only account')}

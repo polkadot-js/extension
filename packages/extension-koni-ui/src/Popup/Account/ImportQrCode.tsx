@@ -3,14 +3,17 @@
 
 import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
+import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { checkPublicAndPrivateKey, createAccountWithSecret } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { QrAccount, ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
@@ -55,8 +58,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { className } = props;
   const { t } = useTranslation();
-  const onComplete = useCompleteCreateAccount();
+  const { goHome } = useDefaultNavigate();
+
   const accountName = useGetDefaultAccountName();
+  const onComplete = useCompleteCreateAccount();
+  const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
 
   const { inactiveModal } = useContext(ModalContext);
 
@@ -153,6 +159,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
+        onBack={onBack}
         rightFooterButton={{
           children: loading ? t('Creating') : t('Scan the QR code'),
           icon: FooterIcon,
@@ -161,7 +168,8 @@ const Component: React.FC<Props> = (props: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: <InfoIcon />
+            icon: <CloseIcon />,
+            onClick: goHome
           }
         ]}
         title={t('Import your wallet by QR')}

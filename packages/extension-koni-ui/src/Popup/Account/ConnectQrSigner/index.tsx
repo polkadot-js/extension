@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
+import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { QrAccount, ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
@@ -45,8 +48,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { className, description, instructionUrl, logoUrl, subTitle, title } = props;
   const { t } = useTranslation();
+  const { goHome } = useDefaultNavigate();
 
   const onComplete = useCompleteCreateAccount();
+  const onBack = useGoBackFromCreateAccount(ATTACH_ACCOUNT_MODAL);
+
   const accountName = useGetDefaultAccountName();
   const { inactiveModal } = useContext(ModalContext);
 
@@ -135,23 +141,20 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
+        onBack={onBack}
         rightFooterButton={{
           children: loading ? t('Creating') : t('Scan the QR code'),
           icon: FooterIcon,
           onClick: openCamera,
           loading: loading
         }}
-        showBackButton={true}
-        showSubHeader={true}
-        subHeaderBackground='transparent'
-        subHeaderCenter={true}
         subHeaderIcons={[
           {
-            icon: <InfoIcon />
+            icon: <CloseIcon />,
+            onClick: goHome
           }
         ]}
-        subHeaderPaddingVertical={true}
         title={title}
       >
         <div className={CN('container')}>
@@ -202,7 +205,7 @@ const Component: React.FC<Props> = (props: Props) => {
             overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
           />
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 };

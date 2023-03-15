@@ -2,15 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountSuriV2, createSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NewSeedPhraseState } from '@subwallet/extension-koni-ui/types/account';
@@ -54,7 +57,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const location = useLocation();
   const notify = useNotification();
+
+  const { goHome } = useDefaultNavigate();
+
   const onComplete = useCompleteCreateAccount();
+  const onBack = useGoBackFromCreateAccount(NEW_ACCOUNT_MODAL);
+
   const [accountTypes] = useState<KeypairType[]>((location.state as NewSeedPhraseState)?.accountTypes || []);
 
   const accountName = useGetDefaultAccountName();
@@ -96,6 +104,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       resolve={loader}
     >
       <Layout.WithSubHeaderOnly
+        onBack={onBack}
         rightFooterButton={{
           children: t('I have saved it somewhere safe'),
           icon: FooterIcon,
@@ -105,7 +114,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: <InfoIcon />
+            icon: <CloseIcon />,
+            onClick: goHome
           }
         ]}
         title={t<string>('Your recovery phrase')}

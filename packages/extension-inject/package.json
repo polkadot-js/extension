@@ -1,11 +1,12 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "bugs": "https://github.com/polkadot-js/extension/issues",
-  "contributors": [],
   "description": "A generic injector (usable to any extension), that populates the base exposed interfaces to be used by dapps.",
+  "engines": {
+    "node": ">=14"
+  },
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-inject#readme",
   "license": "Apache-2.0",
-  "maintainers": [],
   "name": "@polkadot/extension-inject",
   "repository": {
     "directory": "packages/extension-inject",
@@ -14,7 +15,7 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "0.45.3-1-x",
+  "version": "0.45.3-2-x",
   "main": "index.js",
   "dependencies": {
     "@polkadot/rpc-provider": "^10.1.3",

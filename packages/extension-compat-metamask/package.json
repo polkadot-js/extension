@@ -1,11 +1,12 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "bugs": "https://github.com/polkadot-js/extension/issues",
-  "contributors": [],
   "description": "Metamask compatibility layer",
+  "engines": {
+    "node": ">=14"
+  },
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-compat-metamask#readme",
   "license": "Apache-2.0",
-  "maintainers": [],
   "name": "@polkadot/extension-compat-metamask",
   "repository": {
     "directory": "packages/extension-compat-metamask",
@@ -17,11 +18,11 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.45.3-1-x",
+  "version": "0.45.3-2-x",
   "main": "index.js",
   "dependencies": {
     "@metamask/detect-provider": "^1.2.0",
-    "@polkadot/extension-inject": "^0.45.3-1-x",
+    "@polkadot/extension-inject": "^0.45.3-2-x",
     "@polkadot/types": "^10.1.3",
     "@polkadot/util": "^11.0.2",
     "tslib": "^2.5.0",

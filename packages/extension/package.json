@@ -1,11 +1,12 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "bugs": "https://github.com/polkadot-js/extension/issues",
-  "contributors": [],
   "description": "A sample signer extension for the @polkadot/api",
+  "engines": {
+    "node": ">=14"
+  },
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension#readme",
   "license": "Apache-2.0",
-  "maintainers": [],
   "name": "@polkadot/extension",
   "repository": {
     "directory": "packages/extension",
@@ -14,11 +15,11 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.45.3-1-x",
+  "version": "0.45.3-2-x",
   "dependencies": {
-    "@polkadot/extension-base": "^0.45.3-1-x",
-    "@polkadot/extension-inject": "^0.45.3-1-x",
-    "@polkadot/extension-ui": "^0.45.3-1-x",
+    "@polkadot/extension-base": "^0.45.3-2-x",
+    "@polkadot/extension-inject": "^0.45.3-2-x",
+    "@polkadot/extension-ui": "^0.45.3-2-x",
     "tslib": "^2.5.0"
   },
   "devDependencies": {

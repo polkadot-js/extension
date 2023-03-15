@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Field/MultiValidatorSelector';
@@ -25,6 +26,7 @@ import { PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -38,12 +40,18 @@ interface StakeFromProps extends TransactionFormBaseProps {
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const transactionContext = useContext(TransactionContext);
+  const location = useLocation();
+  const chainStakingMetadata = location.state as ChainStakingMetadata;
   const assetRegistry = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
+  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const isAll = isAccountAll(currentAccount?.address || '');
   const [form] = useForm<StakeFromProps>();
+  const chainInfo = chainInfoMap[chainStakingMetadata.chain];
+  const slug = _getChainNativeTokenSlug(chainInfo);
   const formDefault = {
     from: transactionContext.from,
+    token: slug,
     value: '0'
   };
 
@@ -72,8 +80,6 @@ const Component: React.FC<Props> = (props: Props) => {
       form.setFieldValue('nominate', nominate);
     }
   }, [form, transactionContext]);
-
-  console.log('values', form.getFieldsValue().nominate);
 
   const tokenList = useMemo<TokenItemType[]>(() => (
     Object.values(assetRegistry).map(({ name, originChain, slug, symbol }) => ({ name, slug, originChain, symbol }))
@@ -115,7 +121,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <ScreenTab className={className}>
+      <ScreenTab
+        className={className}
+        defaultIndex={chainStakingMetadata.type === StakingType.POOLED.valueOf() ? 1 : 2}
+        hideTabList={true}
+      >
         <ScreenTab.SwTabPanel label={t('Pools')}>
           <TransactionContent>
             <Form

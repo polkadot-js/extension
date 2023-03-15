@@ -16,6 +16,7 @@ import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phospho
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import EmptyAccount from "@subwallet/extension-koni-ui/components/Account/EmptyAccount";
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
@@ -70,6 +71,8 @@ const getFilteredList = (items: ValidatorDataType[], filters: string[]) => {
 
   return filteredList;
 };
+
+const renderEmpty = () => <EmptyAccount />;
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', id = 'multi-validator-selector', onChange } = props;
@@ -179,6 +182,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           // eslint-disable-next-line react/jsx-no-bind
           onClickActionBtn={onClickActionBtn}
           renderItem={renderItem}
+          renderWhenEmpty={renderEmpty}
           searchFunction={searchFunction}
           searchPlaceholder={t('Search validator')}
           searchableMinCharactersCount={2}

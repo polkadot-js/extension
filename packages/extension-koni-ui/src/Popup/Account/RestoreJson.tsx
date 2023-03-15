@@ -71,6 +71,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { goHome } = useDefaultNavigate();
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
+  const [form] = Form.useForm();
+
   const [fileValidateState, setFileValidateState] = useState<ValidateState>({});
   const [submitValidateState, setSubmitValidateState] = useState<ValidateState>({});
   const [validating, setValidating] = useState(false);
@@ -257,7 +259,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         rightFooterButton={{
           children: t('Import from Json'),
           icon: FooterIcon,
-          onClick: onSubmit,
+          onClick: form.submit,
           disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
           loading: validating || loading
         }}
@@ -275,7 +277,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           </div>
           <Form
             className='form-container'
+            form={form}
             name={formName}
+            onFinish={onSubmit}
           >
             <Form.Item
               help={fileValidateState.message}

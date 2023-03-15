@@ -263,6 +263,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
       focusPassword();
     } else {
+      setIsError(false);
       form.resetFields();
       setIsDisable(true);
     }

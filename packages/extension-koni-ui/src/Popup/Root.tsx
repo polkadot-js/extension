@@ -60,7 +60,9 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   useEffect(() => {
     const pathName = location.pathname;
 
-    if (pathName === DEFAULT_ROUTER_PATH) {
+    if (needMigrate && hasMasterPassword) {
+      navigate(migratePasswordUrl);
+    } else if (pathName === DEFAULT_ROUTER_PATH) {
       if (isNoAccount(accounts)) {
         if (hasMasterPassword && isLocked) {
           navigate(loginUrl);

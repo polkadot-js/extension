@@ -324,6 +324,7 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       paddingLeft: token.sizeSM,
       overflow: 'hidden',
       display: 'flex',
+      flexDirection: 'row',
 
       '.ant-select-modal-input-container.ant-select-modal-input-border-round::before': {
         display: 'none'
@@ -392,6 +393,10 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       '.selected': {
         color: token['cyan-6']
       }
+    },
+
+    '.ant-select-modal-input-container': {
+      overflow: 'hidden'
     },
 
     '.selected-account': {

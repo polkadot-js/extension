@@ -11,7 +11,7 @@ import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extensio
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, InputRef, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
-import { Book, CaretLeft, Lightning, SortAscending } from 'phosphor-react';
+import {Book, CaretLeft, FadersHorizontal, Lightning, SortAscending} from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -161,9 +161,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     closeSortingModal();
   };
 
+  const onClickActionBtn = () => {
+    activeModal(FILTER_MODAL_ID);
+  };
+
   return (
     <>
       <SelectModal
+        actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
         className={`${className} modal-full`}
         closeIcon={<Icon
           phosphorIcon={CaretLeft}
@@ -175,6 +180,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         itemKey={'address'}
         items={filteredList}
         label={label}
+        // eslint-disable-next-line react/jsx-no-bind
+        onClickActionBtn={onClickActionBtn}
         onSelect={_onSelectItem}
         placeholder={placeholder || t('Select pool')}
         prefix={
@@ -197,6 +204,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         searchPlaceholder={t('Search validator')}
         searchableMinCharactersCount={2}
         selected={value || ''}
+        showActionBtn
         title={t('Select pool')}
       />
 

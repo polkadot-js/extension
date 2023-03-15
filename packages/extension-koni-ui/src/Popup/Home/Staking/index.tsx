@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
@@ -81,7 +80,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { data, priceMap } = useGetStakingList();
-  const [{ chain, stakingType }, setSelectedItem] = useState<{ chain: string | undefined, stakingType: StakingType | undefined }>({ chain: undefined, stakingType: undefined });
+  const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);
   const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(data, FILTER_MODAL_ID);
   const filteredList = useMemo(() => {
     return getFilteredList(data, selectedFilters);
@@ -96,16 +95,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     inactiveModal(FILTER_MODAL_ID);
   }, [inactiveModal]);
 
-  const onClickRightIcon = useCallback((e?: SyntheticEvent) => {
-    e && e.stopPropagation();
+  const onClickRightIcon = useCallback((item: StakingDataType) => {
+    setSelectedItem(item);
     activeModal(MORE_ACTION_MODAL);
   }, [activeModal]);
 
-  const onClickItem = useCallback((chain: string, stakingType: StakingType) => {
-    setSelectedItem({
-      chain,
-      stakingType
-    });
+  const onClickItem = useCallback((item: StakingDataType, e?: SyntheticEvent) => {
+    e && e.stopPropagation();
+    setSelectedItem(item);
 
     activeModal(STAKING_DETAIL_MODAL_ID);
   }, [activeModal]);
@@ -165,7 +162,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t('Staking')}
       >
         <SwList.Section
-          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+          actionBtnIcon={<Icon
+            phosphorIcon={FadersHorizontal}
+            size='sm'
+          />}
           enableSearchInput={true}
           list={lazyItems}
           onClickActionBtn={onClickActionBtn}
@@ -191,12 +191,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           options={FILTER_OPTIONS}
         />
 
-        <StakingDetailModal
-          chain={chain}
-          stakingType={stakingType}
-        />
+        {/*<StakingDetailModal*/}
+        {/*  chain={chain}*/}
+        {/*  stakingType={stakingType}*/}
+        {/*/>*/}
 
-        <MoreActionModal />
+        <MoreActionModal chainStakingMetadata={selectedItem?.chainStakingMetadata} />
       </Layout.Base>
     </PageWrapper>
   );

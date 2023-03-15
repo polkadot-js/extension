@@ -1,22 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { Icon, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { User, Users } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   stakingData: StakingDataType,
   priceMap: Record<string, number>,
   decimals: number,
-  onClickRightIcon: () => void,
-  onClickItem: (chain: string, stakingType: StakingType) => void,
+  onClickRightIcon: (item: StakingDataType) => void,
+  onClickItem: (item: StakingDataType) => void,
 }
 
 function getStakingTypeTag (stakingType: string) {
@@ -41,20 +40,25 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
     return getConvertedBalanceValue(balanceValue, Number(`${priceMap[staking.chain] || 0}`));
   }, [balanceValue, priceMap, staking.chain]);
 
+  const _onClickRightIcon = useCallback((e?: SyntheticEvent) => {
+    e && e.stopPropagation();
+    onClickRightIcon(stakingData);
+  }, [onClickRightIcon, stakingData]);
+
   return (
     <StakingItem
       className={className}
       convertedStakingValue={convertedBalanceValue}
       decimal={0}
       displayToken={staking.nativeToken}
-      onClickRightIcon={onClickRightIcon}
+      onClickRightIcon={_onClickRightIcon}
       stakingNetwork={staking.name}
       stakingType={getStakingTypeTag(staking.type)}
       stakingValue={balanceValue}
       symbol={staking.nativeToken}
       networkKey={staking.chain}
       // eslint-disable-next-line react/jsx-no-bind
-      onPressItem={() => onClickItem(staking.chain, staking.type)}
+      onPressItem={() => onClickItem(stakingData)}
     />
   );
 };

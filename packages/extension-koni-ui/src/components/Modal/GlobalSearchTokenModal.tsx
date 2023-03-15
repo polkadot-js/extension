@@ -92,7 +92,8 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
 export const GlobalSearchTokenModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.ant-sw-modal-body': {
-      padding: 0,
+      paddingLeft: 0,
+      paddingRight: 0,
       display: 'flex'
     },
 
@@ -102,7 +103,7 @@ export const GlobalSearchTokenModal = styled(Component)<Props>(({ theme: { token
     },
 
     '.ant-sw-list-search-input': {
-      marginBottom: token.marginXS
+      paddingBottom: token.paddingXS
     },
 
     '.ant-sw-list': {

@@ -167,8 +167,7 @@ export default function useGetStakingList () {
 
       for (const chainStakingMetadata of chainStakingMetadataList) {
         if (
-          stakingItem.chain === chainStakingMetadata.chain &&
-          stakingItem.type === chainStakingMetadata.type
+          stakingItem.chain === chainStakingMetadata.chain
         ) {
           stakingDataType.chainStakingMetadata = chainStakingMetadata;
 

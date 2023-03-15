@@ -89,7 +89,7 @@ export function getRelayStakingOnChain (substrateApi: _SubstrateApi, useAddresse
   });
 }
 
-export function getRelayPoolingOnchain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+export function getRelayPoolingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
   const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
 
   return parentApi.api.query?.nominationPools?.poolMembers.multi(useAddresses, (ledgers: Codec[]) => {

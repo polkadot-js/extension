@@ -10,6 +10,12 @@ export const REVOKE_ACTION = 'revoke';
 export const BOND_LESS_ACTION = 'bondLess';
 export const DECREASE_ACTION = 'decrease'; // for bifrost
 
+export interface PalletNominationPoolsPoolMember {
+  poolId: number,
+  points: number,
+  lasRecordedRewardCounter: number,
+  unbondingEras: Record<string, number>
+}
 export interface PalletDappsStakingDappInfo {
   address: string,
   name: string,
@@ -101,6 +107,10 @@ export interface ValidatorExtraInfo {
 export interface Unlocking {
   remainingEras: BN;
   value: BN;
+}
+
+export function transformPoolName (input: string): string {
+  return input.replace(/[^\x20-\x7E]/g, '');
 }
 
 export function parseIdentity (identityInfo: PalletIdentityRegistration | null): string | undefined {

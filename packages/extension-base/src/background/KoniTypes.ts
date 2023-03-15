@@ -147,8 +147,6 @@ export interface StakingItem {
   unit?: string,
 
   state: APIItemState,
-
-  unlockingInfo?: UnlockingStakeInfo,
   rewardInfo?: StakingRewardItem
 }
 
@@ -162,11 +160,6 @@ export interface StakingRewardJson {
   ready: boolean;
   slowInterval: Array<StakingRewardItem>;
   fastInterval: Array<StakingRewardItem>;
-}
-
-export interface StakeUnlockingJson {
-  timestamp: number,
-  details: UnlockingStakeInfo[]
 }
 
 export interface PriceJson {
@@ -1374,6 +1367,7 @@ export interface ChainStakingMetadata {
   era: number, // also round for parachains
   expectedReturn?: number; // in %, annually
   inflation?: number; // in %, annually
+  minJoinNominationPool?: string; // for relaychain supports nomination pool
   minStake: string;
   maxValidatorPerNominator: number;
   maxWithdrawalRequestPerValidator: number;
@@ -1381,16 +1375,33 @@ export interface ChainStakingMetadata {
   unstakingPeriod: number; // in hours
 }
 
-// TODO: has overlap info with ValidatorInfo
 export interface NominationInfo {
   chain: string;
-  validatorAddress: string;
+  validatorAddress: string; // can be a nomination pool id
   validatorIdentity?: string;
   activeStake: string;
 
-  // For some chains (parachains,...)
   hasUnstaking?: boolean;
   validatorMinStake?: string;
+}
+
+export interface PalletNominationPoolsBondedPoolInner {
+  points: number,
+  state: 'Open' | 'Destroying',
+  memberCounter: number,
+  roles: {
+    depositor: string,
+    root: string,
+    nominator: string,
+    bouncer: string
+  }
+}
+
+export interface NominationPoolInfo extends Pick<PalletNominationPoolsBondedPoolInner, 'roles' | 'memberCounter' | 'state'> {
+  id: number,
+  address: string,
+  name?: string,
+  bondedAmount: string
 }
 
 export enum UnstakingStatus {
@@ -1697,12 +1708,12 @@ export interface KoniRequestSignatures {
   'pri(staking.submitTuringCompound)': [RequestTuringStakeCompound, SWTransactionResponse];
   'pri(staking.submitClaimReward)': [RequestStakeClaimReward, SWTransactionResponse];
   'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, SWTransactionResponse];
-  'pri(unbonding.subscribeUnlockingInfo)': [null, StakeUnlockingJson, StakeUnlockingJson];
   'pri(unbonding.submitTransaction)': [RequestUnbondingSubmit, SWTransactionResponse];
   'pri(bonding.submitTransaction)': [RequestBondingSubmit, SWTransactionResponse];
   'pri(bonding.subscribeChainStakingMetadata)': [null, ChainStakingMetadata[], ChainStakingMetadata[]];
   'pri(bonding.subscribeNominatorMetadata)': [null, NominatorMetadata[], NominatorMetadata[]];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, ValidatorInfo[]];
+  'pri(bonding.getNominationPoolOptions)': [string, NominationPoolInfo[]];
 
   // Chains, assets functions
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];

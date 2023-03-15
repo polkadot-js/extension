@@ -12,12 +12,11 @@ import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Upper
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import classNames from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -109,16 +108,20 @@ function Component (): React.ReactElement {
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
     return () => {
-      navigate('/home/token-detail-list', { state: {
-        symbol: item.symbol,
-        tokenGroup: item.slug
-      } as TokenDetailParam });
+      navigate(`/home/token-detail-list/${item.slug}`);
     };
   }, [navigate]);
 
   const onClickManageToken = useCallback(() => {
     navigate('/settings/tokens/manage');
   }, [navigate]);
+
+  useEffect(() => {
+    setReceiveSelectedResult((prev) => ({
+      ...prev,
+      selectedAcc: currentAccount?.address
+    }));
+  }, [currentAccount?.address]);
 
   return (
     <div

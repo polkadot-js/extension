@@ -16,7 +16,7 @@ import styled from 'styled-components';
 
 type Props = ThemeProps;
 
-const GlobalSearchTokenModalId = 'globalSearchToken';
+export const GlobalSearchTokenModalId = 'globalSearchToken';
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);

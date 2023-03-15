@@ -32,6 +32,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   return (
     <SwModal
       className={className}
+      destroyOnClose={true}
       id={CUSTOMIZE_MODAL}
       onCancel={onCancel}
       title={t('Customization')}

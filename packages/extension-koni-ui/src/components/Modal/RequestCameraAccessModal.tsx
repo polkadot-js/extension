@@ -34,18 +34,18 @@ const Component: React.FC<Props> = (props: Props) => {
     closeModal();
 
     if (isPopup) {
-      windowOpen('settings/security').catch(console.error);
+      windowOpen('/settings/security').catch(console.error);
     } else {
-      navigate('settings/security');
+      navigate('/settings/security');
     }
   }, [closeModal, isPopup, navigate]);
 
   return (
     <SwModal
       id={modalId}
+      onCancel={closeModal}
       title={t('Cannot scan')}
       wrapClassName={CN(className)}
-      onCancel={closeModal}
     >
       <div className='body-container'>
         <div className='notice'>
@@ -98,8 +98,8 @@ const RequestCameraAccessModal = styled(Component)<Props>(({ theme: { token } }:
     '.title': {
       fontWeight: token.fontWeightStrong,
       color: token.colorWarning,
-      fontSize: token.fontSizeHeading6,
-      lineHeight: token.lineHeightHeading6
+      fontSize: token.fontSizeHeading5,
+      lineHeight: token.lineHeightHeading5
     },
 
     '.description': {

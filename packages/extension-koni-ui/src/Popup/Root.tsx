@@ -62,7 +62,11 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
     if (pathName === DEFAULT_ROUTER_PATH) {
       if (isNoAccount(accounts)) {
-        navigate(welcomeUrl);
+        if (hasMasterPassword && isLocked) {
+          navigate(loginUrl);
+        } else {
+          navigate(welcomeUrl);
+        }
       } else if (!hasMasterPassword) {
         navigate(createPasswordUrl);
       } else if (isLocked) {

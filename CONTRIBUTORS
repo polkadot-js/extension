@@ -1,7 +1,7 @@
     1216	Nam Phạm                      	[Issue-963] update parsing RMRK NFTs
-     805	AnhMTV                        	Release version 0.8.1
+     806	AnhMTV                        	Release version 0.8.2
      465	Jaco                          	0.42.5 (#969)
-     363	S2kael                        	[Issue-945] [XCM] Add GMLR xcm from Acala to Moonbeam
+     364	S2kael                        	[Issue-1000] [XCM] update network Bifrost Kusama and Moonbeam
      185	quangdo                       	
      154	lw-cdm                        	Fix tslint issues
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
@@ -10,7 +10,7 @@
       81	Hieu Dao                      	[CI Skip] Update subspace block explorer
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
-      14	dominhquang                   	Update explorer url for Nodle network
+      19	dominhquang                   	Update OriginChain list
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

@@ -109,20 +109,20 @@ const groupStakingRewardItems = (stakingRewardItems: StakingRewardItem[]): Staki
 };
 
 export default function useGetStakingList () {
-  const { chainStakingMetadataList, nominatorMetadataList, stakeUnlockingMap, stakingMap, stakingRewardMap } = useSelector((state: RootState) => state.staking);
+  const { chainStakingMetadataList, nominatorMetadataList, stakingMap, stakingRewardMap } = useSelector((state: RootState) => state.staking);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
 
-  console.log('chainStakingMetadataList', chainStakingMetadataList);
-  console.log('nominatorMetadataList', nominatorMetadataList);
+  const isAll = useMemo(() => {
+    return currentAccount !== null && isAccountAll(currentAccount.address);
+  }, [currentAccount]);
 
   const partResult = useMemo(() => {
     const parsedPriceMap: Record<string, number> = {};
     let readyStakingItems: StakingItem[] = [];
     let stakingRewardList = stakingRewardMap;
     const stakingData: StakingDataType[] = [];
-    const isAll = currentAccount && isAccountAll(currentAccount.address);
 
     stakingMap.forEach((stakingItem) => {
       const chainInfo = chainInfoMap[stakingItem.chain];
@@ -160,6 +160,8 @@ export default function useGetStakingList () {
           stakingItem.address === reward.address
         ) {
           stakingDataType.reward = reward;
+
+          break;
         }
       }
 
@@ -169,32 +171,23 @@ export default function useGetStakingList () {
           stakingItem.type === chainStakingMetadata.type
         ) {
           stakingDataType.chainStakingMetadata = chainStakingMetadata;
-        }
-      }
 
-      for (const nominatorMetadata of nominatorMetadataList) {
-        if (
-          stakingItem.chain === nominatorMetadata.chain &&
-          stakingItem.type === nominatorMetadata.type &&
-          stakingItem.address === nominatorMetadata.address
-        ) {
-          stakingDataType.nominatorMetadata = nominatorMetadata;
+          break;
         }
       }
 
       if (!isAll) {
-        stakeUnlockingMap.forEach((unlockingInfo) => {
+        for (const nominatorMetadata of nominatorMetadataList) {
           if (
-            unlockingInfo.chain === stakingItem.chain &&
-            unlockingInfo.type === stakingItem.type &&
-            unlockingInfo.address === stakingItem.address
+            stakingItem.chain === nominatorMetadata.chain &&
+            stakingItem.type === nominatorMetadata.type &&
+            stakingItem.address === nominatorMetadata.address
           ) {
-            stakingDataType.staking = {
-              ...stakingItem,
-              unlockingInfo
-            } as StakingItem;
+            stakingDataType.nominatorMetadata = nominatorMetadata;
+
+            break;
           }
-        });
+        }
       }
 
       stakingData.push(stakingDataType);
@@ -204,7 +197,7 @@ export default function useGetStakingList () {
       data: stakingData,
       priceMap: parsedPriceMap
     };
-  }, [chainInfoMap, chainStakingMetadataList, currentAccount, nominatorMetadataList, priceMap, stakeUnlockingMap, stakingMap, stakingRewardMap]);
+  }, [chainInfoMap, chainStakingMetadataList, isAll, nominatorMetadataList, priceMap, stakingMap, stakingRewardMap]);
 
   return useMemo((): StakingData => ({ ...partResult }), [partResult]);
 }

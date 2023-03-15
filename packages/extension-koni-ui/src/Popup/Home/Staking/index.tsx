@@ -121,7 +121,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <SwStakingItem
         className='staking-item'
         decimals={item.decimals}
-        key={`${item.staking.chain}-${item.staking.type}`}
+        key={`${item.staking.chain}-${item.staking.type}-${item.staking.address}`}
         onClickItem={onClickItem}
         onClickRightIcon={onClickRightIcon}
         priceMap={priceMap}
@@ -191,10 +191,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           options={FILTER_OPTIONS}
         />
 
-        {/*<StakingDetailModal*/}
-        {/*  chain={chain}*/}
-        {/*  stakingType={stakingType}*/}
-        {/*/>*/}
+        {/* <StakingDetailModal */}
+        {/*  chain={chain} */}
+        {/*  stakingType={stakingType} */}
+        {/* /> */}
 
         <MoreActionModal chainStakingMetadata={selectedItem?.chainStakingMetadata} />
       </Layout.Base>

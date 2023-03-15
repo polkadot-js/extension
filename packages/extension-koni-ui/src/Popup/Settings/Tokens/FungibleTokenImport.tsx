@@ -18,7 +18,7 @@ import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
 import { BackgroundIcon, Col, Field, Form, Icon, Image, NetworkItem, Row, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import { CheckCircle, Coin } from 'phosphor-react';
+import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -66,7 +66,7 @@ function getTokenTypeSupported (chainInfo: _ChainInfo) {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { goBack, goHome } = useDefaultNavigate();
+  const { goBack } = useDefaultNavigate();
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
@@ -265,13 +265,28 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const renderTokenTypeOption = useCallback((tokenTypeOption: TokenTypeOption, selected: boolean) => {
     return (
       <SettingItem
-        name={tokenTypeOption.label}
-        leftItem={(
+        className='token-type-item'
+        leftItemIcon={(
           <BackgroundIcon
+            backgroundColor='var(--token-type-icon-bg-color)'
+            iconColor='var(--token-type-icon-color)'
             phosphorIcon={Coin}
+            size='sm'
+            weight='fill'
           />
         )}
-        rightItem={selected ? undefined : undefined}
+        name={tokenTypeOption.label}
+        rightItem={
+          selected &&
+            (
+              <Icon
+                iconColor='var(--token-selected-icon-color)'
+                phosphorIcon={CheckCircle}
+                size={'sm'}
+                weight={'fill'}
+              />
+            )
+        }
       />
     );
   }, []);
@@ -309,18 +324,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           disabled: isSubmitDisabled(),
           icon: (
             <Icon
-              phosphorIcon={CheckCircle}
+              phosphorIcon={PlusCircle}
               weight='fill'
             />
           ),
           loading,
           onClick: onSubmit,
-          children: 'Save'
+          children: t('Import')
         }}
         subHeaderIcons={[
           {
-            icon: <InfoIcon />,
-            onClick: goHome
+            icon: <InfoIcon />
+            // onClick: goHome
           }
         ]}
         title={t<string>('Import token')}
@@ -417,6 +432,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.import_token__container': {
+      paddingTop: token.padding,
       marginLeft: token.margin,
       marginRight: token.margin
     },
@@ -427,6 +443,22 @@ const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Prop
 
     '.ant-field-container.ant-field-size-medium .ant-field-wrapper': {
       padding: token.paddingSM
+    },
+
+    '.token-type-item': {
+      '--token-type-icon-bg-color': token['orange-6'],
+      '--token-type-icon-color': token.colorWhite,
+      '--token-selected-icon-color': token.colorSuccess,
+
+      '.ant-web3-block-right-item': {
+        marginRight: 0
+      }
+    },
+
+    '.token_import__selected_option': {
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      color: token.colorText
     }
   });
 });

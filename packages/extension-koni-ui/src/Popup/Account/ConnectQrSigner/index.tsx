@@ -4,9 +4,9 @@
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
-import { REQUEST_CAMERA_ACCESS_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -47,7 +47,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { inactiveModal } = useContext(ModalContext);
 
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [loading, setLoading] = useState(false);
@@ -113,9 +113,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [account, accountName, onComplete, inactiveModal]);
 
-  const openCamera = useCallback(() => {
-    activeModal(REQUEST_CAMERA_ACCESS_MODAL);
-  }, [activeModal]);
+  const openCamera = useOpenQrScanner(modalId);
 
   const onSuccess = useCallback((result: ScannerResult) => {
     if (!loading) {

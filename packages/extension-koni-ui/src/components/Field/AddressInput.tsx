@@ -4,6 +4,7 @@
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
@@ -26,7 +27,7 @@ const modalId = 'input-account-address-modal';
 
 function Component ({ className = '', label, onChange, onBlur, placeholder, value, id = modalId, showAddressBook, showScanner }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { inactiveModal } = useContext(ModalContext);
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
   const accountName = useMemo(() => {
     const account = accounts.find((acc) => acc.address.toLowerCase() === value?.toLowerCase());
@@ -40,13 +41,7 @@ function Component ({ className = '', label, onChange, onBlur, placeholder, valu
     onChange && onChange({ target: { value: val } });
   }, [onChange]);
 
-  const onOpenScanner = useCallback(() => {
-    activeModal(id);
-  }, [activeModal, id]);
-
-  const onCloseScanner = useCallback(() => {
-    inactiveModal(id);
-  }, [inactiveModal, id]);
+  const onOpenScanner = useOpenQrScanner(id);
 
   const onScanError = useCallback(() => {
     // do something
@@ -122,7 +117,6 @@ function Component ({ className = '', label, onChange, onBlur, placeholder, valu
       {showScanner && <SwQrScanner
         className={className}
         id={id}
-        onClose={onCloseScanner}
         onError={onScanError}
         onSuccess={onSuccess}
       />}

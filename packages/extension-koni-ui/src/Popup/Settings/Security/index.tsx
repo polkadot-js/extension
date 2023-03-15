@@ -10,7 +10,7 @@ import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { BackgroundIcon, Icon, SettingItem, Switch } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Camera, CaretRight, GlobeHemisphereEast, Key } from 'phosphor-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -85,6 +85,19 @@ const Component: React.FC<Props> = (props: Props) => {
       navigate(url);
     };
   }, [navigate]);
+
+  useEffect(() => {
+    if (camera) {
+      window.navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+          // Close video
+          stream.getTracks().forEach((track) => {
+            track.stop();
+          });
+        })
+        .catch(console.error);
+    }
+  }, [camera]);
 
   return (
     <PageWrapper className={CN(className)}>

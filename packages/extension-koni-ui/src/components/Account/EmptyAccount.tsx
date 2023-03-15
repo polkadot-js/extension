@@ -1,12 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import PageIcon from '@subwallet/react-ui/lib/page-icon';
 import { MagnifyingGlass } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
 type Props = ThemeProps;
 

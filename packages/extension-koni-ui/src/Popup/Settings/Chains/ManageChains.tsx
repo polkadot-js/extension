@@ -1,17 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible, _isCustomChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import NetworkToggleItem from '@subwallet/extension-koni-ui/components/NetworkToggleItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
-import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyList';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, SwList } from '@subwallet/react-ui';
@@ -43,10 +41,10 @@ const FILTER_OPTIONS = [
   { label: 'Disabled chains', value: FilterValue.DISABLED }
 ];
 
-function filterChains (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, filters: string[]): _ChainInfo[] {
-  const filteredChainList: _ChainInfo[] = [];
+function filterChains (chainInfoList: ChainInfoWithState[], filters: string[]): ChainInfoWithState[] {
+  const filteredChainList: ChainInfoWithState[] = [];
 
-  Object.values(chainInfoMap).forEach((chainInfo) => {
+  chainInfoList.forEach((chainInfo) => {
     let isValidationPassed = filters.length <= 0;
 
     for (const filter of filters) {
@@ -55,10 +53,10 @@ function filterChains (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: 
           isValidationPassed = _isCustomChain(chainInfo.slug);
           break;
         case FilterValue.ENABLED:
-          isValidationPassed = chainStateMap[chainInfo.slug].active;
+          isValidationPassed = chainInfo.active;
           break;
         case FilterValue.DISABLED:
-          isValidationPassed = !chainStateMap[chainInfo.slug].active;
+          isValidationPassed = !chainInfo.active;
           break;
         case FilterValue.SUBSTRATE:
           isValidationPassed = _isSubstrateChain(chainInfo);
@@ -89,31 +87,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);
-
-  const { chainInfoMap, chainStateMap } = useSelector((state: RootState) => state.chainStore);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+  const chainInfoList = useChainInfoWithState();
   const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(Object.values(chainInfoMap), 'filterTokenModal');
   const allChains = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return filterChains(chainInfoMap, chainStateMap, selectedFilters);
-  }, [chainInfoMap, chainStateMap, selectedFilters]);
-  const { hasMore, lazyItems, loadMoreItems } = useLazyList(allChains);
+    return filterChains(chainInfoList, selectedFilters);
+  }, [chainInfoList, selectedFilters]);
 
-  const searchToken = useCallback((chainInfo: _ChainInfo, searchText: string) => {
+  const searchToken = useCallback((chainInfo: ChainInfoWithState, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
-    return (
-      chainInfo.name.toLowerCase().includes(searchTextLowerCase)
-    );
+    return chainInfo.name.toLowerCase().includes(searchTextLowerCase);
   }, []);
 
-  const renderChainItem = useCallback((chainInfo: _ChainInfo) => {
-    return (
-      <NetworkToggleItem
-        chainInfo={chainInfo}
-        chainStateMap={chainStateMap}
-      />
-    );
-  }, [chainStateMap]);
+  const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
+    return <NetworkToggleItem chainInfo={chainInfo} />;
+  }, []);
 
   const emptyTokenList = useCallback(() => {
     return (
@@ -176,14 +165,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           />}
           className={'manage_chains__container'}
           enableSearchInput={true}
-          ignoreScrollbar={lazyItems.length > 7}
-          list={lazyItems}
+          ignoreScrollbar={allChains.length > 7}
+          list={allChains}
           mode={'boxed'}
           onClickActionBtn={openFilterModal}
-          pagination={{
-            hasMore,
-            loadMore: loadMoreItems
-          }}
           renderItem={renderChainItem}
           renderOnScroll={true}
           renderWhenEmpty={emptyTokenList}

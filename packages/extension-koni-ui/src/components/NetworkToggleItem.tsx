@@ -1,52 +1,24 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { _ChainConnectionStatus, _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, NetworkItem } from '@subwallet/react-ui';
-import { WifiHigh, WifiSlash } from 'phosphor-react';
-import React, { useCallback } from 'react';
+import { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { NetworkItem } from '@subwallet/react-ui';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  chainInfo: _ChainInfo,
-  chainStateMap: Record<string, _ChainState>
+  chainInfo: ChainInfoWithState,
 
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chainInfo, chainStateMap, className } = props;
+  const { chainInfo, className } = props;
   const navigate = useNavigate();
-  const { token } = useTheme() as Theme;
-  const chainState = chainStateMap[chainInfo.slug];
-
-  const getConnectionStatusIcon = useCallback(() => {
-    if (chainState.connectionStatus === _ChainConnectionStatus.CONNECTED.valueOf()) {
-      return <BackgroundIcon
-        backgroundColor={token.colorSuccess}
-        phosphorIcon={WifiHigh}
-      />;
-    }
-
-    return <BackgroundIcon
-      backgroundColor={token.colorIcon}
-      phosphorIcon={WifiSlash}
-    />;
-  }, [chainState.connectionStatus, token.colorIcon, token.colorSuccess]);
-
-  const renderNetworkRightItem = useCallback((chainInfo: _ChainInfo) => {
-    return (
-      <ChainItemFooter
-        chainInfo={chainInfo}
-        chainState={chainState}
-        navigate={navigate}
-        showDetailNavigation={true}
-      />
-    );
-  }, [chainState, navigate]);
+  const connectSymbol = (chainInfo.connectionStatus === _ChainConnectionStatus.CONNECTED) ? '__connected__' : '__disconnected__';
 
   return (
     <NetworkItem
@@ -57,8 +29,12 @@ const Component: React.FC<Props> = (props: Props) => {
       name={chainInfo.name}
       networkKey={chainInfo.slug}
       networkMainLogoSize={36}
-      rightItem={renderNetworkRightItem(chainInfo)}
-      subIcon={getConnectionStatusIcon()}
+      rightItem={<ChainItemFooter
+        chainInfo={chainInfo}
+        navigate={navigate}
+        showDetailNavigation={true}
+      />}
+      subSymbol={connectSymbol}
       withDivider={true}
     />
   );

@@ -111,10 +111,6 @@ export const CustomizeModal = styled(Component)<Props>(({ theme: { token } }: Pr
       flex: 1
     },
 
-    '.ant-sw-list-wrapper': {
-      overflow: 'auto'
-    },
-
     '.network_item__container .ant-web3-block-right-item': {
       marginRight: 0
     }

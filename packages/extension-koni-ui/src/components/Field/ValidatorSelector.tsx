@@ -5,6 +5,7 @@ import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
+import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -71,7 +72,7 @@ const getFilteredList = (items: ValidatorDataType[], filters: string[]) => {
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, id = 'validator-selector', label, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
+  const { chain, className = '', disabled, id = 'validator-selector', label, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
   const items = useGetValidatorList(chain, 'nominate') as ValidatorDataType[];
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [sortSelection, setSortSelection] = useState<string>('');
@@ -79,14 +80,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const filteredList = useMemo(() => {
     return getFilteredList(items, selectedFilters);
   }, [items, selectedFilters]);
+  const { onSelect } = useSelectModalInputHelper(props, ref);
 
   useExcludeModal(id);
 
   const { t } = useTranslation();
-
-  const _onSelectItem = useCallback((value: string) => {
-    onChange && onChange({ target: { value } });
-  }, [onChange]);
 
   const searchFunction = useCallback((item: ValidatorDataType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -181,7 +179,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         itemKey={'address'}
         items={filteredList}
         label={label}
-        onSelect={_onSelectItem}
+        onSelect={onSelect}
         placeholder={placeholder || t('Select validator')}
         prefix={
           <Avatar

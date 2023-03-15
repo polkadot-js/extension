@@ -183,13 +183,11 @@ function getAccountBalance (
             getConvertedBalanceValue(tokenBalance.total.value, priceValue)
           );
           tokenGroupBalance.total.convertedValue = tokenGroupBalance.total.convertedValue.plus(tokenBalance.total.convertedValue);
-          totalBalanceInfo.convertedValue = totalBalanceInfo.convertedValue.plus(tokenGroupBalance.total.convertedValue);
 
           tokenBalance.total.pastConvertedValue = tokenBalance.total.pastConvertedValue.plus(
             getConvertedBalanceValue(tokenBalance.total.value, price24hValue)
           );
           tokenGroupBalance.total.pastConvertedValue = tokenGroupBalance.total.pastConvertedValue.plus(tokenBalance.total.pastConvertedValue);
-          totalBalanceInfo.converted24hValue = totalBalanceInfo.converted24hValue.plus(tokenGroupBalance.total.pastConvertedValue);
         }
       }
 
@@ -217,6 +215,8 @@ function getAccountBalance (
     }
 
     tokenGroupBalanceMap[tokenGroupKey] = tokenGroupBalance;
+    totalBalanceInfo.convertedValue = totalBalanceInfo.convertedValue.plus(tokenGroupBalance.total.convertedValue);
+    totalBalanceInfo.converted24hValue = totalBalanceInfo.converted24hValue.plus(tokenGroupBalance.total.pastConvertedValue);
   });
 
   // Compute total balance change

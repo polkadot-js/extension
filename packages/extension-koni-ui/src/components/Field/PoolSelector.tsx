@@ -6,6 +6,7 @@ import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
 import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingPoolItem';
+import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -72,7 +73,8 @@ const getFilteredList = (items: NominationPoolDataType[], filters: string[]) => 
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, id = 'pool-selector', label, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
+  const { chain, className = '', disabled, id = 'pool-selector', label, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
+  const { t } = useTranslation();
   const items = useGetValidatorList(chain, 'pool') as NominationPoolDataType[];
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [sortSelection, setSortSelection] = useState<string>('');
@@ -80,14 +82,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const filteredList = useMemo(() => {
     return getFilteredList(items, selectedFilters);
   }, [items, selectedFilters]);
+  const { onSelect } = useSelectModalInputHelper(props, ref);
 
   useExcludeModal(id);
-
-  const { t } = useTranslation();
-
-  const _onSelectItem = useCallback((value: string) => {
-    onChange && onChange({ target: { value } });
-  }, [onChange]);
 
   const searchFunction = useCallback((item: NominationPoolDataType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -174,7 +171,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         itemKey={'address'}
         items={filteredList}
         label={label}
-        onSelect={_onSelectItem}
+        onSelect={onSelect}
         placeholder={placeholder || t('Select pool')}
         prefix={
           <Avatar

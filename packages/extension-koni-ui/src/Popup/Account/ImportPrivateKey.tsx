@@ -13,6 +13,7 @@ import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/ex
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { Form, Icon, Input } from '@subwallet/react-ui';
+import { useForm } from '@subwallet/react-ui/es/form/Form';
 import CN from 'classnames';
 import { FileArrowDown } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
@@ -43,8 +44,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [changed, setChanged] = useState(false);
   const [privateKey, setPrivateKey] = useState('');
   const [autoCorrect, setAutoCorrect] = useState('');
+  const [form] = useForm();
 
   const accountName = useGetDefaultAccountName();
+
+  // Auto focus field
+  useFocusFormItem(form, fieldName);
 
   const onChange: ChangeEventHandler<HTMLTextAreaElement> = useCallback((event) => {
     setChanged(true);
@@ -133,8 +138,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     };
   }, [privateKey, changed]);
 
-  useFocusFormItem(formName, fieldName);
-
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
@@ -158,6 +161,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           </div>
           <Form
             className='form-container'
+            form={form}
             name={formName}
           >
             <Form.Item

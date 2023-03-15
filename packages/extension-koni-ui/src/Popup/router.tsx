@@ -121,7 +121,7 @@ export const router = createHashRouter([
         ...Home.generateRouterObject('/home'),
         children: [
           Tokens.generateRouterObject('tokens'),
-          TokenDetailList.generateRouterObject('token-detail-list'),
+          TokenDetailList.generateRouterObject('token-detail-list/:slug'),
           {
             path: 'nfts',
             element: <Outlet />,

@@ -15,6 +15,7 @@ import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-u
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { Form, Icon, Input } from '@subwallet/react-ui';
+import { useForm } from '@subwallet/react-ui/es/form/Form';
 import CN from 'classnames';
 import { FileArrowDown } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
@@ -41,6 +42,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const timeOutRef = useRef<NodeJS.Timer>();
   const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
+  const [form] = useForm();
 
   const [keyTypes, setKeyTypes] = useState<KeypairType[]>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const [validateState, setValidateState] = useState<ValidateState>({});
@@ -131,7 +133,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     };
   }, [seedPhrase, changed]);
 
-  useFocusFormItem(formName, fieldName);
+  useFocusFormItem(form, fieldName);
 
   return (
     <PageWrapper className={CN(className)}>
@@ -156,6 +158,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           </div>
           <Form
             className='form-container'
+            form={form}
             name={formName}
           >
             <Form.Item

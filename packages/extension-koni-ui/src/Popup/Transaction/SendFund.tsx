@@ -375,6 +375,13 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }
   }, [tokenItems, assetRegistryMap, form, transactionContext]);
 
+  // Focus the first field
+  // useEffect(() => {
+  //   const focusField = isAllAccount ? 'from' : 'token';
+  //
+  //   (form.getFieldInstance(focusField) as HTMLInputElement).focus();
+  // }, [form, isAllAccount]);
+
   return (
     <>
       <TransactionContent className={CN(`${className} -transaction-content`)}>

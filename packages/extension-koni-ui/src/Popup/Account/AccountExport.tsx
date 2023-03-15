@@ -271,7 +271,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [account?.address, form]);
 
-  useFocusFormItem(formName, FormFieldName.PASSWORD);
+  useFocusFormItem(form, FormFieldName.PASSWORD);
 
   if (!account) {
     return null;

@@ -122,7 +122,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, [activeModal, noAccount]);
 
-  useFocusFormItem(formName, FormFieldName.PASSWORD, !checkActive(REQUEST_CREATE_PASSWORD_MODAL));
+  useFocusFormItem(form, FormFieldName.PASSWORD, !checkActive(REQUEST_CREATE_PASSWORD_MODAL));
 
   return (
     <PageWrapper className={CN(className)}>

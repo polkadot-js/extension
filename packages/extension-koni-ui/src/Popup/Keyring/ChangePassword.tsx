@@ -91,7 +91,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     form.resetFields([FormFieldName.CONFIRM_PASSWORD]);
   }, [form]);
 
-  useFocusFormItem(formName, FormFieldName.OLD_PASSWORD);
+  useFocusFormItem(form, FormFieldName.OLD_PASSWORD);
 
   return (
     <PageWrapper className={CN(className)}>

@@ -7,3 +7,4 @@ export { default as DeriveAccountModal } from './Account/DeriveAccountModal';
 export { default as ImportAccountModal } from './Account/ImportAccountModal';
 export { default as NewAccountModal } from './Account/NewAccountModal';
 export { default as RequestCreatePasswordModal } from './RequestCreatePasswordModal';
+export { default as RequestCameraAccessModal } from './RequestCameraAccessModal';

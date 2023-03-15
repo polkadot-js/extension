@@ -4,16 +4,16 @@
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
+import { REQUEST_CAMERA_ACCESS_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
+import { QrAccount, ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { qrSignerScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
 import { Form, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
-import { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 import CN from 'classnames';
 import { Info, QrCode } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
@@ -114,7 +114,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [account, accountName, onComplete, inactiveModal]);
 
   const openCamera = useCallback(() => {
-    activeModal(modalId);
+    activeModal(REQUEST_CAMERA_ACCESS_MODAL);
   }, [activeModal]);
 
   const onSuccess = useCallback((result: ScannerResult) => {

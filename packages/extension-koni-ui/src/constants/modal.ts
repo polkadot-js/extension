@@ -12,3 +12,4 @@ export const REQUEST_CREATE_PASSWORD_MODAL = 'request-create-password-modal';
 export const CONFIRMATION_DETAIL_MODAL = 'confirmation-detail-modal';
 export const CONFIRMATION_QR_MODAL = 'confirmation-qr-modal';
 export const CONFIRMATION_SCAN_MODAL = 'confirmation-scan-modal';
+export const REQUEST_CAMERA_ACCESS_MODAL = 'request-camera-access-modal';

@@ -25,7 +25,7 @@ interface Props extends BasicInputWrapper, ThemeProps {
 
 const modalId = 'input-account-address-modal';
 
-function Component ({ className = '', label, disabled, readOnly, onChange, onBlur, onFocus, placeholder, value, id = modalId, showAddressBook, showScanner }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ className = '', disabled, id = modalId, label, onBlur, onChange, onFocus, placeholder, readOnly, showAddressBook, showScanner, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const inputRef = useForwardInputRef(ref);

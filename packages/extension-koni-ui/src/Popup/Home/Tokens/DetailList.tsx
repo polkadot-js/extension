@@ -8,6 +8,7 @@ import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeCo
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { DetailModal } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailUpperBlock';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
@@ -15,10 +16,9 @@ import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import classNames from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 
 type Props = ThemeProps;
 

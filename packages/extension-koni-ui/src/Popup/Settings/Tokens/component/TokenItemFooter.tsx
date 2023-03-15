@@ -7,8 +7,7 @@ import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotifi
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { updateAssetSetting } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Switch } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { Button, Icon, Switch } from '@subwallet/react-ui';
 import { DotsThree } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import { NavigateFunction } from 'react-router';

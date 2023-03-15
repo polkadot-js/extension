@@ -6,9 +6,9 @@ import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
-import { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
 import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useContext, useMemo } from 'react';

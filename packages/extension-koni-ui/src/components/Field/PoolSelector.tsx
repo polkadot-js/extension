@@ -9,8 +9,7 @@ import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, InputRef, SelectModal, useExcludeModal } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { Button, Icon, InputRef, ModalContext, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import { Book, CaretLeft, Lightning, SortAscending } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';

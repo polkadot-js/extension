@@ -11,11 +11,10 @@ import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import { checkPublicAndPrivateKey, createAccountWithSecret } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
+import { QrAccount, ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { importQrScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
 import { Form, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
-import { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 import CN from 'classnames';
 import { Info, QrCode, Scan } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';

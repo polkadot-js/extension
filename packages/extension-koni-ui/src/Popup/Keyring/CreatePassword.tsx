@@ -12,8 +12,7 @@ import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messag
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
-import { Form, Icon, Input, ModalContext, SwModal } from '@subwallet/react-ui';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { Form, Icon, Input, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CaretLeft, CheckCircle, Info, ShieldPlus } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';

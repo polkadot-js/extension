@@ -10,8 +10,7 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import { useSelectValidators } from '@subwallet/extension-koni-ui/hooks/modal/useSelectValidators';
 import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, InputRef, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { Button, Icon, InputRef, ModalContext, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';

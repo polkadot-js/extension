@@ -3,8 +3,7 @@
 
 import { REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { Button, Icon, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ShieldPlus, ShieldStar } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';

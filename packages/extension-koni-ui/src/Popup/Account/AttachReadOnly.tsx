@@ -12,9 +12,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/util/form';
 import { readOnlyScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
-import { Form, Icon } from '@subwallet/react-ui';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { Form, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Eye, Info } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
@@ -49,7 +47,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
 
-  const [form] = useForm<ReadOnlyAccountInput>();
+  const [form] = Form.useForm<ReadOnlyAccountInput>();
 
   const [reformatAddress, setReformatAddress] = useState('');
   const [loading, setLoading] = useState(false);

@@ -18,7 +18,6 @@ import { openInNewTab } from '@subwallet/extension-koni-ui/util';
 import { getAccountType } from '@subwallet/extension-koni-ui/util/account';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { Button, Form, Icon, SwSubHeader } from '@subwallet/react-ui';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
 import CN from 'classnames';
 import { ShoppingCartSimple } from 'phosphor-react';
 import qs from 'querystring';
@@ -76,7 +75,7 @@ function Component ({ className }: Props) {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const { t } = useTranslation();
   const { goBack } = useDefaultNavigate();
-  const [form] = useForm<BuyTokensFormProps>();
+  const [form] = Form.useForm<BuyTokensFormProps>();
   const formDefault: BuyTokensFormProps = {
     address: isAllAccount ? '' : (currentAccount?.address || ''),
     tokenKey: fixedTokenKey || '',

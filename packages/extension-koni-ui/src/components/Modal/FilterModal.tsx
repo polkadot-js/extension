@@ -2,10 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Checkbox } from '@subwallet/react-ui';
+import { Button, Checkbox, Icon, SwModal } from '@subwallet/react-ui';
 import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
-import Icon from '@subwallet/react-ui/es/icon';
-import SwModal from '@subwallet/react-ui/es/sw-modal';
 import { FadersHorizontal } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';

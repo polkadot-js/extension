@@ -15,9 +15,7 @@ import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyLis
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, SwList } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { Coin, FadersHorizontal, Plus } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';

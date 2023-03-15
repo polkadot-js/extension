@@ -11,9 +11,9 @@ import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
+import { ModalContext } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import classNames from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';

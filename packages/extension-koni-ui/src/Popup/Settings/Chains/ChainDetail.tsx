@@ -14,9 +14,7 @@ import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/
 import useFetchChainState from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainState';
 import { removeChain, upsertChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Col, Field, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
-import Icon from '@subwallet/react-ui/es/icon';
+import { Button, ButtonProps, Col, Field, Form, Icon, Input, Row, Tooltip } from '@subwallet/react-ui';
 import { FloppyDiskBack, Globe, Plus, ShareNetwork, Trash } from 'phosphor-react';
 import { FieldData, RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -40,7 +38,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const location = useLocation();
   const showNotification = useNotification();
-  const [form] = useForm<ChainDetailForm>();
+  const [form] = Form.useForm<ChainDetailForm>();
   const { handleSimpleConfirmModal } = useConfirmModal({
     title: t<string>('Delete chain'),
     maskClosable: true,

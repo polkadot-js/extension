@@ -10,8 +10,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, Icon, SwSubHeader } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ButtonProps, Icon, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Info } from 'phosphor-react';
 import React, { Dispatch, SetStateAction, useCallback, useContext, useMemo, useState } from 'react';

@@ -8,8 +8,7 @@ import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFo
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Form, Icon, Input } from '@subwallet/react-ui';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { Form, Icon, Input, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FloppyDiskBack, Info, ShieldCheck } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';

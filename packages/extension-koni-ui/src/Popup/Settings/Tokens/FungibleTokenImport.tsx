@@ -14,10 +14,8 @@ import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/sc
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
-import { ButtonProps, Col, Field, Form, Image, NetworkItem, Row, SelectModal } from '@subwallet/react-ui';
+import { ButtonProps, Col, Field, Form, Icon, Image, NetworkItem, PageIcon, Row, SelectModal } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
-import Icon from '@subwallet/react-ui/es/icon';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { CheckCircle, Coin, Info } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';

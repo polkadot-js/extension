@@ -16,8 +16,7 @@ import MoreActionModal, { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
-import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';

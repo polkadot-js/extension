@@ -12,8 +12,7 @@ import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, QRCode, SettingItem } from '@subwallet/react-ui';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, PageIcon, QRCode, SettingItem } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { saveAs } from 'file-saver';
 import { CheckCircle, CopySimple, DownloadSimple, FileJs, Leaf, QrCode, Wallet } from 'phosphor-react';

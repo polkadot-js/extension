@@ -10,9 +10,8 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan';
-import { Button, Checkbox, CrowdloanItem, Icon, SwList, SwModal, Tag } from '@subwallet/react-ui';
+import { Button, Checkbox, CrowdloanItem, Icon, ModalContext, SwList, SwModal, Tag } from '@subwallet/react-ui';
 import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';

@@ -12,8 +12,7 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import { deleteCustomAssets } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Col, Field, Logo, Row, Tooltip } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { Button, ButtonProps, Col, Field, Icon, Logo, Row, Tooltip } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { Copy, Trash } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';

@@ -14,9 +14,7 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyList';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, SwList } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { FadersHorizontal, ListChecks, Plus } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';

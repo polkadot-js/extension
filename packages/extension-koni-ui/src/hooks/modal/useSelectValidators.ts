@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useState } from 'react';
 
 export function useSelectValidators<T> (items: T[], modalId: string, onChange?: BasicOnChangeFunction<T>) {

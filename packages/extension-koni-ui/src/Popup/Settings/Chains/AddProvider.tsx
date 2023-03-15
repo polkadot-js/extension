@@ -13,9 +13,7 @@ import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
-import { ActivityIndicator, ButtonProps, Col, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
-import Icon from '@subwallet/react-ui/es/icon';
+import { ActivityIndicator, ButtonProps, Col, Form, Icon, Input, Row, Tooltip } from '@subwallet/react-ui';
 import { Globe, Info, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -104,7 +102,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     };
   }, [chainInfo, chainType]);
 
-  const [form] = useForm<AddProviderForm>();
+  const [form] = Form.useForm<AddProviderForm>();
   const [isValidating, setIsValidating] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);

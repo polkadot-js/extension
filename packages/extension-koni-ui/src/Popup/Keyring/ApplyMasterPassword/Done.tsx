@@ -4,7 +4,7 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React from 'react';

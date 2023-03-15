@@ -11,9 +11,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
-import { ActivityIndicator, ButtonProps, Col, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
-import Icon from '@subwallet/react-ui/es/icon';
+import { ActivityIndicator, ButtonProps, Col, Form, Icon, Input, Row, Tooltip } from '@subwallet/react-ui';
 import { FloppyDiskBack, Globe, Info, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
@@ -47,7 +45,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
-  const [form] = useForm<ChainImportForm>();
+  const [form] = Form.useForm<ChainImportForm>();
 
   const [loading, setLoading] = useState(false);
   const [isPureEvmChain, setIsPureEvmChain] = useState(false);

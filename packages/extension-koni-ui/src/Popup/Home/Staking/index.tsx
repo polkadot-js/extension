@@ -191,10 +191,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           options={FILTER_OPTIONS}
         />
 
-        {/* <StakingDetailModal */}
-        {/*  chain={chain} */}
-        {/*  stakingType={stakingType} */}
-        {/* /> */}
+        {!!(selectedItem && selectedItem.nominatorMetadata && selectedItem.chainStakingMetadata) &&
+          <StakingDetailModal
+            chainStakingMetadata={selectedItem.chainStakingMetadata}
+            nominatorMetadata={selectedItem.nominatorMetadata}
+          />}
 
         <MoreActionModal chainStakingMetadata={selectedItem?.chainStakingMetadata} />
       </Layout.Base>

@@ -56,6 +56,11 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       lineHeight: token.lineHeight
     },
 
+    '.sm-text': {
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM
+    },
+
     '.mono-text': {
       fontFamily: token.monoSpaceFontFamily
     },

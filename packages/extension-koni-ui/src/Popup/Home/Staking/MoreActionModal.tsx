@@ -58,6 +58,11 @@ const ACTION_LIST: ActionListType[] = [
   // }
 ];
 
+export type StakingDataOption = {
+  chainStakingMetadata: ChainStakingMetadata,
+  hideTabList: boolean
+}
+
 const Component: React.FC<Props> = (props: Props) => {
   const { chainStakingMetadata, className } = props;
   const { inactiveModal } = useContext(ModalContext);
@@ -74,7 +79,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onPressItem = useCallback(
     (item: ActionListType) => {
-      return () => navigate(item.value, { state: chainStakingMetadata });
+      return () => navigate(item.value, { state: { chainStakingMetadata, hideTabList: true } as StakingDataOption });
     },
     [chainStakingMetadata, navigate]
   );

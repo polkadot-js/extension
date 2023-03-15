@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainStakingMetadata, ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Field/MultiValidatorSelector';
@@ -12,6 +12,7 @@ import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { StakingNetworkDetailModal, StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import ScreenTab from '@subwallet/extension-koni-ui/components/ScreenTab';
 import SelectValidatorInput from '@subwallet/extension-koni-ui/components/SelectValidatorInput';
+import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
@@ -41,14 +42,17 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const transactionContext = useContext(TransactionContext);
   const location = useLocation();
-  const chainStakingMetadata = location.state as ChainStakingMetadata;
+  const { chainStakingMetadata, hideTabList } = location.state as StakingDataOption;
+
   const assetRegistry = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const isAll = isAccountAll(currentAccount?.address || '');
   const [form] = useForm<StakeFromProps>();
   const chainInfo = chainInfoMap[chainStakingMetadata.chain];
+  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
   const slug = _getChainNativeTokenSlug(chainInfo);
+
   const formDefault = {
     from: transactionContext.from,
     token: slug,
@@ -124,7 +128,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <ScreenTab
         className={className}
         defaultIndex={chainStakingMetadata.type === StakingType.POOLED.valueOf() ? 1 : 2}
-        hideTabList={true}
+        hideTabList={!!hideTabList}
       >
         <ScreenTab.SwTabPanel label={t('Pools')}>
           <TransactionContent>
@@ -267,13 +271,13 @@ const Component: React.FC<Props> = (props: Props) => {
       </TransactionFooter>
 
       <StakingNetworkDetailModal
-        activeNominators={['0', '0']}
-        estimatedEarning={'0'}
-        minimumActive={{ decimals: 10, value: '100', symbol: 'DOT' }}
+        estimatedEarning={chainStakingMetadata.expectedReturn}
+        inflation={chainStakingMetadata.inflation}
+        maxValidatorPerNominator={chainStakingMetadata.maxValidatorPerNominator}
+        minimumActive={{ decimals, value: chainStakingMetadata.minStake, symbol }}
+        unstakingPeriod={chainStakingMetadata.unstakingPeriod}
         // eslint-disable-next-line react/jsx-no-bind
         onCancel={onCloseInfoModal}
-
-        unstakingPeriod={'0'}
       />
     </>
   );

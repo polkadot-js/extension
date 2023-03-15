@@ -4,14 +4,16 @@
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import { useEffect } from 'react';
 
-const useFocusFormItem = (form: FormInstance, fieldName: string, active = true) => {
+const useFocusFormItem = (form: FormInstance, fieldName: string, active = true, timeOut = 33) => {
   useEffect(() => {
     if (active) {
-      const elem = form.getFieldInstance(fieldName) as HTMLInputElement;
+      setTimeout(() => {
+        const elem = form.getFieldInstance(fieldName) as HTMLInputElement;
 
-      elem && elem.focus && elem.focus();
+        elem && elem.focus && elem.focus();
+      }, timeOut);
     }
-  }, [active, fieldName, form]);
+  }, [active, fieldName, form, timeOut]);
 };
 
 export default useFocusFormItem;

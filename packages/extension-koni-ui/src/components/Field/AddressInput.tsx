@@ -3,7 +3,7 @@
 
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
@@ -64,6 +64,7 @@ function Component ({ className = '', label, onChange, onBlur, placeholder, valu
         className={CN('address-input', className, {
           '-is-valid-address': isAddress(value)
         })}
+        id={id}
         label={label || t('Account address')}
         onBlur={onBlur}
         onChange={_onChange}

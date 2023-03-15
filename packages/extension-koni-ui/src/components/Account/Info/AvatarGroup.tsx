@@ -68,7 +68,7 @@ const Component: React.FC<Props> = ({ accounts: _accounts, className }: Props) =
         }
         {
           countMore > 0 && (
-            <div className='cont-more'>+{countMore > 10 ? 10 : countMore}</div>
+            <div className='cont-more'>+{countMore}</div>
           )
         }
       </div>

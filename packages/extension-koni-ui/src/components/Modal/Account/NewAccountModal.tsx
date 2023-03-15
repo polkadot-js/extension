@@ -6,9 +6,9 @@ import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
-import useClickOutSide from '@subwallet/extension-koni-ui/hooks/useClickOutSide';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/util/dom';
 import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
@@ -76,7 +76,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           icon={(
             <Icon
               className={'icon-submit'}
-              iconColor='var(--icon-color)'
               phosphorIcon={CheckCircle}
               weight='fill'
             />
@@ -96,10 +95,6 @@ const CreateAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
       display: 'flex',
       flexDirection: 'column',
       gap: token.sizeXS
-    },
-
-    '.icon-submit': {
-      '--icon-color': token.colorTextBase
     }
   };
 });

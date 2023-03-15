@@ -11,7 +11,7 @@ import { useParams } from 'react-router';
 import styled, { useTheme } from 'styled-components';
 
 import { Layout } from '../components';
-import useTranslation from '../hooks/useTranslation';
+import useTranslation from '../hooks/common/useTranslation';
 
 interface Props {
   className?: string;

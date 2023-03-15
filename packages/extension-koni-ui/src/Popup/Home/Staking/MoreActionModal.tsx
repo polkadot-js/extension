@@ -84,7 +84,6 @@ const Component: React.FC<Props> = (props: Props) => {
       maskClosable={true}
       onCancel={onCancel}
       title={t('Actions')}
-
     >
       {ACTION_LIST.map((item) => (
         <SettingItem

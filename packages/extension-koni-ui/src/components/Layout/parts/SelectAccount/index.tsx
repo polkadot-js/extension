@@ -9,11 +9,11 @@ import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account
 import { ConnectWebsiteModal } from '@subwallet/extension-koni-ui/components/Layout/parts/ConnectWebsiteModal';
 import SelectAccountFooter from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Footer';
 import { SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/auth/useGetCurrentAuth';
+import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/auth/useGetCurrentTab';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/useGetCurrentAuth';
-import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/useGetCurrentTab';
-import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
@@ -117,7 +117,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const onClickDetailAccount = useCallback((address: string) => {
     return () => {
       inactiveModal(modalId);
-      navigate(`/accounts/detail/${address}`);
+      setTimeout(() => {
+        navigate(`/accounts/detail/${address}`);
+      }, 100);
     };
   }, [navigate, inactiveModal]);
 

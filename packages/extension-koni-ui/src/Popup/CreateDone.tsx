@@ -2,15 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { DISCORD_URL, TELEGRAM_URL, TWITTER_URL } from '@subwallet/extension-koni-ui/constants/commont';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon } from '@subwallet/react-ui';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import CN from 'classnames';
-import { CheckCircle, DiscordLogo, PaperPlaneTilt, TwitterLogo } from 'phosphor-react';
+import { CheckCircle, DiscordLogo, PaperPlaneTilt, TwitterLogo, X } from 'phosphor-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
+import { Layout } from '../components';
 
 type Props = ThemeProps;
 
@@ -47,44 +50,61 @@ const items: SocialItem[] = [
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
+  const { goHome } = useDefaultNavigate();
+
   const { t } = useTranslation();
 
   return (
-    <div className={CN(className)}>
-      <div className='page-icon'>
-        <PageIcon
-          color='var(--page-icon-color)'
-          iconProps={{
-            weight: 'fill',
-            phosphorIcon: CheckCircle
-          }}
+    <Layout.WithSubHeaderOnly
+      rightFooterButton={{
+        children: t('Exit'),
+        onClick: goHome
+      }}
+      showBackButton={true}
+      subHeaderLeft={(
+        <Icon
+          phosphorIcon={X}
+          size='md'
         />
+      )}
+      title={t('Successful')}
+    >
+      <div className={CN(className)}>
+        <div className='page-icon'>
+          <PageIcon
+            color='var(--page-icon-color)'
+            iconProps={{
+              weight: 'fill',
+              phosphorIcon: CheckCircle
+            }}
+          />
+        </div>
+        <div className='title'>
+          {t('You’re all done!')}
+        </div>
+        <div className='description'>
+          {t('Follow along with product updates or reach out if you have any questions.')}
+        </div>
+        <div className='button-group'>
+          {
+            items.map((item) => (
+              <Button
+                className={CN(`type-${item.type}`)}
+                icon={(
+                  <Icon
+                    phosphorIcon={item.icon}
+                    weight='fill'
+                  />
+                )}
+                key={item.type}
+                onClick={openInNewTab(item.url)}
+                shape='squircle'
+              />
+            ))
+          }
+        </div>
       </div>
-      <div className='title'>
-        {t('You’re all done!')}
-      </div>
-      <div className='description'>
-        {t('Follow along with product updates or reach out if you have any questions.')}
-      </div>
-      <div className='button-group'>
-        {
-          items.map((item) => (
-            <Button
-              className={CN(`type-${item.type}`)}
-              icon={(
-                <Icon
-                  phosphorIcon={item.icon}
-                  weight='fill'
-                />
-              )}
-              key={item.type}
-              onClick={openInNewTab(item.url)}
-              shape='squircle'
-            />
-          ))
-        }
-      </div>
-    </div>
+    </Layout.WithSubHeaderOnly>
   );
 };
 

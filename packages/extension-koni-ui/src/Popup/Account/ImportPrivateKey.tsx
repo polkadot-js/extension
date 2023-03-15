@@ -49,7 +49,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [changed, setChanged] = useState(false);
   const [privateKey, setPrivateKey] = useState('');
   const [autoCorrect, setAutoCorrect] = useState('');
-  const [form] = useForm();
+  const [form] = Form.useForm();
 
   const accountName = useGetDefaultAccountName();
 

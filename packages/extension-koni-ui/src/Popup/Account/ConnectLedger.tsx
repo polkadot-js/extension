@@ -290,7 +290,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 />
                 <Button
                   block={true}
-                  className={CN('ledger-button', { connected: isConnected })}
+                  className={CN('ledger-button', { connected: isConnected, loading: isLoading })}
                   contentAlign='left'
                   icon={(
                     <BackgroundIcon
@@ -304,7 +304,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   schema='secondary'
                 >
                   <div className='ledger-button-content'>
-                    <span>
+                    <span className='ledger-info-text'>
                       {t(isConnected
                         ? 'Connected ledger'
                         : warning
@@ -389,7 +389,13 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      flex: 1
+      flex: 1,
+      overflow: 'hidden'
+    },
+
+    '.ledger-info-text': {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
 
     '.ledger-button': {
@@ -425,6 +431,12 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
       '.ant-account-item': {
         paddingTop: token.paddingSM,
         paddingBottom: token.paddingSM
+      }
+    },
+
+    '.loading': {
+      '.anticon': {
+        animation: 'spinner-loading 1s infinite linear'
       }
     }
   };

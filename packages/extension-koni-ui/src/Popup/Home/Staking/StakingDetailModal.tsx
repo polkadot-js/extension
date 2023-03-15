@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainStakingMetadata, NominatorMetadata, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { isShowNominationByValidator } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { toShort } from '@subwallet/extension-koni-ui/util';
@@ -17,7 +16,6 @@ import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { CheckCircle, DotsThree } from 'phosphor-react';
 import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -27,13 +25,11 @@ interface Props extends ThemeProps {
 
 export const STAKING_DETAIL_MODAL_ID = 'staking-detail-modal-id';
 
-const Component: React.FC<Props> = (props: Props) => {
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
-  const { chainStakingMetadata, className, nominatorMetadata } = props;
+const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominatorMetadata }: Props) => {
   const { expectedReturn, inflation, minStake, unstakingPeriod } = chainStakingMetadata;
   const { activeStake, address, chain, nominations, type, unstakings } = nominatorMetadata;
-  const chainInfo = chainInfoMap[chain];
-  const isSubstrateRelayChain = _isSubstrateRelayChain(chainInfo);
+
+  const showingOption = isShowNominationByValidator(chain);
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { data: stakingData } = useGetStakingList();
   const data = useMemo((): StakingDataType => {
@@ -138,6 +134,7 @@ const Component: React.FC<Props> = (props: Props) => {
         spaceSize={'xs'}
         valueColorScheme={'light'}
       >
+        {/* co the co expectedReturn nhung ko co inflation */}
         {!!expectedReturn && !!inflation &&
           <MetaInfo.Default label={t('Estimated earning')}>
             <div className={'__active-nominators-value'}>
@@ -178,7 +175,7 @@ const Component: React.FC<Props> = (props: Props) => {
         </MetaInfo.Default>}
       </MetaInfo>
 
-      {isSubstrateRelayChain && <MetaInfo
+      {showingOption && <MetaInfo
         hasBackgroundWrapper
         spaceSize={'xs'}
         valueColorScheme={'light'}
@@ -196,7 +193,7 @@ const Component: React.FC<Props> = (props: Props) => {
         </>
       </MetaInfo>}
 
-      {!isSubstrateRelayChain &&
+      {!showingOption &&
         <>
           {unstakings.map((item) => (
             <MetaInfo
@@ -211,7 +208,10 @@ const Component: React.FC<Props> = (props: Props) => {
                 statusName={t('Earning reward')}
               />
 
-              <MetaInfo.Default className={'__para'} label={t('Unstaked')}>
+              <MetaInfo.Default
+                className={'__para'}
+                label={t('Unstaked')}
+              >
                 <div>
                   <Number
                     className={'common-text text-light-4'}
@@ -220,6 +220,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     value={item.claimable}
                   />
 
+                  {/* chi hien thi waiting time khi UnstakingStatus = unlocking, neu waitingTime = 0 && UnstakingStatus = unlocking => soon */}
                   {!!getUnstakingPeriod(item.waitingTime) &&
                     <Number
                       className={'sm-text text-light-4'}

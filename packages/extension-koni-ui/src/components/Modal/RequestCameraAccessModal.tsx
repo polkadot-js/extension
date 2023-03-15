@@ -36,7 +36,7 @@ const Component: React.FC<Props> = (props: Props) => {
     if (isPopup) {
       windowOpen('/settings/security').catch(console.error);
     } else {
-      navigate('/settings/security');
+      navigate('/settings/security', { state: true });
     }
   }, [closeModal, isPopup, navigate]);
 

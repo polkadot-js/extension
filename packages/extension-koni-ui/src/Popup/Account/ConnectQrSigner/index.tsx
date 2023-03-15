@@ -139,6 +139,10 @@ const Component: React.FC<Props> = (props: Props) => {
     });
   }, []);
 
+  const onClose = useCallback(() => {
+    setValidateState({});
+  }, []);
+
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
@@ -200,6 +204,7 @@ const Component: React.FC<Props> = (props: Props) => {
             className={className}
             id={modalId}
             isError={!!validateState.status}
+            onClose={onClose}
             onError={onError}
             onSuccess={onSuccess}
             overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}

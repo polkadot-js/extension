@@ -4,6 +4,7 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
@@ -13,7 +14,7 @@ import { Camera, CaretRight, GlobeHemisphereEast, Key } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
@@ -52,7 +53,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
   const { t } = useTranslation();
+  const { goBack } = useDefaultNavigate();
   const navigate = useNavigate();
+  const location = useLocation();
+  const canGoBack = !!location.state;
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
@@ -61,13 +65,17 @@ const Component: React.FC<Props> = (props: Props) => {
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [loading, setLoading] = useState(false);
 
-  const goBack = useCallback(() => {
-    if (noAccount) {
-      navigate(DEFAULT_ROUTER_PATH);
+  const onBack = useCallback(() => {
+    if (canGoBack) {
+      goBack();
     } else {
-      navigate('/settings/list');
+      if (noAccount) {
+        navigate(DEFAULT_ROUTER_PATH);
+      } else {
+        navigate('/settings/list');
+      }
     }
-  }, [navigate, noAccount]);
+  }, [canGoBack, goBack, navigate, noAccount]);
 
   const updateCamera = useCallback((currentValue: boolean) => {
     return () => {
@@ -102,7 +110,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
-        onBack={goBack}
+        onBack={onBack}
         title={t('Security settings')}
       >
         <div className='body-container'>

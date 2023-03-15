@@ -149,6 +149,10 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [handleResult, loading, onSubmit]);
 
+  const onClose = useCallback(() => {
+    setValidateState({});
+  }, []);
+
   const onError = useCallback((error: string) => {
     setValidateState({
       message: error,
@@ -225,6 +229,7 @@ const Component: React.FC<Props> = (props: Props) => {
             className={className}
             id={modalId}
             isError={!!validateState.status}
+            onClose={onClose}
             onError={onError}
             onSuccess={onSuccess}
             overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}

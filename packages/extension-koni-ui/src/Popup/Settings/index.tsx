@@ -118,7 +118,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightIcon: CaretRight,
           title: 'Security settings',
           onClick: () => {
-            navigate('/settings/security');
+            navigate('/settings/security', { state: true });
           }
         },
         {

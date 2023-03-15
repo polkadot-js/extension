@@ -5,6 +5,7 @@ import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
+import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts';
 import nftParamsHandler from '@subwallet/extension-koni-ui/Popup/Transaction/helper/nftParamsHandler';
@@ -113,6 +114,9 @@ const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
     setChain(collectionInfo.chain);
     setFrom(nftItem.owner);
   }, [collectionInfo.chain, nftItem.owner, setChain, setFrom, setTransactionType]);
+
+  // Focus to the first field
+  useFocusFormItem(form, 'to');
 
   return (
     <>

@@ -4,6 +4,7 @@
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks/form/useForwardInputRef';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
@@ -24,9 +25,10 @@ interface Props extends BasicInputWrapper, ThemeProps {
 
 const modalId = 'input-account-address-modal';
 
-function Component ({ className = '', label, onChange, onBlur, placeholder, value, id = modalId, showAddressBook, showScanner }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ className = '', label, disabled, readOnly, onChange, onBlur, onFocus, placeholder, value, id = modalId, showAddressBook, showScanner }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const inputRef = useForwardInputRef(ref);
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
   const accountName = useMemo(() => {
     const account = accounts.find((acc) => acc.address.toLowerCase() === value?.toLowerCase());
@@ -64,10 +66,12 @@ function Component ({ className = '', label, onChange, onBlur, placeholder, valu
         className={CN('address-input', className, {
           '-is-valid-address': isAddress(value)
         })}
+        disabled={disabled}
         id={id}
         label={label || t('Account address')}
         onBlur={onBlur}
         onChange={_onChange}
+        onFocus={onFocus}
         placeholder={placeholder || t('Please type or paste an address')}
         prefix={
           <>
@@ -90,7 +94,8 @@ function Component ({ className = '', label, onChange, onBlur, placeholder, valu
             />
           </>
         }
-        // status={'error'}
+        readOnly={readOnly}
+        ref={inputRef}
         suffix={(
           <>
             {showAddressBook && <Button

@@ -19,5 +19,6 @@ export interface BasicInputWrapper<T = string> {
   disabled?: boolean,
   onChange?: BasicOnChangeFunction<T>,
   onBlur?: InputProps['onBlur'],
+  onFocus?: InputProps['onFocus'],
   readOnly?: boolean,
 }

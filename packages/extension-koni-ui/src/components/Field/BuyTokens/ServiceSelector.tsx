@@ -3,6 +3,7 @@
 
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, InputRef, Logo, SelectModal, Web3Block } from '@subwallet/react-ui';
 import { CheckCircle } from 'phosphor-react';
@@ -36,8 +37,10 @@ const serviceItems: ServiceItem[] = [
   }
 ];
 
-const Component = ({ className = '', disabled, id = 'service-selector', label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
+const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
+  const { className = '', disabled, id = 'service-selector', label, placeholder, value } = props;
   const { t } = useTranslation();
+  const { onSelect } = useSelectModalInputHelper(props, ref);
 
   const renderSelected = useCallback((item: ServiceItem) => {
     return (
@@ -54,10 +57,6 @@ const Component = ({ className = '', disabled, id = 'service-selector', label, o
       </div>
     );
   }, []);
-
-  const onSelectItem = useCallback((value: string) => {
-    onChange && onChange({ target: { value } });
-  }, [onChange]);
 
   const renderItem = useCallback((item: ServiceItem, selected: boolean) => {
     return (
@@ -94,7 +93,7 @@ const Component = ({ className = '', disabled, id = 'service-selector', label, o
         itemKey={'key'}
         items={serviceItems}
         label={label}
-        onSelect={onSelectItem}
+        onSelect={onSelect}
         placeholder={placeholder || t('Select service')}
         renderItem={renderItem}
         renderSelected={renderSelected}

@@ -1,10 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
+import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
+import { useEffect } from 'react';
 
-const useFocusFormItem = (formName: string, fieldName: string, active = true, timeOut = 10) => {
-  useFocusById(`${formName}_${fieldName}`, active, timeOut);
+const useFocusFormItem = (form: FormInstance, fieldName: string, active = true) => {
+  useEffect(() => {
+    if (active) {
+      const elem = form.getFieldInstance(fieldName) as HTMLInputElement;
+
+      elem && elem.focus && elem.focus();
+    }
+  }, [active, fieldName, form]);
 };
 
 export default useFocusFormItem;

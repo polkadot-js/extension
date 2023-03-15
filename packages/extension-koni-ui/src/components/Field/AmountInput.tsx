@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
+import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks/form/useForwardInputRef';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Input, InputRef } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -42,6 +43,7 @@ export const getOutputValuesFromString: (input: string, power: number) => string
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { className, decimals, disabled, maxValue, onChange } = props;
   const [inputValue, setInputValue] = useState('');
+  const inputRef = useForwardInputRef(ref);
 
   const { t } = useTranslation();
 
@@ -89,9 +91,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     <Input
       className={className}
       disabled={disabled}
+      id={props.id}
+      label={props.label}
       maxLength={5}
+      onBlur={props.onBlur}
       onChange={onChangeInput}
-      placeholder={t('Amount')}
+      placeholder={props.placeholder || t('Amount')}
+      readOnly={props.readOnly}
+      ref={inputRef}
       suffix={suffix()}
       type={'number'}
       value={inputValue}

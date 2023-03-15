@@ -4,6 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Icon, InputRef, ModalContext, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { CheckCircle, PlusCircle, ShareNetwork } from 'phosphor-react';
@@ -12,8 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps, BasicInputWrapper {
-  chainInfo: _ChainInfo,
-  disabled: boolean
+  chainInfo: _ChainInfo
 }
 
 interface ProviderItemType {
@@ -21,11 +21,13 @@ interface ProviderItemType {
   label: string
 }
 
-const Component = ({ chainInfo, className = '', disabled, id = 'provider-selector', label, onChange, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
+const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
+  const { chainInfo, className = '', disabled, id = 'provider-selector', label, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
   const modalContext = useContext(ModalContext);
+  const { onSelect } = useSelectModalInputHelper(props, ref);
 
   const providerValueList = useCallback(() => {
     return Object.entries(chainInfo.providers).map(([key, provider]) => {
@@ -35,10 +37,6 @@ const Component = ({ chainInfo, className = '', disabled, id = 'provider-selecto
       } as ProviderItemType;
     });
   }, [chainInfo.providers]);
-
-  const _onSelectItem = useCallback((value: string) => {
-    onChange && onChange({ target: { value } });
-  }, [onChange]);
 
   const renderItem = useCallback((item: ProviderItemType, selected: boolean) => {
     return (
@@ -93,31 +91,29 @@ const Component = ({ chainInfo, className = '', disabled, id = 'provider-selecto
   }, [handleAddProvider, t, token.colorTextLight1]);
 
   return (
-    <>
-      <SelectModal
-        className={`${className} provider_selector__modal`}
-        disabled={disabled}
-        footer={footerButton()}
-        id={id}
-        inputClassName={`${className} provider_selector__input`}
-        itemKey={'value'}
-        items={providerValueList()}
-        label={label}
-        onSelect={_onSelectItem}
-        placeholder={t('Select provider')}
-        prefix={<Icon
-          customSize={'24px'}
-          iconColor={token['gray-4']}
-          phosphorIcon={ShareNetwork}
-          type={'phosphor'}
-          weight={'bold'}
-        />}
-        renderItem={renderItem}
-        renderSelected={renderSelectedProvider}
-        selected={value || ''}
-        title={t('Select provider')}
-      />
-    </>
+    <SelectModal
+      className={`${className} provider_selector__modal`}
+      disabled={disabled}
+      footer={footerButton()}
+      id={id}
+      inputClassName={`${className} provider_selector__input`}
+      itemKey={'value'}
+      items={providerValueList()}
+      label={label}
+      onSelect={onSelect}
+      placeholder={t('Select provider')}
+      prefix={<Icon
+        customSize={'24px'}
+        iconColor={token['gray-4']}
+        phosphorIcon={ShareNetwork}
+        type={'phosphor'}
+        weight={'bold'}
+      />}
+      renderItem={renderItem}
+      renderSelected={renderSelectedProvider}
+      selected={value || ''}
+      title={t('Select provider')}
+    />
   );
 };
 

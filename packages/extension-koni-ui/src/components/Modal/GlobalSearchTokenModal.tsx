@@ -5,7 +5,6 @@ import { TokenBalanceSelectionItem } from '@subwallet/extension-koni-ui/componen
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { AccountBalanceHookType, TokenGroupHookType } from '@subwallet/extension-koni-ui/types/hook';
-import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { SwList, SwModal } from '@subwallet/react-ui';
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -40,10 +39,7 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
     return () => {
-      navigate('/home/token-detail-list', { state: {
-        symbol: item.symbol,
-        tokenSlug: item.slug
-      } as TokenDetailParam });
+      navigate(`/home/token-detail-list/${item.slug}`);
       onCancel();
     };
   }, [navigate, onCancel]);

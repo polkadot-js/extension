@@ -12,7 +12,6 @@ import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Upper
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import classNames from 'classnames';
@@ -109,10 +108,7 @@ function Component (): React.ReactElement {
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
     return () => {
-      navigate('/home/token-detail-list', { state: {
-        symbol: item.symbol,
-        tokenGroup: item.slug
-      } as TokenDetailParam });
+      navigate(`/home/token-detail-list/${item.slug}`);
     };
   }, [navigate]);
 

@@ -1423,7 +1423,8 @@ export interface NominatorMetadata {
   address: string,
   activeStake: string,
   nominations: NominationInfo[],
-  unstakings: UnstakingInfo[]
+  unstakings: UnstakingInfo[],
+  isBondedBefore?: boolean
 }
 
 export interface ValidatorInfo {

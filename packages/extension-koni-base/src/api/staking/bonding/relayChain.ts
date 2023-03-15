@@ -87,15 +87,17 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
   const chain = chainInfo.slug;
   const chainApi = await substrateApi.isReady;
 
-  const [_ledger, _nominations, _currentEra] = await Promise.all([
+  const [_ledger, _nominations, _currentEra, _bonded] = await Promise.all([
     chainApi.api.query.staking.ledger(address),
     chainApi.api.query.staking.nominators(address),
-    chainApi.api.query.staking.currentEra()
+    chainApi.api.query.staking.currentEra(),
+    chainApi.api.query.staking.bonded(address)
   ]);
 
   const ledger = _ledger.toJSON() as unknown as PalletStakingStakingLedger;
   const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
   const currentEra = _currentEra.toString();
+  const bonded = _bonded.toHuman();
 
   if (!ledger) {
     return;
@@ -141,7 +143,8 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
     activeStake,
 
     nominations: nominationList,
-    unstakings: unstakingList
+    unstakings: unstakingList,
+    isBondedBefore: bonded !== null
   } as NominatorMetadata;
 }
 
@@ -345,83 +348,35 @@ export async function getRelayPoolsInfo (chain: string, substrateApi: _Substrate
   return nominationPools;
 }
 
-export async function getRelayBondingTxInfo (substrateApi: _SubstrateApi, controllerId: string, amount: BN, validators: string[], isBondedBefore: boolean, bondDest = 'Staked') {
-  const apiPromise = await substrateApi.isReady;
-
-  if (!isBondedBefore) {
-    const bondTx = apiPromise.api.tx.staking.bond(controllerId, amount, bondDest);
-    const nominateTx = apiPromise.api.tx.staking.nominate(validators);
-    const extrinsic = apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);
-
-    return extrinsic.paymentInfo(controllerId);
-  } else {
-    const bondTx = apiPromise.api.tx.staking.bondExtra(amount);
-    const nominateTx = apiPromise.api.tx.staking.nominate(validators);
-    const extrinsic = apiPromise.api.tx.utility.batchAll([bondTx, nominateTx]);
-
-    return extrinsic.paymentInfo(controllerId);
-  }
-}
-
-export async function handleRelayBondingTxInfo (chainInfo: _ChainInfo, amount: number, targetValidators: string[], isBondedBefore: boolean, networkKey: string, nominatorAddress: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-
-  try {
-    const parsedAmount = amount * (10 ** decimals);
-    const binaryAmount = new BN(parsedAmount.toString());
-    const [txInfo, balance] = await Promise.all([
-      getRelayBondingTxInfo(substrateApiMap[networkKey], nominatorAddress, binaryAmount, targetValidators, isBondedBefore),
-      getFreeBalance(networkKey, nominatorAddress, substrateApiMap, evmApiMap)
-    ]);
-
-    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
-    const rawFee = parseRawNumber(txInfo.partialFee.toString());
-    const binaryBalance = new BN(balance);
-
-    const sumAmount = txInfo.partialFee.add(binaryAmount);
-    const balanceError = sumAmount.gt(binaryBalance);
-
-    return {
-      rawFee,
-      fee: feeString,
-      balanceError
-    } as BasicTxInfo;
-  } catch (e) {
-    return {
-      fee: `0.0000 ${symbol}`,
-      balanceError: false
-    };
-  }
-}
-
-export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, controllerId: string, amount: number, validators: string[], isBondedBefore: boolean, chainInfo: _ChainInfo, bondDest = 'Staked') {
+export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, targetValidators: ValidatorInfo[], nominatorMetadata: NominatorMetadata, chainInfo: _ChainInfo, bondDest = 'Staked') {
   const chainApi = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-  const parsedAmount = amount * (10 ** decimals);
-  const binaryAmount = new BN(parsedAmount.toString());
+  const binaryAmount = new BN(amount);
 
   let bondTx;
-  const nominateTx = chainApi.api.tx.staking.nominate(validators);
+  let nominateTx;
 
-  if (!isBondedBefore) {
-    bondTx = chainApi.api.tx.staking.bond(controllerId, binaryAmount, bondDest);
+  if (!nominatorMetadata.isBondedBefore) { // first time
+    bondTx = chainApi.api.tx.staking.bond(nominatorMetadata.address, binaryAmount, bondDest);
+    nominateTx = chainApi.api.tx.staking.nominate(targetValidators);
+
+    return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
   } else {
-    bondTx = chainApi.api.tx.staking.bondExtra(binaryAmount);
+    if (binaryAmount.gt(BN_ZERO)) {
+      bondTx = chainApi.api.tx.staking.bondExtra(binaryAmount);
+    }
+
+    if (nominatorMetadata.isBondedBefore && targetValidators.length > 0) {
+      nominateTx = chainApi.api.tx.staking.nominate(targetValidators);
+    }
+  }
+
+  if (bondTx && !nominateTx) {
+    return bondTx;
+  } else if (nominateTx && !bondTx) {
+    return nominateTx;
   }
 
   return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
-}
-
-export function getTargetValidators (bondedValidators: string[], selectedValidator: string) {
-  if (bondedValidators.length === 0) {
-    return [selectedValidator];
-  } else {
-    if (bondedValidators.includes(selectedValidator)) {
-      return bondedValidators;
-    } else {
-      return [selectedValidator, ...bondedValidators];
-    }
-  }
 }
 
 export async function getRelayUnbondingTxInfo (substrateApi: _SubstrateApi, amount: BN, address: string) {

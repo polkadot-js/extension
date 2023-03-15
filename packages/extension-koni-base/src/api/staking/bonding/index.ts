@@ -8,7 +8,7 @@ import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/
 import { getAmplitudeBondingExtrinsic, getAmplitudeClaimRewardExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeNominatorMetadata, getAmplitudeStakingMetadata, getAmplitudeUnbondingExtrinsic, getAmplitudeWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding/amplitude';
 import { getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarNominatorMetadata, getAstarStakingMetadata, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding/astar';
 import { getParaBondingExtrinsic, getParachainCollatorsInfo, getParaChainNominatorMetadata, getParaChainStakingMetadata, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding/paraChain';
-import { getPoolingClaimRewardExtrinsic, getRelayBondingExtrinsic, getRelayChainNominatorMetadata, getRelayChainStakingMetadata, getRelayPoolsInfo, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, getTargetValidators } from '@subwallet/extension-koni-base/api/staking/bonding/relayChain';
+import { getPoolingClaimRewardExtrinsic, getRelayBondingExtrinsic, getRelayChainNominatorMetadata, getRelayChainStakingMetadata, getRelayPoolsInfo, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding/relayChain';
 
 // all addresses must be converted to its chain format
 
@@ -52,18 +52,16 @@ export async function getNominationPoolsInfo (chain: string, substrateApi: _Subs
   return getRelayPoolsInfo(chain, substrateApi);
 }
 
-export async function getBondingExtrinsic (chainInfo: _ChainInfo, networkKey: string, amount: number, bondedValidators: string[], validatorInfo: ValidatorInfo, isBondedBefore: boolean, nominatorAddress: string, substrateApi: _SubstrateApi) {
-  if (_STAKING_CHAIN_GROUP.para.includes(networkKey)) {
-    return getParaBondingExtrinsic(nominatorAddress, chainInfo, substrateApi, amount, validatorInfo, bondedValidators.length);
-  } else if (_STAKING_CHAIN_GROUP.astar.includes(networkKey)) {
-    return getAstarBondingExtrinsic(substrateApi, chainInfo, amount, networkKey, nominatorAddress, validatorInfo);
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(networkKey)) {
-    return getAmplitudeBondingExtrinsic(nominatorAddress, chainInfo, substrateApi, amount, validatorInfo);
+export async function getBondingExtrinsic (chainInfo: _ChainInfo, chain: string, amount: string, nominatorMetadata: NominatorMetadata, selectedValidators: ValidatorInfo[], substrateApi: _SubstrateApi) {
+  if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+    return getParaBondingExtrinsic(nominatorAddress, chainInfo, substrateApi, amount, selectedValidators, nominatorMetadata);
+  } else if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+    return getAstarBondingExtrinsic(substrateApi, chainInfo, amount, chain, nominatorAddress, selectedValidators);
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
+    return getAmplitudeBondingExtrinsic(nominatorAddress, chainInfo, substrateApi, amount, selectedValidators);
   }
 
-  const targetValidators: string[] = getTargetValidators(bondedValidators, validatorInfo.address);
-
-  return getRelayBondingExtrinsic(substrateApi, nominatorAddress, amount, targetValidators, isBondedBefore, chainInfo);
+  return getRelayBondingExtrinsic(substrateApi, amount, selectedValidators, nominatorMetadata, chainInfo);
 }
 
 export async function getUnbondingExtrinsic (address: string, amount: number, networkKey: string, chainInfo: _ChainInfo, substrateApi: _SubstrateApi, validatorAddress?: string, unstakeAll?: boolean) {

@@ -1,25 +1,23 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import CustomizeModalContent from '@subwallet/extension-koni-ui/components/Modal/CustomizeModalContent';
+import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateShowZeroBalanceState } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
+import { BackgroundIcon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
 import { Wallet } from 'phosphor-react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 
-const CustomizeModalContent = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/CustomizeModalContent'));
+type Props = ThemeProps;
 
-type Props = ThemeProps & {
-  id: string,
-  onCancel: () => void,
-}
-
-function Component ({ className = '', id, onCancel }: Props): React.ReactElement<Props> {
+function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { inactiveModal } = useContext(ModalContext);
   const { token } = useTheme() as Theme;
   const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
 
@@ -27,10 +25,14 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
     updateShowZeroBalanceState(checked);
   }, []);
 
+  const onCancel = useCallback(() => {
+    inactiveModal(CUSTOMIZE_MODAL);
+  }, [inactiveModal]);
+
   return (
     <SwModal
       className={className}
-      id={id}
+      id={CUSTOMIZE_MODAL}
       onCancel={onCancel}
       title={t('Customization')}
     >

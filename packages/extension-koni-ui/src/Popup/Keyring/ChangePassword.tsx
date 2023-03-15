@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
@@ -10,7 +11,7 @@ import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messag
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Form, Icon, Input, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { FloppyDiskBack, Info, ShieldCheck } from 'phosphor-react';
+import { FloppyDiskBack, ShieldCheck } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -110,12 +111,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <InfoIcon />
           }
         ]}
         title={t('Change password')}

@@ -8,6 +8,7 @@ import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account
 import AccountWithNameSkeleton from '@subwallet/extension-koni-ui/components/Account/Item/AccountWithNameSkeleton';
 import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/useGetSupportedLedger';
@@ -19,7 +20,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
 import { BackgroundIcon, Button, Icon, Image, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, CircleNotch, Info, Swatches } from 'phosphor-react';
+import { CheckCircle, CircleNotch, Swatches } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -243,12 +244,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <InfoIcon />
           }
         ]}
         title={t('Connect Ledger device')}

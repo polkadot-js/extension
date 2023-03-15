@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
@@ -15,7 +16,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NewSeedPhraseState } from '@subwallet/extension-koni-ui/types/account';
 import { Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, Info } from 'phosphor-react';
+import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -104,12 +105,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <InfoIcon />
           }
         ]}
         title={t<string>('Your recovery phrase')}

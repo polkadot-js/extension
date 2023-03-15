@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
@@ -13,7 +14,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { Form, Icon, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { FileArrowDown, Info } from 'phosphor-react';
+import { FileArrowDown } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -146,12 +147,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <InfoIcon />
           }
         ]}
         title={t<string>('Import via Private Key')}

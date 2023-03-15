@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
@@ -18,7 +19,7 @@ import { copyToClipboard } from '@subwallet/extension-koni-ui/util/dom';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/util/form';
 import { BackgroundIcon, Button, Field, Form, Icon, Input, QRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, Info, QrCode, ShareNetwork, Swatches, TrashSimple, User } from 'phosphor-react';
+import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, Swatches, TrashSimple, User } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -202,12 +203,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <Layout.WithSubHeaderOnly
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <InfoIcon />
           }
         ]}
         title={t('Account detail')}

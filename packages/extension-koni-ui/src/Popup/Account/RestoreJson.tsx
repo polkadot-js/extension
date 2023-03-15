@@ -4,6 +4,7 @@
 import { ResponseJsonGetAccountInfo } from '@subwallet/extension-base/background/types';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -19,7 +20,7 @@ import { UploadChangeParam, UploadFile } from '@subwallet/react-ui/es/upload/int
 import AccountCard from '@subwallet/react-ui/es/web3-block/account-card';
 import { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import CN from 'classnames';
-import { DotsThree, FileArrowDown, Info } from 'phosphor-react';
+import { DotsThree, FileArrowDown } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -258,12 +259,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <InfoIcon />
           }
         ]}
         title={t<string>('Import from Json')}

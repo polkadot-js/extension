@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
@@ -15,7 +16,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { Form, Icon, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { FileArrowDown, Info } from 'phosphor-react';
+import { FileArrowDown } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -144,12 +145,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <InfoIcon />
           }
         ]}
         title={t<string>('Import from seed phrase')}

@@ -3,6 +3,7 @@
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
@@ -14,7 +15,7 @@ import { convertFieldToObject } from '@subwallet/extension-koni-ui/util/form';
 import { readOnlyScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
 import { Form, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Eye, Info } from 'phosphor-react';
+import { Eye } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -146,12 +147,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <InfoIcon />
           }
         ]}
         title={t<string>('Attach watch-only account')}

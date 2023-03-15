@@ -5,6 +5,7 @@ import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { changeAuthorizationBlock, changeAuthorizationPerSite } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -12,8 +13,9 @@ import { findAccountByAddress } from '@subwallet/extension-koni-ui/util';
 import { accountCanSign, getSignMode } from '@subwallet/extension-koni-ui/util/account';
 import { Button, Icon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, GlobeHemisphereWest, Info, ShieldCheck, ShieldSlash, XCircle } from 'phosphor-react';
+import { CheckCircle, GlobeHemisphereWest, ShieldCheck, ShieldSlash, XCircle } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 
@@ -34,6 +36,8 @@ type ConnectIcon = {
 };
 
 function Component ({ authInfo, className = '', id, isBlocked = true, isNotConnected = false, onCancel, url }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
   const [allowedMap, setAllowedMap] = useState<Record<string, boolean>>(authInfo?.isAllowedMap || {});
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
@@ -307,13 +311,9 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
       id={id}
       onCancel={onCancel}
       rightIconProps={{
-        icon: (
-          <Icon
-            phosphorIcon={Info}
-          />
-        )
+        icon: <InfoIcon />
       }}
-      title={'Connect website'} // todo: i18n this
+      title={t('Connect website')}
     >
       <ConfirmationGeneralInfo
         request={{

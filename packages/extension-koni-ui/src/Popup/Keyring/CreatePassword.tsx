@@ -3,6 +3,7 @@
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
@@ -14,7 +15,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { Form, Icon, Input, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CaretLeft, CheckCircle, Info, ShieldPlus } from 'phosphor-react';
+import { CaretLeft, CheckCircle, ShieldPlus } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -135,12 +136,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            ),
+            icon: <InfoIcon />,
             onClick: openModal
           }
         ]}
@@ -216,12 +212,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             id={modalId}
             onCancel={closeModal}
             rightIconProps={{
-              icon: (
-                <Icon
-                  phosphorIcon={Info}
-                  size='sm'
-                />
-              )
+              icon: <InfoIcon />
             }}
             title={t('Instructions')}
             wrapClassName={className}

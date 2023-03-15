@@ -117,11 +117,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const subHeaderButton: ButtonProps[] = useMemo(() => {
     return [
       {
-        icon: <Icon
-          phosphorIcon={Plus}
-          size='sm'
-          type='phosphor'
-        />,
+        icon: (
+          <Icon
+            phosphorIcon={Plus}
+            size='sm'
+            type='phosphor'
+          />
+        ),
         onClick: () => {
           navigate('/settings/tokens/import-token', { state: { isExternalRequest: false } });
         }
@@ -154,13 +156,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t<string>('Manage tokens')}
       >
         <SwList.Section
-          actionBtnIcon={<Icon
-            customSize={'20px'}
-            phosphorIcon={FadersHorizontal}
-            size='sm'
-            type='phosphor'
-            weight={'fill'}
-          />}
+          actionBtnIcon={(
+            <Icon
+              customSize={'20px'}
+              phosphorIcon={FadersHorizontal}
+              size='sm'
+              type='phosphor'
+              weight={'fill'}
+            />
+          )}
           className={'manage_tokens__container'}
           enableSearchInput={true}
           gridGap={'14px'}

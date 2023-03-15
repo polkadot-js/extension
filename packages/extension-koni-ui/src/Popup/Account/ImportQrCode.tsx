@@ -3,6 +3,7 @@
 
 import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
 import { Layout } from '@subwallet/extension-koni-ui/components';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
@@ -17,7 +18,7 @@ import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { importQrScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
 import { Form, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Info, QrCode, Scan } from 'phosphor-react';
+import { QrCode, Scan } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -160,12 +161,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <InfoIcon />
           }
         ]}
         title={t('Import your wallet by QR')}

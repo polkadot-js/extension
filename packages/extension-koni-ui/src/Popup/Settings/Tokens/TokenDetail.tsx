@@ -168,13 +168,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               _isSmartContractToken(tokenInfo) && <Field
                 content={contractAddressInfo()}
                 label={t<string>('Contract address')}
+                placeholder={t<string>('Contract address')}
                 prefix={contractAddressIcon()}
                 suffix={contractAddressSuffix()}
               />
             }
             <Field
               content={originChainInfo.name}
-              label={t<string>('Chain')}
+              label={t<string>('Network')}
+              placeholder={t<string>('Network')}
               prefix={<Logo
                 network={originChainInfo.slug}
                 size={20}

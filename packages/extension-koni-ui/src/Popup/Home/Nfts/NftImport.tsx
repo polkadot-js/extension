@@ -4,6 +4,7 @@
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getNftTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
+import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -14,10 +15,9 @@ import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/sc
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
-import { Form, Icon, Image, Input, NetworkItem, SelectModal } from '@subwallet/react-ui';
+import { BackgroundIcon, Form, Icon, Image, Input, NetworkItem, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
-import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import { CheckCircle, QrCode } from 'phosphor-react';
+import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -173,7 +173,30 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const renderNftTypeOption = useCallback((nftType: NftTypeOption, selected: boolean) => {
     return (
-      <div>{nftType.label} {selected}</div>
+      <SettingItem
+        className='nft-type-item'
+        leftItemIcon={(
+          <BackgroundIcon
+            backgroundColor='var(--nft-type-icon-bg-color)'
+            iconColor='var(--nft-type-icon-color)'
+            phosphorIcon={Coin}
+            size='sm'
+            weight='fill'
+          />
+        )}
+        name={nftType.label}
+        rightItem={
+          selected &&
+          (
+            <Icon
+              iconColor='var(--nft-selected-icon-color)'
+              phosphorIcon={CheckCircle}
+              size='sm'
+              weight='fill'
+            />
+          )
+        }
+      />
     );
   }, []);
 
@@ -186,42 +209,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const renderChainSelected = useCallback((chainInfo: _ChainInfo) => {
     return (
       <div className={'nft_import__selected_option'}>{chainInfo.name}</div>
-    );
-  }, []);
-
-  const contractAddressIcon = useCallback(() => {
-    const contractAddress = formRef.current?.getFieldValue('contractAddress') as string;
-    const theme = isEthereumAddress(contractAddress) ? 'ethereum' : 'polkadot';
-
-    if (contractAddress) {
-      return (
-        <SwAvatar
-          identPrefix={42}
-          size={token.fontSizeXL}
-          theme={theme}
-          value={contractAddress}
-        />
-      );
-    }
-
-    return <SwAvatar
-      identPrefix={42}
-      size={token.fontSizeXL}
-      theme={'beachball'}
-      value={''}
-    />;
-  }, [token.fontSizeXL]);
-
-  const contractAddressQrIcon = useCallback(() => {
-    return (
-      <div className={'nft_import__Qr'}>
-        <Icon
-          customSize={'20px'}
-          phosphorIcon={QrCode}
-          type='phosphor'
-          weight={'light'}
-        />
-      </div>
     );
   }, []);
 
@@ -324,28 +311,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       className={className}
       resolve={dataContext.awaitStores(['nft'])}
     >
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={goBack}
         rightFooterButton={{
-          block: true,
           disabled: isSubmitDisabled(),
           icon: (
             <Icon
-              phosphorIcon={CheckCircle}
-              type='phosphor'
-              weight={'fill'}
+              phosphorIcon={PlusCircle}
+              weight='fill'
             />
           ),
           loading: loading,
           onClick: onSubmit,
-          children: 'Save'
+          children: t('Import')
         }}
-        showBackButton={true}
-        showSubHeader={true}
-        showTabBar={false}
-        subHeaderBackground={'transparent'}
-        subHeaderCenter={true}
-        subHeaderPaddingVertical={true}
         title={t<string>('Import NFT')}
       >
         <div className={'nft_import__container'}>
@@ -367,16 +346,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 id='import-nft-select-chain'
                 itemKey={'slug'}
                 items={Object.values(chainInfoMap)}
-                label={t<string>('Chain')}
+                label={t<string>('Network')}
                 onSelect={onChangeChain}
-                placeholder={t('Select chain')}
+                placeholder={t('Select network')}
                 prefix={selectedChain !== '' && originChainLogo()}
                 renderItem={renderChainOption}
                 renderSelected={renderChainSelected}
                 searchFunction={searchChain}
-                searchPlaceholder={'Search chain'}
+                searchPlaceholder={'Search network'}
                 searchableMinCharactersCount={2}
                 selected={selectedChain}
+                title={t('Select network')}
               />
             </Form.Item>
 
@@ -395,6 +375,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 renderItem={renderNftTypeOption}
                 renderSelected={renderNftTypeSelected}
                 selected={selectedNftType}
+                title={t('Select NFT type')}
               />
             </Form.Item>
 
@@ -402,11 +383,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               name='contractAddress'
               rules={[{ validator: contractAddressValidator }]}
             >
-              <Input
+              <AddressInput
                 disabled={selectedNftType === ''}
                 label={t<string>('NFT contract address')}
-                prefix={contractAddressIcon()}
-                suffix={contractAddressQrIcon()}
+                showScanner={true}
               />
             </Form.Item>
 
@@ -426,7 +406,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             />
           </Form>
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }
@@ -453,6 +433,16 @@ const NftImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.nft_import__selected_option': {
       color: token.colorTextHeading
+    },
+
+    '.nft-type-item': {
+      '--nft-type-icon-bg-color': token['orange-6'],
+      '--nft-type-icon-color': token.colorWhite,
+      '--nft-selected-icon-color': token.colorSuccess,
+
+      '.ant-web3-block-right-item': {
+        marginRight: 0
+      }
     }
   });
 });

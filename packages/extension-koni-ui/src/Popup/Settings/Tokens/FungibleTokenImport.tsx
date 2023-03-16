@@ -5,7 +5,6 @@ import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -282,8 +281,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Icon
                 iconColor='var(--token-selected-icon-color)'
                 phosphorIcon={CheckCircle}
-                size={'sm'}
-                weight={'fill'}
+                size='sm'
+                weight='fill'
               />
             )
         }
@@ -332,12 +331,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onClick: onSubmit,
           children: t('Import')
         }}
-        subHeaderIcons={[
-          {
-            icon: <InfoIcon />
-            // onClick: goHome
-          }
-        ]}
         title={t<string>('Import token')}
       >
         <div className={'import_token__container'}>
@@ -397,7 +390,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             >
               <AddressInput
                 disabled={selectedTokenType === ''}
-                label={t('Token contract address')}
+                label={t('Contract address')}
                 showScanner={true}
               />
             </Form.Item>

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const TOKENS_PER_PAGE = 10;
 
-export function useLazyList<T> (items: T[], forceReload = false) {
+export function useLazyList<T> (items: T[], forceReload = true) {
   const [lazyItems, setLazyItems] = useState<T[]>([]);
   const [paging, setPaging] = useState(TOKENS_PER_PAGE);
 

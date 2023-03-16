@@ -84,7 +84,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const allFungibleTokens = useMemo(() => {
     return filterFungibleTokens(assetRegistry, assetSettingMap, selectedFilters);
   }, [assetRegistry, assetSettingMap, selectedFilters]);
-  const { hasMore, lazyItems, loadMoreItems } = useLazyList(allFungibleTokens);
+  const { hasMore, lazyItems, loadMoreItems } = useLazyList(allFungibleTokens, false);
 
   const searchToken = useCallback((token: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();

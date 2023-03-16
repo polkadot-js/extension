@@ -728,7 +728,7 @@ export async function subscribeStakingNominatorMetadata (callback: (data: Nomina
 }
 
 export async function submitBonding (request: RequestBondingSubmit): Promise<SWTransactionResponse> {
-  return sendMessage('pri(bonding.submitTransaction)', request);
+  return sendMessage('pri(bonding.submitBondingTransaction)', request);
 }
 
 export async function submitUnbonding (request: RequestUnbondingSubmit): Promise<SWTransactionResponse> {

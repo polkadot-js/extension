@@ -1423,7 +1423,8 @@ export interface NominatorMetadata {
   address: string,
   activeStake: string,
   nominations: NominationInfo[],
-  unstakings: UnstakingInfo[]
+  unstakings: UnstakingInfo[],
+  isBondedBefore?: boolean
 }
 
 export interface ValidatorInfo {
@@ -1474,12 +1475,10 @@ export interface ChainBondingInfo {
 }
 
 export interface BondingSubmitParams extends BaseRequestSign {
-  networkKey: string,
-  nominatorAddress: string,
-  amount: number,
-  validatorInfo: ValidatorInfo,
-  isBondedBefore: boolean,
-  bondedValidators: string[], // already delegated validators
+  chain: string,
+  nominatorMetadata: NominatorMetadata,
+  amount: string,
+  selectedValidators: ValidatorInfo[],
   lockPeriod?: number // in month
 }
 
@@ -1488,12 +1487,11 @@ export type RequestBondingSubmit = InternalRequestSign<BondingSubmitParams>;
 // UnBonding
 
 export interface UnbondingSubmitParams extends BaseRequestSign {
-  amount: number,
-  networkKey: string,
-  address: string,
+  amount: string,
+  chain: string,
+  nominatorMetadata: NominatorMetadata,
   // for some chains
-  validatorAddress?: string,
-  unstakeAll?: boolean
+  validatorAddress?: string
 }
 
 export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
@@ -1501,10 +1499,9 @@ export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
 // Withdraw
 
 export interface StakeWithdrawalParams extends BaseRequestSign {
-  address: string,
-  networkKey: string,
-  validatorAddress?: string,
-  action?: string
+  nominatorMetadata: NominatorMetadata,
+  chain: string,
+  validatorAddress?: string
 }
 
 export type RequestStakeWithdrawal = InternalRequestSign<StakeWithdrawalParams>;
@@ -1709,7 +1706,7 @@ export interface KoniRequestSignatures {
   'pri(staking.submitClaimReward)': [RequestStakeClaimReward, SWTransactionResponse];
   'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, SWTransactionResponse];
   'pri(unbonding.submitTransaction)': [RequestUnbondingSubmit, SWTransactionResponse];
-  'pri(bonding.submitTransaction)': [RequestBondingSubmit, SWTransactionResponse];
+  'pri(bonding.submitBondingTransaction)': [RequestBondingSubmit, SWTransactionResponse];
   'pri(bonding.subscribeChainStakingMetadata)': [null, ChainStakingMetadata[], ChainStakingMetadata[]];
   'pri(bonding.subscribeNominatorMetadata)': [null, NominatorMetadata[], NominatorMetadata[]];
   'pri(bonding.getBondingOptions)': [BondingOptionParams, ValidatorInfo[]];

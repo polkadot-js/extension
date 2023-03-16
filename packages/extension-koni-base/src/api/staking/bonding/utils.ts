@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
-import { parseRawNumber } from '@subwallet/extension-base/utils';
+import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
-import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND } from '@polkadot/util';
+import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO } from '@polkadot/util';
 
 export const REVOKE_ACTION = 'revoke';
 export const BOND_LESS_ACTION = 'bondLess';
@@ -255,4 +256,39 @@ export function isShowNominationByValidator (chain: string): 'showByValue' | 'sh
   }
 
   return 'showByValue';
+}
+
+export function getBondedValidators (nominations: NominationInfo[]) {
+  const bondedValidators: string[] = [];
+  let nominationCount = 0;
+
+  for (const nomination of nominations) {
+    const bnActiveStake = new BN(nomination.activeStake);
+
+    if (bnActiveStake.gt(BN_ZERO)) {
+      nominationCount += 1;
+      bondedValidators.push(reformatAddress(nomination.validatorAddress, 0));
+    }
+  }
+
+  return {
+    nominationCount,
+    bondedValidators
+  };
+}
+
+export function isUnstakeAll (selectedValidator: string, nominations: NominationInfo[], unstakeAmount: string) {
+  let isUnstakeAll = false;
+
+  for (const nomination of nominations) {
+    if (nomination.validatorAddress === selectedValidator) {
+      if (unstakeAmount === nomination.activeStake) {
+        isUnstakeAll = true;
+      }
+
+      break;
+    }
+  }
+
+  return isUnstakeAll;
 }

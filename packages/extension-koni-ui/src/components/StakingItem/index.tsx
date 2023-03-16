@@ -51,20 +51,27 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
       convertedStakingValue={convertedBalanceValue}
       decimal={0}
       displayToken={staking.nativeToken}
+      networkKey={staking.chain}
       onClickRightIcon={_onClickRightIcon}
+      // eslint-disable-next-line react/jsx-no-bind
+      onPressItem={() => onClickItem(stakingData)}
       stakingNetwork={staking.name}
       stakingType={getStakingTypeTag(staking.type)}
       stakingValue={balanceValue}
       symbol={staking.nativeToken}
-      networkKey={staking.chain}
-      // eslint-disable-next-line react/jsx-no-bind
-      onPressItem={() => onClickItem(stakingData)}
     />
   );
 };
 
 const SwStakingItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.ant-staking-item-name': {
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      maxWidth: '120px'
+    },
+
     '.ant-staking-item-right-icon': {
       display: 'none'
     },

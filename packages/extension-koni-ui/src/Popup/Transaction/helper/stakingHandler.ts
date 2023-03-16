@@ -8,9 +8,19 @@ export function getUnstakingPeriod (unstakingPeriod?: number) {
     if (days < 1) {
       return 'Soon';
     } else {
-      return `${days}`;
+      return `${days} days`;
     }
   }
 
   return '';
+}
+
+export function getWaitingTime (waitingTime?: number, untilWithdraw?: boolean) {
+  const days = waitingTime ? Number(waitingTime / 24).toFixed(2) : 0;
+
+  if (days < 1) {
+    return 'Soon';
+  } else {
+    return `${days} ${untilWithdraw ? 'until withdraw' : 'next days'}`;
+  }
 }

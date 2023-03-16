@@ -116,6 +116,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   ];
 
+  console.log('selectedItem', selectedItem);
+
   const renderItem = useCallback((item: StakingDataType) => {
     return (
       <SwStakingItem
@@ -207,6 +209,14 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
+
+    '.ant-sw-screen-layout-body': {
+      display: 'flex'
+    },
+
+    '.ant-sw-list-section': {
+      flex: 1
+    },
 
     '.staking__filter_option': {
       width: '100%'

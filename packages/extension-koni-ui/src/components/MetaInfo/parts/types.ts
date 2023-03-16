@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React from 'react';
 
 export interface InfoItemBase extends ThemeProps {
-  label: string,
+  label?: React.ReactNode,
   valueColorSchema?: 'default' | 'light' | 'gray' | 'success' | 'gold' | 'danger'
 }

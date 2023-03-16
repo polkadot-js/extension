@@ -7,7 +7,7 @@ import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
-import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import { MORE_ACTION_MODAL, StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
@@ -17,6 +17,7 @@ import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { ArrowCircleUpRight, CheckCircle, DotsThree } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -35,6 +36,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const { activeStake, address, chain, nominations, type, unstakings } = nominatorMetadata;
   const [seeMore, setSeeMore] = useState<boolean>(false);
   const { token } = useTheme() as Theme;
+  const navigate = useNavigate();
 
   const showingOption = isShowNominationByValidator(chain);
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -52,6 +54,15 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
     nominated: t('Nominated'),
     pooled: t('Pooled')
   };
+  const onClickStakeMoreBtn = useCallback(() => {
+    inactiveModal(STAKING_DETAIL_MODAL_ID);
+    setTimeout(() => navigate('/transaction/stake', { state: { chainStakingMetadata, nominatorMetadata, hideTabList: true } as StakingDataOption }), 300);
+  }, [chainStakingMetadata, inactiveModal, navigate, nominatorMetadata]);
+
+  const onClickUnstakeBtn = useCallback(() => {
+    inactiveModal(STAKING_DETAIL_MODAL_ID);
+    setTimeout(() => navigate('/transaction/unstake'), 300);
+  }, [inactiveModal, navigate]);
 
   const footer = () => {
     return (
@@ -64,9 +75,13 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         />
         <Button
           className='__action-btn'
+          onClick={onClickUnstakeBtn}
           schema='secondary'
         >{t('Unstake')}</Button>
-        <Button className='__action-btn'>{t('Stake more')}</Button>
+        <Button
+          className='__action-btn'
+          onClick={onClickStakeMoreBtn}
+        >{t('Stake more')}</Button>
       </div>
     );
   };
@@ -142,7 +157,9 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   return (
     <SwModal
       className={className}
+      closable={true}
       footer={footer()}
+      maskClosable={true}
       id={STAKING_DETAIL_MODAL_ID}
       onCancel={onCloseModal}
       title={modalTitle}

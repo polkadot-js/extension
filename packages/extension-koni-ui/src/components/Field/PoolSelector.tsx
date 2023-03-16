@@ -1,18 +1,20 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
+import { PoolDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal'
 import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingPoolItem';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, InputRef, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
-import {Book, CaretLeft, FadersHorizontal, Lightning, SortAscending} from 'phosphor-react';
-import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
+import { Book, CaretLeft, FadersHorizontal, Lightning, SortAscending } from 'phosphor-react';
+import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -22,6 +24,7 @@ interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
   onClickBookBtn?: (e: SyntheticEvent) => void;
   onClickLightningBtn?: (e: SyntheticEvent) => void;
+  nominationPoolList?: NominationInfo[];
 }
 
 const SORTING_MODAL_ID = 'pool-sorting-modal';
@@ -73,9 +76,11 @@ const getFilteredList = (items: NominationPoolDataType[], filters: string[]) => 
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, id = 'pool-selector', label, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
+  const { chain, className = '', disabled, id = 'pool-selector', label, nominationPoolList, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
+  const nominationPoolValueList = nominationPoolList && nominationPoolList.length ? nominationPoolList.map((item) => item.validatorAddress) : [];
   const items = useGetValidatorList(chain, 'pool') as NominationPoolDataType[];
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
   const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(items, FILTER_MODAL_ID);
   const filteredList = useMemo(() => {
@@ -85,6 +90,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   useExcludeModal(id);
 
   const { t } = useTranslation();
+
+  useEffect(() => {
+    onChange && onChange({ target: { value: nominationPoolValueList[0] } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const _onSelectItem = useCallback((value: string) => {
     onChange && onChange({ target: { value } });
@@ -110,12 +120,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         id={item.id}
         identity={item.identity}
         memberCount={item.memberCount}
-        // eslint-disable-next-line @typescript-eslint/no-empty-function,react/jsx-no-bind
-        onClickMoreBtn={() => {}}
+        // eslint-disable-next-line react/jsx-no-bind
+        onClickMoreBtn={(e: SyntheticEvent) => {
+          e.stopPropagation();
+          setViewDetailItem(item);
+          activeModal(PoolDetailModalId);
+        }}
         symbol={item.symbol}
       />
     );
-  }, []);
+  }, [activeModal]);
 
   const closeFilterModal = () => {
     inactiveModal(FILTER_MODAL_ID);
@@ -227,12 +241,24 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         optionSelection={sortSelection}
         options={sortingOptions}
       />
+
+      {viewDetailItem && <PoolDetailModal
+        // eslint-disable-next-line react/jsx-no-bind
+        onCancel={() => inactiveModal(PoolDetailModalId)}
+        selectedNominationPool={viewDetailItem}
+        decimals={0}
+      />}
     </>
   );
 };
 
 const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
+    '.ant-sw-modal-header': {
+      paddingTop: token.paddingXS,
+      paddingBottom: token.paddingLG
+    },
+
     '&.pool-selector-input': {
       '.__selected-item': {
         display: 'flex',

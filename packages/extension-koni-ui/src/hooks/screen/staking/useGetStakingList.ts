@@ -113,7 +113,6 @@ export default function useGetStakingList () {
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-  console.log('nominatorMetadataList', nominatorMetadataList);
 
   const isAll = useMemo(() => {
     return currentAccount !== null && isAccountAll(currentAccount.address);

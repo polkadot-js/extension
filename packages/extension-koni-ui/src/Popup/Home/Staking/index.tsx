@@ -11,7 +11,7 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyList';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import MoreActionModal, { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import MoreActionModal, { MORE_ACTION_MODAL, StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal'
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
@@ -101,7 +101,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   const onClickItem = useCallback((item: StakingDataType, e?: SyntheticEvent) => {
-    e && e.stopPropagation();
+    // e && e.stopPropagation();
     setSelectedItem(item);
 
     activeModal(STAKING_DETAIL_MODAL_ID);
@@ -115,8 +115,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }
     }
   ];
-
-  console.log('selectedItem', selectedItem);
 
   const renderItem = useCallback((item: StakingDataType) => {
     return (
@@ -199,7 +197,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             nominatorMetadata={selectedItem.nominatorMetadata}
           />}
 
-        <MoreActionModal chainStakingMetadata={selectedItem?.chainStakingMetadata} />
+        <MoreActionModal
+          chainStakingMetadata={selectedItem?.chainStakingMetadata}
+          nominatorMetadata={selectedItem?.nominatorMetadata}
+        />
       </Layout.Base>
     </PageWrapper>
   );

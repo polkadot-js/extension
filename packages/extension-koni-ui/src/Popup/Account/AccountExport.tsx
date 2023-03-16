@@ -313,7 +313,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }
       >
         <div className='body-container'>
-          <div className='notice'>
+          <div className={CN('notice', { 'mb-large': !firstStep })}>
             <AlertBox
               description={t('Anyone with your  keys can steal any assets held in your account.')}
               title={t('Warning: Never disclose this key')}
@@ -342,6 +342,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   ]}
                 >
                   <Input
+                    disabled={loading}
                     placeholder={t('Type your SubWallet password')}
                     suffix={<span />}
                     type='password'
@@ -373,7 +374,7 @@ const Component: React.FC<Props> = (props: Props) => {
                               />
                             )}
                             name={t<string>(item.label)}
-                            onPressItem={item.disable ? undefined : onPressType(item.type)}
+                            onPressItem={(item.disable || loading) ? undefined : onPressType(item.type)}
                             rightItem={(
                               <Icon
                                 className='setting-item-right-icon'
@@ -513,7 +514,11 @@ const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
     '.notice': {
       marginTop: token.margin,
-      marginBottom: token.marginLG
+      marginBottom: token.margin,
+
+      '&.mb-large': {
+        marginBottom: token.marginLG
+      }
     },
 
     '.export-types-container': {
@@ -597,7 +602,6 @@ const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
       '.private-key-field': {
         '.ant-field-wrapper': {
-          height: token.sizeLG * 4.25,
           alignItems: 'start',
           textAlign: 'center'
         }

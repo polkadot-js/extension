@@ -135,7 +135,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
 
     '.bg-gradient': {
       backgroundImage: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
-      height: '100%',
+      height: 290,
       width: '100%',
       position: 'absolute',
       left: 0,

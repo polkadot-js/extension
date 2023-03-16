@@ -99,6 +99,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return (
       <TokenToggleItem
         assetSettingMap={assetSettingMap}
+        key={tokenInfo.slug}
         tokenInfo={tokenInfo}
       />
     );
@@ -178,7 +179,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             loadMore: loadMoreItems
           }}
           renderItem={renderTokenItem}
-          renderOnScroll={false}
+          renderOnScroll={!hasMore}
           renderWhenEmpty={emptyTokenList}
           searchFunction={searchToken}
           searchMinCharactersCount={2}

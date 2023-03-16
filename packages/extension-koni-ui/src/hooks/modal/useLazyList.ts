@@ -5,14 +5,24 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const TOKENS_PER_PAGE = 10;
 
-export function useLazyList<T> (items: T[]) {
+export function useLazyList<T> (items: T[], forceReload = false) {
   const [lazyItems, setLazyItems] = useState<T[]>([]);
   const [paging, setPaging] = useState(TOKENS_PER_PAGE);
 
   useEffect(() => {
-    setLazyItems(items.slice(0, TOKENS_PER_PAGE));
-    setPaging(TOKENS_PER_PAGE);
-  }, [items]);
+    if (forceReload) {
+      setLazyItems(items.slice(0, TOKENS_PER_PAGE));
+      setPaging(TOKENS_PER_PAGE);
+    } else {
+      setLazyItems((prevState) => {
+        if (prevState.length) {
+          return prevState;
+        } else {
+          return items.slice(0, TOKENS_PER_PAGE);
+        }
+      });
+    }
+  }, [items, forceReload]);
 
   const hasMore = useMemo(() => {
     return items.length > lazyItems.length;

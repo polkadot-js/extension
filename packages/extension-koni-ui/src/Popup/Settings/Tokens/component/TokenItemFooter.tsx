@@ -28,31 +28,34 @@ function Component ({ assetSetting, className = '', navigate, tokenInfo }: Props
 
   const onSwitchTokenVisible = useCallback((checked: boolean, event: React.MouseEvent<HTMLButtonElement>) => {
     if (!loading) {
-      updateAssetSetting({
-        tokenSlug: tokenInfo.slug,
-        assetSetting: {
-          visible: checked
-        }
-      })
-        .then((result) => {
-          setLoading(false);
-
-          if (result) {
-            setChecked(checked);
-          } else {
+      setLoading(true);
+      setTimeout(() => {
+        updateAssetSetting({
+          tokenSlug: tokenInfo.slug,
+          assetSetting: {
+            visible: checked
+          }
+        })
+          .then((result) => {
+            if (result) {
+              setChecked(checked);
+            } else {
+              showNotification({
+                message: t('Error'),
+                type: 'error'
+              });
+            }
+          })
+          .catch(() => {
             showNotification({
               message: t('Error'),
               type: 'error'
             });
-          }
-        })
-        .catch(() => {
-          showNotification({
-            message: t('Error'),
-            type: 'error'
+          })
+          .finally(() => {
+            setLoading(false);
           });
-          setLoading(false);
-        });
+      }, 300);
     }
   }, [loading, showNotification, t, tokenInfo.slug]);
 
@@ -64,7 +67,7 @@ function Component ({ assetSetting, className = '', navigate, tokenInfo }: Props
     <div className={`manage_tokens__right_item_container ${className}`}>
       <Switch
         checked={checked}
-        disabled={loading}
+        loading={loading}
         onClick={onSwitchTokenVisible}
       />
       <Button

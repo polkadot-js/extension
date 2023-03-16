@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
-import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
+import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks/form/useForwardInputRef';
+import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
-import { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
 import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useContext, useMemo } from 'react';
@@ -27,7 +28,7 @@ const modalId = 'input-account-address-modal';
 
 function Component ({ className = '', disabled, id = modalId, label, onBlur, onChange, onFocus, placeholder, readOnly, showAddressBook, showScanner, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { inactiveModal } = useContext(ModalContext);
   const inputRef = useForwardInputRef(ref);
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
   const accountName = useMemo(() => {
@@ -42,13 +43,7 @@ function Component ({ className = '', disabled, id = modalId, label, onBlur, onC
     onChange && onChange({ target: { value: val } });
   }, [onChange]);
 
-  const onOpenScanner = useCallback(() => {
-    activeModal(id);
-  }, [activeModal, id]);
-
-  const onCloseScanner = useCallback(() => {
-    inactiveModal(id);
-  }, [inactiveModal, id]);
+  const onOpenScanner = useOpenQrScanner(id);
 
   const onScanError = useCallback(() => {
     // do something
@@ -127,7 +122,6 @@ function Component ({ className = '', disabled, id = modalId, label, onBlur, onC
       {showScanner && <SwQrScanner
         className={className}
         id={id}
-        onClose={onCloseScanner}
         onError={onScanError}
         onSuccess={onSuccess}
       />}

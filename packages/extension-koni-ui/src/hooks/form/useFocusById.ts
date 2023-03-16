@@ -13,7 +13,7 @@ const focusInput = (id: string, timeOut: number) => {
   }, timeOut);
 };
 
-const useFocusById = (id: string, active = true, timeOut = 10) => {
+const useFocusById = (id: string, active = true, timeOut = 33) => {
   useEffect(() => {
     if (active) {
       focusInput(id, timeOut);

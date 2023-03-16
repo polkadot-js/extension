@@ -7,7 +7,9 @@ import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Se
 import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
+import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useGoBackSelectAccount from '@subwallet/extension-koni-ui/hooks/modal/useGoBackSelectAccount';
+import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/util/dom';
@@ -35,6 +37,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { checkActive, inactiveModal } = useContext(ModalContext);
   const { token } = useTheme() as Theme;
+  const isPopup = useIsPopup();
+
   const isActive = checkActive(modalId);
 
   const onBack = useGoBackSelectAccount(modalId);
@@ -63,13 +67,24 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       navigate(path);
     };
   }, [navigate, inactiveModal]);
+
+  const onClickLedger = useCallback(() => {
+    inactiveModal(modalId);
+
+    if (isPopup) {
+      windowOpen('/accounts/connect-ledger').catch(console.error);
+    } else {
+      navigate('accounts/connect-ledger');
+    }
+  }, [inactiveModal, isPopup, navigate]);
+
   const items = useMemo((): AttachAccountItem[] => ([
     {
       backgroundColor: token['orange-7'],
       icon: Swatches,
       key: 'connect-ledger',
       label: 'Connect Ledger device',
-      onClick: onClickItem('accounts/connect-ledger')
+      onClick: onClickLedger
     },
     {
       backgroundColor: token['magenta-7'],
@@ -92,7 +107,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       label: 'Attach watch-only account',
       onClick: onClickItem('accounts/attach-read-only')
     }
-  ]), [token, onClickItem]);
+  ]), [token, onClickItem, onClickLedger]);
 
   return (
     <SwModal

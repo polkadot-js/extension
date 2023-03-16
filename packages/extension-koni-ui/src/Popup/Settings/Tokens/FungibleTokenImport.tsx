@@ -4,8 +4,8 @@
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -14,12 +14,10 @@ import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/sc
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
-import { ButtonProps, Col, Field, Form, Image, NetworkItem, Row, SelectModal } from '@subwallet/react-ui';
+import { BackgroundIcon, Col, Field, Form, Icon, Image, NetworkItem, Row, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
-import Icon from '@subwallet/react-ui/es/icon';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import { CheckCircle, Coin, Info } from 'phosphor-react';
+import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -27,7 +25,6 @@ import styled, { useTheme } from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import ChainLogoMap from '../../../assets/logo';
-import Layout from '../../../components/Layout';
 
 type Props = ThemeProps
 
@@ -67,7 +64,7 @@ function getTokenTypeSupported (chainInfo: _ChainInfo) {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { goBack, goHome } = useDefaultNavigate();
+  const { goBack } = useDefaultNavigate();
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
@@ -188,22 +185,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     });
   }, [selectedChain, selectedTokenType, t]);
 
-  const subHeaderButton: ButtonProps[] = useMemo(() => {
-    return [
-      {
-        icon: <Icon
-          phosphorIcon={Info}
-          size='sm'
-          type='phosphor'
-          weight={'light'}
-        />,
-        onClick: () => {
-          goHome();
-        }
-      }
-    ];
-  }, [goHome]);
-
   const originChainLogo = useCallback(() => {
     return (
       <Image
@@ -281,7 +262,30 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const renderTokenTypeOption = useCallback((tokenTypeOption: TokenTypeOption, selected: boolean) => {
     return (
-      <div>{tokenTypeOption.label} {selected}</div>
+      <SettingItem
+        className='token-type-item'
+        leftItemIcon={(
+          <BackgroundIcon
+            backgroundColor='var(--token-type-icon-bg-color)'
+            iconColor='var(--token-type-icon-color)'
+            phosphorIcon={Coin}
+            size='sm'
+            weight='fill'
+          />
+        )}
+        name={tokenTypeOption.label}
+        rightItem={
+          selected &&
+            (
+              <Icon
+                iconColor='var(--token-selected-icon-color)'
+                phosphorIcon={CheckCircle}
+                size='sm'
+                weight='fill'
+              />
+            )
+        }
+      />
     );
   }, []);
 
@@ -311,47 +315,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       className={`import_token ${className}`}
       resolve={dataContext.awaitStores(['nft'])}
     >
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={goBack}
         rightFooterButton={{
           block: true,
           disabled: isSubmitDisabled(),
           icon: (
             <Icon
-              phosphorIcon={CheckCircle}
-              type='phosphor'
-              weight={'fill'}
+              phosphorIcon={PlusCircle}
+              weight='fill'
             />
           ),
           loading,
           onClick: onSubmit,
-          children: 'Save'
+          children: t('Import')
         }}
-        showBackButton={true}
-        showSubHeader={true}
-        subHeaderBackground={'transparent'}
-        subHeaderCenter={true}
-        subHeaderIcons={subHeaderButton}
-        subHeaderPaddingVertical={true}
         title={t<string>('Import token')}
       >
         <div className={'import_token__container'}>
-          <div className={'import_token__header_container'}>
-            <div className={'import_token__header_icon_wrapper'}>
-              <PageIcon
-                color={token.colorSecondary}
-                iconProps={{
-                  phosphorIcon: Coin,
-                  weight: 'fill'
-                }}
-              />
-            </div>
-
-            <div className={'import_token__header_text_container'}>
-              <div>{t<string>('Import token')}</div>
-            </div>
-          </div>
-
           <Form
             initialValues={{
               contractAddress: '',
@@ -369,9 +350,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 id='import-nft-select-chain'
                 itemKey={'slug'}
                 items={Object.values(chainInfoMap)}
-                label={t<string>('Chain')}
+                label={t<string>('Network')}
                 onSelect={onChangeChain}
-                placeholder={t('Select chain')}
+                placeholder={t('Select network')}
                 prefix={selectedChain !== '' && originChainLogo()}
                 renderItem={renderChainOption}
                 renderSelected={renderChainSelected}
@@ -379,6 +360,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 searchPlaceholder={'Search chain'}
                 searchableMinCharactersCount={2}
                 selected={selectedChain}
+                title={t('Select network')}
               />
             </Form.Item>
 
@@ -397,6 +379,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 renderItem={renderTokenTypeOption}
                 renderSelected={renderNftTypeSelected}
                 selected={selectedTokenType}
+                title={t('Select token type')}
               />
             </Form.Item>
 
@@ -406,7 +389,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             >
               <AddressInput
                 disabled={selectedTokenType === ''}
-                label={t('Token contract address')}
+                label={t('Contract address')}
                 showScanner={true}
               />
             </Form.Item>
@@ -433,7 +416,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             />
           </Form>
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }
@@ -441,30 +424,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.import_token__container': {
+      paddingTop: token.padding,
       marginLeft: token.margin,
       marginRight: token.margin
-    },
-
-    '.import_token__header_container': {
-      marginTop: 30,
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: token.padding,
-      flexDirection: 'column',
-      alignContent: 'center',
-      marginBottom: token.marginLG
-    },
-
-    '.import_token__header_text_container': {
-      fontWeight: token.headingFontWeight,
-      textAlign: 'center',
-      fontSize: token.fontSizeHeading3,
-      color: token.colorText
-    },
-
-    '.import_token__header_icon_wrapper': {
-      display: 'flex',
-      justifyContent: 'center'
     },
 
     '.import_token__selected_option': {
@@ -473,6 +435,22 @@ const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Prop
 
     '.ant-field-container.ant-field-size-medium .ant-field-wrapper': {
       padding: token.paddingSM
+    },
+
+    '.token-type-item': {
+      '--token-type-icon-bg-color': token['orange-6'],
+      '--token-type-icon-color': token.colorWhite,
+      '--token-selected-icon-color': token.colorSuccess,
+
+      '.ant-web3-block-right-item': {
+        marginRight: 0
+      }
+    },
+
+    '.token_import__selected_option': {
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      color: token.colorText
     }
   });
 });

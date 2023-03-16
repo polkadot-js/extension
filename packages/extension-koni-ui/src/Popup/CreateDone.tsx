@@ -5,8 +5,7 @@ import { DISCORD_URL, TELEGRAM_URL, TWITTER_URL } from '@subwallet/extension-kon
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/util';
-import { Button, Icon } from '@subwallet/react-ui';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { Button, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, DiscordLogo, PaperPlaneTilt, TwitterLogo, X } from 'phosphor-react';
 import React from 'react';

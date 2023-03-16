@@ -1,9 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
@@ -12,8 +14,7 @@ import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, QRCode, SettingItem } from '@subwallet/react-ui';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, PageIcon, QRCode, SettingItem } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { saveAs } from 'file-saver';
 import { CheckCircle, CopySimple, DownloadSimple, FileJs, Leaf, QrCode, Wallet } from 'phosphor-react';
@@ -79,7 +80,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goHome = useDefaultNavigate().goHome;
+  const { goHome } = useDefaultNavigate();
   const { accountAddress } = useParams();
 
   const account = useGetAccountByAddress(accountAddress);
@@ -260,6 +261,14 @@ const Component: React.FC<Props> = (props: Props) => {
     ];
   }, [account?.isExternal, account?.isMasterAccount]);
 
+  const onBack = useCallback(() => {
+    if (accountAddress) {
+      navigate(`/accounts/detail/${accountAddress}`);
+    } else {
+      navigate(DEFAULT_ROUTER_PATH);
+    }
+  }, [accountAddress, navigate]);
+
   useEffect(() => {
     if (!account) {
       goHome();
@@ -279,212 +288,221 @@ const Component: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <Layout.WithSubHeaderOnly
-      className={CN(className)}
-      rightFooterButton={{
-        children: firstStep ? t('Confirm') : t('Finish'),
-        icon: firstStep ? undefined : FinishIcon,
-        disabled: isDisabled || !exportTypes.length,
-        loading: loading,
-        onClick: firstStep ? form.submit : goHome
-      }}
-      title={
-        firstStep
-          ? t('Export account')
-          : !exportSingle
-            ? t('Export successful')
-            : t(titleMap[exportTypes[0]])
-      }
-    >
-      <div className='body-container'>
-        <div className='notice'>
-          <AlertBox
-            description={t('Anyone with your  keys can steal any assets held in your account.')}
-            title={t('Warning: Never disclose this key')}
-            type='warning'
-          />
-        </div>
-        {
-          firstStep && (
-            <Form
-              form={form}
-              initialValues={{
-                [FormFieldName.PASSWORD]: '',
-                [FormFieldName.TYPES]: []
-              }}
-              name={formName}
-              onFieldsChange={onUpdate}
-              onFinish={onSubmit}
-            >
-              <Form.Item
-                name={FormFieldName.PASSWORD}
-                rules={[
-                  {
-                    message: 'Password is required',
-                    required: true
-                  }
-                ]}
+    <PageWrapper className={CN(className)}>
+      <Layout.WithSubHeaderOnly
+        onBack={onBack}
+        rightFooterButton={{
+          children: firstStep ? t('Confirm') : t('Finish'),
+          icon: firstStep ? undefined : FinishIcon,
+          disabled: isDisabled || !exportTypes.length,
+          loading: loading,
+          onClick: firstStep ? form.submit : goHome
+        }}
+        subHeaderIcons={[
+          {
+            icon: <CloseIcon />,
+            onClick: goHome
+          }
+        ]}
+        title={
+          firstStep
+            ? t('Export account')
+            : !exportSingle
+              ? t('Export successful')
+              : t(titleMap[exportTypes[0]])
+        }
+      >
+        <div className='body-container'>
+          <div className={CN('notice', { 'mb-large': !firstStep })}>
+            <AlertBox
+              description={t('Anyone with your  keys can steal any assets held in your account.')}
+              title={t('Warning: Never disclose this key')}
+              type='warning'
+            />
+          </div>
+          {
+            firstStep && (
+              <Form
+                form={form}
+                initialValues={{
+                  [FormFieldName.PASSWORD]: '',
+                  [FormFieldName.TYPES]: []
+                }}
+                name={formName}
+                onFieldsChange={onUpdate}
+                onFinish={onSubmit}
               >
-                <Input
-                  placeholder={t('Type your SubWallet password')}
-                  suffix={<span />}
-                  type='password'
-                />
-              </Form.Item>
-              <Form.Item name={FormFieldName.TYPES}>
-                <div className='export-types-container'>
-                  {
-                    items.map((item) => {
-                      const _selected = exportTypes?.includes(item.type);
+                <Form.Item
+                  name={FormFieldName.PASSWORD}
+                  rules={[
+                    {
+                      message: 'Password is required',
+                      required: true
+                    }
+                  ]}
+                >
+                  <Input
+                    disabled={loading}
+                    placeholder={t('Type your SubWallet password')}
+                    suffix={<span />}
+                    type='password'
+                  />
+                </Form.Item>
+                <Form.Item name={FormFieldName.TYPES}>
+                  <div className='export-types-container'>
+                    {
+                      items.map((item) => {
+                        const _selected = exportTypes?.includes(item.type);
 
-                      return (
-                        <SettingItem
-                          className={CN(
-                            'export-item',
-                            `export-${item.type}`,
-                            {
-                              selected: _selected,
-                              disabled: item.disable
-                            }
-                          )}
-                          key={item.type}
-                          leftItemIcon={(
-                            <BackgroundIcon
-                              backgroundColor='var(--icon-bg-color)'
-                              phosphorIcon={item.icon}
-                              size='sm'
-                              weight='fill'
-                            />
-                          )}
-                          name={t<string>(item.label)}
-                          onPressItem={item.disable ? undefined : onPressType(item.type)}
-                          rightItem={(
-                            <Icon
-                              className='setting-item-right-icon'
-                              iconColor='var(--selected-icon-color)'
-                              phosphorIcon={CheckCircle}
-                              size='sm'
-                              weight='fill'
-                            />
-                          )}
-                        />
-                      );
-                    })
-                  }
-                </div>
-              </Form.Item>
-            </Form>
-          )
-        }
-        {
-          !firstStep && (
-            <div
-              className={CN(
-                'result-container',
-                { 'export-single': exportSingle }
-              )}
-            >
-              {
-                exportTypes.includes(ExportType.PRIVATE_KEY) && (
-                  <div className='result-content'>
-                    <div className='result-title'>{t(titleMap[ExportType.PRIVATE_KEY])}</div>
-                    <Field
-                      className='private-key-field'
-                      content={privateKey}
-                      maxLine={10}
-                    />
-                    <Button
-                      icon={(
-                        <Icon phosphorIcon={CopySimple} />
-                      )}
-                      onClick={onCopyPrivateKey}
-                      type='ghost'
-                    >
-                      {t('Copy to clipboard')}
-                    </Button>
+                        return (
+                          <SettingItem
+                            className={CN(
+                              'export-item',
+                              `export-${item.type}`,
+                              {
+                                selected: _selected,
+                                disabled: item.disable
+                              }
+                            )}
+                            key={item.type}
+                            leftItemIcon={(
+                              <BackgroundIcon
+                                backgroundColor='var(--icon-bg-color)'
+                                phosphorIcon={item.icon}
+                                size='sm'
+                                weight='fill'
+                              />
+                            )}
+                            name={t<string>(item.label)}
+                            onPressItem={(item.disable || loading) ? undefined : onPressType(item.type)}
+                            rightItem={(
+                              <Icon
+                                className='setting-item-right-icon'
+                                iconColor='var(--selected-icon-color)'
+                                phosphorIcon={CheckCircle}
+                                size='sm'
+                                weight='fill'
+                              />
+                            )}
+                          />
+                        );
+                      })
+                    }
                   </div>
-                )
-              }
-              {
-                exportTypes.includes(ExportType.SEED_PHRASE) && (
-                  <div className='result-content'>
-                    <div className='result-title'>{t(titleMap[ExportType.SEED_PHRASE])}</div>
-                    <WordPhrase seedPhrase={seedPhrase} />
-                  </div>
-                )
-              }
-              {
-                exportTypes.includes(ExportType.QR_CODE) && (
-                  <div className='result-content'>
-                    <div className='result-title'>{t(titleMap[ExportType.QR_CODE])}</div>
-                    <div className='qr-area'>
-                      <QRCode
-                        errorLevel='Q'
-                        size={264}
-                        value={qrData}
+                </Form.Item>
+              </Form>
+            )
+          }
+          {
+            !firstStep && (
+              <div
+                className={CN(
+                  'result-container',
+                  { 'export-single': exportSingle }
+                )}
+              >
+                {
+                  exportTypes.includes(ExportType.PRIVATE_KEY) && (
+                    <div className='result-content'>
+                      <div className='result-title'>{t(titleMap[ExportType.PRIVATE_KEY])}</div>
+                      <Field
+                        className='private-key-field'
+                        content={privateKey}
+                        maxLine={10}
                       />
+                      <Button
+                        icon={(
+                          <Icon phosphorIcon={CopySimple} />
+                        )}
+                        onClick={onCopyPrivateKey}
+                        type='ghost'
+                      >
+                        {t('Copy to clipboard')}
+                      </Button>
                     </div>
-                  </div>
-                )
-              }
-              {
-                exportTypes.includes(ExportType.JSON_FILE) && jsonData && (
-                  <div className='result-content'>
-                    <div className='result-title'>{t('Your json file')}</div>
-                    {
-                      exportSingle && (
-                        <>
-                          <div className='page-icon'>
-                            <PageIcon
-                              color='var(--page-icon-color)'
-                              iconProps={{
-                                phosphorIcon: CheckCircle,
-                                weight: 'fill'
-                              }}
-                            />
-                          </div>
-                          <div className='json-done-tile'>
-                            {t('Success!')}
-                          </div>
-                          <div className='json-done-description'>
-                            {t('You have successfully export JSON file for your accounts')}
-                          </div>
-                        </>
-                      )
-                    }
-                    {
-                      !exportSingle && (
-                        <SettingItem
-                          className='download-json'
-                          leftItemIcon={(
-                            <BackgroundIcon
-                              backgroundColor='var(--icon-bg-color)'
-                              phosphorIcon={FileJs}
-                              size='sm'
-                              weight='fill'
-                            />
-                          )}
-                          name={`${account.address}.json`}
-                          onPressItem={onExportJson(jsonData, account.address)}
-                          rightItem={(
-                            <Icon
-                              className='setting-item-right-icon'
-                              phosphorIcon={DownloadSimple}
-                              size='sm'
-                              weight='fill'
-                            />
-                          )}
+                  )
+                }
+                {
+                  exportTypes.includes(ExportType.SEED_PHRASE) && (
+                    <div className='result-content'>
+                      <div className='result-title'>{t(titleMap[ExportType.SEED_PHRASE])}</div>
+                      <WordPhrase seedPhrase={seedPhrase} />
+                    </div>
+                  )
+                }
+                {
+                  exportTypes.includes(ExportType.QR_CODE) && (
+                    <div className='result-content'>
+                      <div className='result-title'>{t(titleMap[ExportType.QR_CODE])}</div>
+                      <div className='qr-area'>
+                        <QRCode
+                          errorLevel='Q'
+                          size={264}
+                          value={qrData}
                         />
-                      )
-                    }
-                  </div>
-                )
-              }
-            </div>
-          )
-        }
-      </div>
-    </Layout.WithSubHeaderOnly>
+                      </div>
+                    </div>
+                  )
+                }
+                {
+                  exportTypes.includes(ExportType.JSON_FILE) && jsonData && (
+                    <div className='result-content'>
+                      <div className='result-title'>{t('Your json file')}</div>
+                      {
+                        exportSingle && (
+                          <>
+                            <div className='page-icon'>
+                              <PageIcon
+                                color='var(--page-icon-color)'
+                                iconProps={{
+                                  phosphorIcon: CheckCircle,
+                                  weight: 'fill'
+                                }}
+                              />
+                            </div>
+                            <div className='json-done-tile'>
+                              {t('Success!')}
+                            </div>
+                            <div className='json-done-description'>
+                              {t('You have successfully export JSON file for your accounts')}
+                            </div>
+                          </>
+                        )
+                      }
+                      {
+                        !exportSingle && (
+                          <SettingItem
+                            className='download-json'
+                            leftItemIcon={(
+                              <BackgroundIcon
+                                backgroundColor='var(--icon-bg-color)'
+                                phosphorIcon={FileJs}
+                                size='sm'
+                                weight='fill'
+                              />
+                            )}
+                            name={`${account.address}.json`}
+                            onPressItem={onExportJson(jsonData, account.address)}
+                            rightItem={(
+                              <Icon
+                                className='setting-item-right-icon'
+                                phosphorIcon={DownloadSimple}
+                                size='sm'
+                                weight='fill'
+                              />
+                            )}
+                          />
+                        )
+                      }
+                    </div>
+                  )
+                }
+              </div>
+            )
+          }
+        </div>
+      </Layout.WithSubHeaderOnly>
+    </PageWrapper>
   );
 };
 
@@ -496,7 +514,11 @@ const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
     '.notice': {
       marginTop: token.margin,
-      marginBottom: token.marginLG
+      marginBottom: token.margin,
+
+      '&.mb-large': {
+        marginBottom: token.marginLG
+      }
     },
 
     '.export-types-container': {
@@ -580,7 +602,6 @@ const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
       '.private-key-field': {
         '.ant-field-wrapper': {
-          height: token.sizeLG * 4.25,
           alignItems: 'start',
           textAlign: 'center'
         }

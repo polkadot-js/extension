@@ -23,7 +23,6 @@ import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
 import { isAvailableTokenAsset } from '@subwallet/extension-koni-ui/util/chainAndAsset';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PaperPlaneTilt } from 'phosphor-react';
@@ -184,7 +183,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [form] = useForm<TransferFormProps>();
+  const [form] = Form.useForm<TransferFormProps>();
   const formDefault = {
     from: transactionContext.from,
     chain: transactionContext.chain,

@@ -8,8 +8,7 @@ import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
-import { Button, Icon, SwModal } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
 import { CheckCircle, DotsThree } from 'phosphor-react';
 import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';

@@ -3,8 +3,7 @@
 
 import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon } from '@subwallet/react-ui';
-import SwModal from '@subwallet/react-ui/es/sw-modal';
+import { BackgroundIcon, SwModal } from '@subwallet/react-ui';
 import { SortAscending } from 'phosphor-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

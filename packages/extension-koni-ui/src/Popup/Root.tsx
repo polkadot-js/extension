@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -60,9 +60,15 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   useEffect(() => {
     const pathName = location.pathname;
 
-    if (pathName === DEFAULT_ROUTER_PATH) {
+    if (needMigrate && hasMasterPassword) {
+      navigate(migratePasswordUrl);
+    } else if (pathName === DEFAULT_ROUTER_PATH) {
       if (isNoAccount(accounts)) {
-        navigate(welcomeUrl);
+        if (hasMasterPassword && isLocked) {
+          navigate(loginUrl);
+        } else {
+          navigate(welcomeUrl);
+        }
       } else if (!hasMasterPassword) {
         navigate(createPasswordUrl);
       } else if (isLocked) {

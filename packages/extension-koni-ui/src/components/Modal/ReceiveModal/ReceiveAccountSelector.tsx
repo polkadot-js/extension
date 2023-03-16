@@ -17,11 +17,6 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-export type ChainItemType = {
-  name: string,
-  slug: string,
-};
-
 interface Props extends ThemeProps {
   id: string,
   label?: string,

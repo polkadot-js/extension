@@ -1,22 +1,24 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { Form, Icon, Input } from '@subwallet/react-ui';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
 import CN from 'classnames';
-import { FileArrowDown, Info } from 'phosphor-react';
+import { FileArrowDown } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -38,10 +40,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
-  const timeOutRef = useRef<NodeJS.Timer>();
+  const { goHome } = useDefaultNavigate();
+
   const onComplete = useCompleteCreateAccount();
+  const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
+
   const accountName = useGetDefaultAccountName();
-  const [form] = useForm();
+
+  const timeOutRef = useRef<NodeJS.Timer>();
+
+  const [form] = Form.useForm();
 
   const [keyTypes, setKeyTypes] = useState<KeypairType[]>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const [validateState, setValidateState] = useState<ValidateState>({});
@@ -60,24 +68,26 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onSubmit = useCallback(() => {
     if (seedPhrase) {
       setSubmitting(true);
-      createAccountSuriV2({
-        name: accountName,
-        suri: seedPhrase,
-        isAllowed: true,
-        types: keyTypes
-      })
-        .then(() => {
-          onComplete();
+      setTimeout(() => {
+        createAccountSuriV2({
+          name: accountName,
+          suri: seedPhrase,
+          isAllowed: true,
+          types: keyTypes
         })
-        .catch((error: Error): void => {
-          setValidateState({
-            status: 'error',
-            message: error.message
+          .then(() => {
+            onComplete();
+          })
+          .catch((error: Error): void => {
+            setValidateState({
+              status: 'error',
+              message: error.message
+            });
+          })
+          .finally(() => {
+            setSubmitting(false);
           });
-        })
-        .finally(() => {
-          setSubmitting(false);
-        });
+      }, 300);
     }
   }, [seedPhrase, accountName, keyTypes, onComplete]);
 
@@ -137,6 +147,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
+        onBack={onBack}
         rightFooterButton={{
           children: validating ? t('Validating') : t('Import account'),
           icon: FooterIcon,
@@ -146,12 +157,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <CloseIcon />,
+            onClick: goHome
           }
         ]}
         title={t<string>('Import from seed phrase')}

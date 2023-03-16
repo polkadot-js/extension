@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import PageIcon from '@subwallet/react-ui/lib/page-icon';
+import { PageIcon } from '@subwallet/react-ui';
 import { MagnifyingGlass } from 'phosphor-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

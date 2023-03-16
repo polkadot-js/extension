@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -6,15 +6,7 @@ import CN from 'classnames';
 import React from 'react';
 import styled from 'styled-components';
 
-import AccountItem from './parts/AccountItem';
-import ChainItem from './parts/ChainItem';
-import DataItem from './parts/DataItem';
-import DefaultItem from './parts/DefaultItem';
-import DisplayTypeItem from './parts/DisplayTypeItem';
-import NumberItem from './parts/NumberItem';
-import StatusItem from './parts/StatusItem';
-import TotalItem from './parts/TotalItem';
-import TransferItem from './parts/TransferItem';
+import { AccountItem, ChainItem, DataItem, DefaultItem, DisplayTypeItem, NumberItem, StatusItem, TotalItem, TransferItem } from './parts';
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;

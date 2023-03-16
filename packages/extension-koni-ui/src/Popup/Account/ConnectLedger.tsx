@@ -39,7 +39,7 @@ interface ImportLedgerItem {
   name: string;
 }
 
-const LIMIT_PER_PAGE = 20;
+const LIMIT_PER_PAGE = 5;
 
 const FooterIcon = (
   <Icon
@@ -114,27 +114,27 @@ const Component: React.FC<Props> = (props: Props) => {
             try {
               const { address } = await getAddress(i);
 
-              const item: ImportLedgerItem = {
+              rs[i - start] = {
                 accountIndex: i,
                 name: `Ledger ${networkName} ${i + 1}`,
                 address: address
               };
-
-              rs[i - start] = item;
-
-              setLedgerAccounts((prevState) => {
-                const result = [...prevState];
-
-                result[i] = item;
-
-                return result;
-              });
             } catch (e) {
               refresh();
               setFirstStep(true);
               break;
             }
           }
+
+          setLedgerAccounts((prevState) => {
+            const result = [...prevState];
+
+            for (let i = start; i < end; i++) {
+              result[i] = rs[i - start];
+            }
+
+            return result;
+          });
         };
 
         handler().then().catch().finally(() => setIsLoadMore(false));
@@ -245,7 +245,7 @@ const Component: React.FC<Props> = (props: Props) => {
           icon: FooterIcon,
           disabled: !isConnected || (!firstStep && !selectedAccounts.length),
           onClick: firstStep ? onNextStep : onSubmit,
-          loading: isSubmitting || isLoadMore
+          loading: isSubmitting
         }}
         subHeaderIcons={[
           {
@@ -336,14 +336,14 @@ const Component: React.FC<Props> = (props: Props) => {
               <SwList.Section
                 className='list-container'
                 displayRow={true}
-                ignoreScrollbar={ledgerAccounts && ledgerAccounts.length > 5}
+                ignoreScrollbar={ledgerAccounts && ledgerAccounts.length > 4}
                 list={ledgerAccounts}
                 pagination={{
                   hasMore: !isLoadMore,
-                  loadMore: () => console.log(12)
+                  loadMore: onLoadMore(isLoadMore, page)
                 }}
                 renderItem={renderItem(selectedAccounts)}
-                renderOnScroll={true}
+                renderOnScroll={false}
                 rowGap='var(--list-gap)'
               />
             )

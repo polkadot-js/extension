@@ -20,11 +20,11 @@ type Props = ThemeProps & {
 
 export const StakingNetworkDetailModalId = 'stakingNetworkDetailModalId';
 
-function Component ({ className,
-  onCancel,
-  activeNominators: [currentNominatorCount, totalNominatorCount],
+function Component ({ activeNominators: [currentNominatorCount, totalNominatorCount],
+  className,
   estimatedEarning,
   minimumActive,
+  onCancel,
   unstakingPeriod }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 

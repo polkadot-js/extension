@@ -44,7 +44,7 @@ const TokenDetailModalId = 'tokenDetailModalId';
 
 function Component (): React.ReactElement {
   const [isShrink, setIsShrink] = useState<boolean>(false);
-  const goBack = useDefaultNavigate().goBack;
+  const { goBack, goHome } = useDefaultNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
   const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
@@ -82,17 +82,33 @@ function Component (): React.ReactElement {
     return '0';
   }, [tokenGroupSlug, tokenBalanceMap, tokenGroupBalanceMap]);
 
-  const tokenSlugs = useMemo<string[]>(() => {
+  const tokenBalanceItems = useMemo<TokenBalanceItemType[]>(() => {
     if (tokenGroupSlug) {
       if (tokenGroupMap[tokenGroupSlug]) {
-        return tokenGroupMap[tokenGroupSlug];
+        const items: TokenBalanceItemType[] = [];
+
+        tokenGroupMap[tokenGroupSlug].forEach((tokenSlug) => {
+          if (tokenBalanceMap[tokenSlug]) {
+            items.push(tokenBalanceMap[tokenSlug]);
+          }
+        });
+
+        return items;
       }
 
-      return [tokenGroupSlug];
+      if (tokenBalanceMap[tokenGroupSlug]) {
+        return [tokenBalanceMap[tokenGroupSlug]];
+      }
     }
 
-    return [];
-  }, [tokenGroupSlug, tokenGroupMap]);
+    return [] as TokenBalanceItemType[];
+  }, [tokenGroupSlug, tokenGroupMap, tokenBalanceMap]);
+
+  useEffect(() => {
+    if (!tokenBalanceItems.length) {
+      goHome();
+    }
+  }, [goHome, tokenBalanceItems.length]);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;
@@ -195,21 +211,13 @@ function Component (): React.ReactElement {
         className={'__scroll-container'}
       >
         {
-          tokenSlugs.map((tokenSlug) => {
-            const item = tokenBalanceMap[tokenSlug];
-
-            if (!item) {
-              return null;
-            }
-
-            return (
-              <TokenBalanceDetailItem
-                key={item.slug}
-                {...item}
-                onClickDotsIcon={onClickThreeDots(item)}
-              />
-            );
-          })
+          tokenBalanceItems.map((item) => (
+            <TokenBalanceDetailItem
+              key={item.slug}
+              {...item}
+              onClickDotsIcon={onClickThreeDots(item)}
+            />
+          ))
         }
       </div>
 

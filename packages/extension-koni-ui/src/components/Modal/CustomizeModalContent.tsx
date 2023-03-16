@@ -3,16 +3,14 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
+import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NetworkItem, PageIcon, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { MagnifyingGlass } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps
@@ -21,37 +19,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
+  const chainInfoList = useChainInfoWithState();
 
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
-  const chainStateMap = useSelector((state: RootState) => state.chainStore.chainStateMap);
-
-  const chainInfoList = useMemo(() => {
-    return Object.values(chainInfoMap);
-  }, [chainInfoMap]);
-
-  const renderNetworkItem = useCallback((chainInfo: _ChainInfo) => {
-    const chainState = chainStateMap[chainInfo.slug];
-
-    return (
-      <ChainItemFooter
-        chainInfo={chainInfo}
-        chainState={chainState}
-      />
-    );
-  }, [chainStateMap]);
-
-  const renderChainConnectionStatus = useCallback((chainInfo: _ChainInfo) => {
-    const chainState = chainStateMap[chainInfo.slug];
-
-    if (chainState.connectionStatus === _ChainConnectionStatus.CONNECTED) {
-      return '__connected__';
-    }
-
-    return '__disconnected__';
-  }, [chainStateMap]);
-
-  const renderChainItem = useCallback((chainInfo: _ChainInfo) => {
-    const { symbol } = _getChainNativeTokenBasicInfo(chainInfo);
+  const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
+    const conectSymbol = (chainInfo.connectionStatus === _ChainConnectionStatus.CONNECTED) ? '__connected__' : '__disconnected__';
 
     return (
       <NetworkItem
@@ -59,12 +30,12 @@ const Component: React.FC<Props> = (props: Props) => {
         isShowSubLogo={true}
         key={chainInfo.slug}
         name={chainInfo.name}
-        rightItem={renderNetworkItem(chainInfo)}
-        subSymbol={renderChainConnectionStatus(chainInfo)}
-        symbol={symbol.toLowerCase()}
+        networkKey={chainInfo.slug}
+        rightItem={<ChainItemFooter chainInfo={chainInfo} />}
+        subSymbol={conectSymbol}
       />
     );
-  }, [renderChainConnectionStatus, renderNetworkItem]);
+  }, []);
 
   const chainSearchFunc = useCallback((item: _ChainInfo, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();

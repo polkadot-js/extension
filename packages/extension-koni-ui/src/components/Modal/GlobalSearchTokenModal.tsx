@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TokenBalanceSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceSelectionItem';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { AccountBalanceHookType, TokenGroupHookType } from '@subwallet/extension-koni-ui/types/hook';
@@ -32,6 +33,7 @@ function getTokenBalances (
 }
 
 function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalanceMap }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const tokenBalances = useMemo<TokenBalanceItemType[]>(() => {
     return getTokenBalances(tokenBalanceMap, sortedTokenSlugs);
@@ -72,7 +74,8 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
       className={className}
       id={id}
       onCancel={onCancel}
-      title={'Select token'} // todo: i18n this
+      title={t('Select token')}
+      destroyOnClose={true}
     >
       <SwList.Section
         displayRow
@@ -83,7 +86,7 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
         rowGap = {'8px'}
         searchFunction={searchFunc}
         searchMinCharactersCount={2}
-        searchPlaceholder='Token name' // todo: i18n this
+        searchPlaceholder={t('Token name')}
       />
     </SwModal>
   );
@@ -92,7 +95,8 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
 export const GlobalSearchTokenModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.ant-sw-modal-body': {
-      padding: 0,
+      paddingLeft: 0,
+      paddingRight: 0,
       display: 'flex'
     },
 
@@ -102,7 +106,7 @@ export const GlobalSearchTokenModal = styled(Component)<Props>(({ theme: { token
     },
 
     '.ant-sw-list-search-input': {
-      marginBottom: token.marginXS
+      paddingBottom: token.paddingXS
     },
 
     '.ant-sw-list': {

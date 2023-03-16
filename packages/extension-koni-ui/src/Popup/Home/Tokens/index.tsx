@@ -1,13 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
-import { ReceiveAccountSelector } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveAccountSelector';
-import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
-import { TokensSelector } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelector';
+import { AccountSelectorModal, AccountSelectorModalId } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
+import ReceiveQrModal, { ReceiveSelectedResult } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
+import { ReceiveTokensSelectorModalId, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenGroupBalanceItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/UpperBlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -23,11 +26,6 @@ import styled from 'styled-components';
 
 type Props = ThemeProps;
 
-type ReceiveSelectedResult = {
-  selectedAcc?: string;
-  selectedNetwork?: string;
-};
-
 function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
 
@@ -42,15 +40,21 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
 }
 
 function Component (): React.ReactElement {
+  const { t } = useTranslation();
   const [isShrink, setIsShrink] = useState<boolean>(false);
-  const { activeModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
-  const [{ selectedAcc, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>({ selectedAcc: currentAccount?.address });
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+  const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
+
+  const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(
+    { selectedAccount: currentAccount?.address }
+  );
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;
@@ -116,10 +120,40 @@ function Component (): React.ReactElement {
     navigate('/settings/tokens/manage');
   }, [navigate]);
 
+  const onOpenSendFund = useCallback(() => {
+    navigate('/transaction/send-fund');
+  },
+  [navigate]
+  );
+
+  const onOpenBuyTokens = useCallback(() => {
+    navigate('/buy-tokens');
+  },
+  [navigate]
+  );
+
+  const onOpenReceive = useCallback(() => {
+    if (isAllAccount) {
+      activeModal(AccountSelectorModalId);
+    } else {
+      activeModal(ReceiveTokensSelectorModalId);
+    }
+  }, [activeModal, isAllAccount]);
+
+  const openSelectAccount = useCallback((account: AccountJson) => {
+    setReceiveSelectedResult({ selectedAccount: account.address });
+    activeModal(ReceiveTokensSelectorModalId);
+    inactiveModal(AccountSelectorModalId);
+  }, [activeModal, inactiveModal]);
+
+  const openSelectToken = useCallback((item: _ChainAsset) => {
+    setReceiveSelectedResult((prevState) => ({ ...prevState, selectedNetwork: item.originChain }));
+  }, []);
+
   useEffect(() => {
     setReceiveSelectedResult((prev) => ({
       ...prev,
-      selectedAcc: currentAccount?.address
+      selectedAccount: currentAccount?.address
     }));
   }, [currentAccount?.address]);
 
@@ -139,6 +173,9 @@ function Component (): React.ReactElement {
         <UpperBlock
           isPriceDecrease={isTotalBalanceDecrease}
           isShrink={isShrink}
+          onOpenBuyTokens={onOpenBuyTokens}
+          onOpenReceive={onOpenReceive}
+          onOpenSendFund={onOpenSendFund}
           totalChangePercent={totalBalanceInfo.change.percent}
           totalChangeValue={totalBalanceInfo.change.value}
           totalValue={totalBalanceInfo.convertedValue}
@@ -171,32 +208,22 @@ function Component (): React.ReactElement {
             size={'xs'}
             type={'ghost'}
           >
-            {/* todo: i18n this */}
-            Manage token list
+            {t('Manage token list')}
           </Button>
         </div>
       </div>
-      <ReceiveAccountSelector
-        className='token-account-selector'
-        id='receive-account-selector'
-        // eslint-disable-next-line react/jsx-no-bind
-        onSelectItem={(address: string) => {
-          setReceiveSelectedResult({ selectedAcc: address });
-          activeModal('receive-token-selector');
-        }}
-        selectedItem=''
+
+      <AccountSelectorModal
+        onSelectItem={openSelectAccount}
       />
 
-      <TokensSelector
-        address={selectedAcc || currentAccount?.address}
-        className='receive-token-selector'
-        id='receive-token-selector'
-        // eslint-disable-next-line react/jsx-no-bind
-        onChangeSelectedNetwork={(value) => setReceiveSelectedResult((prevState) => ({ ...prevState, selectedNetwork: value }))}
+      <TokensSelectorModal
+        address={selectedAccount || currentAccount?.address}
+        onSelectItem={openSelectToken}
       />
 
       <ReceiveQrModal
-        address={selectedAcc}
+        address={selectedAccount}
         selectedNetwork={selectedNetwork}
       />
     </div>
@@ -269,10 +296,6 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
       '.__scrolling-block': {
         display: 'flex'
       }
-    },
-
-    '.token-account-selector, .receive-token-selector': {
-      display: 'none'
     }
   });
 });

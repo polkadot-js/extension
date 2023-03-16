@@ -7,16 +7,17 @@ import { Button, Number } from '@subwallet/react-ui';
 import Icon from '@subwallet/react-ui/es/icon';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import { ArrowFatLinesDown, CaretLeft, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React, { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
   balanceValue: SwNumberProps['value'];
   symbol: string;
   isShrink: boolean;
-  sendFundSlug?: string;
   onClickBack: () => void;
+  onOpenSendFund: () => void;
+  onOpenBuyTokens: () => void;
+  onOpenReceive: () => void;
 };
 
 function isSupportBuyTokens (symbol: string) {
@@ -28,21 +29,10 @@ function Component (
     className = '',
     isShrink,
     onClickBack,
-    sendFundSlug,
+    onOpenBuyTokens,
+    onOpenReceive,
+    onOpenSendFund,
     symbol }: Props): React.ReactElement<Props> {
-  const navigate = useNavigate();
-  const openSendFund = useCallback(() => {
-    navigate('/transaction/send-fund', sendFundSlug ? ({ state: { slug: sendFundSlug } }) : undefined);
-  },
-  [navigate, sendFundSlug]
-  );
-
-  const openBuyTokens = useCallback(() => {
-    navigate('/buy-tokens', { state: { symbol } });
-  },
-  [navigate, symbol]
-  );
-
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
       <div className='__top'>
@@ -72,31 +62,38 @@ function Component (
         />
         <div className={'__action-button-container'}>
           <Button
-            icon={<Icon
-              phosphorIcon={ArrowFatLinesDown}
-              size={isShrink ? 'sm' : 'md'}
-            />}
+            icon={(
+              <Icon
+                phosphorIcon={ArrowFatLinesDown}
+                size={isShrink ? 'sm' : 'md'}
+              />
+            )}
+            onClick={onOpenReceive}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
           />
           <div className={'__button-space'} />
           <Button
-            icon={<Icon
-              phosphorIcon={PaperPlaneTilt}
-              size={isShrink ? 'sm' : 'md'}
-            />}
-            onClick={openSendFund}
+            icon={(
+              <Icon
+                phosphorIcon={PaperPlaneTilt}
+                size={isShrink ? 'sm' : 'md'}
+              />
+            )}
+            onClick={onOpenSendFund}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
           />
           <div className={'__button-space'} />
           <Button
             disabled={!isSupportBuyTokens(symbol)}
-            icon={<Icon
-              phosphorIcon={ShoppingCartSimple}
-              size={isShrink ? 'sm' : 'md'}
-            />}
-            onClick={openBuyTokens}
+            icon={(
+              <Icon
+                phosphorIcon={ShoppingCartSimple}
+                size={isShrink ? 'sm' : 'md'}
+              />
+            )}
+            onClick={onOpenBuyTokens}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
           />

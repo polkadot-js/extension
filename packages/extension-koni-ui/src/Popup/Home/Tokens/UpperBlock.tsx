@@ -1,14 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { Button, Icon, ModalContext, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
+import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
 import { ArrowFatLinesDown, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -17,38 +13,21 @@ type Props = ThemeProps & {
   totalChangePercent: SwNumberProps['value'];
   isPriceDecrease: boolean;
   isShrink: boolean;
+  onOpenSendFund: () => void;
+  onOpenBuyTokens: () => void;
+  onOpenReceive: () => void;
 };
 
 function Component (
   { className = '',
     isPriceDecrease,
     isShrink,
+    onOpenBuyTokens,
+    onOpenReceive,
+    onOpenSendFund,
     totalChangePercent,
     totalChangeValue,
     totalValue }: Props): React.ReactElement<Props> {
-  const { activeModal } = useContext(ModalContext);
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-  const navigate = useNavigate();
-  const openSendFund = useCallback(() => {
-    navigate('/transaction/send-fund');
-  },
-  [navigate]
-  );
-
-  const openBuyTokens = useCallback(() => {
-    navigate('/buy-tokens');
-  },
-  [navigate]
-  );
-
-  const openReceive = useCallback(() => {
-    if (currentAccount && isAccountAll(currentAccount.address)) {
-      activeModal('receive-account-selector');
-    } else {
-      activeModal('receive-token-selector');
-    }
-  }, [activeModal, currentAccount]);
-
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
       <Number
@@ -90,7 +69,7 @@ function Component (
             phosphorIcon={ArrowFatLinesDown}
             size={isShrink ? 'sm' : 'md' }
           />}
-          onClick={openReceive}
+          onClick={onOpenReceive}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
         />
@@ -100,7 +79,7 @@ function Component (
             phosphorIcon={PaperPlaneTilt}
             size={isShrink ? 'sm' : 'md' }
           />}
-          onClick={openSendFund}
+          onClick={onOpenSendFund}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
         />
@@ -112,7 +91,7 @@ function Component (
               size={isShrink ? 'sm' : 'md' }
             />
           }
-          onClick={openBuyTokens}
+          onClick={onOpenBuyTokens}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
         />

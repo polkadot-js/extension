@@ -5,20 +5,9 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
-import {
-  getBondedValidators,
-  getParaCurrentInflation,
-  InflationConfig,
-  isUnstakeAll,
-  PalletIdentityRegistration,
-  PalletParachainStakingDelegationRequestsScheduledRequest,
-  PalletParachainStakingDelegator,
-  ParachainStakingCandidateMetadata,
-  parseIdentity,
-  TuringOptimalCompoundFormat
-} from '@subwallet/extension-koni-base/api/staking/bonding/utils';
+import { getBondedValidators, getParaCurrentInflation, InflationConfig, isUnstakeAll, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -320,4 +309,10 @@ export async function getTuringCancelCompoundingExtrinsic (substrateApi: _Substr
   const apiPromise = await substrateApi.isReady;
 
   return apiPromise.api.tx.automationTime.cancelTask(taskId);
+}
+
+export async function getParaCancelWithdrawalExtrinsic (substrateApi: _SubstrateApi, selectedUnstaking: UnstakingInfo) {
+  const chainApi = await substrateApi.isReady;
+
+  return chainApi.api.tx.parachainStaking.cancelDelegationRequest(selectedUnstaking.validatorAddress);
 }

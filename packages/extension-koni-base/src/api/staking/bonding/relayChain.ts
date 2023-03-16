@@ -406,8 +406,50 @@ export async function getRelayWithdrawalExtrinsic (substrateApi: _SubstrateApi, 
   }
 }
 
+export async function getRelayCancelWithdrawalExtrinsic (substrateApi: _SubstrateApi, selectedUnstaking: UnstakingInfo) {
+  const chainApi = await substrateApi.isReady;
+
+  return chainApi.api.tx.staking.rebond(selectedUnstaking.claimable);
+}
+
+// Pooling txs
+
 export async function getPoolingClaimRewardExtrinsic (substrateApi: _SubstrateApi) {
   const chainApi = await substrateApi.isReady;
 
   return chainApi.api.tx.nominationPools.claimPayout();
+}
+
+export async function getPoolingBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, selectedPoolId: number, nominatorMetadata: NominatorMetadata | undefined) {
+  const chainApi = await substrateApi.isReady;
+  const bnActiveStake = new BN(nominatorMetadata?.activeStake || '0');
+
+  if (bnActiveStake.gt(BN_ZERO)) { // already joined a pool
+    return chainApi.api.tx.nominationPools.bondExtra({ FreeBalance: amount });
+  }
+
+  return chainApi.api.tx.nominationPools.join(amount, selectedPoolId);
+}
+
+export async function getPoolingUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: string, nominatorMetadata: NominatorMetadata) {
+  const chainApi = await substrateApi.isReady;
+
+  return chainApi.api.tx.nominationPools.unbond({ Id: nominatorMetadata.address }, amount);
+}
+
+export async function getPoolingWithdrawalExtrinsic (substrateApi: _SubstrateApi, nominatorMetadata: NominatorMetadata, isReBond: boolean) {
+  const chainApi = await substrateApi.isReady;
+
+  if (isReBond) {
+    return chainApi.api.tx.nominationPools.bondExtra('Rewards');
+  }
+
+  if (chainApi.api.tx.nominationPools.withdrawUnbonded.meta.args.length === 2) {
+    const _slashingSpans = (await chainApi.api.query.staking.slashingSpans(nominatorMetadata.address)).toHuman() as Record<string, any>;
+    const slashingSpanCount = _slashingSpans !== null ? _slashingSpans.spanIndex as string : '0';
+
+    return chainApi.api.tx.nominationPools.withdrawUnbonded({ Id: nominatorMetadata.address }, slashingSpanCount);
+  } else {
+    return chainApi.api.tx.nominationPools.withdrawUnbonded({ Id: nominatorMetadata.address });
+  }
 }

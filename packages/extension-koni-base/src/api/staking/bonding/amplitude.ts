@@ -237,3 +237,9 @@ export async function getAmplitudeClaimRewardExtrinsic (substrateApi: _Substrate
     chainApi.api.tx.parachainStaking.claimRewards()
   ]);
 }
+
+export async function getAmplitudeCancelWithdrawalExtrinsic (substrateApi: _SubstrateApi) {
+  const chainApi = await substrateApi.isReady;
+
+  return chainApi.api.tx.parachainStaking.cancelLeaveCandidates();
+}

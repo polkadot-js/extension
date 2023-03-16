@@ -3,10 +3,9 @@
 
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountWithNameSkeleton, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
-import AccountWithNameSkeleton from '@subwallet/extension-koni-ui/components/Account/Item/AccountWithNameSkeleton';
-import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field';
+import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
+import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks/form/useForwardInputRef';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Input, InputRef } from '@subwallet/react-ui';

@@ -1,10 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
@@ -310,7 +309,7 @@ const Component: React.FC<Props> = (props: Props) => {
             block={true}
             className='account-button'
             contentAlign='left'
-            disabled={account.isExternal}
+            disabled={account.isExternal || deriving}
             icon={(
               <BackgroundIcon
                 backgroundColor={token['green-6']}
@@ -328,6 +327,7 @@ const Component: React.FC<Props> = (props: Props) => {
             block={true}
             className={CN('account-button', 'remove-button')}
             contentAlign='left'
+            disabled={deriving}
             icon={(
               <BackgroundIcon
                 backgroundColor={token.colorError}

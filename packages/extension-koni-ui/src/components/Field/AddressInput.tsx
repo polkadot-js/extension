@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
-import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
+import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks/form/useForwardInputRef';
 import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';

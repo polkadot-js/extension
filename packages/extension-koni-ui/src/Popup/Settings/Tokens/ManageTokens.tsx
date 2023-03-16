@@ -4,8 +4,8 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import TokenToggleItem from '@subwallet/extension-koni-ui/components/TokenItem/TokenToggleItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -21,8 +21,6 @@ import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
-import Layout from '../../../components/Layout';
 
 type Props = ThemeProps
 enum FilterValue {

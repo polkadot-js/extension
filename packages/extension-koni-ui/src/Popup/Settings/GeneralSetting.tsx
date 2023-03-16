@@ -3,7 +3,7 @@
 
 import { BrowserConfirmationType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { languageOptions } from '@subwallet/extension-base/constants/i18n';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveBrowserConfirmationType } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';

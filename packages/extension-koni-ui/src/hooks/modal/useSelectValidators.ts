@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field';
+import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useState } from 'react';
 

@@ -6,8 +6,6 @@ import AccountCardSelection from '@subwallet/extension-koni-ui/components/Accoun
 import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import AccountBriefInfo from '@subwallet/extension-koni-ui/components/Account/Info/AccountBriefInfo';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
-import { ConnectWebsiteModal } from '@subwallet/extension-koni-ui/components/Layout/parts/ConnectWebsiteModal';
-import SelectAccountFooter from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Footer';
 import { SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/auth/useGetCurrentAuth';
 import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/auth/useGetCurrentTab';
@@ -29,6 +27,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+
+import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
+import SelectAccountFooter from '../SelectAccount/Footer';
 
 type Props = ThemeProps
 

@@ -1,16 +1,19 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { Form, Icon, Input } from '@subwallet/react-ui';
+import { useForm } from '@subwallet/react-ui/es/form/Form';
+import CN from 'classnames';
 import { FileArrowDown, Info } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
@@ -24,12 +27,15 @@ const FooterIcon = (
   />
 );
 
+const formName = 'import-private-key-form';
+const fieldName = 'private-key';
+
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
   const timeOutRef = useRef<NodeJS.Timer>();
-  const goHome = useDefaultNavigate().goHome;
+  const onComplete = useCompleteCreateAccount();
 
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [validating, setValidating] = useState(false);
@@ -37,8 +43,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [changed, setChanged] = useState(false);
   const [privateKey, setPrivateKey] = useState('');
   const [autoCorrect, setAutoCorrect] = useState('');
+  const [form] = useForm();
 
   const accountName = useGetDefaultAccountName();
+
+  // Auto focus field
+  useFocusFormItem(form, fieldName);
 
   const onChange: ChangeEventHandler<HTMLTextAreaElement> = useCallback((event) => {
     setChanged(true);
@@ -58,7 +68,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         types: [EVM_ACCOUNT_TYPE]
       })
         .then(() => {
-          goHome();
+          onComplete();
         })
         .catch((error: Error): void => {
           setValidateState({
@@ -70,7 +80,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }
-  }, [privateKey, accountName, goHome]);
+  }, [privateKey, accountName, onComplete]);
 
   useEffect(() => {
     let amount = true;
@@ -128,55 +138,60 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [privateKey, changed]);
 
   return (
-    <Layout.Base
-      rightFooterButton={{
-        children: validating ? t('Validating') : t('Import account'),
-        icon: FooterIcon,
-        onClick: onSubmit,
-        disabled: !privateKey || !!validateState.status,
-        loading: validating || loading
-      }}
-      showBackButton={true}
-      showSubHeader={true}
-      subHeaderBackground='transparent'
-      subHeaderCenter={true}
-      subHeaderIcons={[
-        {
-          icon: <Icon
-            phosphorIcon={Info}
-            size='sm'
-          />
-        }
-      ]}
-      subHeaderPaddingVertical={true}
-      title={t<string>('Import via Private Key')}
-    >
-      <div className={className}>
-        <div className='description'>
-          {t('To import an existing wallet, please enter the private key here')}
+    <PageWrapper className={CN(className)}>
+      <Layout.WithSubHeaderOnly
+        rightFooterButton={{
+          children: validating ? t('Validating') : t('Import account'),
+          icon: FooterIcon,
+          onClick: onSubmit,
+          disabled: !privateKey || !!validateState.status,
+          loading: validating || loading
+        }}
+        subHeaderIcons={[
+          {
+            icon: (
+              <Icon
+                phosphorIcon={Info}
+                size='md'
+              />
+            )
+          }
+        ]}
+        title={t<string>('Import via Private Key')}
+      >
+        <div className='container'>
+          <div className='description'>
+            {t('To import an existing wallet, please enter the private key here')}
+          </div>
+          <Form
+            className='form-container'
+            form={form}
+            name={formName}
+          >
+            <Form.Item
+              help={validateState.message}
+              name={fieldName}
+              validateStatus={validateState.status}
+            >
+              <Input.TextArea
+                className='private-key-input'
+                onChange={onChange}
+                placeholder={t('Enter or paste private key')}
+                value={autoCorrect || privateKey || ''}
+              />
+            </Form.Item>
+          </Form>
         </div>
-        <Form className='form-container'>
-          <Form.Item validateStatus={validateState.status}>
-            <Input.TextArea
-              className='private-key-input'
-              onChange={onChange}
-              placeholder={t('Enter or paste private key')}
-              value={autoCorrect || privateKey || ''}
-            />
-          </Form.Item>
-          <Form.Item
-            help={validateState.message}
-            validateStatus={validateState.status}
-          />
-        </Form>
-      </div>
-    </Layout.Base>
+      </Layout.WithSubHeaderOnly>
+    </PageWrapper>
   );
 };
 
 const ImportPrivateKey = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    padding: token.padding,
+    '.container': {
+      padding: token.padding
+    },
 
     '.description': {
       padding: `0 ${token.padding}px`,

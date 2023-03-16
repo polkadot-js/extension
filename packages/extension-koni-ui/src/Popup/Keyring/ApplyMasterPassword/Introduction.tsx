@@ -44,7 +44,7 @@ const IntroductionMigratePassword = styled(Component)<Props>(({ theme: { token }
     '.page-icon': {
       display: 'flex',
       justifyContent: 'center',
-      marginTop: token.controlHeightLG,
+      marginTop: token.margin,
       '--page-icon-color': token.colorSecondary
     },
 
@@ -54,7 +54,7 @@ const IntroductionMigratePassword = styled(Component)<Props>(({ theme: { token }
       fontWeight: token.fontWeightStrong,
       fontSize: token.fontSizeHeading3,
       lineHeight: token.lineHeightHeading3,
-      color: token.colorTextBase
+      color: token.colorText
     },
 
     '.description': {

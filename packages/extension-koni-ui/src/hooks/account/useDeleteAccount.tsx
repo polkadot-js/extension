@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useConfirmModal from '@subwallet/extension-koni-ui/hooks/useConfirmModal';
+import useConfirmModal from '@subwallet/extension-koni-ui/hooks/modal/useConfirmModal';
 import { SwModalFuncProps } from '@subwallet/react-ui';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';

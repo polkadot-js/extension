@@ -3,11 +3,12 @@
 
 import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
 import { Layout } from '@subwallet/extension-koni-ui/components';
+import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
+import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { checkPublicAndPrivateKey, createAccountWithSecret } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
@@ -53,7 +54,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { className } = props;
   const { t } = useTranslation();
-  const { goHome } = useDefaultNavigate();
+  const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -79,49 +80,55 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onSubmit = useCallback((_account: QrAccount) => {
     setLoading(true);
+    inactiveModal(modalId);
+    setValidateState({
+      message: '',
+      status: 'success'
+    });
 
     if (_account && JSON.stringify(account) !== JSON.stringify(_account)) {
       setAccount(_account);
 
-      checkAccount(_account)
-        .then((isEthereum) => {
-          createAccountWithSecret({ name: accountName,
-            isAllow: true,
-            secretKey: _account.content,
-            publicKey: _account.genesisHash,
-            isEthereum: isEthereum })
-            .then(({ errors, success }) => {
-              if (success) {
-                inactiveModal(modalId);
-                setValidateState({});
-                goHome();
-              } else {
+      setTimeout(() => {
+        checkAccount(_account)
+          .then((isEthereum) => {
+            createAccountWithSecret({ name: accountName,
+              isAllow: true,
+              secretKey: _account.content,
+              publicKey: _account.genesisHash,
+              isEthereum: isEthereum })
+              .then(({ errors, success }) => {
+                if (success) {
+                  setValidateState({});
+                  onComplete();
+                } else {
+                  setValidateState({
+                    message: errors[0].message,
+                    status: 'error'
+                  });
+                }
+              })
+              .catch((error: Error) => {
                 setValidateState({
-                  message: errors[0].message,
+                  message: error.message,
                   status: 'error'
                 });
-              }
-            })
-            .catch((error: Error) => {
-              setValidateState({
-                message: error.message,
-                status: 'error'
+              })
+              .finally(() => {
+                setLoading(false);
               });
-            })
-            .finally(() => {
-              setLoading(false);
+          })
+          .catch((error: Error) => {
+            setValidateState({
+              message: error.message,
+              status: 'error'
             });
-        })
-        .catch((error: Error) => {
-          setValidateState({
-            message: error.message,
-            status: 'error'
           });
-        });
+      }, 300);
     } else {
       setLoading(false);
     }
-  }, [account, accountName, goHome, inactiveModal]);
+  }, [account, accountName, onComplete, inactiveModal]);
 
   const openCamera = useCallback(() => {
     activeModal(modalId);
@@ -145,77 +152,84 @@ const Component: React.FC<Props> = (props: Props) => {
   }, []);
 
   return (
-    <Layout.Base
-      rightFooterButton={{
-        children: loading ? t('Creating') : t('Scan the QR code'),
-        icon: FooterIcon,
-        onClick: openCamera,
-        loading: loading
-      }}
-      showBackButton={true}
-      showSubHeader={true}
-      subHeaderBackground='transparent'
-      subHeaderCenter={true}
-      subHeaderIcons={[
-        {
-          icon: (
-            <Icon
-              phosphorIcon={Info}
-              size='sm'
-            />
-          )
-        }
-      ]}
-      subHeaderPaddingVertical={true}
-      title={t('Import your wallet by QR')}
-    >
-      <div className={CN(className, 'container')}>
-        <div className='sub-title'>
-          {t('Please make sure that you have granted SubWallet the access to your device\'s camera.')}
-        </div>
-        <div className='logo'>
-          <DualLogo
-            leftLogo={(
-              <Image
-                height={56}
-                shape='squircle'
-                src={ChainLogoMap.subwallet}
-                width={56}
-              />
-            )}
-            linkIcon={(
+    <PageWrapper className={CN(className)}>
+      <Layout.WithSubHeaderOnly
+        rightFooterButton={{
+          children: loading ? t('Creating') : t('Scan the QR code'),
+          icon: FooterIcon,
+          onClick: openCamera,
+          loading: loading
+        }}
+        subHeaderIcons={[
+          {
+            icon: (
               <Icon
-                phosphorIcon={Scan}
+                phosphorIcon={Info}
                 size='md'
               />
-            )}
-            rightLogo={(
-              <Image
-                height={56}
-                shape='squircle'
-                src={ChainLogoMap.subwallet}
-                width={56}
-              />
-            )}
+            )
+          }
+        ]}
+        title={t('Import your wallet by QR')}
+      >
+        <div className={CN(className, 'container')}>
+          <div className='sub-title'>
+            {t('Please make sure that you have granted SubWallet the access to your device\'s camera.')}
+          </div>
+          <div className='logo'>
+            <DualLogo
+              leftLogo={(
+                <Image
+                  height={56}
+                  shape='squircle'
+                  src={ChainLogoMap.subwallet}
+                  width={56}
+                />
+              )}
+              linkIcon={(
+                <Icon
+                  phosphorIcon={Scan}
+                  size='md'
+                />
+              )}
+              rightLogo={(
+                <Image
+                  height={56}
+                  shape='squircle'
+                  src={ChainLogoMap.subwallet}
+                  width={56}
+                />
+              )}
+            />
+          </div>
+          <div className='instruction'>
+            <div className='instruction'>
+              <span>{t('Click the "Scan the QR code" button, or read ')}&nbsp;</span>
+              <a
+                className='link'
+                href='#'
+              >
+                {t('this instructions')}
+              </a>
+              <span>,&nbsp;</span>
+              <span>{t('for more details.')}</span>
+            </div>
+          </div>
+          <Form.Item
+            help={validateState.message}
+            validateStatus={validateState.status}
+          />
+          <SwQrScanner
+            className={className}
+            id={modalId}
+            isError={!!validateState.status}
+            onError={onError}
+            onSuccess={onSuccess}
+            overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
           />
         </div>
-        <div className='instruction'>
-          {t('Click the "Scan the QR code" button, or read this instruction for more details.')}
-        </div>
-        <Form.Item
-          help={validateState.message}
-          validateStatus={validateState.status}
-        />
-        <SwQrScanner
-          className={className}
-          id={modalId}
-          isError={!!validateState.status}
-          onError={onError}
-          onSuccess={onSuccess}
-          overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
-        />
-      </div>
-    </Layout.Base>
+      </Layout.WithSubHeaderOnly>
+    </PageWrapper>
   );
 };
 
@@ -245,6 +259,11 @@ const ImportQrCode = styled(Component)<Props>(({ theme: { token } }: Props) => {
       lineHeight: token.lineHeightHeading6,
       color: token.colorTextDescription,
       textAlign: 'center'
+    },
+
+    '.link': {
+      color: token.colorLink,
+      textDecoration: 'underline'
     }
   };
 });

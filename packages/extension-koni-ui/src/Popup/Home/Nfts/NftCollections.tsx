@@ -5,8 +5,8 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useGetNftByAccount from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetNftByAccount';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -132,7 +132,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           displayGrid={true}
           enableSearchInput={true}
           gridGap={'14px'}
-          ignoreScrollbar={nftCollections.length > 2}
+          ignoreScrollbar={nftCollections.length > 4}
           list={nftCollections}
           minColumnWidth={'160px'}
           renderItem={renderNftCollection}

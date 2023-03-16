@@ -5,6 +5,7 @@ import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
+import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -72,7 +73,7 @@ const getFilteredList = (items: ValidatorDataType[], filters: string[]) => {
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, id = 'validator-selector', label, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
+  const { chain, className = '', disabled, id = 'validator-selector', label, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
   const items = useGetValidatorList(chain, 'nominate') as ValidatorDataType[];
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [sortSelection, setSortSelection] = useState<string>('');
@@ -80,14 +81,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const filteredList = useMemo(() => {
     return getFilteredList(items, selectedFilters);
   }, [items, selectedFilters]);
+  const { onSelect } = useSelectModalInputHelper(props, ref);
 
   useExcludeModal(id);
 
   const { t } = useTranslation();
-
-  const _onSelectItem = useCallback((value: string) => {
-    onChange && onChange({ target: { value } });
-  }, [onChange]);
 
   const searchFunction = useCallback((item: ValidatorDataType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -119,45 +117,54 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     inactiveModal(FILTER_MODAL_ID);
   };
 
-  const closeSortingModal = () => {
-    inactiveModal(SORTING_MODAL_ID);
-  };
+  const closeSortingModal = useCallback(
+    () => {
+      inactiveModal(SORTING_MODAL_ID);
+    },
+    [inactiveModal]
+  );
 
-  const renderSelected = (item: ValidatorDataType) => {
-    return (
-      <div className={'__selected-item'}>
-        <div className={'__selected-item-name common-text'}>
-          {item.identity}
+  const renderSelected = useCallback(
+    (item: ValidatorDataType) => {
+      return (
+        <div className={'__selected-item'}>
+          <div className={'__selected-item-name common-text'}>
+            {item.identity}
+          </div>
+
+          <div className={'__selected-item-right-part common-text'}>
+            <Button
+              icon={<Icon
+                phosphorIcon={Book}
+                size='sm'
+              />}
+              onClick={onClickBookBtn}
+              size='xs'
+              type='ghost'
+            />
+            <Button
+              icon={<Icon
+                phosphorIcon={Lightning}
+                size='sm'
+              />}
+              onClick={onClickLightningBtn}
+              size='xs'
+              type='ghost'
+            />
+          </div>
         </div>
+      );
+    },
+    [onClickBookBtn, onClickLightningBtn]
+  );
 
-        <div className={'__selected-item-right-part common-text'}>
-          <Button
-            icon={<Icon
-              phosphorIcon={Book}
-              size='sm'
-            />}
-            onClick={onClickBookBtn}
-            size='xs'
-            type='ghost'
-          />
-          <Button
-            icon={<Icon
-              phosphorIcon={Lightning}
-              size='sm'
-            />}
-            onClick={onClickLightningBtn}
-            size='xs'
-            type='ghost'
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const onChangeSortOpt = (value: string) => {
-    setSortSelection(value);
-    closeSortingModal();
-  };
+  const onChangeSortOpt = useCallback(
+    (value: string) => {
+      setSortSelection(value);
+      closeSortingModal();
+    },
+    [closeSortingModal]
+  );
 
   return (
     <>
@@ -173,7 +180,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         itemKey={'address'}
         items={filteredList}
         label={label}
-        onSelect={_onSelectItem}
+        onSelect={onSelect}
         placeholder={placeholder || t('Select validator')}
         prefix={
           <Avatar
@@ -183,7 +190,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           />
         }
         renderItem={renderItem}
-        // eslint-disable-next-line react/jsx-no-bind
         renderSelected={renderSelected}
         rightIconProps={{
           icon: <Icon phosphorIcon={SortAscending} />,
@@ -210,9 +216,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       <SortingModal
         id={SORTING_MODAL_ID}
-        // eslint-disable-next-line react/jsx-no-bind
         onCancel={closeSortingModal}
-        // eslint-disable-next-line react/jsx-no-bind
         onChangeOption={onChangeSortOpt}
         optionSelection={sortSelection}
         options={sortingOptions}

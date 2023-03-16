@@ -9,10 +9,10 @@ import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrap
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import TokenToggleItem from '@subwallet/extension-koni-ui/components/TokenItem/TokenToggleItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyList';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, SwList } from '@subwallet/react-ui';
@@ -166,7 +166,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           className={'manage_tokens__container'}
           enableSearchInput={true}
           gridGap={'14px'}
-          ignoreScrollbar={lazyItems.length > 2}
+          ignoreScrollbar={lazyItems.length > 7}
           list={lazyItems}
           minColumnWidth={'172px'}
           mode={'boxed'}

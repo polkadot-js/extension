@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, InputRef, Logo, SelectModal } from '@subwallet/react-ui';
 import TokenItem from '@subwallet/react-ui/es/web3-block/token-item';
@@ -23,25 +24,19 @@ interface Props extends ThemeProps, BasicInputWrapper {
   prefixShape?: 'circle' | 'none' | 'squircle' | 'square';
 }
 
-function Component ({ className = '', disabled, id = 'token-select', items, label, onChange, placeholder, prefixShape, showChainInSelected = false, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+  const { className = '', disabled, id = 'token-select', items, label, placeholder, showChainInSelected = false, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const renderTokenSelected = useCallback((item: TokenItemType) => {
     return (
       <div className={'__selected-item'}>
         {item.symbol}
-        {showChainInSelected && (<span className={'ml-xxs'}>({item.originChain})</span>)}
+        {showChainInSelected}
       </div>
     );
   }, [showChainInSelected]);
-
-  const _onChange = useCallback(
-    (value: string) => {
-      onChange && onChange({ target: { value } });
-    },
-    [onChange]
-  );
-
+  const { onSelect } = useSelectModalInputHelper(props, ref);
   const searchFunction = useCallback((item: TokenItemType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
@@ -77,7 +72,7 @@ function Component ({ className = '', disabled, id = 'token-select', items, labe
           type='phosphor'
           weight={'fill'}
         />}
-        subName={item.originChain}
+        subName={''}
         subNetworkKey={item.originChain}
         symbol={item.symbol.toLowerCase()}
       />
@@ -93,7 +88,7 @@ function Component ({ className = '', disabled, id = 'token-select', items, labe
       itemKey={'slug'}
       items={items}
       label={label}
-      onSelect={_onChange}
+      onSelect={onSelect}
       placeholder={placeholder || t('Select token')}
       prefix={value !== '' && chainLogo}
       renderItem={renderItem}
@@ -102,6 +97,7 @@ function Component ({ className = '', disabled, id = 'token-select', items, labe
       searchPlaceholder={t('Search chain')}
       searchableMinCharactersCount={2}
       selected={value || ''}
+      title={label}
     />
   );
 }

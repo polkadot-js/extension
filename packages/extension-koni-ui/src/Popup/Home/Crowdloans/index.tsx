@@ -6,8 +6,8 @@ import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan';
 import { Button, Checkbox, CrowdloanItem, Icon, SwList, SwModal, Tag } from '@subwallet/react-ui';
@@ -139,10 +139,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [allCrowdloanList, hasMore, paging]);
 
   // filter
-  const onClickActionBtn = (e?: SyntheticEvent) => {
-    e && e.stopPropagation();
-    activeModal(FILTER_MODAL_ID);
-  };
+  const onClickActionBtn = useCallback(
+    (e?: SyntheticEvent) => {
+      e && e.stopPropagation();
+      activeModal(FILTER_MODAL_ID);
+    },
+    [activeModal]
+  );
 
   const onChangeFilterOpt = useCallback((e: CheckboxChangeEvent) => {
     const changedValue = e.target.value as FilterValue;
@@ -195,7 +198,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   // render item
-  const getParaStateLabel = (paraState?: CrowdloanParaState) => {
+  const getParaStateLabel = useCallback((paraState?: CrowdloanParaState) => {
     if (!paraState) {
       return '';
     }
@@ -213,39 +216,45 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     return '';
-  };
+  }, [t]);
 
-  const renderItem = (item: CrowdloanItemType) => {
-    return (
-      <CrowdloanItem
-        balanceValue={item.contribute}
-        className={'crowdloan-item'}
-        convertedBalanceValue={item.convertedContribute}
-        crowdloanStatusTag={
-          <Tag color={getTagColor(item.paraState)}>{getParaStateLabel(item.paraState)}</Tag>
-        }
-        decimal={0}
-        displayNetwork={item.chainDisplayName}
-        displayToken={item.symbol}
-        isShowSubLogo={true}
-        key={`${item.symbol}_${item.slug}`}
-        networkKey={item.slug}
-        paraChain={item.relayParentDisplayName}
-        subNetworkKey={getRelayParentKey(item.relayParentDisplayName)}
-      />
-    );
-  };
+  const renderItem = useCallback(
+    (item: CrowdloanItemType) => {
+      return (
+        <CrowdloanItem
+          balanceValue={item.contribute}
+          className={'crowdloan-item'}
+          convertedBalanceValue={item.convertedContribute}
+          crowdloanStatusTag={
+            <Tag color={getTagColor(item.paraState)}>{getParaStateLabel(item.paraState)}</Tag>
+          }
+          decimal={0}
+          displayNetwork={item.chainDisplayName}
+          displayToken={item.symbol}
+          isShowSubLogo={true}
+          key={`${item.symbol}_${item.slug}`}
+          networkKey={item.slug}
+          paraChain={item.relayParentDisplayName}
+          subNetworkKey={getRelayParentKey(item.relayParentDisplayName)}
+        />
+      );
+    },
+    [getParaStateLabel]
+  );
 
   // empty list
-  const emptyCrowdloanList = () => {
-    return (
-      <EmptyList
-        emptyMessage={t('Your crowdloan will appear here!')}
-        emptyTitle={t('No crowdloan')}
-        phosphorIcon={Rocket}
-      />
-    );
-  };
+  const emptyCrowdloanList = useCallback(
+    () => {
+      return (
+        <EmptyList
+          emptyMessage={t('Your crowdloan will appear here!')}
+          emptyTitle={t('No crowdloan')}
+          phosphorIcon={Rocket}
+        />
+      );
+    },
+    [t]
+  );
 
   return (
     <PageWrapper
@@ -262,17 +271,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           enableSearchInput={true}
+          ignoreScrollbar={items.length > 4}
           list={filteredList}
-          // eslint-disable-next-line react/jsx-no-bind
           onClickActionBtn={onClickActionBtn}
           pagination={{
             hasMore,
             loadMore: loadMoreItems
           }}
-          // eslint-disable-next-line react/jsx-no-bind
           renderItem={renderItem}
           renderOnScroll={false}
-          // eslint-disable-next-line react/jsx-no-bind
           renderWhenEmpty={emptyCrowdloanList}
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
@@ -330,6 +337,14 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
       display: 'flex',
       flexDirection: 'column',
       gap: token.marginLG
+    },
+
+    '.ant-sw-list-section': {
+      height: '100%'
+    },
+
+    '.ant-sw-list-wrapper': {
+      overflow: 'auto'
     }
   });
 });

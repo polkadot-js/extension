@@ -3,16 +3,16 @@
 
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import AccountWithNameSkeleton from '@subwallet/extension-koni-ui/components/Account/Item/AccountWithNameSkeleton';
 import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
+import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/useGetSupportedLedger';
+import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -52,7 +52,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const supportedLedger = useGetSupportedLedger();
-  const { goHome } = useDefaultNavigate();
+  const onComplete = useCompleteCreateAccount();
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
@@ -138,7 +138,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onNextStep = useCallback(() => {
     setFirstStep(false);
-    onLoadMore(isLoadMore, page)();
+
+    if (!page) {
+      onLoadMore(isLoadMore, page)();
+    }
   }, [isLoadMore, onLoadMore, page]);
 
   const onClickItem = useCallback((selectedAccounts: ImportLedgerItem[], item: ImportLedgerItem): () => void => {
@@ -208,7 +211,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }))
       })
         .then(() => {
-          goHome();
+          onComplete();
         })
         .catch((e: Error) => {
           console.log(e);
@@ -217,7 +220,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setIsSubmitting(false);
         });
     }, 300);
-  }, [selectedAccounts, selectedChain, goHome]);
+  }, [selectedAccounts, selectedChain, onComplete]);
 
   useEffect(() => {
     setSelectedAccounts([]);
@@ -228,127 +231,124 @@ const Component: React.FC<Props> = (props: Props) => {
   const isConnected = !isLocked && !isLoading && !!ledger;
 
   return (
-    <Layout.Base
-      className={className}
-      onBack={firstStep ? undefined : onPreviousStep}
-      rightFooterButton={{
-        children: t('Connect Ledger device'),
-        icon: FooterIcon,
-        disabled: !isConnected || (!firstStep && !selectedAccounts.length),
-        onClick: firstStep ? onNextStep : onSubmit,
-        loading: isSubmitting || isLoadMore
-      }}
-      showBackButton={true}
-      showSubHeader={true}
-      subHeaderBackground='transparent'
-      subHeaderCenter={true}
-      subHeaderIcons={[
-        {
-          icon: (
-            <Icon
-              phosphorIcon={Info}
-              size='sm'
-            />
-          )
-        }
-      ]}
-      subHeaderPaddingVertical={true}
-      title={t('Connect Ledger device')}
-    >
-      <div className={CN('container')}>
-        <div className='sub-title'>
-          {t('Connect and unlock your Ledger, then open the DApps on your Ledger.')}
-        </div>
-        {
-          firstStep && (
-            <>
-              <div className='logo'>
-                <DualLogo
-                  leftLogo={(
-                    <Image
-                      height={56}
-                      shape='squircle'
-                      src={LogosMap.subwallet}
-                      width={56}
-                    />
-                  )}
-                  rightLogo={(
-                    <Image
-                      height={56}
-                      shape='squircle'
-                      src={LogosMap.ledger}
-                      width={56}
-                    />
-                  )}
-                />
-              </div>
-              <ChainSelector
-                items={networks}
-                label={t('Select network')}
-                onChange={onChainChange}
-                value={chain}
+    <PageWrapper className={CN(className)}>
+      <Layout.WithSubHeaderOnly
+        onBack={firstStep ? undefined : onPreviousStep}
+        rightFooterButton={{
+          children: t('Connect Ledger device'),
+          icon: FooterIcon,
+          disabled: !isConnected || (!firstStep && !selectedAccounts.length),
+          onClick: firstStep ? onNextStep : onSubmit,
+          loading: isSubmitting || isLoadMore
+        }}
+        subHeaderIcons={[
+          {
+            icon: (
+              <Icon
+                phosphorIcon={Info}
+                size='md'
               />
-              <Button
-                block={true}
-                className={CN('ledger-button', { connected: isConnected })}
-                contentAlign='left'
-                icon={(
-                  <BackgroundIcon
-                    backgroundColor='var(--icon-bg-color)'
-                    phosphorIcon={isConnected ? Swatches : CircleNotch}
-                    size='sm'
-                    weight='fill'
-                  />
-                )}
-                onClick={refresh}
-                schema='secondary'
-              >
-                <div className='ledger-button-content'>
-                  <span>
-                    {t(isConnected
-                      ? 'Connected ledger'
-                      : warning
-                        ? 'Please unlock your Ledger'
-                        : error || (
-                          ledger
-                            ? 'Waiting'
-                            : 'Searching Ledger device'
-                        )
-                    )}
-                  </span>
-                  {
-                    isConnected && (
-                      <Icon
-                        className='check-icon'
-                        phosphorIcon={CheckCircle}
-                        size='md'
-                        weight='fill'
+            )
+          }
+        ]}
+        title={t('Connect Ledger device')}
+      >
+        <div className={CN('container')}>
+          <div className='sub-title'>
+            {t('Connect and unlock your Ledger, then open the DApps on your Ledger.')}
+          </div>
+          {
+            firstStep && (
+              <>
+                <div className='logo'>
+                  <DualLogo
+                    leftLogo={(
+                      <Image
+                        height={56}
+                        shape='squircle'
+                        src={LogosMap.subwallet}
+                        width={56}
                       />
-                    )
-                  }
+                    )}
+                    rightLogo={(
+                      <Image
+                        height={56}
+                        shape='squircle'
+                        src={LogosMap.ledger}
+                        width={56}
+                      />
+                    )}
+                  />
                 </div>
-              </Button>
-            </>
-          )
-        }
-        {
-          !firstStep && (
-            <SwList.Section
-              className='list-container'
-              displayRow={true}
-              list={ledgerAccounts}
-              pagination={{
-                hasMore: !isLoadMore,
-                loadMore: () => console.log(12)
-              }}
-              renderItem={renderItem(selectedAccounts)}
-              renderOnScroll={true}
-              rowGap='var(--list-gap)'
-            />
-          )
-        }
-      </div>
-    </Layout.Base>
+                <ChainSelector
+                  items={networks}
+                  label={t('Select network')}
+                  onChange={onChainChange}
+                  value={chain}
+                />
+                <Button
+                  block={true}
+                  className={CN('ledger-button', { connected: isConnected })}
+                  contentAlign='left'
+                  icon={(
+                    <BackgroundIcon
+                      backgroundColor='var(--icon-bg-color)'
+                      phosphorIcon={isConnected ? Swatches : CircleNotch}
+                      size='sm'
+                      weight='fill'
+                    />
+                  )}
+                  onClick={refresh}
+                  schema='secondary'
+                >
+                  <div className='ledger-button-content'>
+                    <span>
+                      {t(isConnected
+                        ? 'Connected ledger'
+                        : warning
+                          ? 'Please unlock your Ledger'
+                          : error || (
+                            ledger
+                              ? 'Waiting'
+                              : 'Searching Ledger device'
+                          )
+                      )}
+                    </span>
+                    {
+                      isConnected && (
+                        <Icon
+                          className='check-icon'
+                          phosphorIcon={CheckCircle}
+                          size='md'
+                          weight='fill'
+                        />
+                      )
+                    }
+                  </div>
+                </Button>
+              </>
+            )
+          }
+          {
+            !firstStep && (
+              <SwList.Section
+                className='list-container'
+                displayRow={true}
+                ignoreScrollbar={ledgerAccounts && ledgerAccounts.length > 5}
+                list={ledgerAccounts}
+                pagination={{
+                  hasMore: !isLoadMore,
+                  loadMore: () => console.log(12)
+                }}
+                renderItem={renderItem(selectedAccounts)}
+                renderOnScroll={true}
+                rowGap='var(--list-gap)'
+              />
+            )
+          }
+        </div>
+      </Layout.WithSubHeaderOnly>
+    </PageWrapper>
   );
 };
 
@@ -361,7 +361,7 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
     },
 
     '.container': {
-      padding: `${token.padding}px ${token.padding}px `,
+      padding: `${token.padding}px ${token.padding}px 0`,
       overflow: 'hidden',
       height: '100%',
       display: 'flex',

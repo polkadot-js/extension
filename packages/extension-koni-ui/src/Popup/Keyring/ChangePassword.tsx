@@ -1,16 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Form, Icon, Input } from '@subwallet/react-ui';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import CN from 'classnames';
-import { Info, ShieldCheck } from 'phosphor-react';
+import { FloppyDiskBack, Info, ShieldCheck } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -32,6 +33,7 @@ interface ChangePasswordFormState {
 
 const newPasswordRules = renderBasePasswordRules('New password');
 const confirmPasswordRules = renderBaseConfirmPasswordRules(FormFieldName.PASSWORD);
+const formName = 'change-password-form';
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
@@ -89,108 +91,107 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     form.resetFields([FormFieldName.CONFIRM_PASSWORD]);
   }, [form]);
 
+  useFocusFormItem(form, FormFieldName.OLD_PASSWORD);
+
   return (
-    <Layout.Base
-      className={CN(className)}
-      leftFooterButton={{
-        children: t('Cancel'),
-        onClick: goHome,
-        disabled: loading
-      }}
-      onBack={goBack}
-      rightFooterButton={{
-        children: t('Save'),
-        onClick: form.submit,
-        loading: loading,
-        disabled: isDisabled
-      }}
-      showBackButton={true}
-      showSubHeader={true}
-      subHeaderBackground='transparent'
-      subHeaderCenter={true}
-      subHeaderIcons={[
-        {
+    <PageWrapper className={CN(className)}>
+      <Layout.WithSubHeaderOnly
+        onBack={goBack}
+        rightFooterButton={{
+          children: t('Save'),
+          onClick: form.submit,
+          loading: loading,
+          disabled: isDisabled,
           icon: (
             <Icon
-              phosphorIcon={Info}
-              size='sm'
+              phosphorIcon={FloppyDiskBack}
+              weight='fill'
             />
           )
-        }
-      ]}
-      subHeaderPaddingVertical={true}
-      title={t('Change password')}
-    >
-      <div className='body-container'>
-        <div className='page-icon'>
-          <PageIcon
-            color='var(--page-icon-color)'
-            iconProps={{
-              weight: 'fill',
-              phosphorIcon: ShieldCheck
+        }}
+        subHeaderIcons={[
+          {
+            icon: (
+              <Icon
+                phosphorIcon={Info}
+                size='md'
+              />
+            )
+          }
+        ]}
+        title={t('Change password')}
+      >
+        <div className='body-container'>
+          <div className='page-icon'>
+            <PageIcon
+              color='var(--page-icon-color)'
+              iconProps={{
+                weight: 'fill',
+                phosphorIcon: ShieldCheck
+              }}
+            />
+          </div>
+          <div className='title'>
+            {t('Change your password')}
+          </div>
+          <Form
+            form={form}
+            initialValues={{
+              [FormFieldName.OLD_PASSWORD]: '',
+              [FormFieldName.PASSWORD]: '',
+              [FormFieldName.CONFIRM_PASSWORD]: ''
             }}
-          />
+            name={formName}
+            onFieldsChange={onUpdate}
+            onFinish={onSubmit}
+          >
+            <Form.Item
+              hideError={true}
+              name={FormFieldName.OLD_PASSWORD}
+              rules={[
+                {
+                  message: 'Password is required',
+                  required: true
+                }
+              ]}
+            >
+              <Input
+                disabled={loading}
+                placeholder={t('Current password')}
+                type='password'
+              />
+            </Form.Item>
+            <Form.Item
+              hideError={true}
+              name={FormFieldName.PASSWORD}
+              rules={newPasswordRules}
+            >
+              <Input
+                disabled={loading}
+                onChange={onChangePassword}
+                placeholder={t('New password')}
+                type='password'
+              />
+            </Form.Item>
+            <Form.Item
+              hideError={true}
+              name={FormFieldName.CONFIRM_PASSWORD}
+              rules={confirmPasswordRules}
+            >
+              <Input
+                disabled={loading}
+                placeholder={t('Confirm new password')}
+                type='password'
+              />
+            </Form.Item>
+            <Form.Item
+              help={submitError}
+              validateStatus={submitError && 'error'}
+            />
+          </Form>
         </div>
-        <div className='title'>
-          {t('Change your password')}
-        </div>
-        <Form
-          form={form}
-          initialValues={{
-            [FormFieldName.OLD_PASSWORD]: '',
-            [FormFieldName.PASSWORD]: '',
-            [FormFieldName.CONFIRM_PASSWORD]: ''
-          }}
-          name='change-password-form'
-          onFieldsChange={onUpdate}
-          onFinish={onSubmit}
-        >
-          <Form.Item
-            hideError={true}
-            name={FormFieldName.OLD_PASSWORD}
-            rules={[
-              {
-                message: 'Password is required',
-                required: true
-              }
-            ]}
-          >
-            <Input
-              disabled={loading}
-              placeholder={t('Current password')}
-              type='password'
-            />
-          </Form.Item>
-          <Form.Item
-            hideError={true}
-            name={FormFieldName.PASSWORD}
-            rules={newPasswordRules}
-          >
-            <Input
-              disabled={loading}
-              onChange={onChangePassword}
-              placeholder={t('New password')}
-              type='password'
-            />
-          </Form.Item>
-          <Form.Item
-            hideError={true}
-            name={FormFieldName.CONFIRM_PASSWORD}
-            rules={confirmPasswordRules}
-          >
-            <Input
-              disabled={loading}
-              placeholder={t('Confirm new password')}
-              type='password'
-            />
-          </Form.Item>
-          <Form.Item
-            help={submitError}
-            validateStatus={submitError && 'error'}
-          />
-        </Form>
-      </div>
-    </Layout.Base>
+      </Layout.WithSubHeaderOnly>
+    </PageWrapper>
   );
 };
 

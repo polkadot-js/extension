@@ -55,21 +55,22 @@ function Component (
             <>
               <div className={'ant-balance-item-balance-info-wrapper'}>
                 <Number
-                  className={'__converted-value'}
-                  decimal={0}
-                  decimalOpacity={0.45}
-                  prefix='$'
-                  value={total.convertedValue}
-                />
-                <Number
                   className={'__value'}
                   decimal={0}
                   decimalOpacity={0.45}
-                  intOpacity={0.45}
-                  size={12}
                   suffix={symbol}
-                  unitOpacity={0.45}
                   value={total.value}
+                />
+                <Number
+                  className={'__converted-value'}
+                  decimal={0}
+                  decimalOpacity={0.45}
+                  intOpacity={0.45}
+                  prefix='$'
+                  size={12}
+
+                  unitOpacity={0.45}
+                  value={total.convertedValue}
                 />
               </div>
 
@@ -110,12 +111,12 @@ export const TokenBalanceSelectionItem = styled(Component)<Props>(({ theme: { to
       lineHeight: 'inherit'
     },
 
-    '.__converted-value': {
+    '.__value': {
       lineHeight: token.lineHeightLG,
       fontSize: token.fontSizeLG
     },
 
-    '.__value': {
+    '.__converted-value': {
       lineHeight: token.lineHeightSM,
       fontSize: token.fontSizeSM
     },

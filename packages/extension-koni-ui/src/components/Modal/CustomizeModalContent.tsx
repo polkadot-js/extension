@@ -3,17 +3,15 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
+import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, NetworkItem, SwList } from '@subwallet/react-ui';
+import { NetworkItem, SwList } from '@subwallet/react-ui';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import CN from 'classnames';
-import { MagnifyingGlass, WifiHigh, WifiSlash } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { MagnifyingGlass } from 'phosphor-react';
+import React, { useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps
@@ -22,47 +20,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
+  const chainInfoList = useChainInfoWithState();
 
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
-  const chainStateMap = useSelector((state: RootState) => state.chainStore.chainStateMap);
-
-  const chainInfoList = useMemo(() => {
-    return Object.values(chainInfoMap);
-  }, [chainInfoMap]);
-
-  const renderNetworkItem = useCallback((chainInfo: _ChainInfo) => {
-    const chainState = chainStateMap[chainInfo.slug];
-
-    return (
-      <ChainItemFooter
-        chainInfo={chainInfo}
-        chainState={chainState}
-      />
-    );
-  }, [chainStateMap]);
-
-  const renderChainConnectionStatus = useCallback((chainInfo: _ChainInfo) => {
-    const chainState = chainStateMap[chainInfo.slug];
-
-    if (chainState.connectionStatus === _ChainConnectionStatus.CONNECTED) {
-      return (
-        <Icon
-          phosphorIcon={WifiHigh}
-          weight='fill'
-        />
-      );
-    }
-
-    return (
-      <Icon
-        phosphorIcon={WifiSlash}
-        weight='fill'
-      />
-    );
-  }, [chainStateMap]);
-
-  const renderChainItem = useCallback((chainInfo: _ChainInfo) => {
-    const { symbol } = _getChainNativeTokenBasicInfo(chainInfo);
+  const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
+    const conectSymbol = (chainInfo.connectionStatus === _ChainConnectionStatus.CONNECTED) ? '__connected__' : '__disconnected__';
 
     return (
       <NetworkItem
@@ -70,12 +31,12 @@ const Component: React.FC<Props> = (props: Props) => {
         isShowSubLogo={true}
         key={chainInfo.slug}
         name={chainInfo.name}
-        rightItem={renderNetworkItem(chainInfo)}
-        subIcon={renderChainConnectionStatus(chainInfo)}
-        symbol={symbol.toLowerCase()}
+        networkKey={chainInfo.slug}
+        rightItem={<ChainItemFooter chainInfo={chainInfo} />}
+        subSymbol={conectSymbol}
       />
     );
-  }, [renderChainConnectionStatus, renderNetworkItem]);
+  }, []);
 
   const chainSearchFunc = useCallback((item: _ChainInfo, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -107,27 +68,33 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [t, token]);
 
   return (
-    <div className={CN(className)}>
-      {/* // todo: i18n this */}
-      <div className={'__group-label'}>Chains</div>
-
-      <SwList.Section
-        displayRow
-        enableSearchInput
-        list={chainInfoList}
-        renderItem={renderChainItem}
-        renderWhenEmpty={emptyChainList}
-        rowGap={'8px'}
-        searchFunction={chainSearchFunc}
-        searchMinCharactersCount={2}
-        searchPlaceholder='Chain name' // todo: i18n this
-      />
-    </div>
+    <SwList.Section
+      className={CN(className)}
+      displayRow
+      enableSearchInput
+      ignoreScrollbar={chainInfoList.length > 5}
+      list={chainInfoList}
+      renderItem={renderChainItem}
+      renderWhenEmpty={emptyChainList}
+      rowGap={'8px'}
+      searchFunction={chainSearchFunc}
+      searchMinCharactersCount={2}
+      searchPlaceholder={t('Chain name')}
+    />
   );
 };
 
 const CustomizeModalContent = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.ant-sw-list-search-input': {
+      paddingBottom: token.paddingXS
+    },
+
+    '.ant-network-item-content': {
+      paddingTop: token.paddingXS,
+      paddingBottom: token.paddingXS
+    },
+
     '.manage_chain__empty_container': {
       marginTop: 20,
       display: 'flex',

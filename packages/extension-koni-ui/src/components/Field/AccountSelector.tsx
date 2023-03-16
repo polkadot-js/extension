@@ -6,7 +6,8 @@ import { isAccountAll } from '@subwallet/extension-base/utils';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
@@ -25,10 +26,12 @@ function defaultFiler (account: AccountJson): boolean {
   return !isAccountAll(account.address);
 }
 
-const Component = ({ className = '', disabled, filter, id = 'account-selector', label, onChange, placeholder, readOnly, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
+const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
+  const { className = '', disabled, filter, id = 'account-selector', label, placeholder, readOnly, value } = props;
   const items = useSelector((state: RootState) => state.accountState.accounts)
     .filter(filter || defaultFiler);
   const { t } = useTranslation();
+  const { onSelect } = useSelectModalInputHelper(props, ref);
 
   const renderSelected = useCallback((item: AccountJson) => {
     return (
@@ -43,10 +46,6 @@ const Component = ({ className = '', disabled, filter, id = 'account-selector', 
       </div>
     );
   }, []);
-
-  const _onSelectItem = useCallback((value: string) => {
-    onChange && onChange({ target: { value } });
-  }, [onChange]);
 
   const searchFunction = useCallback((item: AccountJson, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -79,7 +78,7 @@ const Component = ({ className = '', disabled, filter, id = 'account-selector', 
         itemKey={'address'}
         items={items}
         label={label}
-        onSelect={_onSelectItem}
+        onSelect={onSelect}
         placeholder={placeholder || t('Select account')}
         prefix={
           <Avatar
@@ -94,6 +93,7 @@ const Component = ({ className = '', disabled, filter, id = 'account-selector', 
         searchPlaceholder={t('Search name')}
         searchableMinCharactersCount={2}
         selected={value || ''}
+        title={label}
       />
     </>
   );

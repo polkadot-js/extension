@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useCopy from '@subwallet/extension-koni-ui/hooks/useCopy';
+import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { WordItem } from '@subwallet/extension-koni-ui/types/account';
 import { convertToWords } from '@subwallet/extension-koni-ui/util/seedPhrase';

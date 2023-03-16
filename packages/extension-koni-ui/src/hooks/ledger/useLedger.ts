@@ -9,7 +9,7 @@ import { Ledger } from '@polkadot/hw-ledger';
 import { LedgerAddress } from '@polkadot/hw-ledger/types';
 import { assert } from '@polkadot/util';
 
-import useTranslation from './useTranslation';
+import useTranslation from '../common/useTranslation';
 
 interface StateBase {
   isLedgerCapable: boolean;

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/useGetCurrentTab';
+import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/auth/useGetCurrentTab';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';

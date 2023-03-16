@@ -5,8 +5,9 @@ import { Layout } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
+import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
+import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import useCopy from '@subwallet/extension-koni-ui/hooks/useCopy';
 import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
@@ -20,8 +21,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-
-import { isArray } from '@polkadot/util';
 
 type Props = ThemeProps;
 
@@ -73,6 +72,8 @@ const FinishIcon = (
   />
 );
 
+const formName = 'account-export-form';
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
@@ -92,7 +93,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [isDisabled, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const [privateKey, setPrivateKey] = useState<string>('');
   const [publicKey, setPublicKey] = useState<string>('');
@@ -118,16 +118,6 @@ const Component: React.FC<Props> = (props: Props) => {
       .some((value) => !!value);
 
     const empty = allFields.map((data) => data.value as unknown).some((value) => !value);
-
-    const passwordChange = changedFields.find((data) =>
-      isArray(data.name)
-        ? data.name.includes(FormFieldName.PASSWORD)
-        : data.name === FormFieldName.PASSWORD
-    );
-
-    if (passwordChange) {
-      setError('');
-    }
 
     setIsDisable(error || empty);
   }, []);
@@ -216,13 +206,13 @@ const Component: React.FC<Props> = (props: Props) => {
           setFirstStep(false);
         })
         .catch((e: Error) => {
-          setError(e.message);
+          form.setFields([{ name: FormFieldName.PASSWORD, errors: [e.message] }]);
         })
         .finally(() => {
           setLoading(false);
         });
     }, 500);
-  }, [account]);
+  }, [account, form]);
 
   const onPressType = useCallback((value: ExportType) => {
     return () => {
@@ -282,6 +272,8 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [account?.address, form]);
 
+  useFocusFormItem(form, FormFieldName.PASSWORD);
+
   if (!account) {
     return null;
   }
@@ -320,12 +312,11 @@ const Component: React.FC<Props> = (props: Props) => {
                 [FormFieldName.PASSWORD]: '',
                 [FormFieldName.TYPES]: []
               }}
-              name='account-export-form'
+              name={formName}
               onFieldsChange={onUpdate}
               onFinish={onSubmit}
             >
               <Form.Item
-                className='form-item-no-error'
                 name={FormFieldName.PASSWORD}
                 rules={[
                   {
@@ -382,10 +373,6 @@ const Component: React.FC<Props> = (props: Props) => {
                   }
                 </div>
               </Form.Item>
-              <Form.Item
-                help={error}
-                validateStatus={error && 'error'}
-              />
             </Form>
           )
         }
@@ -432,6 +419,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     <div className='result-title'>{t(titleMap[ExportType.QR_CODE])}</div>
                     <div className='qr-area'>
                       <QRCode
+                        errorLevel='Q'
                         size={264}
                         value={qrData}
                       />

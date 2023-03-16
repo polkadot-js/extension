@@ -4,7 +4,7 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
@@ -99,6 +99,12 @@ function Component ({ className = '', customInput, id, label, onSelectItem, sele
 
 export const ReceiveAccountSelector = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '&.account-selector-modal': {
+      '.ant-sw-list-search-input': {
+        paddingBottom: token.paddingXS
+      }
+    },
+
     '&.account-selector-input': {
       '.__selected-item': {
         display: 'flex',

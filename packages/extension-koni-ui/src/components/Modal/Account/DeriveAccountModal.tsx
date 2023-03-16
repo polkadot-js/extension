@@ -8,10 +8,10 @@ import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account
 import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { CREATE_ACCOUNT_MODAL, DERIVE_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
-import useClickOutSide from '@subwallet/extension-koni-ui/hooks/useClickOutSide';
-import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { deriveAccountV3 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -122,6 +122,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <SwList.Section
         displayRow={true}
         enableSearchInput={true}
+        ignoreScrollbar={filtered && filtered.length > 6}
         list={filtered}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}
@@ -138,7 +139,15 @@ const DeriveAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
     '--row-gap': token.sizeXS,
 
     '.ant-sw-modal-body': {
-      padding: `${token.padding}px 0`
+      padding: `${token.padding}px 0 0`
+    },
+
+    '.ant-sw-list-section': {
+      maxHeight: 450
+    },
+
+    '.ant-sw-list-wrapper': {
+      overflow: 'auto'
     },
 
     '.ant-web3-block': {

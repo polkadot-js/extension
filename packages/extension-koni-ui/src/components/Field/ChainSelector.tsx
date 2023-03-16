@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
 import { Icon, InputRef, Logo, NetworkItem, SelectModal } from '@subwallet/react-ui';
@@ -14,22 +15,17 @@ interface Props extends ThemeProps, BasicInputWrapper {
   items: ChainItemType[]
 }
 
-function Component ({ className = '', disabled, id = 'address-input', items, label, onChange, placeholder, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+  const { className = '', disabled, id = 'address-input', items, label, placeholder, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
+  const { onSelect } = useSelectModalInputHelper(props, ref);
 
   const renderChainSelected = useCallback((item: ChainItemType) => {
     return (
       <div className={'__selected-item'}>{item.name}</div>
     );
   }, []);
-
-  const _onChange = useCallback(
-    (value: string) => {
-      onChange && onChange({ target: { value } });
-    },
-    [onChange]
-  );
 
   const searchFunction = useCallback((item: ChainItemType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -75,7 +71,7 @@ function Component ({ className = '', disabled, id = 'address-input', items, lab
       itemKey={'slug'}
       items={items}
       label={label}
-      onSelect={_onChange}
+      onSelect={onSelect}
       placeholder={placeholder || t('Select chain')}
       prefix={value !== '' && chainLogo}
       renderItem={renderItem}
@@ -84,6 +80,7 @@ function Component ({ className = '', disabled, id = 'address-input', items, lab
       searchPlaceholder={t('Search chain')}
       searchableMinCharactersCount={2}
       selected={value || ''}
+      title={label}
     />
   );
 }

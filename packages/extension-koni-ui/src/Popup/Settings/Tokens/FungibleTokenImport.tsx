@@ -4,22 +4,22 @@
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
+import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetContractSupportedChains';
-import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
-import { detectThemeAvatar } from '@subwallet/extension-koni-ui/util';
-import { ButtonProps, Col, Field, Form, Image, Input, NetworkItem, Row, SelectModal } from '@subwallet/react-ui';
+import { ButtonProps, Col, Field, Form, Image, NetworkItem, Row, SelectModal } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import Icon from '@subwallet/react-ui/es/icon';
 import PageIcon from '@subwallet/react-ui/es/page-icon';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import { CheckCircle, Coin, Info, QrCode } from 'phosphor-react';
+import { CheckCircle, Coin, Info } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -291,42 +291,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
-  const contractAddressIcon = useCallback(() => {
-    const contractAddress = formRef.current?.getFieldValue('contractAddress') as string;
-    const theme = detectThemeAvatar(contractAddress);
-
-    if (contractAddress) {
-      return (
-        <SwAvatar
-          identPrefix={42}
-          size={token.fontSizeXL}
-          theme={theme}
-          value={contractAddress}
-        />
-      );
-    }
-
-    return <SwAvatar
-      identPrefix={42}
-      size={token.fontSizeXL}
-      theme={'beachball'}
-      value={''}
-    />;
-  }, [token.fontSizeXL]);
-
-  const contractAddressQrIcon = useCallback(() => {
-    return (
-      <div className={'nft_import__Qr'}>
-        <Icon
-          customSize={'20px'}
-          phosphorIcon={QrCode}
-          type='phosphor'
-          weight={'light'}
-        />
-      </div>
-    );
-  }, []);
-
   const tokenDecimalsPrefix = useCallback(() => {
     const contractAddress = formRef.current?.getFieldValue('contractAddress') as string;
 
@@ -440,11 +404,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               name={'contractAddress'}
               rules={[{ validator: contractAddressValidator }]}
             >
-              <Input
+              <AddressInput
                 disabled={selectedTokenType === ''}
-                label={t<string>('Token contract address')}
-                prefix={contractAddressIcon()}
-                suffix={contractAddressQrIcon()}
+                label={t('Token contract address')}
+                showScanner={true}
               />
             </Form.Item>
 

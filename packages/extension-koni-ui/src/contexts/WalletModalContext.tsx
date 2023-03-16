@@ -2,16 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AttachAccountModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, NewAccountModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components/Modal';
+import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/CustomizeModal';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
-import { Debugger } from '@subwallet/extension-koni-ui/Popup/Debugger';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Button, Icon, ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
+import { ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Bug } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
-import styled from 'styled-components';
 
 interface Props {
   children: React.ReactNode;
@@ -50,21 +48,9 @@ export const usePredefinedModal = () => {
   return { openPModal, isOpenPModal };
 };
 
-const DebugIcon = <Icon
-  phosphorIcon={Bug}
-  type={'phosphor'}
-/>;
-
-const DebugTrigger = styled.div(({ theme }) => ({
-  position: 'absolute',
-  right: 16,
-  bottom: 90
-}));
-
 export const WalletModalContext = ({ children }: Props) => {
   const { activeList, activeModal, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { openPModal } = usePredefinedModal();
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
 
   const hasActiveModal = useMemo(() => !!activeList.length, [activeList.length]);
@@ -90,32 +76,12 @@ export const WalletModalContext = ({ children }: Props) => {
     });
   }, [setSearchParams]);
 
-  const openDebugger = useCallback(() => {
-    openPModal('debugger');
-  }, [openPModal]);
-
   return <>
     <div
       id='popup-container'
       style={{ zIndex: hasActiveModal ? undefined : -1 }}
     />
     {children}
-    <DebugTrigger>
-      <Button
-        block
-        icon={DebugIcon}
-        onClick={openDebugger}
-        shape='round'
-        size='md'
-      />
-    </DebugTrigger>
-    <SwModal
-      id={'debugger'}
-      onCancel={onCloseModal}
-      title={'Debugger'}
-    >
-      <Debugger />
-    </SwModal>
     <SwModal
       className={'modal-full'}
       closable={false}
@@ -132,5 +98,6 @@ export const WalletModalContext = ({ children }: Props) => {
     <NewAccountModal />
     <DeriveAccountModal />
     <RequestCreatePasswordModal />
+    <CustomizeModal />
   </>;
 };

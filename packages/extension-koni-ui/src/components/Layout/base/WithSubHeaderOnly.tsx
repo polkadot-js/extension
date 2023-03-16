@@ -7,7 +7,7 @@ import React from 'react';
 
 type Props = Omit<
 LayoutBaseProps,
-'headerBackground' | 'headerIcons' | 'headerLeft' | 'headerCenter' | 'headerOnClickLeft' | 'headerPaddingVertical'
+'headerBackground' | 'headerIcons' | 'headerLeft' | 'headerCenter' | 'headerOnClickLeft' | 'headerPaddingVertical' | 'showHeader'
 > & Required<Pick<LayoutBaseProps, 'title'>>
   ;
 

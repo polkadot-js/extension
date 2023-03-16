@@ -3,19 +3,19 @@
 
 import { _getBlockExplorerFromChain, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
-import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getScanExplorerAddressInfoUrl } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { Button, Icon, Logo, ModalContext, QRCode, SwModal } from '@subwallet/react-ui';
 import AccountItem from '@subwallet/react-ui/es/web3-block/account-item';
 import CN from 'classnames';
-import { CopySimple, Info } from 'phosphor-react';
+import { CaretLeft, CopySimple, GlobeHemisphereWest, Info } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   address?: string;
@@ -26,7 +26,6 @@ const modalId = RECEIVE_QR_MODAL;
 
 const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Props) => {
   const { t } = useTranslation();
-  const { token } = useTheme() as Theme;
   const { inactiveModal } = useContext(ModalContext);
   const notify = useNotification();
   const chainInfo = useFetchChainInfo(selectedNetwork || '');
@@ -77,13 +76,19 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
   return (
     <SwModal
       className={CN(className)}
+      closeIcon={
+        <Icon
+          phosphorIcon={CaretLeft}
+          size='md'
+        />
+      }
       id={modalId}
       onCancel={onCancel}
       rightIconProps={{
         icon: (
           <Icon
             phosphorIcon={Info}
-            size='sm'
+            size='md'
           />
         )
       }}
@@ -98,38 +103,50 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
           />
         </div>
 
-        <AccountItem
-          address={formattedAddress}
-          addressPreLength={7}
-          addressSufLength={7}
-          avatarIdentPrefix={42}
-          className={'receive-account-item'}
-          leftItem={
-            <Logo
-              network={chainInfo?.slug}
-              size={24}
-            />
-          }
-          rightItem={
-            <CopyToClipboard text={formattedAddress}>
-              <Button
-                className='__copy-button'
-                icon={<Icon
-                  iconColor={token.colorTextLight4}
-                  phosphorIcon={CopySimple}
-                  size='sm'
-                />}
-                onClick={onClickCopyBtn}
-                size='xs'
-                type='ghost'
+        <div className={'receive-account-item-wrapper'}>
+          <AccountItem
+            address={formattedAddress}
+            addressPreLength={7}
+            addressSufLength={7}
+            avatarIdentPrefix={42}
+            className={'receive-account-item'}
+            leftItem={
+              <Logo
+                network={chainInfo?.slug}
+                size={24}
               />
-            </CopyToClipboard>
-          }
-        />
+            }
+            rightItem={
+              <CopyToClipboard text={formattedAddress}>
+                <Button
+                  className='__copy-button'
+                  icon={
+                    <Icon
+                      phosphorIcon={CopySimple}
+                      size='sm'
+                    />
+                  }
+                  onClick={onClickCopyBtn}
+                  size='xs'
+                  type='ghost'
+                />
+              </CopyToClipboard>
+            }
+          />
+        </div>
 
         <Button
           block
+          className={'__view-on-explorer'}
           disabled={!scanExplorerAddressUrl}
+          icon={
+            <Icon
+              customSize={'28px'}
+              phosphorIcon={GlobeHemisphereWest}
+              size='sm'
+              weight={'fill'}
+            />
+          }
           onClick={handleClickViewOnExplorer}
         >{t('View on explorer')}</Button>
       </>
@@ -157,22 +174,37 @@ const ReceiveQrModal = styled(Component)<Props>(({ theme: { token } }: Props) =>
       }
     },
 
+    '.ant-web3-block-middle-item': {
+      width: 'auto'
+    },
+
+    '.__view-on-explorer': {
+      fontSize: token.fontSizeLG
+    },
+
+    '.ant-account-item': {
+      backgroundColor: token.colorBgSecondary
+    },
+
+    '.receive-account-item-wrapper': {
+      display: 'flex',
+      marginTop: token.margin,
+      marginBottom: token.margin,
+      justifyContent: 'center'
+    },
+
     '.receive-account-item': {
       position: 'relative',
-      marginTop: 16,
-      marginBottom: 16,
+      paddingTop: token.paddingXXS,
+      paddingBottom: token.paddingXXS,
 
       '.ant-account-item-address': {
         fontSize: token.fontSize,
         lineHeight: token.lineHeight,
         color: token.colorTextLight4,
-        fontWeight: token.bodyFontWeight
+        fontWeight: token.bodyFontWeight,
+        paddingRight: token.paddingXS
       }
-    },
-
-    '.__copy-button': {
-      position: 'absolute',
-      right: 4
     },
 
     '.receive-qr-code-wrapper': {
@@ -180,6 +212,14 @@ const ReceiveQrModal = styled(Component)<Props>(({ theme: { token } }: Props) =>
       paddingTop: 16,
       flex: 1,
       justifyContent: 'center'
+    },
+
+    '.__copy-button': {
+      color: token.colorTextLight3,
+
+      '&:hover': {
+        color: token.colorTextLight2
+      }
     }
   };
 });

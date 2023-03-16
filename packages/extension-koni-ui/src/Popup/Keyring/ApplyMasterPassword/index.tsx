@@ -3,10 +3,10 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
 import { forgetAccount, keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import MigrateDone from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword/Done';
 import IntroductionMigratePassword from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword/Introduction';
@@ -54,6 +54,29 @@ const removeIcon = (
     phosphorIcon={Trash}
   />
 );
+
+const formName = 'migrate-password-form';
+const passwordInputId = `${formName}_${FormFieldName.PASSWORD}`;
+
+const focusPassword = () => {
+  setTimeout(() => {
+    const element = document.getElementById(passwordInputId);
+
+    if (element) {
+      element.focus();
+    }
+  }, 10);
+};
+
+const selectPassword = () => {
+  setTimeout(() => {
+    const element = document.getElementById(passwordInputId);
+
+    if (element) {
+      (element as HTMLInputElement).select();
+    }
+  }, 10);
+};
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -109,6 +132,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }).then((res) => {
           if (!res.status) {
             form.setFields([{ name: FormFieldName.PASSWORD, errors: [res.errors[0]] }]);
+            selectPassword();
             setIsError(true);
           } else {
             setIsError(false);
@@ -116,6 +140,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }).catch((e: Error) => {
           setIsError(true);
           form.setFields([{ name: FormFieldName.PASSWORD, errors: [e.message] }]);
+          selectPassword();
         }).finally(() => {
           setLoading(false);
         });
@@ -210,122 +235,130 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [needMigrate.length, deleting]);
 
   useEffect(() => {
-    setCurrentAccount((prevState) => {
-      if (deleting) {
-        return prevState;
-      }
-
-      if (!prevState) {
-        setIsDisable(true);
-        form.resetFields();
-
-        return needMigrate[0];
-      } else {
-        const exists = needMigrate.find((acc) => acc.address === prevState.address);
-
-        if (exists) {
+    if (step === 'Migrate') {
+      setCurrentAccount((prevState) => {
+        if (deleting) {
           return prevState;
-        } else {
-          setIsDisable(true);
+        }
+
+        if (!prevState) {
           form.resetFields();
+          setIsDisable(true);
 
           return needMigrate[0];
+        } else {
+          const exists = needMigrate.find((acc) => acc.address === prevState.address);
+
+          form.resetFields();
+          setIsDisable(true);
+
+          if (exists) {
+            return prevState;
+          } else {
+            return needMigrate[0];
+          }
         }
-      }
-    });
-  }, [form, needMigrate, deleting]);
+      });
+
+      focusPassword();
+    } else {
+      form.resetFields();
+      setIsDisable(true);
+    }
+  }, [form, needMigrate, deleting, step]);
 
   return (
-    <Layout.WithSubHeaderOnly
-      className={CN(className)}
-      onBack={onBack}
-      rightFooterButton={{
-        ...footerButton,
-        disabled: step === 'Migrate' && isDisabled && deleting,
-        loading: step === 'Migrate' && loading
-      }}
-      showBackButton={step !== 'Introduction'}
-      subHeaderIcons={[
-        {
-          icon: (
-            <Icon
-              phosphorIcon={Info}
-              size='sm'
-            />
-          )
-        }
-      ]}
-      title={title}
-    >
-      { step === 'Introduction' && <IntroductionMigratePassword /> }
-      { step === 'Done' && <MigrateDone accounts={canMigrate} /> }
-      { step === 'Migrate' && currentAccount && (
-        <div className='body-container'>
-          <div className='account-avatar'>
-            <SwAvatar
-              size={token.sizeLG * 4}
-              theme={currentAccount.type === 'ethereum' ? 'ethereum' : 'polkadot'}
-              value={currentAccount.address}
-            />
-          </div>
-          <Form
-            form={form}
-            initialValues={{
-              [FormFieldName.PASSWORD]: ''
-            }}
-            name='migrate-password-form'
-            onFieldsChange={onUpdate}
-            onFinish={onSubmit}
-          >
-            <Form.Item>
-              <Field
-                content={currentAccount.name || ''}
-                label={t('Account name')}
-                placeholder={t('Account name')}
+    <PageWrapper className={CN(className)}>
+      <Layout.WithSubHeaderOnly
+        onBack={onBack}
+        rightFooterButton={{
+          ...footerButton,
+          disabled: step === 'Migrate' && (isDisabled || deleting),
+          loading: step === 'Migrate' && loading
+        }}
+        showBackButton={step !== 'Introduction'}
+        subHeaderIcons={[
+          {
+            icon: (
+              <Icon
+                phosphorIcon={Info}
+                size='md'
               />
-            </Form.Item>
-            <Form.Item>
-              <Field
-                content={toShort(currentAccount.address || '', 15, 17)}
-                label={t('Account address')}
-                placeholder={t('Account address')}
+            )
+          }
+        ]}
+        title={title}
+      >
+        {step === 'Introduction' && <IntroductionMigratePassword />}
+        {step === 'Done' && <MigrateDone accounts={canMigrate} />}
+        {step === 'Migrate' && currentAccount && (
+          <div className='body-container'>
+            <div className='account-avatar'>
+              <SwAvatar
+                size={token.sizeLG * 4}
+                theme={currentAccount.type === 'ethereum' ? 'ethereum' : 'polkadot'}
+                value={currentAccount.address}
               />
-            </Form.Item>
-            <Form.Item
-              className='form-item-no-error'
-              name={FormFieldName.PASSWORD}
-              rules={[
-                {
-                  message: 'Current password is required',
-                  required: true
-                }
-              ]}
+            </div>
+            <Form
+              form={form}
+              initialValues={{
+                [FormFieldName.PASSWORD]: ''
+              }}
+              name={formName}
+              onFieldsChange={onUpdate}
+              onFinish={onSubmit}
             >
-              <Input
-                label={t('Current password')}
-                type='password'
-              />
-            </Form.Item>
-            {
-              isError && (
-                <Form.Item
-                  className='form-item-button'
-                >
-                  <Button
-                    icon={removeIcon}
-                    loading={deleting}
-                    onClick={onDelete}
-                    type='ghost'
+              <Form.Item>
+                <Field
+                  content={currentAccount.name || ''}
+                  label={t('Account name')}
+                  placeholder={t('Account name')}
+                />
+              </Form.Item>
+              <Form.Item>
+                <Field
+                  content={toShort(currentAccount.address || '', 15, 17)}
+                  label={t('Account address')}
+                  placeholder={t('Account address')}
+                />
+              </Form.Item>
+              <Form.Item
+                hideError={true}
+                name={FormFieldName.PASSWORD}
+                rules={[
+                  {
+                    message: 'Current password is required',
+                    required: true
+                  }
+                ]}
+              >
+                <Input
+                  label={t('Current password')}
+                  type='password'
+                />
+              </Form.Item>
+              {
+                isError && (
+                  <Form.Item
+                    className='form-item-button'
                   >
-                    {t('Remove this account')}
-                  </Button>
-                </Form.Item>
-              )
-            }
-          </Form>
-        </div>
-      )}
-    </Layout.WithSubHeaderOnly>
+                    <Button
+                      icon={removeIcon}
+                      loading={deleting}
+                      onClick={onDelete}
+                      type='ghost'
+                    >
+                      {t('Remove this account')}
+                    </Button>
+                  </Form.Item>
+                )
+              }
+            </Form>
+          </div>
+        )}
+      </Layout.WithSubHeaderOnly>
+    </PageWrapper>
   );
 };
 

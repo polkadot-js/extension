@@ -6,11 +6,11 @@ import { _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base
 import Layout from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useConfirmModal from '@subwallet/extension-koni-ui/hooks/modal/useConfirmModal';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainAssetInfo';
-import useConfirmModal from '@subwallet/extension-koni-ui/hooks/useConfirmModal';
-import useNotification from '@subwallet/extension-koni-ui/hooks/useNotification';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { deleteCustomAssets } from '@subwallet/extension-koni-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail, INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
@@ -166,7 +166,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           displayGrid={true}
           enableSearchInput={true}
           gridGap={'14px'}
-          ignoreScrollbar={nftList.length > 2}
+          ignoreScrollbar={nftList.length > 4}
           list={nftList}
           minColumnWidth={'160px'}
           renderItem={renderNft}

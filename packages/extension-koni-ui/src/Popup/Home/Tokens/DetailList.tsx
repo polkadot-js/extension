@@ -8,15 +8,16 @@ import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeCo
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { DetailModal } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailUpperBlock';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { TokenDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import classNames from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -43,41 +44,71 @@ const TokenDetailModalId = 'tokenDetailModalId';
 
 function Component (): React.ReactElement {
   const [isShrink, setIsShrink] = useState<boolean>(false);
-  const goBack = useDefaultNavigate().goBack;
-  const location = useLocation();
+  const { goBack, goHome } = useDefaultNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
-  const [routeParams] = useState<TokenDetailParam>(location.state as TokenDetailParam);
-  const { symbol,
-    tokenGroup: currentTokenGroup,
-    tokenSlug: currentTokenSlug } = routeParams;
+  const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
+  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
+  const { slug: tokenGroupSlug } = useParams();
   const { accountBalance: { tokenBalanceMap, tokenGroupBalanceMap }, tokenGroupStructure: { tokenGroupMap } } = useContext(HomeContext);
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const tokenBalanceValue = useMemo<SwNumberProps['value']>(() => {
-    if (!!currentTokenGroup && !!tokenGroupBalanceMap[currentTokenGroup]) {
-      return tokenGroupBalanceMap[currentTokenGroup].total.convertedValue;
+  const symbol = useMemo<string>(() => {
+    if (tokenGroupSlug) {
+      if (multiChainAssetMap[tokenGroupSlug]) {
+        return multiChainAssetMap[tokenGroupSlug].symbol;
+      }
+
+      if (assetRegistryMap[tokenGroupSlug]) {
+        return assetRegistryMap[tokenGroupSlug].symbol;
+      }
     }
 
-    if (!!currentTokenSlug && !!tokenBalanceMap[currentTokenSlug]) {
-      return tokenBalanceMap[currentTokenSlug].total.convertedValue;
+    return '';
+  }, [tokenGroupSlug, assetRegistryMap, multiChainAssetMap]);
+
+  const tokenBalanceValue = useMemo<SwNumberProps['value']>(() => {
+    if (tokenGroupSlug) {
+      if (tokenGroupBalanceMap[tokenGroupSlug]) {
+        return tokenGroupBalanceMap[tokenGroupSlug].total.convertedValue;
+      }
+
+      if (tokenBalanceMap[tokenGroupSlug]) {
+        return tokenBalanceMap[tokenGroupSlug].total.convertedValue;
+      }
     }
 
     return '0';
-  }, [currentTokenGroup, currentTokenSlug, tokenBalanceMap, tokenGroupBalanceMap]);
+  }, [tokenGroupSlug, tokenBalanceMap, tokenGroupBalanceMap]);
 
-  const tokenSlugs = useMemo<string[]>(() => {
-    if (!!currentTokenGroup && !!tokenGroupMap[currentTokenGroup]) {
-      return tokenGroupMap[currentTokenGroup];
+  const tokenBalanceItems = useMemo<TokenBalanceItemType[]>(() => {
+    if (tokenGroupSlug) {
+      if (tokenGroupMap[tokenGroupSlug]) {
+        const items: TokenBalanceItemType[] = [];
+
+        tokenGroupMap[tokenGroupSlug].forEach((tokenSlug) => {
+          if (tokenBalanceMap[tokenSlug]) {
+            items.push(tokenBalanceMap[tokenSlug]);
+          }
+        });
+
+        return items;
+      }
+
+      if (tokenBalanceMap[tokenGroupSlug]) {
+        return [tokenBalanceMap[tokenGroupSlug]];
+      }
     }
 
-    if (currentTokenSlug) {
-      return [currentTokenSlug];
-    }
+    return [] as TokenBalanceItemType[];
+  }, [tokenGroupSlug, tokenGroupMap, tokenBalanceMap]);
 
-    return [];
-  }, [currentTokenGroup, currentTokenSlug, tokenGroupMap]);
+  useEffect(() => {
+    if (!tokenBalanceItems.length) {
+      goHome();
+    }
+  }, [goHome, tokenBalanceItems.length]);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;
@@ -172,7 +203,7 @@ function Component (): React.ReactElement {
           className={'__static-block'}
           isShrink={isShrink}
           onClickBack={goBack}
-          sendFundSlug={currentTokenSlug || currentTokenGroup}
+          sendFundSlug={tokenGroupSlug}
           symbol={symbol}
         />
       </div>
@@ -180,21 +211,13 @@ function Component (): React.ReactElement {
         className={'__scroll-container'}
       >
         {
-          tokenSlugs.map((tokenSlug) => {
-            const item = tokenBalanceMap[tokenSlug];
-
-            if (!item) {
-              return null;
-            }
-
-            return (
-              <TokenBalanceDetailItem
-                key={item.slug}
-                {...item}
-                onClickDotsIcon={onClickThreeDots(item)}
-              />
-            );
-          })
+          tokenBalanceItems.map((item) => (
+            <TokenBalanceDetailItem
+              key={item.slug}
+              {...item}
+              onClickDotsIcon={onClickThreeDots(item)}
+            />
+          ))
         }
       </div>
 

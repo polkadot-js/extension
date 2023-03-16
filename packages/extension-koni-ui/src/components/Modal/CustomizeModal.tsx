@@ -1,25 +1,23 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import CustomizeModalContent from '@subwallet/extension-koni-ui/components/Modal/CustomizeModalContent';
+import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateShowZeroBalanceState } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
+import { BackgroundIcon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
 import { Wallet } from 'phosphor-react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 
-const CustomizeModalContent = React.lazy(() => import('@subwallet/extension-koni-ui/components/Modal/CustomizeModalContent'));
+type Props = ThemeProps;
 
-type Props = ThemeProps & {
-  id: string,
-  onCancel: () => void,
-}
-
-function Component ({ className = '', id, onCancel }: Props): React.ReactElement<Props> {
+function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { inactiveModal } = useContext(ModalContext);
   const { token } = useTheme() as Theme;
   const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
 
@@ -27,14 +25,19 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
     updateShowZeroBalanceState(checked);
   }, []);
 
+  const onCancel = useCallback(() => {
+    inactiveModal(CUSTOMIZE_MODAL);
+  }, [inactiveModal]);
+
   return (
     <SwModal
       className={className}
-      id={id}
+      destroyOnClose={true}
+      id={CUSTOMIZE_MODAL}
       onCancel={onCancel}
       title={t('Customization')}
     >
-      <div className={'__group-label'}>Balance</div>
+      <div className={'__group-label'}>{t('Balance')}</div>
       <div className={'__group-content'}>
         <SettingItem
           className={'__setting-item'}
@@ -48,7 +51,7 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
               weight='fill'
             />
           }
-          name={'Show zero balance'} // todo: i18n this
+          name={t('Show zero balance')}
           rightItem={
             <Switch
               checked={isShowZeroBalance}
@@ -58,6 +61,8 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
         />
       </div>
 
+      <div className={'__group-label'}>{t('Chains')}</div>
+
       <CustomizeModalContent />
     </SwModal>
   );
@@ -65,8 +70,16 @@ function Component ({ className = '', id, onCancel }: Props): React.ReactElement
 
 export const CustomizeModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '.ant-sw-modal-content': {
+      maxHeight: 586,
+      height: 586,
+      overflow: 'hidden'
+    },
+
     '.ant-sw-modal-body': {
-      padding: 0,
+      paddingLeft: 0,
+      paddingRight: 0,
+      paddingBottom: 0,
       display: 'flex',
       flexDirection: 'column'
     },
@@ -96,10 +109,6 @@ export const CustomizeModal = styled(Component)<Props>(({ theme: { token } }: Pr
 
     '.ant-sw-list-section': {
       flex: 1
-    },
-
-    '.ant-sw-list-wrapper': {
-      overflow: 'auto'
     },
 
     '.network_item__container .ant-web3-block-right-item': {

@@ -8,7 +8,7 @@ import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
-import { Aperture, Database, Globe, Rocket, Wallet } from 'phosphor-react';
+import { Aperture, Clock, Database, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -64,7 +64,7 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
   {
     icon: {
       type: 'phosphor',
-      phosphorIcon: Globe,
+      phosphorIcon: Clock,
       weight: 'fill'
     },
     label: 'History',
@@ -106,7 +106,7 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
     <SwScreenLayout
       {...props}
       footer={showFooter && <Footer />}
-      headerContent={<SelectAccount />}
+      headerContent={props.showHeader && <SelectAccount />}
       headerIcons={headerIcons}
       onBack={onBack || defaultOnBack}
       selectedTabBarItem={selectedTab}

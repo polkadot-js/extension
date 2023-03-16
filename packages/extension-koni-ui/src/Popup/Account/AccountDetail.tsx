@@ -233,6 +233,7 @@ const Component: React.FC<Props> = (props: Props) => {
               rules={[
                 {
                   message: 'Wallet name is required',
+                  transform: (value: string) => value.trim(),
                   required: true
                 }
               ]}
@@ -250,6 +251,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     // size='xs'
                   />
                 )}
+                disabled={deriving}
                 suffix={(
                   <Icon
                     className={CN({ loading: saving })}

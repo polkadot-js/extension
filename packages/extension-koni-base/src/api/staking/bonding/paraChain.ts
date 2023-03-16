@@ -7,7 +7,18 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
-import { getBondedValidators, getParaCurrentInflation, InflationConfig, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
+import {
+  getBondedValidators,
+  getParaCurrentInflation,
+  InflationConfig,
+  isUnstakeAll,
+  PalletIdentityRegistration,
+  PalletParachainStakingDelegationRequestsScheduledRequest,
+  PalletParachainStakingDelegator,
+  ParachainStakingCandidateMetadata,
+  parseIdentity,
+  TuringOptimalCompoundFormat
+} from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -263,25 +274,23 @@ export async function getParaBondingExtrinsic (nominatorMetadata: NominatorMetad
   }
 }
 
-export async function getParaUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: number, chainInfo: _ChainInfo, collatorAddress: string, unstakeAll: boolean) {
+export async function getParaUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: string, nominatorMetadata: NominatorMetadata, selectedValidator: string) {
   const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-  const parsedAmount = amount * (10 ** decimals);
-  const binaryAmount = new BN(parsedAmount.toString());
+  const binaryAmount = new BN(amount);
+
+  const unstakeAll = isUnstakeAll(selectedValidator, nominatorMetadata.nominations, amount);
 
   if (!unstakeAll) {
-    return apiPromise.api.tx.parachainStaking.scheduleDelegatorBondLess(collatorAddress, binaryAmount);
+    return apiPromise.api.tx.parachainStaking.scheduleDelegatorBondLess(selectedValidator, binaryAmount);
   } else {
-    return apiPromise.api.tx.parachainStaking.scheduleRevokeDelegation(collatorAddress);
+    return apiPromise.api.tx.parachainStaking.scheduleRevokeDelegation(selectedValidator);
   }
 }
 
-export async function getParaWithdrawalExtrinsic (substrateApi: _SubstrateApi, address: string, collatorAddress: string, action: string) {
-  const apiPromise = await substrateApi.isReady;
+export async function getParaWithdrawalExtrinsic (substrateApi: _SubstrateApi, address: string, collatorAddress: string) {
+  const chainApi = await substrateApi.isReady;
 
-  console.log(`executing ${action}`, address, collatorAddress);
-
-  return apiPromise.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
+  return chainApi.api.tx.parachainStaking.executeDelegationRequest(address, collatorAddress);
 }
 
 export async function getTuringCompoundExtrinsic (substrateApi: _SubstrateApi, address: string, collatorAddress: string, accountMinimum: string, bondedAmount: string) {

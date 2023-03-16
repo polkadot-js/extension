@@ -37,9 +37,9 @@ const Component: React.FC<Props> = (props: Props) => {
         hasBackgroundWrapper={true}
       >
         <MetaInfo.Account
-          address={data.validatorInfo.address}
+          address={data.selectedValidators.address}
           label={t('Validator')}
-          name={data.validatorInfo.identity}
+          name={data.selectedValidators.identity}
           networkPrefix={chainInfo.substrateInfo?.addressPrefix}
         />
         <MetaInfo.Number

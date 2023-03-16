@@ -52,46 +52,46 @@ export async function getNominationPoolsInfo (chain: string, substrateApi: _Subs
   return getRelayPoolsInfo(chain, substrateApi);
 }
 
-export async function getBondingExtrinsic (chainInfo: _ChainInfo, chain: string, amount: string, nominatorMetadata: NominatorMetadata, selectedValidators: ValidatorInfo[], substrateApi: _SubstrateApi) {
-  if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+export async function getBondingExtrinsic (chainInfo: _ChainInfo, amount: string, nominatorMetadata: NominatorMetadata, selectedValidators: ValidatorInfo[], substrateApi: _SubstrateApi) {
+  if (_STAKING_CHAIN_GROUP.para.includes(chainInfo.slug)) {
     return getParaBondingExtrinsic(nominatorMetadata, chainInfo, substrateApi, amount, selectedValidators[0]); // only select 1 validator at a time
-  } else if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+  } else if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
     return getAstarBondingExtrinsic(substrateApi, amount, selectedValidators[0]);
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chainInfo.slug)) {
     return getAmplitudeBondingExtrinsic(nominatorMetadata, substrateApi, amount, selectedValidators[0]);
   }
 
   return getRelayBondingExtrinsic(substrateApi, amount, selectedValidators, nominatorMetadata, chainInfo);
 }
 
-export async function getUnbondingExtrinsic (address: string, amount: number, networkKey: string, chainInfo: _ChainInfo, substrateApi: _SubstrateApi, validatorAddress?: string, unstakeAll?: boolean) {
-  if (_STAKING_CHAIN_GROUP.para.includes(networkKey)) {
-    return getParaUnbondingExtrinsic(substrateApi, amount, chainInfo, validatorAddress as string, unstakeAll as boolean);
-  } else if (_STAKING_CHAIN_GROUP.astar.includes(networkKey)) {
-    return getAstarUnbondingExtrinsic(substrateApi, chainInfo, amount, networkKey, address, validatorAddress as string);
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(networkKey)) {
-    return getAmplitudeUnbondingExtrinsic(substrateApi, amount, chainInfo, validatorAddress as string, unstakeAll as boolean);
+export async function getUnbondingExtrinsic (nominatorMetadata: NominatorMetadata, amount: string, chain: string, substrateApi: _SubstrateApi, selectedValidator?: string) {
+  if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+    return getParaUnbondingExtrinsic(substrateApi, amount, nominatorMetadata, selectedValidator as string);
+  } else if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+    return getAstarUnbondingExtrinsic(substrateApi, amount, selectedValidator as string);
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
+    return getAmplitudeUnbondingExtrinsic(substrateApi, amount, nominatorMetadata, selectedValidator as string);
   }
 
-  return getRelayUnbondingExtrinsic(substrateApi, amount, chainInfo);
+  return getRelayUnbondingExtrinsic(substrateApi, amount, nominatorMetadata);
 }
 
-export async function getWithdrawalExtrinsic (dotSamaApi: _SubstrateApi, networkKey: string, address: string, validatorAddress?: string, action?: string) {
-  if (_STAKING_CHAIN_GROUP.para.includes(networkKey)) {
-    return getParaWithdrawalExtrinsic(dotSamaApi, address, validatorAddress as string, action as string);
-  } else if (_STAKING_CHAIN_GROUP.astar.includes(networkKey)) {
-    return getAstarWithdrawalExtrinsic(dotSamaApi);
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(networkKey)) {
-    return getAmplitudeWithdrawalExtrinsic(dotSamaApi, address);
+export async function getWithdrawalExtrinsic (substrateApi: _SubstrateApi, chain: string, nominatorMetadata: NominatorMetadata, validatorAddress?: string) {
+  if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+    return getParaWithdrawalExtrinsic(substrateApi, nominatorMetadata.address, validatorAddress as string);
+  } else if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+    return getAstarWithdrawalExtrinsic(substrateApi);
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
+    return getAmplitudeWithdrawalExtrinsic(substrateApi, nominatorMetadata.address);
   }
 
-  return getRelayWithdrawalExtrinsic(dotSamaApi, address);
+  return getRelayWithdrawalExtrinsic(substrateApi, nominatorMetadata.address);
 }
 
-export async function getClaimRewardExtrinsic (substrateApi: _SubstrateApi, networkKey: string, address: string, stakingType: StakingType, validatorAddress?: string) {
+export async function getClaimRewardExtrinsic (substrateApi: _SubstrateApi, chain: string, address: string, stakingType: StakingType, validatorAddress?: string) {
   if (stakingType === StakingType.POOLED) {
     return getPoolingClaimRewardExtrinsic(substrateApi);
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(networkKey)) {
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
     return getAmplitudeClaimRewardExtrinsic(substrateApi);
   }
 

@@ -2264,22 +2264,22 @@ export default class KoniExtension {
   }
 
   private async submitBonding (inputData: RequestBondingSubmit): Promise<SWTransactionResponse> {
-    const { amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, validatorInfo } = inputData;
+    const { amount, chain, nominatorMetadata, selectedValidators } = inputData;
 
-    if (!amount || !nominatorAddress || !validatorInfo) {
+    if (!amount || !nominatorMetadata || !selectedValidators) {
       // Todo: Check and return error here
 
       return this.#koniState.transactionService
         .generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
     }
 
-    const networkJson = this.#koniState.getChainInfo(networkKey);
-    const dotSamaApi = this.#koniState.getSubstrateApi(networkKey);
-    const extrinsic = await getBondingExtrinsic(networkJson, networkKey, amount, bondedValidators, validatorInfo, isBondedBefore, nominatorAddress, dotSamaApi);
+    const chainInfo = this.#koniState.getChainInfo(chain);
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getBondingExtrinsic(chainInfo, amount, nominatorMetadata, selectedValidators, substrateApi);
 
     return await this.#koniState.transactionService.handleTransaction({
-      address: nominatorAddress,
-      chain: networkKey,
+      address: nominatorMetadata.address,
+      chain: chain,
       chainType: ChainType.SUBSTRATE,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_BOND,
@@ -2289,19 +2289,18 @@ export default class KoniExtension {
   }
 
   private async submitUnbonding (inputData: RequestUnbondingSubmit): Promise<SWTransactionResponse> {
-    const { address, amount, networkKey, unstakeAll, validatorAddress } = inputData;
+    const { amount, chain, nominatorMetadata, validatorAddress } = inputData;
 
-    if (!amount || !address) {
+    if (!amount || !nominatorMetadata) {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
     }
 
-    const dotSamaApi = this.#koniState.getSubstrateApi(networkKey);
-    const networkJson = this.#koniState.getChainInfo(networkKey);
-    const extrinsic = await getUnbondingExtrinsic(address, amount, networkKey, networkJson, dotSamaApi, validatorAddress, unstakeAll);
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getUnbondingExtrinsic(nominatorMetadata, amount, chain, substrateApi, validatorAddress);
 
     return await this.#koniState.transactionService.handleTransaction({
-      address,
-      chain: networkKey,
+      address: nominatorMetadata.address,
+      chain: chain,
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_UNBOND,
@@ -2310,18 +2309,18 @@ export default class KoniExtension {
   }
 
   private async submitStakeWithdrawal (inputData: RequestStakeWithdrawal): Promise<SWTransactionResponse> {
-    const { action, address, networkKey, validatorAddress } = inputData;
+    const { chain, nominatorMetadata, validatorAddress } = inputData;
 
-    if (!address) {
+    if (!nominatorMetadata) {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
     }
 
-    const dotSamaApi = this.#koniState.getSubstrateApi(networkKey);
-    const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, networkKey, address, validatorAddress, action);
+    const dotSamaApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, chain, nominatorMetadata, validatorAddress);
 
     return await this.#koniState.transactionService.handleTransaction({
-      address,
-      chain: networkKey,
+      address: nominatorMetadata.address,
+      chain: chain,
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_WITHDRAW,
@@ -3167,7 +3166,7 @@ export default class KoniExtension {
         return await this.subscribeChainStakingMetadata(id, port);
       case 'pri(bonding.subscribeNominatorMetadata)':
         return await this.subscribeStakingNominatorMetadata(id, port);
-      case 'pri(bonding.submitTransaction)':
+      case 'pri(bonding.submitBondingTransaction)':
         return await this.submitBonding(request as RequestBondingSubmit);
       case 'pri(unbonding.submitTransaction)':
         return await this.submitUnbonding(request as RequestUnbondingSubmit);

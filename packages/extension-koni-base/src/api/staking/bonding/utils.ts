@@ -276,3 +276,19 @@ export function getBondedValidators (nominations: NominationInfo[]) {
     bondedValidators
   };
 }
+
+export function isUnstakeAll (selectedValidator: string, nominations: NominationInfo[], unstakeAmount: string) {
+  let isUnstakeAll = false;
+
+  for (const nomination of nominations) {
+    if (nomination.validatorAddress === selectedValidator) {
+      if (unstakeAmount === nomination.activeStake) {
+        isUnstakeAll = true;
+      }
+
+      break;
+    }
+  }
+
+  return isUnstakeAll;
+}

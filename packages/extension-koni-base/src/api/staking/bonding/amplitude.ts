@@ -7,7 +7,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseRawNumber } from '@subwallet/extension-base/utils';
-import { BlockHeader, getBondedValidators, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
+import { BlockHeader, getBondedValidators, isUnstakeAll, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { BN } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -204,11 +204,11 @@ export async function getAmplitudeBondingExtrinsic (nominatorMetadata: Nominator
   }
 }
 
-export async function getAmplitudeUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: number, chainInfo: _ChainInfo, collatorAddress: string, unstakeAll: boolean) {
+export async function getAmplitudeUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: string, nominatorMetadata: NominatorMetadata, collatorAddress: string) {
   const chainApi = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-  const parsedAmount = amount * (10 ** decimals);
-  const binaryAmount = new BN(parsedAmount.toString());
+  const binaryAmount = new BN(amount);
+
+  const unstakeAll = isUnstakeAll(collatorAddress, nominatorMetadata.nominations, amount);
 
   if (!unstakeAll) {
     const _params = chainApi.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;

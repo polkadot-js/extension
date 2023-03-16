@@ -354,7 +354,7 @@ export default class TransactionService {
         const data = parseTransactionData<ExtrinsicType.STAKING_STAKE>(transaction.data);
 
         historyItem.amount = { ...baseNativeAmount, value: data.amount.toString() || '0' };
-        historyItem.to = data.nominatorAddress;
+        historyItem.to = data.nominatorMetadata;
       }
 
         break;

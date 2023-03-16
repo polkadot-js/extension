@@ -377,16 +377,20 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
   return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
 }
 
-export async function getRelayUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: number, chainInfo: _ChainInfo) {
+export async function getRelayUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: string, nominatorMetadata: NominatorMetadata) {
   const chainApi = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-  const parsedAmount = Math.floor(amount * (10 ** decimals));
-  const binaryAmount = new BN(parsedAmount.toString());
+  const binaryAmount = new BN(amount);
 
-  const chillTx = chainApi.api.tx.staking.chill();
-  const unbondTx = chainApi.api.tx.staking.unbond(binaryAmount);
+  const isUnstakeAll = amount === nominatorMetadata.activeStake;
 
-  return chainApi.api.tx.utility.batchAll([chillTx, unbondTx]);
+  if (isUnstakeAll) {
+    const chillTx = chainApi.api.tx.staking.chill();
+    const unbondTx = chainApi.api.tx.staking.unbond(binaryAmount);
+
+    return chainApi.api.tx.utility.batchAll([chillTx, unbondTx]);
+  }
+
+  return chainApi.api.tx.staking.unbond(binaryAmount);
 }
 
 export async function getRelayWithdrawalExtrinsic (substrateApi: _SubstrateApi, address: string) {

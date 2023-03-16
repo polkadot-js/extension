@@ -168,7 +168,7 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
       }
     },
 
-    '&.-failed': {
+    '&.-fail': {
       '.__main-icon-wrapper:before': {
         backgroundColor: token.colorError
       },
@@ -186,7 +186,7 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
       }
     },
 
-    '&.-completed': {
+    '&.-success': {
       '.__main-icon-wrapper:before': {
         backgroundColor: token.colorSuccess
       },

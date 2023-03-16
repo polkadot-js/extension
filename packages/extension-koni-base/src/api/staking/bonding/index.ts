@@ -54,11 +54,11 @@ export async function getNominationPoolsInfo (chain: string, substrateApi: _Subs
 
 export async function getBondingExtrinsic (chainInfo: _ChainInfo, chain: string, amount: string, nominatorMetadata: NominatorMetadata, selectedValidators: ValidatorInfo[], substrateApi: _SubstrateApi) {
   if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
-    return getParaBondingExtrinsic(nominatorAddress, chainInfo, substrateApi, amount, selectedValidators, nominatorMetadata);
+    return getParaBondingExtrinsic(nominatorMetadata, chainInfo, substrateApi, amount, selectedValidators[0]); // only select 1 validator at a time
   } else if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
-    return getAstarBondingExtrinsic(substrateApi, chainInfo, amount, chain, nominatorAddress, selectedValidators);
+    return getAstarBondingExtrinsic(substrateApi, amount, selectedValidators[0]);
   } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
-    return getAmplitudeBondingExtrinsic(nominatorAddress, chainInfo, substrateApi, amount, selectedValidators);
+    return getAmplitudeBondingExtrinsic(nominatorMetadata, substrateApi, amount, selectedValidators[0]);
   }
 
   return getRelayBondingExtrinsic(substrateApi, amount, selectedValidators, nominatorMetadata, chainInfo);

@@ -2,16 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingType, UnlockingStakeInfo, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-base/utils';
-import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, PalletNominationPoolsPoolMember, parseIdentity, transformPoolName, Unlocking, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, PalletNominationPoolsPoolMember, parseIdentity, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
 import { Bytes } from '@polkadot/types';
-import { BN, BN_ONE, BN_ZERO } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export interface PalletStakingNominations {
@@ -379,17 +377,6 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
   return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
 }
 
-export async function getRelayUnbondingTxInfo (substrateApi: _SubstrateApi, amount: BN, address: string) {
-  const chainApi = await substrateApi.isReady;
-
-  const chillTx = chainApi.api.tx.staking.chill();
-  const unbondTx = chainApi.api.tx.staking.unbond(amount);
-
-  const extrinsic = chainApi.api.tx.utility.batchAll([chillTx, unbondTx]);
-
-  return extrinsic.paymentInfo(address);
-}
-
 export async function getRelayUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: number, chainInfo: _ChainInfo) {
   const chainApi = await substrateApi.isReady;
   const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
@@ -402,148 +389,6 @@ export async function getRelayUnbondingExtrinsic (substrateApi: _SubstrateApi, a
   return chainApi.api.tx.utility.batchAll([chillTx, unbondTx]);
 }
 
-export async function handleRelayUnbondingTxInfo (address: string, amount: number, networkKey: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, chainInfo: _ChainInfo) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-
-  try {
-    const substrateApi = substrateApiMap[networkKey];
-    const parsedAmount = Math.floor(amount * (10 ** decimals));
-    const binaryAmount = new BN(parsedAmount.toString());
-
-    const [txInfo, balance] = await Promise.all([
-      getRelayUnbondingTxInfo(substrateApi, binaryAmount, address),
-      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
-    ]);
-
-    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
-    const rawFee = parseRawNumber(txInfo.partialFee.toString());
-    const binaryBalance = new BN(balance);
-
-    const balanceError = txInfo.partialFee.gt(binaryBalance);
-
-    return {
-      rawFee,
-      fee: feeString,
-      balanceError
-    } as BasicTxInfo;
-  } catch (e) {
-    return {
-      fee: `0.0000 ${symbol}`,
-      balanceError: false
-    } as BasicTxInfo;
-  }
-}
-
-export async function getRelayUnlockingInfo (substrateApi: _SubstrateApi, address: string, networkKey: string) {
-  const chainApi = await substrateApi.isReady;
-
-  const [stakingInfo, progress] = await Promise.all([
-    chainApi.api.derive.staking.account(address),
-    chainApi.api.derive.session.progress()
-  ]);
-
-  // Only get the nearest redeemable
-  let minRemainingEra = BN_ZERO;
-  let nextWithdrawalAmount = BN_ZERO;
-
-  if (stakingInfo.unlocking) {
-    // @ts-ignore
-    const mapped = stakingInfo.unlocking
-      .filter(({ remainingEras, value }) => value.gt(BN_ZERO) && remainingEras.gt(BN_ZERO))
-      .map((unlock): [Unlocking, BN, BN] => [
-        unlock,
-        unlock.remainingEras,
-        unlock.remainingEras
-          .sub(BN_ONE)
-          .imul(progress.eraLength)
-          .iadd(progress.eraLength)
-          .isub(progress.eraProgress)
-      ]);
-
-    mapped.forEach(([{ value }, eras]) => {
-      if (minRemainingEra === BN_ZERO) {
-        minRemainingEra = eras;
-        nextWithdrawalAmount = value;
-      } else if (eras.lt(minRemainingEra)) {
-        minRemainingEra = eras;
-        nextWithdrawalAmount = value;
-      } else if (eras.eq(minRemainingEra)) {
-        nextWithdrawalAmount = nextWithdrawalAmount.add(value);
-      }
-    });
-  }
-
-  return {
-    nextWithdrawal: minRemainingEra.muln(_STAKING_ERA_LENGTH_MAP[networkKey] || _STAKING_ERA_LENGTH_MAP.default),
-    redeemable: stakingInfo.redeemable,
-    nextWithdrawalAmount
-  };
-}
-
-export async function handleRelayUnlockingInfo (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, networkKey: string, address: string, type: StakingType) {
-  const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getRelayUnlockingInfo(substrateApi, address, networkKey);
-
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-
-  const parsedRedeemable = redeemable ? parseFloat(redeemable.toString()) / (10 ** decimals) : 0;
-  const parsedNextWithdrawalAmount = parseFloat(nextWithdrawalAmount.toString()) / (10 ** decimals);
-
-  return {
-    chain: networkKey,
-    address,
-    type,
-
-    nextWithdrawal: parseFloat(nextWithdrawal.toString()),
-    redeemable: parsedRedeemable,
-    nextWithdrawalAmount: parsedNextWithdrawalAmount
-  } as UnlockingStakeInfo;
-}
-
-export async function getRelayWithdrawalTxInfo (substrateApi: _SubstrateApi, address: string) {
-  const chainApi = await substrateApi.isReady;
-
-  if (chainApi.api.tx.staking.withdrawUnbonded.meta.args.length === 1) {
-    const _slashingSpans = (await chainApi.api.query.staking.slashingSpans(address)).toHuman() as Record<string, any>;
-    const slashingSpanCount = _slashingSpans !== null ? _slashingSpans.spanIndex as string : '0';
-    const extrinsic = chainApi.api.tx.staking.withdrawUnbonded(slashingSpanCount);
-
-    return extrinsic.paymentInfo(address);
-  } else {
-    const extrinsic = chainApi.api.tx.staking.withdrawUnbonded();
-
-    return extrinsic.paymentInfo(address);
-  }
-}
-
-export async function handleRelayWithdrawalTxInfo (address: string, networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-
-  try {
-    const [txInfo, balance] = await Promise.all([
-      getRelayWithdrawalTxInfo(substrateApiMap[networkKey], address),
-      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
-    ]);
-
-    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
-    const rawFee = parseRawNumber(txInfo.partialFee.toString());
-    const binaryBalance = new BN(balance);
-    const balanceError = txInfo.partialFee.gt(binaryBalance);
-
-    return {
-      rawFee,
-      fee: feeString,
-      balanceError
-    } as BasicTxInfo;
-  } catch (e) {
-    console.error('Error estimating fee for staking withdrawal', e);
-
-    return {
-      fee: `0.0000 ${symbol}`,
-      balanceError: false
-    } as BasicTxInfo;
-  }
-}
-
 export async function getRelayWithdrawalExtrinsic (substrateApi: _SubstrateApi, address: string) {
   const chainApi = await substrateApi.isReady;
 
@@ -554,43 +399,6 @@ export async function getRelayWithdrawalExtrinsic (substrateApi: _SubstrateApi, 
     return chainApi.api.tx.staking.withdrawUnbonded(slashingSpanCount);
   } else {
     return chainApi.api.tx.staking.withdrawUnbonded();
-  }
-}
-
-async function getPoolingClaimRewardTxInfo (substrateApi: _SubstrateApi, address: string) {
-  const chainApi = await substrateApi.isReady;
-
-  const extrinsic = chainApi.api.tx.nominationPools.claimPayout();
-
-  return extrinsic.paymentInfo(address);
-}
-
-export async function handlePoolingClaimRewardTxInfo (address: string, networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-
-  try {
-    const [txInfo, balance] = await Promise.all([
-      getPoolingClaimRewardTxInfo(substrateApiMap[networkKey], address),
-      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
-    ]);
-
-    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
-    const rawFee = parseRawNumber(txInfo.partialFee.toString());
-    const binaryBalance = new BN(balance);
-    const balanceError = txInfo.partialFee.gt(binaryBalance);
-
-    return {
-      rawFee,
-      fee: feeString,
-      balanceError
-    } as BasicTxInfo;
-  } catch (e) {
-    console.error('Error handling nomination pool reward claiming', e);
-
-    return {
-      fee: `0.0000 ${symbol}`,
-      balanceError: false
-    } as BasicTxInfo;
   }
 }
 

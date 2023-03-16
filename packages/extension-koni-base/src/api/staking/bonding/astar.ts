@@ -254,13 +254,11 @@ export async function handleAstarBondingTxInfo (chainInfo: _ChainInfo, amount: n
   }
 }
 
-export async function getAstarBondingExtrinsic (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappInfo: ValidatorInfo) {
-  const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-  const parsedAmount = amount * (10 ** decimals);
-  const binaryAmount = new BN(parsedAmount.toString());
+export async function getAstarBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, dappInfo: ValidatorInfo) {
+  const chainApi = await substrateApi.isReady;
+  const binaryAmount = new BN(amount);
 
-  return apiPromise.api.tx.dappsStaking.bondAndStake({ Evm: dappInfo.address }, binaryAmount);
+  return chainApi.api.tx.dappsStaking.bondAndStake({ Evm: dappInfo.address }, binaryAmount);
 }
 
 export async function getAstarUnbondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, stakerAddress: string, amount: number, dappAddress: string) {

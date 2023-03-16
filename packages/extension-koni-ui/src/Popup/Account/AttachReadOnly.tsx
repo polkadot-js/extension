@@ -16,6 +16,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/util/form';
 import { readOnlyScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/form';
 import { Form, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Eye } from 'phosphor-react';
@@ -72,11 +73,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, []);
 
   const onFieldsChange: Callbacks<ReadOnlyAccountInput>['onFieldsChange'] = useCallback((changes: FieldData[], allFields: FieldData[]) => {
-    const error = allFields.map((data) => data.errors || [])
-      .reduce((old, value) => [...old, ...value])
-      .some((value) => !!value);
-
-    const empty = allFields.map((data) => data.value as unknown).some((value) => !value);
+    const { empty, error } = simpleCheckForm(changes, allFields);
 
     setIsDisable(error || empty);
 

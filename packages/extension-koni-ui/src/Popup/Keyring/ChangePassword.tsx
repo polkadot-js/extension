@@ -9,6 +9,7 @@ import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFo
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/form';
 import { Form, Icon, Input, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FloppyDiskBack, ShieldCheck } from 'phosphor-react';
@@ -77,11 +78,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [goHome]);
 
   const onUpdate: Callbacks<ChangePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
-    const error = allFields.map((data) => data.errors || [])
-      .reduce((old, value) => [...old, ...value])
-      .some((value) => !!value);
-
-    const empty = allFields.map((data) => data.value as unknown).some((value) => !value);
+    const { empty, error } = simpleCheckForm(changedFields, allFields);
 
     setSubmitError('');
     setIsDisable(error || empty);

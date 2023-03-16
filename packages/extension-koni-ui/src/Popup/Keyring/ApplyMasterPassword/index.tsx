@@ -14,6 +14,7 @@ import IntroductionMigratePassword from '@subwallet/extension-koni-ui/Popup/Keyr
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/form';
 import { Button, ButtonProps, Field, Form, Icon, Input } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
@@ -112,11 +113,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, []);
 
   const onUpdate: Callbacks<MigratePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
-    const error = allFields.map((data) => data.errors || [])
-      .reduce((old, value) => [...old, ...value])
-      .some((value) => !!value);
-
-    const empty = allFields.map((data) => data.value as unknown).some((value) => !value);
+    const { empty, error } = simpleCheckForm(changedFields, allFields);
 
     setIsDisable(error || empty);
   }, []);

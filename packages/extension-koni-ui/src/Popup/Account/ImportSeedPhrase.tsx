@@ -69,24 +69,26 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onSubmit = useCallback(() => {
     if (seedPhrase) {
       setSubmitting(true);
-      createAccountSuriV2({
-        name: accountName,
-        suri: seedPhrase,
-        isAllowed: true,
-        types: keyTypes
-      })
-        .then(() => {
-          onComplete();
+      setTimeout(() => {
+        createAccountSuriV2({
+          name: accountName,
+          suri: seedPhrase,
+          isAllowed: true,
+          types: keyTypes
         })
-        .catch((error: Error): void => {
-          setValidateState({
-            status: 'error',
-            message: error.message
+          .then(() => {
+            onComplete();
+          })
+          .catch((error: Error): void => {
+            setValidateState({
+              status: 'error',
+              message: error.message
+            });
+          })
+          .finally(() => {
+            setSubmitting(false);
           });
-        })
-        .finally(() => {
-          setSubmitting(false);
-        });
+      }, 300);
     }
   }, [seedPhrase, accountName, keyTypes, onComplete]);
 

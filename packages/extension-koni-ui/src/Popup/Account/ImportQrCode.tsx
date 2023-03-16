@@ -11,12 +11,12 @@ import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/mod
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
-import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';
+import useScanAccountQr from '@subwallet/extension-koni-ui/hooks/qr/useScanAccountQr';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { checkPublicAndPrivateKey, createAccountWithSecret } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { QrAccount, ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
+import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { importQrScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
 import { Form, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
@@ -68,22 +68,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [loading, setLoading] = useState(false);
-  const [account, setAccount] = useState<QrAccount | null>(null);
-
-  const handleResult = useCallback((val: string): QrAccount | null => {
-    const result = importQrScan(val);
-
-    if (result) {
-      return result;
-    } else {
-      setValidateState({
-        message: 'Invalid address',
-        status: 'error'
-      });
-
-      return null;
-    }
-  }, []);
 
   const onSubmit = useCallback((_account: QrAccount) => {
     setLoading(true);
@@ -93,72 +77,46 @@ const Component: React.FC<Props> = (props: Props) => {
       status: 'success'
     });
 
-    if (_account && JSON.stringify(account) !== JSON.stringify(_account)) {
-      setAccount(_account);
-
-      setTimeout(() => {
-        checkAccount(_account)
-          .then((isEthereum) => {
-            createAccountWithSecret({ name: accountName,
-              isAllow: true,
-              secretKey: _account.content,
-              publicKey: _account.genesisHash,
-              isEthereum: isEthereum })
-              .then(({ errors, success }) => {
-                if (success) {
-                  setValidateState({});
-                  onComplete();
-                } else {
-                  setValidateState({
-                    message: errors[0].message,
-                    status: 'error'
-                  });
-                }
-              })
-              .catch((error: Error) => {
+    setTimeout(() => {
+      checkAccount(_account)
+        .then((isEthereum) => {
+          createAccountWithSecret({ name: accountName,
+            isAllow: true,
+            secretKey: _account.content,
+            publicKey: _account.genesisHash,
+            isEthereum: isEthereum })
+            .then(({ errors, success }) => {
+              if (success) {
+                setValidateState({});
+                onComplete();
+              } else {
                 setValidateState({
-                  message: error.message,
+                  message: errors[0].message,
                   status: 'error'
                 });
-              })
-              .finally(() => {
-                setLoading(false);
+              }
+            })
+            .catch((error: Error) => {
+              setValidateState({
+                message: error.message,
+                status: 'error'
               });
-          })
-          .catch((error: Error) => {
-            setValidateState({
-              message: error.message,
-              status: 'error'
+            })
+            .finally(() => {
+              setLoading(false);
             });
+        })
+        .catch((error: Error) => {
+          setValidateState({
+            message: error.message,
+            status: 'error'
           });
-      }, 300);
-    } else {
-      setLoading(false);
-    }
-  }, [account, accountName, onComplete, inactiveModal]);
+          setLoading(false);
+        });
+    }, 300);
+  }, [accountName, onComplete, inactiveModal]);
 
-  const openCamera = useOpenQrScanner(modalId);
-
-  const onSuccess = useCallback((result: ScannerResult) => {
-    if (!loading) {
-      const rs = handleResult(result.text);
-
-      if (rs) {
-        onSubmit(rs);
-      }
-    }
-  }, [handleResult, loading, onSubmit]);
-
-  const onClose = useCallback(() => {
-    setValidateState({});
-  }, []);
-
-  const onError = useCallback((error: string) => {
-    setValidateState({
-      message: error,
-      status: 'error'
-    });
-  }, []);
+  const { onClose, onError, onSuccess, openCamera } = useScanAccountQr(modalId, importQrScan, setValidateState, onSubmit);
 
   return (
     <PageWrapper className={CN(className)}>
@@ -178,7 +136,7 @@ const Component: React.FC<Props> = (props: Props) => {
         ]}
         title={t('Import your wallet by QR')}
       >
-        <div className={CN(className, 'container')}>
+        <div className={CN('container')}>
           <div className='sub-title'>
             {t('Please make sure that you have granted SubWallet the access to your device\'s camera.')}
           </div>
@@ -242,7 +200,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const ImportQrCode = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '&.container': {
+    '.container': {
       padding: token.padding
     },
 

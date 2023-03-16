@@ -86,6 +86,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onPreviousStep = useCallback(() => {
     setFirstStep(true);
+    setSelectedAccounts([]);
   }, []);
 
   const onChainChange: BasicOnChangeFunction = useCallback((event) => {

@@ -13,6 +13,7 @@ import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messag
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/form';
 import { Form, Icon, Input, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CaretLeft, CheckCircle, ShieldPlus } from 'phosphor-react';
@@ -94,11 +95,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [onComplete]);
 
   const onUpdate: Callbacks<CreatePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
-    const error = allFields.map((data) => data.errors || [])
-      .reduce((old, value) => [...old, ...value])
-      .some((value) => !!value);
-
-    const empty = allFields.map((data) => data.value as unknown).some((value) => !value);
+    const { empty, error } = simpleCheckForm(changedFields, allFields);
 
     setSubmitError('');
     setIsDisable(error || empty);

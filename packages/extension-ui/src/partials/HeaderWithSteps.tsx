@@ -16,13 +16,15 @@ interface Props {
 }
 
 interface StepProps extends ThemeProps {
+  previous: boolean;
   current: boolean;
   gap: number;
   total: number;
 }
 
 const Step = styled.div<StepProps>`
-  background-color: ${({ current, theme }: StepProps) => (current ? theme.stepsActiveColor : theme.stepsInactiveColor)};
+  background-color: ${({ current, previous, theme }: StepProps) =>
+    previous ? theme.headerStepDone : current ? theme.headerStepCurrent : theme.headerStepToDo};
   height: 2px;
   width: ${({ total }) => `calc(100%/${total})`};
   display: inline-block;
@@ -60,6 +62,7 @@ function HeaderWithSteps({ step, text, total, withBackArrow = false }: Props): R
             current={step === i + 1}
             gap={8}
             key={i}
+            previous={step > i + 1}
             total={total}
           />
         ))}

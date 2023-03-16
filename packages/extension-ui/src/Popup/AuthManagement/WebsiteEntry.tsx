@@ -3,13 +3,13 @@
 
 import type { ThemeProps } from '../../types';
 
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
 
+import chevronIcon from '../../assets/chevron.svg';
+import { Svg } from '../../components/';
 import { ActionContext } from '../../components/contexts';
 import useTranslation from '../../hooks/useTranslation';
 import { getFaviconUrl } from '../../util/getFaviconUrl';
@@ -60,9 +60,9 @@ function WebsiteEntry({
           ? t('all accounts')
           : t('no accounts')}
       </span>
-      <FontAwesomeIcon
+      <Svg
         className='chevron'
-        icon={faChevronRight}
+        src={chevronIcon}
       />
     </div>
   );
@@ -84,8 +84,8 @@ export default styled(WebsiteEntry)(
     cursor: pointer;
     background: ${theme.editCardBackgroundHover};
   
-    .chevron path{
-      fill: ${theme.headerIconBackgroundHover};
+    .chevron {
+      background: ${theme.headerIconBackgroundHover};
     }
   }
 
@@ -124,13 +124,15 @@ export default styled(WebsiteEntry)(
     height: 20px;
   }
 
-  .chevron path{
-    fill: ${theme.iconNeutralColor};
+  .chevron {
+    width: 16px;
+    height: 16px;
+    background: ${theme.iconNeutralColor};
   }
 
   &:hover { 
-    .chevron path{
-      fill: ${theme.headerIconBackgroundHover};
+    .chevron {
+      background: ${theme.headerIconBackgroundHover};
     }
   }
 

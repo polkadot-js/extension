@@ -43,8 +43,6 @@ function Accounts({ className }: Props): React.ReactElement {
   );
   const [accountsCreatedAfterLastAuth, setAccountsCreatedAfterLastAuth] = useState<AccountJson[] | []>([]);
 
-  console.log(flattened);
-
   useEffect(() => {
     getAuthList()
       .then(({ list }) => setAuthList(list))
@@ -52,7 +50,7 @@ function Accounts({ className }: Props): React.ReactElement {
     getConnectedTabsUrl()
       .then((tabsUrl) => setConnectedTabsUrl(tabsUrl))
       .catch(console.error);
-  }, [authList]);
+  }, []);
 
   useEffect(() => {
     if (authList && connectedTabsUrl.length > 0) {
@@ -138,7 +136,7 @@ export default styled(Accounts)(
   ({ theme }: Props) => `
   height: calc(100vh - 2px);
   scrollbar-width: none;
-  margin-top: 16px;
+  margin-top: 32px;
 
   &::-webkit-scrollbar {
     display: none;

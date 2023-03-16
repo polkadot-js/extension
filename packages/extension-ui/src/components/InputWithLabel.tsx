@@ -78,7 +78,7 @@ export default styled(InputWithLabel)(
   margin-bottom: 16px;
  
   > ${Input} {
-  padding-top: ${!label.trim() ? '0px' : '8px'};
+    padding-top: ${!label.trim() ? '0px' : '4px'};
  }
 
   &.withoutMargin {

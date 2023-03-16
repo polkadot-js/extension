@@ -100,7 +100,7 @@ export default styled(TransactionIndex)(
   .arrowLeft, .arrowRight {
     display: inline-block;
     opacity: 0.65;
-    color: ${theme.stepsInactiveColor};
+    color: ${theme.transactionTooltipTextColor};
 
     &.active {
       color: ${theme.buttonTextColor};

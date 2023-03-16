@@ -44,7 +44,7 @@ export default styled(MnemonicPill)(
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 4px;
+  gap: 1px;
   border: 1px solid ${isError ? theme.textColorDanger : theme.boxBorderColor};
   background: ${theme.mnemonicBackground};
   border-radius: ${theme.buttonBorderRadius};
@@ -65,7 +65,7 @@ export default styled(MnemonicPill)(
     color: ${theme.textColor};
     flex: 1;
     text-align: left;
-    max-width: 60px;
+    width: 70px;
     border-radius: ${theme.buttonBorderRadius};
     outline: none;
 

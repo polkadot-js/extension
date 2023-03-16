@@ -3,18 +3,18 @@
 
 import type { ThemeProps } from '../types';
 
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import connectionStatus from '../assets/anim_connection_status.svg';
+import arrowLeft from '../assets/arrow-left.svg';
 import logo from '../assets/azeroLogo.svg';
 import helpIcon from '../assets/help.svg';
 import notConnected from '../assets/not_connected.svg';
 import settingsIcon from '../assets/settings.svg';
 import { ActionContext, Link, Svg, Tooltip } from '../components';
 import useTranslation from '../hooks/useTranslation';
+import { LINKS } from '../links';
 import { getConnectedTabsUrl } from '../messaging';
 import { Z_INDEX } from '../zindex';
 
@@ -67,10 +67,10 @@ function Header({
         <div className='container'>
           <div className='branding'>
             {withBackArrow ? (
-              <FontAwesomeIcon
+              <img
                 className='arrowLeftIcon'
-                icon={faArrowLeft}
                 onClick={goToFnOverride || _onBackArrowClick}
+                src={arrowLeft}
               />
             ) : (
               <div className='flex'>
@@ -87,12 +87,16 @@ function Header({
           <div className='popupMenus'>
             {withHelp && (
               <Tooltip text={t<string>('Help')}>
-                <Link to={'/help'}>
+                <a
+                  href={LINKS.GENERAL_INTRODUCTION}
+                  rel='noreferrer'
+                  target='_blank'
+                >
                   <Svg
                     className='popupToggle'
                     src={helpIcon}
                   />
-                </Link>
+                </a>
               </Tooltip>
             )}
             {withSettings && (
@@ -240,6 +244,7 @@ export default React.memo(
       display: flex;
       justify-content: flex-end;
       gap: 16px;
+      align-items: center;
 
       :last-child {
         padding-right: 18px;
@@ -291,6 +296,7 @@ export default React.memo(
   .arrowLeftIcon {
     color: ${theme.labelColor};
     cursor: pointer;
+    padding: 8px 0px;
 
     :hover {
       path {

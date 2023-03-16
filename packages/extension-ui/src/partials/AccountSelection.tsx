@@ -140,6 +140,10 @@ export default styled(AccounSelection)(
     }
     ${Account} {
       padding: 0px 4px;
+      
+      ${Checkbox} {
+        margin-left: 8px;
+      }
     }
   }
 

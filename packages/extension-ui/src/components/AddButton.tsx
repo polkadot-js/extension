@@ -3,7 +3,7 @@
 
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -13,16 +13,35 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
+const StyledLink = styled(Link)`
+  text-decoration: none;
+`;
+
 const AddButton: React.FC<Props> = function ({ className }: Props) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleMouseEnter = useCallback((): void => {
+    setIsExpanded(true);
+  }, []);
+
+  const handleMouseLeave = useCallback((): void => {
+    setIsExpanded(false);
+  }, []);
+
   return (
-    <Link to={'/account/add-menu'}>
+    <StyledLink
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      to={'/account/add-menu'}
+    >
       <div className={className}>
         <FontAwesomeIcon
           className='icon'
           icon={faPlus}
         />
+        {isExpanded && <span className='expanded'>Add Account</span>}
       </div>
-    </Link>
+    </StyledLink>
   );
 };
 
@@ -30,7 +49,6 @@ export default styled(AddButton)(
   ({ theme }: ThemeProps) => `
 
   display: flex;
-
   margin-left:auto;
   margin-right:auto;
   flex-direction: row;
@@ -70,6 +88,31 @@ export default styled(AddButton)(
 
   &:hover {
     cursor: pointer;
+    width: 100%;
+    width: 328px;
+    border-radius: 24px;
+  }
+
+  span {
+    display: inline-block;
+    margin-left: 8px;
+    opacity: 0;
+    transition: 0.2s ease 1s;
+    color: ${theme.primaryColor};
+    text-decoration: none;
+  }
+
+  .expanded {
+    animation: fadeIn 0.2s ease 0.1s forwards;
+  }
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 `
 );

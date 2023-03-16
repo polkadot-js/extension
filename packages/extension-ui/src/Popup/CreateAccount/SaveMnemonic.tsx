@@ -106,7 +106,7 @@ export default React.memo(
         white-space: pre-line;
         
         & .bold {
-          color: ${theme.textColor};
+          color: ${theme.subTextColor};
           font-weight: 600;
         }
       }
@@ -122,8 +122,12 @@ export default React.memo(
     }
 
     .mnemonic-pill {
-      width: 30%;
+      box-sizing: border-box;
+      width: 108px;
       margin-bottom: 8px;
+      input {
+        text-align: center;
+      }
     }
 
     .copy-to-clipboard {
@@ -132,6 +136,7 @@ export default React.memo(
       align-items: center;
       justify-content: center;
       gap: 8px;
+      font-size: 14px;
     }
     .copy-button {
       margin: 0 auto;

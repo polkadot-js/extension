@@ -77,7 +77,7 @@ function EditName({
           {t<string>('Cancel')}
         </Button>
         <Button
-          isDisabled={!editedName}
+          isDisabled={!editedName || editedName === account?.name}
           onClick={_saveChanges}
         >
           {t<string>('Save')}

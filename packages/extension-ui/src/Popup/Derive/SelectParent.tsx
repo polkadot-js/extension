@@ -19,6 +19,7 @@ import {
   ButtonArea,
   InputWithLabel,
   Label,
+  LearnMore,
   Svg,
   ValidatedInput,
   VerticalSpace,
@@ -27,6 +28,7 @@ import {
 import HelperFooter from '../../components/HelperFooter';
 import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
+import { LINKS } from '../../links';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
 import { isNotShorterThan } from '../../util/validators';
@@ -163,7 +165,7 @@ function SelectParent({
       />
       <span>
         {t<string>('What is the difference between an\naccount and a sub-account?')}&nbsp;
-        <span className='link'>{t<string>('Learn more')}</span>
+        <LearnMore href={LINKS.DERIVE_SUB_ACCOUNT} />
       </span>
     </StyledFooter>
   );

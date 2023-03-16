@@ -1,11 +1,10 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import styled from 'styled-components';
 
+import chevronIcon from '../assets/chevron.svg';
 import copyIcon from '../assets/copyMenu.svg';
 import externalLinkIcon from '../assets/externalLink.svg';
 import { ThemeProps } from '../types';
@@ -20,22 +19,23 @@ interface Props extends ThemeProps {
   position?: 'top' | 'bottom' | 'middle' | 'both';
   extra?: ExtraOptions;
   isDanger?: boolean;
-  toggle?: React.ReactNode;
   onClick?: () => void;
+  link?: string;
 }
 
 interface ExtraProps {
   className?: string;
   extra?: ExtraOptions;
+  link?: string;
 }
 
 const ExtraContent = ({ extra = 'chevron' }: ExtraProps): React.ReactElement<ExtraProps> | null => {
   switch (extra) {
     case 'chevron':
       return (
-        <FontAwesomeIcon
+        <Svg
           className='chevron'
-          icon={faChevronRight}
+          src={chevronIcon}
         />
       );
     case 'copy':
@@ -57,44 +57,55 @@ const ExtraContent = ({ extra = 'chevron' }: ExtraProps): React.ReactElement<Ext
   }
 };
 
+const StyledLink = styled.a`
+  text-decoration: none;
+  color: inherit;
+`;
+
 function EditMenuCard({
   className,
   description,
   extra,
   isDanger = false,
+  link,
   onClick,
   preIcon,
-  title,
-  toggle
+  title
 }: Props): React.ReactElement<Props> {
   return (
-    <div
-      className={className}
-      onClick={onClick}
+    <StyledLink
+      href={link}
+      rel='noreferrer'
+      target='_blank'
     >
-      <div className='flex-container'>
-        <div className='flex-group'>
-          <div className={`title ${isDanger ? 'danger' : ''}`}>
-            {preIcon}
-            {title}
-          </div>
-          <div className='description'>
-            <span className='description-text'>{description}</span>
-            {toggle && <div className='extra'>{toggle}</div>}
-            {!toggle && (
+      <div
+        className={className}
+        onClick={onClick}
+      >
+        <div className='flex-container'>
+          <div className='flex-group'>
+            <div className={`title ${isDanger ? 'danger' : ''}`}>
+              {preIcon}
+              {title}
+            </div>
+            <div className='description'>
+              <span className='description-text'>{description}</span>
               <div className='extra'>
-                <ExtraContent extra={extra} />
+                <ExtraContent
+                  extra={extra}
+                  link={link}
+                />
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </StyledLink>
   );
 }
 
 export default styled(EditMenuCard)(
-  ({ onClick, position, theme }: Props) => `
+  ({ link, onClick, position, theme }: Props) => `
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -130,12 +141,22 @@ export default styled(EditMenuCard)(
     }
     
   
-    .chevron path{
-      fill: ${theme.headerIconBackgroundHover};
+    .chevron {
+      background: ${theme.headerIconBackgroundHover};
+    }
+
+    .link-icon {
+      transform: translateX(4px);
     }
   }
 
-  cursor: ${onClick ? 'pointer' : 'default'};
+  cursor: ${onClick || link ? 'pointer' : 'default'};
+
+  .chevron {
+    width: 16px;
+    height: 16px;
+    background: ${theme.iconNeutralColor};
+  }
 
   .flex-container {
     display: flex;
@@ -182,7 +203,7 @@ export default styled(EditMenuCard)(
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
-      width: 75px;
+      width: 80px;
       text-align: right;
     }
   }
@@ -223,6 +244,7 @@ export default styled(EditMenuCard)(
     width: 20px;
     height: 20px;
     background: ${theme.primaryColor};
+    transition: transform 0.2s ease;
   }
 
   .icon {

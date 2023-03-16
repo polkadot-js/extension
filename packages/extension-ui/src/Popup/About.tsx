@@ -6,10 +6,10 @@ import type { ThemeProps } from '../types';
 import React from 'react';
 import styled from 'styled-components';
 
-import alephMark from '../assets/alephMark.png';
+import alephMark from '../assets/alephMark.svg';
 import { EditMenuCard } from '../components';
-import { useGoTo } from '../hooks/useGoTo';
 import useTranslation from '../hooks/useTranslation';
+import { LINKS } from '../links';
 import Header from '../partials/Header';
 
 interface Props extends ThemeProps {
@@ -17,15 +17,13 @@ interface Props extends ThemeProps {
 }
 
 const AboutMenuCard = styled(EditMenuCard)`
-padding: 0px 16px;
-margin-bottom: 16px;
-border-radius: 8px;
+  padding: 0px 16px;
+  margin-bottom: 16px;
+  border-radius: 8px;
 `;
 
 function About({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-
-  const { goTo } = useGoTo();
 
   return (
     <>
@@ -48,28 +46,28 @@ function About({ className }: Props): React.ReactElement<Props> {
         <AboutMenuCard
           description=''
           extra='link'
-          onClick={goTo('/about')}
+          link={LINKS.GENERAL_INTRODUCTION}
           position='bottom'
           title={t<string>('Help & Support')}
         />
         <AboutMenuCard
           description=''
           extra='link'
-          onClick={goTo('/about')}
+          link={LINKS.TERMS_OF_SERVICE}
           position='bottom'
           title={t<string>('Terms of Service')}
         />
         <AboutMenuCard
           description=''
           extra='link'
-          onClick={goTo('/about')}
+          link={LINKS.PRIVACY_POLICY}
           position='bottom'
           title={t<string>('Privacy Policy')}
         />
         <AboutMenuCard
           description=''
           extra='link'
-          onClick={goTo('/about')}
+          link={LINKS.MAIN_WEBSITE}
           position='bottom'
           title={t<string>('Visit Website')}
         />

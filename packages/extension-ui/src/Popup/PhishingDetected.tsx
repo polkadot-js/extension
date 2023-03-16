@@ -8,8 +8,9 @@ import { useParams } from 'react-router';
 import styled from 'styled-components';
 
 import animatedDanger from '../assets/anim_danger.svg';
-import { Button, ButtonArea, FaviconBox, PopupBorderContainer, Svg, VerticalSpace } from '../components';
+import { Button, ButtonArea, FaviconBox, LearnMore, PopupBorderContainer, Svg, VerticalSpace } from '../components';
 import useTranslation from '../hooks/useTranslation';
+import { LINKS } from '../links';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -54,14 +55,7 @@ function PhishingDetected({ className }: Props): React.ReactElement<Props> {
                   'We have found it on a list of phishing websites that is community-driven and maintained by Parity Technologies. If you think that this website has been flagged incorrectly, open an issue'
                 )}
                 &nbsp;
-                <a
-                  className='link'
-                  href='https://github.com/polkadot-js/phishing/issues/new'
-                  rel='noreferrer'
-                  target={'_blank'}
-                >
-                  {t<string>('here')}
-                </a>
+                <LearnMore href={LINKS.PHISHING}>{t<string>('here')}</LearnMore>
               </span>
             </div>
           </div>

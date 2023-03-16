@@ -3,15 +3,15 @@
 
 import type { ThemeProps } from '../types';
 
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import chevronDown from '../assets/chevron-down.svg';
 import { ALEPH_ZERO_GENESIS_HASH } from '../constants';
 import useTranslation from '../hooks/useTranslation';
 import InputLock from './InputLock';
 import Label from './Label';
+import Svg from './Svg';
 
 interface DropdownOption {
   text: string;
@@ -80,9 +80,9 @@ function Dropdown({
             )
           )}
         </select>
-        <FontAwesomeIcon
+        <Svg
           className={`icon ${isLocked ? 'disabled-icon' : ''}`}
-          icon={faChevronDown}
+          src={chevronDown}
         />
         <InputLock
           isLocked={isLocked}
@@ -143,10 +143,12 @@ export default React.memo(
   }
 
   .icon {
+    height: 20px;
+    width: 20px;
     position: absolute;
     right: 46px;
     top: 20px;
-    color: ${theme.textColor};
+    background: ${theme.subTextColor};
   }
 
   .disabled-icon {

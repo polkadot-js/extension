@@ -89,7 +89,7 @@ function Export({
           <InputWithLabel
             data-export-password
             disabled={isBusy}
-            isError={pass.length < MIN_LENGTH || !!error}
+            isError={!!error}
             label={t<string>('Password')}
             onChange={onPassChange}
             type={isPasswordVisible ? 'text' : 'password'}
@@ -145,7 +145,7 @@ export default withRouter(styled(Export)`
   .password-icon {
     position: absolute;
     top: 18px;
-    right: 36px;
+    right: 20px;
     cursor: pointer;
   }
 

@@ -5,10 +5,12 @@ import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 import helpIcon from '../assets/help.svg';
-import { Address, BackButton, Button, ButtonArea, Dropdown, ScrollWrapper, Svg, VerticalSpace } from '../components';
+import { BackButton, Button, ButtonArea, Dropdown, LearnMore, ScrollWrapper, Svg, VerticalSpace } from '../components';
+import Address from '../components/Address';
 import useGenesisHashOptions from '../hooks/useGenesisHashOptions';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
+import { LINKS } from '../links';
 import { Name, Password } from '../partials';
 import { ThemeProps } from '../types';
 import { AccountContext } from './contexts';
@@ -35,13 +37,15 @@ flex-direction: row;
 display: flex;
 gap: 8px;
 
-.icon-container {
-  margin-top: 4px;
-}
+
 .text-container {
   display: flex;
   gap: 4px;
 }
+`;
+
+const StyledAddress = styled(Address)`
+  margin-bottom: 16px;
 `;
 
 function AccountNamePasswordCreation({
@@ -113,9 +117,9 @@ function AccountNamePasswordCreation({
       </div>
       <div className='text-container'>
         <span>
-          {t<string>('When should you choose the network?')}&nbsp;
+          {t<string>("Don't know which network to choose?")}&nbsp;
           <br />
-          <span className='link'>{t<string>('Learn more')}</span>
+          <LearnMore href={LINKS.NETWORK} />
         </span>
       </div>
     </CustomFooter>
@@ -131,7 +135,7 @@ function AccountNamePasswordCreation({
               {t<string>('Choose how your new account is displayed and protected it in Aleph Zero Signer.')}
             </span>
           </div>
-          <Address
+          <StyledAddress
             address={address}
             genesisHash={genesisHash}
             name={name}

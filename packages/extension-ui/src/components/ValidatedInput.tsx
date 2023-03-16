@@ -87,7 +87,7 @@ position: relative;
   all: unset;
   position: absolute;
   top: 18px;
-  right: 36px;
+  right: 20px;
   cursor: pointer;
 }
 

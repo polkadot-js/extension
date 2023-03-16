@@ -16,6 +16,7 @@ import {
   Button,
   ButtonArea,
   Checkbox,
+  LearnMore,
   RadioGroup,
   ScrollWrapper,
   Svg,
@@ -24,6 +25,7 @@ import {
 import HelperFooter from '../../components/HelperFooter';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
+import { LINKS } from '../../links';
 import { tieAccount } from '../../messaging';
 import { Header } from '../../partials';
 
@@ -84,7 +86,7 @@ function EditNetwork({
       />
       <span>
         {t<string>('Not sure which to choose?')}&nbsp;
-        <span className='link'>{t<string>('Learn more')}</span>
+        <LearnMore href={LINKS.NETWORK} />
       </span>
     </CustomFooter>
   );

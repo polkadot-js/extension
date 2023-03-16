@@ -25,10 +25,6 @@ const FooterWithoutMargin = styled(HelperFooter)`
   display: flex;
   gap: 8px;
   flex-direction: row;
-
-  .icon-container {
-    margin-top: 4px;
-  }
   
   .text-container {
     display: flex;

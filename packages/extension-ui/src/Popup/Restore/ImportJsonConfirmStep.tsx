@@ -62,6 +62,12 @@ function ImportJsonConfirmStep({
         return;
       }
 
+      if (!pass) {
+        setIsDisabled(true);
+
+        return;
+      }
+
       onChangePass(pass);
       setIsDisabled(false);
     },

@@ -8,10 +8,11 @@ import React, { useCallback, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
 import helpIcon from '../../assets/help.svg';
-import { AccountContext, ActionContext, Button, ButtonArea, Svg } from '../../components';
+import { AccountContext, ActionContext, Button, ButtonArea, LearnMore, Svg } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
+import { LINKS } from '../../links';
 import { approveAuthRequest, deleteAuthRequest } from '../../messaging';
 import { AccountSelection } from '../../partials';
 import NoAccount from './NoAccount';
@@ -34,9 +35,6 @@ const CustomFooter = styled(HelperFooter)`
   display: flex;
   gap: 8px;
 
-  .icon-container {
-    margin-top: 4px;
-  }
   .text-container {
     display: flex;
     gap: 4px;
@@ -98,7 +96,7 @@ function Request({ authId, className, isFirst, request: { origin }, url }: Props
           <span>
             {t<string>('Only connect with sites you trust.')}&nbsp;
             <br />
-            <span className='link'>{t<string>('Learn more')}</span>
+            <LearnMore href={LINKS.TRUSTED_APPS} />
           </span>
         </div>
       </div>

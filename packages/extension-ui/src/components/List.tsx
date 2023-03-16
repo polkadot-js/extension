@@ -25,7 +25,8 @@ export default styled(List)(
   color: ${theme.subTextColor};
 
   li {
-    margin-bottom: 16px;
+    text-indent: -16px;
+    margin-bottom: 10px;
     white-space: pre-line;
   }
 

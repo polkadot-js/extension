@@ -168,11 +168,11 @@ export default styled(MnemonicInput)(
     justify-content: space-between;
     width: 100%;
     user-select: all;
-
   }
 
   .mnemonic-pill {
-    width: 30%;
+    box-sizing: border-box;
+    width: 108px;
     margin-bottom: 8px;
   }
 

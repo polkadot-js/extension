@@ -18,7 +18,7 @@ interface Props {
   value?: string | null;
 }
 
-function Identicon ({ className, iconTheme, onCopy, prefix, value }: Props): React.ReactElement<Props> {
+function Identicon({ className, iconTheme, onCopy, prefix, value }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <Icon
@@ -33,7 +33,8 @@ function Identicon ({ className, iconTheme, onCopy, prefix, value }: Props): Rea
   );
 }
 
-export default styled(Identicon)(({ theme }: ThemeProps) => `
+export default styled(Identicon)(
+  ({ theme }: ThemeProps) => `
   background: rgba(192, 192, 292, 0.25);
   border-radius: 50%;
   display: flex;
@@ -50,4 +51,5 @@ export default styled(Identicon)(({ theme }: ThemeProps) => `
       display: none;
     }
   }
-`);
+`
+);

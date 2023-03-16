@@ -34,6 +34,15 @@ function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is S
   return (value as SignerPayloadJSON).genesisHash !== undefined;
 }
 
+const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
+  focused: true,
+  height: 630,
+  left: 150,
+  top: 150,
+  type: 'popup',
+  width: 360
+};
+
 export default class Extension {
   readonly #cachedUnlocks: CachedUnlocks;
 
@@ -470,7 +479,7 @@ export default class Extension {
       return false;
     }
 
-    withErrorLog(() => chrome.tabs.create({ url }));
+    withErrorLog(() => chrome.windows.create({ ...POPUP_WINDOW_OPTS, url }));
 
     return true;
   }

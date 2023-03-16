@@ -8,10 +8,11 @@ import styled from 'styled-components';
 
 import animatedLockIcon from '../../assets/anim_locked.svg';
 import helpIcon from '../../assets/help.svg';
-import { Button, ButtonArea, Svg, VerticalSpace } from '../../components';
+import { Button, ButtonArea, LearnMore, Svg, VerticalSpace } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
 import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
+import { LINKS } from '../../links';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -25,12 +26,18 @@ const WrapperRow = styled.div`
   width: 100%;
 `;
 
+const StyledFooter = styled(HelperFooter)`
+  .icon {
+    margin-bottom: 12px;
+  }
+`;
+
 function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { goTo } = useGoTo();
 
   const footer = (
-    <HelperFooter>
+    <StyledFooter>
       <WrapperRow>
         <Svg
           className='icon'
@@ -38,10 +45,10 @@ function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props
         />
         <span>
           {t<string>('Why it is critical to store your secret\nphrase in a safe place?')}&nbsp;
-          <span className='link'>{t<string>('Learn more')}</span>
+          <LearnMore href={LINKS.SAFETY} />
         </span>
       </WrapperRow>
-    </HelperFooter>
+    </StyledFooter>
   );
 
   return (
@@ -52,12 +59,12 @@ function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props
             className='icon'
             src={animatedLockIcon}
           />
-          <p className='heading'>{t<string>('Safety first!')}</p>
-          <p className='description'>
+          <span className='heading'>{t<string>('Safety first!')}</span>
+          <span className='description'>
             {t<string>(
               "In the next step, you'll generate a secret phrase that allows you to access your account. Anyone who manages to access it will have a full control over your account,\nso read, save, and store it safely."
             )}
-          </p>
+          </span>
         </div>
       </div>
       <VerticalSpace />
@@ -86,6 +93,7 @@ export default React.memo(
       align-items: center;
       justify-content: center;
       margin-top: 54px;
+      gap: 16px;
         
       .icon {
         margin: 0 auto;

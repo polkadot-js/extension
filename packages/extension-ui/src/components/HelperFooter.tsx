@@ -52,6 +52,7 @@ export default React.memo(
       .link {
         color: ${theme.primaryColor};
         cursor: pointer;
+        text-decoration: none;
   
         :hover {
           text-decoration: underline;

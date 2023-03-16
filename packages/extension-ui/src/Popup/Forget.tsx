@@ -9,10 +9,20 @@ import styled from 'styled-components';
 
 import animatedForget from '../assets/anim_vanish.svg';
 import helpIcon from '../assets/help.svg';
-import { AccountContext, ActionContext, Address, Button, ButtonArea, Svg, VerticalSpace } from '../components';
+import {
+  AccountContext,
+  ActionContext,
+  Address,
+  Button,
+  ButtonArea,
+  LearnMore,
+  Svg,
+  VerticalSpace
+} from '../components';
 import HelperFooter from '../components/HelperFooter';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
+import { LINKS } from '../links';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';
 
@@ -50,13 +60,13 @@ function Forget({
       forgetAccount(address)
         .then(() => {
           setIsBusy(false);
-          onAction('/');
         })
         .catch((error: Error) => {
           setIsBusy(false);
           console.error(error);
         });
     });
+    onAction('/');
   }, [address, onAction, show, t]);
 
   const footer = (
@@ -67,7 +77,7 @@ function Forget({
       />
       <span>
         {t<string>('How to restore your account?')}&nbsp;
-        <span className='link'>{` ${t<string>('Learn more')}`}</span>
+        <LearnMore href={LINKS.FORGET} />
       </span>
     </HelperFooter>
   );

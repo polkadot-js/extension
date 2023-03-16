@@ -121,13 +121,13 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
             icon={
               <Icon
                 phosphorIcon={XCircle}
+                weight='fill'
               />
             }
             loading={isSubmit}
             onClick={onCancel}
           >
-            {/* todo: i18n this */}
-            Close
+            {t('Close')}
           </Button>
         </>
       );
@@ -148,8 +148,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
             onClick={onCancel}
             schema={'secondary'}
           >
-            {/* todo: i18n this */}
-            Cancel
+            {t('Cancel')}
           </Button>
           <Button
             block
@@ -162,8 +161,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
             loading={isSubmit}
             onClick={handlerUnblock}
           >
-            {/* todo: i18n this */}
-            Unblock
+            {t('Unblock')}
           </Button>
         </>
       );
@@ -183,8 +181,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
           onClick={onCancel}
           schema={'secondary'}
         >
-          {/* todo: i18n this */}
-          Cancel
+          {t('Cancel')}
         </Button>
         <Button
           block
@@ -197,20 +194,21 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
           loading={isSubmit}
           onClick={handlerSubmit}
         >
-          {/* todo: i18n this */}
-          Confirm
+          {t('Confirm')}
         </Button>
       </>
     );
-  }, [_isNotConnected, handlerSubmit, handlerUnblock, isBlocked, isSubmit, onCancel]);
+  }, [t, _isNotConnected, handlerSubmit, handlerUnblock, isBlocked, isSubmit, onCancel]);
 
   const connectIconProps = useMemo<ConnectIcon>(() => {
     if (_isNotConnected) {
       return {
-        linkIcon: <Icon
-          customSize='24px'
-          phosphorIcon={GlobeHemisphereWest}
-        />,
+        linkIcon: (
+          <Icon
+            customSize='24px'
+            phosphorIcon={GlobeHemisphereWest}
+          />
+        ),
         linkIconBg: token.colorWarning
       };
     }
@@ -230,24 +228,22 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
 
   const renderContent = () => {
     if (_isNotConnected) {
-      // todo: i18n this
       return (
         <>
-          <div className={'__content-heading'}>This is not a Web3 application</div>
+          <div className={'__content-heading'}>{t('This is not a Web3 application')}</div>
           <div className={'text-tertiary __content-text'}>
-            SubWallet is not connected to this site. To connect to a web3 site, find and click the connect button.
+            {t('SubWallet is not connected to this site. To connect to a web3 site, find and click the connect button.')}
           </div>
         </>
       );
     }
 
     if (isBlocked) {
-      // todo: i18n this
       return (
         <>
-          <div className={'__content-heading'}>This site has been blocked</div>
+          <div className={'__content-heading'}>{t('This site has been blocked')}</div>
           <div className={'text-tertiary __content-text'}>
-            This website has previously been blocked. Do you wish to unblock and grant access to it?
+            t{('This website has previously been blocked. Do you wish to unblock and grant access to it?')}
           </div>
         </>
       );
@@ -268,8 +264,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
     return (
       <>
         <div className={CN('__number-of-select-text')}>
-          {/* todo: i18n */}
-          You have {oldConnected} accounts connected to this site
+          {t('You have {{oldConnected}} accounts connected to this site', { replace: { oldConnected } })}
         </div>
 
         <div className={'__account-item-container'}>
@@ -322,7 +317,6 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
         }}
         {...connectIconProps}
       />
-
       {renderContent()}
     </SwModal>
   );
@@ -332,8 +326,7 @@ export const ConnectWebsiteModal = styled(Component)<Props>(({ theme: { token } 
   return ({
     '.ant-sw-modal-body': {
       display: 'flex',
-      flexDirection: 'column',
-      paddingBottom: 0
+      flexDirection: 'column'
     },
 
     '.dual-logo-container': {
@@ -389,8 +382,6 @@ export const ConnectWebsiteModal = styled(Component)<Props>(({ theme: { token } 
 
     '.ant-sw-modal-footer': {
       display: 'flex',
-      marginTop: token.margin,
-      marginBottom: token.margin,
 
       '.ant-btn + .ant-btn.ant-btn': {
         marginInlineStart: token.sizeSM

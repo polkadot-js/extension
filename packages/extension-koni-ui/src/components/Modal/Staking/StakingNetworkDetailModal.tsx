@@ -82,7 +82,10 @@ function Component ({ activeNominators,
         </MetaInfo.Default>}
 
         {!!estimatedEarning && !!inflation &&
-          <MetaInfo.Default label={t('Estimated earning')}>
+          <MetaInfo.Default
+            label={t('Estimated earning')}
+            labelAlign={'top'}
+          >
             <div className={'__active-nominators-value'}>
               <Number
                 className={'__current-nominator-count'}
@@ -113,11 +116,11 @@ function Component ({ activeNominators,
           label={t('Minimum active')}
           suffix={minimumActive.symbol}
           value={minimumActive.value}
-          valueColorSchema={'even-odd'}
+          valueColorSchema={'success'}
         />
 
         {!!unstakingPeriod && <MetaInfo.Default label={t('Unstaking period')}>
-          {t(`${getUnstakingPeriod(unstakingPeriod)} Days`)}
+          <span>{getUnstakingPeriod(unstakingPeriod)}</span>
         </MetaInfo.Default>}
       </MetaInfo>
     </SwModal>

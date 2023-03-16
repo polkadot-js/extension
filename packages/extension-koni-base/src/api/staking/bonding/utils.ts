@@ -248,7 +248,7 @@ export interface TuringOptimalCompoundFormat {
 // validations and check conditions
 export function isShowNominationByValidator (chain: string): 'showByValue' | 'showByValidator' | 'mixed' {
   if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
-    return 'showByValidator';
+    return 'showByValue';
   } else if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
     return 'mixed';
   } else if (_STAKING_CHAIN_GROUP.para.includes(chain)) {

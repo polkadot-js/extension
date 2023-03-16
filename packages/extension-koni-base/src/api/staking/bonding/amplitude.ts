@@ -5,7 +5,6 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { parseRawNumber } from '@subwallet/extension-base/utils';
 import { BlockHeader, getBondedValidators, isUnstakeAll, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 
@@ -127,7 +126,7 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
       claimable: nearestUnstakingAmount.toString(),
       waitingTime: waitingTime > 0 ? waitingTime : 0,
-      validatorAddress: delegatorState.owner
+      validatorAddress: delegatorState?.owner || undefined
     });
   }
 

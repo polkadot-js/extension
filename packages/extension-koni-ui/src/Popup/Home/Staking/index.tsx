@@ -116,8 +116,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   ];
 
-  console.log('selectedItem', selectedItem);
-
   const renderItem = useCallback((item: StakingDataType) => {
     return (
       <SwStakingItem
@@ -216,7 +214,8 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
     },
 
     '.ant-sw-list-section': {
-      flex: 1
+      flex: 1,
+      height: '100%'
     },
 
     '.staking__filter_option': {
@@ -231,10 +230,6 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
     '.staking-item': {
       marginBottom: token.marginXS
-    },
-
-    '.ant-sw-list-section': {
-      height: '100%'
     },
 
     '.ant-sw-list': {

@@ -269,7 +269,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                   <MetaInfo.Number
                     className={'__nomination-field'}
                     decimals={decimals}
-                    key={item.validatorAddress}
+                    key={`${item.validatorAddress}-${item.activeStake}-${item.validatorIdentity || item.validatorMinStake || item.chain}`}
                     label={<AccountItem
                       address={item.validatorAddress}
                       className={'__nomination-label'}
@@ -304,7 +304,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                 {unstakings.map((item) => (
                   <MetaInfo.Number
                     decimals={decimals}
-                    key={item.validatorAddress}
+                    key={`${item.validatorAddress || item.chain}-${item.status}-${item.claimable}`}
                     label={getWaitingTime(item.waitingTime) ? t(getWaitingTime(item.waitingTime)) : t('Withdraw')}
                     suffix={staking.nativeToken}
                     value={item.claimable || ''}

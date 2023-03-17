@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
@@ -16,7 +15,7 @@ interface Props extends ThemeProps {
   priceMap: Record<string, number>,
   decimals: number,
   onClickRightIcon: () => void,
-  onClickItem: (chain: string, stakingType: StakingType) => void,
+  onClickItem: (item: StakingDataType) => void,
 }
 
 function getStakingTypeTag (stakingType: string) {
@@ -43,11 +42,9 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
     return getConvertedBalanceValue(balanceValue, Number(`${priceMap[staking.chain] || 0}`));
   }, [balanceValue, priceMap, staking.chain]);
 
-  const onPressItem = useCallback(() => {
-    return () => {
-      onClickItem(staking.chain, staking.type);
-    };
-  }, [onClickItem, staking.chain, staking.type]);
+  const onPressItem = useCallback((item: StakingDataType) => {
+    onClickItem(item);
+  }, [onClickItem]);
 
   return (
     <StakingItem

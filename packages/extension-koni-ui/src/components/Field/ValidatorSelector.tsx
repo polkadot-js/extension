@@ -71,12 +71,13 @@ const getFilteredList = (items: ValidatorDataType[], filters: string[]) => {
   return filteredList;
 };
 
+// todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', disabled, id = 'validator-selector', label, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
   const items = useGetValidatorList(chain, 'nominate') as ValidatorDataType[];
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [sortSelection, setSortSelection] = useState<string>('');
-  const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(items, FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filteredList = useMemo(() => {
     return getFilteredList(items, selectedFilters);
   }, [items, selectedFilters]);
@@ -208,8 +209,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         onApplyFilter={onApplyFilter}
         // eslint-disable-next-line react/jsx-no-bind
         onCancel={closeFilterModal}
-        onChangeOption={onChangeFilterOpt}
-        optionSelection={changeFilters}
+        onChangeOption={onChangeFilterOption}
+        optionSelectionMap={filterSelectionMap}
         options={filterOptions}
       />
 

@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
-import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -11,7 +10,6 @@ import TokenToggleItem from '@subwallet/extension-koni-ui/components/TokenItem/T
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
-import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyList';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -22,7 +20,10 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-type Props = ThemeProps
+type Props = ThemeProps;
+
+const FILTER_MODAL_ID = 'filterTokenModal';
+
 enum FilterValue {
   ENABLED = 'enabled',
   DISABLED = 'disabled',
@@ -35,41 +36,6 @@ const FILTER_OPTIONS = [
   { label: 'Custom tokens', value: FilterValue.CUSTOM }
 ];
 
-function filterFungibleTokens (assetRegistry: Record<string, _ChainAsset>, assetSettingMap: Record<string, AssetSetting>, filters: string[]): _ChainAsset[] {
-  const filteredTokenList: _ChainAsset[] = [];
-
-  Object.values(assetRegistry).forEach((chainAsset) => {
-    let isValidationPassed = filters.length <= 0;
-
-    for (const filter of filters) {
-      switch (filter) {
-        case FilterValue.CUSTOM:
-          isValidationPassed = _isCustomAsset(chainAsset.slug);
-          break;
-        case FilterValue.ENABLED:
-          isValidationPassed = assetSettingMap[chainAsset.slug] && assetSettingMap[chainAsset.slug].visible;
-          break;
-        case FilterValue.DISABLED:
-          isValidationPassed = !assetSettingMap[chainAsset.slug] || !assetSettingMap[chainAsset.slug].visible;
-          break;
-        default:
-          isValidationPassed = false;
-          break;
-      }
-
-      if (isValidationPassed) {
-        break; // only need to satisfy 1 filter (OR)
-      }
-    }
-
-    if (_isAssetFungibleToken(chainAsset) && isValidationPassed) {
-      filteredTokenList.push(chainAsset);
-    }
-  });
-
-  return filteredTokenList;
-}
-
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -78,11 +44,33 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { assetRegistry, assetSettingMap } = useSelector((state: RootState) => state.assetRegistry);
-  const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(Object.values(assetRegistry), 'filterTokenModal');
-  const allFungibleTokens = useMemo(() => {
-    return filterFungibleTokens(assetRegistry, assetSettingMap, selectedFilters);
-  }, [assetRegistry, assetSettingMap, selectedFilters]);
-  const { hasMore, lazyItems, loadMoreItems } = useLazyList(allFungibleTokens, false);
+  const assetItems = useMemo(() => Object.values(assetRegistry), [assetRegistry]);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const filterFunction = useMemo<(item: _ChainAsset) => boolean>(() => {
+    return (chainAsset) => {
+      if (!selectedFilters.length) {
+        return true;
+      }
+
+      for (const filter of selectedFilters) {
+        if (filter === FilterValue.CUSTOM) {
+          if (_isCustomAsset(chainAsset.slug)) {
+            return true;
+          }
+        } else if (filter === FilterValue.ENABLED) {
+          if (assetSettingMap[chainAsset.slug] && assetSettingMap[chainAsset.slug].visible) {
+            return true;
+          }
+        } else if (filter === FilterValue.DISABLED) {
+          if (!assetSettingMap[chainAsset.slug] || !assetSettingMap[chainAsset.slug].visible) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    };
+  }, [assetSettingMap, selectedFilters]);
 
   const searchToken = useCallback((token: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -132,11 +120,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const openFilterModal = useCallback((e?: SyntheticEvent) => {
     e && e.stopPropagation();
-    activeModal('filterTokenModal');
+    activeModal(FILTER_MODAL_ID);
   }, [activeModal]);
 
   const closeFilterModal = useCallback(() => {
-    inactiveModal('filterTokenModal');
+    inactiveModal(FILTER_MODAL_ID);
   }, [inactiveModal]);
 
   return (
@@ -166,18 +154,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           )}
           className={'manage_tokens__container'}
           enableSearchInput={true}
+          filterBy={filterFunction}
           gridGap={'14px'}
-          ignoreScrollbar={lazyItems.length > 7}
-          list={lazyItems}
+          ignoreScrollbar={assetItems.length > 7}
+          list={assetItems}
           minColumnWidth={'172px'}
           mode={'boxed'}
           onClickActionBtn={openFilterModal}
-          pagination={{
-            hasMore,
-            loadMore: loadMoreItems
-          }}
           renderItem={renderTokenItem}
-          renderOnScroll={!hasMore}
           renderWhenEmpty={emptyTokenList}
           searchFunction={searchToken}
           searchMinCharactersCount={2}
@@ -186,11 +170,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
 
         <FilterModal
-          id={'filterTokenModal'}
+          id={FILTER_MODAL_ID}
           onApplyFilter={onApplyFilter}
           onCancel={closeFilterModal}
-          onChangeOption={onChangeFilterOpt}
-          optionSelection={changeFilters}
+          onChangeOption={onChangeFilterOption}
+          optionSelectionMap={filterSelectionMap}
           options={FILTER_OPTIONS}
         />
       </Layout.Base>

@@ -10,12 +10,10 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { FadersHorizontal, ListChecks, Plus } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -37,58 +35,46 @@ const FILTER_OPTIONS = [
   { label: 'Disabled chains', value: FilterValue.DISABLED }
 ];
 
-function filterChains (chainInfoList: ChainInfoWithState[], filters: string[]): ChainInfoWithState[] {
-  const filteredChainList: ChainInfoWithState[] = [];
-
-  chainInfoList.forEach((chainInfo) => {
-    let isValidationPassed = filters.length <= 0;
-
-    for (const filter of filters) {
-      switch (filter) {
-        case FilterValue.CUSTOM:
-          isValidationPassed = _isCustomChain(chainInfo.slug);
-          break;
-        case FilterValue.ENABLED:
-          isValidationPassed = chainInfo.active;
-          break;
-        case FilterValue.DISABLED:
-          isValidationPassed = !chainInfo.active;
-          break;
-        case FilterValue.SUBSTRATE:
-          isValidationPassed = _isSubstrateChain(chainInfo);
-          break;
-        case FilterValue.EVM:
-          isValidationPassed = _isChainEvmCompatible(chainInfo);
-          break;
-        default:
-          isValidationPassed = false;
-          break;
-      }
-
-      if (isValidationPassed) {
-        break; // only need to satisfy 1 filter (OR)
-      }
-    }
-
-    if (isValidationPassed) {
-      filteredChainList.push(chainInfo);
-    }
-  });
-
-  return filteredChainList;
-}
-
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const chainInfoList = useChainInfoWithState();
-  const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(Object.values(chainInfoMap), 'filterTokenModal');
-  const allChains = useMemo(() => {
-    return filterChains(chainInfoList, selectedFilters);
-  }, [chainInfoList, selectedFilters]);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal('filterTokenModal');
+  const filterFunction = useMemo<(item: ChainInfoWithState) => boolean>(() => {
+    return (chainInfo) => {
+      if (!selectedFilters.length) {
+        return true;
+      }
+
+      for (const filter of selectedFilters) {
+        if (filter === FilterValue.CUSTOM) {
+          if (_isCustomChain(chainInfo.slug)) {
+            return true;
+          }
+        } else if (filter === FilterValue.ENABLED) {
+          if (chainInfo.active) {
+            return true;
+          }
+        } else if (filter === FilterValue.DISABLED) {
+          if (!chainInfo.active) {
+            return true;
+          }
+        } else if (filter === FilterValue.SUBSTRATE) {
+          if (_isSubstrateChain(chainInfo)) {
+            return true;
+          }
+        } else if (filter === FilterValue.EVM) {
+          if (_isChainEvmCompatible(chainInfo)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    };
+  }, [selectedFilters]);
 
   const searchToken = useCallback((chainInfo: ChainInfoWithState, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -160,26 +146,26 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             weight={'fill'}
           />}
           className={'manage_chains__container'}
-          enableSearchInput={true}
-          ignoreScrollbar={allChains.length > 7}
-          list={allChains}
+          enableSearchInput
+          filterBy={filterFunction}
+          ignoreScrollbar={chainInfoList.length > 7}
+          list={chainInfoList}
           mode={'boxed'}
           onClickActionBtn={openFilterModal}
           renderItem={renderChainItem}
-          renderOnScroll={true}
           renderWhenEmpty={emptyTokenList}
           searchFunction={searchToken}
           searchMinCharactersCount={2}
           searchPlaceholder={t<string>('Search chain')}
-          showActionBtn={true}
+          showActionBtn
         />
 
         <FilterModal
           id={'filterTokenModal'}
           onApplyFilter={onApplyFilter}
           onCancel={closeFilterModal}
-          onChangeOption={onChangeFilterOpt}
-          optionSelection={changeFilters}
+          onChangeOption={onChangeFilterOption}
+          optionSelectionMap={filterSelectionMap}
           options={FILTER_OPTIONS}
         />
       </Layout.Base>

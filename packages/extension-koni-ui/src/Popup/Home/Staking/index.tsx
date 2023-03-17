@@ -1,22 +1,20 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
-import Layout from '@subwallet/extension-koni-ui/components/Layout';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
-import SwStakingItem from '@subwallet/extension-koni-ui/components/StakingItem';
+import SwStakingItem from '@subwallet/extension-koni-ui/components/StakingItem/SwStakingItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
-import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyList';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
 import MoreActionModal, { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
-import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -32,8 +30,8 @@ enum FilterValue {
 }
 
 const FILTER_OPTIONS = [
-  { label: 'Nominated', value: FilterValue.NOMINATED },
-  { label: 'Pooled', value: FilterValue.POOLED }
+  { label: 'Nominated', value: StakingType.NOMINATED },
+  { label: 'Pooled', value: StakingType.POOLED }
 ];
 
 const rightIcon = <Icon
@@ -42,50 +40,35 @@ const rightIcon = <Icon
   type='phosphor'
 />;
 
-function getFilteredList (items: StakingDataType[], filters: string[]) {
-  const filteredList: StakingDataType[] = [];
-
-  items.forEach((item) => {
-    let isValidationPassed = filters.length <= 0;
-
-    for (const filter of filters) {
-      switch (filter) {
-        case FilterValue.NOMINATED:
-          isValidationPassed = item.staking.type === 'nominated';
-          break;
-        case FilterValue.POOLED:
-          isValidationPassed = item.staking.type === 'pooled';
-          break;
-        default:
-          isValidationPassed = false;
-          break;
-      }
-
-      if (isValidationPassed) {
-        break; // only need to satisfy 1 filter (OR)
-      }
-    }
-
-    if (isValidationPassed) {
-      filteredList.push(item);
-    }
-  });
-
-  return filteredList;
-}
-
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { data, priceMap } = useGetStakingList();
+  const { data: stakingItems, priceMap } = useGetStakingList();
   const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);
-  const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(data, FILTER_MODAL_ID);
-  const filteredList = useMemo(() => {
-    return getFilteredList(data, selectedFilters);
-  }, [data, selectedFilters]);
-  const { hasMore, lazyItems, loadMoreItems } = useLazyList(filteredList);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const filterFunction = useMemo<(item: StakingDataType) => boolean>(() => {
+    return (item) => {
+      if (!selectedFilters.length) {
+        return true;
+      }
+
+      for (const filter of selectedFilters) {
+        if (filter === FilterValue.NOMINATED) {
+          if (item.staking.type === StakingType.NOMINATED) {
+            return true;
+          }
+        } else if (filter === StakingType.POOLED) {
+          if (item.staking.type === StakingType.POOLED) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    };
+  }, [selectedFilters]);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -167,14 +150,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             size='sm'
           />}
           enableSearchInput={true}
-          list={lazyItems}
+          filterBy={filterFunction}
+          ignoreScrollbar={stakingItems.length > 3}
+          list={stakingItems}
           onClickActionBtn={onClickActionBtn}
-          pagination={{
-            hasMore,
-            loadMore: loadMoreItems
-          }}
           renderItem={renderItem}
-          renderOnScoll={true}
           renderWhenEmpty={emptyStakingList}
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
@@ -186,8 +166,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           id={FILTER_MODAL_ID}
           onApplyFilter={onApplyFilter}
           onCancel={closeFilterModal}
-          onChangeOption={onChangeFilterOpt}
-          optionSelection={changeFilters}
+          onChangeOption={onChangeFilterOption}
+          optionSelectionMap={filterSelectionMap}
           options={FILTER_OPTIONS}
         />
 

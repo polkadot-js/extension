@@ -101,6 +101,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
               if (locationPaths.length >= 3) {
                 if (pathName.startsWith('/home/nfts')) {
                   navigate('/home/nfts/collections');
+                } else if (pathName.startsWith('/home/token-detail-list')) {
+                  navigate('/home/tokens');
                 } else {
                   navigate(`/home/${locationPaths[2]}`);
                 }

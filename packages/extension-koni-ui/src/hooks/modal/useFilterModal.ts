@@ -4,35 +4,27 @@
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useState } from 'react';
 
-export function useFilterModal<T> (items: T[], modalId: string) {
+export function useFilterModal (modalId: string) {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [changeFilters, setChangeFilters] = useState<string[]>(selectedFilters);
+  const [filterSelectionMap, setFilterSelectionMap] = useState<Record<string, boolean>>({});
   const { inactiveModal } = useContext(ModalContext);
 
-  const onChangeFilterOpt = useCallback((value: string, isCheck: boolean) => {
-    if (isCheck) {
-      setChangeFilters([...changeFilters, value]);
-    } else {
-      const newSelectedFilters: string[] = [];
-
-      changeFilters.forEach((filterVal) => {
-        if (filterVal !== value) {
-          newSelectedFilters.push(filterVal);
-        }
-      });
-      setChangeFilters(newSelectedFilters);
-    }
-  }, [changeFilters]);
+  const onChangeFilterOption = useCallback((value: string, isCheck: boolean) => {
+    setFilterSelectionMap((prev) => ({
+      ...prev,
+      [value]: isCheck
+    }));
+  }, []);
 
   const onApplyFilter = useCallback(() => {
     inactiveModal(modalId);
-    setSelectedFilters(changeFilters);
-  }, [changeFilters, inactiveModal, modalId]);
+    setSelectedFilters(Object.keys(filterSelectionMap).filter((o) => filterSelectionMap[o]));
+  }, [filterSelectionMap, inactiveModal, modalId]);
 
   return {
-    onChangeFilterOpt,
+    onChangeFilterOption,
     onApplyFilter,
-    changeFilters,
+    filterSelectionMap,
     selectedFilters
   };
 }

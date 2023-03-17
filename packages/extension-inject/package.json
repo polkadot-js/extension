@@ -26,7 +26,7 @@
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.221",
+    "@types/chrome": "^0.0.224",
     "@types/firefox-webext-browser": "^111.0.0"
   },
   "peerDependencies": {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
-import Layout from '@subwallet/extension-koni-ui/components/Layout';
+import { Layout } from '@subwallet/extension-koni-ui/components/Layout';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import SwStakingItem from '@subwallet/extension-koni-ui/components/StakingItem';

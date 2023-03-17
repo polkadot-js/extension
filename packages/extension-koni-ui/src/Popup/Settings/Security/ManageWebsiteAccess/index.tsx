@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { FilterModal, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { ActionItemType, ActionModal } from '@subwallet/extension-koni-ui/components/Modal/ActionModal';
 import { WebsiteAccessItem } from '@subwallet/extension-koni-ui/components/Setting/WebsiteAccessItem';
+import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { changeAuthorizationAll, forgetAllSite } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -13,7 +14,7 @@ import { updateAuthUrls } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ManageWebsiteAccessDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
-import { GearSix, GlobeHemisphereWest, Plugs, PlugsConnected, X } from 'phosphor-react';
+import { FadersHorizontal, GearSix, GlobeHemisphereWest, Plugs, PlugsConnected, X } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -33,6 +34,15 @@ function getAccountCount (item: AuthUrlInfo): number {
   return Object.values(item.isAllowedMap).filter((i) => i).length;
 }
 
+const FILTER_MODAL_ID = 'manage-website-access-filter-id';
+
+enum FilterValue {
+  SUBSTRATE = 'substrate',
+  ETHEREUM = 'ethereum',
+  BLOCKED = 'blocked',
+  Connected = 'connected',
+}
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const authUrlMap = useSelector((state: RootState) => state.settings.authUrls);
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -40,6 +50,53 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const goBack = useDefaultNavigate().goBack;
   const { token } = useTheme() as Theme;
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const filterFunction = useMemo<(item: AuthUrlInfo) => boolean>(() => {
+    return (item) => {
+      if (!selectedFilters.length) {
+        return true;
+      }
+
+      for (const filter of selectedFilters) {
+        if (filter === FilterValue.SUBSTRATE) {
+          if (item.accountAuthType === 'substrate' || item.accountAuthType === 'both') {
+            return true;
+          }
+        } else if (filter === FilterValue.ETHEREUM) {
+          if (item.accountAuthType === 'evm' || item.accountAuthType === 'both') {
+            return true;
+          }
+        } else if (filter === FilterValue.BLOCKED) {
+          if (!item.isAllowed) {
+            return true;
+          }
+        } else if (filter === FilterValue.Connected) {
+          if (item.isAllowed) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    };
+  }, [selectedFilters]);
+
+  const onClickActionBtn = useCallback(() => {
+    activeModal(FILTER_MODAL_ID);
+  }, [activeModal]);
+
+  const closeFilterModal = useCallback(() => {
+    inactiveModal(FILTER_MODAL_ID);
+  }, [inactiveModal]);
+
+  const filterOptions = useMemo(() => {
+    return [
+      { label: 'Substrate DApp', value: FilterValue.SUBSTRATE },
+      { label: 'Ethereum DApp', value: FilterValue.ETHEREUM },
+      { label: 'Blocked DApp', value: FilterValue.BLOCKED },
+      { label: 'Connected DApp', value: FilterValue.Connected }
+    ];
+  }, []);
 
   const websiteAccessItems = useMemo<AuthUrlInfo[]>(() => {
     return getWebsiteItems(authUrlMap);
@@ -101,14 +158,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const renderItem = useCallback(
     (item: AuthUrlInfo) => {
       return (
-        <div key={item.id}>
-          <WebsiteAccessItem
-            accountCount={getAccountCount(item)}
-            domain={item.id}
-            onClick={onClickItem(item)}
-            siteName={item.origin || item.id}
-          />
-        </div>
+        <WebsiteAccessItem
+          accountCount={getAccountCount(item)}
+          className={'__item'}
+          domain={item.id}
+          key={item.id}
+          onClick={onClickItem(item)}
+          siteName={item.origin || item.id}
+        />
       );
     },
     [onClickItem]
@@ -158,16 +215,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       />
 
       <SwList.Section
-        displayRow
+        actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
         enableSearchInput
+        filterBy={filterFunction}
         ignoreScrollbar={websiteAccessItems.length > 8}
         list={websiteAccessItems}
+        onClickActionBtn={onClickActionBtn}
         renderItem={renderItem}
         renderWhenEmpty={renderEmptyList}
-        rowGap = {'8px'}
         searchFunction={searchFunc}
         searchMinCharactersCount={2}
-        searchPlaceholder={t('Search website')} // todo: i18n this
+        searchPlaceholder={t('Search website')}
+        showActionBtn
       />
 
       <ActionModal
@@ -175,6 +234,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         id={ActionModalId}
         onCancel={onCloseActionModal}
         title={t('Website access config')}
+      />
+
+      <FilterModal
+        id={FILTER_MODAL_ID}
+        onApplyFilter={onApplyFilter}
+        onCancel={closeFilterModal}
+        onChangeOption={onChangeFilterOption}
+        optionSelectionMap={filterSelectionMap}
+        options={filterOptions}
       />
     </PageWrapper>
   );
@@ -188,7 +256,16 @@ const ManageWebsiteAccess = styled(Component)<Props>(({ theme: { token } }: Prop
     flexDirection: 'column',
 
     '.ant-sw-list-section': {
-      flex: 1
+      flex: 1,
+      marginBottom: token.margin
+    },
+
+    '.ant-sw-list-section .ant-sw-list': {
+      paddingBottom: 0
+    },
+
+    '.__item + .__item': {
+      marginTop: token.marginXS
     }
   });
 });

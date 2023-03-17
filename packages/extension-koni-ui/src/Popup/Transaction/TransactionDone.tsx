@@ -6,8 +6,7 @@ import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/p
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button } from '@subwallet/react-ui';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { Button, PageIcon } from '@subwallet/react-ui';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';

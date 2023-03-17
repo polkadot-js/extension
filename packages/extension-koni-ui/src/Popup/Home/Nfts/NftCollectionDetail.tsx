@@ -3,8 +3,7 @@
 
 import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
-import Layout from '@subwallet/extension-koni-ui/components/Layout';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';

@@ -139,15 +139,14 @@ const DeriveAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
     '--row-gap': token.sizeXS,
 
     '.ant-sw-modal-body': {
-      padding: `${token.padding}px 0 0`
-    },
-
-    '.ant-sw-list-section': {
-      maxHeight: 450
+      padding: `${token.padding}px 0`,
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
     },
 
     '.ant-sw-list-wrapper': {
-      overflow: 'auto'
+      overflowY: 'auto'
     },
 
     '.ant-web3-block': {

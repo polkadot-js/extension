@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Image, Web3Block } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { Icon, Image, Web3Block } from '@subwallet/react-ui';
 import { CaretRight } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';

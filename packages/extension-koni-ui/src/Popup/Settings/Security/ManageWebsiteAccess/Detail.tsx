@@ -3,9 +3,9 @@
 
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { ActionItemType, ActionModal } from '@subwallet/extension-koni-ui/components/Modal/ActionModal';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { changeAuthorization, changeAuthorizationPerAccount, forgetSite, toggleAuthorization } from '@subwallet/extension-koni-ui/messaging';
@@ -14,8 +14,7 @@ import { updateAuthUrls } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ManageWebsiteAccessDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { filterNotReadOnlyAccount } from '@subwallet/extension-koni-ui/util/account';
-import { Icon, Switch, SwList, SwSubHeader } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { Icon, ModalContext, Switch, SwList } from '@subwallet/react-ui';
 import { GearSix, MagnifyingGlass, Plugs, PlugsConnected, ShieldCheck, ShieldSlash, X } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -193,48 +192,44 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
 
   return (
     <PageWrapper className={`manage-website-access-detail ${className}`}>
-      <SwSubHeader
-        background={'transparent'}
-        center
+      <Layout.WithSubHeaderOnly
         onBack={goBack}
-        paddingVertical
-        rightButtons={[
+        subHeaderIcons={[
           {
             icon: (
               <Icon
-                customSize={'24px'}
                 phosphorIcon={GearSix}
+                size='md'
                 type='phosphor'
-                weight={'bold'}
+                weight='bold'
               />
             ),
             onClick: onOpenActionModal
           }
         ]}
-        showBackButton
         title={siteName}
-      />
+      >
+        <SwList.Section
+          displayRow
+          enableSearchInput
+          ignoreScrollbar={accountItems.length > 7}
+          list={accountItems}
+          renderItem={renderItem}
+          renderWhenEmpty={renderEmptyList}
+          rowGap = {'8px'}
+          searchFunction={searchFunc}
+          searchMinCharactersCount={2}
+          searchPlaceholder={t('Search account')} // todo: i18n this
+        />
 
-      <SwList.Section
-        displayRow
-        enableSearchInput
-        ignoreScrollbar={accountItems.length > 7}
-        list={accountItems}
-        renderItem={renderItem}
-        renderWhenEmpty={renderEmptyList}
-        rowGap = {'8px'}
-        searchFunction={searchFunc}
-        searchMinCharactersCount={2}
-        searchPlaceholder={t('Search account')} // todo: i18n this
-      />
-
-      <ActionModal
-        actions={actions}
-        className={`${className} action-modal`}
-        id={ActionModalId}
-        onCancel={onCloseActionModal}
-        title={t('Website access config')}
-      />
+        <ActionModal
+          actions={actions}
+          className={`${className} action-modal`}
+          id={ActionModalId}
+          onCancel={onCloseActionModal}
+          title={t('Website access config')}
+        />
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }
@@ -269,6 +264,7 @@ function WrapperComponent (props: WrapperProps) {
 const ManageWebsiteAccessDetail = styled(WrapperComponent)<Props>(({ theme: { token } }: Props) => {
   return ({
     paddingBottom: token.paddingMD,
+
     '&.manage-website-access-detail': {
       height: '100%',
       backgroundColor: token.colorBgDefault,
@@ -278,6 +274,10 @@ const ManageWebsiteAccessDetail = styled(WrapperComponent)<Props>(({ theme: { to
       '.ant-sw-list-section': {
         flex: 1
       }
+    },
+
+    '.ant-sw-screen-layout-body': {
+      paddingTop: token.paddingSM
     },
 
     '&.action-modal': {

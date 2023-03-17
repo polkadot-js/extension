@@ -5,7 +5,8 @@ import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chai
 import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _generateCustomProviderKey, _getChainNativeTokenBasicInfo, _isChainEvmCompatible, _isCustomProvider, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { isUrl } from '@subwallet/extension-base/utils';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -13,16 +14,12 @@ import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
-import { ActivityIndicator, ButtonProps, Col, Form, Input, Row, Tooltip } from '@subwallet/react-ui';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
-import Icon from '@subwallet/react-ui/es/icon';
-import { Globe, Info, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
+import { ActivityIndicator, Col, Form, Icon, Input, Row, Tooltip } from '@subwallet/react-ui';
+import { Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
-
-import Layout from '../../../components/Layout';
 
 type Props = ThemeProps
 
@@ -104,7 +101,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     };
   }, [chainInfo, chainType]);
 
-  const [form] = useForm<AddProviderForm>();
+  const [form] = Form.useForm<AddProviderForm>();
   const [isValidating, setIsValidating] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);
@@ -160,17 +157,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onCancel = useCallback(() => {
     navigate(-1);
   }, [navigate]);
-
-  const subHeaderButton: ButtonProps[] = [
-    {
-      icon: <Icon
-        customSize={`${token.fontSizeHeading3}px`}
-        phosphorIcon={Info}
-        type='phosphor'
-        weight={'light'}
-      />
-    }
-  ];
 
   const handleErrorMessage = useCallback((errorCode: _CHAIN_VALIDATION_ERROR) => {
     switch (errorCode) {
@@ -279,7 +265,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showSubHeader={true}
         subHeaderBackground={'transparent'}
         subHeaderCenter={true}
-        subHeaderIcons={subHeaderButton}
+        subHeaderIcons={[
+          {
+            icon: <InfoIcon />
+          }
+        ]}
         subHeaderPaddingVertical={true}
         title={t<string>('Add new provider')}
       >

@@ -3,14 +3,15 @@
 
 import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
-import Footer from '@subwallet/extension-koni-ui/components/Layout/parts/Footer';
-import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import { Aperture, Clock, Database, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+import Footer from '../parts/Footer';
+import SelectAccount from '../parts/SelectAccount';
 
 export interface LayoutBaseProps extends Omit<
 SwScreenLayoutProps,

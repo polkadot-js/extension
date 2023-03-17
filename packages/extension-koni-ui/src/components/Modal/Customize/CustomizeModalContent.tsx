@@ -7,8 +7,7 @@ import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFo
 import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { NetworkItem, SwList } from '@subwallet/react-ui';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { NetworkItem, PageIcon, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback } from 'react';

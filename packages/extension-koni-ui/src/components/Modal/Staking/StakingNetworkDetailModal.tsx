@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, Number, SwModal, SwNumberProps } from '@subwallet/react-ui';
-import { Info } from 'phosphor-react';
+import { Number, SwModal, SwNumberProps } from '@subwallet/react-ui';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -39,12 +39,7 @@ function Component ({ activeNominators,
       id={StakingNetworkDetailModalId}
       onCancel={onCancel}
       rightIconProps={{
-        icon: (
-          <Icon
-            phosphorIcon={Info}
-            size='sm'
-          />
-        )
+        icon: <InfoIcon />
       }}
       title={t('Network details')}
     >

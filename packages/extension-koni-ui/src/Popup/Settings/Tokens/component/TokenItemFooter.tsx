@@ -7,8 +7,7 @@ import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotifi
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { updateAssetSetting } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Switch } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { Button, Icon, Switch } from '@subwallet/react-ui';
 import { DotsThree } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import { NavigateFunction } from 'react-router';
@@ -29,31 +28,34 @@ function Component ({ assetSetting, className = '', navigate, tokenInfo }: Props
 
   const onSwitchTokenVisible = useCallback((checked: boolean, event: React.MouseEvent<HTMLButtonElement>) => {
     if (!loading) {
-      updateAssetSetting({
-        tokenSlug: tokenInfo.slug,
-        assetSetting: {
-          visible: checked
-        }
-      })
-        .then((result) => {
-          setLoading(false);
-
-          if (result) {
-            setChecked(checked);
-          } else {
+      setLoading(true);
+      setTimeout(() => {
+        updateAssetSetting({
+          tokenSlug: tokenInfo.slug,
+          assetSetting: {
+            visible: checked
+          }
+        })
+          .then((result) => {
+            if (result) {
+              setChecked(checked);
+            } else {
+              showNotification({
+                message: t('Error'),
+                type: 'error'
+              });
+            }
+          })
+          .catch(() => {
             showNotification({
               message: t('Error'),
               type: 'error'
             });
-          }
-        })
-        .catch(() => {
-          showNotification({
-            message: t('Error'),
-            type: 'error'
+          })
+          .finally(() => {
+            setLoading(false);
           });
-          setLoading(false);
-        });
+      }, 300);
     }
   }, [loading, showNotification, t, tokenInfo.slug]);
 
@@ -65,7 +67,7 @@ function Component ({ assetSetting, className = '', navigate, tokenInfo }: Props
     <div className={`manage_tokens__right_item_container ${className}`}>
       <Switch
         checked={checked}
-        disabled={loading}
+        loading={loading}
         onClick={onSwitchTokenVisible}
       />
       <Button

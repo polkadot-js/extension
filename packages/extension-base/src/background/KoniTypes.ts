@@ -442,7 +442,7 @@ export enum ExtrinsicType {
   STAKING_COMPOUNDING = 'staking.compounding',
   STAKING_CANCEL_WITHDRAWAL = 'staking.cancel_withdrawal',
   STAKING_CANCEL_COMPOUNDING = 'staking.cancel_compounding',
-  EVM_EXECUTE = 'evm.smart_contract',
+  EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
 }
 

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ReceiveAccountSelector } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveAccountSelector';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelector } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelector';

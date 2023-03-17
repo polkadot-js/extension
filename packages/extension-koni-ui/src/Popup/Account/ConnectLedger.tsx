@@ -3,23 +3,26 @@
 
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountWithNameSkeleton, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
-import AccountWithNameSkeleton from '@subwallet/extension-koni-ui/components/Account/Item/AccountWithNameSkeleton';
-import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field';
+import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
+import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
+import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/useGetSupportedLedger';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
 import { BackgroundIcon, Button, Icon, Image, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, CircleNotch, Info, Swatches } from 'phosphor-react';
+import { CheckCircle, CircleNotch, Swatches } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -35,7 +38,7 @@ interface ImportLedgerItem {
   name: string;
 }
 
-const LIMIT_PER_PAGE = 20;
+const LIMIT_PER_PAGE = 5;
 
 const FooterIcon = (
   <Icon
@@ -50,9 +53,11 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
   const { t } = useTranslation();
+  const { goHome } = useDefaultNavigate();
 
   const supportedLedger = useGetSupportedLedger();
   const onComplete = useCompleteCreateAccount();
+  const onBack = useGoBackFromCreateAccount(ATTACH_ACCOUNT_MODAL);
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
@@ -80,6 +85,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onPreviousStep = useCallback(() => {
     setFirstStep(true);
+    setSelectedAccounts([]);
   }, []);
 
   const onChainChange: BasicOnChangeFunction = useCallback((event) => {
@@ -108,27 +114,27 @@ const Component: React.FC<Props> = (props: Props) => {
             try {
               const { address } = await getAddress(i);
 
-              const item: ImportLedgerItem = {
+              rs[i - start] = {
                 accountIndex: i,
                 name: `Ledger ${networkName} ${i + 1}`,
                 address: address
               };
-
-              rs[i - start] = item;
-
-              setLedgerAccounts((prevState) => {
-                const result = [...prevState];
-
-                result[i] = item;
-
-                return result;
-              });
             } catch (e) {
               refresh();
               setFirstStep(true);
               break;
             }
           }
+
+          setLedgerAccounts((prevState) => {
+            const result = [...prevState];
+
+            for (let i = start; i < end; i++) {
+              result[i] = rs[i - start];
+            }
+
+            return result;
+          });
         };
 
         handler().then().catch().finally(() => setIsLoadMore(false));
@@ -233,22 +239,18 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
-        onBack={firstStep ? undefined : onPreviousStep}
+        onBack={firstStep ? onBack : onPreviousStep}
         rightFooterButton={{
           children: t('Connect Ledger device'),
           icon: FooterIcon,
           disabled: !isConnected || (!firstStep && !selectedAccounts.length),
           onClick: firstStep ? onNextStep : onSubmit,
-          loading: isSubmitting || isLoadMore
+          loading: isSubmitting
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <CloseIcon />,
+            onClick: goHome
           }
         ]}
         title={t('Connect Ledger device')}
@@ -288,7 +290,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 />
                 <Button
                   block={true}
-                  className={CN('ledger-button', { connected: isConnected })}
+                  className={CN('ledger-button', { connected: isConnected, loading: isLoading })}
                   contentAlign='left'
                   icon={(
                     <BackgroundIcon
@@ -302,7 +304,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   schema='secondary'
                 >
                   <div className='ledger-button-content'>
-                    <span>
+                    <span className='ledger-info-text'>
                       {t(isConnected
                         ? 'Connected ledger'
                         : warning
@@ -334,14 +336,14 @@ const Component: React.FC<Props> = (props: Props) => {
               <SwList.Section
                 className='list-container'
                 displayRow={true}
-                ignoreScrollbar={ledgerAccounts && ledgerAccounts.length > 5}
+                ignoreScrollbar={ledgerAccounts && ledgerAccounts.length > 4}
                 list={ledgerAccounts}
                 pagination={{
                   hasMore: !isLoadMore,
-                  loadMore: () => console.log(12)
+                  loadMore: onLoadMore(isLoadMore, page)
                 }}
                 renderItem={renderItem(selectedAccounts)}
-                renderOnScroll={true}
+                renderOnScroll={false}
                 rowGap='var(--list-gap)'
               />
             )
@@ -387,7 +389,13 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      flex: 1
+      flex: 1,
+      overflow: 'hidden'
+    },
+
+    '.ledger-info-text': {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
 
     '.ledger-button': {
@@ -423,6 +431,12 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
       '.ant-account-item': {
         paddingTop: token.paddingSM,
         paddingBottom: token.paddingSM
+      }
+    },
+
+    '.loading': {
+      '.anticon': {
+        animation: 'spinner-loading 1s infinite linear'
       }
     }
   };

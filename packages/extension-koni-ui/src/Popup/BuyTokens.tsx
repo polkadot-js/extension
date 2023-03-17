@@ -3,11 +3,10 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isAccountAll } from '@subwallet/extension-base/utils';
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { ServiceSelector } from '@subwallet/extension-koni-ui/components/Field/BuyTokens/ServiceSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { PREDEFINED_TRANSAK_TOKEN } from '@subwallet/extension-koni-ui/constants/transak';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -18,7 +17,6 @@ import { openInNewTab } from '@subwallet/extension-koni-ui/util';
 import { getAccountType } from '@subwallet/extension-koni-ui/util/account';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { Button, Form, Icon, SwSubHeader } from '@subwallet/react-ui';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
 import CN from 'classnames';
 import { ShoppingCartSimple } from 'phosphor-react';
 import qs from 'querystring';
@@ -76,7 +74,7 @@ function Component ({ className }: Props) {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const { t } = useTranslation();
   const { goBack } = useDefaultNavigate();
-  const [form] = useForm<BuyTokensFormProps>();
+  const [form] = Form.useForm<BuyTokensFormProps>();
   const formDefault: BuyTokensFormProps = {
     address: isAllAccount ? '' : (currentAccount?.address || ''),
     tokenKey: fixedTokenKey || '',

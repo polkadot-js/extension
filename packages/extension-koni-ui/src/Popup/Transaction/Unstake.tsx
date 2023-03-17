@@ -14,7 +14,6 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { Button, Form, Icon } from '@subwallet/react-ui';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
 import { MinusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -33,7 +32,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const transactionContext = useContext(TransactionContext);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const isAll = isAccountAll(currentAccount?.address || '');
-  const [form] = useForm<StakeFromProps>();
+  const [form] = Form.useForm<StakeFromProps>();
   const formDefault = {
     from: transactionContext.from,
     value: '0'

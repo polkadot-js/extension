@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ResponseJsonGetAccountInfo } from '@subwallet/extension-base/background/types';
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
+import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
+import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -19,7 +21,7 @@ import { UploadChangeParam, UploadFile } from '@subwallet/react-ui/es/upload/int
 import AccountCard from '@subwallet/react-ui/es/web3-block/account-card';
 import { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import CN from 'classnames';
-import { DotsThree, FileArrowDown, Info } from 'phosphor-react';
+import { DotsThree, FileArrowDown } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -64,8 +66,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const { t } = useTranslation();
   const onComplete = useCompleteCreateAccount();
+  const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
   const { goHome } = useDefaultNavigate();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  const [form] = Form.useForm();
 
   const [fileValidateState, setFileValidateState] = useState<ValidateState>({});
   const [submitValidateState, setSubmitValidateState] = useState<ValidateState>({});
@@ -249,21 +254,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
+        onBack={onBack}
         rightFooterButton={{
           children: t('Import from Json'),
           icon: FooterIcon,
-          onClick: onSubmit,
+          onClick: form.submit,
           disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
           loading: validating || loading
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <CloseIcon />,
+            onClick: goHome
           }
         ]}
         title={t<string>('Import from Json')}
@@ -274,7 +276,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           </div>
           <Form
             className='form-container'
+            form={form}
             name={formName}
+            onFinish={onSubmit}
           >
             <Form.Item
               help={fileValidateState.message}

@@ -13,7 +13,7 @@ import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ShieldSlash, UserPlus } from 'phosphor-react';
+import { PlusCircle, ShieldSlash, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -220,41 +220,66 @@ function Component ({ className, request }: Props) {
         </div>
       </div>
       <div className='confirmation-footer'>
-        {visibleAccounts.length > 0 && <>
-          <Button
-            className={'icon-btn'}
-            danger={true}
-            disabled={loading}
-            icon={<Icon phosphorIcon={ShieldSlash} />}
-            onClick={onBlock}
-          />
-          <Button
-            disabled={loading}
-            onClick={onCancel}
-            schema={'secondary'}
-          >
-            {t('Cancel')}
-          </Button>
-          <Button
-            disabled={Object.values(selectedMap).every((value) => !value)}
-            loading={loading}
-            onClick={onConfirm}
-          >
-            {t('Connect')}
-          </Button>
-        </>}
-        {visibleAccounts.length === 0 && <Button
-          disabled={loading}
-          icon={(
-            <Icon
-              phosphorIcon={UserPlus}
-              weight='fill'
-            />
-          )}
-          onClick={onAddAccount}
-        >
-          {t('Create a new account')}
-        </Button>}
+        {
+          visibleAccounts.length > 0 &&
+          (
+            <>
+              <Button
+                className={'icon-btn'}
+                danger={true}
+                disabled={loading}
+                icon={<Icon phosphorIcon={ShieldSlash} />}
+                onClick={onBlock}
+              />
+              <Button
+                disabled={loading}
+                onClick={onCancel}
+                schema={'secondary'}
+              >
+                {t('Cancel')}
+              </Button>
+              <Button
+                disabled={Object.values(selectedMap).every((value) => !value)}
+                loading={loading}
+                onClick={onConfirm}
+              >
+                {t('Connect')}
+              </Button>
+            </>
+          )
+        }
+        {
+          visibleAccounts.length === 0 &&
+            (
+              <>
+                <Button
+                  disabled={loading}
+                  icon={(
+                    <Icon
+                      phosphorIcon={XCircle}
+                      weight='fill'
+                    />
+                  )}
+                  onClick={onCancel}
+                  schema={'secondary'}
+                >
+                  {t('Cancel')}
+                </Button>
+                <Button
+                  disabled={loading}
+                  icon={(
+                    <Icon
+                      phosphorIcon={PlusCircle}
+                      weight='fill'
+                    />
+                  )}
+                  onClick={onAddAccount}
+                >
+                  {t('Create one')}
+                </Button>
+              </>
+            )
+        }
       </div>
     </>
   );

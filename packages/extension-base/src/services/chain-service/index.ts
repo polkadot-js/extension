@@ -328,6 +328,7 @@ export class ChainService {
     delete chainStateMap[slug];
     delete chainInfoMap[slug];
     this.deleteAssetsByChain(slug);
+    this.dbService.removeFromChainStore([slug]).catch(console.error);
 
     this.updateChainSubscription();
 
@@ -845,7 +846,7 @@ export class ChainService {
       multiChainAsset: null,
       name: params.chainEditInfo.name as string,
       originChain: newChainSlug,
-      priceId: null,
+      priceId: params.chainEditInfo.priceId || null,
       slug: '',
       symbol: params.chainEditInfo.symbol as string,
       hasValue: true

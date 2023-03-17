@@ -92,7 +92,6 @@ const Component: React.FC<Props> = (props: Props) => {
           ? (
             <MetaInfo.Chain
               chain={chainInfo.slug}
-              chainName={chainInfo.name}
               label={t<string>('Network')}
             />
           )

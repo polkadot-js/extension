@@ -939,6 +939,8 @@ export interface NftTransactionRequest {
   networkKey: string,
   senderAddress: string,
   recipientAddress: string,
+
+  nftItemName?: string, // Use for confirmation view only
   params: Record<string, any>
 }
 
@@ -1020,6 +1022,7 @@ export interface SubstrateNftTransaction {
 export interface SubstrateNftSubmitTransaction extends BaseRequestSign {
   params: Record<string, any> | null;
   senderAddress: string;
+  nftItemName?: string;
   recipientAddress: string;
 }
 

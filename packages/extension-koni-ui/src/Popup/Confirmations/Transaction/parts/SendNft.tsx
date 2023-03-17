@@ -1,8 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestBondingSubmit } from '@subwallet/extension-base/background/KoniTypes';
-import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
+import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import CN from 'classnames';
@@ -17,7 +16,7 @@ type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
-  const data = transaction.data as RequestBondingSubmit;
+  const data = transaction.data as ExtrinsicDataTypeMap[ExtrinsicType.SEND_NFT];
 
   const { t } = useTranslation();
 
@@ -29,20 +28,26 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <div className={CN(className)}>
-      <CommonTransactionInfo
-        address={transaction.address}
-        network={transaction.chain}
-      />
-      <MetaInfo
-        hasBackgroundWrapper={true}
-      >
-        {/* Todo: Render multi accounts for data.selectedValidators */}
-        <MetaInfo.Number
-          decimals={0}
-          label={t('Amount')}
-          suffix={chainInfo?.substrateInfo?.symbol}
-          value={data.amount}
+      <MetaInfo hasBackgroundWrapper>
+        <MetaInfo.Account
+          address={data.senderAddress}
+          label={t('Sender')}
         />
+
+        <MetaInfo.Account
+          address={data.recipientAddress}
+          label={t('Recipient')}
+        />
+
+        <MetaInfo.Chain
+          chain={chainInfo.slug}
+          label={t('Network')}
+        />
+      </MetaInfo>
+      <MetaInfo hasBackgroundWrapper={true}>
+        {data.nftItemName && <MetaInfo.Default label={t('NFT')}>
+          {data.nftItemName}
+        </MetaInfo.Default>}
         <MetaInfo.Number
           decimals={chainInfo?.substrateInfo?.decimals || 0}
           label={t('Estimated fee')}
@@ -54,8 +59,8 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const StakeTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const SendNftTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {};
 });
 
-export default StakeTransactionConfirmation;
+export default SendNftTransactionConfirmation;

@@ -83,7 +83,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
-    return <NetworkToggleItem chainInfo={chainInfo} />;
+    return <NetworkToggleItem
+      chainInfo={chainInfo}
+      key={chainInfo.slug}
+    />;
   }, []);
 
   const emptyTokenList = useCallback(() => {

@@ -56,11 +56,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return location.state as string;
   }, [location.state]);
 
-  const chainInfo = useFetchChainInfo(chainSlug);
-  const chainState = useFetchChainState(chainSlug);
+  const _chainInfo = useFetchChainInfo(chainSlug);
+  const _chainState = useFetchChainState(chainSlug);
+
+  const [chainInfo] = useState(_chainInfo);
+  const [chainState] = useState(_chainState);
 
   const isPureEvmChain = useMemo(() => {
-    return _isPureEvmChain(chainInfo);
+    return chainInfo && _isPureEvmChain(chainInfo);
   }, [chainInfo]);
 
   const { decimals, symbol } = useMemo(() => {

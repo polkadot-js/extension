@@ -123,7 +123,7 @@ export const router = createHashRouter([
         ...Home.generateRouterObject('/home'),
         children: [
           Tokens.generateRouterObject('tokens'),
-          TokenDetailList.generateRouterObject('token-detail-list/:slug'),
+          TokenDetailList.generateRouterObject('tokens/detail/:slug'),
           {
             path: 'nfts',
             element: <Outlet />,

@@ -9,22 +9,33 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useGetTokensBySettings from '@subwallet/extension-koni-ui/hooks/screen/home/useGetTokensBySettings';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
-  id: string,
+  onSelectItem?: (item: _ChainAsset) => void,
   address?: string,
-  onChangeSelectedNetwork?: (value: string) => void;
+  itemFilter?: (item: _ChainAsset) => boolean
 }
+
+export const ReceiveTokensSelectorModalId = 'receiveTokensSelectorModalId';
 
 const renderEmpty = () => <EmptyAccount />;
 
-function Component ({ address, className = '', id, onChangeSelectedNetwork }: Props): React.ReactElement<Props> {
+function Component ({ address, className = '', itemFilter, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const itemsMap = useGetTokensBySettings(address);
-  const items = Object.values(itemsMap);
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const itemsMap = useGetTokensBySettings(address);
+
+  const items = useMemo<_ChainAsset[]>(() => {
+    const _items = Object.values(itemsMap);
+
+    if (itemFilter) {
+      return _items.filter(itemFilter);
+    }
+
+    return _items;
+  }, [itemFilter, itemsMap]);
 
   const searchFunction = useCallback((item: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -35,16 +46,16 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
   }, []);
 
   const onCancel = useCallback(() => {
-    inactiveModal(id);
-  }, [id, inactiveModal]);
+    inactiveModal(ReceiveTokensSelectorModalId);
+  }, [inactiveModal]);
 
-  const onClickQrBtn = useCallback((chain: string) => {
+  const onClickQrBtn = useCallback((item: _ChainAsset) => {
     return () => {
-      onChangeSelectedNetwork && onChangeSelectedNetwork(chain);
-      inactiveModal(id);
+      onSelectItem && onSelectItem(item);
+      inactiveModal(ReceiveTokensSelectorModalId);
       activeModal(RECEIVE_QR_MODAL);
     };
-  }, [activeModal, id, inactiveModal, onChangeSelectedNetwork]);
+  }, [activeModal, inactiveModal, onSelectItem]);
 
   const renderItem = useCallback((item: _ChainAsset) => {
     return (
@@ -54,8 +65,8 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
         className={'token-selector-item'}
         key={`${item.symbol}-${item.originChain}`}
         name={item.symbol}
-        onClickQrBtn={onClickQrBtn(item.originChain)}
-        onPressItem={onClickQrBtn(item.originChain)}
+        onClickQrBtn={onClickQrBtn(item)}
+        onPressItem={onClickQrBtn(item)}
         subName={item.name}
         subNetworkKey={item.originChain || ''}
         symbol={item.symbol}
@@ -66,9 +77,8 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
   return (
     <SwModal
       className={`${className} chain-selector-modal`}
-      id={id}
+      id={ReceiveTokensSelectorModalId}
       onCancel={onCancel}
-
       title={t('Select token')}
     >
       <SwList.Section
@@ -85,7 +95,7 @@ function Component ({ address, className = '', id, onChangeSelectedNetwork }: Pr
   );
 }
 
-export const TokensSelector = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const TokensSelectorModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.ant-sw-modal-content': {
       minHeight: 474
@@ -98,7 +108,7 @@ export const TokensSelector = styled(Component)<Props>(({ theme: { token } }: Pr
     '.ant-sw-modal-body': {
       paddingLeft: 0,
       paddingRight: 0,
-      paddingBottom: 0,
+      paddingBottom: token.padding,
       marginBottom: 0,
       display: 'flex'
     },
@@ -111,12 +121,8 @@ export const TokensSelector = styled(Component)<Props>(({ theme: { token } }: Pr
       paddingBottom: 0
     },
 
-    '.token-selector-item': {
-      marginBottom: token.marginXS
-    },
-
-    '&.chain-selector-input .__selected-item': {
-      color: token.colorText
+    '.token-selector-item + .token-selector-item': {
+      marginTop: token.marginXS
     }
   });
 });

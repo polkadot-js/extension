@@ -20,14 +20,14 @@ type Props = ThemeProps & {
   title?: string,
   applyFilterButtonTitle?: string,
   onApplyFilter?: () => void,
-  optionSelection: string[],
+  optionSelectionMap: Record<string, boolean>,
   options: OptionType[],
   onChangeOption: (value: string, isChecked: boolean) => void,
 }
 
 function Component (props: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { applyFilterButtonTitle, className = '', id, onApplyFilter, onCancel, onChangeOption, optionSelection, options, title } = props;
+  const { applyFilterButtonTitle, className = '', id, onApplyFilter, onCancel, onChangeOption, optionSelectionMap, options, title } = props;
 
   const _onChangeOption = useCallback((e: CheckboxChangeEvent) => {
     onChangeOption(e.target.value as string, e.target.checked);
@@ -67,7 +67,7 @@ function Component (props: Props): React.ReactElement<Props> {
               key={option.value}
             >
               <Checkbox
-                checked={optionSelection.includes(option.value)}
+                checked={optionSelectionMap[option.value]}
                 onChange={_onChangeOption}
                 value={option.value}
               >

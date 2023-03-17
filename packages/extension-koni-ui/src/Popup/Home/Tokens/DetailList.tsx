@@ -1,8 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { AccountJson } from '@subwallet/extension-base/background/types';
+import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { AccountSelectorModal, AccountSelectorModalId } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
+import ReceiveQrModal, { ReceiveSelectedResult } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
+import { ReceiveTokensSelectorModalId, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
+import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -11,13 +17,13 @@ import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { ModalContext } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
+import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import classNames from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -51,8 +57,12 @@ function Component (): React.ReactElement {
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const { slug: tokenGroupSlug } = useParams();
   const { accountBalance: { tokenBalanceMap, tokenGroupBalanceMap }, tokenGroupStructure: { tokenGroupMap } } = useContext(HomeContext);
-
+  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+  const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(
+    { selectedAccount: currentAccount?.address });
+  const navigate = useNavigate();
 
   const symbol = useMemo<string>(() => {
     if (tokenGroupSlug) {
@@ -177,6 +187,60 @@ function Component (): React.ReactElement {
     };
   }, []);
 
+  const onOpenSendFund = useCallback(() => {
+    navigate('/transaction/send-fund', tokenGroupSlug ? ({ state: { slug: tokenGroupSlug } }) : undefined);
+  },
+  [navigate, tokenGroupSlug]
+  );
+
+  const onOpenBuyTokens = useCallback(() => {
+    navigate('/buy-tokens', { state: { symbol } });
+  },
+  [navigate, symbol]
+  );
+
+  const onOpenReceive = useCallback(() => {
+    if (isAllAccount) {
+      activeModal(AccountSelectorModalId);
+    } else {
+      if (tokenBalanceItems.length === 1) {
+        setReceiveSelectedResult((prev) => ({ ...prev, selectedNetwork: tokenBalanceItems[0].chain }));
+        activeModal(RECEIVE_QR_MODAL);
+
+        return;
+      }
+
+      activeModal(ReceiveTokensSelectorModalId);
+    }
+  }, [activeModal, isAllAccount, tokenBalanceItems]);
+
+  const openSelectAccount = useCallback((account: AccountJson) => {
+    setReceiveSelectedResult({ selectedAccount: account.address });
+
+    if (tokenBalanceItems.length === 1) {
+      setReceiveSelectedResult((prev) => ({ ...prev, selectedNetwork: tokenBalanceItems[0].chain }));
+      activeModal(RECEIVE_QR_MODAL);
+    } else {
+      activeModal(ReceiveTokensSelectorModalId);
+    }
+
+    inactiveModal(AccountSelectorModalId);
+  }, [activeModal, inactiveModal, tokenBalanceItems]);
+
+  const openSelectToken = useCallback((item: _ChainAsset) => {
+    setReceiveSelectedResult((prevState) => ({ ...prevState, selectedNetwork: item.originChain }));
+  }, []);
+
+  const tokensSelectorFiller = useMemo<((item: _ChainAsset) => boolean) | undefined>(() => {
+    if (tokenBalanceItems.length < 2) {
+      return undefined;
+    }
+
+    const acceptSlugs = tokenBalanceItems.map((t) => t.slug);
+
+    return (item: _ChainAsset) => acceptSlugs.includes(item.slug);
+  }, [tokenBalanceItems]);
+
   useEffect(() => {
     if (currentTokenInfo) {
       activeModal(TokenDetailModalId);
@@ -185,7 +249,6 @@ function Component (): React.ReactElement {
     }
   }, [activeModal, currentTokenInfo, inactiveModal]);
 
-  // todo: wait design for scrolling mode
   return (
     <div
       className={'token-detail-container'}
@@ -203,7 +266,9 @@ function Component (): React.ReactElement {
           className={'__static-block'}
           isShrink={isShrink}
           onClickBack={goBack}
-          sendFundSlug={tokenGroupSlug}
+          onOpenBuyTokens={onOpenBuyTokens}
+          onOpenReceive={onOpenReceive}
+          onOpenSendFund={onOpenSendFund}
           symbol={symbol}
         />
       </div>
@@ -226,6 +291,21 @@ function Component (): React.ReactElement {
         id={TokenDetailModalId}
         onCancel={onCloseDetail}
         tokenBalanceMap={tokenBalanceMap}
+      />
+
+      <AccountSelectorModal
+        onSelectItem={openSelectAccount}
+      />
+
+      <TokensSelectorModal
+        address={selectedAccount || currentAccount?.address}
+        itemFilter={tokensSelectorFiller}
+        onSelectItem={openSelectToken}
+      />
+
+      <ReceiveQrModal
+        address={selectedAccount}
+        selectedNetwork={selectedNetwork}
       />
     </div>
   );

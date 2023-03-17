@@ -5,8 +5,8 @@ import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/F
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { useCallback, useContext, useState } from 'react';
 
-export function useSelectValidators<T> (items: T[], modalId: string, onChange?: BasicOnChangeFunction<T>) {
-  const [selectedValidators, setSelectedValidators] = useState<string[]>([]);
+export function useSelectValidators<T> (items: T[], modalId: string, defaultSelectedValidators: string[], onChange?: BasicOnChangeFunction<T>) {
+  const [selectedValidators, setSelectedValidators] = useState<string[]>(defaultSelectedValidators);
   const [changeValidators, setChangeValidators] = useState<string[]>(selectedValidators);
   const { inactiveModal } = useContext(ModalContext);
 

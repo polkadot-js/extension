@@ -24,7 +24,7 @@ import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { PlusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -42,16 +42,24 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const transactionContext = useContext(TransactionContext);
   const location = useLocation();
-  const { chainStakingMetadata, hideTabList } = location.state as StakingDataOption;
+  const { chainStakingMetadata, hideTabList, nominatorMetadata } = location.state as StakingDataOption;
 
   const assetRegistry = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+  const [{ decimals, symbol }, setNativeTokenBasicInfo] = useState<{ decimals: number, symbol: string }>({ decimals: 0, symbol: 'Unit' });
   const isAll = isAccountAll(currentAccount?.address || '');
   const [form] = useForm<StakeFromProps>();
-  const chainInfo = chainInfoMap[chainStakingMetadata.chain];
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-  const slug = _getChainNativeTokenSlug(chainInfo);
+
+  const slug = useMemo(() => {
+    if (chainStakingMetadata) {
+      const chainInfo = chainInfoMap[chainStakingMetadata.chain];
+
+      return _getChainNativeTokenSlug(chainInfo);
+    }
+
+    return '';
+  }, [chainInfoMap, chainStakingMetadata]);
 
   const formDefault = {
     from: transactionContext.from,
@@ -60,6 +68,14 @@ const Component: React.FC<Props> = (props: Props) => {
   };
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  useEffect(() => {
+    if (chainStakingMetadata) {
+      const chainInfo = chainInfoMap[chainStakingMetadata.chain];
+
+      setNativeTokenBasicInfo(_getChainNativeTokenBasicInfo(chainInfo));
+    }
+  }, [chainInfoMap, chainStakingMetadata]);
 
   useEffect(() => {
     transactionContext.setTransactionType(ExtrinsicType.STAKING_STAKE);
@@ -127,7 +143,7 @@ const Component: React.FC<Props> = (props: Props) => {
     <>
       <ScreenTab
         className={className}
-        defaultIndex={chainStakingMetadata.type === StakingType.POOLED.valueOf() ? 1 : 2}
+        defaultIndex={nominatorMetadata.type === StakingType.POOLED.valueOf() ? 0 : 1}
         hideTabList={!!hideTabList}
       >
         <ScreenTab.SwTabPanel label={t('Pools')}>
@@ -181,6 +197,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 <PoolSelector
                   chain={'polkadot'}
                   label={t('Select pool')}
+                  nominationPoolList={nominatorMetadata ? nominatorMetadata.nominations : undefined}
                 />
               </Form.Item>
 
@@ -244,6 +261,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 <MultiValidatorSelector
                   chain={'polkadot'}
                   id={'multi-validator-selector'}
+                  nominators={nominatorMetadata ? nominatorMetadata.nominations : undefined}
                 />
               </Form.Item>
 

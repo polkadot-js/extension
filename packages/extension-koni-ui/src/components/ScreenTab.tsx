@@ -25,7 +25,7 @@ const SwTabPanel = ({ children, label }: ChildProps) => {
 };
 
 const Component = (props: Props) => {
-  const { children, className, defaultIndex = 1, hideTabList = false } = props;
+  const { children, className, defaultIndex = 0, hideTabList = false } = props;
 
   const tabLabelList = React.Children.map(children, (child) => {
     return child.props.label;

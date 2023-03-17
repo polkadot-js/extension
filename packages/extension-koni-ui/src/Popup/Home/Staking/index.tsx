@@ -7,11 +7,11 @@ import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrap
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import SwStakingItem from '@subwallet/extension-koni-ui/components/StakingItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyList';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
-import MoreActionModal, { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import MoreActionModal, { MORE_ACTION_MODAL, StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal'
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
@@ -101,7 +101,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   const onClickItem = useCallback((item: StakingDataType, e?: SyntheticEvent) => {
-    e && e.stopPropagation();
+    // e && e.stopPropagation();
     setSelectedItem(item);
 
     activeModal(STAKING_DETAIL_MODAL_ID);
@@ -167,7 +167,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             size='sm'
           />}
           enableSearchInput={true}
-          ignoreScrollbar={lazyItems.length > 3}
           list={lazyItems}
           onClickActionBtn={onClickActionBtn}
           pagination={{
@@ -198,7 +197,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             nominatorMetadata={selectedItem.nominatorMetadata}
           />}
 
-        <MoreActionModal chainStakingMetadata={selectedItem?.chainStakingMetadata} />
+        <MoreActionModal
+          chainStakingMetadata={selectedItem?.chainStakingMetadata}
+          nominatorMetadata={selectedItem?.nominatorMetadata}
+        />
       </Layout.Base>
     </PageWrapper>
   );
@@ -214,8 +216,7 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
     },
 
     '.ant-sw-list-section': {
-      flex: 1,
-      height: '100%'
+      flex: 1
     },
 
     '.staking__filter_option': {
@@ -230,10 +231,6 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
     '.staking-item': {
       marginBottom: token.marginXS
-    },
-
-    '.ant-sw-list': {
-      overflow: 'auto'
     }
   });
 });

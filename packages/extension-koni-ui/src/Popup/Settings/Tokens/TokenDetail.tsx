@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { _getContractAddressOfToken, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getContractAddressOfToken, _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -10,12 +10,13 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/modal/useConfirmModal';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
-import { deleteCustomAssets } from '@subwallet/extension-koni-ui/messaging';
+import useGetChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainAssetInfo';
+import { deleteCustomAssets, upsertCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Col, Field, Icon, Logo, Row, Tooltip } from '@subwallet/react-ui';
+import { Button, ButtonProps, Col, Field, Icon, Input, Logo, Row, Tooltip } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import { Copy, Trash } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import { CheckCircle, Copy, Trash } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -31,11 +32,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const location = useLocation();
   const showNotification = useNotification();
 
-  const tokenInfo = useMemo(() => {
-    return location.state as _ChainAsset;
+  const tokenSlug = useMemo(() => {
+    return location.state as string;
   }, [location.state]);
+  const tokenInfo = useGetChainAssetInfo(tokenSlug) as _ChainAsset;
+
+  useEffect(() => {
+    if (!tokenInfo) {
+      goBack();
+    }
+  }, [goBack, tokenInfo]);
 
   const originChainInfo = useFetchChainInfo(tokenInfo.originChain);
+
+  const [priceId, setPriceId] = useState(tokenInfo.priceId || '');
+  const [loading, setLoading] = useState(false);
 
   const { handleSimpleConfirmModal } = useConfirmModal({
     title: t<string>('Delete token'),
@@ -132,13 +143,76 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [handleCopyContractAddress, token.colorIcon]);
 
+  const onChangePriceId = useCallback((e: React.FormEvent<HTMLInputElement>) => {
+    setPriceId(e.currentTarget.value);
+  }, []);
+
+  const isSubmitDisabled = useCallback(() => {
+    return tokenInfo.priceId === priceId || priceId.length === 0;
+  }, [priceId, tokenInfo.priceId]);
+
+  const onSubmit = useCallback(() => {
+    setLoading(true);
+
+    upsertCustomToken({
+      ...tokenInfo,
+      priceId
+    })
+      .then((result) => {
+        if (result) {
+          setLoading(false);
+          goBack();
+        } else {
+          setLoading(false);
+          showNotification({
+            message: t('Error')
+          });
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+        showNotification({
+          message: t('Error')
+        });
+      });
+  }, [goBack, priceId, showNotification, t, tokenInfo]);
+
+  const leftFooterButtonProps = useCallback(() => {
+    return _isCustomAsset(tokenInfo.slug)
+      ? {
+        onClick: goBack,
+        children: 'Cancel'
+      }
+      : undefined;
+  }, [goBack, tokenInfo.slug]);
+
+  const rightFooterButtonProps = useCallback(() => {
+    return _isCustomAsset(tokenInfo.slug)
+      ? {
+        block: true,
+        disabled: isSubmitDisabled(),
+        icon: (
+          <Icon
+            phosphorIcon={CheckCircle}
+            weight='fill'
+          />
+        ),
+        loading,
+        onClick: onSubmit,
+        children: t('Save')
+      }
+      : undefined;
+  }, [isSubmitDisabled, loading, onSubmit, t, tokenInfo.slug]);
+
   return (
     <PageWrapper
       className={`token_detail ${className}`}
       resolve={dataContext.awaitStores(['assetRegistry'])}
     >
       <Layout.Base
+        leftFooterButton={leftFooterButtonProps()}
         onBack={goBack}
+        rightFooterButton={rightFooterButtonProps()}
         showBackButton={true}
         showSubHeader={true}
         subHeaderBackground={'transparent'}
@@ -215,6 +289,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 </Tooltip>
               </Col>
             </Row>
+
+            <Tooltip
+              placement={'topLeft'}
+              title={t('Price Id')}
+            >
+              <div>
+                <Input
+                  disabled={!_isCustomAsset(tokenInfo.slug)}
+                  onChange={onChangePriceId}
+                  placeholder={t('Price Id')}
+                  value={priceId}
+                />
+              </div>
+            </Tooltip>
           </div>
         </div>
       </Layout.Base>

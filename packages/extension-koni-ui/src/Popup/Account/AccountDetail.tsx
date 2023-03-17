@@ -240,6 +240,7 @@ const Component: React.FC<Props> = (props: Props) => {
             >
               <Input
                 className='account-name-input'
+                disabled={deriving}
                 label={t('Wallet name')}
                 onBlur={form.submit}
                 placeholder={t('Wallet name')}
@@ -251,7 +252,6 @@ const Component: React.FC<Props> = (props: Props) => {
                     // size='xs'
                   />
                 )}
-                disabled={deriving}
                 suffix={(
                   <Icon
                     className={CN({ loading: saving })}

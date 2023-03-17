@@ -19,7 +19,12 @@ export class HistoryService {
     this.dbService = dbService;
     this.chainService = chainService;
 
-    // Add some delay to avoid fetching so much when start extension background
+    // Load history from database
+    this.dbService.getHistories().then((histories) => {
+      this.historySubject.next(histories);
+    }).catch(console.error);
+
+    // Add some delay to avoid fetching many times when start extension background
     setTimeout(() => {
       // Create history interval and refresh it if changes accounts list
       accounts.subject.subscribe(this.refreshHistoryInterval.bind(this));

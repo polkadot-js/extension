@@ -3,5 +3,4 @@
 
 export { default as ReceiveQrModal } from './ReceiveQrModal';
 
-export * from './ReceiveAccountSelector';
-export * from './TokensSelector';
+export * from './TokensSelectorModal';

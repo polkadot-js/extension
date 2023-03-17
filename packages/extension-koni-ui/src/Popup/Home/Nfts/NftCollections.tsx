@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import Layout from '@subwallet/extension-koni-ui/components/Layout';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useGetNftByAccount from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetNftByAccount';

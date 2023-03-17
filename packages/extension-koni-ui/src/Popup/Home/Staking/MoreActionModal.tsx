@@ -3,8 +3,7 @@
 
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, SettingItem, SwModal } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
 import { ArrowCircleDown, IconProps, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';

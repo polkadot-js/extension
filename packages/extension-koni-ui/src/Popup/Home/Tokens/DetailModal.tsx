@@ -4,8 +4,7 @@
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { Number } from '@subwallet/react-ui';
-import SwModal from '@subwallet/react-ui/es/sw-modal';
+import { Number, SwModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import React from 'react';
 import styled from 'styled-components';

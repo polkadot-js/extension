@@ -3,21 +3,23 @@
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
+import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
+import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/util/form';
 import { readOnlyScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
-import { Form, Icon } from '@subwallet/react-ui';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/form';
+import { Form, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Eye, Info } from 'phosphor-react';
+import { Eye } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,20 +40,28 @@ const FooterIcon = (
 );
 
 const modalId = 'attach-read-only-scanner-modal';
+const formName = 'attach-read-only-form';
+const fieldName = 'address';
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
+  const { goHome } = useDefaultNavigate();
+
   const onComplete = useCompleteCreateAccount();
+  const accountName = useGetDefaultAccountName();
+
+  const accounts = useSelector((root: RootState) => root.accountState.accounts);
+
+  const onBack = useGoBackFromCreateAccount(ATTACH_ACCOUNT_MODAL);
+
+  const [form] = Form.useForm<ReadOnlyAccountInput>();
 
   const [reformatAddress, setReformatAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [isEthereum, setIsEthereum] = useState(false);
-  const [validateState, setValidateState] = useState<ValidateState>({});
-  const accountName = useGetDefaultAccountName();
-  const [form] = useForm<ReadOnlyAccountInput>();
-  const accounts = useSelector((root: RootState) => root.accountState.accounts);
+  const [isDisable, setIsDisable] = useState(true);
 
   const handleResult = useCallback((val: string) => {
     const result = readOnlyScan(val);
@@ -62,11 +72,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, []);
 
-  const onFieldsChange: Callbacks<ReadOnlyAccountInput>['onFieldsChange'] = useCallback((changes: FieldData[], formData: FieldData[]) => {
+  const onFieldsChange: Callbacks<ReadOnlyAccountInput>['onFieldsChange'] = useCallback((changes: FieldData[], allFields: FieldData[]) => {
+    const { empty, error } = simpleCheckForm(changes, allFields);
+
+    setIsDisable(error || empty);
+
     const changeMap = convertFieldToObject<ReadOnlyAccountInput>(changes);
 
     if (changeMap.address) {
-      setValidateState({});
       handleResult(changeMap.address);
     }
   }, [handleResult]);
@@ -108,20 +121,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       })
         .then((errors) => {
           if (errors.length) {
-            setValidateState({
-              message: errors[0].message,
-              status: 'error'
-            });
+            form.setFields([{ name: fieldName, errors: errors.map((e) => e.message) }]);
           } else {
-            setValidateState({});
             onComplete();
           }
         })
         .catch((error: Error) => {
-          setValidateState({
-            message: error.message,
-            status: 'error'
-          });
+          form.setFields([{ name: fieldName, errors: [error.message] }]);
         })
         .finally(() => {
           setLoading(false);
@@ -129,30 +135,25 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     } else {
       setLoading(false);
     }
-  }, [reformatAddress, accountName, isEthereum, onComplete]);
+  }, [form, reformatAddress, accountName, isEthereum, onComplete]);
 
   useFocusById(modalId);
-
-  const isFormValidated = form.getFieldsError().filter(({ errors }) => errors.length).length > 0;
 
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
+        onBack={onBack}
         rightFooterButton={{
           children: t('Attach read-only account'),
           icon: FooterIcon,
-          disabled: !reformatAddress || !!validateState.status || isFormValidated,
+          disabled: isDisable,
           onClick: onSubmit,
           loading: loading
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <CloseIcon />,
+            onClick: goHome
           }
         ]}
         title={t<string>('Attach watch-only account')}
@@ -173,11 +174,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           <Form
             form={form}
             initialValues={{ address: '' }}
+            name={formName}
             onFieldsChange={onFieldsChange}
             onFinish={onSubmit}
           >
             <Form.Item
-              name={'address'}
+              name={fieldName}
               rules={[
                 {
                   message: t('Account address is required'),
@@ -194,10 +196,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 showScanner={true}
               />
             </Form.Item>
-            <Form.Item
-              help={validateState.message}
-              validateStatus={validateState.status}
-            />
           </Form>
         </div>
       </Layout.WithSubHeaderOnly>

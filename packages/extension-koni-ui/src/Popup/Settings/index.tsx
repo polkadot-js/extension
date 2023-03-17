@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/commont';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
@@ -9,8 +9,7 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/util';
-import { BackgroundIcon, Button, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
-import { ButtonProps } from '@subwallet/react-ui/es/button';
+import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
 import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
@@ -86,6 +85,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, 100);
   }, [goHome, notify]);
 
+  const openSecurity = useCallback(() => {
+    if (isPopup) {
+      windowOpen('/settings/security').catch(console.error);
+    } else {
+      navigate('/settings/security', { state: true });
+    }
+  }, [isPopup, navigate]);
+
   // todo: i18n all titles, labels below
   const SettingGroupItemType: SettingGroupItemType[] = [
     {
@@ -118,9 +125,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIconBgColor: token['green-6'],
           rightIcon: CaretRight,
           title: 'Security settings',
-          onClick: () => {
-            navigate('/settings/security');
-          }
+          onClick: openSecurity
         },
         {
           key: 'manage-address-book',

@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { LayoutBaseProps } from '@subwallet/extension-koni-ui/components/Layout/base/Base';
 import React from 'react';
+
+import { LayoutBaseProps } from './Base';
 
 type Props = Omit<
 LayoutBaseProps,

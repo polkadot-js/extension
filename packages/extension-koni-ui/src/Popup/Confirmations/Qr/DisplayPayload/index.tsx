@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { CONFIRMATION_QR_MODAL, CONFIRMATION_SCAN_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -22,7 +23,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
 
-  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+  const { checkActive, inactiveModal } = useContext(ModalContext);
 
   const open = checkActive(modalId);
 
@@ -30,10 +31,12 @@ const Component: React.FC<Props> = (props: Props) => {
     inactiveModal(modalId);
   }, [inactiveModal]);
 
+  const openCamera = useOpenQrScanner(CONFIRMATION_SCAN_MODAL);
+
   const onScan = useCallback(() => {
     inactiveModal(modalId);
-    activeModal(CONFIRMATION_SCAN_MODAL);
-  }, [activeModal, inactiveModal]);
+    openCamera();
+  }, [openCamera, inactiveModal]);
 
   if (!open) {
     return null;

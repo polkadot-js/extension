@@ -3,8 +3,7 @@
 
 import { PREDEFINED_TRANSAK_TOKEN } from '@subwallet/extension-koni-ui/constants/transak';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Number } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { Button, Icon, Number } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import { ArrowFatLinesDown, CaretLeft, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React from 'react';

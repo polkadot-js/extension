@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _getBlockExplorerFromChain, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -12,7 +13,7 @@ import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { Button, Icon, Logo, ModalContext, QRCode, SwModal } from '@subwallet/react-ui';
 import AccountItem from '@subwallet/react-ui/es/web3-block/account-item';
 import CN from 'classnames';
-import { CaretLeft, CopySimple, GlobeHemisphereWest, Info } from 'phosphor-react';
+import { CaretLeft, CopySimple, GlobeHemisphereWest } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
@@ -90,12 +91,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
       id={modalId}
       onCancel={onCancel}
       rightIconProps={{
-        icon: (
-          <Icon
-            phosphorIcon={Info}
-            size='md'
-          />
-        )
+        icon: <InfoIcon />
       }}
       title={t<string>('Your QR code')}
     >

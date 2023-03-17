@@ -17,7 +17,6 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Form, Icon, Image, Typography } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
 import CN from 'classnames';
 import { ArrowCircleRight } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -44,7 +43,7 @@ const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [form] = useForm<SendNFTFormProps>();
+  const [form] = Form.useForm<SendNFTFormProps>();
   const formDefault = {
     from,
     chain,

@@ -3,7 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getContractAddressOfToken, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -12,8 +12,7 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import { deleteCustomAssets } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Col, Field, Logo, Row, Tooltip } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
+import { Button, ButtonProps, Col, Field, Icon, Logo, Row, Tooltip } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { Copy, Trash } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
@@ -21,8 +20,6 @@ import { useLocation } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
-
-import Layout from '../../../components/Layout';
 
 type Props = ThemeProps
 
@@ -169,13 +166,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               _isSmartContractToken(tokenInfo) && <Field
                 content={contractAddressInfo()}
                 label={t<string>('Contract address')}
+                placeholder={t<string>('Contract address')}
                 prefix={contractAddressIcon()}
                 suffix={contractAddressSuffix()}
               />
             }
             <Field
               content={originChainInfo.name}
-              label={t<string>('Chain')}
+              label={t<string>('Network')}
+              placeholder={t<string>('Network')}
               prefix={<Logo
                 network={originChainInfo.slug}
                 size={20}

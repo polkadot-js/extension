@@ -2,18 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { Layout } from '@subwallet/extension-koni-ui/components';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, Icon, SwSubHeader } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Info } from 'phosphor-react';
 import React, { Dispatch, SetStateAction, useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, useNavigate } from 'react-router-dom';
@@ -98,7 +96,7 @@ function Component ({ className }: Props) {
     return showRightBtn
       ? [
         {
-          icon: <Icon phosphorIcon={Info} />,
+          icon: <InfoIcon />,
           onClick: () => onClickRightBtn()
         }
       ]

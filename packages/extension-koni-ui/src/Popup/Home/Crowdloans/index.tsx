@@ -2,17 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
-import Layout from '@subwallet/extension-koni-ui/components/Layout';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan';
-import { Button, Checkbox, CrowdloanItem, Icon, SwList, SwModal, Tag } from '@subwallet/react-ui';
+import { Button, Checkbox, CrowdloanItem, Icon, ModalContext, SwList, SwModal, Tag } from '@subwallet/react-ui';
 import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';

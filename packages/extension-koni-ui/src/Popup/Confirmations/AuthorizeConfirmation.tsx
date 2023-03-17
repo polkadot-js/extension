@@ -5,10 +5,12 @@ import { AccountAuthType, AccountJson, AuthorizeRequest } from '@subwallet/exten
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
+import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { approveAuthRequestV2, cancelAuthRequestV2, rejectAuthRequestV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ShieldSlash, UserPlus } from 'phosphor-react';
@@ -17,6 +19,8 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 interface Props extends ThemeProps {
   request: AuthorizeRequest
@@ -40,9 +44,15 @@ export const filterAuthorizeAccounts = (accounts: AccountJson[], accountAuthType
   rs = rs.filter((acc) => acc.isReadOnly !== true);
 
   if (accountAuthType === 'evm') {
-    rs = rs.filter((acc) => (isAccountAll(acc.address) || acc.type === 'ethereum'));
+    rs = rs.filter((acc) => (!isAccountAll(acc.address) && acc.type === 'ethereum'));
+  } else if (accountAuthType === 'substrate') {
+    rs = rs.filter((acc) => (!isAccountAll(acc.address) && acc.type !== 'ethereum'));
   } else {
-    rs = rs.filter((acc) => (isAccountAll(acc.address) || acc.type !== 'ethereum'));
+    rs = rs.filter((acc) => !isAccountAll(acc.address));
+  }
+
+  if (isNoAccount(rs)) {
+    return [];
   }
 
   return rs;
@@ -89,7 +99,6 @@ function Component ({ className, request }: Props) {
   }, [request]);
 
   const onCancel = useCallback(() => {
-    console.log(12123123123);
     inactiveModal('confirmation');
     setLoading(true);
     handleCancel(request).finally(() => {
@@ -107,9 +116,21 @@ function Component ({ className, request }: Props) {
   }, [request, selectedMap]);
 
   const onAddAccount = useCallback(() => {
-    // Todo: Create new account type depend on auth type
-    navigate('/account/add-account/from-seed');
-  }, [navigate]);
+    let types: KeypairType[];
+
+    switch (accountAuthType) {
+      case 'substrate':
+        types = [SUBSTRATE_ACCOUNT_TYPE];
+        break;
+      case 'evm':
+        types = [EVM_ACCOUNT_TYPE];
+        break;
+      default:
+        types = [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE];
+    }
+
+    navigate('/accounts/new-seed-phrase', { state: { accountTypes: types } });
+  }, [navigate, accountAuthType]);
 
   const onAccountSelect = useCallback((address: string) => {
     const isAll = isAccountAll(address);
@@ -126,6 +147,7 @@ function Component ({ className, request }: Props) {
           visibleAddresses.forEach((key) => {
             newMap[key] = isChecked;
           });
+          newMap[ALL_ACCOUNT_KEY] = isChecked;
         } else {
           // Select/deselect single account and trigger all account
           newMap[address] = isChecked;
@@ -153,13 +175,27 @@ function Component ({ className, request }: Props) {
         >
           {
             visibleAccounts.length === 0
-              ? t("'Don't have any suitable accounts'")
+              ? t('No available account')
               : t('Choose the account(s) you’d like to connect')
           }
         </div>
         {
           !!visibleAccounts.length && (
             <div className='account-list'>
+              {
+                visibleAccounts.length > 1 &&
+                  (
+                    <AccountItemWithName
+                      accountName={'All account'}
+                      accounts={visibleAccounts}
+                      address={ALL_ACCOUNT_KEY}
+                      avatarSize={24}
+                      isSelected={selectedMap[ALL_ACCOUNT_KEY]}
+                      onClick={onAccountSelect(ALL_ACCOUNT_KEY)}
+                      showUnselectIcon
+                    />
+                  )
+              }
               {visibleAccounts.map((item) => (
                 <AccountItemWithName
                   accountName={item.name}
@@ -171,7 +207,6 @@ function Component ({ className, request }: Props) {
                   onClick={onAccountSelect(item.address)}
                   showUnselectIcon
                 />
-
               ))}
             </div>
           )
@@ -179,7 +214,7 @@ function Component ({ className, request }: Props) {
         <div className='description'>
           {
             visibleAccounts.length === 0
-              ? t("'Don't have any suitable accounts to connect, please create a new account'")
+              ? t("You don't have any accounts to connect. Please create a new account")
               : t('Make sure you trust this site before connecting')
           }
         </div>
@@ -201,6 +236,7 @@ function Component ({ className, request }: Props) {
             {t('Cancel')}
           </Button>
           <Button
+            disabled={Object.values(selectedMap).every((value) => !value)}
             loading={loading}
             onClick={onConfirm}
           >
@@ -209,7 +245,12 @@ function Component ({ className, request }: Props) {
         </>}
         {visibleAccounts.length === 0 && <Button
           disabled={loading}
-          icon={<Icon phosphorIcon={UserPlus} />}
+          icon={(
+            <Icon
+              phosphorIcon={UserPlus}
+              weight='fill'
+            />
+          )}
           onClick={onAddAccount}
         >
           {t('Create a new account')}

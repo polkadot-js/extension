@@ -3,9 +3,9 @@
 
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { isAccountAll } from '@subwallet/extension-base/utils';
+import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { HistoryItem } from '@subwallet/extension-koni-ui/components/History/HistoryItem';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HistoryDetailModal, HistoryDetailModalId } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -47,7 +47,7 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
 
   const displayStatus = item.status === ExtrinsicStatus.FAIL ? 'fail' : '';
 
-  if (item.type === ExtrinsicType.TRANSFER_BALANCE || item.type === ExtrinsicType.TRANSFER_TOKEN || item.type === ExtrinsicType.TRANSFER_XCM) {
+  if (item.type === ExtrinsicType.TRANSFER_BALANCE || item.type === ExtrinsicType.TRANSFER_TOKEN || item.type === ExtrinsicType.TRANSFER_XCM || item.type === ExtrinsicType.EVM_EXECUTE) {
     if (item.direction === TransactionDirection.RECEIVED) {
       displayData = {
         className: `-receive -${item.status}`,
@@ -116,7 +116,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.STAKING_BOND]: t('Bond'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward'),
-    [ExtrinsicType.EVM_EXECUTE]: t('EVM Execute')
+    [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction')
   }), [t]);
 
   const typeTitleMap: Record<string, string> = useMemo(() => ({
@@ -130,14 +130,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.STAKING_BOND]: t('Bond transaction'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond transaction'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward transaction'),
-    [ExtrinsicType.EVM_EXECUTE]: t('EVM Execute transaction')
+    [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction')
   }), [t]);
 
   // Fill display data to history list
   const historyList = useMemo(() => {
     const processedList = rawHistoryList.map((item: TransactionHistoryItem) => {
-      const fromName = accountMap[item.from.toLowerCase()] || '';
-      const toName = accountMap[item.to.toLowerCase()] || '';
+      const fromName = accountMap[item.from?.toLowerCase()] || '';
+      const toName = accountMap[item.to?.toLowerCase()] || '';
 
       return { ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) };
     }).sort((a, b) => b.time > a.time ? 1 : -1);

@@ -72,10 +72,10 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
   return (
     <SwModal
       className={className}
+      destroyOnClose={true}
       id={id}
       onCancel={onCancel}
       title={t('Select token')}
-      destroyOnClose={true}
     >
       <SwList.Section
         displayRow

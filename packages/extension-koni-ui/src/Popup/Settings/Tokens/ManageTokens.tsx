@@ -4,8 +4,8 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import TokenToggleItem from '@subwallet/extension-koni-ui/components/TokenItem/TokenToggleItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -15,16 +15,12 @@ import { useLazyList } from '@subwallet/extension-koni-ui/hooks/modal/useLazyLis
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, SwList } from '@subwallet/react-ui';
-import Icon from '@subwallet/react-ui/es/icon';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { Coin, FadersHorizontal, Plus } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
-import Layout from '../../../components/Layout';
 
 type Props = ThemeProps
 enum FilterValue {
@@ -86,7 +82,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const allFungibleTokens = useMemo(() => {
     return filterFungibleTokens(assetRegistry, assetSettingMap, selectedFilters);
   }, [assetRegistry, assetSettingMap, selectedFilters]);
-  const { hasMore, lazyItems, loadMoreItems } = useLazyList(allFungibleTokens);
+  const { hasMore, lazyItems, loadMoreItems } = useLazyList(allFungibleTokens, false);
 
   const searchToken = useCallback((token: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -101,6 +97,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return (
       <TokenToggleItem
         assetSettingMap={assetSettingMap}
+        key={tokenInfo.slug}
         tokenInfo={tokenInfo}
       />
     );
@@ -119,11 +116,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const subHeaderButton: ButtonProps[] = useMemo(() => {
     return [
       {
-        icon: <Icon
-          phosphorIcon={Plus}
-          size='sm'
-          type='phosphor'
-        />,
+        icon: (
+          <Icon
+            phosphorIcon={Plus}
+            size='sm'
+            type='phosphor'
+          />
+        ),
         onClick: () => {
           navigate('/settings/tokens/import-token', { state: { isExternalRequest: false } });
         }
@@ -156,13 +155,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t<string>('Manage tokens')}
       >
         <SwList.Section
-          actionBtnIcon={<Icon
-            customSize={'20px'}
-            phosphorIcon={FadersHorizontal}
-            size='sm'
-            type='phosphor'
-            weight={'fill'}
-          />}
+          actionBtnIcon={(
+            <Icon
+              customSize={'20px'}
+              phosphorIcon={FadersHorizontal}
+              size='sm'
+              type='phosphor'
+              weight={'fill'}
+            />
+          )}
           className={'manage_tokens__container'}
           enableSearchInput={true}
           gridGap={'14px'}
@@ -176,7 +177,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             loadMore: loadMoreItems
           }}
           renderItem={renderTokenItem}
-          renderOnScroll={false}
+          renderOnScroll={!hasMore}
           renderWhenEmpty={emptyTokenList}
           searchFunction={searchToken}
           searchMinCharactersCount={2}

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
+import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { ActionItemType, ActionModal } from '@subwallet/extension-koni-ui/components/Modal/ActionModal';
 import { WebsiteAccessItem } from '@subwallet/extension-koni-ui/components/Setting/WebsiteAccessItem';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -12,8 +12,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateAuthUrls } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ManageWebsiteAccessDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { Icon, SwList, SwSubHeader } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { GearSix, GlobeHemisphereWest, Plugs, PlugsConnected, X } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';

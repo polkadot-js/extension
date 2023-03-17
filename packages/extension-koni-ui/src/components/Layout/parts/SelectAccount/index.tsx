@@ -6,8 +6,6 @@ import AccountCardSelection from '@subwallet/extension-koni-ui/components/Accoun
 import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import AccountBriefInfo from '@subwallet/extension-koni-ui/components/Account/Info/AccountBriefInfo';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
-import { ConnectWebsiteModal } from '@subwallet/extension-koni-ui/components/Layout/parts/ConnectWebsiteModal';
-import SelectAccountFooter from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/Footer';
 import { SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks/auth/useGetCurrentAuth';
 import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/auth/useGetCurrentTab';
@@ -20,8 +18,7 @@ import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account';
-import { BackgroundIcon, SelectModal, Tooltip } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { BackgroundIcon, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Plug, Plugs, PlugsConnected } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -30,6 +27,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+
+import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
+import SelectAccountFooter from '../SelectAccount/Footer';
 
 type Props = ThemeProps
 
@@ -75,6 +75,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));
   }, [accounts]);
+
+  const noReadOnlyAccounts = useMemo(() => {
+    return noAllAccounts.filter(({ isReadOnly }) => !isReadOnly);
+  }, [noAllAccounts]);
 
   const _onSelect = useCallback((address: string) => {
     if (address) {
@@ -198,7 +202,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             setConnectionState(isAllowed ? ConnectionStatement.CONNECTED : ConnectionStatement.DISCONNECTED);
           }
         } else {
-          const numberAccounts = noAllAccounts.filter(({ address }) => filterType(address)).length;
+          const numberAccounts = noReadOnlyAccounts.filter(({ address }) => filterType(address)).length;
           const numberAllowedAccounts = Object.entries(allowedMap)
             .filter(([address]) => filterType(address))
             .filter(([, value]) => value)
@@ -223,7 +227,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       setConnected(0);
       setConnectionState(ConnectionStatement.NOT_CONNECTED);
     }
-  }, [currentAccount?.address, currentAuth, isAllAccount, noAllAccounts]);
+  }, [currentAccount?.address, currentAuth, isAllAccount, noReadOnlyAccounts]);
 
   const visibleText = useMemo((): string => {
     switch (connectionState) {
@@ -327,6 +331,7 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       paddingLeft: token.sizeSM,
       overflow: 'hidden',
       display: 'flex',
+      flexDirection: 'row',
 
       '.ant-select-modal-input-container.ant-select-modal-input-border-round::before': {
         display: 'none'
@@ -399,6 +404,10 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       '.selected': {
         color: token['cyan-6']
       }
+    },
+
+    '.ant-select-modal-input-container': {
+      overflow: 'hidden'
     },
 
     '.selected-account': {

@@ -19,9 +19,11 @@ export class HistoryService {
     this.dbService = dbService;
     this.chainService = chainService;
 
-    // Create history interval and refresh it if changes accounts list
-    this.refreshHistoryInterval();
-    accounts.subject.subscribe(this.refreshHistoryInterval.bind(this));
+    // Add some delay to avoid fetching so much when start extension background
+    setTimeout(() => {
+      // Create history interval and refresh it if changes accounts list
+      accounts.subject.subscribe(this.refreshHistoryInterval.bind(this));
+    }, 3333);
   }
 
   private fetchPromise: Promise<TransactionHistoryItem[]> | null = null;
@@ -40,8 +42,8 @@ export class HistoryService {
     }, {} as Record<string, string>);
 
     historyRecords.forEach((record) => {
-      record.fromName = accountMap[record.from.toLowerCase()];
-      record.toName = accountMap[record.to.toLowerCase()];
+      record.fromName = accountMap[record.from?.toLowerCase()];
+      record.toName = accountMap[record.to?.toLowerCase()];
     });
 
     await this.dbService.upsertHistory(historyRecords);

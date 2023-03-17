@@ -2,16 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Form, Icon, Input } from '@subwallet/react-ui';
-import PageIcon from '@subwallet/react-ui/es/page-icon';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/form';
+import { Form, Icon, Input, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { FloppyDiskBack, Info, ShieldCheck } from 'phosphor-react';
+import { FloppyDiskBack, ShieldCheck } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -77,11 +78,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [goHome]);
 
   const onUpdate: Callbacks<ChangePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
-    const error = allFields.map((data) => data.errors || [])
-      .reduce((old, value) => [...old, ...value])
-      .some((value) => !!value);
-
-    const empty = allFields.map((data) => data.value as unknown).some((value) => !value);
+    const { empty, error } = simpleCheckForm(changedFields, allFields);
 
     setSubmitError('');
     setIsDisable(error || empty);
@@ -111,12 +108,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <InfoIcon />
           }
         ]}
         title={t('Change password')}

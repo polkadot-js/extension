@@ -1,23 +1,29 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
-import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/autoNavigateToCreatePassword';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountSuriV2, createSeedV2 } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NewSeedPhraseState } from '@subwallet/extension-koni-ui/types/account';
-import { Icon } from '@subwallet/react-ui';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
+import { Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, Info } from 'phosphor-react';
-import React, { useCallback, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { CheckCircle } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -49,16 +55,31 @@ const loader = new Promise<string>((resolve, reject) => {
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
-
   const { t } = useTranslation();
   const location = useLocation();
   const notify = useNotification();
-  const onComplete = useCompleteCreateAccount();
-  const [accountTypes] = useState<KeypairType[]>((location.state as NewSeedPhraseState)?.accountTypes || []);
+  const navigate = useNavigate();
 
+  const { goHome } = useDefaultNavigate();
+  const { activeModal } = useContext(ModalContext);
+
+  const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
 
+  const { accounts } = useSelector((state: RootState) => state.accountState);
+  const [accountTypes] = useState<KeypairType[]>((location.state as NewSeedPhraseState)?.accountTypes || []);
+
   const [loading, setLoading] = useState(false);
+
+  const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
+
+  const onBack = useCallback(() => {
+    navigate(DEFAULT_ROUTER_PATH);
+
+    if (!noAccount) {
+      activeModal(NEW_ACCOUNT_MODAL);
+    }
+  }, [navigate, activeModal, noAccount]);
 
   const _onCreate = useCallback((): void => {
     if (!seedPhrase) {
@@ -95,6 +116,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       resolve={loader}
     >
       <Layout.WithSubHeaderOnly
+        onBack={onBack}
         rightFooterButton={{
           children: t('I have saved it somewhere safe'),
           icon: FooterIcon,
@@ -104,12 +126,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: (
-              <Icon
-                phosphorIcon={Info}
-                size='md'
-              />
-            )
+            icon: <CloseIcon />,
+            onClick: goHome
           }
         ]}
         title={t<string>('Your recovery phrase')}

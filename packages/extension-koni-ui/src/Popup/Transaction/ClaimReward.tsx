@@ -16,7 +16,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { Button, Checkbox, Form, Icon } from '@subwallet/react-ui';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -35,6 +35,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const location = useLocation();
+  const [isBondReward, setBondReward] = useState<boolean>(true);
   const { chainStakingMetadata } = location.state as StakingDataOption;
   const isAll = isAccountAll(currentAccount?.address || '');
   const [form] = Form.useForm<StakeFromProps>();
@@ -62,6 +63,10 @@ const Component: React.FC<Props> = (props: Props) => {
     // TODO: submit transaction
   }, []);
 
+  const onClickCheckbox = useCallback(() => {
+    setBondReward(!isBondReward);
+  }, [isBondReward]);
+
   return (
     <>
       <TransactionContent>
@@ -88,7 +93,6 @@ const Component: React.FC<Props> = (props: Props) => {
           >
             <MetaInfo.Chain
               chain={chainInfo?.slug || ''}
-              chainName={chainInfo?.name || ''}
               label={t('Network')}
             />
 
@@ -100,13 +104,16 @@ const Component: React.FC<Props> = (props: Props) => {
             />
             <MetaInfo.Number
               decimals={decimals}
-              label={t('Reward claiming dee')}
+              label={t('Reward claiming fee')}
               suffix={symbol}
               value={'10000'}
             />
           </MetaInfo>
 
-          <Checkbox checked={false}>
+          <Checkbox
+            checked={isBondReward}
+            onClick={onClickCheckbox}
+          >
             {t('Bond reward')}
           </Checkbox>
         </Form>

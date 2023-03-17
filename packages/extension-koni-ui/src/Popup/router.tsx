@@ -85,6 +85,7 @@ const Stake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Tr
 const Unstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Unstake'));
 const CancelUnstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/CancelUnstake'));
 const ClaimReward = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/ClaimReward'));
+const WithDraw = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/WithDraw'));
 
 const ErrorFallback = () => {
   const error = useRouteError();
@@ -147,6 +148,7 @@ export const router = createHashRouter([
           Unstake.generateRouterObject('unstake'),
           CancelUnstake.generateRouterObject('cancel-unstake'),
           ClaimReward.generateRouterObject('claim-reward'),
+          WithDraw.generateRouterObject('withdraw'),
           {
             path: 'withdraw',
             element: <Example />

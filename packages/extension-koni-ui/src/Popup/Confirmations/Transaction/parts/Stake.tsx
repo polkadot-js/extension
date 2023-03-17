@@ -36,12 +36,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <MetaInfo
         hasBackgroundWrapper={true}
       >
-        <MetaInfo.Account
-          address={data.selectedValidators.address}
-          label={t('Validator')}
-          name={data.selectedValidators.identity}
-          networkPrefix={chainInfo.substrateInfo?.addressPrefix}
-        />
+        {/* Todo: Render multi accounts for data.selectedValidators */}
         <MetaInfo.Number
           decimals={0}
           label={t('Amount')}

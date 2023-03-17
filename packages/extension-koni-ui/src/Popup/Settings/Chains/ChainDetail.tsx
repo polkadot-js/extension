@@ -60,7 +60,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const chainState = useFetchChainState(chainSlug);
 
   const isPureEvmChain = useMemo(() => {
-    return _isPureEvmChain(chainInfo);
+    return chainInfo && _isPureEvmChain(chainInfo);
   }, [chainInfo]);
 
   const { decimals, symbol } = useMemo(() => {

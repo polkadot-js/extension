@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
@@ -16,7 +17,6 @@ import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phospho
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import EmptyAccount from "@subwallet/extension-koni-ui/components/Account/EmptyAccount";
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;

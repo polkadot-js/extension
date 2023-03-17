@@ -47,7 +47,7 @@ export function useSelectModalInputHelper ({ id, onBlur, onChange, onFocus }: Ba
 
       return open;
     });
-  }, [isOpen, modalContext, modalId, onBlur]);
+  }, [isOpen, modalContext, modalId, onBlur, onFocus]);
 
   const onSelect = useCallback((val: string) => {
     onChange && onChange({ target: { value: val } });

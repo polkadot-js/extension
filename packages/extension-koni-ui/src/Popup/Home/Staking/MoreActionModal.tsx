@@ -1,17 +1,19 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ChainStakingMetadata, NominatorMetadata} from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
-import { ArrowCircleDown, IconProps, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
+import { ArrowArcLeft, ArrowCircleDown, IconProps, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps & {
+  staking?: StakingItem;
+  reward?: StakingRewardItem;
   chainStakingMetadata?: ChainStakingMetadata;
   nominatorMetadata?: NominatorMetadata;
 }
@@ -48,7 +50,13 @@ const ACTION_LIST: ActionListType[] = [
     backgroundIconColor: 'green-7',
     icon: Wallet,
     label: 'Claim rewards',
-    value: '/transaction/claim_rewards'
+    value: '/transaction/claim-reward'
+  },
+  {
+    backgroundIconColor: 'purple-8',
+    icon: ArrowArcLeft,
+    label: 'Cancel unstake',
+    value: '/transaction/cancel-unstake'
   }
   // {
   //   backgroundIconColor: 'blue-7',
@@ -59,13 +67,15 @@ const ACTION_LIST: ActionListType[] = [
 ];
 
 export type StakingDataOption = {
+  staking?: StakingItem;
+  reward?: StakingRewardItem;
   chainStakingMetadata?: ChainStakingMetadata,
   nominatorMetadata?: NominatorMetadata,
   hideTabList?: boolean
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chainStakingMetadata, className, nominatorMetadata } = props;
+  const { chainStakingMetadata, className, nominatorMetadata, reward, staking } = props;
   const { inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
@@ -80,9 +90,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onPressItem = useCallback(
     (item: ActionListType) => {
-      return () => navigate(item.value, { state: { chainStakingMetadata, nominatorMetadata, hideTabList: true } as StakingDataOption });
+      return () => navigate(item.value, { state: { chainStakingMetadata, nominatorMetadata, staking, reward, hideTabList: true } as StakingDataOption });
     },
-    [chainStakingMetadata, navigate, nominatorMetadata]
+    [chainStakingMetadata, navigate, nominatorMetadata, reward, staking]
   );
 
   return (

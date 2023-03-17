@@ -30,7 +30,7 @@ interface Props extends ThemeProps {
 
 export const STAKING_DETAIL_MODAL_ID = 'staking-detail-modal-id';
 
-const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) => {
+export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) => {
   return unstakings.find((item) => item.validatorAddress === address);
 };
 

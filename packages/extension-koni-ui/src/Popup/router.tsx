@@ -83,6 +83,8 @@ const SendFund = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup
 const SendNFT = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/SendNFT'));
 const Stake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Stake'));
 const Unstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Unstake'));
+const CancelUnstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/CancelUnstake'));
+const ClaimReward = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/ClaimReward'));
 
 const ErrorFallback = () => {
   const error = useRouteError();
@@ -143,12 +145,10 @@ export const router = createHashRouter([
           SendNFT.generateRouterObject('send-nft'),
           Stake.generateRouterObject('stake'),
           Unstake.generateRouterObject('unstake'),
+          CancelUnstake.generateRouterObject('cancel-unstake'),
+          ClaimReward.generateRouterObject('claim-reward'),
           {
             path: 'withdraw',
-            element: <Example />
-          },
-          {
-            path: 'claim-reward',
             element: <Example />
           },
           {

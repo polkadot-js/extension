@@ -2,19 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import { InfoItemBase } from '@subwallet/extension-koni-ui/components/MetaInfo/parts/types';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { StakingStatus, StakingStatusType } from '@subwallet/extension-koni-ui/util/stakingStatus';
 import { SwModal, SwNumberProps } from '@subwallet/react-ui';
-import { CheckCircle, ProhibitInset, StopCircle } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
   onCancel: () => void,
   validatorAddress: string,
   validatorName: string,
-  status: 'active' | 'in_active' | 'oversubscribed',
+  status: StakingStatusType,
   minStake: SwNumberProps['value'],
   ownStake: SwNumberProps['value'],
   decimals: number,
@@ -37,24 +36,6 @@ function Component ({ className,
   validatorName }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
-  const statusMap = useMemo(() => ({
-    active: {
-      schema: 'success' as InfoItemBase['valueColorSchema'],
-      icon: CheckCircle,
-      name: t('Success')
-    },
-    in_active: {
-      schema: 'gray' as InfoItemBase['valueColorSchema'],
-      icon: StopCircle,
-      name: t('Inactive')
-    },
-    oversubscribed: {
-      schema: 'danger' as InfoItemBase['valueColorSchema'],
-      icon: ProhibitInset,
-      name: t('Oversubscribed')
-    }
-  }), [t]);
-
   return (
     <SwModal
       className={className}
@@ -75,9 +56,9 @@ function Component ({ className,
 
         <MetaInfo.Status
           label={t('Status')}
-          statusIcon={statusMap[status].icon}
-          statusName={statusMap[status].name}
-          valueColorSchema={statusMap[status].schema}
+          statusIcon={StakingStatus[status].icon}
+          statusName={StakingStatus[status].name}
+          valueColorSchema={StakingStatus[status].schema}
         />
 
         <MetaInfo.Number

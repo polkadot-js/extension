@@ -16,6 +16,7 @@ type Props = ThemeProps & {
   children: React.ReactElement<ChildProps>[];
   defaultIndex?: number;
   hideTabList?: boolean;
+  onSelectTab?: (index: number) => void;
 }
 
 const SwTabPanel = ({ children, label }: ChildProps) => {
@@ -25,7 +26,7 @@ const SwTabPanel = ({ children, label }: ChildProps) => {
 };
 
 const Component = (props: Props) => {
-  const { children, className, defaultIndex = 0, hideTabList = false } = props;
+  const { children, className, defaultIndex = 0, hideTabList = false, onSelectTab } = props;
 
   const tabLabelList = React.Children.map(children, (child) => {
     return child.props.label;
@@ -35,6 +36,7 @@ const Component = (props: Props) => {
     <Tabs
       className={className}
       defaultIndex={defaultIndex}
+      onSelect={onSelectTab}
     >
       <TabList className={CN('react-tabs__tab-list', { '__hide-tab-list': hideTabList })}>
         {

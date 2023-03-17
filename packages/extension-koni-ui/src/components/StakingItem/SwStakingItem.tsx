@@ -7,14 +7,14 @@ import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { Icon, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { User, Users } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { SyntheticEvent, useMemo } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   stakingData: StakingDataType,
   priceMap: Record<string, number>,
   decimals: number,
-  onClickRightIcon: () => void,
+  onClickRightIcon: (item: StakingDataType) => void,
   onClickItem: (item: StakingDataType) => void,
 }
 
@@ -42,10 +42,6 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
     return getConvertedBalanceValue(balanceValue, Number(`${priceMap[staking.chain] || 0}`));
   }, [balanceValue, priceMap, staking.chain]);
 
-  const onPressItem = useCallback((item: StakingDataType) => {
-    onClickItem(item);
-  }, [onClickItem]);
-
   return (
     <StakingItem
       className={className}
@@ -53,8 +49,13 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
       decimal={0}
       displayToken={staking.nativeToken}
       networkKey={staking.chain}
-      onClickRightIcon={onClickRightIcon}
-      onPressItem={onPressItem}
+      // eslint-disable-next-line react/jsx-no-bind
+      onClickRightIcon={(e?: SyntheticEvent) => {
+        e && e.stopPropagation();
+        onClickRightIcon(stakingData);
+      }}
+      // eslint-disable-next-line react/jsx-no-bind
+      onPressItem={() => onClickItem(stakingData)}
       stakingNetwork={staking.name}
       stakingType={getStakingTypeTag(staking.type)}
       stakingValue={balanceValue}
@@ -65,6 +66,26 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
 
 const SwStakingItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.ant-staking-item-name': {
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      maxWidth: '120px'
+    },
+
+    '.ant-staking-item-balance-info-wrapper .ant-number:last-child': {
+      span: {
+        lineHeight: token.lineHeightSM
+      }
+
+    },
+
+    '.ant-staking-item-balance-info-wrapper .ant-number:first-child': {
+      span: {
+        lineHeight: 1.5
+      }
+    },
+
     '.ant-staking-item-right-icon': {
       display: 'none'
     },

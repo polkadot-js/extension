@@ -3,10 +3,10 @@
 
 import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
-import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/index';
+import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
-import { PoolDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal'
+import { PoolDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal';
 import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingPoolItem';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
@@ -244,10 +244,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       />
 
       {viewDetailItem && <PoolDetailModal
+        decimals={0}
         // eslint-disable-next-line react/jsx-no-bind
         onCancel={() => inactiveModal(PoolDetailModalId)}
         selectedNominationPool={viewDetailItem}
-        decimals={0}
+        status={'active'}
       />}
     </>
   );

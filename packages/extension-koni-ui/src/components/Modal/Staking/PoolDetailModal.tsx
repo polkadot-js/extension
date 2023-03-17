@@ -2,43 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import { InfoItemBase } from '@subwallet/extension-koni-ui/components/MetaInfo/parts/types';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { StakingStatus, StakingStatusType } from '@subwallet/extension-koni-ui/util/stakingStatus';
 import { SwModal } from '@subwallet/react-ui';
-import { CheckCircle, ProhibitInset, StopCircle } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
   decimals: number,
   onCancel: () => void,
+  status: StakingStatusType,
   selectedNominationPool: NominationPoolDataType
 };
 
 export const PoolDetailModalId = 'poolDetailModalId';
 
-function Component ({ className, decimals, onCancel, selectedNominationPool }: Props): React.ReactElement<Props> {
+function Component ({ className, decimals, onCancel, selectedNominationPool, status }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { address, identity, memberCount, symbol } = selectedNominationPool;
-  const statusMap = useMemo(() => ({
-    active: {
-      schema: 'success' as InfoItemBase['valueColorSchema'],
-      icon: CheckCircle,
-      name: t('Success')
-    },
-    in_active: {
-      schema: 'gray' as InfoItemBase['valueColorSchema'],
-      icon: StopCircle,
-      name: t('Inactive')
-    },
-    oversubscribed: {
-      schema: 'danger' as InfoItemBase['valueColorSchema'],
-      icon: ProhibitInset,
-      name: t('Oversubscribed')
-    }
-  }), [t]);
 
   return (
     <SwModal
@@ -60,9 +43,9 @@ function Component ({ className, decimals, onCancel, selectedNominationPool }: P
 
         <MetaInfo.Status
           label={t('Status')}
-          statusIcon={statusMap.active.icon}
-          statusName={statusMap.active.name}
-          valueColorSchema={statusMap.active.schema}
+          statusIcon={StakingStatus[status].icon}
+          statusName={StakingStatus[status].name}
+          valueColorSchema={StakingStatus[status].schema}
         />
 
         <MetaInfo.Number

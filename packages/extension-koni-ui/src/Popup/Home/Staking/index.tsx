@@ -10,13 +10,13 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
-import MoreActionModal, { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import MoreActionModal, { MORE_ACTION_MODAL, StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -70,6 +70,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     };
   }, [selectedFilters]);
 
+  console.log('stakingItems', stakingItems);
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
   }, [activeModal]);
@@ -83,8 +84,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     activeModal(MORE_ACTION_MODAL);
   }, [activeModal]);
 
-  const onClickItem = useCallback((item: StakingDataType, e?: SyntheticEvent) => {
-    // e && e.stopPropagation();
+  const onClickItem = useCallback((item: StakingDataType) => {
     setSelectedItem(item);
 
     activeModal(STAKING_DETAIL_MODAL_ID);
@@ -94,7 +94,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     {
       icon: rightIcon,
       onClick: () => {
-        navigate('/transaction/stake');
+        navigate('/transaction/stake', { state: { chainStakingMetadata: undefined, nominatorMetadata: undefined, hideTabList: false } as StakingDataOption });
       }
     }
   ];

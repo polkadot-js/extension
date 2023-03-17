@@ -120,7 +120,10 @@ const SelectValidatorInput = styled(Component)<Props>(({ theme: { token } }: Pro
 
     '.select-validator-input__content': {
       flex: 1,
-      paddingRight: token.paddingXS
+      paddingRight: token.paddingXS,
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap'
     },
 
     '.select-validator-input__button-wrapper': {

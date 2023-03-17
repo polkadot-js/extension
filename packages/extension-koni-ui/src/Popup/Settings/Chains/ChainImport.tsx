@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _CUSTOM_PREFIX, _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
+import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
@@ -31,7 +31,8 @@ interface ChainImportForm {
   paraId: number,
   evmChainId: number,
   blockExplorer: string,
-  crowdloanUrl: string
+  crowdloanUrl: string,
+  priceId: string
 }
 
 interface ValidationInfo {
@@ -80,6 +81,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     const paraId = form.getFieldValue('paraId') as number;
     const evmChainId = form.getFieldValue('evmChainId') as number;
     const name = form.getFieldValue('name') as string;
+    const priceId = form.getFieldValue('priceId') as string;
 
     const newProviderKey = _generateCustomProviderKey(0);
 
@@ -93,7 +95,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         crowdloanUrl,
         symbol,
         chainType: isPureEvmChain ? 'EVM' : 'Substrate',
-        name
+        name,
+        priceId
       },
       chainSpec: {
         genesisHash,
@@ -381,72 +384,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <Col span={12}>
                   <Tooltip
                     placement={'topLeft'}
-                    title={t('Decimals')}
+                    title={t('Price Id')}
                   >
                     <div>
-                      <Form.Item name={'decimals'}>
+                      <Form.Item name={'priceId'}>
                         <Input
-                          disabled={true}
-                          placeholder={t('Decimals')}
+                          placeholder={t('Price Id')}
                         />
                       </Form.Item>
                     </div>
                   </Tooltip>
                 </Col>
+
                 <Col span={12}>
-                  {
-                    !isPureEvmChain
-                      ? <Tooltip
-                        placement={'topLeft'}
-                        title={t('ParaId')}
-                      >
-                        <div>
-                          <Form.Item name={'paraId'}>
-                            <Input
-                              disabled={true}
-                              placeholder={t('ParaId')}
-                            />
-                          </Form.Item>
-                        </div>
-                      </Tooltip>
-                      : <Tooltip
-                        placement={'topLeft'}
-                        title={t('Chain ID')}
-                      >
-                        <div>
-                          <Form.Item name={'evmChainId'}>
-                            <Input
-                              disabled={true}
-                              placeholder={t('Chain ID')}
-                            />
-                          </Form.Item>
-                        </div>
-                      </Tooltip>
-                  }
-                </Col>
-              </Row>
-
-              <Row gutter={token.paddingSM}>
-                {
-                  !isPureEvmChain &&
-                  <Col span={12}>
-                    <Tooltip
-                      placement={'topLeft'}
-                      title={t('Address prefix')}
-                    >
-                      <div>
-                        <Form.Item name={'addressPrefix'}>
-                          <Input
-                            disabled={true}
-                            placeholder={t('Address prefix')}
-                          />
-                        </Form.Item>
-                      </div>
-                    </Tooltip>
-                  </Col>
-                }
-
-                <Col span={!isPureEvmChain ? 12 : 24}>
                   <Tooltip
                     placement={'topLeft'}
                     title={t('Chain type')}

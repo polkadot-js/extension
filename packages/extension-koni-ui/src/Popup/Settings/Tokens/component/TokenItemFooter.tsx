@@ -60,7 +60,7 @@ function Component ({ assetSetting, className = '', navigate, tokenInfo }: Props
   }, [loading, showNotification, t, tokenInfo.slug]);
 
   const onClick = useCallback(() => {
-    navigate('/settings/tokens/detail', { state: tokenInfo });
+    navigate('/settings/tokens/detail', { state: tokenInfo.slug });
   }, [navigate, tokenInfo]);
 
   return (

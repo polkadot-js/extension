@@ -41,7 +41,7 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
     return () => {
-      navigate(`/home/token-detail-list/${item.slug}`);
+      navigate(`/home/tokens/detail/${item.slug}`);
       onCancel();
     };
   }, [navigate, onCancel]);

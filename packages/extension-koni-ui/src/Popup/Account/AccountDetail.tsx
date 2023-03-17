@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
@@ -45,7 +44,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goHome = useDefaultNavigate().goHome;
+  const { goHome } = useDefaultNavigate();
   const notify = useNotification();
   const { token } = useTheme() as Theme;
   const { accountAddress } = useParams();
@@ -98,7 +97,9 @@ const Component: React.FC<Props> = (props: Props) => {
         .then(() => {
           setDeleting(true);
           forgetAccount(account.address)
-            .then()
+            .then(() => {
+              goHome();
+            })
             .catch((e: Error) => {
               notify({
                 message: e.message,
@@ -118,7 +119,7 @@ const Component: React.FC<Props> = (props: Props) => {
           }
         });
     }
-  }, [account?.address, deleteAccountAction, notify]);
+  }, [account?.address, deleteAccountAction, notify, goHome]);
 
   const onDerive = useCallback(() => {
     if (!account?.address) {
@@ -186,7 +187,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
-    editAccount(account.address, name)
+    editAccount(account.address, name.trim())
       .catch(console.error)
       .finally(() => {
         setSaving(false);
@@ -206,9 +207,12 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
+        disableBack={deriving}
         subHeaderIcons={[
           {
-            icon: <InfoIcon />
+            icon: <CloseIcon />,
+            onClick: goHome,
+            disabled: deriving
           }
         ]}
         title={t('Account detail')}

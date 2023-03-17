@@ -295,6 +295,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         className={className}
         footer={<SelectAccountFooter />}
         id={modalId}
+        ignoreScrollbar={accounts.length > 3}
+        ignoreScrollbarMethod='padding'
         inputWidth={'100%'}
         itemKey='address'
         items={noAllAccounts.length <= 1 ? noAllAccounts : accounts}

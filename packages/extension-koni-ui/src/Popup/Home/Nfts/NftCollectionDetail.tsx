@@ -3,7 +3,7 @@
 
 import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -13,13 +13,13 @@ import useGetChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/comm
 import { deleteCustomAssets } from '@subwallet/extension-koni-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail, INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
-import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
+import CN from 'classnames';
 import { Image, Trash } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 type Props = ThemeProps
 
@@ -36,7 +36,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const location = useLocation();
   const navigate = useNavigate();
   const goBack = useDefaultNavigate().goBack;
-  const { token } = useTheme() as Theme;
   const showNotification = useNotification();
 
   const { handleSimpleConfirmModal } = useConfirmModal({
@@ -85,26 +84,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const emptyNft = useCallback(() => {
     return (
-      <div className={'nft_empty__container'}>
-        <div className={'nft_empty__icon__wrapper'}>
-          <div className={'nft_empty__icon__container'}>
-            <Icon
-              customSize={'64px'}
-              iconColor={token['gray-4']}
-              phosphorIcon={Image}
-              type='phosphor'
-              weight={'fill'}
-            />
-          </div>
-        </div>
-
-        <div className={'nft_empty__text__container'}>
-          <div className={'nft_empty__title'}>{t<string>('No NFT collectible')}</div>
-          <div className={'nft_empty__subtitle'}>{t<string>('Your NFT collectible will appear here!')}</div>
-        </div>
-      </div>
+      <EmptyList
+        emptyMessage={t('Your NFT collectible will appear here!')}
+        emptyTitle={t('No NFT collectible')}
+        phosphorIcon={Image}
+      />
     );
-  }, [t, token]);
+  }, [t]);
 
   const getSubHeaderTitle = useCallback(() => {
     const title = collectionInfo.collectionName || collectionInfo.collectionId;
@@ -161,7 +147,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={`${getSubHeaderTitle()} (${nftList.length})`}
       >
         <SwList.Section
-          className={'nft_item_list__container'}
+          className={CN('nft_item_list__container', { pb: !nftList.length })}
           displayGrid={true}
           enableSearchInput={true}
           gridGap={'14px'}
@@ -188,55 +174,19 @@ const NftCollectionDetail = styled(Component)<Props>(({ theme: { token } }: Prop
     '.nft_item_list__container': {
       paddingTop: 14,
       flex: 1,
-      height: '100%'
+      height: '100%',
+
+      '&.pb': {
+        '.ant-sw-list': {
+          paddingBottom: 1
+        }
+      }
     },
 
     '&__inner': {
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden'
-    },
-
-    '.nft_empty__container': {
-      marginTop: 44,
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: token.padding,
-      flexDirection: 'column',
-      alignContent: 'center'
-    },
-
-    '.nft_empty__icon__wrapper': {
-      display: 'flex',
-      justifyContent: 'center'
-    },
-
-    '.nft_empty__icon__container': {
-      padding: token.paddingLG,
-      borderRadius: '50%',
-      width: '112px',
-      backgroundColor: getAlphaColor(token['gray-3'], 0.1)
-    },
-
-    '.nft_empty__text__container': {
-      display: 'flex',
-      flexDirection: 'column',
-      alignContent: 'center',
-      justifyContent: 'center',
-      flexWrap: 'wrap'
-    },
-
-    '.nft_empty__title': {
-      fontWeight: token.headingFontWeight,
-      textAlign: 'center',
-      fontSize: token.fontSizeLG,
-      color: token.colorText
-    },
-
-    '.nft_empty__subtitle': {
-      marginTop: 6,
-      textAlign: 'center',
-      color: token.colorTextTertiary
     }
   });
 });

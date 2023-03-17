@@ -67,7 +67,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       return (
         <SwAvatar
-          identPrefix={42}
+          identPrefix={originChainInfo.substrateInfo?.addressPrefix}
           size={token.fontSizeXL}
           theme={theme}
           value={nftItem.owner}
@@ -76,7 +76,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
 
     return <div />;
-  }, [nftItem.owner, token.fontSizeXL]);
+  }, [nftItem.owner, originChainInfo.substrateInfo?.addressPrefix, token.fontSizeXL]);
 
   const originChainLogo = useCallback(() => {
     return (

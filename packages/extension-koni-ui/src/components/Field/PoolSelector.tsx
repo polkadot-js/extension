@@ -75,6 +75,7 @@ const getFilteredList = (items: NominationPoolDataType[], filters: string[]) => 
   return filteredList;
 };
 
+// todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', disabled, id = 'pool-selector', label, nominationPoolList, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
   const nominationPoolValueList = nominationPoolList && nominationPoolList.length ? nominationPoolList.map((item) => item.validatorAddress) : [];
@@ -82,7 +83,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
-  const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(items, FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filteredList = useMemo(() => {
     return getFilteredList(items, selectedFilters);
   }, [items, selectedFilters]);
@@ -227,8 +228,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         onApplyFilter={onApplyFilter}
         // eslint-disable-next-line react/jsx-no-bind
         onCancel={closeFilterModal}
-        onChangeOption={onChangeFilterOpt}
-        optionSelection={changeFilters}
+        onChangeOption={onChangeFilterOption}
+        optionSelectionMap={filterSelectionMap}
         options={filterOptions}
       />
 

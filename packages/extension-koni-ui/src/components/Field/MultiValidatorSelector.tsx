@@ -59,21 +59,6 @@ const filterOptions = [
   }
 ];
 
-const getFilteredList = (items: ValidatorDataType[], filters: string[]) => {
-  const filteredList: ValidatorDataType[] = [];
-
-  items.forEach((item) => {
-    const isValidationPassed = filters.length <= 0;
-
-    // TODO: logic filter
-    if (isValidationPassed) {
-      filteredList.push(item);
-    }
-  });
-
-  return filteredList;
-};
-
 const renderEmpty = () => <EmptyAccount />;
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
@@ -83,11 +68,20 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
-  const { changeFilters, onApplyFilter, onChangeFilterOpt, selectedFilters } = useFilterModal(items, FILTER_MODAL_ID);
-  const filteredList = useMemo(() => {
-    return getFilteredList(items, selectedFilters);
-  }, [items, selectedFilters]);
-  const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator } = useSelectValidators(filteredList, id, nominatorValueList, onChange);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const filterFunction = useMemo<(item: ValidatorDataType) => boolean>(() => {
+    return (item) => {
+      if (!selectedFilters.length) {
+        return true;
+      }
+
+      // todo: logic filter here
+
+      return false;
+    };
+  }, [selectedFilters]);
+  const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator } = useSelectValidators(id, nominatorValueList, onChange);
+
   const { t } = useTranslation();
 
   useExcludeModal(id);
@@ -131,9 +125,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     />
   ), [activeModal, changeValidators, onClickItem]);
 
-  const onClickActionBtn = () => {
+  const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
-  };
+  }, [activeModal]);
 
   const searchFunction = useCallback((item: ValidatorDataType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -185,8 +179,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           className={''}
           enableSearchInput={true}
-          list={filteredList}
-          // eslint-disable-next-line react/jsx-no-bind
+          filterBy={filterFunction}
+          list={items}
           onClickActionBtn={onClickActionBtn}
           renderItem={renderItem}
           renderWhenEmpty={renderEmpty}
@@ -202,8 +196,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         onApplyFilter={onApplyFilter}
         // eslint-disable-next-line react/jsx-no-bind
         onCancel={closeFilterModal}
-        onChangeOption={onChangeFilterOpt}
-        optionSelection={changeFilters}
+        onChangeOption={onChangeFilterOption}
+        optionSelectionMap={filterSelectionMap}
         options={filterOptions}
       />
 

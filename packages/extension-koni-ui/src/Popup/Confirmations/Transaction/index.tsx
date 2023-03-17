@@ -17,6 +17,7 @@ import CN from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import SendNftTransactionConfirmation from "@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/SendNft";
 
 interface Props extends ThemeProps {
   confirmation: ConfirmationQueueItem;
@@ -28,6 +29,8 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
     case ExtrinsicType.TRANSFER_TOKEN:
     case ExtrinsicType.TRANSFER_XCM:
       return TransferBlock;
+    case ExtrinsicType.SEND_NFT:
+      return SendNftTransactionConfirmation;
     case ExtrinsicType.STAKING_BOND:
       return StakeTransactionConfirmation;
     default:

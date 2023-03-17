@@ -35,7 +35,9 @@ type Props = ThemeProps;
 
 const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { t } = useTranslation();
-  const { collectionInfo, nftItem } = useLocation().state as INftItemDetail;
+  const locationState = useLocation().state as INftItemDetail;
+  const [collectionInfo] = useState(locationState?.collectionInfo);
+  const [nftItem] = useState(locationState?.nftItem);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const chainInfo = useMemo(() => chainInfoMap[collectionInfo.chain], [chainInfoMap, collectionInfo.chain]);
 
@@ -75,6 +77,7 @@ const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
             senderAddress: from,
             networkKey: chain,
             recipientAddress: to,
+            nftItemName: nftItem?.name,
             params
           });
         } else {
@@ -82,6 +85,7 @@ const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
           sendPromise = substrateNftSubmitTransaction({
             recipientAddress: to,
             senderAddress: from,
+            nftItemName: nftItem?.name,
             params
           });
         }

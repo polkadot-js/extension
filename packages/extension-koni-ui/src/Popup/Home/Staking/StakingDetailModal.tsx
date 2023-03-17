@@ -224,7 +224,6 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
         <MetaInfo.Chain
           chain={staking.chain}
-          chainName={staking.name}
           label={t('Network')}
         />
       </MetaInfo>

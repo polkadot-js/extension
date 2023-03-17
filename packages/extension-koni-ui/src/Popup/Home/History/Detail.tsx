@@ -198,7 +198,6 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
               <>
                 <MetaInfo.Chain
                   chain={data.chain}
-                  chainName={_getChainName(chainInfo)}
                   label={t('Network')}
                 />
 

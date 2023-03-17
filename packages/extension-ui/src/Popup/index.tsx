@@ -51,11 +51,10 @@ import Authorize from './Authorize';
 import CreateAccount from './CreateAccount';
 import Derive from './Derive';
 import Export from './Export';
-import ExportAll from './ExportAll';
+// import ExportAll from './ExportAll';
 import Forget from './Forget';
-import Help from './Help';
-import ImportLedger from './ImportLedger';
-import ImportQr from './ImportQr';
+// import ImportLedger from './ImportLedger';
+// import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
 import Metadata from './Metadata';
 import PhishingDetected from './PhishingDetected';
@@ -184,7 +183,6 @@ export default function Popup(): React.ReactElement {
                           <Switch>
                             <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
                             <Route path='/about'>{wrapWithErrorBoundary(<About />, 'about')}</Route>
-                            <Route path='/help'>{wrapWithErrorBoundary(<Help />, 'help')}</Route>
                             <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'settings')}</Route>
                             <Route path='/account/add-menu'>
                               {wrapWithErrorBoundary(<AddAccountMenu />, 'adding-account-menu')}
@@ -210,13 +208,16 @@ export default function Popup(): React.ReactElement {
                             <Route path='/account/export/:address'>
                               {wrapWithErrorBoundary(<Export />, 'export-address')}
                             </Route>
-                            <Route path='/account/export-all'>
+                            {/* NOT USED */}
+                            {/* <Route path='/account/export-all'>
                               {wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}
-                            </Route>
-                            <Route path='/account/import-ledger'>
+                            </Route> */}
+                            {/* NOT USED */}
+                            {/* <Route path='/account/import-ledger'>
                               {wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}
-                            </Route>
-                            <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
+                            </Route> */}
+                            {/* NOT USED */}
+                            {/* <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route> */}
                             <Route path='/account/import-seed'>
                               {wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}
                             </Route>

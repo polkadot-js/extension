@@ -8,7 +8,7 @@ import styled from 'styled-components';
 
 import partnerLogo from '../assets/partnerLogo.svg';
 import secureIMG from '../assets/secure.png';
-import { ActionContext, Button, ButtonArea, LearnMore, List, Svg, VerticalSpace } from '../components';
+import { ActionContext, Button, ButtonArea, LearnMore, List, VerticalSpace } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { LINKS } from '../links';
 
@@ -43,15 +43,15 @@ const Welcome = function ({ className }: Props): React.ReactElement<Props> {
           </li>
         </List>
         <div className='partner'>
-          <Svg
+          <img
             className='partner-logo'
             src={partnerLogo}
           />
           <span className='subtitle'>
             {t<string>('For extra protection, we highly recommend using the')}&nbsp;
-            <LearnMore href={LINKS.PARTNER}>{t<string>('Threat Slayer extension')} </LearnMore>
+            <LearnMore href={LINKS.PARTNER}>{t<string>('Threat Slayer extension')}</LearnMore>
             &nbsp;
-            {t<string>('which scan every website you visit in real-time.')}
+            {t<string>('which protects you from dangerous websites in real-time.')}
           </span>
         </div>
       </div>
@@ -92,19 +92,19 @@ export default styled(Welcome)(
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    padding: 12px;
+    padding: 12px 12px 12px 16px;
     gap: 16px;
     border: 1px solid ${theme.boxBorderColor};
     border-radius: 8px;
+    width: 328px;
+    height: 104px;
+    box-sizing: border-box;
 
     .partner-logo {
-      width: 34px;
-      height: 35px;
-      background: #fff
+      width: 24px;
+      height: 30px;
     }
   }
-
-
 
   .subtitle {
     font-weight: 300;
@@ -114,7 +114,7 @@ export default styled(Welcome)(
     letter-spacing: 0.07em; 
     color: ${theme.subTextColor};
     white-space: pre-line;
-    width: 246px;
+
   }
 
   .link {

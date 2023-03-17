@@ -210,50 +210,6 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
       expect(wrapper.find('Identicon').first().prop('iconTheme')).toEqual(expectedIconTheme);
     });
 
-    // TODO: fix when copy to clipboard is implemented on the designs
-    // it('can copy its address', () => {
-    //   // the first CopyToClipboard is from the identicon, the second from the copy button
-    //   expect(wrapper.find('CopyToClipboard').at(0).prop('text')).toEqual(address);
-    //   expect(wrapper.find('CopyToClipboard').at(1).prop('text')).toEqual(address);
-    // });
-
-    // :TODO: fix this test when hiding account is added
-    // it('has the account visiblity icon', () => {
-    //   expect(wrapper.find('FontAwesomeIcon.visibleIcon')).toHaveLength(1);
-    // });
-
-    // it('can hide the account', () => {
-    //   jest.spyOn(messaging, 'showAccount').mockResolvedValue(false);
-
-    //   const visibleIcon = wrapper.find('FontAwesomeIcon.visibleIcon');
-    //   const hiddenIcon = wrapper.find('FontAwesomeIcon.hiddenIcon');
-
-    //   expect(visibleIcon.exists()).toBe(true);
-    //   expect(hiddenIcon.exists()).toBe(false);
-
-    //   visibleIcon.simulate('click');
-    //   expect(messaging.showAccount).toBeCalledWith(address, false);
-    // });
-
-    // it('can show the account if hidden', async () => {
-    //   const additionalProps = { isHidden: true };
-
-    //   const mountedHiddenComponent = withAccountsInContext ? await mountComponent({ address, ...additionalProps }, accounts) : await mountComponent({ ...account, ...additionalProps }, []);
-
-    //   const wrapperHidden = mountedHiddenComponent.wrapper;
-
-    //   jest.spyOn(messaging, 'showAccount').mockResolvedValue(true);
-
-    //   const visibleIcon = wrapperHidden.find('FontAwesomeIcon.visibleIcon');
-    //   const hiddenIcon = wrapperHidden.find('FontAwesomeIcon.hiddenIcon');
-
-    //   expect(visibleIcon.exists()).toBe(false);
-    //   expect(hiddenIcon.exists()).toBe(true);
-
-    //   hiddenIcon.simulate('click');
-    //   expect(messaging.showAccount).toBeCalledWith(address, true);
-    // });
-
     it('has settings button', () => {
       expect(wrapper.find('.settings')).toHaveLength(1);
     });

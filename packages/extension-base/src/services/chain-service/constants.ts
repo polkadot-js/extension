@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// import { _DEFAULT_CHAINS } from '@subwallet/chain-list';
-// import { _SubstrateChainType } from '@subwallet/chain-list/types';
+import { _DEFAULT_CHAINS } from '@subwallet/chain-list';
+import { _SubstrateChainType } from '@subwallet/chain-list/types';
 import { SingleModeJson, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 
 export const API_AUTO_CONNECT_MS = 3000;
@@ -203,13 +203,13 @@ export const _XCM_CHAIN_GROUP = {
 export const _XCM_CHAIN_USE_LIMITED_WEIGHT = ['acala', 'karura', 'statemint'];
 
 export const _XCM_TYPE = {
-  // RP: `${_SubstrateChainType.RELAYCHAIN}-${_SubstrateChainType.PARACHAIN}`,
-  // PP: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.PARACHAIN}`,
-  // PR: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.RELAYCHAIN}`
+  RP: `${_SubstrateChainType.RELAYCHAIN}-${_SubstrateChainType.PARACHAIN}`,
+  PP: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.PARACHAIN}`,
+  PR: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.RELAYCHAIN}`
 };
 
 export const _DEFAULT_ACTIVE_CHAINS = [
-  // ..._DEFAULT_CHAINS,
+  ..._DEFAULT_CHAINS,
   'westend',
   'alephTest',
   'shibuya',

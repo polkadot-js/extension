@@ -1,10 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ValidatorDetailModal, ValidatorDetailModalId } from '@subwallet/extension-koni-ui/components';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
+import StakingValidatorItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingValidatorItem';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
@@ -16,9 +19,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
-import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { ValidatorDetailModal, ValidatorDetailModalId } from '@subwallet/extension-koni-ui/components';
-import StakingValidatorItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingValidatorItem';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
@@ -82,7 +82,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [sortSelection, setSortSelection] = useState<string>('');
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filteredList = useMemo(() => {
     return getFilteredList(items, selectedFilters);
   }, [items, selectedFilters]);
@@ -210,7 +210,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       <FilterModal
         id={FILTER_MODAL_ID}
         onApplyFilter={onApplyFilter}
-        // eslint-disable-next-line react/jsx-no-bind
         onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}

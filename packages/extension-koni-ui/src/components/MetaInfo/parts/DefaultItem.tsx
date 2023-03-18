@@ -29,7 +29,8 @@ const Component: React.FC<DefaultInfoItem> = (props: DefaultInfoItem) => {
       </div>
       <div className={CN('__col', {
         '-to-right': valueAlign === 'right'
-      })}>
+      })}
+      >
         <div className={`__value -schema-${valueColorSchema}`}>
           {children}
         </div>

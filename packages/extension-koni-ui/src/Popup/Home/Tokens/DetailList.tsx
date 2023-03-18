@@ -50,7 +50,7 @@ const TokenDetailModalId = 'tokenDetailModalId';
 
 function Component (): React.ReactElement {
   const [isShrink, setIsShrink] = useState<boolean>(false);
-  const { goBack, goHome } = useDefaultNavigate();
+  const { goHome } = useDefaultNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
   const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
@@ -113,6 +113,10 @@ function Component (): React.ReactElement {
 
     return [] as TokenBalanceItemType[];
   }, [tokenGroupSlug, tokenGroupMap, tokenBalanceMap]);
+
+  useEffect(() => {
+    setIsShrink(false);
+  }, [tokenGroupSlug]);
 
   useEffect(() => {
     if (!tokenBalanceItems.length) {
@@ -265,7 +269,7 @@ function Component (): React.ReactElement {
           balanceValue={tokenBalanceValue}
           className={'__static-block'}
           isShrink={isShrink}
-          onClickBack={goBack}
+          onClickBack={goHome}
           onOpenBuyTokens={onOpenBuyTokens}
           onOpenReceive={onOpenReceive}
           onOpenSendFund={onOpenSendFund}

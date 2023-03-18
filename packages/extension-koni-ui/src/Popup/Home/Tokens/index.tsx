@@ -8,6 +8,7 @@ import { AccountSelectorModal, AccountSelectorModalId } from '@subwallet/extensi
 import ReceiveQrModal, { ReceiveSelectedResult } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { ReceiveTokensSelectorModalId, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenGroupBalanceItem';
+import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -16,6 +17,8 @@ import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Upper
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import classNames from 'classnames';
@@ -51,7 +54,7 @@ function Component (): React.ReactElement {
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-  const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const notify = useNotification();
 
   const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(
@@ -145,12 +148,29 @@ function Component (): React.ReactElement {
   );
 
   const onOpenReceive = useCallback(() => {
-    if (isAllAccount) {
+    if (!currentAccount) {
+      activeModal(AccountSelectorModalId);
+
+      return;
+    }
+
+    if (isAccountAll(currentAccount.address)) {
       activeModal(AccountSelectorModalId);
     } else {
+      if (currentAccount.originGenesisHash) {
+        const network = findNetworkJsonByGenesisHash(chainInfoMap, currentAccount.originGenesisHash);
+
+        if (network) {
+          setReceiveSelectedResult((prevState) => ({...prevState, selectedNetwork: network.slug }));
+          activeModal(RECEIVE_QR_MODAL);
+
+          return;
+        }
+      }
+
       activeModal(ReceiveTokensSelectorModalId);
     }
-  }, [activeModal, isAllAccount]);
+  }, [activeModal, chainInfoMap, currentAccount]);
 
   const openSelectAccount = useCallback((account: AccountJson) => {
     setReceiveSelectedResult({ selectedAccount: account.address });

@@ -77,7 +77,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const items = useGetValidatorList(chain, 'nominate') as ValidatorDataType[];
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [sortSelection, setSortSelection] = useState<string>('');
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filteredList = useMemo(() => {
     return getFilteredList(items, selectedFilters);
   }, [items, selectedFilters]);
@@ -112,10 +112,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       <div>Need update this component</div>
     );
   }, []);
-
-  const closeFilterModal = () => {
-    inactiveModal(FILTER_MODAL_ID);
-  };
 
   const closeSortingModal = useCallback(
     () => {
@@ -208,7 +204,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         id={FILTER_MODAL_ID}
         onApplyFilter={onApplyFilter}
         // eslint-disable-next-line react/jsx-no-bind
-        onCancel={closeFilterModal}
+        onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
         options={filterOptions}

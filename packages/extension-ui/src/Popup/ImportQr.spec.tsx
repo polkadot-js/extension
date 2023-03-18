@@ -61,8 +61,7 @@ const typeName = async (wrapper: ReactWrapper, value: string) => {
 
 // jest.mock('@polkadot/react-qr', () => {
 //   return {
-//     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//     QrScanAddress: ({ onScan }: QrScanAddressProps): null => {
+//     QrScanAddress: (_: QrScanAddressProps): null => {
 //       return null;
 //     }
 //   };

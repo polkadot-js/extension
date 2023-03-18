@@ -9,7 +9,6 @@ import React from 'react';
 
 import settings from '@polkadot/ui-settings';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const noop = (): void => undefined;
 
 const AccountContext = React.createContext<AccountsContext>({ accounts: [], hierarchy: [], master: undefined });

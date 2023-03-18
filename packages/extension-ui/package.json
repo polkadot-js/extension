@@ -38,7 +38,7 @@
     "@polkadot/util": "^11.0.2",
     "@polkadot/util-crypto": "^11.0.2",
     "file-saver": "^2.0.5",
-    "i18next": "^22.4.11",
+    "i18next": "^22.4.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^11.7.1",

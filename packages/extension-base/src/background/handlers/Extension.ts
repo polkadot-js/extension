@@ -84,7 +84,7 @@ export default class Extension {
       }
 
       pair.decodePkcs8(oldPass);
-    } catch (error) {
+    } catch {
       throw new Error('oldPass is invalid');
     }
 
@@ -178,7 +178,7 @@ export default class Extension {
       keyring.backupAccount(keyring.getPair(address), password);
 
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -482,13 +482,13 @@ export default class Extension {
 
     try {
       parentPair.decodePkcs8(password);
-    } catch (e) {
+    } catch {
       throw new Error('invalid password');
     }
 
     try {
       return parentPair.derive(suri, metadata);
-    } catch (err) {
+    } catch {
       throw new Error(`"${suri}" is not a valid derivation path`);
     }
   }

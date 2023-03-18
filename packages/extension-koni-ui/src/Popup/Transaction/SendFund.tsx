@@ -11,6 +11,7 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import { makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
@@ -177,12 +178,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const assetSettingMap = useSelector((state: RootState) => state.assetRegistry.assetSettingMap);
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const chainStateMap = useSelector((state: RootState) => state.chainStore.chainStateMap);
+  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
   const balanceMap = useSelector((state: RootState) => state.balance.balanceMap);
   const transactionContext = useContext(TransactionContext);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
+  const notify = useNotification();
   const [form] = Form.useForm<TransferFormProps>();
   const formDefault = {
     from: transactionContext.from,
@@ -289,6 +292,16 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   // Submit transaction
   const submitTransaction = useCallback(
     () => {
+      if (currentAccount && currentAccount.isReadOnly) {
+        notify({
+          message: t('The account you are using is read-only, you cannot send assets with it'),
+          type: 'info',
+          duration: 3
+        });
+
+        return;
+      }
+
       form.validateFields().then((values) => {
         setLoading(true);
         const { chain, destChain, from, to, token, value } = values;
@@ -333,7 +346,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         });
       }).catch(console.log);
     },
-    [form, transactionContext]
+    [currentAccount, form, notify, t, transactionContext]
   );
 
   const currentTokenSlug = Form.useWatch('token', form);

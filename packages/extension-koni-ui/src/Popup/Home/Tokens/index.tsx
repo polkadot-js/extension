@@ -10,6 +10,7 @@ import { ReceiveTokensSelectorModalId, TokensSelectorModal } from '@subwallet/ex
 import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenGroupBalanceItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/UpperBlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -51,6 +52,7 @@ function Component (): React.ReactElement {
 
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
+  const notify = useNotification();
 
   const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(
     { selectedAccount: currentAccount?.address }
@@ -121,9 +123,19 @@ function Component (): React.ReactElement {
   }, [navigate]);
 
   const onOpenSendFund = useCallback(() => {
+    if (currentAccount && currentAccount.isReadOnly) {
+      notify({
+        message: t('The account you are using is read-only, you cannot send assets with it'),
+        type: 'info',
+        duration: 3
+      });
+
+      return;
+    }
+
     navigate('/transaction/send-fund');
   },
-  [navigate]
+  [currentAccount, navigate, notify, t]
   );
 
   const onOpenBuyTokens = useCallback(() => {

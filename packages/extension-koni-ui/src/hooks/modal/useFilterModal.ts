@@ -9,6 +9,15 @@ export function useFilterModal (modalId: string) {
   const [filterSelectionMap, setFilterSelectionMap] = useState<Record<string, boolean>>({});
   const { inactiveModal } = useContext(ModalContext);
 
+  const onCloseFilterModal = useCallback(() => {
+    setFilterSelectionMap(selectedFilters.reduce((acc, curr) => {
+      acc[curr] = true;
+
+      return acc;
+    }, {} as Record<string, boolean>));
+    inactiveModal(modalId);
+  }, [inactiveModal, modalId, selectedFilters]);
+
   const onChangeFilterOption = useCallback((value: string, isCheck: boolean) => {
     setFilterSelectionMap((prev) => ({
       ...prev,
@@ -24,6 +33,7 @@ export function useFilterModal (modalId: string) {
   return {
     onChangeFilterOption,
     onApplyFilter,
+    onCloseFilterModal,
     filterSelectionMap,
     selectedFilters
   };

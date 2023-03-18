@@ -120,10 +120,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     />
   ), [activeModal]);
 
-  const closeFilterModal = () => {
-    inactiveModal(FILTER_MODAL_ID);
-  };
-
   const closeSortingModal = useCallback(
     () => {
       inactiveModal(SORTING_MODAL_ID);
@@ -215,7 +211,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         id={FILTER_MODAL_ID}
         onApplyFilter={onApplyFilter}
         // eslint-disable-next-line react/jsx-no-bind
-        onCancel={closeFilterModal}
+        onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
         options={filterOptions}

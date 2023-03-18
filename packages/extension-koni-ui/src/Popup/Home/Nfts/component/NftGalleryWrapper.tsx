@@ -2,20 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, NftCollection as NftCollection_ } from '@subwallet/react-ui';
+import { ActivityIndicator, NftItem as NftItem_ } from '@subwallet/react-ui';
 import React, { useCallback, useState } from 'react';
 // @ts-ignore
 import { LazyLoadComponent, LazyLoadImage } from 'react-lazy-load-image-component';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
-  title: string,
-  image: string | undefined,
-  fallbackImage?: string | undefined,
-  itemCount?: number
-
-  handleOnClick?: (params?: any) => void,
-  routingParams?: any,
+  title: string;
+  image: string | undefined;
+  fallbackImage?: string | undefined;
+  itemCount?: number;
+  handleOnClick?: (params?: any) => void;
+  routingParams?: any;
 }
 
 function Component ({ className = '', fallbackImage, handleOnClick, image, itemCount, routingParams, title }: Props): React.ReactElement<Props> {
@@ -101,9 +100,9 @@ function Component ({ className = '', fallbackImage, handleOnClick, image, itemC
   }, [showImage, showVideo, extendToken.defaultImagePlaceholder, handleImageError, loadingPlaceholder, getCollectionImage, handleVideoError]);
 
   return (
-    <NftCollection_
+    <NftItem_
       className={`nft_gallery_wrapper ${className}`}
-      count={itemCount || 0}
+      count={itemCount}
       customImageNode={getCollectionImageNode()}
       onClick={onClick}
       title={title}

@@ -67,16 +67,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const renderNft = useCallback((nftItem: NftItem) => {
     const routingParams = { collectionInfo, nftItem } as INftItemDetail;
 
-    return (<NftGalleryWrapper
-      fallbackImage={collectionInfo.image}
-      handleOnClick={handleOnClickNft}
-      image={nftItem.image}
-      itemCount={nftList.length}
-      key={`${nftItem.chain}_${nftItem.collectionId}_${nftItem.id}`}
-      routingParams={routingParams}
-      title={nftItem.name || nftItem.id}
-    />);
-  }, [collectionInfo, handleOnClickNft, nftList.length]);
+    return (
+      <NftGalleryWrapper
+        fallbackImage={collectionInfo.image}
+        handleOnClick={handleOnClickNft}
+        image={nftItem.image}
+        key={`${nftItem.chain}_${nftItem.collectionId}_${nftItem.id}`}
+        routingParams={routingParams}
+        title={nftItem.name || nftItem.id}
+      />
+    );
+  }, [collectionInfo, handleOnClickNft]);
 
   const onBack = useCallback(() => {
     navigate('/home/nfts/collections');

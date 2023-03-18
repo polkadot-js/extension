@@ -41,6 +41,7 @@ const Component: React.FC<Props> = (props: Props) => {
         networkPrefix={chainInfo?.substrateInfo?.addressPrefix}
       />
       <MetaInfo.Default
+        className={'address-field'}
         label={t('Address')}
       >
         {toShort(address)}
@@ -54,7 +55,11 @@ const Component: React.FC<Props> = (props: Props) => {
 };
 
 const CommonTransactionInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  return {};
+  return {
+    '.address-field': {
+      whiteSpace: 'nowrap'
+    }
+  };
 });
 
 export default CommonTransactionInfo;

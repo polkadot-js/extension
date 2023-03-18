@@ -76,7 +76,10 @@ function Component ({ className }: Props) {
     [ExtrinsicType.TRANSFER_BALANCE]: t('Transfer'),
     [ExtrinsicType.SEND_NFT]: t('Transfer NFT'),
     [ExtrinsicType.STAKING_STAKE]: t('Add to Bond'),
-    [ExtrinsicType.STAKING_UNSTAKE]: t('Remove Bond')
+    [ExtrinsicType.STAKING_UNSTAKE]: t('Remove Bond'),
+    [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake'),
+    [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim reward'),
+    [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw')
   }), [t]);
   const { goBack } = useDefaultNavigate();
 

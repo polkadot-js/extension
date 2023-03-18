@@ -10,10 +10,11 @@ import { InfoItemBase } from './types';
 export interface DefaultInfoItem extends InfoItemBase {
   children: React.ReactNode,
   labelAlign?: 'top' | 'center',
+  valueAlign?: 'left' | 'right'
 }
 
 const Component: React.FC<DefaultInfoItem> = (props: DefaultInfoItem) => {
-  const { children, className, label, labelAlign, valueColorSchema = 'default' } = props;
+  const { children, className, label, labelAlign, valueAlign = 'right', valueColorSchema = 'default' } = props;
 
   return (
     <div className={CN(className, '__row', '-type-default')}>
@@ -26,7 +27,9 @@ const Component: React.FC<DefaultInfoItem> = (props: DefaultInfoItem) => {
           {label}
         </div>
       </div>
-      <div className={'__col -to-right'}>
+      <div className={CN('__col', {
+        '-to-right': valueAlign === 'right'
+      })}>
         <div className={`__value -schema-${valueColorSchema}`}>
           {children}
         </div>

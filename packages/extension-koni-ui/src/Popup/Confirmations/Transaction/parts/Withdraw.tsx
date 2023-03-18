@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestBondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestBondingSubmit } from '@subwallet/extension-base/background/KoniTypes';
 import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -37,18 +37,6 @@ const Component: React.FC<Props> = (props: Props) => {
         className={'meta-info'}
         hasBackgroundWrapper
       >
-        {/* <MetaInfo.Account */}
-        {/*   address={'5DnokDpMdNEH8cApsZoWQnjsggADXQmGWUb6q8ZhHeEwvncL'} */}
-        {/*   label={t('Validator')} */}
-        {/*   networkPrefix={42} */}
-        {/* /> */}
-
-        <MetaInfo.AccountGroup
-          accounts={data.selectedValidators}
-          content={t(`${data.selectedValidators.length} selected validators`)}
-          label={t(data.type === StakingType.POOLED ? 'Pool' : 'Validators')}
-        />
-
         <MetaInfo.Number
           decimals={0}
           label={t('Amount')}
@@ -58,7 +46,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
         <MetaInfo.Number
           decimals={chainInfo?.substrateInfo?.decimals || 0}
-          label={t('Estimated fee')}
+          label={t('Withdraw fee')}
           suffix={chainInfo?.substrateInfo?.symbol}
           value={transaction.estimateFee?.value || 0}
         />
@@ -67,8 +55,8 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const StakeTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const WithdrawTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {};
 });
 
-export default StakeTransactionConfirmation;
+export default WithdrawTransactionConfirmation;

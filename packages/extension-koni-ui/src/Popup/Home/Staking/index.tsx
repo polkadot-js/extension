@@ -180,6 +180,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <MoreActionModal
           chainStakingMetadata={selectedItem?.chainStakingMetadata}
           nominatorMetadata={selectedItem?.nominatorMetadata}
+          reward={selectedItem?.reward}
+          staking={selectedItem?.staking}
         />
       </Layout.Base>
     </PageWrapper>

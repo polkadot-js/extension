@@ -2,15 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SigningRequest } from '@subwallet/extension-base/background/types';
-import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
-import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
-import ViewDetailIcon from '@subwallet/extension-koni-ui/components/Icon/ViewDetailIcon';
+import { AccountItemWithName, ConfirmationGeneralInfo, ViewDetailIcon } from '@subwallet/extension-koni-ui/components';
 import useOpenDetailModal from '@subwallet/extension-koni-ui/hooks/confirmation/useOpenDetailModal';
 import useParseSubstrateRequestPayload from '@subwallet/extension-koni-ui/hooks/confirmation/useParseSubstrateRequestPayload';
-import BaseDetailModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/BaseDetailModal';
-import SubstrateExtrinsic from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/Substrate/Extrinsic';
-import SubstrateMessageDetail from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/Substrate/Message';
-import SubstrateSignArea from '@subwallet/extension-koni-ui/Popup/Confirmations/Sign/Substrate';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isSubstrateMessage } from '@subwallet/extension-koni-ui/util';
 import { Button } from '@subwallet/react-ui';
@@ -20,6 +14,9 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { SignerPayloadJSON } from '@polkadot/types/types';
+
+import { BaseDetailModal, SubstrateExtrinsic, SubstrateMessageDetail } from './Detail';
+import { SubstrateSignArea } from './Sign';
 
 interface Props extends ThemeProps {
   request: SigningRequest;

@@ -2,15 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ConfirmationsQueueItem, EvmSendTransactionRequest } from '@subwallet/extension-base/background/KoniTypes';
-import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
-import ViewDetailIcon from '@subwallet/extension-koni-ui/components/Icon/ViewDetailIcon';
-import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
+import { ConfirmationGeneralInfo, MetaInfo, ViewDetailIcon } from '@subwallet/extension-koni-ui/components';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useGetChainInfoByChainId from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByChainId';
 import useOpenDetailModal from '@subwallet/extension-koni-ui/hooks/confirmation/useOpenDetailModal';
-import BaseDetailModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/BaseDetailModal';
-import EvmTransactionDetail from '@subwallet/extension-koni-ui/Popup/Confirmations/Detail/Evm/Transaction';
-import EvmSignArea from '@subwallet/extension-koni-ui/Popup/Confirmations/Sign/Evm';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { EvmSignatureSupportType } from '@subwallet/extension-koni-ui/types/confirmation';
 import { isEvmMessage } from '@subwallet/extension-koni-ui/util';
@@ -19,6 +14,9 @@ import CN from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
+import { BaseDetailModal, EvmTransactionDetail } from './Detail';
+import { EvmSignArea } from './Sign';
 
 interface Props extends ThemeProps {
   type: EvmSignatureSupportType

@@ -439,13 +439,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             />
           </Form.Item>
 
-          <Form.Item name={'destChain'}>
-            <ChainSelector
-              disabled={!destChainItems.length}
-              items={destChainItems}
-            />
-          </Form.Item>
-
           <Form.Item
             name={'to'}
             rules={[
@@ -458,6 +451,13 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <AddressInput
               label={t('Send to account')}
               showScanner={true}
+            />
+          </Form.Item>
+
+          <Form.Item name={'destChain'}>
+            <ChainSelector
+              disabled={!destChainItems.length}
+              items={destChainItems}
             />
           </Form.Item>
         </Form>

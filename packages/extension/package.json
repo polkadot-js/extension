@@ -15,11 +15,11 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.45.3-3-x",
+  "version": "0.45.3-4-x",
   "dependencies": {
-    "@polkadot/extension-base": "^0.45.3-3-x",
-    "@polkadot/extension-inject": "^0.45.3-3-x",
-    "@polkadot/extension-ui": "^0.45.3-3-x",
+    "@polkadot/extension-base": "^0.45.3-4-x",
+    "@polkadot/extension-inject": "^0.45.3-4-x",
+    "@polkadot/extension-ui": "^0.45.3-4-x",
     "tslib": "^2.5.0"
   },
   "devDependencies": {

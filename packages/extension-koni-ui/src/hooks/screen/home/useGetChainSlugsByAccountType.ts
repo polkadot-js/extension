@@ -2,27 +2,36 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType } from '@subwallet/extension-koni-ui/types';
+import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
+import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<string, _ChainInfo>): string[] {
+function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<string, _ChainInfo>, accountNetwork?: string): string[] {
   const result: string[] = [];
 
   Object.keys(chainInfoMap).forEach((chain) => {
-    const isChainEvmCompatible = _isChainEvmCompatible(chainInfoMap[chain]);
-
-    if (isChainEvmCompatible) {
-      if (accountType === 'ALL' || accountType === 'ETHEREUM') {
+    if (accountNetwork) {
+      if (chain === accountNetwork) {
         result.push(chain);
       }
     } else {
-      if (accountType === 'ALL' || accountType === 'SUBSTRATE') {
-        result.push(chain);
+      const isChainEvmCompatible = _isChainEvmCompatible(chainInfoMap[chain]);
+
+      if (isChainEvmCompatible) {
+        if (accountType === 'ALL' || accountType === 'ETHEREUM') {
+          result.push(chain);
+        }
+      } else {
+        if (accountType === 'ALL' || accountType === 'SUBSTRATE') {
+          result.push(chain);
+        }
       }
     }
   });
@@ -32,7 +41,7 @@ function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<st
 
 export function useGetChainSlugsByAccountType (address?: string): string[] {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+  const { accounts, currentAccount } = useSelector((state: RootState) => state.accountState);
 
   const accountType = useMemo(() => {
     let accountType: AccountType = 'ALL';
@@ -54,7 +63,23 @@ export function useGetChainSlugsByAccountType (address?: string): string[] {
     return accountType;
   }, [address, currentAccount?.type]);
 
+  const accountNetwork = useMemo(() => {
+    let account: AccountJson | null = currentAccount;
+
+    if (address) {
+      account = findAccountByAddress(accounts, address);
+    }
+
+    const originGenesisHash = account?.originGenesisHash;
+
+    if (originGenesisHash) {
+      return findNetworkJsonByGenesisHash(chainInfoMap, originGenesisHash)?.slug;
+    } else {
+      return undefined;
+    }
+  }, [accounts, address, chainInfoMap, currentAccount]);
+
   return useMemo<string[]>(() => {
-    return getChainsAccountType(accountType, chainInfoMap);
-  }, [accountType, chainInfoMap]);
+    return getChainsAccountType(accountType, chainInfoMap, accountNetwork);
+  }, [accountType, chainInfoMap, accountNetwork]);
 }

@@ -69,7 +69,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filterFunction = useMemo<(item: ValidatorDataType) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
@@ -91,10 +91,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     onApplyChangeValidators();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const closeFilterModal = () => {
-    inactiveModal(FILTER_MODAL_ID);
-  };
 
   const closeSortingModal = () => {
     inactiveModal(SORTING_MODAL_ID);
@@ -196,7 +192,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         id={FILTER_MODAL_ID}
         onApplyFilter={onApplyFilter}
         // eslint-disable-next-line react/jsx-no-bind
-        onCancel={closeFilterModal}
+        onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
         options={filterOptions}

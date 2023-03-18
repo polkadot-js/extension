@@ -152,7 +152,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const [selectedItem, setSelectedItem] = useState<TransactionHistoryDisplayItem | null>(null);
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filterFunction = useMemo<(item: TransactionHistoryDisplayItem) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
@@ -284,10 +284,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     activeModal(FILTER_MODAL_ID);
   }, [activeModal]);
 
-  const closeFilterModal = useCallback(() => {
-    inactiveModal(FILTER_MODAL_ID);
-  }, [inactiveModal]);
-
   useEffect(() => {
     if (selectedItem) {
       activeModal(HistoryDetailModalId);
@@ -388,7 +384,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <FilterModal
         id={FILTER_MODAL_ID}
         onApplyFilter={onApplyFilter}
-        onCancel={closeFilterModal}
+        onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
         options={filterOptions}

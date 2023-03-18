@@ -83,7 +83,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filteredList = useMemo(() => {
     return getFilteredList(items, selectedFilters);
   }, [items, selectedFilters]);
@@ -131,10 +131,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       />
     );
   }, [activeModal]);
-
-  const closeFilterModal = () => {
-    inactiveModal(FILTER_MODAL_ID);
-  };
 
   const closeSortingModal = () => {
     inactiveModal(SORTING_MODAL_ID);
@@ -227,7 +223,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         id={FILTER_MODAL_ID}
         onApplyFilter={onApplyFilter}
         // eslint-disable-next-line react/jsx-no-bind
-        onCancel={closeFilterModal}
+        onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
         options={filterOptions}

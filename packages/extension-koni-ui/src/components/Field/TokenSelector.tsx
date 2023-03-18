@@ -65,13 +65,15 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         name={item.symbol}
         networkMainLogoShape={'circle'}
         networkMainLogoSize={28}
-        rightItem={selected && <Icon
-          customSize={'20px'}
-          iconColor={token.colorSuccess}
-          phosphorIcon={CheckCircle}
-          type='phosphor'
-          weight={'fill'}
-        />}
+        rightItem={selected && (<div className={'__check-icon'}>
+          <Icon
+            customSize={'20px'}
+            iconColor={token.colorSuccess}
+            phosphorIcon={CheckCircle}
+            type='phosphor'
+            weight={'fill'}
+          />
+        </div>)}
         subName={''}
         subNetworkKey={item.originChain}
         symbol={item.symbol.toLowerCase()}
@@ -94,7 +96,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       renderItem={renderItem}
       renderSelected={renderTokenSelected}
       searchFunction={searchFunction}
-      searchPlaceholder={t('Search chain')}
+      searchPlaceholder={t('Search token')}
       searchableMinCharactersCount={2}
       selected={value || ''}
       title={label}
@@ -111,6 +113,12 @@ export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { to
     // TODO: delete this when fix component in ui-base
     '.token-item .ant-network-item-sub-name': {
       display: 'none'
+    },
+
+    '.token-item .__check-icon': {
+      display: 'flex',
+      width: 40,
+      justifyContent: 'center'
     }
   });
 });

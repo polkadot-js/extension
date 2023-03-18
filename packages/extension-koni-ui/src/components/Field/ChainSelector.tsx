@@ -51,13 +51,15 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         networkKey={item.slug}
         networkMainLogoShape={'circle'}
         networkMainLogoSize={28}
-        rightItem={selected && <Icon
-          customSize={'20px'}
-          iconColor={token.colorSuccess}
-          phosphorIcon={CheckCircle}
-          type='phosphor'
-          weight={'fill'}
-        />}
+        rightItem={selected && (<div className={'__check-icon'}>
+          <Icon
+            customSize={'20px'}
+            iconColor={token.colorSuccess}
+            phosphorIcon={CheckCircle}
+            type='phosphor'
+            weight={'fill'}
+          />
+        </div>)}
       />
     );
   }, [token]);
@@ -89,6 +91,12 @@ export const ChainSelector = styled(forwardRef(Component))<Props>(({ theme: { to
   return ({
     '&.chain-selector-input .__selected-item': {
       color: token.colorText
+    },
+
+    '.ant-network-item .__check-icon': {
+      display: 'flex',
+      width: 40,
+      justifyContent: 'center'
     }
   });
 });

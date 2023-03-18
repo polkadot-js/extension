@@ -1,10 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ValidatorDetailModal, ValidatorDetailModalId } from '@subwallet/extension-koni-ui/components';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
+import StakingValidatorItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingValidatorItem';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
@@ -21,6 +24,7 @@ interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
   onClickBookBtn?: (e: SyntheticEvent) => void;
   onClickLightningBtn?: (e: SyntheticEvent) => void;
+  nominators?: NominationInfo[];
 }
 
 const SORTING_MODAL_ID = 'nominated-sorting-modal';
@@ -77,7 +81,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const items = useGetValidatorList(chain, 'nominate') as ValidatorDataType[];
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [sortSelection, setSortSelection] = useState<string>('');
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filteredList = useMemo(() => {
     return getFilteredList(items, selectedFilters);
   }, [items, selectedFilters]);
@@ -98,24 +103,22 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     );
   }, []);
 
-  const renderItem = useCallback((item: ValidatorDataType) => {
-    return (
-      // <StakingValidatorItem
-      //   address={item.address}
-      //   className={'pool-item'}
-      //   identity={item.identity}
-      //   symbol={item.symbol}
-      //   commission={item.commission}
-      //   // eslint-disable-next-line @typescript-eslint/no-empty-function,react/jsx-no-bind
-      //   onClickMoreBtn={() => {}}
-      // />
-      <div>Need update this component</div>
-    );
-  }, []);
-
-  const closeFilterModal = () => {
-    inactiveModal(FILTER_MODAL_ID);
-  };
+  const renderItem = useCallback((item: ValidatorDataType) => (
+    <StakingValidatorItem
+      apy={'15'}
+      className={'pool-item'}
+      isSelected={false}
+      key={item.address}
+      // eslint-disable-next-line react/jsx-no-bind
+      onClickMoreBtn={(e: SyntheticEvent) => {
+        e.stopPropagation();
+        setViewDetailItem(item);
+        activeModal(ValidatorDetailModalId);
+      }}
+      showSelectedIcon={false}
+      validatorInfo={item}
+    />
+  ), [activeModal]);
 
   const closeSortingModal = useCallback(
     () => {
@@ -207,8 +210,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       <FilterModal
         id={FILTER_MODAL_ID}
         onApplyFilter={onApplyFilter}
-        // eslint-disable-next-line react/jsx-no-bind
-        onCancel={closeFilterModal}
+        onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
         options={filterOptions}
@@ -221,6 +223,22 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         optionSelection={sortSelection}
         options={sortingOptions}
       />
+
+      {viewDetailItem &&
+        <ValidatorDetailModal
+          commission={viewDetailItem.commission}
+          decimals={0}
+          earningEstimated={viewDetailItem.expectedReturn || ''}
+          minStake={viewDetailItem.minBond}
+          // eslint-disable-next-line react/jsx-no-bind
+          onCancel={() => inactiveModal(ValidatorDetailModalId)}
+          ownStake={viewDetailItem.ownStake}
+          status={'active'}
+          symbol={viewDetailItem.symbol}
+          validatorAddress={viewDetailItem.address}
+          validatorName={viewDetailItem.identity || ''}
+        />
+      }
     </>
   );
 };

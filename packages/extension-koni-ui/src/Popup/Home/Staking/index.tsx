@@ -42,12 +42,12 @@ const rightIcon = <Icon
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { activeModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { data: stakingItems, priceMap } = useGetStakingList();
   const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filterFunction = useMemo<(item: StakingDataType) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
@@ -74,10 +74,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
   }, [activeModal]);
-
-  const closeFilterModal = useCallback(() => {
-    inactiveModal(FILTER_MODAL_ID);
-  }, [inactiveModal]);
 
   const onClickRightIcon = useCallback((item: StakingDataType) => {
     setSelectedItem(item);
@@ -165,7 +161,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <FilterModal
           id={FILTER_MODAL_ID}
           onApplyFilter={onApplyFilter}
-          onCancel={closeFilterModal}
+          onCancel={onCloseFilterModal}
           onChangeOption={onChangeFilterOption}
           optionSelectionMap={filterSelectionMap}
           options={FILTER_OPTIONS}
@@ -180,6 +176,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <MoreActionModal
           chainStakingMetadata={selectedItem?.chainStakingMetadata}
           nominatorMetadata={selectedItem?.nominatorMetadata}
+          reward={selectedItem?.reward}
+          staking={selectedItem?.staking}
         />
       </Layout.Base>
     </PageWrapper>

@@ -11,6 +11,7 @@ import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { DetailModal } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailUpperBlock';
@@ -22,6 +23,7 @@ import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import classNames from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -50,7 +52,7 @@ const TokenDetailModalId = 'tokenDetailModalId';
 
 function Component (): React.ReactElement {
   const [isShrink, setIsShrink] = useState<boolean>(false);
-  const { goBack, goHome } = useDefaultNavigate();
+  const { goHome } = useDefaultNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
   const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
@@ -59,6 +61,8 @@ function Component (): React.ReactElement {
   const { accountBalance: { tokenBalanceMap, tokenGroupBalanceMap }, tokenGroupStructure: { tokenGroupMap } } = useContext(HomeContext);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
+  const notify = useNotification();
+  const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(
     { selectedAccount: currentAccount?.address });
@@ -113,6 +117,10 @@ function Component (): React.ReactElement {
 
     return [] as TokenBalanceItemType[];
   }, [tokenGroupSlug, tokenGroupMap, tokenBalanceMap]);
+
+  useEffect(() => {
+    setIsShrink(false);
+  }, [tokenGroupSlug]);
 
   useEffect(() => {
     if (!tokenBalanceItems.length) {
@@ -188,9 +196,19 @@ function Component (): React.ReactElement {
   }, []);
 
   const onOpenSendFund = useCallback(() => {
+    if (currentAccount && currentAccount.isReadOnly) {
+      notify({
+        message: t('The account you are using is read-only, you cannot send assets with it'),
+        type: 'info',
+        duration: 3
+      });
+
+      return;
+    }
+
     navigate('/transaction/send-fund', tokenGroupSlug ? ({ state: { slug: tokenGroupSlug } }) : undefined);
   },
-  [navigate, tokenGroupSlug]
+  [currentAccount, navigate, notify, t, tokenGroupSlug]
   );
 
   const onOpenBuyTokens = useCallback(() => {
@@ -265,7 +283,7 @@ function Component (): React.ReactElement {
           balanceValue={tokenBalanceValue}
           className={'__static-block'}
           isShrink={isShrink}
-          onClickBack={goBack}
+          onClickBack={goHome}
           onOpenBuyTokens={onOpenBuyTokens}
           onOpenReceive={onOpenReceive}
           onOpenSendFund={onOpenSendFund}

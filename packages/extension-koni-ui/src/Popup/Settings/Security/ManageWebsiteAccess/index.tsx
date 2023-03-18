@@ -23,9 +23,6 @@ import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps;
 
-const ActionModalId = 'actionModalId';
-// const FilterModalId = 'filterModalId';
-
 function getWebsiteItems (authUrlMap: Record<string, AuthUrlInfo>): AuthUrlInfo[] {
   return Object.values(authUrlMap);
 }
@@ -34,6 +31,7 @@ function getAccountCount (item: AuthUrlInfo): number {
   return Object.values(item.isAllowedMap).filter((i) => i).length;
 }
 
+const ACTION_MODAL_ID = 'actionModalId';
 const FILTER_MODAL_ID = 'manage-website-access-filter-id';
 
 enum FilterValue {
@@ -50,7 +48,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const goBack = useDefaultNavigate().goBack;
   const { token } = useTheme() as Theme;
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filterFunction = useMemo<(item: AuthUrlInfo) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
@@ -85,10 +83,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     activeModal(FILTER_MODAL_ID);
   }, [activeModal]);
 
-  const closeFilterModal = useCallback(() => {
-    inactiveModal(FILTER_MODAL_ID);
-  }, [inactiveModal]);
-
   const filterOptions = useMemo(() => {
     return [
       { label: 'Substrate DApp', value: FilterValue.SUBSTRATE },
@@ -103,11 +97,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [authUrlMap]);
 
   const onOpenActionModal = useCallback(() => {
-    activeModal(ActionModalId);
+    activeModal(ACTION_MODAL_ID);
   }, [activeModal]);
 
   const onCloseActionModal = useCallback(() => {
-    inactiveModal(ActionModalId);
+    inactiveModal(ACTION_MODAL_ID);
   }, [inactiveModal]);
 
   const actions: ActionItemType[] = useMemo(() => {
@@ -231,7 +225,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       <ActionModal
         actions={actions}
-        id={ActionModalId}
+        id={ACTION_MODAL_ID}
         onCancel={onCloseActionModal}
         title={t('Website access config')}
       />
@@ -239,7 +233,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <FilterModal
         id={FILTER_MODAL_ID}
         onApplyFilter={onApplyFilter}
-        onCancel={closeFilterModal}
+        onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
         options={filterOptions}

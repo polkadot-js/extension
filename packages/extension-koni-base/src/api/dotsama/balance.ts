@@ -9,6 +9,7 @@ import { _BALANCE_CHAIN_GROUP, _BALANCE_TOKEN_GROUP, _PURE_EVM_CHAINS } from '@s
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isPureEvmChain, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses, sumBN } from '@subwallet/extension-base/utils';
+import { PalletNominationPoolsPoolMember } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 import { getEVMBalance } from '@subwallet/extension-koni-base/api/tokens/evm/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
@@ -111,8 +112,21 @@ async function subscribeSubstrateBalance (addresses: string[], chainInfo: _Chain
 async function subscribeWithAccountMulti (addresses: string[], chainInfo: _ChainInfo, networkAPI: ApiPromise, callBack: (rs: BalanceItem) => void) {
   const chainNativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
 
-  const unsub = await networkAPI.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
+  const unsub = await networkAPI.query.system.account.multi(addresses, async (balances: AccountInfo[]) => {
     let [total, reserved, miscFrozen, feeFrozen] = [new BN(0), new BN(0), new BN(0), new BN(0)];
+
+    let pooledStakingBalance = BN_ZERO;
+
+    if (networkAPI.query.nominationPools) {
+      const poolMemberDatas = await networkAPI.query.nominationPools.poolMembers.multi(addresses);
+
+      for (const _poolMemberData of poolMemberDatas) {
+        const poolMemberData = _poolMemberData.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
+        const pooledBalance = new BN(poolMemberData.points.toString());
+
+        pooledStakingBalance = pooledStakingBalance.add(pooledBalance);
+      }
+    }
 
     balances.forEach((balance: AccountInfo) => {
       total = total.add(balance.data?.free?.toBn() || new BN(0));
@@ -121,8 +135,14 @@ async function subscribeWithAccountMulti (addresses: string[], chainInfo: _Chain
       feeFrozen = feeFrozen.add(balance.data?.feeFrozen?.toBn() || new BN(0));
     });
 
-    const free = total.sub(miscFrozen);
-    const locked = reserved.add(miscFrozen);
+    let locked = reserved.add(miscFrozen);
+
+    if (pooledStakingBalance.gt(BN_ZERO)) {
+      total = total.add(pooledStakingBalance);
+      locked = locked.add(pooledStakingBalance);
+    }
+
+    const free = total.sub(locked);
 
     callBack({
       tokenSlug: chainNativeTokenSlug,

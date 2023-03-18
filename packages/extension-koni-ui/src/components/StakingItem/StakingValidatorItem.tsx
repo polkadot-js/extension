@@ -14,20 +14,21 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps & {
   validatorInfo: ValidatorDataType;
-  onClick: (value: string) => void;
+  onClick?: (value: string) => void;
   onClickMoreBtn: (e: SyntheticEvent) => void;
   apy: string;
-  isSelected: boolean;
+  isSelected?: boolean;
+  showSelectedIcon?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { apy, className, isSelected, onClick, onClickMoreBtn, validatorInfo } = props;
+  const { apy, className, isSelected, onClick, onClickMoreBtn, showSelectedIcon = true, validatorInfo } = props;
   const { token } = useTheme() as Theme;
 
   const { t } = useTranslation();
 
   const _onSelect = useCallback(() => {
-    onClick(`${validatorInfo.address}-${validatorInfo.identity || ''}`);
+    onClick && onClick(`${validatorInfo.address}-${validatorInfo.identity || ''}`);
   },
   [onClick, validatorInfo.address, validatorInfo.identity]
   );
@@ -80,13 +81,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
         rightItem={
           <>
-            <Icon
+            {showSelectedIcon && <Icon
               className={'right-item__select-icon'}
               iconColor={isSelected ? token.colorSuccess : token.colorTextLight4}
               phosphorIcon={CheckCircle}
               size={'sm'}
               weight={'fill'}
-            />
+            />}
             <Button
               icon={
                 <Icon phosphorIcon={DotsThree} />

@@ -19,6 +19,8 @@ import styled from 'styled-components';
 
 type Props = ThemeProps
 
+const FILTER_MODAL_ID = 'filterTokenModal';
+
 enum FilterValue {
   ENABLED = 'enabled',
   DISABLED = 'disabled',
@@ -39,9 +41,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { activeModal } = useContext(ModalContext);
   const chainInfoList = useChainInfoWithState();
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal('filterTokenModal');
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filterFunction = useMemo<(item: ChainInfoWithState) => boolean>(() => {
     return (chainInfo) => {
       if (!selectedFilters.length) {
@@ -120,12 +122,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const openFilterModal = useCallback((e?: SyntheticEvent) => {
     e && e.stopPropagation();
-    activeModal('filterTokenModal');
+    activeModal(FILTER_MODAL_ID);
   }, [activeModal]);
-
-  const closeFilterModal = useCallback(() => {
-    inactiveModal('filterTokenModal');
-  }, [inactiveModal]);
 
   return (
     <PageWrapper
@@ -164,9 +162,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
 
         <FilterModal
-          id={'filterTokenModal'}
+          id={FILTER_MODAL_ID}
           onApplyFilter={onApplyFilter}
-          onCancel={closeFilterModal}
+          onCancel={onCloseFilterModal}
           onChangeOption={onChangeFilterOption}
           optionSelectionMap={filterSelectionMap}
           options={FILTER_OPTIONS}

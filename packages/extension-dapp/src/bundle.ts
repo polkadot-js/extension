@@ -170,7 +170,7 @@ export async function web3Accounts ({ accountType, extensions, genesisHash, ss58
         const list = await accounts.get();
 
         return mapAccounts(source, filterAccounts(list, genesisHash, accountType), ss58Format);
-      } catch (error) {
+      } catch {
         // cannot handle this one
         return [];
       }

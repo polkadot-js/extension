@@ -24,7 +24,6 @@
       "@polkadot/extension-mocks/*": ["extension-mocks/src/*.ts"],
       "@polkadot/extension-ui": ["extension-ui/src/index.ts"],
       "@polkadot/extension-ui/*": ["extension-ui/src/*.ts"]
-    },
-    "skipLibCheck": true
+    }
 	}
  }

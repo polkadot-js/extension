@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, AssetSetting, BalanceJson, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, PriceJson, StakeUnlockingJson, StakingJson, StakingRewardJson, ThemeNames, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, AssetSetting, BalanceJson, ChainStakingMetadata, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, NominatorMetadata, PriceJson, StakingJson, StakingRewardJson, ThemeNames, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
@@ -222,11 +222,17 @@ export const updateStakingReward = (data: StakingRewardJson) => {
 
 export const subscribeStakingReward = lazySubscribeMessage('pri(stakingReward.getSubscription)', null, updateStakingReward, updateStakingReward);
 
-export const updateStakeUnlockingInfo = (data: StakeUnlockingJson) => {
-  store.dispatch({ type: 'staking/updateStakeUnlockingInfo', payload: data.details });
+export const updateChainStakingMetadata = (data: ChainStakingMetadata[]) => {
+  store.dispatch({ type: 'staking/updateChainStakingMetadata', payload: data });
 };
 
-export const subscribeStakeUnlockingInfo = lazySubscribeMessage('pri(unbonding.subscribeUnlockingInfo)', null, updateStakeUnlockingInfo, updateStakeUnlockingInfo);
+export const subscribeChainStakingMetadata = lazySubscribeMessage('pri(bonding.subscribeChainStakingMetadata)', null, updateChainStakingMetadata, updateChainStakingMetadata);
+
+export const updateStakingNominatorMetadata = (data: NominatorMetadata[]) => {
+  store.dispatch({ type: 'staking/updateNominatorMetadata', payload: data });
+};
+
+export const subscribeStakingNominatorMetadata = lazySubscribeMessage('pri(bonding.subscribeNominatorMetadata)', null, updateStakingNominatorMetadata, updateStakingNominatorMetadata);
 
 export const updateTxHistory = (data: TransactionHistoryItem[]) => {
   store.dispatch({ type: 'transactionHistory/update', payload: data });

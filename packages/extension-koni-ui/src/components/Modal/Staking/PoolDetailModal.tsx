@@ -3,45 +3,32 @@
 
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingStatus, StakingStatusType } from '@subwallet/extension-koni-ui/util/stakingStatus';
-import { SwModal, SwNumberProps } from '@subwallet/react-ui';
+import { SwModal } from '@subwallet/react-ui';
 import React from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  onCancel: () => void,
-  validatorAddress: string,
-  validatorName: string,
-  status: StakingStatusType,
-  minStake: SwNumberProps['value'],
-  ownStake: SwNumberProps['value'],
   decimals: number,
-  symbol: string,
-  earningEstimated: SwNumberProps['value'],
-  commission: SwNumberProps['value']
+  onCancel: () => void,
+  status: StakingStatusType,
+  selectedNominationPool: NominationPoolDataType
 };
 
-export const ValidatorDetailModalId = 'validatorDetailModalId';
+export const PoolDetailModalId = 'poolDetailModalId';
 
-function Component ({ className,
-  commission, decimals,
-  earningEstimated,
-  minStake,
-  onCancel,
-  ownStake,
-  status,
-  symbol,
-  validatorAddress,
-  validatorName }: Props): React.ReactElement<Props> {
+function Component ({ className, decimals, onCancel, selectedNominationPool, status }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { address, identity, memberCount, symbol } = selectedNominationPool;
 
   return (
     <SwModal
       className={className}
-      id={ValidatorDetailModalId}
+      id={PoolDetailModalId}
       onCancel={onCancel}
-      title={t('Validator details')}
+      title={t('Pooled details')}
     >
       <MetaInfo
         hasBackgroundWrapper
@@ -49,9 +36,9 @@ function Component ({ className,
         valueColorScheme={'light'}
       >
         <MetaInfo.Account
-          address={validatorAddress}
-          label={t('Validator')}
-          name={validatorName}
+          address={address}
+          label={t('Pool')}
+          name={identity}
         />
 
         <MetaInfo.Status
@@ -62,32 +49,31 @@ function Component ({ className,
         />
 
         <MetaInfo.Number
-          decimals={decimals}
-          label={t('Min stake')}
-          suffix={symbol}
-          value={minStake}
-          valueColorSchema={'even-odd'}
-        />
-
-        <MetaInfo.Number
-          decimals={decimals}
-          label={t('Own stake')}
-          suffix={symbol}
-          value={ownStake}
-          valueColorSchema={'even-odd'}
-        />
-
-        <MetaInfo.Number
-          label={t('Earning estimated')}
-          suffix={'%'}
-          value={earningEstimated}
-          valueColorSchema={'even-odd'}
-        />
-
-        <MetaInfo.Number
           label={t('Commission')}
           suffix={'%'}
-          value={commission}
+          value={'10'}
+          valueColorSchema={'even-odd'}
+        />
+
+        <MetaInfo.Number
+          decimals={decimals}
+          label={t('Owner pooled')}
+          suffix={symbol}
+          value={memberCount}
+          valueColorSchema={'even-odd'}
+        />
+
+        <MetaInfo.Number
+          label={t('Total pooled')}
+          suffix={'%'}
+          value={memberCount}
+          valueColorSchema={'even-odd'}
+        />
+
+        <MetaInfo.Number
+          label={t('Member of pool')}
+          suffix={'%'}
+          value={memberCount}
           valueColorSchema={'even-odd'}
         />
       </MetaInfo>
@@ -95,7 +81,7 @@ function Component ({ className,
   );
 }
 
-export const ValidatorDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const PoolDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
 
   });

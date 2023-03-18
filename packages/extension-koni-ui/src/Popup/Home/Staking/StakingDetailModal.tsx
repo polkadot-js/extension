@@ -1,45 +1,74 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { isShowNominationByValidator } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
+import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
+import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
-import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { MORE_ACTION_MODAL, StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
-import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
-import { CheckCircle, DotsThree } from 'phosphor-react';
-import React, { useContext, useMemo } from 'react';
+import { toShort } from '@subwallet/extension-koni-ui/util';
+import { StakingStatus } from '@subwallet/extension-koni-ui/util/stakingStatus';
+import { Button, Icon, Number, SwModal } from '@subwallet/react-ui';
+import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
-  chain?: string;
-  stakingType?: StakingType;
+  nominatorMetadata: NominatorMetadata;
+  chainStakingMetadata: ChainStakingMetadata;
 }
 
 export const STAKING_DETAIL_MODAL_ID = 'staking-detail-modal-id';
 
-const Component: React.FC<Props> = (props: Props) => {
-  const { chain, className, stakingType } = props;
+const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) => {
+  return unstakings.find((item) => item.validatorAddress === address);
+};
+
+const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominatorMetadata }: Props) => {
+  const { expectedReturn, minStake, unstakingPeriod } = chainStakingMetadata;
+  const { activeStake, address, chain, nominations, type, unstakings } = nominatorMetadata;
+  const [seeMore, setSeeMore] = useState<boolean>(false);
+  const { token } = useTheme() as Theme;
+  const navigate = useNavigate();
+  const showingOption = isShowNominationByValidator(chain);
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { data: stakingData } = useGetStakingList();
   const data = useMemo((): StakingDataType => {
     return stakingData.find(
-      (item) => item.staking.chain === chain && item.staking.type === stakingType
+      (item) => item.staking.chain === chain && item.staking.type === type
     ) as StakingDataType;
-  }, [stakingData, chain, stakingType]);
+  }, [stakingData, chain, type]);
   const { decimals, reward, staking } = data || { staking: {}, reward: {} };
   const { t } = useTranslation();
-  const modalTitle = stakingType === StakingType.NOMINATED.valueOf() ? 'Nominate details' : 'Pooled details';
-  const stakingStatusLabel = stakingType === StakingType.NOMINATED.valueOf() ? 'Nominate status' : 'Pooled status';
-  const accountName = useGetAccountByAddress(staking.address);
-
+  const modalTitle = type === StakingType.NOMINATED.valueOf() ? 'Nominate details' : 'Pooled details';
+  const account = useGetAccountByAddress(staking.address);
   const stakingTypeNameMap: Record<string, string> = {
     nominated: t('Nominated'),
     pooled: t('Pooled')
   };
+
+  const onClickStakeMoreBtn = useCallback(() => {
+    inactiveModal(STAKING_DETAIL_MODAL_ID);
+    setTimeout(() => navigate('/transaction/stake', { state: { chainStakingMetadata, nominatorMetadata, hideTabList: true } as StakingDataOption }), 300);
+  }, [chainStakingMetadata, inactiveModal, navigate, nominatorMetadata]);
+
+  const chainInfo = useFetchChainInfo(staking.chain);
+  const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
+
+  const onClickUnstakeBtn = useCallback(() => {
+    inactiveModal(STAKING_DETAIL_MODAL_ID);
+    setTimeout(() => navigate('/transaction/unstake'), 300);
+  }, [inactiveModal, navigate]);
 
   const footer = () => {
     return (
@@ -52,63 +81,116 @@ const Component: React.FC<Props> = (props: Props) => {
         />
         <Button
           className='__action-btn'
+          onClick={onClickUnstakeBtn}
           schema='secondary'
         >{t('Unstake')}</Button>
-        <Button className='__action-btn'>{t('Stake more')}</Button>
+        <Button
+          className='__action-btn'
+          onClick={onClickStakeMoreBtn}
+        >{t('Stake more')}</Button>
       </div>
     );
   };
 
+  const onClickSeeMoreBtn = useCallback(() => {
+    setSeeMore(true);
+  }, []);
+
+  const onCloseModal = useCallback(() => {
+    setSeeMore(false);
+    inactiveModal(STAKING_DETAIL_MODAL_ID);
+  }, [inactiveModal]);
+
+  const renderUnstakingInfo = useCallback((item: NominationInfo) => {
+    const unstakingData = getUnstakingInfo(unstakings, item.validatorAddress);
+
+    return (
+      <MetaInfo
+        hasBackgroundWrapper
+        key={item.validatorAddress}
+        spaceSize={'sm'}
+        valueColorScheme={'light'}
+      >
+        <MetaInfo.Account
+          address={item.validatorAddress}
+          label={t('Validator')}
+          name={item.validatorIdentity || toShort(item.validatorAddress)}
+          networkPrefix={networkPrefix}
+        />
+
+        <MetaInfo.Number
+          decimals={decimals}
+          key={item.validatorAddress}
+          label={t('Active stake')}
+          suffix={staking.nativeToken}
+          value={item.activeStake || ''}
+          valueColorSchema={'gray'}
+        />
+
+        <MetaInfo.Status
+          label={t('Staking status')}
+          statusIcon={StakingStatus.active.icon}
+          statusName={StakingStatus.active.name}
+          valueColorSchema={StakingStatus.active.schema}
+        />
+
+        {!!unstakingData && showingOption === 'showByValidator' && <MetaInfo.Default
+          className={'__para'}
+          label={t('Unstaked')}
+          labelAlign={unstakingData.status === UnstakingStatus.UNLOCKING.valueOf() ? 'top' : 'center'}
+        >
+          <div>
+            <Number
+              className={'common-text text-light-4'}
+              decimal={decimals}
+              suffix={staking.nativeToken}
+              value={unstakingData.claimable}
+            />
+
+            {/* chi hien thi waiting time khi UnstakingStatus = unlocking, neu waitingTime = 0 && UnstakingStatus = unlocking => soon */}
+            {unstakingData.status === UnstakingStatus.UNLOCKING.valueOf() &&
+              <Number
+                className={'sm-text text-light-4'}
+                decimal={0}
+                value={getWaitingTime(unstakingData.waitingTime)}
+              />
+            }
+          </div>
+        </MetaInfo.Default>}
+      </MetaInfo>
+    );
+  }, [decimals, networkPrefix, showingOption, staking.nativeToken, t, unstakings]);
+
   return (
     <SwModal
       className={className}
+      closable={true}
       footer={footer()}
       id={STAKING_DETAIL_MODAL_ID}
-      // eslint-disable-next-line react/jsx-no-bind
-      onCancel={() => inactiveModal(STAKING_DETAIL_MODAL_ID)}
+      maskClosable={true}
+      onCancel={onCloseModal}
       title={modalTitle}
     >
       <MetaInfo>
-        <MetaInfo.Number
-          decimals={decimals}
-          label={t('Bonded fund')}
-          suffix={staking.nativeToken}
-          value={staking.balance || '0'}
+        <MetaInfo.Account
+          address={address}
+          label={t('Account')}
+          name={account?.name}
         />
 
-        <MetaInfo.Number
-          decimals={decimals}
-          label={t('Unlocking stake')}
-          suffix={staking.nativeToken}
-          value={staking.unlockingBalance || '0'}
+        {/* change this when all account data is full */}
+        {/* <MetaInfo.AccountGroup label={'Account'} accounts={accounts} content={`${accounts.length} accounts staking`} /> */}
+
+        <MetaInfo.DisplayType
+          label={t('Staking type')}
+          typeName={stakingTypeNameMap[staking.type]}
         />
-
-        {!!reward?.unclaimedReward && (
-          <MetaInfo.Number
-            decimals={decimals}
-            label={t('Unclaimed reward')}
-            suffix={staking.nativeToken}
-            value={reward?.unclaimedReward || '0'}
-          />
-        )}
-
-        {!!reward?.totalSlash && (
-          <MetaInfo.Number
-            decimals={decimals}
-            label={t('Total slash')}
-            suffix={staking.nativeToken}
-            value={reward?.totalReward || '0'}
-          />
-        )}
-
-        {!!reward?.latestReward && (
-          <MetaInfo.Number
-            decimals={decimals}
-            label={t('Latest Reward')}
-            suffix={staking.nativeToken}
-            value={reward?.latestReward || '0'}
-          />
-        )}
+        <MetaInfo.Status
+          label={t('Nomination')}
+          statusIcon={StakingStatus.active.icon}
+          statusName={StakingStatus.active.name}
+          valueColorSchema={StakingStatus.active.schema}
+        />
 
         {!!reward?.totalReward && (
           <MetaInfo.Number
@@ -119,32 +201,154 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         )}
 
-        <MetaInfo.DisplayType
-          label={t('Staking type')}
-          typeName={stakingTypeNameMap[staking.type]}
+        <MetaInfo.Number
+          decimals={decimals}
+          label={t('Staked')}
+          suffix={staking.nativeToken}
+          value={String(parseFloat(activeStake) + parseFloat(staking.unlockingBalance || '0'))}
         />
+
+        {!seeMore && <MetaInfo.Number
+          decimals={decimals}
+          label={t('Active staked')}
+          suffix={staking.nativeToken}
+          value={activeStake}
+        />}
+
+        {!seeMore && <MetaInfo.Number
+          decimals={decimals}
+          label={t('Unstaked')}
+          suffix={staking.nativeToken}
+          value={staking.unlockingBalance || '0'}
+        />}
 
         <MetaInfo.Chain
           chain={staking.chain}
-          chainName={staking.name}
           label={t('Network')}
         />
-
-        <MetaInfo.Account
-          address={staking.address}
-          label={t('Account')}
-          name={accountName?.name || ''}
-        />
-
-        {/* // TODO: change this when background update information */}
-        <MetaInfo.Status
-          label={stakingStatusLabel}
-          statusIcon={CheckCircle}
-          statusName={t('Earning Reward')}
-          valueColorSchema={'success'}
-        />
-
       </MetaInfo>
+
+      {!seeMore && <Button
+        block
+        className={'see-more-btn'}
+        icon={<Icon
+          iconColor={token.colorTextLight4}
+          phosphorIcon={ArrowCircleUpRight}
+          size={'sm'}
+        />}
+        onClick={onClickSeeMoreBtn}
+        size={'xs'}
+        type={'ghost'}
+      >
+        {t('See more')}
+      </Button>}
+
+      {seeMore && <>
+        <MetaInfo
+          hasBackgroundWrapper
+          spaceSize={'xs'}
+          valueColorScheme={'light'}
+        >
+          {!!expectedReturn &&
+            <MetaInfo.Number
+              label={t('Estimated earning')}
+              suffix={'%'}
+              value={expectedReturn}
+              valueColorSchema={'even-odd'}
+            />
+          }
+
+          <MetaInfo.Number
+            decimals={decimals}
+            label={t('Minimum active')}
+            suffix={staking.nativeToken}
+            value={minStake}
+            valueColorSchema={'gray'}
+          />
+
+          {!!unstakingPeriod && <MetaInfo.Default
+            label={t('Unstaking period')}
+            valueColorSchema={'gray'}
+          >
+            {getUnstakingPeriod(unstakingPeriod)}
+          </MetaInfo.Default>}
+        </MetaInfo>
+
+        {showingOption === 'showByValue' && !!(nominations && nominations.length) && (
+          <>
+            <MetaInfo valueColorScheme={'light'}>
+              <MetaInfo.Number
+                decimals={decimals}
+                label={t('Active staked')}
+                suffix={staking.nativeToken}
+                value={activeStake}
+              />
+            </MetaInfo>
+            <MetaInfo
+              hasBackgroundWrapper
+              spaceSize={'xs'}
+              valueColorScheme={'light'}
+            >
+              <>
+                {nominations.map((item) => (
+                  <MetaInfo.Number
+                    className={'__nomination-field'}
+                    decimals={decimals}
+                    key={`${item.validatorAddress}-${item.activeStake}-${item.validatorIdentity || item.validatorMinStake || item.chain}`}
+                    label={<AccountItem
+                      address={item.validatorAddress}
+                      className={'__nomination-label'}
+                      name={item.validatorIdentity}
+                    />}
+                    suffix={staking.nativeToken}
+                    value={item.activeStake || ''}
+                    valueColorSchema={'gray'}
+                  />
+                ))}
+              </>
+            </MetaInfo>
+          </>
+        )}
+
+        {(showingOption === 'showByValue' || showingOption === 'mixed') && !!(unstakings && unstakings.length) && (
+          <>
+            <MetaInfo valueColorScheme={'light'}>
+              <MetaInfo.Number
+                decimals={decimals}
+                label={t('Unstaked')}
+                suffix={staking.nativeToken}
+                value={staking.unlockingBalance || '0'}
+              />
+            </MetaInfo>
+            <MetaInfo
+              hasBackgroundWrapper
+              spaceSize={'xs'}
+              valueColorScheme={'light'}
+            >
+              <>
+                {unstakings.map((item) => (
+                  <MetaInfo.Number
+                    decimals={decimals}
+                    key={`${item.validatorAddress || item.chain}-${item.status}-${item.claimable}`}
+                    label={getWaitingTime(item.waitingTime) ? t(getWaitingTime(item.waitingTime)) : t('Withdraw')}
+                    suffix={staking.nativeToken}
+                    value={item.claimable || ''}
+                    valueColorSchema={'gray'}
+                  />
+                ))}
+              </>
+            </MetaInfo>
+          </>
+        )}
+
+        {(showingOption === 'showByValidator' || showingOption === 'mixed') &&
+          <>
+            {nominations && nominations.length && nominations.map((item) => (
+              renderUnstakingInfo(item)
+            ))}
+          </>
+        }
+      </>}
     </SwModal>
   );
 };
@@ -158,6 +362,58 @@ const StakingDetailModal = styled(Component)<Props>(({ theme: { token } }: Props
 
     '.__action-btn': {
       flex: 1
+    },
+
+    '.__slash': {
+      marginLeft: token.marginXXS,
+      marginRight: token.marginXXS
+    },
+
+    '.__inflation-text': {
+      marginLeft: token.marginXXS,
+      color: token.colorTextLight4
+    },
+
+    '.__expected-return, .__inflation': {
+      display: 'inline-flex'
+    },
+
+    '.__inflation': {
+      color: token.colorTextLight4
+    },
+
+    '.__nomination-field': {
+      '> .__col': {
+        overflow: 'hidden'
+      }
+    },
+
+    '.__nomination-label > .__col.-to-right': {
+      flex: 'initial',
+      overflow: 'hidden',
+      alignItems: 'flex-start',
+
+      '.__account-item': {
+        width: '100%'
+      },
+
+      '.__account-name': {
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        whiteSpace: 'nowrap'
+      }
+    },
+
+    '.see-more-btn': {
+      marginTop: token.margin
+    },
+
+    '.ant-sw-modal-body': {
+      paddingBottom: 0
+    },
+
+    '.ant-sw-modal-footer': {
+      border: 'none'
     }
   };
 });

@@ -1,14 +1,102 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
-import { parseRawNumber } from '@subwallet/extension-base/utils';
+import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
-import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND } from '@polkadot/util';
+import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO } from '@polkadot/util';
 
 export const REVOKE_ACTION = 'revoke';
 export const BOND_LESS_ACTION = 'bondLess';
 export const DECREASE_ACTION = 'decrease'; // for bifrost
+
+export interface PalletNominationPoolsPoolMember {
+  poolId: number,
+  points: number,
+  lasRecordedRewardCounter: number,
+  unbondingEras: Record<string, number>
+}
+export interface PalletDappsStakingDappInfo {
+  address: string,
+  name: string,
+  gitHubUrl: string,
+  tags: string[],
+  url: string,
+  imagesUrl: string[]
+}
+export interface PalletDappsStakingUnlockingChunk {
+  amount: number,
+  unlockEra: number
+}
+export interface PalletDappsStakingAccountLedger {
+  locked: number,
+  unbondingInfo: {
+    unlockingChunks: PalletDappsStakingUnlockingChunk[]
+  }
+}
+export interface BlockHeader {
+  parentHash: string,
+  number: number,
+  stateRoot: string,
+  extrinsicsRoot: string
+}
+export interface ParachainStakingStakeOption {
+  owner: string,
+  amount: number
+}
+
+export interface ParachainStakingCandidateMetadata {
+  bond: number,
+  delegationCount: number,
+  totalCounted: number,
+  lowestTopDelegationAmount: number,
+  status: any | 'Active'
+}
+
+export enum PalletParachainStakingRequestType {
+  REVOKE = 'revoke',
+  DECREASE = 'decrease',
+  BOND_LESS = 'bondLess'
+}
+
+export interface PalletParachainStakingDelegationRequestsScheduledRequest {
+  delegator: string,
+  whenExecutable: number,
+  action: Record<PalletParachainStakingRequestType, number>
+}
+
+export interface PalletParachainStakingDelegationInfo {
+  owner: string,
+  amount: number
+}
+
+export interface PalletParachainStakingDelegator {
+  id: string,
+  delegations: PalletParachainStakingDelegationInfo[],
+  total: number,
+  lessTotal: number,
+  status: number
+}
+
+export interface PalletIdentityRegistration {
+  judgements: any[],
+  deposit: number,
+  info: {
+    display: {
+      Raw: string
+    },
+    web: {
+      Raw: string
+    },
+    twitter: {
+      Raw: string
+    },
+    riot: {
+      Raw: string
+    }
+  }
+}
 
 export interface ValidatorExtraInfo {
   commission: string,
@@ -20,6 +108,30 @@ export interface ValidatorExtraInfo {
 export interface Unlocking {
   remainingEras: BN;
   value: BN;
+}
+
+export function transformPoolName (input: string): string {
+  return input.replace(/[^\x20-\x7E]/g, '');
+}
+
+export function parseIdentity (identityInfo: PalletIdentityRegistration | null): string | undefined {
+  let identity;
+
+  if (identityInfo !== null) {
+    const displayName = identityInfo?.info?.display?.Raw;
+    const web = identityInfo?.info?.web?.Raw;
+    const riot = identityInfo?.info?.riot?.Raw;
+    const twitter = identityInfo?.info?.twitter?.Raw;
+
+    if (displayName && !displayName.startsWith('0x')) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      identity = displayName;
+    } else {
+      identity = twitter || web || riot;
+    }
+  }
+
+  return identity;
 }
 
 export function getInflationParams (networkKey: string): _SubstrateInflationParams {
@@ -131,4 +243,52 @@ export function getParaCurrentInflation (totalStaked: number, inflationConfig: I
 export interface TuringOptimalCompoundFormat {
   period: string; // in days
   apy: string;
+}
+
+// validations and check conditions
+export function isShowNominationByValidator (chain: string): 'showByValue' | 'showByValidator' | 'mixed' {
+  if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
+    return 'showByValue';
+  } else if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+    return 'mixed';
+  } else if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+    return 'showByValidator';
+  }
+
+  return 'showByValue';
+}
+
+export function getBondedValidators (nominations: NominationInfo[]) {
+  const bondedValidators: string[] = [];
+  let nominationCount = 0;
+
+  for (const nomination of nominations) {
+    const bnActiveStake = new BN(nomination.activeStake);
+
+    if (bnActiveStake.gt(BN_ZERO)) {
+      nominationCount += 1;
+      bondedValidators.push(reformatAddress(nomination.validatorAddress, 0));
+    }
+  }
+
+  return {
+    nominationCount,
+    bondedValidators
+  };
+}
+
+export function isUnstakeAll (selectedValidator: string, nominations: NominationInfo[], unstakeAmount: string) {
+  let isUnstakeAll = false;
+
+  for (const nomination of nominations) {
+    if (nomination.validatorAddress === selectedValidator) {
+      if (unstakeAmount === nomination.activeStake) {
+        isUnstakeAll = true;
+      }
+
+      break;
+    }
+  }
+
+  return isUnstakeAll;
 }

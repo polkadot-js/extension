@@ -112,7 +112,7 @@ function Component (): React.ReactElement {
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
     return () => {
-      navigate(`/home/token-detail-list/${item.slug}`);
+      navigate(`/home/tokens/detail/${item.slug}`);
     };
   }, [navigate]);
 

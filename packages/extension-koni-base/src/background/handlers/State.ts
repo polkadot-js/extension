@@ -6,7 +6,7 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakeUnlockingJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, NominatorMetadata, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
@@ -112,6 +112,8 @@ export default class KoniState {
 
   private nftSubject = new Subject<NftJson>();
   private stakingSubject = new Subject<StakingJson>();
+  private chainStakingMetadataSubject = new Subject<ChainStakingMetadata[]>();
+  private stakingNominatorMetadataSubject = new Subject<NominatorMetadata[]>();
 
   private stakingRewardSubject = new Subject<StakingRewardJson>();
   private stakingRewardState: StakingRewardJson = {
@@ -119,9 +121,6 @@ export default class KoniState {
     slowInterval: [],
     fastInterval: []
   } as StakingRewardJson;
-
-  private stakeUnlockingInfoSubject = new Subject<StakeUnlockingJson>();
-  private stakeUnlockingInfo: StakeUnlockingJson = { timestamp: -1, details: [] };
 
   private lazyMap: Record<string, unknown> = {};
 
@@ -311,7 +310,19 @@ export default class KoniState {
       this.onReady(); // TODO: do better than a callback
       this.initAssetSetting();
       this.updateServiceInfo();
+
+      this.startSubscription();
       this.logger.log('Done init state');
+    });
+  }
+
+  private startSubscription () {
+    this.dbService.subscribeChainStakingMetadata([], (data) => {
+      this.chainStakingMetadataSubject.next(data);
+    });
+
+    this.dbService.subscribeNominatorMetadata((data) => {
+      this.stakingNominatorMetadataSubject.next(data);
     });
   }
 
@@ -398,6 +409,18 @@ export default class KoniState {
     return this.chainService.getChainInfoByKey(networkKey);
   }
 
+  public async getChainStakingMetadata (): Promise<ChainStakingMetadata[]> {
+    return this.dbService.getChainStakingMetadata();
+  }
+
+  public async getStakingMetadataByChain (chain: string, type: StakingType) {
+    return this.dbService.getStakingMetadataByChain(chain, type);
+  }
+
+  public async getNominatorMetadata (): Promise<NominatorMetadata[]> {
+    return this.dbService.getNominatorMetadata();
+  }
+
   public async getStaking (): Promise<StakingJson> {
     const addresses = await this.getDecodedAddresses();
 
@@ -406,36 +429,40 @@ export default class KoniState {
     return { ready: true, details: stakings } as StakingJson;
   }
 
-  public async getStakingRecordsByAddress (address: string): Promise<StakingItem[]> {
-    return await this.dbService.getStakings([address], this.activeChainSlugs);
+  public async getStakingOwnersByChains (chains: string[]): Promise<string[]> {
+    const stakings = await this.dbService.getStakingsByChains(chains);
+    const addresses: string[] = [];
+
+    stakings.forEach((staking) => {
+      if (!addresses.includes(staking.address)) {
+        addresses.push(staking.address);
+      }
+    });
+
+    return addresses;
   }
 
   public async getPooledStakingRecordsByAddress (addresses: string[]): Promise<StakingItem[]> {
     return await this.dbService.getPooledStakings(addresses, this.activeChainSlugs);
   }
 
-  public async getStoredStaking (address: string) {
-    const items = await this.dbService.stores.staking.getDataByAddressAsObject(address);
-
-    return items || {};
-  }
-
-  public getStakeUnlockingInfo () {
-    return this.stakeUnlockingInfo;
-  }
-
-  public setStakeUnlockingInfo (data: StakeUnlockingJson) {
-    this.stakeUnlockingInfo = data;
-
-    this.stakeUnlockingInfoSubject.next(this.stakeUnlockingInfo);
-  }
-
-  public subscribeStakeUnlockingInfo () {
-    return this.stakeUnlockingInfoSubject;
-  }
+  // TODO: delete later
+  // public async getStoredStaking (address: string) {
+  //   const items = await this.dbService.stores.staking.getDataByAddressAsObject(address);
+  //
+  //   return items || {};
+  // }
 
   public subscribeStaking () {
     return this.stakingSubject;
+  }
+
+  public subscribeChainStakingMetadata () {
+    return this.chainStakingMetadataSubject;
+  }
+
+  public subscribeNominatorMetadata () {
+    return this.stakingNominatorMetadataSubject;
   }
 
   public ensureUrlAuthorizedV2 (url: string): Promise<boolean> {
@@ -444,6 +471,14 @@ export default class KoniState {
 
   public setStakingItem (networkKey: string, item: StakingItem): void {
     this.dbService.updateStaking(networkKey, item.address, item).catch((e) => this.logger.warn(e));
+  }
+
+  public updateChainStakingMetadata (item: ChainStakingMetadata) {
+    this.dbService.updateChainStakingMetadata(item).catch((e) => this.logger.warn(e));
+  }
+
+  public updateStakingNominatorMetadata (item: NominatorMetadata) {
+    this.dbService.updateNominatorMetadata(item).catch((e) => this.logger.warn(e));
   }
 
   public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {
@@ -1753,13 +1788,5 @@ export default class KoniState {
 
   public createUnsubscriptionHandle (id: string, unsubscribe: () => void): void {
     this.unsubscriptionMap[id] = unsubscribe;
-  }
-
-  public setExtraDelegationInfo (networkKey: string, address: string, collatorAddress: string): void {
-    this.dbService.updateExtraDelegationInfo(networkKey, address, collatorAddress).catch((e) => this.logger.warn(e));
-  }
-
-  public async getExtraDelegationInfo (networkKey: string, address: string) {
-    return await this.dbService.getExtraDelegationInfo(networkKey, address);
   }
 }

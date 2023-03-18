@@ -6,14 +6,14 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { DotsThree } from 'phosphor-react';
-import React from 'react';
+import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = NominationPoolDataType & ThemeProps & {
-  onClickMoreBtn: () => void;
+  onClickMoreBtn: (e: SyntheticEvent) => void;
 }
 
 const Component: React.FC<Props> = (props: Props) => {

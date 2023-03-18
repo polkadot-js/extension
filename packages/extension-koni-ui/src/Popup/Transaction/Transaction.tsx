@@ -38,6 +38,7 @@ export interface TransactionContextProps extends TransactionFormBaseProps {
   onDone: (extrinsicHash: string) => void,
   onClickRightBtn: () => void,
   setShowRightBtn: Dispatch<SetStateAction<boolean>>
+  setDisabledRightBtn: Dispatch<SetStateAction<boolean>>
 }
 
 export const TransactionContext = React.createContext<TransactionContextProps>({
@@ -55,7 +56,9 @@ export const TransactionContext = React.createContext<TransactionContextProps>({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   onClickRightBtn: () => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setShowRightBtn: (value) => {}
+  setShowRightBtn: (value) => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setDisabledRightBtn: (value) => {}
 });
 
 function Component ({ className }: Props) {
@@ -68,6 +71,7 @@ function Component ({ className }: Props) {
   const [chain, setChain] = useState('');
   const [transactionType, setTransactionType] = useState<ExtrinsicType>(ExtrinsicType.TRANSFER_BALANCE);
   const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
+  const [disabledRightBtn, setDisabledRightBtn] = useState<boolean>(false);
   const titleMap = useMemo<Record<string, string>>(() => ({
     [ExtrinsicType.TRANSFER_BALANCE]: t('Transfer'),
     [ExtrinsicType.SEND_NFT]: t('Transfer NFT'),
@@ -96,16 +100,17 @@ function Component ({ className }: Props) {
     return showRightBtn
       ? [
         {
+          disabled: disabledRightBtn,
           icon: <InfoIcon />,
           onClick: () => onClickRightBtn()
         }
       ]
       : [];
-  }, [onClickRightBtn, showRightBtn]);
+  }, [disabledRightBtn, onClickRightBtn, showRightBtn]);
 
   return (
     <Layout.Home showTabBar={false}>
-      <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, setTransactionType, onDone, onClickRightBtn, setShowRightBtn }}>
+      <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, setTransactionType, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
             <SwSubHeader

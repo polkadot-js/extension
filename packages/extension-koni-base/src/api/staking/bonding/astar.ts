@@ -2,27 +2,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, DelegationItem, StakingType, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxInfo, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnlockingStakeInfo, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { isUrl, parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-base/utils';
 import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 import fetch from 'cross-fetch';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { BN } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
-export async function getAstarBondingBasics (networkKey: string) {
+export async function getAstarStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   const aprPromise = new Promise(function (resolve) {
-    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/apr`, {
-      method: 'GET'
-    }).then((resp) => {
-      resolve(resp.json());
-    }).catch(console.error);
-  });
-  const dappInfoPromise = new Promise(function (resolve) {
-    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/dapps`, {
+    fetch(`https://api.astar.network/api/v1/${chain}/dapps-staking/apr`, {
       method: 'GET'
     }).then((resp) => {
       resolve(resp.json());
@@ -33,7 +28,7 @@ export async function getAstarBondingBasics (networkKey: string) {
     const id = setTimeout(() => {
       clearTimeout(id);
       resolve(null);
-    }, 5000);
+    }, 8000);
   });
 
   const aprRacePromise = Promise.race([
@@ -41,46 +36,131 @@ export async function getAstarBondingBasics (networkKey: string) {
     aprPromise
   ]); // need race because API often timeout
 
-  const dappRacePromise = Promise.race([
-    timeout,
-    dappInfoPromise
-  ]); // need race because API often timeout
-
-  const [aprInfo, _dappInfo] = await Promise.all([
+  const [aprInfo, chainApi] = await Promise.all([
     aprRacePromise,
-    dappRacePromise
+    substrateApi.isReady
   ]);
 
-  let validatorCount = 0;
+  const era = (await chainApi.api.query.dappsStaking.currentEra()).toString();
+  const minDelegatorStake = chainApi.api.consts.dappsStaking.minimumStakingAmount.toString();
+  const unstakingDelay = chainApi.api.consts.dappsStaking.unbondingPeriod.toString();
 
-  if (_dappInfo !== null) {
-    const allDapps = _dappInfo as Record<string, any>[];
+  const unstakingPeriod = parseInt(unstakingDelay) * _STAKING_ERA_LENGTH_MAP[chain];
 
-    validatorCount = allDapps.length;
+  return {
+    chain,
+    type: StakingType.NOMINATED,
+    expectedReturn: aprInfo !== null ? aprInfo as number : undefined,
+    era: parseInt(era),
+    minStake: minDelegatorStake,
+    maxValidatorPerNominator: 100, // temporary fix for Astar, there's no limit for now
+    maxWithdrawalRequestPerValidator: 1, // by default
+    allowCancelUnstaking: true,
+    unstakingPeriod
+  } as ChainStakingMetadata;
+}
+
+export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+  if (isEthereumAddress(address)) {
+    return;
   }
 
-  if (aprInfo !== null) {
-    return {
-      isMaxNominators: false,
-      stakedReturn: aprInfo as number,
-      validatorCount
-    };
+  const chain = chainInfo.slug;
+  const chainApi = await substrateApi.isReady;
+
+  const nominationList: NominationInfo[] = [];
+  const unstakingList: UnstakingInfo[] = [];
+
+  const allDappsReq = new Promise(function (resolve) {
+    fetch(`https://api.astar.network/api/v1/${chain}/dapps-staking/dapps`, {
+      method: 'GET'
+    }).then((resp) => {
+      resolve(resp.json());
+    }).catch(console.error);
+  });
+
+  const [_ledger, _era, _stakerInfo] = await Promise.all([
+    chainApi.api.query.dappsStaking.ledger(address),
+    chainApi.api.query.dappsStaking.currentEra(),
+    chainApi.api.query.dappsStaking.generalStakerInfo.entries(address)
+  ]);
+
+  const ledger = _ledger.toPrimitive() as unknown as PalletDappsStakingAccountLedger;
+  const currentEra = _era.toString();
+
+  let bnTotalActiveStake = BN_ZERO;
+
+  if (_stakerInfo.length > 0) {
+    const dAppInfoMap: Record<string, PalletDappsStakingDappInfo> = {};
+    const allDapps = await allDappsReq as PalletDappsStakingDappInfo[];
+
+    allDapps.forEach((dappInfo) => {
+      dAppInfoMap[dappInfo.address.toLowerCase()] = dappInfo;
+    });
+
+    for (const item of _stakerInfo) {
+      const data = item[0].toHuman() as unknown as any[];
+      const stakedDapp = data[1] as Record<string, string>;
+      const stakeData = item[1].toPrimitive() as Record<string, Record<string, string>[]>;
+      const stakeList = stakeData.stakes;
+
+      const dappAddress = stakedDapp.Evm.toLowerCase();
+      const currentStake = stakeList.slice(-1)[0].staked.toString() || '0';
+
+      const bnCurrentStake = new BN(currentStake);
+
+      if (bnCurrentStake.gt(BN_ZERO)) {
+        bnTotalActiveStake = bnTotalActiveStake.add(bnCurrentStake);
+        const dappInfo = dAppInfoMap[dappAddress];
+
+        nominationList.push({
+          chain,
+          validatorAddress: dappAddress,
+          activeStake: currentStake,
+          validatorMinStake: '0',
+          validatorIdentity: dappInfo?.name,
+          hasUnstaking: false // cannot get unstaking info by dapp
+        });
+      }
+    }
+  }
+
+  const unlockingChunks = ledger.unbondingInfo.unlockingChunks;
+
+  if (unlockingChunks.length > 0) {
+    const nearestUnstaking = unlockingChunks[0]; // only handle 1 unstaking request at a time, might need to change
+
+    const isClaimable = nearestUnstaking.unlockEra - parseInt(currentEra) <= 0;
+    const remainingEra = nearestUnstaking.unlockEra - (parseInt(currentEra) + 1);
+    const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+
+    unstakingList.push({
+      chain,
+      status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+      claimable: nearestUnstaking.amount.toString(),
+      waitingTime: waitingTime > 0 ? waitingTime : 0
+    });
+  }
+
+  if (nominationList.length === 0 && unstakingList.length === 0) {
+    return;
   }
 
   return {
-    isMaxNominators: false,
-    stakedReturn: 0,
-    validatorCount
-  };
+    chain,
+    type: StakingType.NOMINATED,
+    address: address,
+    activeStake: bnTotalActiveStake.toString(),
+    nominations: nominationList,
+    unstakings: unstakingList
+  } as NominatorMetadata;
 }
 
-export async function getAstarDappsInfo (networkKey: string, substrateApi: _SubstrateApi, decimals: number, address: string) {
+export async function getAstarDappsInfo (networkKey: string, substrateApi: _SubstrateApi) {
   const chainApi = await substrateApi.isReady;
   const rawMaxStakerPerContract = (chainApi.api.consts.dappsStaking.maxNumberOfStakersPerContract).toHuman() as string;
-  const rawMinStake = (chainApi.api.consts.dappsStaking.minimumStakingAmount).toHuman() as string;
 
   const allDappsInfo: ValidatorInfo[] = [];
-  const minStake = parseRawNumber(rawMinStake);
   const maxStakerPerContract = parseRawNumber(rawMaxStakerPerContract);
 
   const allDappsReq = new Promise(function (resolve) {
@@ -91,25 +171,10 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
     }).catch(console.error);
   });
 
-  const [_stakedDapps, _era, _allDapps] = await Promise.all([
-    chainApi.api.query.dappsStaking.generalStakerInfo.entries(address),
+  const [_era, _allDapps] = await Promise.all([
     chainApi.api.query.dappsStaking.currentEra(),
     allDappsReq
   ]);
-
-  const stakedDappsList: string[] = [];
-
-  for (const item of _stakedDapps) {
-    const data = item[0].toHuman() as any[];
-    const stakedDapp = data[1] as Record<string, string>;
-    const _stakes = item[1].toHuman() as Record<string, any>;
-    const stakes = _stakes.stakes as Record<string, string>[];
-    const latestStakeInfo = stakes[stakes.length - 1];
-
-    if (latestStakeInfo.staked && parseRawNumber(latestStakeInfo.staked) !== 0) {
-      stakedDappsList.push((stakedDapp.Evm).toLowerCase());
-    }
-  }
 
   const era = parseRawNumber(_era.toHuman() as string);
   const allDapps = _allDapps as Record<string, any>[];
@@ -132,28 +197,21 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
       commission: 0,
       expectedReturn: 0,
       address: dappAddress,
-      totalStake: (totalStake / 10 ** decimals).toString(),
+      totalStake: totalStake.toString(),
       ownStake: '0',
-      otherStake: (totalStake / 10 ** decimals).toString(),
+      otherStake: totalStake.toString(),
       nominatorCount: stakerCount,
       blocked: false,
       isVerified: false,
-      minBond: (minStake / 10 ** decimals).toString(),
-      isNominated: stakedDappsList.includes(dappAddress.toLowerCase()),
+      minBond: '0',
       icon: dappIcon,
       identity: dappName,
-      chain: networkKey
+      chain: networkKey,
+      isCrowded: stakerCount >= maxStakerPerContract
     });
   }));
 
-  return {
-    maxNominatorPerValidator: maxStakerPerContract,
-    era: -1,
-    validatorsInfo: allDappsInfo,
-    isBondedBefore: false, // No need for this on astar
-    bondedValidators: stakedDappsList,
-    maxNominations: 100
-  };
+  return allDappsInfo;
 }
 
 export async function getAstarBondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, stakerAddress: string, amount: number, dappInfo: ValidatorInfo) {
@@ -196,13 +254,11 @@ export async function handleAstarBondingTxInfo (chainInfo: _ChainInfo, amount: n
   }
 }
 
-export async function getAstarBondingExtrinsic (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappInfo: ValidatorInfo) {
-  const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-  const parsedAmount = amount * (10 ** decimals);
-  const binaryAmount = new BN(parsedAmount.toString());
+export async function getAstarBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, dappInfo: ValidatorInfo) {
+  const chainApi = await substrateApi.isReady;
+  const binaryAmount = new BN(amount);
 
-  return apiPromise.api.tx.dappsStaking.bondAndStake({ Evm: dappInfo.address }, binaryAmount);
+  return chainApi.api.tx.dappsStaking.bondAndStake({ Evm: dappInfo.address }, binaryAmount);
 }
 
 export async function getAstarUnbondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, stakerAddress: string, amount: number, dappAddress: string) {
@@ -243,11 +299,9 @@ export async function handleAstarUnbondingTxInfo (chainInfo: _ChainInfo, amount:
   }
 }
 
-export async function getAstarUnbondingExtrinsic (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappAddress: string) {
+export async function getAstarUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: string, dappAddress: string) {
   const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-  const parsedAmount = amount * (10 ** decimals);
-  const binaryAmount = new BN(parsedAmount.toString());
+  const binaryAmount = new BN(amount);
 
   return apiPromise.api.tx.dappsStaking.unbondAndUnstake({ Evm: dappAddress }, binaryAmount);
 }
@@ -344,9 +398,9 @@ export async function handleAstarWithdrawalTxInfo (networkKey: string, chainInfo
 }
 
 export async function getAstarWithdrawalExtrinsic (substrateApi: _SubstrateApi) {
-  const apiPromise = await substrateApi.isReady;
+  const chainApi = await substrateApi.isReady;
 
-  return apiPromise.api.tx.dappsStaking.withdrawUnbonded();
+  return chainApi.api.tx.dappsStaking.withdrawUnbonded();
 }
 
 export async function getAstarClaimRewardTxInfo (substrateApi: _SubstrateApi, address: string) {
@@ -446,6 +500,7 @@ export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi,
     const dappAddress = stakedDapp.Evm.toLowerCase();
 
     let numberOfUnclaimedEra = 0;
+    const maxTx = 50;
 
     for (let i = 0; i < stakes.length; i++) {
       const { era, staked } = stakes[i];
@@ -464,88 +519,14 @@ export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi,
       numberOfUnclaimedEra += eraToClaim;
     }
 
-    for (let i = 0; i < numberOfUnclaimedEra; i++) {
+    for (let i = 0; i < Math.min(numberOfUnclaimedEra, maxTx); i++) {
       const tx = apiPromise.api.tx.dappsStaking.claimStaker({ Evm: dappAddress });
 
       transactions.push(tx);
     }
   }
 
-  console.log('no of tx: ', transactions.length);
+  console.log('no of astar claim reward tx: ', transactions.length);
 
   return apiPromise.api.tx.utility.batch(transactions);
-}
-
-export async function getAstarDelegationInfo (substrateApi: _SubstrateApi, address: string, networkKey: string) {
-  const allDappsReq = new Promise(function (resolve) {
-    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/dapps`, {
-      method: 'GET'
-    }).then((resp) => {
-      resolve(resp.json());
-    }).catch(console.error);
-  });
-  const timeout = new Promise((resolve) => {
-    const id = setTimeout(() => {
-      clearTimeout(id);
-      resolve(null);
-    }, 2000);
-  });
-
-  const racePromise = Promise.race([
-    allDappsReq,
-    timeout
-  ]);
-
-  const [_stakedDapps, _allDapps] = await Promise.all([
-    substrateApi.api.query.dappsStaking.generalStakerInfo.entries(address),
-    racePromise
-  ]);
-
-  const rawMinStake = (substrateApi.api.consts.dappsStaking.minimumStakingAmount).toHuman() as string;
-  const minStake = parseRawNumber(rawMinStake);
-
-  let allDapps: Record<string, any>[] | null = null;
-
-  if (_allDapps !== null) {
-    allDapps = _allDapps as Record<string, any>[];
-  }
-
-  const dappMap: Record<string, { identity: string; icon?: string; }> = {};
-  const delegationsList: DelegationItem[] = [];
-
-  if (allDapps !== null) {
-    for (const dappInfo of allDapps) {
-      const dappAddress = dappInfo.address as string;
-      const dappName = dappInfo.name as string;
-      const dappIcon = isUrl(dappInfo.iconUrl as string) ? dappInfo.iconUrl as string : undefined;
-
-      dappMap[dappAddress.toLowerCase()] = { identity: dappName, icon: dappIcon };
-    }
-  }
-
-  for (const item of _stakedDapps) {
-    const data = item[0].toHuman() as any[];
-    const stakedDapp = data[1] as Record<string, string>;
-    const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
-    const stakeList = stakeData.stakes;
-    const dappAddress = stakedDapp.Evm.toLowerCase();
-    let totalStake = 0;
-
-    if (stakeList.length > 0) {
-      const latestStake = stakeList.slice(-1)[0].staked.toString();
-
-      totalStake = parseRawNumber(latestStake);
-    }
-
-    delegationsList.push({
-      owner: dappAddress,
-      amount: totalStake.toString(),
-      minBond: minStake.toString(),
-      identity: dappMap[dappAddress] ? dappMap[dappAddress].identity : undefined,
-      icon: dappMap[dappAddress] ? dappMap[dappAddress].icon : undefined,
-      hasScheduledRequest: false
-    });
-  }
-
-  return delegationsList;
 }

@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationPoolInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationPoolMetadata, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-export type NominationPoolDataType = NominationPoolInfo & {
+export type NominationPoolDataType = NominationPoolMetadata & {
   symbol: string;
 }
 

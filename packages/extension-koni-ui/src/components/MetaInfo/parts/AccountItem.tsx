@@ -22,11 +22,11 @@ const Component: React.FC<AccountInfoItem> = (props: AccountInfoItem) => {
 
   return (
     <div className={CN(className, '__row -type-account')}>
-      <div className={'__col'}>
+      {!!label && <div className={'__col'}>
         <div className={'__label'}>
           {label}
         </div>
-      </div>
+      </div>}
       <div className={'__col -to-right'}>
         <div className={`__account-item __value -is-wrapper -schema-${valueColorSchema}`}>
           <Avatar
@@ -46,7 +46,14 @@ const Component: React.FC<AccountInfoItem> = (props: AccountInfoItem) => {
 };
 
 const AccountItem = styled(Component)<AccountInfoItem>(({ theme: { token } }: AccountInfoItem) => {
-  return {};
+  return {
+    '.__account-name': {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      maxWidth: 150
+    }
+  };
 });
 
 export default AccountItem;

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import CN from 'classnames';
 import React from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import styled from 'styled-components';
@@ -13,6 +14,9 @@ export type ChildProps = {
 
 type Props = ThemeProps & {
   children: React.ReactElement<ChildProps>[];
+  defaultIndex?: number;
+  hideTabList?: boolean;
+  onSelectTab?: (index: number) => void;
 }
 
 const SwTabPanel = ({ children, label }: ChildProps) => {
@@ -22,15 +26,19 @@ const SwTabPanel = ({ children, label }: ChildProps) => {
 };
 
 const Component = (props: Props) => {
-  const { children, className } = props;
+  const { children, className, defaultIndex = 0, hideTabList = false, onSelectTab } = props;
 
   const tabLabelList = React.Children.map(children, (child) => {
     return child.props.label;
   });
 
   return (
-    <Tabs className={className}>
-      <TabList>
+    <Tabs
+      className={className}
+      defaultIndex={defaultIndex}
+      onSelect={onSelectTab}
+    >
+      <TabList className={CN('react-tabs__tab-list', { '__hide-tab-list': hideTabList })}>
         {
           tabLabelList.map((label) => (
             <Tab key={label}>{label}</Tab>
@@ -55,9 +63,13 @@ const _ScreenTab = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.react-tabs__tab-list': {
       display: 'flex',
       padding: 4,
-      borderRadius: '8px',
-      margin: '0 16px',
+      borderRadius: token.borderRadiusLG,
+      margin: `0 ${token.padding}px ${token.padding}px`,
       background: '#1A1A1A'
+    },
+
+    '.__hide-tab-list': {
+      display: 'none'
     },
 
     '.react-tabs__tab': {

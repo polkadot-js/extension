@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { AssetSetting, BalanceItem, ChainBondingInfo, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, NominationPoolInfo, NominatorInfo, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, UnlockingStakeInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AssetSetting, BalanceItem, ChainBondingInfo, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, NominationPoolMetadata, NominatorInfo, NominatorMetadata, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
@@ -131,12 +131,13 @@ export interface NftStore extends BaseReduxStore {
 export interface StakingStore extends BaseReduxStore {
   stakingMap: StakingItem[],
   stakingRewardMap: StakingRewardItem[],
-  stakeUnlockingMap: UnlockingStakeInfo[]
+  chainStakingMetadataList: ChainStakingMetadata[],
+  nominatorMetadataList: NominatorMetadata[]
 }
 
 export interface BondingStore extends BaseReduxStore {
   chainBondingInfoMap: Record<string, ChainBondingInfo>,
   validatorInfoMap: Record<string, ValidatorInfo[]>,
-  nominationPoolInfoMap: Record<string, NominationPoolInfo[]>,
+  nominationPoolInfoMap: Record<string, NominationPoolMetadata[]>,
   nominatorInfo: Record<string, NominatorInfo>
 }

@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Field/MultiValidatorSelector';
@@ -11,6 +12,8 @@ import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { StakingNetworkDetailModal, StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import ScreenTab from '@subwallet/extension-koni-ui/components/ScreenTab';
 import SelectValidatorInput from '@subwallet/extension-koni-ui/components/SelectValidatorInput';
+import { useGetStakeData } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakeData';
+import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
@@ -18,11 +21,14 @@ import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extensi
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { Button, Divider, Form, Icon, ModalContext } from '@subwallet/react-ui';
+import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
+import { useForm } from '@subwallet/react-ui/es/form/Form';
+import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { PlusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -36,21 +42,64 @@ interface StakeFromProps extends TransactionFormBaseProps {
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const transactionContext = useContext(TransactionContext);
+  const location = useLocation();
+  const { chainStakingMetadata, hideTabList, nominatorMetadata } = location.state as StakingDataOption;
+
   const assetRegistry = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
+  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+  const [{ decimals, symbol }, setNativeTokenBasicInfo] = useState<{ decimals: number, symbol: string }>({ decimals: 0, symbol: 'Unit' });
   const isAll = isAccountAll(currentAccount?.address || '');
-  const [form] = Form.useForm<StakeFromProps>();
+  const [form] = useForm<StakeFromProps>();
+  const defaultIndex = useMemo(() => {
+    if (nominatorMetadata) {
+      if (nominatorMetadata.type === StakingType.POOLED.valueOf()) {
+        return 0;
+      } else {
+        return 1;
+      }
+    } else {
+      return 0;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const [stakingType, setStakingType] = useState<string>(defaultIndex === 0 ? StakingType.POOLED.valueOf() : StakingType.NOMINATED.valueOf());
+  const { _chainStakingMetadata, _nominatorMetadata } = useGetStakeData(currentAccount?.address || '', stakingType, chainStakingMetadata, nominatorMetadata, form.getFieldsValue().token);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const defaultSlug = useMemo(() => {
+    if (chainStakingMetadata) {
+      const chainInfo = chainInfoMap[chainStakingMetadata.chain];
+
+      return _getChainNativeTokenSlug(chainInfo);
+    }
+
+    return '';
+  }, [chainInfoMap, chainStakingMetadata]);
+
   const formDefault = {
     from: transactionContext.from,
+    token: defaultSlug,
     value: '0'
   };
 
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  useEffect(() => {
+    if (_chainStakingMetadata) {
+      const chainInfo = chainInfoMap[_chainStakingMetadata.chain];
+
+      setNativeTokenBasicInfo(_getChainNativeTokenBasicInfo(chainInfo));
+    }
+  }, [chainInfoMap, _chainStakingMetadata]);
 
   useEffect(() => {
     transactionContext.setTransactionType(ExtrinsicType.STAKING_STAKE);
     transactionContext.setShowRightBtn(true);
+    transactionContext.setChain(chainStakingMetadata ? chainStakingMetadata.chain : '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactionContext]);
+
+  useEffect(() => {
+    transactionContext.setDisabledRightBtn(!_chainStakingMetadata);
+  }, [_chainStakingMetadata, transactionContext]);
 
   const onFieldsChange = useCallback(({ from, nominate, token }: Partial<StakeFromProps>, values: StakeFromProps) => {
     // TODO: field change
@@ -71,8 +120,6 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [form, transactionContext]);
 
-  console.log('values', form.getFieldsValue().nominate);
-
   const tokenList = useMemo<TokenItemType[]>(() => (
     Object.values(assetRegistry).map(({ name, originChain, slug, symbol }) => ({ name, slug, originChain, symbol }))
   ), [assetRegistry]);
@@ -83,29 +130,34 @@ const Component: React.FC<Props> = (props: Props) => {
     // TODO: submit transaction
   }, []);
 
-  const getMetaInfo = () => {
-    return (
-      <MetaInfo
-        className={'meta-info'}
-        labelColorScheme={'gray'}
-        spaceSize={'xs'}
-        valueColorScheme={'light'}
-      >
-        <MetaInfo.Default
-          label={t('Estimated earnings:')}
+  const getMetaInfo = useCallback(() => {
+    if (_chainStakingMetadata) {
+      return (
+        <MetaInfo
+          className={'meta-info'}
+          labelColorScheme={'gray'}
+          spaceSize={'xs'}
+          valueColorScheme={'light'}
         >
-          {'15% / year'}
-        </MetaInfo.Default>
+          {_chainStakingMetadata.expectedReturn && <MetaInfo.Number
+            label={t('Estimated earnings:')}
+            suffix={'% / year'}
+            value={_chainStakingMetadata.expectedReturn}
+          />}
 
-        <MetaInfo.Number
-          label={t('Minimum active:')}
-          suffix={'DOT'}
-          value={'293.7'}
-          valueColorSchema={'success'}
-        />
-      </MetaInfo>
-    );
-  };
+          {_chainStakingMetadata.minStake && <MetaInfo.Number
+            decimals={decimals}
+            label={t('Minimum active:')}
+            suffix={symbol}
+            value={_chainStakingMetadata.minStake}
+            valueColorSchema={'success'}
+          />}
+        </MetaInfo>
+      );
+    }
+
+    return null;
+  }, [_chainStakingMetadata, decimals, symbol, t]);
 
   const onCloseInfoModal = () => {
     inactiveModal(StakingNetworkDetailModalId);
@@ -113,7 +165,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <ScreenTab className={className}>
+      <ScreenTab
+        className={className}
+        defaultIndex={defaultIndex}
+        hideTabList={!!hideTabList}
+        // eslint-disable-next-line react/jsx-no-bind
+        onSelectTab={(index: number) => setStakingType(index === 0 ? 'pooled' : 'nominated')}
+      >
         <ScreenTab.SwTabPanel label={t('Pools')}>
           <TransactionContent>
             <Form
@@ -165,12 +223,14 @@ const Component: React.FC<Props> = (props: Props) => {
                 <PoolSelector
                   chain={'polkadot'}
                   label={t('Select pool')}
+                  nominationPoolList={_nominatorMetadata ? _nominatorMetadata.nominations : undefined}
                 />
               </Form.Item>
 
-              <Divider />
-
-              {getMetaInfo()}
+              {!!form.getFieldsValue().token && _chainStakingMetadata && <>
+                <Divider />
+                {getMetaInfo()}
+              </>}
             </Form>
           </TransactionContent>
         </ScreenTab.SwTabPanel>
@@ -228,12 +288,14 @@ const Component: React.FC<Props> = (props: Props) => {
                 <MultiValidatorSelector
                   chain={'polkadot'}
                   id={'multi-validator-selector'}
+                  nominators={_nominatorMetadata ? _nominatorMetadata.nominations : undefined}
                 />
               </Form.Item>
 
-              <Divider />
-
-              {getMetaInfo()}
+              {!!form.getFieldsValue().token && _chainStakingMetadata && <>
+                <Divider />
+                {getMetaInfo()}
+              </>}
             </Form>
           </TransactionContent>
         </ScreenTab.SwTabPanel>
@@ -254,15 +316,15 @@ const Component: React.FC<Props> = (props: Props) => {
         </Button>
       </TransactionFooter>
 
-      <StakingNetworkDetailModal
-        activeNominators={['0', '0']}
-        estimatedEarning={'0'}
-        minimumActive={{ decimals: 10, value: '100', symbol: 'DOT' }}
+      {_chainStakingMetadata && <StakingNetworkDetailModal
+        estimatedEarning={_chainStakingMetadata.expectedReturn}
+        inflation={_chainStakingMetadata.inflation}
+        maxValidatorPerNominator={_chainStakingMetadata.maxValidatorPerNominator}
+        minimumActive={{ decimals, value: _chainStakingMetadata.minStake, symbol }}
+        unstakingPeriod={_chainStakingMetadata.unstakingPeriod}
         // eslint-disable-next-line react/jsx-no-bind
         onCancel={onCloseInfoModal}
-
-        unstakingPeriod={'0'}
-      />
+      />}
     </>
   );
 };

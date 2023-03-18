@@ -5,7 +5,7 @@ import { APIItemState, StakingItem, StakingRewardItem } from '@subwallet/extensi
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { StakingDataType, StakingType } from '@subwallet/extension-koni-ui/types/staking';
+import { StakingData, StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -109,17 +109,20 @@ const groupStakingRewardItems = (stakingRewardItems: StakingRewardItem[]): Staki
 };
 
 export default function useGetStakingList () {
-  const { stakeUnlockingMap, stakingMap, stakingRewardMap } = useSelector((state: RootState) => state.staking);
+  const { chainStakingMetadataList, nominatorMetadataList, stakingMap, stakingRewardMap } = useSelector((state: RootState) => state.staking);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+
+  const isAll = useMemo(() => {
+    return currentAccount !== null && isAccountAll(currentAccount.address);
+  }, [currentAccount]);
 
   const partResult = useMemo(() => {
     const parsedPriceMap: Record<string, number> = {};
     let readyStakingItems: StakingItem[] = [];
     let stakingRewardList = stakingRewardMap;
     const stakingData: StakingDataType[] = [];
-    const isAll = currentAccount && isAccountAll(currentAccount.address);
 
     stakingMap.forEach((stakingItem) => {
       const chainInfo = chainInfoMap[stakingItem.chain];
@@ -144,7 +147,10 @@ export default function useGetStakingList () {
     for (const stakingItem of readyStakingItems) {
       const chainInfo = chainInfoMap[stakingItem.chain];
       const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-      const stakingDataType: StakingDataType = { staking: stakingItem, decimals };
+      const stakingDataType: StakingDataType = {
+        staking: stakingItem,
+        decimals
+      };
 
       for (const reward of stakingRewardList) {
         if (
@@ -154,22 +160,33 @@ export default function useGetStakingList () {
           stakingItem.address === reward.address
         ) {
           stakingDataType.reward = reward;
+
+          break;
+        }
+      }
+
+      for (const chainStakingMetadata of chainStakingMetadataList) {
+        if (
+          stakingItem.chain === chainStakingMetadata.chain
+        ) {
+          stakingDataType.chainStakingMetadata = chainStakingMetadata;
+
+          break;
         }
       }
 
       if (!isAll) {
-        stakeUnlockingMap.forEach((unlockingInfo) => {
+        for (const nominatorMetadata of nominatorMetadataList) {
           if (
-            unlockingInfo.chain === stakingItem.chain &&
-            unlockingInfo.type === stakingItem.type &&
-            unlockingInfo.address === stakingItem.address
+            stakingItem.chain === nominatorMetadata.chain &&
+            stakingItem.type === nominatorMetadata.type &&
+            stakingItem.address === nominatorMetadata.address
           ) {
-            stakingDataType.staking = {
-              ...stakingItem,
-              unlockingInfo
-            } as StakingItem;
+            stakingDataType.nominatorMetadata = nominatorMetadata;
+
+            break;
           }
-        });
+        }
       }
 
       stakingData.push(stakingDataType);
@@ -179,7 +196,7 @@ export default function useGetStakingList () {
       data: stakingData,
       priceMap: parsedPriceMap
     };
-  }, [chainInfoMap, currentAccount, priceMap, stakeUnlockingMap, stakingMap, stakingRewardMap]);
+  }, [chainInfoMap, chainStakingMetadataList, isAll, nominatorMetadataList, priceMap, stakingMap, stakingRewardMap]);
 
-  return useMemo((): StakingType => ({ ...partResult }), [partResult]);
+  return useMemo((): StakingData => ({ ...partResult }), [partResult]);
 }

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ChainStakingMetadata, NominatorMetadata } from '@subwallet/extension-base/background/KoniTypes';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
@@ -10,7 +11,10 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
-type Props = ThemeProps
+type Props = ThemeProps & {
+  chainStakingMetadata?: ChainStakingMetadata;
+  nominatorMetadata?: NominatorMetadata;
+}
 
 export const MORE_ACTION_MODAL = 'more-action-modal';
 
@@ -54,8 +58,14 @@ const ACTION_LIST: ActionListType[] = [
   // }
 ];
 
+export type StakingDataOption = {
+  chainStakingMetadata?: ChainStakingMetadata,
+  nominatorMetadata?: NominatorMetadata,
+  hideTabList?: boolean
+}
+
 const Component: React.FC<Props> = (props: Props) => {
-  const { className } = props;
+  const { chainStakingMetadata, className, nominatorMetadata } = props;
   const { inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
@@ -70,9 +80,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onPressItem = useCallback(
     (item: ActionListType) => {
-      return () => navigate(item.value);
+      return () => navigate(item.value, { state: { chainStakingMetadata, nominatorMetadata, hideTabList: true } as StakingDataOption });
     },
-    [navigate]
+    [chainStakingMetadata, navigate, nominatorMetadata]
   );
 
   return (

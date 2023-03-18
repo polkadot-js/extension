@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
@@ -10,9 +12,10 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import { useSelectValidators } from '@subwallet/extension-koni-ui/hooks/modal/useSelectValidators';
 import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, InputRef, ModalContext, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
+import { Button, Icon, InputRef, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
+import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
-import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
+import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -20,6 +23,8 @@ interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
   onClickBookBtn?: (e: SyntheticEvent) => void;
   onClickLightningBtn?: (e: SyntheticEvent) => void;
+  nominators?: NominationInfo[];
+  isSingleSelect?: boolean;
 }
 
 const SORTING_MODAL_ID = 'nominated-sorting-modal';
@@ -55,9 +60,12 @@ const filterOptions = [
   }
 ];
 
+const renderEmpty = () => <EmptyAccount />;
+
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', id = 'multi-validator-selector', onChange } = props;
+  const { chain, className = '', id = 'multi-validator-selector', isSingleSelect = false, nominators, onChange } = props;
   const items = useGetValidatorList(chain, 'nominate') as ValidatorDataType[];
+  const nominatorValueList = nominators && nominators.length ? nominators.map((item) => `${item.validatorAddress}-${item.validatorIdentity || ''}`) : [];
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
@@ -73,11 +81,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       return false;
     };
   }, [selectedFilters]);
-  const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator } = useSelectValidators(id, onChange);
+  const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator } = useSelectValidators(id, nominatorValueList, onChange, isSingleSelect);
 
   const { t } = useTranslation();
 
   useExcludeModal(id);
+
+  useEffect(() => {
+    onApplyChangeValidators();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const closeFilterModal = () => {
     inactiveModal(FILTER_MODAL_ID);
@@ -171,6 +184,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           list={items}
           onClickActionBtn={onClickActionBtn}
           renderItem={renderItem}
+          renderWhenEmpty={renderEmpty}
           searchFunction={searchFunction}
           searchPlaceholder={t('Search validator')}
           searchableMinCharactersCount={2}
@@ -202,7 +216,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         <ValidatorDetailModal
           commission={viewDetailItem.commission}
           decimals={0}
-          earningEstimated={viewDetailItem.expectedReturn}
+          earningEstimated={viewDetailItem.expectedReturn || ''}
           minStake={viewDetailItem.minBond}
           // eslint-disable-next-line react/jsx-no-bind
           onCancel={() => inactiveModal(ValidatorDetailModalId)}
@@ -220,6 +234,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
 const MultiValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
+    '.ant-sw-modal-header': {
+      paddingTop: token.paddingXS,
+      paddingBottom: token.paddingLG
+    },
+
     '.ant-sw-modal-footer': {
       margin: 0
     },

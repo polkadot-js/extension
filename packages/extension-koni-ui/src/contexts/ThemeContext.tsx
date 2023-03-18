@@ -35,6 +35,11 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       fontFamily: 'inherit',
       whiteSpace: 'pre-wrap'
     },
+
+    '.main-page-container': {
+      border: `1px solid ${token.colorBgInput}`
+    },
+
     '.text-secondary': {
       color: token.colorTextSecondary
     },
@@ -54,6 +59,11 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
     '.common-text': {
       fontSize: token.fontSize,
       lineHeight: token.lineHeight
+    },
+
+    '.sm-text': {
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM
     },
 
     '.mono-text': {

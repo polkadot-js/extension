@@ -3,16 +3,17 @@
 
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { isAccountAll } from '@subwallet/extension-base/utils';
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { FilterModal, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { HistoryItem } from '@subwallet/extension-koni-ui/components/History/HistoryItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import { HistoryDetailModal, HistoryDetailModalId } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
 import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
-import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, DownloadSimple, Rocket, Spinner } from 'phosphor-react';
+import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, DownloadSimple, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -38,8 +39,51 @@ const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
   staking: Database,
   crowdloan: Rocket,
   nft: Aperture,
-  processing: Spinner
+  processing: Spinner,
+  default: ClockCounterClockwise
 };
+
+function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
+  if (item.status === ExtrinsicStatus.PROCESSING) {
+    return IconMap.processing;
+  }
+
+  if (item.type === ExtrinsicType.SEND_NFT) {
+    return IconMap.nft;
+  }
+
+  if (item.type === ExtrinsicType.CROWDLOAN) {
+    return IconMap.crowdloan;
+  }
+
+  if (item.type === ExtrinsicType.STAKING_CLAIM_REWARD) {
+    return IconMap.claim_reward;
+  }
+
+  if (isTypeStaking(item.type)) {
+    return IconMap.staking;
+  }
+
+  return IconMap.default;
+}
+
+function isTypeTransfer (txType: ExtrinsicType) {
+  return [
+    ExtrinsicType.TRANSFER_BALANCE,
+    ExtrinsicType.TRANSFER_TOKEN,
+    ExtrinsicType.TRANSFER_XCM
+  ].includes(txType);
+}
+
+function isTypeStaking (txType: ExtrinsicType) {
+  return [
+    ExtrinsicType.STAKING_STAKE,
+    ExtrinsicType.STAKING_UNSTAKE,
+    ExtrinsicType.STAKING_BOND,
+    ExtrinsicType.STAKING_UNBOND,
+    ExtrinsicType.STAKING_WITHDRAW,
+    ExtrinsicType.STAKING_COMPOUNDING].includes(txType);
+}
 
 function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, string>, titleMap: Record<string, string>): TransactionHistoryDisplayData {
   let displayData: TransactionHistoryDisplayData;
@@ -73,7 +117,7 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
       title: titleMap.received,
       typeName: `${typeName} ${displayStatus} - ${time}`,
       name: nameMap[item.type],
-      icon: IconMap[item.type]
+      icon: getIcon(item)
     };
   }
 
@@ -87,6 +131,19 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
   return displayData;
 }
 
+const FILTER_MODAL_ID = 'history-filter-id';
+
+enum FilterValue {
+  SEND = 'send',
+  RECEIVED = 'received',
+  NFT = 'nft',
+  STAKE = 'stake',
+  CLAIM = 'claim',
+  CROWDLOAN = 'crowdloan',
+  SUCCESSFUL = 'successful',
+  FAILED = 'failed',
+}
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -95,6 +152,65 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const [selectedItem, setSelectedItem] = useState<TransactionHistoryDisplayItem | null>(null);
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const filterFunction = useMemo<(item: TransactionHistoryDisplayItem) => boolean>(() => {
+    return (item) => {
+      if (!selectedFilters.length) {
+        return true;
+      }
+
+      for (const filter of selectedFilters) {
+        if (filter === FilterValue.SEND) {
+          if (isTypeTransfer(item.type) && item.direction === TransactionDirection.SEND) {
+            return true;
+          }
+        } else if (filter === FilterValue.RECEIVED) {
+          if (isTypeTransfer(item.type) && item.direction === TransactionDirection.RECEIVED) {
+            return true;
+          }
+        } else if (filter === FilterValue.NFT) {
+          if (item.type === ExtrinsicType.SEND_NFT) {
+            return true;
+          }
+        } else if (filter === FilterValue.STAKE) {
+          if (isTypeStaking(item.type)) {
+            return true;
+          }
+        } else if (filter === FilterValue.CLAIM) {
+          if (item.type === ExtrinsicType.STAKING_CLAIM_REWARD) {
+            return true;
+          }
+        } else if (filter === FilterValue.CROWDLOAN) {
+          if (item.type === ExtrinsicType.CROWDLOAN) {
+            return true;
+          }
+        } else if (filter === FilterValue.SUCCESSFUL) {
+          if (item.status === ExtrinsicStatus.SUCCESS) {
+            return true;
+          }
+        } else if (filter === FilterValue.FAILED) {
+          if (item.status === ExtrinsicStatus.FAIL) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    };
+  }, [selectedFilters]);
+
+  const filterOptions = useMemo(() => {
+    return [
+      { label: 'Send token transaction', value: FilterValue.SEND },
+      { label: 'Receive token transaction', value: FilterValue.RECEIVED },
+      { label: 'NFT transaction', value: FilterValue.NFT },
+      { label: 'Stake transaction', value: FilterValue.STAKE },
+      { label: 'Claim reward transaction', value: FilterValue.CLAIM },
+      { label: 'Crowdloan transaction', value: FilterValue.CROWDLOAN },
+      { label: 'Successful transaction', value: FilterValue.SUCCESSFUL },
+      { label: 'Failed transaction', value: FilterValue.FAILED }
+    ];
+  }, []);
 
   const accountMap = useMemo(() => {
     return accounts.reduce((accMap, cur) => {
@@ -163,6 +279,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onCloseDetail = useCallback(() => {
     setSelectedItem(null);
   }, []);
+
+  const onClickActionBtn = useCallback(() => {
+    activeModal(FILTER_MODAL_ID);
+  }, [activeModal]);
+
+  const closeFilterModal = useCallback(() => {
+    inactiveModal(FILTER_MODAL_ID);
+  }, [inactiveModal]);
 
   useEffect(() => {
     if (selectedItem) {
@@ -238,16 +362,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
 
         <SwList.Section
+          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           enableSearchInput
+          filterBy={filterFunction}
           groupBy={groupBy}
           groupSeparator={groupSeparator}
           ignoreScrollbar={historyList.length > 4}
           list={historyList}
+          onClickActionBtn={onClickActionBtn}
           renderItem={renderItem}
           renderWhenEmpty={emptyList}
           searchFunction={searchFunc}
           searchMinCharactersCount={2}
           searchPlaceholder={t('Search history')}
+          showActionBtn
         />
       </PageWrapper>
       {!!selectedItem && (
@@ -256,6 +384,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onCancel={onCloseDetail}
         />
       )}
+
+      <FilterModal
+        id={FILTER_MODAL_ID}
+        onApplyFilter={onApplyFilter}
+        onCancel={closeFilterModal}
+        onChangeOption={onChangeFilterOption}
+        optionSelectionMap={filterSelectionMap}
+        options={filterOptions}
+      />
     </>
   );
 }

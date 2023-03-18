@@ -10,13 +10,13 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
-import MoreActionModal, { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import MoreActionModal, { MORE_ACTION_MODAL, StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -46,7 +46,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { data: stakingItems, priceMap } = useGetStakingList();
-  const [{ chain, stakingType }, setSelectedItem] = useState<{ chain: string | undefined, stakingType: StakingType | undefined }>({ chain: undefined, stakingType: undefined });
+  const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filterFunction = useMemo<(item: StakingDataType) => boolean>(() => {
     return (item) => {
@@ -70,6 +70,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     };
   }, [selectedFilters]);
 
+  console.log('stakingItems', stakingItems);
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
   }, [activeModal]);
@@ -78,16 +79,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     inactiveModal(FILTER_MODAL_ID);
   }, [inactiveModal]);
 
-  const onClickRightIcon = useCallback((e?: SyntheticEvent) => {
-    e && e.stopPropagation();
+  const onClickRightIcon = useCallback((item: StakingDataType) => {
+    setSelectedItem(item);
     activeModal(MORE_ACTION_MODAL);
   }, [activeModal]);
 
-  const onClickItem = useCallback((chain: string, stakingType: StakingType) => {
-    setSelectedItem({
-      chain,
-      stakingType
-    });
+  const onClickItem = useCallback((item: StakingDataType) => {
+    setSelectedItem(item);
 
     activeModal(STAKING_DETAIL_MODAL_ID);
   }, [activeModal]);
@@ -96,7 +94,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     {
       icon: rightIcon,
       onClick: () => {
-        navigate('/transaction/stake');
+        navigate('/transaction/stake', { state: { chainStakingMetadata: undefined, nominatorMetadata: undefined, hideTabList: false } as StakingDataOption });
       }
     }
   ];
@@ -106,7 +104,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <SwStakingItem
         className='staking-item'
         decimals={item.decimals}
-        key={`${item.staking.chain}-${item.staking.type}`}
+        key={`${item.staking.chain}-${item.staking.type}-${item.staking.address}`}
         onClickItem={onClickItem}
         onClickRightIcon={onClickRightIcon}
         priceMap={priceMap}
@@ -147,7 +145,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t('Staking')}
       >
         <SwList.Section
-          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+          actionBtnIcon={<Icon
+            phosphorIcon={FadersHorizontal}
+            size='sm'
+          />}
           enableSearchInput={true}
           filterBy={filterFunction}
           ignoreScrollbar={stakingItems.length > 3}
@@ -170,12 +171,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           options={FILTER_OPTIONS}
         />
 
-        <StakingDetailModal
-          chain={chain}
-          stakingType={stakingType}
-        />
+        {!!(selectedItem && selectedItem.nominatorMetadata && selectedItem.chainStakingMetadata) &&
+          <StakingDetailModal
+            chainStakingMetadata={selectedItem.chainStakingMetadata}
+            nominatorMetadata={selectedItem.nominatorMetadata}
+          />}
 
-        <MoreActionModal />
+        <MoreActionModal
+          chainStakingMetadata={selectedItem?.chainStakingMetadata}
+          nominatorMetadata={selectedItem?.nominatorMetadata}
+        />
       </Layout.Base>
     </PageWrapper>
   );
@@ -185,6 +190,14 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
+
+    '.ant-sw-screen-layout-body': {
+      display: 'flex'
+    },
+
+    '.ant-sw-list-section': {
+      flex: 1
+    },
 
     '.staking__filter_option': {
       width: '100%'
@@ -198,14 +211,6 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
     '.staking-item': {
       marginBottom: token.marginXS
-    },
-
-    '.ant-sw-list-section': {
-      height: '100%'
-    },
-
-    '.ant-sw-list': {
-      overflow: 'auto'
     }
   });
 });

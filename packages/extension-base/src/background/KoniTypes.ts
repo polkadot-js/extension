@@ -147,8 +147,6 @@ export interface StakingItem {
   unit?: string,
 
   state: APIItemState,
-
-  unlockingInfo?: UnlockingStakeInfo,
   rewardInfo?: StakingRewardItem
 }
 
@@ -162,11 +160,6 @@ export interface StakingRewardJson {
   ready: boolean;
   slowInterval: Array<StakingRewardItem>;
   fastInterval: Array<StakingRewardItem>;
-}
-
-export interface StakeUnlockingJson {
-  timestamp: number,
-  details: UnlockingStakeInfo[]
 }
 
 export interface PriceJson {
@@ -447,6 +440,7 @@ export enum ExtrinsicType {
   STAKING_CLAIM_REWARD = 'staking.claim_reward',
   STAKING_WITHDRAW = 'staking.withdraw',
   STAKING_COMPOUNDING = 'staking.compounding',
+  STAKING_CANCEL_WITHDRAWAL = 'staking.cancel_withdrawal',
   STAKING_CANCEL_COMPOUNDING = 'staking.cancel_compounding',
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -944,6 +938,8 @@ export interface NftTransactionRequest {
   networkKey: string,
   senderAddress: string,
   recipientAddress: string,
+
+  nftItemName?: string, // Use for confirmation view only
   params: Record<string, any>
 }
 
@@ -1025,6 +1021,7 @@ export interface SubstrateNftTransaction {
 export interface SubstrateNftSubmitTransaction extends BaseRequestSign {
   params: Record<string, any> | null;
   senderAddress: string;
+  nftItemName?: string;
   recipientAddress: string;
 }
 
@@ -1181,41 +1178,6 @@ export type RequestConfirmationComplete = {
   [CT in ConfirmationType]?: ConfirmationDefinitions[CT][1];
 }
 
-export interface ValidatorInfo {
-  address: string;
-  chain: string;
-
-  totalStake: string;
-  ownStake: string;
-  otherStake: string;
-
-  minBond: string;
-  nominatorCount: number;
-  commission: number; // in %
-  expectedReturn: number; // in %, annually
-
-  blocked: boolean;
-  identity?: string;
-  isVerified: boolean;
-  isNominated: boolean; // this validator has been staked to before
-  icon?: string;
-  hasScheduledRequest?: boolean; // for parachain, can't stake more on a collator that has existing scheduled request
-}
-
-export interface NominationPoolInfo {
-  id: string,
-  identity?: string,
-  address: string,
-  memberCount: number,
-  bondedAmount: string
-}
-
-export interface ExtraDelegationInfo {
-  chain: string;
-  address: string;
-  collatorAddress: string;
-}
-
 export interface BasicTxInfo {
   fee: string,
   balanceError: boolean,
@@ -1223,8 +1185,9 @@ export interface BasicTxInfo {
 }
 
 export interface BondingOptionParams {
-  networkKey: string;
+  chain: string;
   address: string;
+  type: StakingType;
 }
 
 export interface SingleModeJson {
@@ -1399,6 +1362,103 @@ export interface RequestCheckCrossChainTransfer extends BaseRequestSign {
 export type RequestCrossChainTransfer = InternalRequestSign<RequestCheckCrossChainTransfer>;
 
 /// Stake
+
+// Staking & Bonding
+export interface ChainStakingMetadata {
+  chain: string;
+  type: StakingType;
+
+  era: number, // also round for parachains
+  expectedReturn?: number; // in %, annually
+  inflation?: number; // in %, annually
+  minJoinNominationPool?: string; // for relaychain supports nomination pool
+  minStake: string;
+  maxValidatorPerNominator: number;
+  maxWithdrawalRequestPerValidator: number;
+  allowCancelUnstaking: boolean;
+  unstakingPeriod: number; // in hours
+}
+
+export interface NominationInfo {
+  chain: string;
+  validatorAddress: string; // can be a nomination pool id
+  validatorIdentity?: string;
+  activeStake: string;
+
+  hasUnstaking?: boolean;
+  validatorMinStake?: string;
+}
+
+export interface PalletNominationPoolsBondedPoolInner {
+  points: number,
+  state: 'Open' | 'Destroying',
+  memberCounter: number,
+  roles: {
+    depositor: string,
+    root: string,
+    nominator: string,
+    bouncer: string
+  }
+}
+
+export interface NominationPoolInfo extends Pick<PalletNominationPoolsBondedPoolInner, 'roles' | 'memberCounter' | 'state'> {
+  id: number,
+  address: string,
+  name?: string,
+  bondedAmount: string
+}
+
+export enum UnstakingStatus {
+  CLAIMABLE = 'CLAIMABLE',
+  UNLOCKING = 'UNLOCKING'
+}
+
+export interface UnstakingInfo {
+  chain: string;
+  status: UnstakingStatus;
+  claimable: string; // amount to be withdrawn
+  waitingTime: number; // in hours
+  validatorAddress?: string; // might unstake from a validator or not
+}
+
+export interface NominatorMetadata {
+  chain: string,
+  type: StakingType,
+  address: string,
+  activeStake: string,
+  nominations: NominationInfo[],
+  unstakings: UnstakingInfo[],
+  isBondedBefore?: boolean
+}
+
+export interface ValidatorInfo {
+  address: string;
+  chain: string;
+
+  totalStake: string;
+  ownStake: string;
+  otherStake: string;
+
+  minBond: string;
+  nominatorCount: number;
+  commission: number; // in %
+  expectedReturn?: number; // in %, annually
+
+  blocked: boolean;
+  identity?: string;
+  isVerified: boolean;
+  icon?: string;
+  isCrowded: boolean;
+}
+
+export interface NominationPoolMetadata {
+  id: string,
+  identity?: string,
+  address: string,
+  memberCount: number,
+  bondedAmount: string
+}
+
 // Bonding
 export interface NominatorInfo {
   chain: string,
@@ -1407,15 +1467,6 @@ export interface NominatorInfo {
   isBondedBefore: boolean,
   bondedValidators: string[],
   bondedPool: string[]
-}
-
-export interface BondingOptionInfo {
-  isBondedBefore: boolean,
-  era: number,
-  maxNominations: number,
-  maxNominatorPerValidator: number,
-  validators: ValidatorInfo[],
-  bondedValidators: string[]
 }
 
 export interface ChainBondingInfo {
@@ -1428,12 +1479,11 @@ export interface ChainBondingInfo {
 }
 
 export interface BondingSubmitParams extends BaseRequestSign {
-  networkKey: string,
-  nominatorAddress: string,
-  amount: number,
-  validatorInfo: ValidatorInfo,
-  isBondedBefore: boolean,
-  bondedValidators: string[], // already delegated validators
+  chain: string,
+  type: StakingType,
+  nominatorMetadata: NominatorMetadata,
+  amount: string,
+  selectedValidators: ValidatorInfo[],
   lockPeriod?: number // in month
 }
 
@@ -1442,12 +1492,11 @@ export type RequestBondingSubmit = InternalRequestSign<BondingSubmitParams>;
 // UnBonding
 
 export interface UnbondingSubmitParams extends BaseRequestSign {
-  amount: number,
-  networkKey: string,
-  address: string,
+  amount: string,
+  chain: string,
+  nominatorMetadata: NominatorMetadata,
   // for some chains
-  validatorAddress?: string,
-  unstakeAll?: boolean
+  validatorAddress?: string
 }
 
 export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
@@ -1455,10 +1504,9 @@ export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
 // Withdraw
 
 export interface StakeWithdrawalParams extends BaseRequestSign {
-  address: string,
-  networkKey: string,
-  validatorAddress?: string,
-  action?: string
+  nominatorMetadata: NominatorMetadata,
+  chain: string,
+  validatorAddress?: string
 }
 
 export type RequestStakeWithdrawal = InternalRequestSign<StakeWithdrawalParams>;
@@ -1467,14 +1515,48 @@ export type RequestStakeWithdrawal = InternalRequestSign<StakeWithdrawalParams>;
 
 export interface StakeClaimRewardParams extends BaseRequestSign {
   address: string,
-  networkKey: string,
+  chain: string,
   validatorAddress?: string,
   stakingType: StakingType
 }
 
 export type RequestStakeClaimReward = InternalRequestSign<StakeClaimRewardParams>;
 
+export interface StakeCancelWithdrawalParams extends BaseRequestSign {
+  address: string,
+  chain: string,
+  selectedUnstaking: UnstakingInfo
+}
+
+export type RequestStakeCancelWithdrawal = InternalRequestSign<StakeCancelWithdrawalParams>;
+
 // Compound
+
+export interface StakePoolingBondingParams extends BaseRequestSign {
+  nominatorMetadata?: NominatorMetadata,
+  chain: string,
+  selectedPool: NominationPoolInfo,
+  amount: string,
+  address: string
+}
+
+export type RequestStakePoolingBonding = InternalRequestSign<StakePoolingBondingParams>;
+
+export interface StakePoolingUnbondingParams extends BaseRequestSign {
+  nominatorMetadata: NominatorMetadata,
+  chain: string,
+  amount: string
+}
+
+export type RequestStakePoolingUnbonding = InternalRequestSign<StakePoolingUnbondingParams>;
+
+export interface StakePoolingWithdrawalParams extends BaseRequestSign {
+  nominatorMetadata: NominatorMetadata,
+  chain: string,
+  isReBond: boolean
+}
+
+export type RequestStakePoolingWithdrawal = InternalRequestSign<StakePoolingWithdrawalParams>;
 
 export interface DelegationItem {
   owner: string,
@@ -1660,14 +1742,18 @@ export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, SWTransactionResponse];
   'pri(staking.submitTuringCompound)': [RequestTuringStakeCompound, SWTransactionResponse];
-  'pri(staking.delegationInfo)': [StakeDelegationRequest, DelegationItem[]];
   'pri(staking.submitClaimReward)': [RequestStakeClaimReward, SWTransactionResponse];
+  'pri(staking.submitCancelWithdrawal)': [RequestStakeCancelWithdrawal, SWTransactionResponse];
   'pri(unbonding.submitWithdrawal)': [RequestStakeWithdrawal, SWTransactionResponse];
-  'pri(unbonding.subscribeUnlockingInfo)': [null, StakeUnlockingJson, StakeUnlockingJson];
   'pri(unbonding.submitTransaction)': [RequestUnbondingSubmit, SWTransactionResponse];
-  'pri(bonding.submitTransaction)': [RequestBondingSubmit, SWTransactionResponse];
-  'pri(bonding.getChainBondingBasics)': [NetworkJson[], Record<string, ChainBondingInfo>, Record<string, ChainBondingInfo>];
-  'pri(bonding.getBondingOptions)': [BondingOptionParams, BondingOptionInfo];
+  'pri(bonding.submitBondingTransaction)': [RequestBondingSubmit, SWTransactionResponse];
+  'pri(bonding.subscribeChainStakingMetadata)': [null, ChainStakingMetadata[], ChainStakingMetadata[]];
+  'pri(bonding.subscribeNominatorMetadata)': [null, NominatorMetadata[], NominatorMetadata[]];
+  'pri(bonding.getBondingOptions)': [BondingOptionParams, ValidatorInfo[]];
+  'pri(bonding.getNominationPoolOptions)': [string, NominationPoolInfo[]];
+  'pri(bonding.nominationPool.submitBonding)': [RequestStakePoolingBonding, SWTransactionResponse];
+  'pri(bonding.nominationPool.submitUnbonding)': [RequestStakePoolingUnbonding, SWTransactionResponse];
+  'pri(bonding.nominationPool.submitWithdrawal)': [RequestStakePoolingWithdrawal, SWTransactionResponse];
 
   // Chains, assets functions
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];

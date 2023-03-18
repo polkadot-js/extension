@@ -7,12 +7,11 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AmountData, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BondingOptionInfo, BondingOptionParams, BrowserConfirmationType, ChainBondingInfo, ChainType, CreateDeriveAccountInfo, CrowdloanJson, CurrentAccountInfo, DelegationItem, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestChangeMasterPassword, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestNftForceUpdate, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeClaimReward, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakeDelegationRequest, StakeUnlockingJson, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AmountData, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BondingOptionParams, BrowserConfirmationType, ChainType, CreateDeriveAccountInfo, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, NominationPoolInfo, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestChangeMasterPassword, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestNftForceUpdate, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakePoolingWithdrawal, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeCancel, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApproveSignature, RequestSigningCancel, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseType, SigningRequest } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
@@ -21,12 +20,13 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, ValidateTran
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { MetadataDef } from '@subwallet/extension-inject/types';
-import { CHAIN_TYPES, getBondingExtrinsic, getChainBondingBasics, getClaimRewardExtrinsic, getDelegationInfo, getUnbondingExtrinsic, getValidatorsInfo, getWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/bonding';
-import { getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic } from '@subwallet/extension-koni-base/api/bonding/paraChain';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { parseSubstrateTransaction } from '@subwallet/extension-koni-base/api/dotsama/parseTransaction';
 import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-koni-base/api/nft/transfer';
+import { getBondingExtrinsic, getCancelWithdrawalExtrinsic, getClaimRewardExtrinsic, getNominationPoolsInfo, getUnbondingExtrinsic, getValidatorsInfo, getWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding';
+import { getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding/paraChain';
+import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, getPoolingWithdrawalExtrinsic } from '@subwallet/extension-koni-base/api/staking/bonding/relayChain';
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-koni-base/api/tokens/evm/transfer';
 import { getPSP34Transaction, getPSP34TransferExtrinsic } from '@subwallet/extension-koni-base/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-koni-base/api/xcm';
@@ -2208,73 +2208,79 @@ export default class KoniExtension {
     };
   }
 
-  private async getChainBondingBasics (id: string, port: chrome.runtime.Port, chainInfos: _ChainInfo[]) {
-    const result: Record<string, ChainBondingInfo> = {};
-    const callback = createSubscription<'pri(bonding.getChainBondingBasics)'>(id, port);
+  private async subscribeChainStakingMetadata (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(bonding.subscribeChainStakingMetadata)'>(id, port);
 
-    await Promise.all(chainInfos.map(async (networkJson) => {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      result[networkJson.slug] = await getChainBondingBasics(networkJson.slug, this.#koniState.getSubstrateApi(networkJson.slug));
-      callback(result);
-    }));
+    const chainStakingMetadata = this.#koniState.subscribeChainStakingMetadata().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, chainStakingMetadata.unsubscribe);
 
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
     });
 
-    return result;
+    return this.#koniState.getChainStakingMetadata();
   }
 
-  private async getBondingOption ({ address, networkKey }: BondingOptionParams): Promise<BondingOptionInfo> {
-    const apiProps = this.#koniState.getSubstrateApi(networkKey);
-    const chainInfo = this.#koniState.getChainInfo(networkKey);
-    let extraCollatorAddress;
+  private async subscribeStakingNominatorMetadata (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(bonding.subscribeNominatorMetadata)'>(id, port);
 
-    if (_STAKING_CHAIN_GROUP.amplitude.includes(networkKey)) {
-      const extraDelegationInfo = await this.#koniState.getExtraDelegationInfo(networkKey, address);
-
-      if (extraDelegationInfo) {
-        extraCollatorAddress = extraDelegationInfo.collatorAddress;
+    const nominatorMetadata = this.#koniState.subscribeNominatorMetadata().subscribe({
+      next: (rs) => {
+        cb(rs);
       }
+    });
+
+    this.createUnsubscriptionHandle(id, nominatorMetadata.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.getNominatorMetadata();
+  }
+
+  private async getBondingOptions ({ chain, type }: BondingOptionParams): Promise<ValidatorInfo[] | undefined> {
+    const apiProps = this.#koniState.getSubstrateApi(chain);
+    const chainInfo = this.#koniState.getChainInfo(chain);
+    const chainStakingMetadata = await this.#koniState.getStakingMetadataByChain(chain, type);
+
+    if (!chainStakingMetadata) {
+      return;
     }
 
     const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
 
-    const { bondedValidators,
-      era,
-      isBondedBefore,
-      maxNominations,
-      maxNominatorPerValidator,
-      validatorsInfo } = await getValidatorsInfo(networkKey, apiProps, decimals, address, extraCollatorAddress);
+    return await getValidatorsInfo(chain, apiProps, decimals, chainStakingMetadata);
+  }
 
-    return {
-      maxNominatorPerValidator,
-      era,
-      validators: validatorsInfo,
-      isBondedBefore,
-      bondedValidators,
-      maxNominations
-    } as BondingOptionInfo;
+  private async getNominationPoolOptions (chain: string): Promise<NominationPoolInfo[]> {
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+
+    return await getNominationPoolsInfo(chain, substrateApi);
   }
 
   private async submitBonding (inputData: RequestBondingSubmit): Promise<SWTransactionResponse> {
-    const { amount, bondedValidators, isBondedBefore, networkKey, nominatorAddress, validatorInfo } = inputData;
+    const { amount, chain, nominatorMetadata, selectedValidators } = inputData;
 
-    if (!amount || !nominatorAddress || !validatorInfo) {
+    if (!amount || !nominatorMetadata || !selectedValidators) {
       // Todo: Check and return error here
 
       return this.#koniState.transactionService
         .generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
     }
 
-    const networkJson = this.#koniState.getChainInfo(networkKey);
-    const dotSamaApi = this.#koniState.getSubstrateApi(networkKey);
-    const extrinsic = await getBondingExtrinsic(networkJson, networkKey, amount, bondedValidators, validatorInfo, isBondedBefore, nominatorAddress, dotSamaApi);
+    const chainInfo = this.#koniState.getChainInfo(chain);
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getBondingExtrinsic(chainInfo, amount, nominatorMetadata, selectedValidators, substrateApi);
 
     return await this.#koniState.transactionService.handleTransaction({
-      address: nominatorAddress,
-      chain: networkKey,
+      address: nominatorMetadata.address,
+      chain: chain,
       chainType: ChainType.SUBSTRATE,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_BOND,
@@ -2284,23 +2290,18 @@ export default class KoniExtension {
   }
 
   private async submitUnbonding (inputData: RequestUnbondingSubmit): Promise<SWTransactionResponse> {
-    const { address, amount, networkKey, unstakeAll, validatorAddress } = inputData;
+    const { amount, chain, nominatorMetadata, validatorAddress } = inputData;
 
-    if (!amount || !address) {
+    if (!amount || !nominatorMetadata) {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
     }
 
-    if (CHAIN_TYPES.amplitude.includes(networkKey)) {
-      this.#koniState.setExtraDelegationInfo(networkKey, address, validatorAddress as string);
-    }
-
-    const dotSamaApi = this.#koniState.getSubstrateApi(networkKey);
-    const networkJson = this.#koniState.getChainInfo(networkKey);
-    const extrinsic = await getUnbondingExtrinsic(address, amount, networkKey, networkJson, dotSamaApi, validatorAddress, unstakeAll);
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getUnbondingExtrinsic(nominatorMetadata, amount, chain, substrateApi, validatorAddress);
 
     return await this.#koniState.transactionService.handleTransaction({
-      address,
-      chain: networkKey,
+      address: nominatorMetadata.address,
+      chain: chain,
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_UNBOND,
@@ -2309,18 +2310,18 @@ export default class KoniExtension {
   }
 
   private async submitStakeWithdrawal (inputData: RequestStakeWithdrawal): Promise<SWTransactionResponse> {
-    const { action, address, networkKey, validatorAddress } = inputData;
+    const { chain, nominatorMetadata, validatorAddress } = inputData;
 
-    if (!address) {
+    if (!nominatorMetadata) {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
     }
 
-    const dotSamaApi = this.#koniState.getSubstrateApi(networkKey);
-    const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, networkKey, address, validatorAddress, action);
+    const dotSamaApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, chain, nominatorMetadata, validatorAddress);
 
     return await this.#koniState.transactionService.handleTransaction({
-      address,
-      chain: networkKey,
+      address: nominatorMetadata.address,
+      chain: chain,
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_WITHDRAW,
@@ -2329,18 +2330,18 @@ export default class KoniExtension {
   }
 
   private async submitStakeClaimReward (inputData: RequestStakeClaimReward): Promise<SWTransactionResponse> {
-    const { address, networkKey, stakingType, validatorAddress } = inputData;
+    const { address, chain, stakingType, validatorAddress } = inputData;
 
     if (!address) {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
     }
 
-    const dotSamaApi = this.#koniState.getSubstrateApi(networkKey);
-    const extrinsic = await getClaimRewardExtrinsic(dotSamaApi, networkKey, address, stakingType, validatorAddress);
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getClaimRewardExtrinsic(substrateApi, chain, address, stakingType, validatorAddress);
 
     return await this.#koniState.transactionService.handleTransaction({
       address,
-      chain: networkKey,
+      chain: chain,
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_CLAIM_REWARD,
@@ -2348,27 +2349,72 @@ export default class KoniExtension {
     });
   }
 
-  private async getStakingDelegationInfo ({ address, networkKey }: StakeDelegationRequest): Promise<DelegationItem[]> {
-    const dotSamaApi = this.#koniState.getSubstrateApi(networkKey);
+  private async submitCancelStakeWithdrawal (inputData: RequestStakeCancelWithdrawal): Promise<SWTransactionResponse> {
+    const { address, chain, selectedUnstaking } = inputData;
 
-    return await getDelegationInfo(dotSamaApi, address, networkKey);
+    if (!chain || !selectedUnstaking) {
+      return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
+    }
+
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getCancelWithdrawalExtrinsic(substrateApi, chain, selectedUnstaking);
+
+    return await this.#koniState.transactionService.handleTransaction({
+      address,
+      chain,
+      transaction: extrinsic,
+      data: inputData,
+      extrinsicType: ExtrinsicType.STAKING_CANCEL_WITHDRAWAL,
+      chainType: ChainType.SUBSTRATE
+    });
   }
 
-  private subscribeStakeUnlockingInfo (id: string, port: chrome.runtime.Port): StakeUnlockingJson {
-    const cb = createSubscription<'pri(unbonding.subscribeUnlockingInfo)'>(id, port);
-    const unlockingInfoSubscription = this.#koniState.subscribeStakeUnlockingInfo().subscribe({
-      next: (rs) => {
-        cb(rs);
-      }
+  private async submitPoolingBonding (inputData: RequestStakePoolingBonding): Promise<SWTransactionResponse> {
+    const { address, amount, chain, nominatorMetadata, selectedPool } = inputData;
+
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getPoolingBondingExtrinsic(substrateApi, amount, selectedPool.id, nominatorMetadata);
+
+    return await this.#koniState.transactionService.handleTransaction({
+      address,
+      chain,
+      transaction: extrinsic,
+      data: inputData,
+      extrinsicType: ExtrinsicType.STAKING_BOND,
+      chainType: ChainType.SUBSTRATE
     });
+  }
 
-    this.createUnsubscriptionHandle(id, unlockingInfoSubscription.unsubscribe);
+  private async submitPoolingUnbonding (inputData: RequestStakePoolingUnbonding): Promise<SWTransactionResponse> {
+    const { amount, chain, nominatorMetadata } = inputData;
 
-    port.onDisconnect.addListener((): void => {
-      this.cancelSubscription(id);
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getPoolingUnbondingExtrinsic(substrateApi, amount, nominatorMetadata);
+
+    return await this.#koniState.transactionService.handleTransaction({
+      address: nominatorMetadata.address,
+      chain,
+      transaction: extrinsic,
+      data: inputData,
+      extrinsicType: ExtrinsicType.STAKING_UNBOND,
+      chainType: ChainType.SUBSTRATE
     });
+  }
 
-    return this.#koniState.getStakeUnlockingInfo();
+  private async submitPoolingWithdrawal (inputData: RequestStakePoolingWithdrawal): Promise<SWTransactionResponse> {
+    const { chain, isReBond, nominatorMetadata } = inputData;
+
+    const substrateApi = this.#koniState.getSubstrateApi(chain);
+    const extrinsic = await getPoolingWithdrawalExtrinsic(substrateApi, nominatorMetadata, isReBond);
+
+    return await this.#koniState.transactionService.handleTransaction({
+      address: nominatorMetadata.address,
+      chain,
+      transaction: extrinsic,
+      data: inputData,
+      extrinsicType: ExtrinsicType.STAKING_WITHDRAW,
+      chainType: ChainType.SUBSTRATE
+    });
   }
 
   // EVM Transaction
@@ -3182,25 +3228,33 @@ export default class KoniExtension {
 
       /// Stake
       case 'pri(bonding.getBondingOptions)':
-        return await this.getBondingOption(request as BondingOptionParams);
-      case 'pri(bonding.getChainBondingBasics)':
-        return await this.getChainBondingBasics(id, port, request as _ChainInfo[]);
-      case 'pri(bonding.submitTransaction)':
+        return await this.getBondingOptions(request as BondingOptionParams);
+      case 'pri(bonding.getNominationPoolOptions)':
+        return await this.getNominationPoolOptions(request as string);
+      case 'pri(bonding.subscribeChainStakingMetadata)':
+        return await this.subscribeChainStakingMetadata(id, port);
+      case 'pri(bonding.subscribeNominatorMetadata)':
+        return await this.subscribeStakingNominatorMetadata(id, port);
+      case 'pri(bonding.submitBondingTransaction)':
         return await this.submitBonding(request as RequestBondingSubmit);
       case 'pri(unbonding.submitTransaction)':
         return await this.submitUnbonding(request as RequestUnbondingSubmit);
-      case 'pri(unbonding.subscribeUnlockingInfo)':
-        return this.subscribeStakeUnlockingInfo(id, port);
       case 'pri(unbonding.submitWithdrawal)':
         return await this.submitStakeWithdrawal(request as RequestStakeWithdrawal);
       case 'pri(staking.submitClaimReward)':
         return await this.submitStakeClaimReward(request as RequestStakeClaimReward);
-      case 'pri(staking.delegationInfo)':
-        return await this.getStakingDelegationInfo(request as StakeDelegationRequest);
+      case 'pri(staking.submitCancelWithdrawal)':
+        return await this.submitCancelStakeWithdrawal(request as RequestStakeCancelWithdrawal);
       case 'pri(staking.submitTuringCompound)':
         return await this.submitTuringStakeCompounding(request as RequestTuringStakeCompound);
       case 'pri(staking.submitTuringCancelCompound)':
         return await this.submitTuringCancelStakeCompound(request as RequestTuringCancelStakeCompound);
+      case 'pri(bonding.nominationPool.submitBonding)':
+        return await this.submitPoolingBonding(request as RequestStakePoolingBonding);
+      case 'pri(bonding.nominationPool.submitUnbonding)':
+        return await this.submitPoolingUnbonding(request as RequestStakePoolingUnbonding);
+      case 'pri(bonding.nominationPool.submitWithdrawal)':
+        return await this.submitPoolingWithdrawal(request as RequestStakePoolingWithdrawal);
 
       // EVM Transaction
       case 'pri(evm.transaction.parse.input)':

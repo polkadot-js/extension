@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, CrowdloanItem, NftCollection, NftItem, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
-import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, ExtraDelegationInfoStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
+import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
+import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
+import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
 import { Subscription } from 'dexie';
 
@@ -15,6 +17,7 @@ export default class DatabaseService {
   private _db: KoniDatabase;
   public stores;
   private logger: Logger;
+  // TODO: might remove this
   private nftSubscription: Subscription | undefined;
   private stakingSubscription: Subscription | undefined;
 
@@ -29,10 +32,13 @@ export default class DatabaseService {
       staking: new StakingStore(this._db.stakings),
       transaction: new TransactionStore(this._db.transactions),
       migration: new MigrationStore(this._db.migrations),
-      extraDelegationInfo: new ExtraDelegationInfoStore(this._db.extraDelegationInfo),
 
       chain: new ChainStore(this._db.chain),
-      asset: new AssetStore(this._db.asset)
+      asset: new AssetStore(this._db.asset),
+
+      // staking
+      chainStakingMetadata: new ChainStakingMetadataStore(this._db.chainStakingMetadata),
+      nominatorMetadata: new NominatorMetadataStore(this._db.nominatorMetadata)
     };
   }
 
@@ -48,7 +54,7 @@ export default class DatabaseService {
   async removeFromBalanceStore (assets: string[]) {
     this.logger.log('Bulk removing AssetStore');
 
-    return await this.stores.balance.removeBySlugs(assets);
+    return this.stores.balance.removeBySlugs(assets);
   }
 
   // Crowdloan
@@ -73,12 +79,16 @@ export default class DatabaseService {
     }
   }
 
-  async getStakings (addresses: string[], chainHashes?: string[]) {
-    const stakings = await this.stores.staking.getStakings(addresses, chainHashes);
+  async getStakings (addresses: string[], chains?: string[]) {
+    const stakings = await this.stores.staking.getStakings(addresses, chains);
 
     this.logger.log('Get Stakings: ', stakings);
 
     return stakings;
+  }
+
+  async getStakingsByChains (chains: string[]) {
+    return this.stores.staking.getStakingsByChains(chains);
   }
 
   async getPooledStakings (addresses: string[], chainHashes?: string[]) {
@@ -97,6 +107,18 @@ export default class DatabaseService {
     });
 
     return this.stakingSubscription;
+  }
+
+  subscribeChainStakingMetadata (chains: string[], callback: (data: ChainStakingMetadata[]) => void) {
+    this.stores.chainStakingMetadata.subscribeByChain(chains).subscribe(({
+      next: (data) => callback && callback(data)
+    }));
+  }
+
+  subscribeNominatorMetadata (callback: (data: NominatorMetadata[]) => void) {
+    this.stores.nominatorMetadata.subscribeAll().subscribe(({
+      next: (data) => callback && callback(data)
+    }));
   }
 
   // Transaction histories
@@ -169,19 +191,6 @@ export default class DatabaseService {
     return this.stores.nft.removeNfts(chain, address, collectionId, nftIds);
   }
 
-  // Delegation info
-  async updateExtraDelegationInfo (chain: string, address: string, collatorAddress: string) {
-    return this.stores.extraDelegationInfo.upsert({ chain, address, collatorAddress });
-  }
-
-  async getExtraDelegationInfo (chain: string, address: string) {
-    const delegationInfo = await this.stores.extraDelegationInfo.getDelegationInfo(chain, address);
-
-    this.logger.log('Get extra delegation info: ', delegationInfo);
-
-    return delegationInfo;
-  }
-
   // Chain
   async updateChainStore (item: IChain) {
     this.logger.log(`Updating storageInfo for chain [${item.slug}]`);
@@ -228,5 +237,30 @@ export default class DatabaseService {
     this.logger.log('Bulk removing AssetStore');
 
     return this.stores.asset.removeAssets(items);
+  }
+
+  // Staking
+  async updateChainStakingMetadata (item: ChainStakingMetadata) {
+    this.logger.log('Update ChainStakingMetadata: ', item.chain);
+
+    return this.stores.chainStakingMetadata.upsert(item);
+  }
+
+  async getChainStakingMetadata () {
+    return this.stores.chainStakingMetadata.getAll();
+  }
+
+  async getStakingMetadataByChain (chain: string, type = StakingType.NOMINATED) {
+    return this.stores.chainStakingMetadata.getByChainAndType(chain, type);
+  }
+
+  async updateNominatorMetadata (item: NominatorMetadata) {
+    this.logger.log('Update NominatorMetadata: ', item.address, item.chain);
+
+    return this.stores.nominatorMetadata.upsert(item);
+  }
+
+  async getNominatorMetadata () {
+    return this.stores.nominatorMetadata.getAll();
   }
 }

@@ -103,7 +103,7 @@ function Component ({ className }: Props) {
     const { address, service, tokenKey } = form.getFieldsValue();
 
     if (service === 'transak') {
-      const [token, chain, transaKNetwork] = tokenKey.split('|');
+      const [token, chain, transakNetwork] = tokenKey.split('|');
       const networkPrefix = chainInfoMap[chain].substrateInfo?.addressPrefix;
 
       const walletAddress = tokenKeyMapIsEthereum[tokenKey]
@@ -113,7 +113,7 @@ function Component ({ className }: Props) {
       const params = {
         apiKey: '4b3bfb00-7f7c-44b3-844f-d4504f1065be',
         defaultCryptoCurrency: token,
-        networks: transaKNetwork,
+        networks: transakNetwork,
         cryptoCurrencyList: token,
         walletAddress
       };
@@ -123,6 +123,16 @@ function Component ({ className }: Props) {
       openInNewTab(`${TransakUrl}?${query}`)();
     }
   }, [form, chainInfoMap]);
+
+  const isSupportBuyTokens = useMemo(() => {
+    if ((selectedService === 'transak') && selectedAddress && selectedTokenKey) {
+      const [symbol] = selectedTokenKey.split('|');
+
+      return PREDEFINED_TRANSAK_TOKEN[symbol].support === getAccountType(selectedAddress);
+    }
+
+    return false;
+  }, [selectedAddress, selectedTokenKey, selectedService]);
 
   useEffect(() => {
     if (currentAddress !== currentAccount?.address) {
@@ -223,7 +233,7 @@ function Component ({ className }: Props) {
 
         <div className={'__layout-footer'}>
           <Button
-            disabled={(selectedService !== 'transak') || !(selectedAddress && selectedTokenKey)}
+            disabled={!isSupportBuyTokens}
             icon={ (
               <Icon
                 phosphorIcon={ShoppingCartSimple}

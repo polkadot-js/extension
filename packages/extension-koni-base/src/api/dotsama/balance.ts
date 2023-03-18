@@ -233,7 +233,8 @@ function subscribeERC20Interval (addresses: string[], chain: string, evmApiMap: 
         callBack({
           tokenSlug: tokenInfo.slug,
           free: free.toString(),
-          locked: '0'
+          locked: '0',
+          state: APIItemState.READY
         } as BalanceItem);
       } catch (err) {
         console.log('There is a problem fetching ' + tokenInfo.slug + ' token balance', err);
@@ -242,6 +243,7 @@ function subscribeERC20Interval (addresses: string[], chain: string, evmApiMap: 
   };
 
   tokenList = state.getAssetByChainAndAsset(chain, [_AssetType.ERC20]);
+
   Object.entries(tokenList).forEach(([slug, tokenInfo]) => {
     erc20ContractMap[slug] = getERC20Contract(chain, _getContractAddressOfToken(tokenInfo), evmApiMap);
   });

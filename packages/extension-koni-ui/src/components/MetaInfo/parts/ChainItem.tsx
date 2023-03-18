@@ -1,20 +1,23 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Logo } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { InfoItemBase } from './types';
 
 export interface ChainInfoItem extends InfoItemBase {
-  chain: string,
-  chainName: string,
+  chain: string
 }
 
 const Component: React.FC<ChainInfoItem> = (props: ChainInfoItem) => {
-  const { chain, chainName, className, label, valueColorSchema = 'default' } = props;
+  const { chain, className, label, valueColorSchema = 'default' } = props;
+  const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
+  const chainInfo = useMemo(() => (chainInfoMap[chain]), [chain, chainInfoMap]);
 
   return (
     <div className={CN(className, '__row -type-chain')}>
@@ -32,7 +35,7 @@ const Component: React.FC<ChainInfoItem> = (props: ChainInfoItem) => {
           />
 
           <div className={'__chain-name ml-xs'}>
-            {chainName}
+            {chainInfo?.name}
           </div>
         </div>
       </div>

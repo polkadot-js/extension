@@ -8,7 +8,7 @@ import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/
 import { _isChainEvmCompatible, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 import { getAmplitudeStakingOnChain, getAstarStakingOnChain, getParaStakingOnChain } from '@subwallet/extension-koni-base/api/staking/paraChain';
-import { getNominationPoolReward, getRelayPoolingOnchain, getRelayStakingOnChain } from '@subwallet/extension-koni-base/api/staking/relayChain';
+import { getNominationPoolReward, getRelayPoolingOnChain, getRelayStakingOnChain } from '@subwallet/extension-koni-base/api/staking/relayChain';
 import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
 
 interface PromiseMapping {
@@ -52,7 +52,7 @@ export function stakingOnChainApi (addresses: string[], substrateApiMap: Record<
     }
 
     if (_STAKING_CHAIN_GROUP.nominationPool.includes(chain)) {
-      const unsub = await getRelayPoolingOnchain(parentApi, useAddresses, chainInfoMap, chain, callback);
+      const unsub = await getRelayPoolingOnChain(parentApi, useAddresses, chainInfoMap, chain, callback);
 
       unsubList.push(unsub);
     }

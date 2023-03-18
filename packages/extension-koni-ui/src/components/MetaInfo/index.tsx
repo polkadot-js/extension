@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import AccountGroupItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountGroupItem';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React from 'react';
@@ -214,6 +215,7 @@ type CompoundedComponent = React.ForwardRefExoticComponent<Omit<Props, 'theme'>>
   Data: typeof DataItem,
   Status: typeof StatusItem,
   Account: typeof AccountItem,
+  AccountGroup: typeof AccountGroupItem,
   Transfer: typeof TransferItem,
   Chain: typeof ChainItem,
   DisplayType: typeof DisplayTypeItem,
@@ -227,6 +229,7 @@ const MetaInfo = _MetaInfo as unknown as CompoundedComponent;
 MetaInfo.Data = DataItem;
 MetaInfo.Status = StatusItem;
 MetaInfo.Account = AccountItem;
+MetaInfo.AccountGroup = AccountGroupItem;
 MetaInfo.Transfer = TransferItem;
 MetaInfo.Chain = ChainItem;
 MetaInfo.DisplayType = DisplayTypeItem;

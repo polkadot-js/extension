@@ -1,4 +1,4 @@
-     603	Jaco                          	Bump dev deps (#1234)
+     604	Jaco                          	0.45.3 (#1235)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

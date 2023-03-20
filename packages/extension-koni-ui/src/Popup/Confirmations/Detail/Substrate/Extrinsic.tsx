@@ -57,7 +57,7 @@ const decodeMethod = (data: string, chain: Chain, specVersion: BN): Decoded => {
 const renderMethod = (data: string, { args, method }: Decoded, t: TFunction): React.ReactNode => {
   if (!args || !method) {
     return (
-      <MetaInfo.Data label={t('Method data')}>
+      <MetaInfo.Data label={t<string>('Method data')}>
         {data}
       </MetaInfo.Data>
     );
@@ -65,7 +65,7 @@ const renderMethod = (data: string, { args, method }: Decoded, t: TFunction): Re
 
   return (
     <div className='method-container'>
-      <MetaInfo.Data label={t('Method')}>
+      <MetaInfo.Data label={t<string>('Method')}>
         <details>
           <summary>
             {method.section}.{method.method}{method.meta ? `(${method.meta.args.map(({ name }) => name).join(', ')})` : ''}
@@ -75,7 +75,7 @@ const renderMethod = (data: string, { args, method }: Decoded, t: TFunction): Re
       </MetaInfo.Data>
       {
         method.meta && (
-          <MetaInfo.Data label={t('Info')}>
+          <MetaInfo.Data label={t<string>('Info')}>
             <details>
               <summary>{method.meta.docs.map((d) => d.toString().trim()).join(' ')}</summary>
             </details>

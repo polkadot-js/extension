@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
@@ -30,6 +29,12 @@ enum FormFieldName {
   NAME = 'name'
 }
 
+enum ActionType {
+  EXPORT = 'export',
+  DERIVE = 'derive',
+  DELETE = 'delete'
+}
+
 interface DetailFormState {
   [FormFieldName.NAME]: string;
 }
@@ -39,7 +44,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const goHome = useDefaultNavigate().goHome;
+  const { goHome } = useDefaultNavigate();
   const notify = useNotification();
   const { token } = useTheme() as Theme;
   const { accountAddress } = useParams();
@@ -92,7 +97,9 @@ const Component: React.FC<Props> = (props: Props) => {
         .then(() => {
           setDeleting(true);
           forgetAccount(account.address)
-            .then()
+            .then(() => {
+              goHome();
+            })
             .catch((e: Error) => {
               notify({
                 message: e.message,
@@ -112,7 +119,7 @@ const Component: React.FC<Props> = (props: Props) => {
           }
         });
     }
-  }, [account?.address, deleteAccountAction, notify]);
+  }, [account?.address, deleteAccountAction, notify, goHome]);
 
   const onDerive = useCallback(() => {
     if (!account?.address) {
@@ -180,7 +187,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
-    editAccount(account.address, name)
+    editAccount(account.address, name.trim())
       .catch(console.error)
       .finally(() => {
         setSaving(false);
@@ -200,9 +207,12 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
+        disableBack={deriving}
         subHeaderIcons={[
           {
-            icon: <InfoIcon />
+            icon: <CloseIcon />,
+            onClick: goHome,
+            disabled: deriving
           }
         ]}
         title={t('Account detail')}
@@ -290,12 +300,12 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           <Button
             block={true}
-            className='account-button'
+            className={CN('account-button', `action-type-${ActionType.DERIVE}`)}
             contentAlign='left'
             disabled={!canDerive}
             icon={(
               <BackgroundIcon
-                backgroundColor={token['magenta-7']}
+                backgroundColor='var(--icon-bg-color)'
                 phosphorIcon={ShareNetwork}
                 size='sm'
                 weight='fill'
@@ -309,12 +319,12 @@ const Component: React.FC<Props> = (props: Props) => {
           </Button>
           <Button
             block={true}
-            className='account-button'
+            className={CN('account-button', `action-type-${ActionType.EXPORT}`)}
             contentAlign='left'
             disabled={account.isExternal || deriving}
             icon={(
               <BackgroundIcon
-                backgroundColor={token['green-6']}
+                backgroundColor='var(--icon-bg-color)'
                 phosphorIcon={Export}
                 size='sm'
                 weight='fill'
@@ -327,12 +337,12 @@ const Component: React.FC<Props> = (props: Props) => {
           </Button>
           <Button
             block={true}
-            className={CN('account-button', 'remove-button')}
+            className={CN('account-button', `action-type-${ActionType.DELETE}`)}
             contentAlign='left'
             disabled={deriving}
             icon={(
               <BackgroundIcon
-                backgroundColor={token.colorError}
+                backgroundColor='var(--icon-bg-color)'
                 phosphorIcon={TrashSimple}
                 size='sm'
                 weight='fill'
@@ -362,8 +372,8 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
         height: token.sizeMD,
 
         '.anticon': {
-          height: token.sizeSM,
-          width: token.sizeSM
+          height: token.size,
+          width: token.size
         }
       },
 
@@ -402,14 +412,37 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
       '.account-button': {
         marginBottom: token.marginXS,
-        gap: token.sizeXS
+        gap: token.sizeXS,
+        color: token.colorTextLight1,
+
+        '&:disabled': {
+          color: token.colorTextLight1,
+          opacity: 0.4
+        }
       },
 
-      '.remove-button': {
-        color: token.colorError,
+      [`.action-type-${ActionType.DERIVE}`]: {
+        '--icon-bg-color': token['magenta-7']
+      },
+
+      [`.action-type-${ActionType.EXPORT}`]: {
+        '--icon-bg-color': token['green-6']
+      },
+
+      [`.action-type-${ActionType.DELETE}`]: {
+        '--icon-bg-color': token['colorError-6'],
+        color: token['colorError-6'],
 
         '.ant-background-icon': {
-          color: token.colorTextBase
+          color: token.colorTextLight1
+        },
+
+        '&:disabled': {
+          color: token['colorError-6'],
+
+          '.ant-background-icon': {
+            color: token.colorTextLight1
+          }
         }
       }
     },

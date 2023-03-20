@@ -86,7 +86,7 @@ export const SW_THEME_CONFIGS: Record<ThemeNames, SwThemeConfig> = {
   [ThemeNames.LIGHT]: {
     id: ThemeNames.LIGHT,
     name: 'Light',
-    algorithm: SwReactUI.defaultAlgorithm,
+    algorithm: SwReactUI.darkAlgorithm,
     customTokens: (token) => (token),
     generateExtraTokens: (token) => {
       return { ...genDefaultExtraTokens(token) };

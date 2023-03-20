@@ -41,7 +41,7 @@ export const findAccountByAddress = (accounts: AccountJson[], address?: string):
       return null;
     }
 
-    const originAddress = isEthereumAddress(address) ? address : encodeAddress(decodeAddress(address));
+    const originAddress = address === ALL_ACCOUNT_KEY ? address : isEthereumAddress(address) ? address : encodeAddress(decodeAddress(address));
     const result = accounts.find((account) => account.address.toLowerCase() === originAddress.toLowerCase());
 
     return result || null;

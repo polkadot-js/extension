@@ -1056,6 +1056,13 @@ export default class KoniState {
         [assetSlug]: assetSetting
       });
     });
+
+    // if chain not enabled, then automatically enable
+    if (assetSetting.visible) {
+      const assetInfo = this.chainService.getAssetBySlug(assetSlug);
+
+      this.chainService.enableChain(assetInfo.originChain);
+    }
   }
 
   public subscribeAssetSettings () {

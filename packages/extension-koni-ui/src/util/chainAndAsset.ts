@@ -9,13 +9,15 @@ import { _isAssetFungibleToken } from '@subwallet/extension-base/services/chain-
 export function isAvailableTokenAsset (
   chainAsset: _ChainAsset,
   assetSettingMap: Record<string, AssetSetting>,
-  chainStateMap: Record<string, _ChainState>
+  chainStateMap: Record<string, _ChainState>,
+  ledgerNetwork?: string
 ): boolean {
   const assetSetting = assetSettingMap[chainAsset.slug];
 
   const isAssetVisible = assetSetting && assetSetting.visible;
   const isAssetFungible = _isAssetFungibleToken(chainAsset);
   const isAssetActive = chainStateMap[chainAsset.originChain].active;
+  const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset.originChain : true; // Check if have ledger network
 
-  return isAssetVisible && isAssetFungible && isAssetActive;
+  return isAssetVisible && isAssetFungible && isAssetActive && isValidLedger;
 }

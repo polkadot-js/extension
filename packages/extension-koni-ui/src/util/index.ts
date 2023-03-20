@@ -14,8 +14,7 @@ import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { decodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-export * from './common';
-export * from './accountAll';
+import { findAccountByAddress } from './account';
 
 // todo: Refactor this file
 
@@ -24,12 +23,6 @@ function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): 
 
   return accounts.filter((a) => !isAccountAll(a.address)).find(({ address }): boolean =>
     decodeAddress(address).toString() === pkStr
-  ) || null;
-}
-
-export function findAccountByAddress (accounts: AccountJson[], _address: string): AccountJson | null {
-  return accounts.find(({ address }): boolean =>
-    address === _address
   ) || null;
 }
 
@@ -219,3 +212,7 @@ export const detectThemeAvatar = (address?: string) => isEthereumAddress(address
 export { toAddress } from './toAddress';
 export { openInNewTab } from '@subwallet/extension-koni-ui/util/browser';
 export { isSubstrateMessage, isEvmMessage } from './confirmation';
+
+export * from './account';
+export * from './common';
+export * from './accountAll';

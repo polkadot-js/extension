@@ -290,6 +290,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
+        disableBack={loading}
         onBack={onBack}
         rightFooterButton={{
           children: firstStep ? t('Confirm') : t('Finish'),
@@ -301,7 +302,8 @@ const Component: React.FC<Props> = (props: Props) => {
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
-            onClick: goHome
+            onClick: goHome,
+            disabled: loading
           }
         ]}
         title={

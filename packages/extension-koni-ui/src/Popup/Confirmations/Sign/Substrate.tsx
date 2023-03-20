@@ -7,9 +7,6 @@ import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByGenesisHash';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
-import DisplayPayloadModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload';
-import SubstrateQr from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload/Substrate';
-import ScanSignature from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/ScanSignature';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isSubstrateMessage } from '@subwallet/extension-koni-ui/util';
@@ -23,6 +20,8 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
+
+import { DisplayPayloadModal, ScanSignature, SubstrateQr } from '../Qr';
 
 interface Props extends ThemeProps {
   account: AccountJson;

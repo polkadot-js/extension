@@ -457,6 +457,7 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.STAKING_UNSTAKE]: RequestUnbondingSubmit,
   [ExtrinsicType.STAKING_BOND]: RequestBondingSubmit,
   [ExtrinsicType.STAKING_UNBOND]: RequestUnbondingSubmit,
+  [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: any,
   [ExtrinsicType.STAKING_CLAIM_REWARD]: RequestStakeClaimReward,
   [ExtrinsicType.STAKING_WITHDRAW]: RequestStakeWithdrawal,
   [ExtrinsicType.STAKING_CANCEL_WITHDRAWAL]: RequestStakeCancelWithdrawal,

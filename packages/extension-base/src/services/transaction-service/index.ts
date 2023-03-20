@@ -113,19 +113,23 @@ export default class TransactionService {
       estimateFee.symbol = symbol;
 
       if (transaction) {
-        if (isSubstrateTransaction(transaction)) {
-          estimateFee.value = (await transaction.paymentInfo(address)).partialFee.toString();
-        } else {
-          const web3 = this.chainService.getEvmApi(chain);
-
-          if (!web3) {
-            validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED));
+        try {
+          if (isSubstrateTransaction(transaction)) {
+            estimateFee.value = (await transaction.paymentInfo(address)).partialFee.toString();
           } else {
-            const gasPrice = await web3.api.eth.getGasPrice();
-            const gasLimit = await web3.api.eth.estimateGas(transaction);
+            const web3 = this.chainService.getEvmApi(chain);
 
-            estimateFee.value = (gasLimit * parseInt(gasPrice)).toString();
+            if (!web3) {
+              validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED));
+            } else {
+              const gasPrice = await web3.api.eth.getGasPrice();
+              const gasLimit = await web3.api.eth.estimateGas(transaction);
+
+              estimateFee.value = (gasLimit * parseInt(gasPrice)).toString();
+            }
           }
+        } catch (e) {
+          estimateFee.value = '0';
         }
       }
     }

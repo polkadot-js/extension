@@ -70,7 +70,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     };
   }, [selectedFilters]);
 
-  console.log('stakingItems', stakingItems);
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
   }, [activeModal]);

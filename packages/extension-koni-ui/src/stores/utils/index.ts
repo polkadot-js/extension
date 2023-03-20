@@ -239,3 +239,9 @@ export const updateTxHistory = (data: TransactionHistoryItem[]) => {
 };
 
 export const subscribeTxHistory = lazySubscribeMessage('pri(transaction.history.getSubscription)', null, updateTxHistory, updateTxHistory);
+
+// export const updateChainValidators = (data: ChainValidatorParams) => {
+//   store.dispatch({ type: 'bonding/updateChainValidators', payload: data });
+// };
+//
+// export const subscribeChainValidators = lazySubscribeMessage('pri(bonding.getBondingOptions)', null, updateChainValidators, updateChainValidators);

@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationPoolMetadata, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationPoolInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-export type NominationPoolDataType = NominationPoolMetadata & {
+export type NominationPoolDataType = NominationPoolInfo & {
   symbol: string;
 }
 
@@ -28,39 +28,43 @@ const useGetValidatorList = (chain: string, type: 'pool' | 'nominate') => {
     if (type === 'pool') {
       const result: NominationPoolDataType[] = [];
 
-      nominationPoolList.forEach((item) => {
-        const transformBondedAmount = getInputValuesFromString(item.bondedAmount, decimals);
+      if (nominationPoolList) {
+        nominationPoolList.forEach((item) => {
+          const transformBondedAmount = getInputValuesFromString(item.bondedAmount, decimals);
 
-        const nominationPoolItem: NominationPoolDataType = {
-          ...item,
-          bondedAmount: transformBondedAmount,
-          symbol
-        };
+          const nominationPoolItem: NominationPoolDataType = {
+            ...item,
+            bondedAmount: transformBondedAmount,
+            symbol
+          };
 
-        result.push(nominationPoolItem);
-      });
+          result.push(nominationPoolItem);
+        });
+      }
 
       return result;
     } else {
       const result: ValidatorDataType[] = [];
 
-      validatorList.forEach((item) => {
-        const transformMinBond = getInputValuesFromString(item.minBond, decimals);
-        const transformOwnStake = getInputValuesFromString(item.ownStake, decimals);
-        const transformOtherStake = getInputValuesFromString(item.otherStake, decimals);
-        const transformTotalStake = getInputValuesFromString(item.totalStake, decimals);
+      if (validatorList) {
+        validatorList.forEach((item) => {
+          const transformMinBond = getInputValuesFromString(item.minBond, decimals);
+          const transformOwnStake = getInputValuesFromString(item.ownStake, decimals);
+          const transformOtherStake = getInputValuesFromString(item.otherStake, decimals);
+          const transformTotalStake = getInputValuesFromString(item.totalStake, decimals);
 
-        const validatorItem: ValidatorDataType = {
-          ...item,
-          minBond: transformMinBond,
-          ownStake: transformOwnStake,
-          otherStake: transformOtherStake,
-          totalStake: transformTotalStake,
-          symbol
-        };
+          const validatorItem: ValidatorDataType = {
+            ...item,
+            minBond: transformMinBond,
+            ownStake: transformOwnStake,
+            otherStake: transformOtherStake,
+            totalStake: transformTotalStake,
+            symbol
+          };
 
-        result.push(validatorItem);
-      });
+          result.push(validatorItem);
+        });
+      }
 
       return result;
     }

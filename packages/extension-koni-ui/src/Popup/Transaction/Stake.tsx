@@ -45,6 +45,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const location = useLocation();
   const { chainStakingMetadata, hideTabList, nominatorMetadata } = location.state as StakingDataOption;
 
+  console.log(chainStakingMetadata, nominatorMetadata)
+
   const assetRegistry = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);

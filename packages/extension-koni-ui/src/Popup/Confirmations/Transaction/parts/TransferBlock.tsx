@@ -3,12 +3,13 @@
 
 import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import { BaseTransactionConfirmationProps } from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/Base';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+
+import { BaseTransactionConfirmationProps } from './Base';
 
 type Props = BaseTransactionConfirmationProps;
 

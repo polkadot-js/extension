@@ -13,8 +13,9 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BuyTokensParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { openInNewTab } from '@subwallet/extension-koni-ui/util';
+import { findAccountByAddress, openInNewTab } from '@subwallet/extension-koni-ui/util';
 import { getAccountType } from '@subwallet/extension-koni-ui/util/account';
+import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { Button, Form, Icon, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -35,17 +36,28 @@ type BuyTokensFormProps = {
   service: 'transak' | 'moonPay' | 'onramper'
 }
 
-function getTokenItems (accountType: AccountType): TokenItemType[] {
+function getTokenItems (accountType: AccountType, ledgerNetwork?: string): TokenItemType[] {
   const result: TokenItemType[] = [];
 
   Object.values(PREDEFINED_TRANSAK_TOKEN).forEach((info) => {
-    if (accountType === 'ALL' || accountType === info.support) {
-      result.push({
-        name: info.symbol,
-        slug: info.key,
-        symbol: info.symbol,
-        originChain: info.chain
-      });
+    if (ledgerNetwork) {
+      if (info.chain === ledgerNetwork) {
+        result.push({
+          name: info.symbol,
+          slug: info.key,
+          symbol: info.symbol,
+          originChain: info.chain
+        });
+      }
+    } else {
+      if (accountType === 'ALL' || accountType === info.support) {
+        result.push({
+          name: info.symbol,
+          slug: info.key,
+          symbol: info.symbol,
+          originChain: info.chain
+        });
+      }
     }
   });
 
@@ -68,10 +80,11 @@ function Component ({ className }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
   const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
   const fixedTokenKey = currentSymbol ? PREDEFINED_TRANSAK_TOKEN[currentSymbol]?.key : undefined;
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+
+  const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+
   const [currentAddress] = useState<string | undefined>(currentAccount?.address);
-  const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const { t } = useTranslation();
   const { goBack } = useDefaultNavigate();
   const [form] = Form.useForm<BuyTokensFormProps>();
@@ -86,18 +99,27 @@ function Component ({ className }: Props) {
   const selectedService = Form.useWatch('service', form);
 
   const accountType = selectedAddress ? getAccountType(selectedAddress) : '';
+  const ledgerNetwork = useMemo((): string | undefined => {
+    const account = findAccountByAddress(accounts, selectedAddress);
+
+    if (account?.originGenesisHash) {
+      return findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
+    }
+
+    return undefined;
+  }, [accounts, chainInfoMap, selectedAddress]);
 
   const tokenItems = useMemo<TokenItemType[]>(() => {
     if (fixedTokenKey) {
-      return getTokenItems('ALL');
+      return getTokenItems('ALL', ledgerNetwork);
     }
 
     if (!accountType) {
       return [];
     }
 
-    return getTokenItems(accountType);
-  }, [accountType, fixedTokenKey]);
+    return getTokenItems(accountType, ledgerNetwork);
+  }, [accountType, fixedTokenKey, ledgerNetwork]);
 
   const onClickNext = useCallback(() => {
     const { address, service, tokenKey } = form.getFieldsValue();
@@ -128,11 +150,11 @@ function Component ({ className }: Props) {
     if ((selectedService === 'transak') && selectedAddress && selectedTokenKey) {
       const [symbol] = selectedTokenKey.split('|');
 
-      return PREDEFINED_TRANSAK_TOKEN[symbol].support === getAccountType(selectedAddress);
+      return PREDEFINED_TRANSAK_TOKEN[symbol].support === getAccountType(selectedAddress) && tokenItems.find((item) => item.slug === selectedTokenKey);
     }
 
     return false;
-  }, [selectedAddress, selectedTokenKey, selectedService]);
+  }, [selectedService, selectedAddress, selectedTokenKey, tokenItems]);
 
   useEffect(() => {
     if (currentAddress !== currentAccount?.address) {

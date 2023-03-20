@@ -3,7 +3,9 @@
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
@@ -56,6 +58,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const canGoBack = !!location.state;
+  const isPopup = useIsPopup();
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
@@ -80,12 +83,25 @@ const Component: React.FC<Props> = (props: Props) => {
     return () => {
       setLoading(true);
       settings.set({ camera: currentValue ? 'off' : 'on' });
+
+      if (!currentValue) {
+        if (isPopup) {
+          windowOpen('/settings/security')
+            .catch((e: Error) => {
+              console.log(e);
+              settings.set({ camera: 'off' });
+            });
+
+          return;
+        }
+      }
+
       setTimeout(() => {
         setCamera(settings.camera === 'on');
         setLoading(false);
       }, 300);
     };
-  }, []);
+  }, [isPopup]);
 
   const onClickItem = useCallback((url: string) => {
     return () => {

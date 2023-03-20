@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { REQUEST_CAMERA_ACCESS_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
-import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -22,7 +20,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const isPopup = useIsPopup();
 
   const { inactiveModal } = useContext(ModalContext);
 
@@ -33,12 +30,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const onClick = useCallback(() => {
     closeModal();
 
-    if (isPopup) {
-      windowOpen('/settings/security').catch(console.error);
-    } else {
-      navigate('/settings/security', { state: true });
-    }
-  }, [closeModal, isPopup, navigate]);
+    navigate('/settings/security', { state: true });
+  }, [closeModal, navigate]);
 
   return (
     <SwModal

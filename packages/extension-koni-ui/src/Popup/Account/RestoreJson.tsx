@@ -232,7 +232,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         avatarIdentPrefix={42}
         avatarTheme={account.type === 'ethereum' ? 'ethereum' : 'polkadot'}
         className='account-item'
-        isSelected={true}
         key={account.address}
       />
     );

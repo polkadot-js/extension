@@ -85,14 +85,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, 100);
   }, [goHome, notify]);
 
-  const openSecurity = useCallback(() => {
-    if (isPopup) {
-      windowOpen('/settings/security').catch(console.error);
-    } else {
-      navigate('/settings/security', { state: true });
-    }
-  }, [isPopup, navigate]);
-
   // todo: i18n all titles, labels below
   const SettingGroupItemType: SettingGroupItemType[] = [
     {
@@ -125,7 +117,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIconBgColor: token['green-6'],
           rightIcon: CaretRight,
           title: 'Security settings',
-          onClick: openSecurity
+          onClick: () => {
+            navigate('/settings/security', { state: true });
+          }
         },
         {
           key: 'manage-address-book',

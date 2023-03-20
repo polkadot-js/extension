@@ -5,9 +5,6 @@ import { ConfirmationDefinitions, ConfirmationResult } from '@subwallet/extensio
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
-import DisplayPayloadModal from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload';
-import EvmQr from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/DisplayPayload/Evm';
-import ScanSignature from '@subwallet/extension-koni-ui/Popup/Confirmations/Qr/ScanSignature';
 import { PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { EvmSignatureSupportType } from '@subwallet/extension-koni-ui/types/confirmation';
 import { isEvmMessage } from '@subwallet/extension-koni-ui/util';
@@ -18,6 +15,8 @@ import { CheckCircle, QrCode, Swatches, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
+import { DisplayPayloadModal, EvmQr, ScanSignature } from '../Qr';
 
 interface Props extends ThemeProps {
   id: string;

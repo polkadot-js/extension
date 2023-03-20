@@ -3,6 +3,7 @@
 
 import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
@@ -21,7 +22,9 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SendFundParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
+import { findAccountByAddress } from '@subwallet/extension-koni-ui/util';
 import { isAvailableTokenAsset } from '@subwallet/extension-koni-ui/util/chainAndAsset';
+import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
@@ -55,6 +58,7 @@ function isAssetTypeValid (
 
 function getTokenItems (
   address: string,
+  accounts: AccountJson[],
   chainInfoMap: Record<string, _ChainInfo>,
   chainStateMap: Record<string, _ChainState>,
   assetRegistryMap: Record<string, _ChainAsset>,
@@ -62,10 +66,13 @@ function getTokenItems (
   multiChainAssetMap: Record<string, _MultiChainAsset>,
   sendFundSlug?: string // is ether a token slug or a multiChainAsset slug
 ): TokenItemType[] {
-  if (!address) {
+  const account = findAccountByAddress(accounts, address);
+
+  if (!account) {
     return [];
   }
 
+  const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
   const isEthereum = isEthereumAddress(address);
   const isSetTokenSlug = !!sendFundSlug && !!assetRegistryMap[sendFundSlug];
   const isSetMultiChainAssetSlug = !!sendFundSlug && !!multiChainAssetMap[sendFundSlug];
@@ -77,7 +84,7 @@ function getTokenItems (
 
     if (isSetTokenSlug) {
       if (isAssetTypeValid(assetRegistryMap[sendFundSlug], chainInfoMap, isEthereum) &&
-        isAvailableTokenAsset(assetRegistryMap[sendFundSlug], assetSettingMap, chainStateMap)) {
+        isAvailableTokenAsset(assetRegistryMap[sendFundSlug], assetSettingMap, chainStateMap, ledgerNetwork)) {
         const { name, originChain, slug, symbol } = assetRegistryMap[sendFundSlug];
 
         return [
@@ -98,7 +105,7 @@ function getTokenItems (
 
   Object.values(assetRegistryMap).forEach((chainAsset) => {
     if (!(isAssetTypeValid(chainAsset, chainInfoMap, isEthereum) &&
-      isAvailableTokenAsset(chainAsset, assetSettingMap, chainStateMap))) {
+      isAvailableTokenAsset(chainAsset, assetSettingMap, chainStateMap, ledgerNetwork))) {
       return;
     }
 
@@ -178,31 +185,40 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const assetSettingMap = useSelector((state: RootState) => state.assetRegistry.assetSettingMap);
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const chainStateMap = useSelector((state: RootState) => state.chainStore.chainStateMap);
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-  const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
+  const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const balanceMap = useSelector((state: RootState) => state.balance.balanceMap);
-  const transactionContext = useContext(TransactionContext);
+  const { chain: contextChain,
+    from: contextFrom,
+    onDone: contextOnDone,
+    setChain: contextSetChain,
+    setFrom: contextSetFrom } = useContext(TransactionContext);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   const notify = useNotification();
   const [form] = Form.useForm<TransferFormProps>();
   const formDefault = {
-    from: transactionContext.from,
-    chain: transactionContext.chain,
+    from: contextFrom,
+    chain: contextChain,
     destChain: '',
     token: '',
     to: '',
     value: ''
   };
 
+  const currentFrom = Form.useWatch('from', form);
+  const currentTokenSlug = Form.useWatch('token', form);
+
+  const currentAccount = useMemo(() => findAccountByAddress(accounts, currentFrom), [accounts, currentFrom]);
+
   const destChainItems = useMemo<ChainItemType[]>(() => {
-    return getDestinationChainItems(transactionContext.chain, chainInfoMap);
-  }, [chainInfoMap, transactionContext.chain]);
+    return getDestinationChainItems(contextChain, chainInfoMap);
+  }, [chainInfoMap, contextChain]);
 
   const tokenItems = useMemo<TokenItemType[]>(() => {
     return getTokenItems(
-      transactionContext.from,
+      contextFrom,
+      accounts,
       chainInfoMap,
       chainStateMap,
       assetRegistryMap,
@@ -210,7 +226,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       multiChainAssetMap,
       sendFundSlug
     );
-  }, [assetRegistryMap, assetSettingMap, chainInfoMap, chainStateMap, transactionContext.from, multiChainAssetMap, sendFundSlug]);
+  }, [accounts, assetRegistryMap, assetSettingMap, chainInfoMap, chainStateMap, contextFrom, multiChainAssetMap, sendFundSlug]);
 
   const validateRecipientAddress = useCallback((rule: Rule, _recipientAddress: string): Promise<void> => {
     if (!_recipientAddress) {
@@ -269,7 +285,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       }
 
       if (part.from) {
-        transactionContext.setFrom(part.from);
+        contextSetFrom(part.from);
       }
 
       if (part.token) {
@@ -281,12 +297,12 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           destChain: chain
         });
 
-        transactionContext.setChain(chain);
+        contextSetChain(chain);
       }
 
       setErrors([]);
     },
-    [assetRegistryMap, form, transactionContext]
+    [assetRegistryMap, form, contextSetChain, contextSetFrom]
   );
 
   // Submit transaction
@@ -338,7 +354,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             setErrors(errors.map((e) => e.message));
             setWarnings(warnings.map((w) => w.message));
           } else if (extrinsicHash) {
-            transactionContext.onDone(extrinsicHash);
+            contextOnDone(extrinsicHash);
           }
         }).catch((e: Error) => {
           setLoading(false);
@@ -346,10 +362,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         });
       }).catch(console.log);
     },
-    [currentAccount, form, notify, t, transactionContext]
+    [currentAccount, form, notify, t, contextOnDone]
   );
 
-  const currentTokenSlug = Form.useWatch('token', form);
   const currentChainAsset = useMemo(() => {
     return currentTokenSlug ? assetRegistryMap[currentTokenSlug] : undefined;
   }, [assetRegistryMap, currentTokenSlug]);
@@ -363,16 +378,40 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   })();
 
   useEffect(() => {
-    if (tokenItems.length) {
-      const { token } = form.getFieldsValue();
+    const { from, token } = form.getFieldsValue();
 
+    if (tokenItems.length) {
       if (!token) {
-        form.setFieldsValue({
-          token: tokenItems[0].slug,
-          chain: assetRegistryMap[tokenItems[0].slug].originChain,
-          destChain: assetRegistryMap[tokenItems[0].slug].originChain
-        });
-        transactionContext.setChain(assetRegistryMap[tokenItems[0].slug].originChain);
+        const account = findAccountByAddress(accounts, from);
+
+        let pass = false;
+
+        if (account?.originGenesisHash) {
+          const network = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash);
+
+          if (network) {
+            const token = tokenItems.find((item) => item.originChain === network.slug);
+
+            if (token) {
+              form.setFieldsValue({
+                token: token.slug,
+                chain: assetRegistryMap[token.slug].originChain,
+                destChain: assetRegistryMap[token.slug].originChain
+              });
+              contextSetChain(assetRegistryMap[token.slug].originChain);
+              pass = true;
+            }
+          }
+        }
+
+        if (!pass) {
+          form.setFieldsValue({
+            token: tokenItems[0].slug,
+            chain: assetRegistryMap[tokenItems[0].slug].originChain,
+            destChain: assetRegistryMap[tokenItems[0].slug].originChain
+          });
+          contextSetChain(assetRegistryMap[tokenItems[0].slug].originChain);
+        }
       } else {
         const isSelectedTokenInList = tokenItems.some((i) => i.slug === token);
 
@@ -382,11 +421,11 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             chain: assetRegistryMap[tokenItems[0].slug].originChain,
             destChain: assetRegistryMap[tokenItems[0].slug].originChain
           });
-          transactionContext.setChain(assetRegistryMap[tokenItems[0].slug].originChain);
+          contextSetChain(assetRegistryMap[tokenItems[0].slug].originChain);
         }
       }
     }
-  }, [tokenItems, assetRegistryMap, form, transactionContext]);
+  }, [accounts, tokenItems, assetRegistryMap, form, contextSetChain, chainInfoMap]);
 
   // Focus the first field
   // useEffect(() => {

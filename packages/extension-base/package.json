@@ -79,7 +79,6 @@
     "@subwallet/extension-chains": "^0.8.1",
     "@subwallet/extension-dapp": "^0.8.1",
     "@subwallet/extension-inject": "^0.8.1",
-    "@subwallet/extension-koni-base": "^0.8.1",
     "@subwallet/keyring": "^0.0.4",
     "@subwallet/ui-keyring": "^0.0.3",
     "@unique-nft/types": "^0.6.0-4",

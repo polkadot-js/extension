@@ -38,7 +38,6 @@ const packages = [
   'extension-dapp',
   'extension-inject',
   'extension-koni',
-  'extension-koni-base',
   'extension-koni-ui'
 ];
 

@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset, _SubstrateChainType } from '@subwallet/chain-list/types';

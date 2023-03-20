@@ -21,7 +21,7 @@ export const PoolDetailModalId = 'poolDetailModalId';
 
 function Component ({ className, decimals, onCancel, selectedNominationPool, status }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { address, identity, memberCount, symbol } = selectedNominationPool;
+  const { address, memberCounter, name, symbol } = selectedNominationPool;
 
   return (
     <SwModal
@@ -38,7 +38,7 @@ function Component ({ className, decimals, onCancel, selectedNominationPool, sta
         <MetaInfo.Account
           address={address}
           label={t('Pool')}
-          name={identity}
+          name={name}
         />
 
         <MetaInfo.Status
@@ -59,21 +59,21 @@ function Component ({ className, decimals, onCancel, selectedNominationPool, sta
           decimals={decimals}
           label={t('Owner pooled')}
           suffix={symbol}
-          value={memberCount}
+          value={memberCounter}
           valueColorSchema={'even-odd'}
         />
 
         <MetaInfo.Number
           label={t('Total pooled')}
           suffix={'%'}
-          value={memberCount}
+          value={memberCounter}
           valueColorSchema={'even-odd'}
         />
 
         <MetaInfo.Number
           label={t('Member of pool')}
           suffix={'%'}
-          value={memberCount}
+          value={memberCounter}
           valueColorSchema={'even-odd'}
         />
       </MetaInfo>

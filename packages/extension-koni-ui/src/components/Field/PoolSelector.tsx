@@ -106,8 +106,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
     return (
       item.address.toLowerCase().includes(searchTextLowerCase) ||
-      (item.identity
-        ? item.identity.toLowerCase().includes(searchTextLowerCase)
+      (item.name
+        ? item.name.toLowerCase().includes(searchTextLowerCase)
         : false)
     );
   }, []);
@@ -115,19 +115,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const renderItem = useCallback((item: NominationPoolDataType) => {
     return (
       <StakingPoolItem
-        address={item.address}
-        bondedAmount={item.bondedAmount}
+        {...item}
         className={'pool-item'}
-        id={item.id}
-        identity={item.identity}
-        memberCount={item.memberCount}
         // eslint-disable-next-line react/jsx-no-bind
         onClickMoreBtn={(e: SyntheticEvent) => {
           e.stopPropagation();
           setViewDetailItem(item);
           activeModal(PoolDetailModalId);
         }}
-        symbol={item.symbol}
       />
     );
   }, [activeModal]);
@@ -140,7 +135,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return (
       <div className={'__selected-item'}>
         <div className={'__selected-item-name common-text'}>
-          {item.identity}
+          {item.name}
         </div>
 
         <div className={'__selected-item-right-part common-text'}>

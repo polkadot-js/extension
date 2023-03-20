@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import { isShowNominationByValidator } from '@subwallet/extension-koni-base/api/staking/bonding/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';

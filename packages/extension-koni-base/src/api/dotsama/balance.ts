@@ -122,9 +122,12 @@ async function subscribeWithAccountMulti (addresses: string[], chainInfo: _Chain
 
       for (const _poolMemberData of poolMemberDatas) {
         const poolMemberData = _poolMemberData.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
-        const pooledBalance = new BN(poolMemberData.points.toString());
 
-        pooledStakingBalance = pooledStakingBalance.add(pooledBalance);
+        if (poolMemberData) {
+          const pooledBalance = new BN(poolMemberData.points.toString());
+
+          pooledStakingBalance = pooledStakingBalance.add(pooledBalance);
+        }
       }
     }
 

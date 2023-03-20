@@ -148,7 +148,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={`${getSubHeaderTitle()} (${nftList.length})`}
       >
         <SwList.Section
-          className={CN('nft_item_list__container', { pb: !nftList.length })}
+          className={CN('nft_item_list__container')}
           displayGrid={true}
           enableSearchInput={true}
           gridGap={'14px'}
@@ -177,10 +177,9 @@ const NftCollectionDetail = styled(Component)<Props>(({ theme: { token } }: Prop
       flex: 1,
       height: '100%',
 
-      '&.pb': {
-        '.ant-sw-list': {
-          paddingBottom: 1
-        }
+      '.ant-sw-list': {
+        paddingBottom: 1,
+        marginBottom: -1
       }
     },
 

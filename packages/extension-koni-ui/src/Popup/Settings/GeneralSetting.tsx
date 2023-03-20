@@ -3,16 +3,18 @@
 
 import { BrowserConfirmationType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { languageOptions } from '@subwallet/extension-base/constants/i18n';
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveBrowserConfirmationType } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateBrowserConfirmationType, updateLanguage, updateTheme } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps, SwSubHeader } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
+import CN from 'classnames';
 import i18next from 'i18next';
-import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout, MoonStars, Sun } from 'phosphor-react';
+import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 
@@ -23,12 +25,13 @@ type SelectionItemType = {
   leftIcon: SwIconProps['phosphorIcon'],
   leftIconBgColor: string,
   title: string,
+  disabled?: boolean,
 };
 
 function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
   return (
     <SettingItem
-      className={'__selection-item'}
+      className={CN('__selection-item', { 'item-disabled': item.disabled })}
       key={item.key}
       leftItemIcon={
         <BackgroundIcon
@@ -89,6 +92,8 @@ type LoadingMap = {
 };
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
@@ -108,23 +113,25 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         key: ThemeNames.DARK,
         leftIcon: MoonStars,
         leftIconBgColor: token.colorPrimary,
-        title: 'Dark theme' // todo: i18n this
+        title: t('Dark theme')
       },
       {
         key: ThemeNames.LIGHT,
         leftIcon: Sun,
         leftIconBgColor: token.colorPrimary,
-        title: 'Light theme (coming soon)' // todo: i18n this
+        title: t('Light theme (coming soon)'),
+        disabled: true
       }
     ];
-  }, [token]);
+  }, [t, token]);
 
   const languageItems = useMemo<SelectionItemType[]>(() => {
     return languageOptions.map((item) => ({
       key: item.value,
       leftIcon: GlobeHemisphereEast,
       leftIconBgColor: token['green-6'],
-      title: item.text
+      title: item.text,
+      disabled: item.value !== 'en'
     }));
   }, [token]);
 
@@ -132,24 +139,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return [
       {
         key: 'extension',
-        leftIcon: Layout,
+        leftIcon: LayoutIcon,
         leftIconBgColor: token['volcano-6'],
-        title: 'Extension' // todo: i18n this
+        title: t('Extension')
       },
       {
         key: 'popup',
         leftIcon: ArrowSquareUpRight,
         leftIconBgColor: token['volcano-6'],
-        title: 'Popup' // todo: i18n this
+        title: t('Popup')
       },
       {
         key: 'window',
         leftIcon: CornersOut,
         leftIconBgColor: token['volcano-6'],
-        title: 'Window' // todo: i18n this
+        title: t('Window')
       }
     ];
-  }, [token]);
+  }, [t, token]);
 
   const onSelectLanguage = useCallback((value: string) => {
     setLanguage(value as LanguageType);
@@ -199,81 +206,76 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   return (
     <PageWrapper className={`general-setting ${className}`}>
-      <SwSubHeader
-        background={'transparent'}
-        center
+      <Layout.WithSubHeaderOnly
         onBack={goBack}
-        paddingVertical
-        showBackButton
-        title={'General settings' } // todo: i18n this
-      />
+        title={t('General settings')}
+      >
+        <div className={'__scroll-container'}>
+          <SelectModal
+            background={'default'}
+            className={`__modal ${className}`}
+            customInput={renderModalTrigger({
+              key: 'wallet-theme-trigger',
+              leftIcon: Image,
+              leftIconBgColor: token.colorPrimary,
+              title: t('Wallet theme')
+            })}
+            id='wallet-theme-select-modal'
+            inputWidth={'100%'}
+            itemKey='key'
+            items={themeItems}
+            onSelect={updateTheme as unknown as (value: string) => void}
+            renderItem={renderSelectionItem}
+            selected={theme}
+            shape='round'
+            title={t('Wallet theme')}
+          />
 
-      <div className={'__scroll-container'}>
-        <SelectModal
-          background={'default'}
-          className={`__modal ${className}`}
-          customInput={renderModalTrigger({
-            key: 'wallet-theme-trigger',
-            leftIcon: Image,
-            leftIconBgColor: token.colorPrimary,
-            title: 'Wallet theme' // todo: i18n this
-          })}
-          id='wallet-theme-select-modal'
-          inputWidth={'100%'}
-          itemKey='key'
-          items={themeItems}
-          onSelect={updateTheme as unknown as (value: string) => void}
-          renderItem={renderSelectionItem}
-          selected={theme}
-          shape='round'
-          size='small'
-          title={'Wallet theme'} // todo: i18n this
-        />
+          <SelectModal
+            background={'default'}
+            className={`__modal ${className}`}
+            customInput={renderModalTrigger({
+              key: 'languages-trigger',
+              leftIcon: GlobeHemisphereEast,
+              leftIconBgColor: token['green-6'],
+              title: t('Languages')
+            })}
+            disabled={loadingMap.language}
+            id='languages-select-modal'
+            inputWidth={'100%'}
+            itemKey='key'
+            items={languageItems}
+            onSelect={onSelectLanguage}
+            renderItem={renderSelectionItem}
+            selected={language}
+            shape='round'
+            size='small'
+            title={t('Languages')}
+          />
 
-        <SelectModal
-          background={'default'}
-          className={`__modal ${className}`}
-          customInput={renderModalTrigger({
-            key: 'languages-trigger',
-            leftIcon: GlobeHemisphereEast,
-            leftIconBgColor: token['green-6'],
-            title: 'Languages' // todo: i18n this
-          })}
-          disabled={loadingMap.language}
-          id='languages-select-modal'
-          inputWidth={'100%'}
-          itemKey='key'
-          items={languageItems}
-          onSelect={onSelectLanguage}
-          renderItem={renderSelectionItem}
-          selected={language}
-          shape='round'
-          size='small'
-          title={'Languages'} // todo: i18n this
-        />
-
-        <SelectModal
-          background={'default'}
-          className={`__modal ${className}`}
-          customInput={renderModalTrigger({
-            key: 'browser-confirmation-type-trigger',
-            leftIcon: BellSimpleRinging,
-            leftIconBgColor: token['volcano-6'],
-            title: 'Browser confirmation type' // todo: i18n this
-          })}
-          disabled={loadingMap.browserConfirmationType}
-          id='browser-confirmation-type-select-modal'
-          inputWidth={'100%'}
-          itemKey='key'
-          items={browserConfirmationItems}
-          onSelect={onSelectBrowserConfirmationType}
-          renderItem={renderSelectionItem}
-          selected={browserConfirmationType}
-          shape='round'
-          size='small'
-          title={'Browser confirmation type'} // todo: i18n this
-        />
-      </div>
+          <SelectModal
+            background={'default'}
+            className={`__modal ${className}`}
+            customInput={renderModalTrigger({
+              key: 'browser-confirmation-type-trigger',
+              leftIcon: BellSimpleRinging,
+              leftIconBgColor: token['volcano-6'],
+              title: t('Browser confirmation type')
+            })}
+            disabled={loadingMap.browserConfirmationType}
+            id='browser-confirmation-type-select-modal'
+            inputWidth={'100%'}
+            itemKey='key'
+            items={browserConfirmationItems}
+            onSelect={onSelectBrowserConfirmationType}
+            renderItem={renderSelectionItem}
+            selected={browserConfirmationType}
+            shape='round'
+            size='small'
+            title={t('Browser confirmation type')}
+          />
+        </div>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }
@@ -286,6 +288,13 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: -token.marginXS
+    },
+
+    '.item-disabled': {
+      '.ant-setting-item-content': {
+        cursor: 'not-allowed',
+        backgroundColor: `${token.colorBgSecondary} !important`
+      }
     },
 
     '&.general-setting': {

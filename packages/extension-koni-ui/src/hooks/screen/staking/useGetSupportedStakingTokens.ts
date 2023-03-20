@@ -7,7 +7,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-export default function useGetSupportedStakingToken (): _ChainAsset[] {
+export default function useGetSupportedStakingTokens (): _ChainAsset[] {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
 

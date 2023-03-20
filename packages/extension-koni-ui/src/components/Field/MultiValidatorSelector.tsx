@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -64,7 +64,7 @@ const renderEmpty = () => <EmptyAccount />;
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', id = 'multi-validator-selector', isSingleSelect = false, nominators, onChange } = props;
-  const items = useGetValidatorList(chain, 'nominate') as ValidatorDataType[];
+  const items = useGetValidatorList(chain, StakingType.NOMINATED) as ValidatorDataType[];
   const nominatorValueList = nominators && nominators.length ? nominators.map((item) => `${item.validatorAddress}-${item.validatorIdentity || ''}`) : [];
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);

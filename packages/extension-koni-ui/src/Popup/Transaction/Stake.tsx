@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Field/MultiValidatorSelector';
@@ -13,9 +13,9 @@ import { StakingNetworkDetailModal, StakingNetworkDetailModalId } from '@subwall
 import ScreenTab from '@subwallet/extension-koni-ui/components/ScreenTab';
 import SelectValidatorInput from '@subwallet/extension-koni-ui/components/SelectValidatorInput';
 import { useGetStakeData } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakeData';
-import useGetSupportedStakingToken from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetSupportedStakingToken';
-import { getBondingOptions } from '@subwallet/extension-koni-ui/messaging';
+import useGetSupportedStakingTokens from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetSupportedStakingTokens';
 import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import { fetchChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
@@ -46,16 +46,17 @@ const Component: React.FC<Props> = (props: Props) => {
   const transactionContext = useContext(TransactionContext);
   const location = useLocation();
   const { t } = useTranslation();
+  const [form] = useForm<StakeFromProps>();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { chainStakingMetadata, hideTabList, nominatorMetadata } = location.state as StakingDataOption;
-  const tokenList = useGetSupportedStakingToken();
+  const tokenList = useGetSupportedStakingTokens();
 
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [{ decimals, symbol }, setNativeTokenBasicInfo] = useState<{ decimals: number, symbol: string }>({ decimals: 0, symbol: 'Unit' });
-  const isAll = isAccountAll(currentAccount?.address || '');
-  const [form] = useForm<StakeFromProps>();
-  const defaultIndex = useMemo(() => {
+  const isAllAccount = isAccountAll(currentAccount?.address || '');
+  const defaultTab = useMemo(() => {
     if (nominatorMetadata) {
       if (nominatorMetadata.type === StakingType.POOLED) {
         return 0;
@@ -67,9 +68,9 @@ const Component: React.FC<Props> = (props: Props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const [stakingType, setStakingType] = useState<StakingType>(defaultIndex === 0 ? StakingType.POOLED : StakingType.NOMINATED);
+  const [stakingType, setStakingType] = useState<StakingType>(defaultTab === 0 ? StakingType.POOLED : StakingType.NOMINATED);
   const { _chainStakingMetadata, _nominatorMetadata } = useGetStakeData(currentAccount?.address || '', stakingType, chainStakingMetadata, nominatorMetadata, form.getFieldsValue().token);
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+
   const defaultSlug = useMemo(() => {
     if (chainStakingMetadata) {
       const chainInfo = chainInfoMap[chainStakingMetadata.chain];
@@ -80,11 +81,13 @@ const Component: React.FC<Props> = (props: Props) => {
     return '';
   }, [chainInfoMap, chainStakingMetadata]);
 
-  const formDefault = {
-    from: transactionContext.from,
-    token: defaultSlug,
-    value: '0'
-  };
+  const formDefault = useMemo(() => {
+    return {
+      from: transactionContext.from,
+      token: defaultSlug,
+      value: '0'
+    };
+  }, [defaultSlug, transactionContext.from]);
 
   useEffect(() => {
     if (_chainStakingMetadata) {
@@ -99,11 +102,18 @@ const Component: React.FC<Props> = (props: Props) => {
     transactionContext.setShowRightBtn(true);
     transactionContext.setChain(chainStakingMetadata ? chainStakingMetadata.chain : '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transactionContext]);
+  }, []);
 
   useEffect(() => {
     transactionContext.setDisabledRightBtn(!_chainStakingMetadata);
   }, [_chainStakingMetadata, transactionContext]);
+
+  useEffect(() => { // fetch validators when change stakingType
+    if (transactionContext.chain !== '') {
+      console.log('fetch validators');
+      fetchChainValidators(transactionContext.chain, stakingType);
+    }
+  }, [stakingType, transactionContext.chain]);
 
   const onFieldsChange = useCallback(({ from, nominate, token }: Partial<StakeFromProps>, values: StakeFromProps) => {
     // TODO: field change
@@ -113,29 +123,16 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     if (token) {
-      const chain = token.split('-')[0];
+      const chain = _getOriginChainOfAsset(token);
 
       transactionContext.setChain(chain);
       form.setFieldValue('token', token);
-
-      if (stakingType === StakingType.NOMINATED) {
-        store.dispatch()
-        getBondingOptions(chain, stakingType)
-          .then((result) => {
-            console.log('result', result);
-          })
-          .catch(() => {
-            // show notification
-          });
-      } else {
-        console.log('got ehjre');
-      }
     }
 
     if (nominate) {
       form.setFieldValue('nominate', nominate);
     }
-  }, [form, stakingType, transactionContext]);
+  }, [form, transactionContext]);
 
   const submitTransaction = useCallback(() => {
     // TODO: submit transaction
@@ -178,7 +175,7 @@ const Component: React.FC<Props> = (props: Props) => {
     <>
       <ScreenTab
         className={className}
-        defaultIndex={defaultIndex}
+        defaultIndex={defaultTab}
         hideTabList={!!hideTabList}
         // eslint-disable-next-line react/jsx-no-bind
         onSelectTab={(index: number) => setStakingType(index === 0 ? StakingType.POOLED : StakingType.NOMINATED)}
@@ -191,13 +188,13 @@ const Component: React.FC<Props> = (props: Props) => {
               initialValues={formDefault}
               onValuesChange={onFieldsChange}
             >
-              {isAll &&
+              {isAllAccount &&
                 <Form.Item name={'from'}>
                   <AccountSelector />
                 </Form.Item>
               }
 
-              {!isAll && <Form.Item name={'token'}>
+              {!isAllAccount && <Form.Item name={'token'}>
                 <TokenSelector
                   items={tokenList}
                   prefixShape='circle'
@@ -211,7 +208,7 @@ const Component: React.FC<Props> = (props: Props) => {
               />
 
               <div className={'form-row'}>
-                {isAll && <Form.Item name={'token'}>
+                {isAllAccount && <Form.Item name={'token'}>
                   <TokenSelector
                     items={tokenList}
                     prefixShape='circle'
@@ -232,7 +229,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
               <Form.Item name={'pool'}>
                 <PoolSelector
-                  chain={'polkadot'}
+                  chain={transactionContext.chain}
                   label={t('Select pool')}
                   nominationPoolList={_nominatorMetadata ? _nominatorMetadata.nominations : undefined}
                 />
@@ -254,13 +251,13 @@ const Component: React.FC<Props> = (props: Props) => {
               initialValues={formDefault}
               onValuesChange={onFieldsChange}
             >
-              {isAll &&
+              {isAllAccount &&
                 <Form.Item name={'from'}>
                   <AccountSelector />
                 </Form.Item>
               }
 
-              {!isAll && <Form.Item name={'token'}>
+              {!isAllAccount && <Form.Item name={'token'}>
                 <TokenSelector
                   items={tokenList}
                   prefixShape='circle'
@@ -274,7 +271,7 @@ const Component: React.FC<Props> = (props: Props) => {
               />
 
               <div className={'form-row'}>
-                {isAll && <Form.Item name={'token'}>
+                {isAllAccount && <Form.Item name={'token'}>
                   <TokenSelector
                     items={tokenList}
                     prefixShape='circle'
@@ -297,7 +294,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
               <Form.Item name={'nominate'}>
                 <MultiValidatorSelector
-                  chain={'polkadot'}
+                  chain={transactionContext.chain}
                   id={'multi-validator-selector'}
                   nominators={_nominatorMetadata ? _nominatorMetadata.nominations : undefined}
                 />

@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationPoolInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationPoolInfo, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
+import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -16,16 +17,19 @@ export type ValidatorDataType = ValidatorInfo & {
   symbol: string;
 }
 
-const useGetValidatorList = (chain: string, type: 'pool' | 'nominate') => {
+const useGetValidatorList = (chain: string, type: StakingType) => {
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
-  const chainInfo = chainInfoMap[chain];
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-  const nominationPoolList = nominationPoolInfoMap[chain];
-  const validatorList = validatorInfoMap[chain];
+  const chainInfo = useFetchChainInfo(chain);
 
   return useMemo(() => {
-    if (type === 'pool') {
+    if (!chainInfo) {
+      return [];
+    }
+
+    const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
+
+    if (type === StakingType.POOLED) {
+      const nominationPoolList = nominationPoolInfoMap[chain];
       const result: NominationPoolDataType[] = [];
 
       if (nominationPoolList) {
@@ -44,6 +48,7 @@ const useGetValidatorList = (chain: string, type: 'pool' | 'nominate') => {
 
       return result;
     } else {
+      const validatorList = validatorInfoMap[chain];
       const result: ValidatorDataType[] = [];
 
       if (validatorList) {
@@ -68,7 +73,7 @@ const useGetValidatorList = (chain: string, type: 'pool' | 'nominate') => {
 
       return result;
     }
-  }, [decimals, nominationPoolList, symbol, type, validatorList]);
+  }, [chain, chainInfo, nominationPoolInfoMap, type, validatorInfoMap]);
 };
 
 export default useGetValidatorList;

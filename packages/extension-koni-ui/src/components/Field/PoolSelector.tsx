@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -79,7 +79,8 @@ const getFilteredList = (items: NominationPoolDataType[], filters: string[]) => 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', disabled, id = 'pool-selector', label, nominationPoolList, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
   const nominationPoolValueList = nominationPoolList && nominationPoolList.length ? nominationPoolList.map((item) => item.validatorAddress) : [];
-  const items = useGetValidatorList(chain, 'pool') as NominationPoolDataType[];
+  const items = useGetValidatorList(chain, StakingType.POOLED) as NominationPoolDataType[];
+
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');

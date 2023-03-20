@@ -161,7 +161,7 @@ function Component (): React.ReactElement {
         const network = findNetworkJsonByGenesisHash(chainInfoMap, currentAccount.originGenesisHash);
 
         if (network) {
-          setReceiveSelectedResult((prevState) => ({...prevState, selectedNetwork: network.slug }));
+          setReceiveSelectedResult((prevState) => ({ ...prevState, selectedNetwork: network.slug }));
           activeModal(RECEIVE_QR_MODAL);
 
           return;

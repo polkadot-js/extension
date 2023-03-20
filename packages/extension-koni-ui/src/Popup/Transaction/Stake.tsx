@@ -7,12 +7,14 @@ import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/A
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Field/MultiValidatorSelector';
 import PoolSelector from '@subwallet/extension-koni-ui/components/Field/PoolSelector';
-import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
+import { TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { StakingNetworkDetailModal, StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import ScreenTab from '@subwallet/extension-koni-ui/components/ScreenTab';
 import SelectValidatorInput from '@subwallet/extension-koni-ui/components/SelectValidatorInput';
 import { useGetStakeData } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakeData';
+import useGetSupportedStakingToken from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetSupportedStakingToken';
+import { getBondingOptions } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
@@ -43,11 +45,11 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const transactionContext = useContext(TransactionContext);
   const location = useLocation();
+  const { t } = useTranslation();
+
   const { chainStakingMetadata, hideTabList, nominatorMetadata } = location.state as StakingDataOption;
+  const tokenList = useGetSupportedStakingToken();
 
-  console.log(chainStakingMetadata, nominatorMetadata)
-
-  const assetRegistry = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [{ decimals, symbol }, setNativeTokenBasicInfo] = useState<{ decimals: number, symbol: string }>({ decimals: 0, symbol: 'Unit' });
@@ -55,7 +57,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [form] = useForm<StakeFromProps>();
   const defaultIndex = useMemo(() => {
     if (nominatorMetadata) {
-      if (nominatorMetadata.type === StakingType.POOLED.valueOf()) {
+      if (nominatorMetadata.type === StakingType.POOLED) {
         return 0;
       } else {
         return 1;
@@ -65,7 +67,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const [stakingType, setStakingType] = useState<string>(defaultIndex === 0 ? StakingType.POOLED.valueOf() : StakingType.NOMINATED.valueOf());
+  const [stakingType, setStakingType] = useState<StakingType>(defaultIndex === 0 ? StakingType.POOLED : StakingType.NOMINATED);
   const { _chainStakingMetadata, _nominatorMetadata } = useGetStakeData(currentAccount?.address || '', stakingType, chainStakingMetadata, nominatorMetadata, form.getFieldsValue().token);
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const defaultSlug = useMemo(() => {
@@ -115,18 +117,25 @@ const Component: React.FC<Props> = (props: Props) => {
 
       transactionContext.setChain(chain);
       form.setFieldValue('token', token);
+
+      if (stakingType === StakingType.NOMINATED) {
+        store.dispatch()
+        getBondingOptions(chain, stakingType)
+          .then((result) => {
+            console.log('result', result);
+          })
+          .catch(() => {
+            // show notification
+          });
+      } else {
+        console.log('got ehjre');
+      }
     }
 
     if (nominate) {
       form.setFieldValue('nominate', nominate);
     }
-  }, [form, transactionContext]);
-
-  const tokenList = useMemo<TokenItemType[]>(() => (
-    Object.values(assetRegistry).map(({ name, originChain, slug, symbol }) => ({ name, slug, originChain, symbol }))
-  ), [assetRegistry]);
-
-  const { t } = useTranslation();
+  }, [form, stakingType, transactionContext]);
 
   const submitTransaction = useCallback(() => {
     // TODO: submit transaction
@@ -172,7 +181,7 @@ const Component: React.FC<Props> = (props: Props) => {
         defaultIndex={defaultIndex}
         hideTabList={!!hideTabList}
         // eslint-disable-next-line react/jsx-no-bind
-        onSelectTab={(index: number) => setStakingType(index === 0 ? 'pooled' : 'nominated')}
+        onSelectTab={(index: number) => setStakingType(index === 0 ? StakingType.POOLED : StakingType.NOMINATED)}
       >
         <ScreenTab.SwTabPanel label={t('Pools')}>
           <TransactionContent>

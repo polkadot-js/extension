@@ -1189,7 +1189,6 @@ export interface BasicTxInfo {
 
 export interface BondingOptionParams {
   chain: string;
-  address: string;
   type: StakingType;
 }
 

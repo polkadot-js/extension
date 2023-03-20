@@ -959,22 +959,17 @@ export default class KoniExtension {
     }
   }
 
-  private getPrice (): Promise<PriceJson> {
-    return new Promise<PriceJson>((resolve, reject) => {
-      this.#koniState.getPrice((rs: PriceJson) => {
-        resolve(rs);
-      });
-    });
+  private async getPrice (): Promise<PriceJson> {
+    return this.#koniState.priceService.getPrice();
   }
 
   private subscribePrice (id: string, port: chrome.runtime.Port): Promise<PriceJson> {
     const cb = createSubscription<'pri(price.getSubscription)'>(id, port);
 
-    const priceSubscription = this.#koniState.subscribePrice().subscribe({
-      next: (rs) => {
+    const priceSubscription = this.#koniState.priceService.getPriceSubject()
+      .subscribe((rs) => {
         cb(rs);
-      }
-    });
+      });
 
     this.createUnsubscriptionHandle(id, priceSubscription.unsubscribe);
 

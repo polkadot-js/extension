@@ -3,9 +3,10 @@
 
 import { ProviderError } from '@subwallet/extension-base/background/errors/ProviderError';
 import { MessageTypes, TransportRequestMessage } from '@subwallet/extension-base/background/types';
-import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
+import { PORT_EXTENSION, PORT_MOBILE } from '@subwallet/extension-base/defaults';
 import { NftHandler } from '@subwallet/extension-base/koni/api/nft';
 import KoniExtension from '@subwallet/extension-base/koni/background/handlers/Extension';
+import Mobile from '@subwallet/extension-base/koni/background/handlers/Mobile';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import KoniTabs from '@subwallet/extension-base/koni/background/handlers/Tabs';
 
@@ -15,6 +16,7 @@ import { assert } from '@polkadot/util';
 export const state = new KoniState();
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
+export const mobile = new Mobile(state);
 export const nftHandler = new NftHandler();
 
 // Migration
@@ -38,6 +40,7 @@ export const nftHandler = new NftHandler();
 // }).catch((e) => console.warn(e));
 
 export default function handlers<TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port: chrome.runtime.Port, extensionPortName = PORT_EXTENSION): void {
+  const isMobile = port.name === PORT_MOBILE;
   const isExtension = port.name === extensionPortName;
   const sender = port.sender as chrome.runtime.MessageSender;
   const from = isExtension
@@ -47,9 +50,11 @@ export default function handlers<TMessageType extends MessageTypes> ({ id, messa
 
   console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);
 
-  const promise = isExtension
-    ? extension.handle(id, message, request, port)
-    : tabs.handle(id, message, request, from, port);
+  const promise = isMobile
+    ? mobile.handle(id, message, request, port)
+    : isExtension
+      ? extension.handle(id, message, request, port)
+      : tabs.handle(id, message, request, from, port);
 
   promise
     .then((response): void => {

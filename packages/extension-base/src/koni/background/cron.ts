@@ -123,7 +123,11 @@ export class KoniCron {
     this.serviceSubscription = this.state.subscribeServiceInfo().subscribe({
       next: (serviceInfo) => {
         this.logger.log('ServiceInfo updated, restarting...');
-        const { address } = serviceInfo.currentAccountInfo;
+        const address = serviceInfo.currentAccountInfo?.address;
+
+        if (!address) {
+          return;
+        }
 
         this.resetStakingReward();
         this.resetNft(address);

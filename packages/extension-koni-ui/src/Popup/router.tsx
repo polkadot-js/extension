@@ -6,7 +6,7 @@ import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { i18nPromise } from '@subwallet/extension-koni-ui/util/i18n';
 import React, { ComponentType, ReactNode } from 'react';
-import { createHashRouter, Outlet, useLocation, useRouteError } from 'react-router-dom';
+import { createHashRouter, Outlet, useLocation } from 'react-router-dom';
 
 export class LazyLoader {
   public loader;
@@ -86,19 +86,7 @@ const Unstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/
 const CancelUnstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/CancelUnstake'));
 const ClaimReward = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/ClaimReward'));
 const WithDraw = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/WithDraw'));
-
-const ErrorFallback = () => {
-  const error = useRouteError();
-
-  console.error(error);
-
-  return (
-    <div>
-      <h1>An Error Occurred</h1>
-      <p>Sorry, something went wrong. Please try again later.</p>
-    </div>
-  );
-};
+const ErrorFallback = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/ErrorFallback'));
 
 // A Placeholder page
 export function Example () {
@@ -115,7 +103,7 @@ export const router = createHashRouter([
     path: '/',
     loader: () => i18nPromise,
     element: <Root />,
-    errorElement: <ErrorFallback />,
+    errorElement: <ErrorFallback.element />,
     children: [
       Welcome.generateRouterObject('/welcome'),
       BuyTokens.generateRouterObject('/buy-tokens'),

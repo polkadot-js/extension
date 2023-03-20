@@ -8,8 +8,6 @@
   "references": [
     { "path": "../extension-base/tsconfig.build.json"
     },
-    { "path": "../extension-koni-base/tsconfig.build.json"
-    },
     { "path": "../extension-chains/tsconfig.build.json"
     },
     { "path": "../extension-dapp/tsconfig.build.json"

@@ -921,5 +921,19 @@
   "Active staked": "",
   "See more": "",
   "Token": "",
-  "Manage token list": ""
+  "Manage token list": "",
+  "Cancel unstake fee": "",
+  "Reward claiming": "",
+  "Reward claiming fee": "",
+  "Your rewards will be bonded back into the pool": "",
+  "Unbond amount": "",
+  "Withdraw fee": "",
+  "Opps! An Error Occurred": "",
+  "Sorry, something went wrong.": "",
+  "Please try again later.": "",
+  "Select collator": "",
+  "Unstaked:": "",
+  "Transaction fee:": "",
+  "Bond reward": "",
+  "Cancel unstake": ""
 }

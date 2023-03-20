@@ -19,7 +19,6 @@
     "@babel/runtime": "^7.20.6",
     "@subwallet/extension-base": "^0.8.1",
     "@subwallet/extension-inject": "^0.8.1",
-    "@subwallet/extension-koni-base": "^0.8.1",
     "@subwallet/extension-koni-ui": "^0.8.1"
   },
   "devDependencies": {

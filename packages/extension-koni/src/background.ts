@@ -9,10 +9,10 @@ import type { RequestSignatures, TransportRequestMessage } from '@subwallet/exte
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
+import { onExtensionInstall } from '@subwallet/extension-base/koni/background/events';
+import handlers, { state as koniState } from '@subwallet/extension-base/koni/background/handlers';
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import KeyringStore from '@subwallet/extension-base/stores/Keyring';
-import { onExtensionInstall } from '@subwallet/extension-koni-base/background/events';
-import handlers, { state as koniState } from '@subwallet/extension-koni-base/background/handlers';
 import keyring from '@subwallet/ui-keyring';
 
 import { assert } from '@polkadot/util';

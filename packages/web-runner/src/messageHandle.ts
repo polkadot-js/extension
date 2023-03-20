@@ -3,7 +3,7 @@
 
 import { RequestSignatures, TransportRequestMessage, TransportResponseMessage } from '@subwallet/extension-base/background/types';
 import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
-import handlers, { state as koniState } from '@subwallet/extension-koni-base/background/handlers';
+import handlers, { state as koniState } from '@subwallet/extension-base/koni/background/handlers';
 
 export interface CustomResponse<T> {
   id: string,

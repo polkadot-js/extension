@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';

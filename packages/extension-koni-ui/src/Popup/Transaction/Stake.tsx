@@ -93,8 +93,11 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [defaultSlug, transactionContext.from]);
 
-  console.log('formDefault', formDefault);
-  console.log('form', form.getFieldsValue());
+  const currentValue = Form.useWatch('value', form);
+  const currentFrom = Form.useWatch('from', form);
+  const currentTokenSlug = Form.useWatch('token', form);
+  const currentPool = Form.useWatch('pool', form);
+  const currentNominator = Form.useWatch('nominate', form);
 
   useEffect(() => {
     if (_chainStakingMetadata) {
@@ -121,7 +124,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [stakingType, transactionContext.chain]);
 
-  const onFieldsChange = useCallback(({ from, nominate, token }: Partial<StakeFromProps>, values: StakeFromProps) => {
+  const onFieldsChange = useCallback(({ from, nominate, token, value }: Partial<StakeFromProps>, values: StakeFromProps) => {
     // TODO: field change
 
     if (from) {
@@ -201,15 +204,14 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [activeModal]);
 
   const isDisabledStakeBtn = useMemo(() => {
-    const isDisabled = !form.getFieldsValue().token || form.getFieldsValue().value === '0' || form.getFieldsValue().from === ALL_ACCOUNT_KEY;
+    const isDisabled = !currentTokenSlug || currentValue === '0' || !currentValue || currentFrom === ALL_ACCOUNT_KEY;
 
     if (stakingType === StakingType.POOLED) {
-      return isDisabled || !form.getFieldsValue().pool;
+      return isDisabled || !currentPool;
     } else {
-      return isDisabled || !form.getFieldsValue().nominate;
+      return isDisabled || !currentNominator;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.getFieldsValue().token, form.getFieldsValue().value, form.getFieldsValue().pool, form.getFieldsValue().nominate, form.getFieldsValue().from, stakingType]);
+  }, [currentFrom, currentNominator, currentPool, currentTokenSlug, currentValue, stakingType]);
 
   return (
     <>
@@ -271,14 +273,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
               <Form.Item name={'pool'}>
                 <PoolSelector
-                  disabled={!form.getFieldsValue().token}
+                  disabled={!currentTokenSlug}
                   chain={transactionContext.chain}
                   label={t('Select pool')}
                   nominationPoolList={_nominatorMetadata ? _nominatorMetadata.nominations : undefined}
                 />
               </Form.Item>
 
-              {!!form.getFieldsValue().token && _chainStakingMetadata && <>
+              {!!currentTokenSlug && _chainStakingMetadata && <>
                 <Divider />
                 {getMetaInfo()}
               </>}
@@ -335,7 +337,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 label={t('Select validator')}
                 // eslint-disable-next-line react/jsx-no-bind
                 onClick={onActiveValidatorSelector}
-                value={form.getFieldsValue().nominate}
+                value={currentNominator}
+                disabled={!currentTokenSlug}
               />
 
               <Form.Item name={'nominate'}>

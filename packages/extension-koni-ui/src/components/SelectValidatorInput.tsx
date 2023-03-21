@@ -6,7 +6,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Book, DotsThree } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -17,10 +17,11 @@ type Props = ThemeProps & {
   placeholder?: string;
   value: string;
   onClick: () => void;
+  disabled?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, label, onClick, placeholder, value } = props;
+  const { className, disabled, label, onClick, placeholder, value } = props;
   const { t } = useTranslation();
 
   const addressList = useMemo(() => {
@@ -55,10 +56,16 @@ const Component: React.FC<Props> = (props: Props) => {
     return valueList[0].split('___')[1];
   };
 
+  const _onClick = useCallback(() => {
+    !disabled && onClick();
+  }, [disabled, onClick]);
+
   return (
     <div
-      className={CN(className)}
-      onClick={onClick}
+      className={CN(className, {
+        '-disabled': disabled
+      })}
+      onClick={_onClick}
     >
       <div className={'select-validator-input__label'}>{label}</div>
       <div className={'select-validator-input__content-wrapper'}>
@@ -69,6 +76,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className={'select-validator-input__content'}>{renderContent()}</div>
         <div className={'select-validator-input__button-wrapper'}>
           <Button
+            disabled={disabled}
             icon={<Icon
               phosphorIcon={Book}
               size={'sm'}
@@ -77,6 +85,7 @@ const Component: React.FC<Props> = (props: Props) => {
             type={'ghost'}
           />
           <Button
+            disabled={disabled}
             icon={<Icon
               phosphorIcon={DotsThree}
               size={'sm'}
@@ -98,6 +107,11 @@ const SelectValidatorInput = styled(Component)<Props>(({ theme: { token } }: Pro
     cursor: 'pointer',
     border: '2px solid transparent',
     transition: 'border-color 0.3s',
+
+    '&.-disabled': {
+      cursor: 'not-allowed',
+      border: 'none'
+    },
 
     '&:hover': {
       borderColor: token.colorPrimaryBorderHover

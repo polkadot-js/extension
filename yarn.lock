@@ -6102,7 +6102,7 @@ __metadata:
     "@subwallet/extension-inject": ^0.8.1
     "@subwallet/extension-mocks": ^0.8.1
     "@subwallet/keyring": ^0.0.4
-    "@subwallet/react-ui": 5.1.2-b30
+    "@subwallet/react-ui": 5.1.2-b31
     "@subwallet/ui-keyring": ^0.0.3
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -6216,9 +6216,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b30":
-  version: 5.1.2-b30
-  resolution: "@subwallet/react-ui@npm:5.1.2-b30"
+"@subwallet/react-ui@npm:5.1.2-b31":
+  version: 5.1.2-b31
+  resolution: "@subwallet/react-ui@npm:5.1.2-b31"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -6231,6 +6231,7 @@ __metadata:
     "@fortawesome/free-solid-svg-icons": ^6.2.1
     "@fortawesome/react-fontawesome": ^0.2.0
     "@polkadot/react-identicon": ^2.9.14
+    "@polkadot/util-crypto": ^11.1.1
     "@rc-component/tour": ~1.1.0
     "@zxing/browser": ^0.1.1
     "@zxing/library": ^0.19.1
@@ -6285,7 +6286,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: 6270a09373be5078799faea423bc123a9dab5d5505b0040a6886e8709cff706356dbf7916f2bf16e4845e43c69a9d52d2ba730bb535de7032be390d0f4fdb71d
+  checksum: f08dab8b4efcc51a4da0d2e62bc90eda16fe1566bfff419a166d561c1c2f94599228b5ec2c317dba3132f4609f9a7173eba2784ac44679b5b9950ac1caab6258
   languageName: node
   linkType: hard
 

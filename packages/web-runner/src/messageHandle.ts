@@ -13,7 +13,8 @@ export interface CustomResponse<T> {
 
 export type PageStatus = CustomResponse<{ status: 'init' | 'load' | 'crypto_ready' }>
 
-export function responseMessage (response: TransportResponseMessage<keyof RequestSignatures> | PageStatus) {// @ts-ignore
+export function responseMessage (response: TransportResponseMessage<keyof RequestSignatures> | PageStatus) {
+  // @ts-ignore
   if (window.ReactNativeWebView) {
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

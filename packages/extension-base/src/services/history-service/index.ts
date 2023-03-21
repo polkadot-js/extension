@@ -34,6 +34,10 @@ export class HistoryService {
   private fetchPromise: Promise<TransactionHistoryItem[]> | null = null;
   private nextFetch: NodeJS.Timeout | undefined = undefined;
   private async fetchAndLoadHistories (addresses: string[]): Promise<TransactionHistoryItem[]> {
+    if (!addresses || addresses.length === 0) {
+      return [];
+    }
+
     const chainMap = this.chainService.getChainInfoMap();
 
     // Query data from subscan or any indexer

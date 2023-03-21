@@ -120,8 +120,13 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         flex: 1,
         overflow: 'hidden'
       }
-    }
+    },
 
+    '.item-disabled': {
+      opacity: 0.4,
+      cursor: 'not-allowed !important',
+      backgroundColor: `${token.colorBgSecondary} !important`
+    }
   });
 });
 

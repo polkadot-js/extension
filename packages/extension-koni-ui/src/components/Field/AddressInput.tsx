@@ -165,11 +165,6 @@ export const AddressInput = styled(forwardRef(Component))<Props>(({ theme: { tok
       pointerEvents: 'none'
     },
 
-    '.ant-input': {
-      marginLeft: -40,
-      paddingLeft: 40
-    },
-
     '&:focus-within, &.-status-error': {
       '.__overlay': {
         pointerEvents: 'none',

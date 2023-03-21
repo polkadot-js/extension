@@ -269,6 +269,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
+        disableBack={loading}
         onBack={onBack}
         rightFooterButton={{
           ...footerButton,
@@ -341,6 +342,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       icon={removeIcon}
                       loading={deleting}
                       onClick={onDelete}
+                      size='xs'
                       type='ghost'
                     >
                       {t('Remove this account')}
@@ -386,6 +388,7 @@ const ApplyMasterPassword = styled(Component)<Props>(({ theme: { token } }: Prop
       },
 
       '.form-item-button': {
+        paddingTop: token.marginXXS,
         marginBottom: 0,
 
         '.ant-form-item-control-input-content': {

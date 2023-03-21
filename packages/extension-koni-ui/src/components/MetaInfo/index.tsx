@@ -66,7 +66,8 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__row': {
-      display: 'flex'
+      display: 'flex',
+      overflow: 'hidden'
     },
 
     '.__row.-d-column': {
@@ -120,6 +121,7 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
+      overflow: 'hidden',
 
       '> div + div': {
         marginTop: token.marginSM
@@ -182,7 +184,8 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.__value.-is-wrapper': {
       display: 'flex',
-      alignItems: 'center'
+      alignItems: 'center',
+      maxWidth: '100%'
     },
 
     '.__status-item': {
@@ -197,6 +200,12 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '&.-failed, &.-cancelled': {
         color: token.colorError
       }
+    },
+
+    '.__account-name': {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
     },
 
     '.__row.-type-total': {

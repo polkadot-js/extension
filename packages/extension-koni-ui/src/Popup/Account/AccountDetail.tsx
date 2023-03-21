@@ -449,6 +449,7 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
     '.account-name-input': {
       '.loading': {
+        color: token['gray-5'],
         animation: 'spinner-loading 1s infinite linear'
       }
     }

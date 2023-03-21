@@ -31,10 +31,12 @@ function Component ({ className, index, numberOfConfirmations, onClickNext, onCl
             className: CN('__right-block'),
             onClick: onClickNext,
             size: 'xs',
-            icon: (<Icon
-              phosphorIcon={CaretRight}
-              size='sm'
-            />)
+            icon: (
+              <Icon
+                phosphorIcon={CaretRight}
+                size='md'
+              />
+            )
           }
         ]}
       showBackButton={index > 0}

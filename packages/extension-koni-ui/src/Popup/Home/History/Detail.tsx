@@ -110,14 +110,12 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
   }), [t]);
 
   const openBlockExplorer = useCallback(
-    () => {
-      if (data.extrinsicHash && data.extrinsicHash !== '') {
-        const link = getTransactionLink(chainInfo, data.extrinsicHash);
-
+    (link: string) => {
+      return () => {
         window.open(link, '_blank');
-      }
+      };
     },
-    [chainInfo, data.extrinsicHash]
+    []
   );
 
   const modalFooter = useMemo<React.ReactNode>(() => {
@@ -139,21 +137,27 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
       );
     }
 
-    return (
-      <Button
-        block
-        icon={
-          <Icon
-            phosphorIcon={ArrowSquareUpRight}
-            weight={'fill'}
-          />
-        }
-        onClick={openBlockExplorer}
-      >
-        {t('View on explorer')}
-      </Button>
-    );
-  }, [data.status, onCancel, openBlockExplorer, t]);
+    const link = (data.extrinsicHash && data.extrinsicHash !== '') && getTransactionLink(chainInfo, data.extrinsicHash);
+
+    if (link) {
+      return (
+        <Button
+          block
+          icon={
+            <Icon
+              phosphorIcon={ArrowSquareUpRight}
+              weight={'fill'}
+            />
+          }
+          onClick={openBlockExplorer(link)}
+        >
+          {t('View on explorer')}
+        </Button>
+      );
+    }
+
+    return null;
+  }, [chainInfo, data.extrinsicHash, data.status, onCancel, openBlockExplorer, t]);
 
   const transactionType = data.type;
 

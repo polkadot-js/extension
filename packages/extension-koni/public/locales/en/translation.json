@@ -935,5 +935,16 @@
   "Unstaked:": "",
   "Transaction fee:": "",
   "Bond reward": "",
-  "Cancel unstake": ""
+  "Cancel unstake": "",
+  "Origin Chain": "",
+  "DestinationChain Chain": "",
+  "Dark theme": "",
+  "Light theme (coming soon)": "",
+  "Extension": "",
+  "Popup": "",
+  "Window": "",
+  "General settings": "",
+  "Wallet theme": "",
+  "Languages": "",
+  "Browser confirmation type": ""
 }

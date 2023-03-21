@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RequestSignatures, TransportRequestMessage, TransportResponseMessage } from '@subwallet/extension-base/background/types';
-import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
+import { PORT_CONTENT, PORT_EXTENSION, PORT_MOBILE } from '@subwallet/extension-base/defaults';
 import handlers, { state as koniState } from '@subwallet/extension-base/koni/background/handlers';
 
 export interface CustomResponse<T> {
@@ -30,7 +30,7 @@ export function setupHandlers () {
     const data = ev.data as TransportRequestMessage<keyof RequestSignatures>;
     const port = {
       name: PORT_EXTENSION,
-      sender: { url: ev.origin },
+      sender: { url: data.origin || ev.origin },
       postMessage: responseMessage,
       onDisconnect: {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -40,7 +40,9 @@ export function setupHandlers () {
     };
 
     if (data.id && data.message) {
-      if (data.message.startsWith('pri')) {
+      if (data.message.startsWith('mobile')) {
+        port.name = PORT_MOBILE;
+      } else if (data.message.startsWith('pri')) {
         port.name = PORT_EXTENSION;
       } else {
         port.name = PORT_CONTENT;

@@ -358,7 +358,7 @@ export default class State {
           : (signCount ? `${signCount}` : '')
     );
 
-    withErrorLog(() => chrome.browserAction.setBadgeText({ text }));
+    withErrorLog(() => chrome.browserAction?.setBadgeText({ text }));
 
     if (shouldClose && text === '') {
       this.popupClose();

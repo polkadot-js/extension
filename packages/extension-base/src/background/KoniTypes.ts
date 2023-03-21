@@ -1741,6 +1741,39 @@ export interface RequestGetTransaction {
   id: string;
 }
 
+// Mobile update
+export type SubscriptionServiceType = 'chainRegistry' | 'balance' | 'crowdloan' | 'staking';
+export type CronServiceType = 'price' | 'nft' | 'staking' | 'history' | 'recoverApi' | 'checkApiStatus';
+export type CronType =
+  'recoverApiMap' |
+  'checkApiMapStatus' |
+  'refreshHistory' |
+  'refreshNft' |
+  'refreshPrice' |
+  'refreshStakeUnlockingInfo' |
+  'refreshStakingReward' |
+  'refreshPoolingStakingReward';
+
+export interface RequestInitCronAndSubscription {
+  subscription: {
+    activeServices: SubscriptionServiceType[]
+  },
+  cron: {
+    intervalMap: Partial<Record<CronType, number>>,
+    activeServices: CronServiceType[]
+  }
+}
+
+export interface RequestCronAndSubscriptionAction {
+  subscriptionServices: SubscriptionServiceType[];
+  cronServices: CronServiceType[];
+}
+
+export interface ActiveCronAndSubscriptionMap {
+  subscription: Record<SubscriptionServiceType, boolean>;
+  cron: Record<CronServiceType, boolean>;
+}
+
 export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, SWTransactionResponse];
@@ -1918,6 +1951,20 @@ export interface KoniRequestSignatures {
   // Get Transaction
   'pri(transactions.getOne)': [RequestGetTransaction, SWTransactionResult];
   'pri(transactions.subscribe)': [null, Record<string, SWTransactionResult>, Record<string, SWTransactionResult>];
+
+  // Mobile
+  'mobile(ping)': [null, string];
+  'mobile(cronAndSubscription.init)': [RequestInitCronAndSubscription, ActiveCronAndSubscriptionMap];
+  'mobile(cronAndSubscription.activeService.subscribe)': [null, ActiveCronAndSubscriptionMap, ActiveCronAndSubscriptionMap];
+  'mobile(cronAndSubscription.start)': [RequestCronAndSubscriptionAction, void];
+  'mobile(cronAndSubscription.stop)': [RequestCronAndSubscriptionAction, void];
+  'mobile(cronAndSubscription.restart)': [RequestCronAndSubscriptionAction, void];
+  'mobile(cron.start)': [CronServiceType[], void];
+  'mobile(cron.stop)': [CronServiceType[], void];
+  'mobile(cron.restart)': [CronServiceType[], void];
+  'mobile(subscription.start)': [SubscriptionServiceType[], void];
+  'mobile(subscription.stop)': [SubscriptionServiceType[], void];
+  'mobile(subscription.restart)': [SubscriptionServiceType[], void];
 }
 
 export interface ApplicationMetadataType {

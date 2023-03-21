@@ -45,6 +45,8 @@ const EmptyList = styled(Component)<Props>(({ theme: { token } }: Props) => {
     gap: token.padding,
     flexDirection: 'column',
     alignContent: 'center',
+    position: 'relative',
+    zIndex: 2,
 
     '.empty_text_container': {
       display: 'flex',

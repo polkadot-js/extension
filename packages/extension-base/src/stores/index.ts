@@ -3,5 +3,4 @@
 
 export { default as AccountsStore } from './Accounts';
 export { default as MetadataStore } from './Metadata';
-export { default as PriceStore } from './Price';
 export { default as CurrentAccountStore } from './CurrentAccountStore';

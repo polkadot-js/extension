@@ -342,8 +342,8 @@ const Component: React.FC<Props> = (props: Props) => {
                       icon={removeIcon}
                       loading={deleting}
                       onClick={onDelete}
-                      type='ghost'
                       size='xs'
+                      type='ghost'
                     >
                       {t('Remove this account')}
                     </Button>

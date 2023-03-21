@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
+import ChainItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/ChainItem';
 import { ChainInfo } from '@subwallet/extension-koni-ui/types/chain';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { Logo } from '@subwallet/react-ui';
@@ -12,6 +13,7 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+import AccountItem from './AccountItem';
 import { InfoItemBase } from './types';
 
 export interface TransferInfoItem extends Omit<InfoItemBase, 'label'> {
@@ -70,6 +72,32 @@ const Component: React.FC<TransferInfoItem> = (props: TransferInfoItem) => {
       </div>
     );
   };
+
+  if (!recipientAddress) {
+    return (
+      <>
+        <AccountItem
+          address={senderAddress}
+          label={senderLabel || t('Sender')}
+          name={senderName}
+        />
+
+        {!!originChain && (
+          <ChainItem
+            chain={originChain.slug}
+            label={t('Origin Chain')}
+          />
+        )}
+
+        {!!destinationChain && (
+          <ChainItem
+            chain={destinationChain.slug}
+            label={t('DestinationChain Chain')}
+          />
+        )}
+      </>
+    );
+  }
 
   return (
     <div className={CN(className, '__row -type-transfer')}>

@@ -354,8 +354,8 @@ export default class TransactionService {
       case ExtrinsicType.CROWDLOAN:
         break;
       case ExtrinsicType.STAKING_BOND:
-      case ExtrinsicType.STAKING_STAKE: {
-        const data = parseTransactionData<ExtrinsicType.STAKING_STAKE>(transaction.data);
+      case ExtrinsicType.STAKING_JOIN_POOL: {
+        const data = parseTransactionData<ExtrinsicType.STAKING_JOIN_POOL>(transaction.data);
 
         historyItem.amount = { ...baseNativeAmount, value: data.amount.toString() || '0' };
         // Todo: Need fill data
@@ -364,8 +364,8 @@ export default class TransactionService {
 
         break;
       case ExtrinsicType.STAKING_UNBOND:
-      case ExtrinsicType.STAKING_UNSTAKE: {
-        const data = parseTransactionData<ExtrinsicType.STAKING_UNSTAKE>(transaction.data);
+      case ExtrinsicType.STAKING_LEAVE_POOL: {
+        const data = parseTransactionData<ExtrinsicType.STAKING_LEAVE_POOL>(transaction.data);
 
         historyItem.to = data.validatorAddress || '';
         historyItem.amount = { ...baseNativeAmount, value: data.amount.toString() || '0' };

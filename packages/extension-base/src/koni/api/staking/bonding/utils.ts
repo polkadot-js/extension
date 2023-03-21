@@ -7,10 +7,6 @@ import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils
 
 import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO } from '@polkadot/util';
 
-export const REVOKE_ACTION = 'revoke';
-export const BOND_LESS_ACTION = 'bondLess';
-export const DECREASE_ACTION = 'decrease'; // for bifrost
-
 export interface PalletNominationPoolsPoolMember {
   poolId: number,
   points: number,

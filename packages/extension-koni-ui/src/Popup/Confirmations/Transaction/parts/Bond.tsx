@@ -67,8 +67,8 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const StakeTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const BondTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {};
 });
 
-export default StakeTransactionConfirmation;
+export default BondTransactionConfirmation;

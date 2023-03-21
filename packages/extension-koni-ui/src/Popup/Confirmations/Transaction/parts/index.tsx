@@ -4,6 +4,7 @@
 export type { BaseTransactionConfirmationProps } from './Base';
 export { default as BaseTransactionConfirmation } from './Base';
 export { default as SendNftTransactionConfirmation } from './SendNft';
-export { default as StakeTransactionConfirmation } from './Stake';
+export { default as BondTransactionConfirmation } from './Bond';
+export { default as JoinPoolTransactionConfirmation } from './JoinPool';
 
 export * from './TransferBlock';

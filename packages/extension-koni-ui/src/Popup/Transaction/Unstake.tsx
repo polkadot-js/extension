@@ -39,7 +39,7 @@ const Component: React.FC<Props> = (props: Props) => {
   };
 
   useEffect(() => {
-    transactionContext.setTransactionType(ExtrinsicType.STAKING_UNSTAKE);
+    transactionContext.setTransactionType(ExtrinsicType.STAKING_LEAVE_POOL);
   }, [transactionContext]);
 
   const onFieldsChange = useCallback(({ from }: Partial<StakeFromProps>, values: StakeFromProps) => {

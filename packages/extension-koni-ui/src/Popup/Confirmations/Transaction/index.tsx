@@ -18,7 +18,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { EvmSignArea, SubstrateSignArea } from '../Sign';
-import { BaseTransactionConfirmation, SendNftTransactionConfirmation, StakeTransactionConfirmation, TransferBlock } from './parts';
+import { BaseTransactionConfirmation, BondTransactionConfirmation, JoinPoolTransactionConfirmation, SendNftTransactionConfirmation, TransferBlock } from './parts';
 
 interface Props extends ThemeProps {
   confirmation: ConfirmationQueueItem;
@@ -32,9 +32,11 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
       return TransferBlock;
     case ExtrinsicType.SEND_NFT:
       return SendNftTransactionConfirmation;
-    case ExtrinsicType.STAKING_STAKE:
-      return StakeTransactionConfirmation;
-    case ExtrinsicType.STAKING_UNSTAKE:
+    case ExtrinsicType.STAKING_JOIN_POOL:
+      return JoinPoolTransactionConfirmation;
+    case ExtrinsicType.STAKING_BOND:
+      return BondTransactionConfirmation;
+    case ExtrinsicType.STAKING_LEAVE_POOL:
       return UnstakeTransactionConfirmation;
     case ExtrinsicType.STAKING_WITHDRAW:
       return WithdrawTransactionConfirmation;

@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominationPoolInfo, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Field/MultiValidatorSelector';
@@ -15,7 +16,7 @@ import ScreenTab from '@subwallet/extension-koni-ui/components/ScreenTab';
 import SelectValidatorInput from '@subwallet/extension-koni-ui/components/SelectValidatorInput';
 import { useGetStakeData } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakeData';
 import useGetSupportedStakingTokens from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetSupportedStakingTokens';
-import { submitBonding } from '@subwallet/extension-koni-ui/messaging';
+import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { fetchChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
@@ -44,6 +45,18 @@ interface StakeFromProps extends TransactionFormBaseProps {
   pool: number
 }
 
+function parseNominations (nomination: string) {
+  const infoList = nomination.split(',');
+
+  const result: string[] = [];
+
+  infoList.forEach((info) => {
+    result.push(info.split('___')[0]);
+  });
+
+  return result;
+}
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const transactionContext = useContext(TransactionContext);
@@ -51,11 +64,14 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const [form] = useForm<StakeFromProps>();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const [locationState] = useState<StakingDataOption>(location?.state as StakingDataOption);
 
-  const { chainStakingMetadata, hideTabList, nominatorMetadata } = location.state as StakingDataOption;
+  const { chainStakingMetadata, hideTabList, nominatorMetadata } = locationState;
   const tokenList = useGetSupportedStakingTokens();
   const [loading, setLoading] = useState(false);
 
+  // TODO: should do better to get validators info
+  const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [{ decimals, symbol }, setNativeTokenBasicInfo] = useState<{ decimals: number, symbol: string }>({ decimals: 0, symbol: 'Unit' });
@@ -108,7 +124,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [chainInfoMap, _chainStakingMetadata]);
 
   useEffect(() => {
-    transactionContext.setTransactionType(ExtrinsicType.STAKING_STAKE);
+    transactionContext.setTransactionType(ExtrinsicType.STAKING_JOIN_POOL);
     transactionContext.setShowRightBtn(true);
     transactionContext.setChain(chainStakingMetadata ? chainStakingMetadata.chain : '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -143,24 +159,89 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [form, transactionContext]);
 
+  const getSelectedValidators = useCallback((nominations: string[]) => {
+    const validatorList = validatorInfoMap[transactionContext.chain];
+
+    if (!validatorList) {
+      return [];
+    }
+
+    const result: ValidatorInfo[] = [];
+
+    validatorList.forEach((validator) => {
+      if (nominations.includes(validator.address)) {
+        result.push(validator);
+      }
+    });
+
+    return result;
+  }, [transactionContext.chain, validatorInfoMap]);
+
+  const getSelectedPool = useCallback((poolId: number) => {
+    const nominationPoolList = nominationPoolInfoMap[transactionContext.chain];
+
+    for (const pool of nominationPoolList) {
+      if (pool.id === poolId) {
+        return pool;
+      }
+    }
+
+    // eslint-disable-next-line
+    return;
+  }, [nominationPoolInfoMap, transactionContext.chain]);
+
   const submitTransaction = useCallback(() => {
     form.validateFields()
       .then((values) => {
         setLoading(true);
-        const { nominate, pool, token, value } = values;
+        const { from, nominate, pool, value } = values;
+        let bondingPromise: Promise<SWTransactionResponse>;
 
-        const bondingPromise = submitBonding({
-          amount: value,
-          chain: transactionContext.chain,
-          nominatorMetadata: _nominatorMetadata,
-          selectedValidators: [],
-          type: pool ? StakingType.POOLED : StakingType.NOMINATED
-        });
+        if (pool) {
+          const selectedPool = getSelectedPool(pool);
+
+          bondingPromise = submitPoolBonding({
+            amount: value,
+            chain: transactionContext.chain,
+            nominatorMetadata: _nominatorMetadata,
+            selectedPool: selectedPool as NominationPoolInfo,
+            address: from
+          });
+        } else {
+          const selectedValidators = getSelectedValidators(parseNominations(nominate));
+
+          bondingPromise = submitBonding({
+            amount: value,
+            chain: transactionContext.chain,
+            nominatorMetadata: _nominatorMetadata,
+            selectedValidators,
+            type: StakingType.NOMINATED
+          });
+        }
+
+        bondingPromise
+          .then((response) => {
+            const { errors, extrinsicHash, warnings } = response;
+
+            if (errors.length || warnings.length) {
+              console.log('failed', errors, warnings);
+              setLoading(false);
+              // setErrors(errors.map((e) => e.message));
+              // setWarnings(warnings.map((w) => w.message));
+            } else if (extrinsicHash) {
+              transactionContext.onDone(extrinsicHash);
+            }
+          })
+          .catch((error) => {
+            setLoading(false);
+            console.log(error);
+          });
       })
       .catch((error: Error) => {
+        console.log(error);
         setLoading(false);
       });
-  }, []);
+  }, [_nominatorMetadata, form, getSelectedPool, getSelectedValidators, transactionContext]);
 
   const getMetaInfo = useCallback(() => {
     if (_chainStakingMetadata) {
@@ -345,7 +426,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 <MultiValidatorSelector
                   chain={transactionContext.chain}
                   id={'multi-validator-selector'}
-                  nominators={_nominatorMetadata ? _nominatorMetadata.nominations : undefined}
+                  nominations={_nominatorMetadata ? _nominatorMetadata.nominations : undefined}
                 />
               </Form.Item>
 

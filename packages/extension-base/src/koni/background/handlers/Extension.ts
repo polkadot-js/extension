@@ -2380,7 +2380,7 @@ export default class KoniExtension {
       chain,
       transaction: extrinsic,
       data: inputData,
-      extrinsicType: ExtrinsicType.STAKING_BOND,
+      extrinsicType: ExtrinsicType.STAKING_JOIN_POOL,
       chainType: ChainType.SUBSTRATE
     });
   }
@@ -2396,7 +2396,7 @@ export default class KoniExtension {
       chain,
       transaction: extrinsic,
       data: inputData,
-      extrinsicType: ExtrinsicType.STAKING_UNBOND,
+      extrinsicType: ExtrinsicType.STAKING_LEAVE_POOL,
       chainType: ChainType.SUBSTRATE
     });
   }

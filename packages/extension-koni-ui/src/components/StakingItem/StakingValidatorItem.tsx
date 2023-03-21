@@ -3,6 +3,7 @@
 
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { toShort } from '@subwallet/extension-koni-ui/util';
 import { BackgroundIcon, Button, Icon, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { CheckCircle, DotsThree, Medal } from 'phosphor-react';
@@ -11,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
-import { toShort } from '@subwallet/extension-koni-ui/util';
 
 type Props = ThemeProps & {
   validatorInfo: ValidatorDataType;
@@ -20,10 +20,11 @@ type Props = ThemeProps & {
   apy: string;
   isSelected?: boolean;
   showSelectedIcon?: boolean;
+  isNominated?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { apy, className, isSelected, onClick, onClickMoreBtn, showSelectedIcon = true, validatorInfo } = props;
+  const { apy, className, isNominated, isSelected, onClick, onClickMoreBtn, showSelectedIcon = true, validatorInfo } = props;
   const { token } = useTheme() as Theme;
 
   const { t } = useTranslation();
@@ -60,12 +61,12 @@ const Component: React.FC<Props> = (props: Props) => {
           <>
             <div className={'middle-item__name-wrapper'}>
               <div className={'middle-item__name'}>{validatorInfo.identity || toShort(validatorInfo.address)}</div>
-              <Icon
+              {isNominated && <Icon
                 iconColor={token.colorSuccess}
                 phosphorIcon={Medal}
                 size={'xs'}
                 weight={'fill'}
-              />
+              />}
             </div>
 
             <div className={'middle-item__info'}>

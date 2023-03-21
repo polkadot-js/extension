@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {NominationInfo, StakingType} from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -65,7 +65,9 @@ const renderEmpty = () => <EmptyAccount />;
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', id = 'multi-validator-selector', isSingleSelect = false, nominations, onChange } = props;
   const items = useGetValidatorList(chain, StakingType.NOMINATED) as ValidatorDataType[];
-  const nominatorValueList = nominations && nominations.length ? nominations.map((item) => `${item.validatorAddress}___${item.validatorIdentity || ''}`) : [];
+  const nominatorValueList = useMemo(() => {
+    return nominations && nominations.length ? nominations.map((item) => `${item.validatorAddress}___${item.validatorIdentity || ''}`) : [];
+  }, [nominations]);
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
@@ -82,7 +84,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     };
   }, [selectedFilters]);
   const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator } = useSelectValidators(id, nominatorValueList, onChange, isSingleSelect);
-
   const { t } = useTranslation();
 
   useExcludeModal(id);
@@ -90,7 +91,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   useEffect(() => {
     onApplyChangeValidators();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [items]);
 
   const closeSortingModal = () => {
     inactiveModal(SORTING_MODAL_ID);
@@ -105,22 +106,25 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     onChangeSelectedValidator(value);
   }, [onChangeSelectedValidator]);
 
-  const renderItem = useCallback((item: ValidatorDataType) => (
-    <StakingValidatorItem
-      apy={'15'}
-      className={'pool-item'}
-      isSelected={changeValidators.includes(`${item.address}___${item.identity || ''}`)}
-      key={item.address}
-      validatorInfo={item}
-      onClick={onClickItem}
-      // eslint-disable-next-line react/jsx-no-bind
-      onClickMoreBtn={(e: SyntheticEvent) => {
-        e.stopPropagation();
-        setViewDetailItem(item);
-        activeModal(ValidatorDetailModalId);
-      }}
-    />
-  ), [activeModal, changeValidators, onClickItem]);
+  const renderItem = useCallback((item: ValidatorDataType) => {
+    return (
+      <StakingValidatorItem
+        apy={'15'}
+        className={'pool-item'}
+        isNominated={nominatorValueList.includes(`${item.address}___${item.identity || ''}`)}
+        isSelected={changeValidators.includes(`${item.address}___${item.identity || ''}`)}
+        key={item.address}
+        validatorInfo={item}
+        onClick={onClickItem}
+        // eslint-disable-next-line react/jsx-no-bind
+        onClickMoreBtn={(e: SyntheticEvent) => {
+          e.stopPropagation();
+          setViewDetailItem(item);
+          activeModal(ValidatorDetailModalId);
+        }}
+      />
+    );
+  }, [activeModal, changeValidators, nominatorValueList, onClickItem]);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);

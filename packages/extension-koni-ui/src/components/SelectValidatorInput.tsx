@@ -5,7 +5,7 @@ import AvatarGroup, { BaseAccountInfo } from '@subwallet/extension-koni-ui/compo
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Book, DotsThree } from 'phosphor-react';
+import { Book, Lightning } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -87,7 +87,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <Button
             disabled={disabled}
             icon={<Icon
-              phosphorIcon={DotsThree}
+              phosphorIcon={Lightning}
               size={'sm'}
             />}
             size={'xs'}
@@ -120,7 +120,9 @@ const SelectValidatorInput = styled(Component)<Props>(({ theme: { token } }: Pro
     '.select-validator-input__label': {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
-      color: token.colorTextLight4
+      color: token.colorTextLight4,
+      position: 'relative',
+      zIndex: 0
     },
 
     '.select-validator-input__content-wrapper': {
@@ -137,7 +139,8 @@ const SelectValidatorInput = styled(Component)<Props>(({ theme: { token } }: Pro
       paddingRight: token.paddingXS,
       textOverflow: 'ellipsis',
       overflow: 'hidden',
-      whiteSpace: 'nowrap'
+      whiteSpace: 'nowrap',
+      zIndex: 0
     },
 
     '.select-validator-input__button-wrapper': {

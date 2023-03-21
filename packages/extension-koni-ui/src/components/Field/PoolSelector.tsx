@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import EmptyAccount from '../Account/EmptyAccount';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
@@ -75,6 +76,8 @@ const getFilteredList = (items: NominationPoolDataType[], filters: string[]) => 
   return filteredList;
 };
 
+const renderEmpty = () => <EmptyAccount />;
+
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', disabled, id = 'pool-selector', label, nominationPoolList, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
@@ -94,9 +97,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    onChange && onChange({ target: { value: nominationPoolValueList[0] } });
+    if (items && items.length) {
+      onChange && onChange({ target: { value: nominationPoolValueList[0] } });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [items]);
 
   const _onSelectItem = useCallback((value: string) => {
     onChange && onChange({ target: { value } });
@@ -199,8 +204,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           />
         }
         renderItem={renderItem}
-        // eslint-disable-next-line react/jsx-no-bind
-        renderSelected={renderSelected}
         rightIconProps={{
           icon: <Icon phosphorIcon={SortAscending} />,
           onClick: () => {
@@ -212,6 +215,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         searchableMinCharactersCount={2}
         selected={value || ''}
         showActionBtn
+        renderWhenEmpty={renderEmpty}
+        // eslint-disable-next-line react/jsx-no-bind
+        renderSelected={renderSelected}
         title={t('Select pool')}
       />
 

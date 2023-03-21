@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
@@ -91,6 +92,9 @@ const Component: React.FC<Props> = (props: Props) => {
       value: '0'
     };
   }, [defaultSlug, transactionContext.from]);
+
+  console.log('formDefault', formDefault);
+  console.log('form', form.getFieldsValue());
 
   useEffect(() => {
     if (_chainStakingMetadata) {
@@ -196,13 +200,23 @@ const Component: React.FC<Props> = (props: Props) => {
     activeModal('multi-validator-selector');
   }, [activeModal]);
 
+  const isDisabledStakeBtn = useMemo(() => {
+    const isDisabled = !form.getFieldsValue().token || form.getFieldsValue().value === '0' || form.getFieldsValue().from === ALL_ACCOUNT_KEY;
+
+    if (stakingType === StakingType.POOLED) {
+      return isDisabled || !form.getFieldsValue().pool;
+    } else {
+      return isDisabled || !form.getFieldsValue().nominate;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.getFieldsValue().token, form.getFieldsValue().value, form.getFieldsValue().pool, form.getFieldsValue().nominate, form.getFieldsValue().from, stakingType]);
+
   return (
     <>
       <ScreenTab
         className={className}
         defaultIndex={defaultTab}
-        hideTabList={!!hideTabList}
-        // eslint-disable-next-line react/jsx-no-bind
+        hideTabList={hideTabList}
         onSelectTab={onSelectTab}
       >
         <ScreenTab.SwTabPanel label={t('Pools')}>
@@ -213,14 +227,16 @@ const Component: React.FC<Props> = (props: Props) => {
               initialValues={formDefault}
               onValuesChange={onFieldsChange}
             >
-              {isAllAccount &&
-                <Form.Item name={'from'}>
-                  <AccountSelector />
-                </Form.Item>
-              }
+              <Form.Item
+                hidden={!isAllAccount}
+                name={'from'}
+              >
+                <AccountSelector />
+              </Form.Item>
 
               {!isAllAccount && <Form.Item name={'token'}>
                 <TokenSelector
+                  disabled={!!chainStakingMetadata}
                   items={tokenList}
                   prefixShape='circle'
                 />
@@ -235,6 +251,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <div className={'form-row'}>
                 {isAllAccount && <Form.Item name={'token'}>
                   <TokenSelector
+                    disabled={!!chainStakingMetadata}
                     items={tokenList}
                     prefixShape='circle'
                   />
@@ -254,6 +271,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
               <Form.Item name={'pool'}>
                 <PoolSelector
+                  disabled={!form.getFieldsValue().token}
                   chain={transactionContext.chain}
                   label={t('Select pool')}
                   nominationPoolList={_nominatorMetadata ? _nominatorMetadata.nominations : undefined}
@@ -276,14 +294,16 @@ const Component: React.FC<Props> = (props: Props) => {
               initialValues={formDefault}
               onValuesChange={onFieldsChange}
             >
-              {isAllAccount &&
-                <Form.Item name={'from'}>
-                  <AccountSelector />
-                </Form.Item>
-              }
+              <Form.Item
+                hidden={!isAllAccount}
+                name={'from'}
+              >
+                <AccountSelector />
+              </Form.Item>
 
               {!isAllAccount && <Form.Item name={'token'}>
                 <TokenSelector
+                  disabled={!!chainStakingMetadata}
                   items={tokenList}
                   prefixShape='circle'
                 />
@@ -298,6 +318,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <div className={'form-row'}>
                 {isAllAccount && <Form.Item name={'token'}>
                   <TokenSelector
+                    disabled={!!chainStakingMetadata}
                     items={tokenList}
                     prefixShape='circle'
                   />
@@ -338,6 +359,7 @@ const Component: React.FC<Props> = (props: Props) => {
         warnings={[]}
       >
         <Button
+          disabled={isDisabledStakeBtn}
           icon={<Icon
             phosphorIcon={PlusCircle}
             weight={'fill'}

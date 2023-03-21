@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import { toShort } from '@subwallet/extension-koni-ui/util';
 
 type Props = ThemeProps & {
   validatorInfo: ValidatorDataType;
@@ -28,7 +29,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const _onSelect = useCallback(() => {
-    onClick && onClick(`${validatorInfo.address}-${validatorInfo.identity || ''}`);
+    onClick && onClick(`${validatorInfo.address}___${validatorInfo.identity || ''}`);
   },
   [onClick, validatorInfo.address, validatorInfo.identity]
   );
@@ -58,7 +59,7 @@ const Component: React.FC<Props> = (props: Props) => {
         middleItem={
           <>
             <div className={'middle-item__name-wrapper'}>
-              <div className={'middle-item__name'}>{validatorInfo.identity}</div>
+              <div className={'middle-item__name'}>{validatorInfo.identity || toShort(validatorInfo.address)}</div>
               <Icon
                 iconColor={token.colorSuccess}
                 phosphorIcon={Medal}

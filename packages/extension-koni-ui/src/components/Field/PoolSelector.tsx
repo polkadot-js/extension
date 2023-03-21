@@ -184,7 +184,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         disabled={disabled}
         id={id}
         inputClassName={`${className} pool-selector-input`}
-        itemKey={'address'}
+        itemKey={'id'}
         items={filteredList}
         label={label}
         // eslint-disable-next-line react/jsx-no-bind

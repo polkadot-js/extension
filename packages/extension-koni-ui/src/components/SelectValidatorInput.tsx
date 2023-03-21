@@ -26,7 +26,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const addressList = useMemo(() => {
     if (value) {
       const addressList: BaseAccountInfo[] = value.split(',').map((item) => {
-        const itemInfo = item.split('-');
+        const itemInfo = item.split('___');
 
         return {
           address: itemInfo[0],
@@ -52,7 +52,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return t(`Selected ${valueList.length} validator`);
     }
 
-    return valueList[0].split('-')[1];
+    return valueList[0].split('___')[1];
   };
 
   return (

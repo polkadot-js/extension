@@ -3,6 +3,7 @@
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Field/MultiValidatorSelector';
@@ -14,6 +15,7 @@ import ScreenTab from '@subwallet/extension-koni-ui/components/ScreenTab';
 import SelectValidatorInput from '@subwallet/extension-koni-ui/components/SelectValidatorInput';
 import { useGetStakeData } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakeData';
 import useGetSupportedStakingTokens from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetSupportedStakingTokens';
+import { submitBonding } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { fetchChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
@@ -51,6 +53,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { chainStakingMetadata, hideTabList, nominatorMetadata } = location.state as StakingDataOption;
   const tokenList = useGetSupportedStakingTokens();
+  const [loading, setLoading] = useState(false);
 
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
@@ -110,7 +113,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => { // fetch validators when change stakingType
     if (transactionContext.chain !== '') {
-      console.log('fetch validators');
       fetchChainValidators(transactionContext.chain, stakingType);
     }
   }, [stakingType, transactionContext.chain]);
@@ -135,7 +137,22 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [form, transactionContext]);
 
   const submitTransaction = useCallback(() => {
-    // TODO: submit transaction
+    form.validateFields()
+      .then((values) => {
+        const { nominate, token, value } = values;
+
+        console.log(value, token, nominate, values);
+      })
+      .catch((error: Error) => {
+        setLoading(false);
+      });
+    let sendPromise: Promise<SWTransactionResponse>;
+
+    sendPromise = submitBonding({
+      amount: '', chain: '', nominatorMetadata: undefined, selectedValidators: [], type: undefined
+
+    })
+      .then();
   }, []);
 
   const getMetaInfo = useCallback(() => {

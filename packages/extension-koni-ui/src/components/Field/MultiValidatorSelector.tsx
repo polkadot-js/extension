@@ -65,7 +65,7 @@ const renderEmpty = () => <EmptyAccount />;
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', id = 'multi-validator-selector', isSingleSelect = false, nominators, onChange } = props;
   const items = useGetValidatorList(chain, StakingType.NOMINATED) as ValidatorDataType[];
-  const nominatorValueList = nominators && nominators.length ? nominators.map((item) => `${item.validatorAddress}-${item.validatorIdentity || ''}`) : [];
+  const nominatorValueList = nominators && nominators.length ? nominators.map((item) => `${item.validatorAddress}___${item.validatorIdentity || ''}`) : [];
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
@@ -109,7 +109,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     <StakingValidatorItem
       apy={'15'}
       className={'pool-item'}
-      isSelected={changeValidators.includes(`${item.address}-${item.identity || ''}`)}
+      isSelected={changeValidators.includes(`${item.address}___${item.identity || ''}`)}
       key={item.address}
       validatorInfo={item}
       onClick={onClickItem}

@@ -22,6 +22,7 @@
        1	David Hawig                   	Update README.md (#403)
        1	f00                           	fix(authorize): long urls pushes the cta down (#1005)
        1	Forrest                       	Add Web3AccountsOptions to web3FromAddress function (#617)
+       1	Giovanny Gongora              	change textarea for div to show the mnemonic seed (#1147)
        1	KarishmaBothara               	Added code to support custom signed extension/user extension (#670)
        1	Marcel Jackisch               	Minor changes to readme (#376)
        1	Michael Healy                 	Small typo (#932)

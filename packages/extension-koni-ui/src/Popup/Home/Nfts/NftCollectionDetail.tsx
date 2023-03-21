@@ -93,16 +93,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [t]);
 
-  const getSubHeaderTitle = useCallback(() => {
-    const title = collectionInfo.collectionName || collectionInfo.collectionId;
-
-    if (title.length >= 30) {
-      return `${title.slice(0, 25)}...`;
-    }
-
-    return title;
-  }, [collectionInfo.collectionId, collectionInfo.collectionName]);
-
   const handleDeleteNftCollection = useCallback(() => {
     handleSimpleConfirmModal().then(() => {
       if (collectionInfo.originAsset) {
@@ -145,10 +135,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderCenter={false}
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
-        title={`${getSubHeaderTitle()} (${nftList.length})`}
+        title={(
+          <div className={CN('header-content')}>
+            <div className={CN('collection-name')}>
+              {collectionInfo.collectionName || collectionInfo.collectionId}
+            </div>
+            <div className={CN('collection-count')}>
+              &nbsp;({nftList.length})
+            </div>
+          </div>
+        )}
       >
         <SwList.Section
-          className={CN('nft_item_list__container', { pb: !nftList.length })}
+          className={CN('nft_item_list__container')}
           displayGrid={true}
           enableSearchInput={true}
           gridGap={'14px'}
@@ -172,15 +171,29 @@ const NftCollectionDetail = styled(Component)<Props>(({ theme: { token } }: Prop
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
 
+    '.header-content': {
+      color: token.colorTextBase,
+      fontWeight: token.fontWeightStrong,
+      fontSize: token.fontSizeHeading4,
+      lineHeight: token.lineHeightHeading4,
+      display: 'flex',
+      flexDirection: 'row',
+      overflow: 'hidden'
+    },
+
+    '.collection-name': {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
+    },
+
     '.nft_item_list__container': {
       paddingTop: 14,
       flex: 1,
       height: '100%',
 
-      '&.pb': {
-        '.ant-sw-list': {
-          paddingBottom: 1
-        }
+      '.ant-sw-list': {
+        paddingBottom: 1,
+        marginBottom: -1
       }
     },
 

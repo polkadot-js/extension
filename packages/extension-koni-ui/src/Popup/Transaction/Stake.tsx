@@ -346,8 +346,8 @@ const Component: React.FC<Props> = (props: Props) => {
                   rules={[{ required: true }]}
                 >
                   <AmountInput
-                    decimals={10}
-                    maxValue={'10000'}
+                    decimals={decimals}
+                    maxValue={'10000'} // TODO
                   />
                 </Form.Item>
               </div>
@@ -409,8 +409,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
                 <Form.Item name={'value'}>
                   <AmountInput
-                    decimals={10}
-                    maxValue={'10000'}
+                    decimals={decimals}
+                    maxValue={'10000'} // TODO
                   />
                 </Form.Item>
               </div>

@@ -25,6 +25,7 @@ type ActionListType = {
   icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>,
   label: string,
   value: string,
+  action: string
 }
 
 const ACTION_LIST: ActionListType[] = [
@@ -32,31 +33,36 @@ const ACTION_LIST: ActionListType[] = [
     backgroundIconColor: 'green-6',
     icon: PlusCircle,
     label: 'Stake more',
-    value: '/transaction/stake'
+    value: '/transaction/stake',
+    action: 'stake'
   },
   {
     backgroundIconColor: 'magenta-6',
     icon: MinusCircle,
     label: 'Unstake funds',
-    value: '/transaction/unstake'
+    value: '/transaction/unstake',
+    action: 'unstake'
   },
   {
     backgroundIconColor: 'geekblue-6',
     icon: ArrowCircleDown,
     label: 'Withdraw',
-    value: '/transaction/withdraw'
+    value: '/transaction/withdraw',
+    action: 'withdraw'
   },
   {
     backgroundIconColor: 'green-7',
     icon: Wallet,
     label: 'Claim rewards',
-    value: '/transaction/claim-reward'
+    value: '/transaction/claim-reward',
+    action: 'claim-reward'
   },
   {
     backgroundIconColor: 'purple-8',
     icon: ArrowArcLeft,
     label: 'Cancel unstake',
-    value: '/transaction/cancel-unstake'
+    value: '/transaction/cancel-unstake',
+    action: 'cancel-unstake'
   }
   // {
   //   backgroundIconColor: 'blue-7',
@@ -95,6 +101,12 @@ const Component: React.FC<Props> = (props: Props) => {
     [chainStakingMetadata, navigate, nominatorMetadata, reward, staking]
   );
 
+  const availableActions = useCallback(() => {
+    const result: string[] = [];
+
+    return result;
+  }, []);
+
   return (
     <SwModal
       className={className}
@@ -106,7 +118,7 @@ const Component: React.FC<Props> = (props: Props) => {
     >
       {ACTION_LIST.map((item) => (
         <SettingItem
-          className='action-more-item'
+          className={`action-more-item ${availableActions().includes(item.action) ? '' : 'disabled'}`}
           key={item.label}
           leftItemIcon={<BackgroundIcon
             backgroundColor={token[item.backgroundIconColor] as string}
@@ -126,6 +138,10 @@ const MoreActionModal = styled(Component)<Props>(({ theme: { token } }: Props) =
   return {
     '.action-more-item:not(:last-child)': {
       marginBottom: token.marginXS
+    },
+
+    '.disabled': {
+      cursor: 'not-allowed'
     }
   };
 });

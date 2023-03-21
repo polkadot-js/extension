@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
@@ -287,4 +287,48 @@ export function isUnstakeAll (selectedValidator: string, nominations: Nomination
   }
 
   return isUnstakeAll;
+}
+
+export enum StakingAction {
+  STAKE = 'STAKE',
+  UNSTAKE = 'UNSTAKE',
+  WITHDRAW = 'WITHDRAW',
+  CLAIM_REWARD = 'CLAIM_REWARD',
+  CANCEL_UNSTAKE = 'CANCEL_UNSTAKE'
+}
+
+export function getStakingAvailableActions (nominatorMetadata: NominatorMetadata): StakingAction[] {
+  const result: StakingAction[] = [StakingAction.STAKE];
+
+  const bnActiveStake = new BN(nominatorMetadata.activeStake);
+
+  if (nominatorMetadata.activeStake && bnActiveStake.gt(BN_ZERO)) {
+    result.push(StakingAction.UNSTAKE);
+  }
+
+  if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain)) {
+
+  } else if (_STAKING_CHAIN_GROUP.para.includes(nominatorMetadata.chain)) {
+
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain)) {
+
+  } else {
+    if (nominatorMetadata.unstakings.length > 0) {
+      result.push(StakingAction.CANCEL_UNSTAKE);
+      let hasClaimable = false;
+
+      for (const unstaking of nominatorMetadata.unstakings) {
+        if (unstaking.status === UnstakingStatus.CLAIMABLE) {
+          hasClaimable = true;
+          break;
+        }
+      }
+
+      if (hasClaimable) {
+        result.push(StakingAction.WITHDRAW);
+      }
+    }
+  }
+
+  return result;
 }

@@ -67,8 +67,8 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
   const onClickUnstakeBtn = useCallback(() => {
     inactiveModal(STAKING_DETAIL_MODAL_ID);
-    setTimeout(() => navigate('/transaction/unstake'), 300);
-  }, [inactiveModal, navigate]);
+    setTimeout(() => navigate('/transaction/unstake', { state: { chainStakingMetadata, nominatorMetadata, hideTabList: true } as StakingDataOption }), 300);
+  }, [inactiveModal, navigate, nominatorMetadata]);
 
   const footer = () => {
     return (

@@ -1,10 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata } from '@subwallet/extension-base/background/KoniTypes';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import PoolSelector from '@subwallet/extension-koni-ui/components/Field/PoolSelector';
+import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
+import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import BondedBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/BondedBalance';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
@@ -15,16 +18,19 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { MinusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
 
 interface StakeFromProps extends TransactionFormBaseProps {
   token: string
-  value: string
+  value: string,
+  validator?: string,
+  from: string
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -32,15 +38,19 @@ const Component: React.FC<Props> = (props: Props) => {
   const transactionContext = useContext(TransactionContext);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const isAll = isAccountAll(currentAccount?.address || '');
+  const location = useLocation();
+  const [locationState] = useState<StakingDataOption>(location?.state as StakingDataOption);
+  const [nominatorMetadata] = useState(locationState?.nominatorMetadata as NominatorMetadata);
+  const chainInfo = useFetchChainInfo(nominatorMetadata.chain);
+  const { decimals } = useMemo(() => {
+    return _getChainNativeTokenBasicInfo(chainInfo);
+  }, [chainInfo]);
+
   const [form] = Form.useForm<StakeFromProps>();
   const formDefault = {
     from: transactionContext.from,
     value: '0'
   };
-
-  useEffect(() => {
-    transactionContext.setTransactionType(ExtrinsicType.STAKING_LEAVE_POOL);
-  }, [transactionContext]);
 
   const onFieldsChange = useCallback(({ from }: Partial<StakeFromProps>, values: StakeFromProps) => {
     // TODO: field change
@@ -61,9 +71,9 @@ const Component: React.FC<Props> = (props: Props) => {
           initialValues={formDefault}
           onValuesChange={onFieldsChange}
         >
-
           <BondedBalance
-            bondedBalance={'0'}
+            chainInfo={chainInfo}
+            bondedBalance={nominatorMetadata.activeStake}
             className={'bonded-balance'}
           />
 
@@ -73,9 +83,9 @@ const Component: React.FC<Props> = (props: Props) => {
             </Form.Item>
           }
 
-          <Form.Item name={'pool'}>
+          <Form.Item name={'validator'}>
             <PoolSelector
-              chain={'polkadot'}
+              chain={nominatorMetadata.chain}
               label={t('Select validator')}
             />
           </Form.Item>
@@ -87,8 +97,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
           <Form.Item name={'value'}>
             <AmountInput
-              decimals={10}
-              maxValue={'10000'}
+              decimals={decimals}
+              maxValue={nominatorMetadata.activeStake}
             />
           </Form.Item>
 

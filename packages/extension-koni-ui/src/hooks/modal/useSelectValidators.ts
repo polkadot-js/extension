@@ -6,7 +6,7 @@ import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useState } from 'react';
 
 export function useSelectValidators (modalId: string, defaultSelectedValidators: string[], onChange?: BasicOnChangeFunction, isSingleSelect?: boolean) {
-  const [selectedValidators, setSelectedValidators] = useState<string[]>([]);
+  const [selectedValidators, setSelectedValidators] = useState<string[]>(defaultSelectedValidators);
   const [changeValidators, setChangeValidators] = useState<string[]>(selectedValidators);
   const { inactiveModal } = useContext(ModalContext);
 

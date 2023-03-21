@@ -612,6 +612,16 @@ export default class KoniExtension {
     return transformedAccounts.filter((a) => !a.isReadOnly).map((a) => a.address);
   }
 
+  private isAddressValidWithAuthType (address: string, accountAuthType?: AccountAuthType): boolean {
+    if (accountAuthType === 'substrate') {
+      return !isEthereumAddress(address);
+    } else if (accountAuthType === 'evm') {
+      return isEthereumAddress(address);
+    }
+
+    return true;
+  }
+
   private filterAccountsByAccountAuthType (accounts: string[], accountAuthType?: AccountAuthType): string[] {
     if (accountAuthType === 'substrate') {
       return accounts.filter((address) => !isEthereumAddress(address));
@@ -703,13 +713,17 @@ export default class KoniExtension {
     this.#koniState.getAuthorize((value) => {
       assert(value, 'The source is not known');
 
-      value[url].isAllowedMap[address] = connectValue;
+      if (this.isAddressValidWithAuthType(address, value[url].accountAuthType)) {
+        value[url].isAllowedMap[address] = connectValue;
 
-      console.log('Devbu: ', value);
+        console.log('Devbu: ', value);
 
-      this.#koniState.setAuthorize(value, () => {
+        this.#koniState.setAuthorize(value, () => {
+          callBack && callBack(value);
+        });
+      } else {
         callBack && callBack(value);
-      });
+      }
     });
   }
 
@@ -1062,7 +1076,9 @@ export default class KoniExtension {
     this.#koniState.getAuthorize((value) => {
       if (value && Object.keys(value).length) {
         Object.keys(value).forEach((url) => {
-          value[url].isAllowedMap[address] = isAllowed;
+          if (this.isAddressValidWithAuthType(address, value[url].accountAuthType)) {
+            value[url].isAllowedMap[address] = isAllowed;
+          }
         });
 
         this.#koniState.setAuthorize(value);

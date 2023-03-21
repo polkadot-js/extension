@@ -124,7 +124,8 @@ export const router = createHashRouter([
           },
           Crowdloans.generateRouterObject('crowdloans'),
           Staking.generateRouterObject('staking'),
-          History.generateRouterObject('history')
+          History.generateRouterObject('history'),
+          History.generateRouterObject('history/:chain/:extrinsicHash')
         ]
       },
       {

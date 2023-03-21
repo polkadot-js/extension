@@ -3,7 +3,6 @@
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
-import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Field/MultiValidatorSelector';
@@ -40,7 +39,8 @@ type Props = ThemeProps
 interface StakeFromProps extends TransactionFormBaseProps {
   token: string
   value: string
-  nominate: string
+  nominate: string,
+  pool: number
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -139,20 +139,20 @@ const Component: React.FC<Props> = (props: Props) => {
   const submitTransaction = useCallback(() => {
     form.validateFields()
       .then((values) => {
-        const { nominate, token, value } = values;
+        setLoading(true);
+        const { nominate, pool, token, value } = values;
 
-        console.log(value, token, nominate, values);
+        const bondingPromise = submitBonding({
+          amount: value,
+          chain: transactionContext.chain,
+          nominatorMetadata: _nominatorMetadata,
+          selectedValidators: [],
+          type: pool ? StakingType.POOLED : StakingType.NOMINATED
+        });
       })
       .catch((error: Error) => {
         setLoading(false);
       });
-    let sendPromise: Promise<SWTransactionResponse>;
-
-    sendPromise = submitBonding({
-      amount: '', chain: '', nominatorMetadata: undefined, selectedValidators: [], type: undefined
-
-    })
-      .then();
   }, []);
 
   const getMetaInfo = useCallback(() => {
@@ -188,6 +188,14 @@ const Component: React.FC<Props> = (props: Props) => {
     inactiveModal(StakingNetworkDetailModalId);
   };
 
+  const onSelectTab = useCallback((index: number) => {
+    setStakingType(index === 0 ? StakingType.POOLED : StakingType.NOMINATED);
+  }, []);
+
+  const onActiveValidatorSelector = useCallback(() => {
+    activeModal('multi-validator-selector');
+  }, [activeModal]);
+
   return (
     <>
       <ScreenTab
@@ -195,7 +203,7 @@ const Component: React.FC<Props> = (props: Props) => {
         defaultIndex={defaultTab}
         hideTabList={!!hideTabList}
         // eslint-disable-next-line react/jsx-no-bind
-        onSelectTab={(index: number) => setStakingType(index === 0 ? StakingType.POOLED : StakingType.NOMINATED)}
+        onSelectTab={onSelectTab}
       >
         <ScreenTab.SwTabPanel label={t('Pools')}>
           <TransactionContent>
@@ -305,7 +313,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <SelectValidatorInput
                 label={t('Select validator')}
                 // eslint-disable-next-line react/jsx-no-bind
-                onClick={() => activeModal('multi-validator-selector')}
+                onClick={onActiveValidatorSelector}
                 value={form.getFieldsValue().nominate}
               />
 
@@ -334,7 +342,7 @@ const Component: React.FC<Props> = (props: Props) => {
             phosphorIcon={PlusCircle}
             weight={'fill'}
           />}
-          loading={false}
+          loading={loading}
           onClick={submitTransaction}
         >
           {t('Stake')}

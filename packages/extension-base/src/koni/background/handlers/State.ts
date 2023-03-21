@@ -6,10 +6,9 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, NominatorMetadata, PriceJson, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
-import { getTokenPrice } from '@subwallet/extension-base/koni/api/coingecko';
 import { getFreeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
@@ -17,13 +16,14 @@ import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/cha
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParachain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
+import { PriceService } from '@subwallet/extension-base/services/price-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { CurrentAccountStore, PriceStore } from '@subwallet/extension-base/stores';
+import { CurrentAccountStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -82,11 +82,9 @@ export default class KoniState {
   private readonly unsubscriptionMap: Record<string, () => void> = {};
 
   private assetSettingStore = new AssetSettingStore();
-  private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly accountRefStore = new AccountRefStore();
   private readonly keyringStateSubject = new Subject<KeyringState>();
-  private priceStoreReady = false;
   private externalRequest: Record<string, ExternalRequestPromise> = {};
 
   private keyringState: KeyringState = {
@@ -136,7 +134,8 @@ export default class KoniState {
 
   readonly transactionService: TransactionService;
   readonly historyService: HistoryService;
-  readonly balanceSevirce: BalanceService;
+  readonly priceService: PriceService;
+  readonly balanceService: BalanceService;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor (providers: Providers = {}) {
@@ -147,9 +146,10 @@ export default class KoniState {
     this.chainService = new ChainService(this.dbService);
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService);
-    this.balanceSevirce = new BalanceService(getFreeBalance);
+    this.priceService = new PriceService(this.dbService, this.chainService);
+    this.balanceService = new BalanceService(getFreeBalance);
     this.historyService = new HistoryService(this.dbService, this.chainService);
-    this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceSevirce, this.historyService);
+    this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceService, this.historyService);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');
@@ -1007,39 +1007,6 @@ export default class KoniState {
 
   public getAllPriceIds () {
     return this.chainService.getAllPriceIds();
-  }
-
-  public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
-    this.priceStore.set('PriceData', priceData, () => {
-      if (callback) {
-        callback(priceData);
-        this.priceStoreReady = true;
-      }
-    });
-  }
-
-  public getPrice (update: (value: PriceJson) => void): void {
-    this.priceStore.get('PriceData', (rs) => {
-      if (this.priceStoreReady) {
-        update(rs);
-      } else {
-        const allPriceIds = this.getAllPriceIds();
-
-        getTokenPrice(allPriceIds)
-          .then((rs) => {
-            this.setPrice(rs);
-            update(rs);
-          })
-          .catch((err) => {
-            this.logger.error(err);
-            throw err;
-          });
-      }
-    });
-  }
-
-  public subscribePrice () {
-    return this.priceStore.getSubject();
   }
 
   public setAssetSettings (assetSettings: Record<string, AssetSetting>): void {

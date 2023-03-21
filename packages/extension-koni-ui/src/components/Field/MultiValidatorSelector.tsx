@@ -83,6 +83,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [selectedFilters]);
   const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator } = useSelectValidators(id, nominatorValueList, onChange, isSingleSelect);
 
+  console.log('nominatorValueList', nominatorValueList);
   const { t } = useTranslation();
 
   useExcludeModal(id);

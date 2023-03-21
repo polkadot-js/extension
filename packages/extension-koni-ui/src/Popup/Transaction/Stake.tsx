@@ -273,7 +273,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
               <Form.Item name={'pool'}>
                 <PoolSelector
-                  disabled={!currentTokenSlug}
+                  disabled={!currentTokenSlug || !!chainStakingMetadata}
                   chain={transactionContext.chain}
                   label={t('Select pool')}
                   nominationPoolList={_nominatorMetadata ? _nominatorMetadata.nominations : undefined}

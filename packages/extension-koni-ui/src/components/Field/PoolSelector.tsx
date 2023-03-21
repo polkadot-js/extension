@@ -81,9 +81,10 @@ const renderEmpty = () => <EmptyAccount />;
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', disabled, id = 'pool-selector', label, nominationPoolList, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
-  const nominationPoolValueList = nominationPoolList && nominationPoolList.length ? nominationPoolList.map((item) => item.validatorAddress) : [];
+  const nominationPoolValueList = useMemo(() => {
+    return nominationPoolList && nominationPoolList.length ? nominationPoolList.map((item) => item.validatorAddress) : [];
+  }, [nominationPoolList]);
   const items = useGetValidatorList(chain, StakingType.POOLED) as NominationPoolDataType[];
-
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
@@ -97,11 +98,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    if (items && items.length) {
-      onChange && onChange({ target: { value: nominationPoolValueList[0] } });
+    if (items && items.length && !value) {
+      onChange && onChange({ target: { value: parseInt(nominationPoolValueList[0]) as unknown as string } });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
+  }, [items, nominationPoolValueList, onChange, value]);
 
   const _onSelectItem = useCallback((value: string) => {
     onChange && onChange({ target: { value } });
@@ -215,6 +215,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         searchableMinCharactersCount={2}
         selected={value || ''}
         showActionBtn
+
         renderWhenEmpty={renderEmpty}
         // eslint-disable-next-line react/jsx-no-bind
         renderSelected={renderSelected}

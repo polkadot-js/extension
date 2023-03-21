@@ -123,7 +123,7 @@ export const updateBrowserConfirmationType = (type: AppSettings['browserConfirma
 };
 
 export const updateUiSettings = (data: UiSettings) => {
-  store.dispatch({ type: 'accountState/updateUiSettings', payload: data });
+  store.dispatch({ type: 'settings/updateUiSettings', payload: data });
 };
 
 export const subscribeUiSettings = lazySubscribeMessage('pri(settings.subscribe)', null, updateUiSettings, updateUiSettings);

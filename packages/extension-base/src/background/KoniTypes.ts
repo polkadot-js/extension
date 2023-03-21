@@ -403,14 +403,17 @@ export type BrowserConfirmationType = 'extension'|'popup'|'window';
 
 export interface UiSettings {
   // language: LanguageType,
-  browserConfirmationType: BrowserConfirmationType,
+  browserConfirmationType: BrowserConfirmationType;
   // isShowZeroBalance: boolean,
   isShowBalance: boolean;
   accountAllLogo: string;
   theme: ThemeNames;
+  camera: boolean;
 }
 
 export type RequestSettingsType = UiSettings;
+
+export type RequestCameraSettings = { camera: boolean };
 
 export interface RandomTestRequest {
   start: number;
@@ -1774,6 +1777,7 @@ export interface ActiveCronAndSubscriptionMap {
   cron: Record<CronServiceType, boolean>;
 }
 
+// Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, SWTransactionResponse];
@@ -1883,6 +1887,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
+  'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

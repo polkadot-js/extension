@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
+import { BrowserConfirmationType, RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
 import RequestService from '@subwallet/extension-base/services/request-service';
-
-import settings from '@polkadot/ui-settings';
 
 const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
 
@@ -26,11 +25,20 @@ const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {
 
 export default class PopupHandler {
   readonly #requestService: RequestService;
-  #notification = settings.notification;
+  #notification: BrowserConfirmationType = 'popup';
   #windows: number[] = [];
 
   constructor (requestService: RequestService) {
     this.#requestService = requestService;
+
+    const updateNotification = (rs: RequestSettingsType) => {
+      this.#notification = rs.browserConfirmationType;
+    };
+
+    requestService.settingService.getSettings(updateNotification);
+    requestService.settingService.getSubject().subscribe({
+      next: updateNotification
+    });
   }
 
   public updateIconV2 (shouldClose?: boolean): void {
@@ -42,12 +50,6 @@ export default class PopupHandler {
     if (shouldClose && text === '') {
       this.popupClose();
     }
-  }
-
-  public setNotification (notification: string): boolean {
-    this.#notification = notification;
-
-    return true;
   }
 
   public get popup () {
@@ -63,19 +65,11 @@ export default class PopupHandler {
 
   public popupOpen (): void {
     if (this.#notification !== 'extension') {
-      if (this.#notification === 'window') {
-        chrome.windows.create(NORMAL_WINDOW_OPTS, (window): void => {
-          if (window) {
-            this.#windows.push(window.id || 0);
-          }
-        });
-      }
-
       chrome.windows.getCurrent((win) => {
-        const popupOptions = { ...POPUP_WINDOW_OPTS };
+        const popupOptions = { ...(this.#notification === 'window' ? NORMAL_WINDOW_OPTS : POPUP_WINDOW_OPTS) };
 
         if (win) {
-          popupOptions.left = (win.left || 0) + (win.width || 0) - (POPUP_WINDOW_OPTS.width || 0) - 20;
+          popupOptions.left = (win.left || 0) + (win.width || 0) - (popupOptions.width || 0) - 20;
           popupOptions.top = (win.top || 0) + 80;
         }
 

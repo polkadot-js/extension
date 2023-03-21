@@ -58,6 +58,15 @@ const TokenToggleItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       }
     },
 
+    '.ant-logo': {
+      marginRight: token.marginXXS
+    },
+
+    '.-sub-logo .ant-image-img': {
+      width: `${token.size}px !important`,
+      height: `${token.size}px !important`
+    },
+
     '.ant-network-item-sub-name': {
       display: 'none'
     },

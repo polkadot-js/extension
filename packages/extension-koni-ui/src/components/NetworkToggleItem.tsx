@@ -24,13 +24,14 @@ const Component: React.FC<Props> = (props: Props) => {
     <NetworkItem
       className={className}
       dividerPadding={56}
-      isShowSubLogo={false}
+      isShowSubLogo
       key={chainInfo.slug}
       name={chainInfo.name}
       networkKey={chainInfo.slug}
       networkMainLogoSize={36}
       rightItem={<ChainItemFooter
         chainInfo={chainInfo}
+        className={'__toggle-area'}
         navigate={navigate}
         showDetailNavigation={true}
       />}
@@ -49,6 +50,15 @@ const NetworkToggleItem = styled(Component)<Props>(({ theme: { token } }: Props)
       '.ant-web3-block-right-item': {
         marginRight: `-${token.padding + 2}px`
       }
+    },
+
+    '.ant-logo': {
+      marginRight: token.marginXXS
+    },
+
+    '.-sub-logo .ant-image-img': {
+      width: `${token.size}px !important`,
+      height: `${token.size}px !important`
     },
 
     '.manage_tokens__right_item_container': {

@@ -46,14 +46,7 @@ const Component: React.FC<AccountInfoItem> = (props: AccountInfoItem) => {
 };
 
 const AccountItem = styled(Component)<AccountInfoItem>(({ theme: { token } }: AccountInfoItem) => {
-  return {
-    '.__account-name': {
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      maxWidth: 150
-    }
-  };
+  return {};
 });
 
 export default AccountItem;

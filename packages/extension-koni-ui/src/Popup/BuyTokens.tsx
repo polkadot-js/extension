@@ -195,7 +195,7 @@ function Component ({ className }: Props) {
   }, [fixedTokenKey]);
 
   return (
-    <Layout.Home showTabBar={false}>
+    <Layout.Home showFilterIcon>
       <PageWrapper className={CN(className, 'transaction-wrapper')}>
         <SwSubHeader
           background={'transparent'}

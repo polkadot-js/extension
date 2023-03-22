@@ -210,6 +210,14 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
       paddingTop: token.padding,
       paddingBottom: token.paddingSM,
       flex: 1
+    },
+
+    '.ant-network-item-content .__toggle-area': {
+      marginRight: -token.marginXXS,
+
+      'button + button': {
+        marginLeft: token.marginXS
+      }
     }
   });
 });

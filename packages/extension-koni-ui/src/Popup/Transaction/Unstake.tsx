@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, RequestUnbondingSubmit } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { isUnbondFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import PoolSelector from '@subwallet/extension-koni-ui/components/Field/PoolSelector';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
-import { submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
+import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import BondedBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/BondedBalance';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
@@ -72,17 +73,31 @@ const Component: React.FC<Props> = (props: Props) => {
     const value = form.getFieldValue('value') as string;
     const selectedValidator = nominatorMetadata.nominations[0].validatorAddress;
 
-    const params: RequestUnbondingSubmit = {
-      amount: value,
-      chain: nominatorMetadata.chain,
-      nominatorMetadata
-    };
+    let unbondingPromise: Promise<SWTransactionResponse>;
 
-    if (mustChooseValidator()) {
-      params.validatorAddress = ''; // TODO
+    if (nominatorMetadata.type === StakingType.POOLED) {
+      const params: RequestStakePoolingUnbonding = {
+        amount: value,
+        chain: nominatorMetadata.chain,
+        nominatorMetadata
+      };
+
+      unbondingPromise = submitPoolUnbonding(params);
+    } else {
+      const params: RequestUnbondingSubmit = {
+        amount: value,
+        chain: nominatorMetadata.chain,
+        nominatorMetadata
+      };
+
+      if (mustChooseValidator()) {
+        params.validatorAddress = ''; // TODO
+      }
+
+      unbondingPromise = submitUnbonding(params);
     }
 
-    submitUnbonding(params)
+    unbondingPromise
       .then((result) => {
         const { errors, extrinsicHash, warnings } = result;
 

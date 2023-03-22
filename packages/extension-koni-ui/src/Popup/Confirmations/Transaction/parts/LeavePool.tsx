@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestBondingSubmit } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestStakePoolingUnbonding } from '@subwallet/extension-base/background/KoniTypes';
 import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
@@ -16,7 +16,7 @@ type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
-  const data = transaction.data as RequestBondingSubmit;
+  const data = transaction.data as RequestStakePoolingUnbonding;
 
   const { t } = useTranslation();
   const { decimals, symbol } = useGetNativeTokenBasicInfo(transaction.chain);
@@ -49,8 +49,8 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const UnstakeTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const LeavePoolTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {};
 });
 
-export default UnstakeTransactionConfirmation;
+export default LeavePoolTransactionConfirmation;

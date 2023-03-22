@@ -12,13 +12,14 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { InputRef, SelectModal } from '@subwallet/react-ui';
-import React, { ForwardedRef, forwardRef, useCallback } from 'react';
+import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps, BasicInputWrapper {
+  externalAccounts?: AccountJson[],
   filter?: (account: AccountJson) => boolean
 }
 
@@ -27,9 +28,13 @@ function defaultFiler (account: AccountJson): boolean {
 }
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
-  const { className = '', disabled, filter, id = 'account-selector', label, placeholder, readOnly, value } = props;
-  const items = useSelector((state: RootState) => state.accountState.accounts)
-    .filter(filter || defaultFiler);
+  const { className = '', disabled, externalAccounts, filter, id = 'account-selector', label, placeholder, readOnly, value } = props;
+  const _items = useSelector((state: RootState) => state.accountState.accounts);
+
+  const items = useMemo(() => {
+    return (externalAccounts || _items).filter(filter || defaultFiler);
+  }, [_items, externalAccounts, filter]);
+
   const { t } = useTranslation();
   const { onSelect } = useSelectModalInputHelper(props, ref);
 

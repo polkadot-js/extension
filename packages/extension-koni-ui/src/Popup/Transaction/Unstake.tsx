@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { isUnbondFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import PoolSelector from '@subwallet/extension-koni-ui/components/Field/PoolSelector';
-import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
+import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import BondedBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/BondedBalance';
@@ -21,7 +20,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { MinusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -29,8 +28,8 @@ import styled from 'styled-components';
 
 type Props = ThemeProps
 
-interface StakeFromProps extends TransactionFormBaseProps {
-  token: string
+interface UnstakeFromProps extends TransactionFormBaseProps {
+  token: string,
   value: string,
   validator?: string,
   from: string
@@ -44,26 +43,23 @@ const Component: React.FC<Props> = (props: Props) => {
   const location = useLocation();
   const [locationState] = useState<StakingDataOption>(location?.state as StakingDataOption);
   const [nominatorMetadata] = useState(locationState?.nominatorMetadata as NominatorMetadata);
-  const chainInfo = useFetchChainInfo(nominatorMetadata.chain);
-  const { decimals } = useMemo(() => {
-    return _getChainNativeTokenBasicInfo(chainInfo);
-  }, [chainInfo]);
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(nominatorMetadata.chain);
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
 
   const mustChooseValidator = useCallback(() => {
-    return isUnbondFromValidator(nominatorMetadata);
+    return isActionFromValidator(nominatorMetadata);
   }, [nominatorMetadata]);
 
-  const [form] = Form.useForm<StakeFromProps>();
+  const [form] = Form.useForm<UnstakeFromProps>();
   const formDefault = {
     from: transactionContext.from,
     value: '0'
   };
 
-  const onFieldsChange = useCallback(({ from }: Partial<StakeFromProps>, values: StakeFromProps) => {
+  const onFieldsChange = useCallback(({ from }: Partial<UnstakeFromProps>, values: UnstakeFromProps) => {
     // TODO: field change
   }, []);
 
@@ -126,7 +122,8 @@ const Component: React.FC<Props> = (props: Props) => {
         >
           <BondedBalance
             bondedBalance={nominatorMetadata.activeStake}
-            chainInfo={chainInfo}
+            decimals={decimals}
+            symbol={symbol}
             className={'bonded-balance'}
           />
 

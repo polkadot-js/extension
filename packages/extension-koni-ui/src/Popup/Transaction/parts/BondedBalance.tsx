@@ -1,29 +1,24 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps & {
   label?: string;
   bondedBalance?: string | number | BigN;
-  chainInfo: _ChainInfo;
+  decimals: number;
+  symbol: string;
 }
 
-const Component = ({ bondedBalance, chainInfo, className, label }: Props) => {
+const Component = ({ bondedBalance, className, decimals, label, symbol }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-
-  const { decimals, symbol } = useMemo(() => {
-    return _getChainNativeTokenBasicInfo(chainInfo);
-  }, [chainInfo]);
 
   return (
     <Typography.Paragraph className={CN(className, 'bonded-balance')}>

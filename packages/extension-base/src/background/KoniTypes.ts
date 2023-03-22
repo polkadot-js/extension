@@ -456,7 +456,6 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.CROWDLOAN]: any,
   [ExtrinsicType.STAKING_JOIN_POOL]: RequestStakePoolingBonding,
   [ExtrinsicType.STAKING_LEAVE_POOL]: RequestStakePoolingUnbonding,
-  [ExtrinsicType.STAKING_POOL_WITHDRAW]: RequestStakePoolingWithdrawal,
   [ExtrinsicType.STAKING_BOND]: RequestStakePoolingBonding,
   [ExtrinsicType.STAKING_UNBOND]: RequestUnbondingSubmit,
   [ExtrinsicType.STAKING_CLAIM_REWARD]: RequestStakeClaimReward,
@@ -1504,10 +1503,11 @@ export interface UnbondingSubmitParams extends BaseRequestSign {
 
 export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
 
-// Withdraw
+// WithdrawStake
 
 export interface StakeWithdrawalParams extends BaseRequestSign {
   nominatorMetadata: NominatorMetadata,
+  unstakingInfo: UnstakingInfo,
   chain: string,
   validatorAddress?: string
 }
@@ -1552,14 +1552,6 @@ export interface StakePoolingUnbondingParams extends BaseRequestSign {
 }
 
 export type RequestStakePoolingUnbonding = InternalRequestSign<StakePoolingUnbondingParams>;
-
-export interface StakePoolingWithdrawalParams extends BaseRequestSign {
-  nominatorMetadata: NominatorMetadata,
-  chain: string,
-  isReBond: boolean
-}
-
-export type RequestStakePoolingWithdrawal = InternalRequestSign<StakePoolingWithdrawalParams>;
 
 export interface DelegationItem {
   owner: string,
@@ -1756,7 +1748,6 @@ export interface KoniRequestSignatures {
   'pri(bonding.getNominationPoolOptions)': [string, NominationPoolInfo[]];
   'pri(bonding.nominationPool.submitBonding)': [RequestStakePoolingBonding, SWTransactionResponse];
   'pri(bonding.nominationPool.submitUnbonding)': [RequestStakePoolingUnbonding, SWTransactionResponse];
-  'pri(bonding.nominationPool.submitWithdrawal)': [RequestStakePoolingWithdrawal, SWTransactionResponse];
 
   // Chains, assets functions
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];

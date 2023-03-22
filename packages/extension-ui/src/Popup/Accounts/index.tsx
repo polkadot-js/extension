@@ -10,8 +10,17 @@ import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
 
-import { AccountContext, AddButton, ButtonArea, ScrollWrapper, VerticalSpace } from '../../components';
+import {
+  AccountContext,
+  AddButton,
+  Address,
+  BottomWrapper,
+  ButtonArea,
+  ScrollWrapper,
+  VerticalSpace
+} from '../../components';
 import { ActionContext } from '../../components/contexts';
+import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useTranslation from '../../hooks/useTranslation';
 import { getAuthList, getConnectedTabsUrl } from '../../messaging';
 import { Header } from '../../partials';
@@ -27,6 +36,19 @@ const CustomHeader = styled(Header)`
   margin: 0px;
 `;
 
+const StyledScrollWrapper = styled(ScrollWrapper)`
+  ${BottomWrapper} {
+    position: absolute;
+    bottom: 0px;
+    right: 0;
+    left: 0;
+  }
+
+  .network-group:last-of-type {
+    padding-bottom: 70px;
+  }
+`;
+
 function Accounts({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [filter, setFilter] = useState('');
@@ -36,7 +58,7 @@ function Accounts({ className }: Props): React.ReactElement {
   const { hierarchy } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const networkMap = useMemo(() => getNetworkMap(), []);
-  const defaultNetwork = 'any';
+  const defaultNetwork = 'Aleph Zero';
   const { filterChildren, flattened, getParentName, groupedParents } = useMemo(
     () => createGroupedAccountData(filteredAccount),
     [filteredAccount]
@@ -53,10 +75,14 @@ function Accounts({ className }: Props): React.ReactElement {
   }, []);
 
   useEffect(() => {
-    if (authList && connectedTabsUrl.length > 0) {
+    if (!authList) {
+      return;
+    }
+
+    if (connectedTabsUrl.length > 0) {
       setAccountsCreatedAfterLastAuth(
         flattened.filter(
-          (account) => account?.whenCreated && account?.whenCreated > authList[connectedTabsUrl[0]].lastAuth
+          (account) => account?.whenCreated && account?.whenCreated > authList[connectedTabsUrl[0]]?.lastAuth
         )
       );
     }
@@ -82,12 +108,17 @@ function Accounts({ className }: Props): React.ReactElement {
     setFilter(filter.toLowerCase());
   }, []);
 
+  const areAllAleph = flattened.every((account) => account.genesisHash === ALEPH_ZERO_GENESIS_HASH);
+
   const accounts = Object.entries(groupedParents)
     .filter(([, details]) => details.length > 0)
     .map(([networkName, details]) => {
       return (
-        <div key={networkName}>
-          {networkName !== defaultNetwork && <span className='network-heading'>{networkName}</span>}
+        <div
+          className='network-group'
+          key={networkName}
+        >
+          {!areAllAleph && <span className='network-heading'>{networkName}</span>}
           {details.map((json) => (
             <AccountsTree
               {...json}
@@ -112,20 +143,22 @@ function Accounts({ className }: Props): React.ReactElement {
         <AddAccount />
       ) : (
         <>
-          <CustomHeader
-            onFilter={_onFilter}
-            text={t<string>('Accounts')}
-            withConnectedAccounts
-            withHelp
-            withSettings
-          />
-          <ScrollWrapper>
-            <div className={className}>{accounts}</div>
-          </ScrollWrapper>
+          <StyledScrollWrapper>
+            <CustomHeader
+              className='header'
+              onFilter={_onFilter}
+              text={t<string>('Accounts')}
+              withBackdrop
+              withConnectedAccounts
+              withHelp
+              withSettings
+            />
+            <div className={`${className || ''} ${areAllAleph ? 'all-aleph-main' : 'all-grouped'}`}>{accounts}</div>
+            <ButtonArea>
+              <AddButton />
+            </ButtonArea>
+          </StyledScrollWrapper>
           <VerticalSpace />
-          <ButtonArea>
-            <AddButton />
-          </ButtonArea>
         </>
       )}
     </>
@@ -134,9 +167,18 @@ function Accounts({ className }: Props): React.ReactElement {
 
 export default styled(Accounts)(
   ({ theme }: Props) => `
-  height: calc(100vh - 2px);
+  height: calc(100vh + 16px);
   scrollbar-width: none;
-  margin-top: 32px;
+  
+
+  &.all-aleph-main {
+    margin-top: 32px;
+  }
+
+  &.all-grouped {
+    margin-top: 16px;
+  }
+
 
   &::-webkit-scrollbar {
     display: none;
@@ -157,6 +199,10 @@ export default styled(Accounts)(
     padding: 8px 0 8px 8px;
     margin: 24px 0 16px 0;
     border-bottom: 1px solid ${theme.boxBorderColor};
+  }
+
+  ${Address} {
+    width: 100%;
   }
 `
 );

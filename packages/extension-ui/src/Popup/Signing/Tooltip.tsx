@@ -45,6 +45,7 @@ export default styled(Tooltip)(
   position: relative;
   display: inline-block;
   text-transform: none;
+  transition: 0.2s ease;
 
   .tooltip-content {
     box-sizing: border-box;

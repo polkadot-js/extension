@@ -109,7 +109,7 @@ const MnemonicInput = ({
         { ...MNEMONIC_WORDS_INITIAL_STATE }
       )
     );
-  }, [seed, setMnemonicWords]);
+  }, [mnemonicWords, seed, setMnemonicWords]);
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -188,6 +188,7 @@ export default styled(MnemonicInput)(
     font-size: 13px;
     line-height: 130%;
     border-radius: 50%;
+    user-select: none;
   }
 `
 );

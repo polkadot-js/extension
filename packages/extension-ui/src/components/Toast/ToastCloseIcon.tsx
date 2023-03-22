@@ -46,14 +46,16 @@ function ToastCloseIcon({ animationDurationInSeconds = 1500, className }: Props)
         viewBox='0 0 14 14'
         width='14'
         x='9'
+        xmlns='http://www.w3.org/2000/svg'
         y='9'
       >
         <path
           clipRule='evenodd'
           d='M7.00005 7.88394L12.8081 13.692L13.692 12.8081L7.88394 7.00005L13.692 1.192L12.8081 0.308115L7.00005 6.11617L1.19199 0.308105L0.308105 1.19199L6.11617 7.00005L0.308105 12.8081L1.19199 13.692L7.00005 7.88394Z'
+          fill='#111B24'
           fillRule='evenodd'
           id='times-icon'
-        ></path>
+        />
       </svg>
     </svg>
   );
@@ -74,7 +76,7 @@ export default styled(ToastCloseIcon)(
     opacity: 0.1;
   }
 
-  #black-circle, #grey-circle, #times-icon {
+  #black-circle, #grey-circle {
     stroke: ${theme.toastTextColor};
   }
       

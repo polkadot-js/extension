@@ -8,7 +8,7 @@ import { useParams } from 'react-router';
 import styled from 'styled-components';
 
 import animatedRemove from '../../assets/anim_unlink.svg';
-import { Button, ButtonArea, FaviconBox, Svg, VerticalSpace } from '../../components';
+import { AnimatedSvg, Button, ButtonArea, FaviconBox, VerticalSpace } from '../../components';
 import { ActionContext } from '../../components/contexts';
 import { useGoTo } from '../../hooks/useGoTo';
 import useToast from '../../hooks/useToast';
@@ -24,9 +24,12 @@ interface URLState {
 }
 
 const CustomFaviconBox = styled(FaviconBox)`
-    box-sizing: border-box;
     margin: 0 auto;
     margin-top: 16px;
+
+    :hover {
+      background: ${({ theme }: ThemeProps) => theme.inputBorderColor};
+    }
 `;
 
 function DisconnectApp({ className }: Props): React.ReactElement<Props> {
@@ -55,7 +58,7 @@ function DisconnectApp({ className }: Props): React.ReactElement<Props> {
       />
       <div className={className}>
         <div className='content'>
-          <Svg
+          <AnimatedSvg
             className='animated-remove-icon'
             src={animatedRemove}
           />
@@ -131,7 +134,6 @@ export default React.memo(
     justify-content: center;
     width: 96px;
     height: 96px;
-    background: ${theme.dangerBackground};
     margin: 0 auto;
   }
       

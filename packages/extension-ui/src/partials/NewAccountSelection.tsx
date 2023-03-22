@@ -9,9 +9,11 @@ import styled from 'styled-components';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 
 import plusIcon from '../assets/add.svg';
+import border from '../assets/border.svg';
 import ribbon from '../assets/ribbon.svg';
-import { AccountContext, FaviconBox, Svg } from '../components';
+import { AccountContext, Svg } from '../components';
 import Checkbox from '../components/Checkbox';
+import FaviconBox from '../components/FaviconBox';
 import useTranslation from '../hooks/useTranslation';
 import Account from '../Popup/Accounts/Account';
 import AccountsTree from '../Popup/Accounts/AccountsTree';
@@ -23,6 +25,7 @@ interface Props extends ThemeProps {
   url: string;
   showHidden?: boolean;
   newAccounts: Array<AccountJson> | [];
+  onChange?: (value: boolean) => void;
 }
 
 interface GroupedData {
@@ -32,10 +35,22 @@ interface GroupedData {
 const StyledCheckbox = styled(Checkbox)`
   display: flex;
   justify-content: flex-end;
-  margin-right: 8px;
+  margin-right: 24px;
 `;
 
-function NewAccountSelection({ className, newAccounts, showHidden = false, url }: Props): React.ReactElement<Props> {
+const StyledFaviconBox = styled(FaviconBox)`
+  :hover {
+    background: ${({ theme }: ThemeProps) => theme.inputBorderColor};
+  }
+`;
+
+function NewAccountSelection({
+  className,
+  newAccounts,
+  onChange,
+  showHidden = false,
+  url
+}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts, hierarchy, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
@@ -54,6 +69,10 @@ function NewAccountSelection({ className, newAccounts, showHidden = false, url }
   }, [areAllAccountsSelected, noAccountSelected]);
 
   const _onSelectAllToggle = useCallback(() => {
+    if (onChange) {
+      onChange(true);
+    }
+
     if (areAllAccountsSelected) {
       setSelectedAccounts && setSelectedAccounts([]);
 
@@ -61,7 +80,7 @@ function NewAccountSelection({ className, newAccounts, showHidden = false, url }
     }
 
     setSelectedAccounts && setSelectedAccounts(allDisplayedAddresses);
-  }, [allDisplayedAddresses, areAllAccountsSelected, setSelectedAccounts]);
+  }, [allDisplayedAddresses, areAllAccountsSelected, onChange, setSelectedAccounts]);
 
   const groupedAccounts = flattened.reduce<GroupedData>(
     (acc, curr) => {
@@ -79,8 +98,15 @@ function NewAccountSelection({ className, newAccounts, showHidden = false, url }
   return (
     <div className={className}>
       <div className='withWarning'>
+        <Svg
+          className='border'
+          src={border}
+        />
         <div className='heading'>{t<string>('Update connected app')}</div>
-        <FaviconBox url={url} />
+        <StyledFaviconBox
+          url={url}
+          withoutProtocol
+        />
         <div className='separator'>
           <div className='line'></div>
           <Svg
@@ -95,21 +121,26 @@ function NewAccountSelection({ className, newAccounts, showHidden = false, url }
           )}
         </div>
       </div>
-      <StyledCheckbox
-        checked={areAllAccountsSelected}
-        className='accountTree-checkbox'
-        indeterminate={isIndeterminate}
-        label={t('Select all')}
-        onChange={_onSelectAllToggle}
-      />
+      {flattened.length > 1 && (
+        <StyledCheckbox
+          checked={areAllAccountsSelected}
+          className='accountTree-checkbox'
+          indeterminate={isIndeterminate}
+          label={t('Select all')}
+          onChange={_onSelectAllToggle}
+        />
+      )}
       <div className='accountList'>
         {Object.entries(groupedAccounts).map(([group, accounts]) => {
           return (
             <>
-              {group !== 'new' && <span className='separator-heading'>{group}</span>}
+              {group !== 'new' && groupedAccounts.other.length > 0 && (
+                <span className='separator-heading'>{group}</span>
+              )}
               {accounts.map((json, index) => (
                 <AccountsTree
                   {...json}
+                  checkBoxOnChange={onChange}
                   className={group === 'new' ? 'new' : ''}
                   isAuthList
                   key={`${group}:${index}:${json.address}`}
@@ -133,6 +164,24 @@ export default styled(NewAccountSelection)(
   // due to internal padding
   margin: 0px -16px;
 
+  ${AccountsTree}:last-of-type {
+    padding-bottom: 48px;
+  }
+
+  ${Checkbox} label span {
+    left: -10px;
+  }
+
+  .border{
+    z-index: ${Z_INDEX.BORDER};
+    position: absolute;
+    top: 0;
+    pointer-events: none;
+    background: ${theme.newTransactionBackground};
+    height: 600px;
+    width: 360px;
+  }
+
   .new {
     ${Account} {
       .name {
@@ -140,6 +189,7 @@ export default styled(NewAccountSelection)(
       }
 
       position: relative;
+      
       &:before {
         content: url(${ribbon});
         display: block;
@@ -174,7 +224,6 @@ export default styled(NewAccountSelection)(
 
   .accountList {
     overflow-x: hidden;
-    height: 240px;
     scrollbar-color: ${theme.boxBorderColor};
     scrollbar-width: 2px;
     padding-right: 2px;

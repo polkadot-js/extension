@@ -4,8 +4,9 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Loading } from '../../components';
+import { ActionContext, Loading, ScrollWrapper } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
+import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed, validateSeed } from '../../messaging';
@@ -23,7 +24,7 @@ function CreateAccount(): React.ReactElement {
   const [seed, setSeed] = useState<null | string>(null);
   const [type, setType] = useState(DEFAULT_TYPE);
   const [name, setName] = useState('');
-  const [genesisHash, setGenesis] = useState('');
+  const [genesisHash, setGenesis] = useState(ALEPH_ZERO_GENESIS_HASH);
   const chain = useMetadata(genesisHash, true);
 
   useEffect((): void => {

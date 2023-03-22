@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { TypeRegistry } from '@polkadot/types';
 
-import { ActionContext, Address, VerticalSpace, Warning } from '../../../components';
+import { ActionContext, Address, BottomWrapper, VerticalSpace, Warning } from '../../../components';
 import { useTranslation } from '../../../components/translate';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
@@ -46,7 +46,8 @@ function isRawPayload(payload: SignerPayloadJSON | SignerPayloadRaw): payload is
 
 const StyledAddress = styled(Address)`
   max-width: 324px;
-  margin: 0px 8px 8px 8px;`;
+  margin: 0px 8px 8px 8px;
+`;
 
 const Wrapper = styled.div`
   position: absolute;
@@ -54,6 +55,12 @@ const Wrapper = styled.div`
   right: 0px;
   bottom: 16px;
   margin: 0px 8px;
+`;
+
+const StyledSignArea = styled(SignArea)`
+  ~ ${BottomWrapper} {
+    backdrop-filter: initial;
+  }
 `;
 
 export default function Request({
@@ -137,7 +144,7 @@ export default function Request({
             isExternal={isExternal}
             isHardware={isHardware}
           />
-          <SignArea
+          <StyledSignArea
             buttonText={buttonText}
             error={error}
             isExternal={isExternal}
@@ -188,7 +195,7 @@ export default function Request({
             address={address}
             isExternal={isExternal}
           />
-          <SignArea
+          <StyledSignArea
             buttonText={buttonText}
             error={error}
             isExternal={isExternal}

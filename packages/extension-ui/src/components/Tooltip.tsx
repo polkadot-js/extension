@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '../types';
@@ -15,7 +15,6 @@ interface Props {
 const TOOLTIP_MARGIN = 14;
 
 const Tooltip: React.FC<Props> = function ({ children, text }: Props) {
-  const [isVisible, setIsVisible] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   function _checkBoundaries() {
@@ -37,34 +36,18 @@ const Tooltip: React.FC<Props> = function ({ children, text }: Props) {
   }
 
   const _handleMouseEnter = useCallback(() => {
-    setIsVisible(true);
     _checkBoundaries();
   }, []);
 
-  const _handleMouseLeave = useCallback(() => {
-    setIsVisible(false);
-  }, []);
-
-  useEffect(() => {
-    if (isVisible) {
-      _checkBoundaries();
-    }
-  }, [isVisible]);
-
   return (
-    <StyledTooltipContainer
-      onMouseEnter={_handleMouseEnter}
-      onMouseLeave={_handleMouseLeave}
-    >
+    <StyledTooltipContainer onMouseEnter={_handleMouseEnter}>
       {children}
-      {isVisible && (
-        <StyledTooltip
-          className='tooltip'
-          ref={tooltipRef}
-        >
-          <span>{text}</span>
-        </StyledTooltip>
-      )}
+      <StyledTooltip
+        className='tooltip'
+        ref={tooltipRef}
+      >
+        <span>{text}</span>
+      </StyledTooltip>
     </StyledTooltipContainer>
   );
 };
@@ -89,6 +72,9 @@ const StyledTooltip = styled.div`
     box-shadow: ${({ theme }: ThemeProps) => theme.tooltipBoxShadow};
     border-radius: 2px;
     margin-top:14px;
+    opacity: 0;
+    transition: 0.2s ease;
+
 
     & span  {
     font-family: ${({ theme }: ThemeProps) => theme.primaryFontFamily};
@@ -96,11 +82,18 @@ const StyledTooltip = styled.div`
     font-size: 13px;
     line-height: 130%;
     }
-
 `;
 
 const StyledTooltipContainer = styled.div`
     display: inline-block;
     position: relative;
     z-index: ${Z_INDEX.TOOLTIP};
+
+    :hover  {
+      ${StyledTooltip} {
+        opacity: 1;
+        transition: 0.2s ease;
+        transition-delay: 0.8s;
+      } 
+    }
 `;

@@ -19,8 +19,7 @@ interface Props {
 
 const StyledFaviconBox = styled(FaviconBox)`
   box-sizing: border-box;
-  margin: 0px  -16px 0px  0px ;
-  width: 328px;
+  margin: 0px auto;
 `;
 
 function RemoveAuth({ className, url }: Props): React.ReactElement {
@@ -35,6 +34,8 @@ function RemoveAuth({ className, url }: Props): React.ReactElement {
     <div
       className='remove-container'
       onClick={goToDisconnect}
+      onKeyPress={goToDisconnect}
+      tabIndex={0}
     >
       <Svg
         className='remove-icon'
@@ -49,6 +50,7 @@ function RemoveAuth({ className, url }: Props): React.ReactElement {
       <StyledFaviconBox
         disconnectElement={disconnectElement}
         url={url}
+        withoutProtocol
       />
     </div>
   );
@@ -73,6 +75,7 @@ export default styled(RemoveAuth)(
     letter-spacing: 0.06em;
 
     .remove-text {
+      transition: 0.2 ease;
       color: ${theme.dangerBackground};
     }
 
@@ -88,6 +91,7 @@ export default styled(RemoveAuth)(
   }
 
   .remove-icon {
+    transition: 0.2 ease;
     cursor: pointer;
     height: 16px;
     width: 16px;

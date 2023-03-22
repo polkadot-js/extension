@@ -13,9 +13,11 @@ interface Props extends ThemeProps {
 
 const Svg = ({ className }: Props) => <span className={className} />;
 
-export default styled(Svg)(({ src, theme }: Props) => `
+export default styled(Svg)(
+  ({ src, theme }: Props) => `
   background: ${theme.textColor};
   display: inline-block;
   mask: url(${src});
   mask-size: cover;
-`);
+`
+);

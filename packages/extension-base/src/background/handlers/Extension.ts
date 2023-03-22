@@ -38,6 +38,7 @@ const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,
   height: 630,
   left: 150,
+  state: 'normal',
   top: 150,
   type: 'popup',
   width: 360
@@ -470,6 +471,7 @@ export default class Extension {
     return true;
   }
 
+  // this method is called when we want to open up the popup from the ui
   private windowOpen (path: AllowedPath): boolean {
     const url = `${chrome.extension.getURL('index.html')}#${path}`;
 
@@ -479,7 +481,14 @@ export default class Extension {
       return false;
     }
 
-    withErrorLog(() => chrome.windows.create({ ...POPUP_WINDOW_OPTS, url }));
+    // We're adding chrome.windows.update to make sure that the extension popup is not fullscreened
+    // There is a bug in Chrome that causes the extension popup to be fullscreened when user has any fullscreened browser window opened on the main screen
+    withErrorLog(() => chrome.windows.create({ ...POPUP_WINDOW_OPTS, url },
+      (window): void => {
+        if (window) {
+          chrome.windows.update(window.id || 0, { state: 'normal' }).catch(console.error);
+        }
+      }));
 
     return true;
   }

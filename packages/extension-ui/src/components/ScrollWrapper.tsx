@@ -5,6 +5,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '../types';
+import Address from './Address';
+import Label from './Label';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -35,6 +37,14 @@ export default styled(ScrollWrapper)(
 
   ::-webkit-scrollbar {
     width: 8px;
+  }
+
+  ${Label}:not(.label), ${Address} {
+    width: calc(100% + 8px);
+  }
+
+  .header .container{
+    width: 360px;
   }
 
 `

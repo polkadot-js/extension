@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { getAllMetadata } from '../messaging';
 import chains from '../util/chains';
-import useTranslation from './useTranslation';
 
 interface Option {
   text: string;
@@ -22,7 +21,6 @@ const RELAY_CHAIN = 'Relay Chain';
 const ALEPH_ZERO = 'Aleph Zero';
 
 export default function (): Option[] {
-  const { t } = useTranslation();
   const [metadataChains, setMetadatachains] = useState<Option[]>([]);
 
   useEffect(() => {
@@ -58,19 +56,14 @@ export default function (): Option[] {
       { alephChains: [], relayChains: [], otherChains: [] }
     );
 
-    const newChains = [
-      ...alephChains,
-      { text: t('Allow use on any chain'), value: '' },
-      ...relayChains,
-      ...otherChains
-    ];
+    const newChains = [...alephChains, ...relayChains, ...otherChains];
 
     const extraChains = metadataChains.filter(({ value }) => {
       return !chains.find(({ genesisHash }) => genesisHash === value);
     });
 
     return [...newChains, ...extraChains];
-  }, [metadataChains, t]);
+  }, [metadataChains]);
 
   return hashes;
 }

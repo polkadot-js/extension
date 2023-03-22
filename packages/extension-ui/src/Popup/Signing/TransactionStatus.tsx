@@ -9,7 +9,7 @@ import styled from 'styled-components';
 
 import animDeclined from '../../assets/anim_declined.svg';
 import animSigned from '../../assets/anim_signed.svg';
-import { PopupBorderContainer, Svg } from '../../components';
+import { AnimatedSvg, PopupBorderContainer } from '../../components';
 import { ActionContext } from '../../components/contexts';
 import useTranslation from '../../hooks/useTranslation';
 
@@ -39,7 +39,7 @@ function TransactionStatus({
       <div className={className}>
         <div className='content'>
           <div className='content-inner'>
-            <Svg
+            <AnimatedSvg
               className='icon'
               src={isSigned ? animSigned : animDeclined}
             />
@@ -90,7 +90,6 @@ export default React.memo(
   }
 
   .icon {
-    background: ${match.params.status === 'signed' ? theme.successBackground : theme.dangerBackground};
     width: 96px;
     height: 96px;
   }

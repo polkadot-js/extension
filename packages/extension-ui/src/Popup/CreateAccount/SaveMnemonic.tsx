@@ -8,7 +8,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
 import copyIcon from '../../assets/copy.svg';
-import { BackButton, Button, ButtonArea, MnemonicPill, VerticalSpace } from '../../components';
+import { BackButton, Button, ButtonArea, MnemonicPill, Svg, VerticalSpace } from '../../components';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 
@@ -54,7 +54,7 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
             tertiary
           >
             <div className='copy-to-clipboard'>
-              <img
+              <Svg
                 className='copyIcon'
                 src={copyIcon}
               />
@@ -78,6 +78,13 @@ export default React.memo(
     display: flex;
     flex-direction: column;
     gap: 48px;
+
+
+    .copyIcon {
+      width: 16px;
+      height: 16px;
+      background: ${theme.primaryColor};
+    }
 
     .text {
       display: flex;
@@ -119,6 +126,10 @@ export default React.memo(
       justify-content: space-between;
       width: 100%;
       user-select: all;
+
+      .mnemonic-index {
+        user-select: none;
+      }
     }
 
     .mnemonic-pill {
@@ -126,7 +137,7 @@ export default React.memo(
       width: 108px;
       margin-bottom: 8px;
       input {
-        text-align: center;
+        text-align: left;
       }
     }
 
@@ -137,6 +148,12 @@ export default React.memo(
       justify-content: center;
       gap: 8px;
       font-size: 14px;
+
+      :hover {
+        ${Svg} {
+          background: ${theme.buttonBackgroundHover};
+        }
+      }
     }
     .copy-button {
       margin: 0 auto;

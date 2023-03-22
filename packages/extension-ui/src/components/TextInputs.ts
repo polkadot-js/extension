@@ -22,7 +22,7 @@ const TextInput = css(
   font-size: ${theme.fontSize};
   height: 56px;
   outline: none;
-  padding-left: 16px;
+  padding-left: 15px;
   resize: none;
   width: 100%;
   transition: 0.2s ease;
@@ -38,8 +38,8 @@ const TextInput = css(
     caret-color: ${withError ? theme.iconDangerColor : theme.inputFocusBorderColor};
   }
 
-  &:hover {
-    border-color: ${theme.inputFocusHoverColor};
+  &:hover:not(:disabled):not(:active):not(:focus) {
+    border-color: ${withError ? theme.errorBorderColor : theme.inputFocusHoverColor};
   }
 
   &:disabled {

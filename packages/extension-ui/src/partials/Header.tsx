@@ -27,6 +27,7 @@ interface Props extends ThemeProps {
   withHelp?: boolean;
   withSettings?: boolean;
   smallMargin?: boolean;
+  withBackdrop?: boolean;
   text?: React.ReactNode;
   withStepper?: boolean;
   goToFnOverride?: () => void;
@@ -39,6 +40,7 @@ function Header({
   smallMargin = false,
   text,
   withBackArrow,
+  withBackdrop,
   withConnectedAccounts,
   withHelp,
   withSettings
@@ -63,15 +65,25 @@ function Header({
 
   return (
     <>
-      <div className={`${className} ${smallMargin ? 'smallMargin' : ''} header`}>
+      <div
+        className={`${className} ${smallMargin ? 'smallMargin' : ''}header ${
+          withBackdrop ? 'backdrop-margin-left' : ''
+        }`}
+      >
         <div className='container'>
           <div className='branding'>
             {withBackArrow ? (
-              <img
-                className='arrowLeftIcon'
+              <div
+                className='arrow-container'
                 onClick={goToFnOverride || _onBackArrowClick}
-                src={arrowLeft}
-              />
+                onKeyPress={goToFnOverride || _onBackArrowClick}
+                tabIndex={0}
+              >
+                <Svg
+                  className='arrowLeftIcon'
+                  src={arrowLeft}
+                />
+              </div>
             ) : (
               <div className='flex'>
                 <img
@@ -124,10 +136,10 @@ function Header({
                   className='greenDot'
                   src={connectionStatus}
                 />
-                <span></span>Connected
+                <span>Connected</span>
               </Link>
             ) : (
-              <div className='connectedAccounts'>
+              <div className='connectedAccounts with-green-dot'>
                 <img
                   className='greenDot'
                   src={notConnected}
@@ -150,11 +162,15 @@ export default React.memo(
   font-weight: normal;
   margin: 0;
   position: sticky;
-  position: sticky;
   top: 0px;
   backdrop-filter: blur(10px);
   z-index: ${Z_INDEX.HEADER};
   margin-bottom: ${withStepper ? '0px' : '25px'};
+
+  &.backdrop-margin-left {
+    margin-left: -16px;
+    min-width: 360px;
+  }
 
   && {
     padding: 0 0 0;
@@ -162,6 +178,13 @@ export default React.memo(
 
   .flex {
     display: flex;
+  }
+
+  .arrow-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 0px;
   }
 
   .connectedAccountsWrapper {
@@ -180,6 +203,7 @@ export default React.memo(
     border: 1px solid ${theme.boxBorderColor};
     margin: 0 auto;
     width: fit-content;
+    transition: 0.2s ease;
 
   }
 
@@ -193,11 +217,16 @@ export default React.memo(
     line-height: 130%;
     letter-spacing: 0.06em;
     gap: 4px;
+    transition: 0.2s ease;
 
     .greenDot {
       width: 20px;
       height: 20px;
       color: ${theme.connectedDotColor};
+    }
+
+    .with-green-dot:hover {
+      background: ${theme.connectedIndicatorHover};
     }
   }
 
@@ -273,10 +302,16 @@ export default React.memo(
       vertical-align: middle;
       width: 20px;
       height: 20px;
+      background: ${theme.iconNeutralColor};
+      transition: 0.2s ease;
 
       &:hover {
         cursor: pointer;
         background: ${theme.headerIconBackgroundHover};
+      }
+
+      &:active {
+        margin-top: 3px;
       }
     }
 
@@ -296,13 +331,18 @@ export default React.memo(
   .arrowLeftIcon {
     color: ${theme.labelColor};
     cursor: pointer;
-    padding: 8px 0px;
+    width: 20px;
+    height: 20px;
+    background: ${theme.iconNeutralColor};
 
     :hover {
-      path {
-        fill: ${theme.headerIconBackgroundHover};
+      background: ${theme.headerIconBackgroundHover};
     }
-}
+
+    &:active {
+      margin-top: 3px;
+    }
+  }
 
   &.smallMargin {
     margin-bottom: 15px;

@@ -58,7 +58,7 @@ function EditName({
       <div className={className}>
         <Address
           address={address}
-          name={editedName}
+          name={editedName || t('<unknown>')}
         />
         <div className='name'>
           <Name

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
+import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -14,6 +15,7 @@ import {
   Button,
   ButtonArea,
   FileNameDisplay,
+  Input,
   InputWithLabel,
   ScrollWrapper,
   ValidatedInput,
@@ -53,7 +55,7 @@ function ImportJsonConfirmStep({
     setIsPasswordVisible(!isPasswordVisible);
   }, [isPasswordVisible]);
 
-  const MIN_LENGTH = 6;
+  const MIN_LENGTH = 0;
   const isPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')), [t]);
 
   const _onChangePass = useCallback(
@@ -89,9 +91,10 @@ function ImportJsonConfirmStep({
             />
           ))}
           {requirePassword && (
-            <div>
+            <div className={`${isPasswordError ? 'error' : ''}`}>
               <ValidatedInput
                 component={InputWithLabel}
+                isError={isPasswordError}
                 label={t<string>('Password')}
                 onValidatedChange={_onChangePass}
                 showPasswordElement={
@@ -133,4 +136,10 @@ function ImportJsonConfirmStep({
 
 export default styled(ImportJsonConfirmStep)`
     margin-top: 32px;
+
+    .error {
+      ${ValidatedInput} ${Input} {
+        border: 1px solid ${({ theme }: ThemeProps) => theme.dangerBackground};
+      }
+    }
 `;

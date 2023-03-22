@@ -6,7 +6,8 @@ import type { ThemeProps } from '../../types';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, AuthorizeReqContext, PopupBorderContainer } from '../../components';
+import { AccountContext, AuthorizeReqContext, Checkbox } from '../../components';
+import Account from '../Accounts/Account';
 import Request from './Request';
 
 interface Props extends ThemeProps {
@@ -21,7 +22,7 @@ function Authorize({ className = '' }: Props): React.ReactElement {
     .join(' ');
 
   return (
-    <PopupBorderContainer>
+    <>
       <div className={`${className} ${classes}`}>
         {requests.map(
           ({ id, request, url }, index): React.ReactNode => (
@@ -36,31 +37,68 @@ function Authorize({ className = '' }: Props): React.ReactElement {
           )
         )}
       </div>
-    </PopupBorderContainer>
+    </>
   );
 }
 
 export default styled(Authorize)(
   ({ theme }: Props) => `
-  overflow-y: auto;  
-  outline:  37px solid ${theme.newTransactionBackground};
-  border-radius: 32px;
+
+  .top {
+    position: absolute;
+    top: 0;
+    margin-top: -5px;
+  }
+
+  .bottom {
+    position: absolute;
+    bottom: 0;
+  }
+
   height: 584px;
   margin-top: 8px;
-  overflow-y: hidden;
+  overflow-y: scroll;
   overflow-x: hidden;
 
+  ::-webkit-scrollbar-thumb {
+    background:${theme.boxBorderColor};
+    border-radius: 50px;  
+    width: 2px;  
+    border-right: 2px solid #111B24;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ${Account} {
+    padding: 0px 4px;
+    
+    ${Checkbox} {
+      margin-left: 8px;
+    }
+  }
+
   &.lastRequest {
-    overflow: hidden;
+    overflow-y: scroll;
+
+    ::-webkit-scrollbar-thumb {
+      background:${theme.boxBorderColor};
+      border-radius: 50px;  
+      width: 2px;  
+      border-right: 2px solid #111B24;
+    }
+  
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
   }
 
   && {
     padding: 0;
   }
 
-  .request {
-    padding: 0 24px;
-  }
+
 
   &.warning-outline {
     outline:  37px solid ${theme.warningColor};

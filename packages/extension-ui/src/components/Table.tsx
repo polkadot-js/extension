@@ -113,6 +113,7 @@ export default React.memo(
     background: ${theme.iconNeutralColor};
     width: 12px;
     height: 12px;
+    margin-top: 6px;
   }
 `
   )

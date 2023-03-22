@@ -17,6 +17,7 @@ import styled from 'styled-components';
 import details from '../assets/details.svg';
 import exportIcon from '../assets/export.svg';
 import subAccountIcon from '../assets/subAccount.svg';
+import { ALEPH_ZERO_GENESIS_HASH } from '../constants';
 import useMetadata from '../hooks/useMetadata';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useToast from '../hooks/useToast';
@@ -169,15 +170,11 @@ function Address({
           className='identityIcon'
           iconTheme={theme}
           isExternal={isExternal}
-          onCopy={_onCopy}
           prefix={prefix}
           value={formatted || address}
         />
         <CopyToClipboard text={(address && address) || ''}>
-          <div
-            className='info'
-            onClick={_onCopy}
-          >
+          <div className='info'>
             {parentName ? (
               <>
                 <div className='name-banner'>
@@ -209,7 +206,7 @@ function Address({
                 <Name />
               </div>
             )}
-            {chain?.genesisHash && (
+            {chain?.genesisHash && chain?.genesisHash !== ALEPH_ZERO_GENESIS_HASH && (
               <div
                 className='banner chain'
                 data-field='chain'
@@ -222,6 +219,7 @@ function Address({
               <div
                 className='fullAddress'
                 data-field='address'
+                onClick={_onCopy}
               >
                 {_ellipsisName(formatted || address) || t('<unknown>')}
               </div>
@@ -271,7 +269,7 @@ function Address({
 }
 
 export default styled(Address)(
-  ({ theme }: Props) => `
+  ({ actions, theme, withExport }: Props) => `
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
   border-radius: 8px;
@@ -280,7 +278,7 @@ export default styled(Address)(
   transition: background 0.2s ease;
 
   :hover {
-    background: ${theme.menuBackground};
+    background: ${withExport || actions ? theme.menuBackground : 'transparent'};
 
     .detailsIcon {
       background: ${theme.headerIconBackgroundHover};
@@ -357,7 +355,6 @@ export default styled(Address)(
   }
 
   .info {
-    cursor: copy;
     max-width: 200px;
     border-radius: 8px;
   }
@@ -460,12 +457,13 @@ export default styled(Address)(
   .fullAddress {
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100px;
+    max-width: 162px;
     color: ${theme.subTextColor};
     font-size: 14px;
     line-height: 145%;
     font-weight: 300;
     letter-spacing: 0.07em;
+    cursor: copy;
   }
 
   .detailsIcon {

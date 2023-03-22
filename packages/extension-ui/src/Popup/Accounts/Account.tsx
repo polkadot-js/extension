@@ -10,12 +10,13 @@ import { canDerive } from '@polkadot/extension-base/utils';
 import { ThemeProps } from '@polkadot/extension-ui/types';
 
 import { AccountContext, Address, Checkbox, Dropdown, Link, MenuDivider } from '../../components';
+import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 import { editAccount, tieAccount } from '../../messaging';
 import { Name } from '../../partials';
 
-interface Props extends AccountJson {
+interface Props extends AccountJson, ThemeProps {
   className?: string;
   parentName?: string;
   withCheckbox?: boolean;
@@ -130,7 +131,7 @@ function Account({
                 label=''
                 onChange={_onChangeGenesis}
                 options={genesisOptions}
-                value={genesisHash || ''}
+                value={genesisHash || ALEPH_ZERO_GENESIS_HASH}
               />
             </div>
           </>
@@ -178,7 +179,20 @@ function Account({
 }
 
 export default styled(Account)(
-  ({ theme }: ThemeProps) => `
+  ({ theme, withCheckbox }: Props) => `
+  ${Address}:hover {
+    background: ${withCheckbox ? theme.menuBackground : theme.menuBackground};
+  
+    ${Checkbox} span {
+    border: 1px solid ${theme.primaryColor};
+    }
+  }
+
+  ${Address}:active {
+    ${Checkbox} span {
+      background: ${theme.primaryColor};
+    }
+  }
 
   .address {
     display: flex;

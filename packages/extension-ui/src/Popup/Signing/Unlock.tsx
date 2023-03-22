@@ -19,7 +19,7 @@ interface Props {
   setError: (error: string | null) => void;
   setPassword: (password: string) => void;
 }
-const MIN_PASSWORD_LENGTH = 6;
+const MIN_PASSWORD_LENGTH = 0;
 
 function Unlock({
   className,

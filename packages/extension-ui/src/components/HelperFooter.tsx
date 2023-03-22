@@ -25,7 +25,7 @@ export default React.memo(
     margin-top: 24px;
     gap: 4px;
     padding: 0 16px;
-  
+
     &:before {
       position: absolute;
       content: '';
@@ -53,6 +53,7 @@ export default React.memo(
         color: ${theme.primaryColor};
         cursor: pointer;
         text-decoration: none;
+        transition: 0.2s ease;
   
         :hover {
           text-decoration: underline;

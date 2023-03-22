@@ -3,35 +3,35 @@
 
 import type { ThemeProps } from '../types';
 
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import styled from 'styled-components';
 
+import arrowLeft from '../assets/arrow-left.svg';
 import Button from './Button';
+import Svg from './Svg';
 
 interface Props {
   className?: string;
   onClick: () => void;
 }
 
-function BackButton ({ className, onClick  }: Props): React.ReactElement<Props> {
+function BackButton({ className, onClick }: Props): React.ReactElement<Props> {
   return (
     <Button
       className={className}
       onClick={onClick}
       secondary
     >
-      <FontAwesomeIcon
+      <Svg
         className='arrowLeft'
-        icon={faArrowLeft}
-        size='sm'
+        src={arrowLeft}
       />
     </Button>
   );
 }
 
-export default styled(BackButton)(({ theme }: ThemeProps) => `
+export default styled(BackButton)(
+  ({ theme }: ThemeProps) => `
   background: ${theme.buttonSecondaryBackground};
   display: flex;
   flex-direction: row;
@@ -46,13 +46,15 @@ export default styled(BackButton)(({ theme }: ThemeProps) => `
   width: 42px;
 
   .arrowLeft {
-    color: ${theme.subTextColor};
+    background: ${theme.subTextColor};
     display: block;
-    margin: auto;
+    width: 20px;
+    height: 20px;
   }
 
   &:not(:disabled):hover {
     background: ${theme.buttonSecondaryBackgroundHover};
     box-shadow: ${theme.buttonSecondaryBackgroundHover};
   }
-`);
+`
+);

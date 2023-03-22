@@ -49,6 +49,9 @@ interface Props extends ThemeProps {
 const singleSlashRegex = /([^/]|^)\/([^/]|$)/;
 
 const StyledFooter = styled(HelperFooter)`
+  .icon {
+    margin-bottom: 12px;
+  }
   gap: 8px;
 `;
 

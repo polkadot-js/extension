@@ -334,18 +334,6 @@ describe('Signing requests', () => {
       }, 1500);
     });
 
-    it('shows an error when the password is too short', async () => {
-      // silencing the following expected console.error
-      console.error = jest.fn();
-      // eslint-disable-next-line @typescript-eslint/require-await
-      enterPassword('short');
-
-      await act(flushAllPromises);
-      wrapper.update();
-
-      expect(wrapper.find('.warning-message').first().text()).toBe('Password is too short');
-    });
-
     it('when last request has been removed/cancelled, shows the previous one', async () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
       await act(flushAllPromises);

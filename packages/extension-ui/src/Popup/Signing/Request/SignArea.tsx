@@ -124,14 +124,13 @@ function SignArea({ buttonText, className, error, isExternal, isFirst, setError,
           isDanger
           isDisabled={!isFirst}
           onClick={_onCancel}
-          secondary
         >
           {t<string>('Decline')}
         </Button>
         <Button
           data-sign-transaction
           isBusy={isBusy}
-          isDisabled={(!!isLocked && !password) || !!error}
+          isDisabled={!isFirst || (!!isLocked && !password) || !!error}
           isSuccess
           onClick={_onSign}
         >

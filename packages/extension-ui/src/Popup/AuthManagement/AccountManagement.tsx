@@ -23,7 +23,7 @@ const CustomButtonArea = styled(ButtonArea)`
 `;
 
 function AccountManagement({ className, location: { search } }: Props): React.ReactElement<Props> {
-  const { selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
+  const { hierarchy, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const searchParams = new URLSearchParams(search);
@@ -62,21 +62,27 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
   return (
     <>
       <Header
-        smallMargin={true}
         text={t<string>('Connected accounts')}
         withBackArrow
+        withHelp
       />
       <div className={className}>
         {url && (
           <>
             <RemoveAuth url={url} />
-            <AccountSelection
-              className='accountSelection'
-              onChange={setSelectedAccountsChanged}
-              showHidden={true}
-              url={url}
-              withWarning={false}
-            />
+            {hierarchy.length > 0 ? (
+              <AccountSelection
+                className='accountSelection'
+                onChange={setSelectedAccountsChanged}
+                showHidden={true}
+                url={url}
+                withWarning={false}
+              />
+            ) : (
+              <div className='no-accounts'>
+                <span>{t<string>('You do NOT have any account.')}</span>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -101,17 +107,33 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
 }
 
 export default withRouter(styled(AccountManagement)`
-  margin-top: -16px;
   overflow: hidden;
+
+  .no-accounts {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    gap: 8px;
+    height: 80px;
+    margin-top: 16px;
+    border: 1px dashed #1B2B38;
+    border-radius: 8px;
+  }
+
   .accountSelection {
     ${Checkbox} {
-        margin-right: 16px;
-      }
+      margin-right: 16px;
+    }
+
     .accountList {
       height: 350px;
       padding: 0px 8px;
     }
   }
+  
   .acceptButton {
     width: 90%;
     margin: 0.5rem auto 0;

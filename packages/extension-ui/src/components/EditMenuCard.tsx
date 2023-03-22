@@ -21,6 +21,7 @@ interface Props extends ThemeProps {
   isDanger?: boolean;
   onClick?: () => void;
   link?: string;
+  tabIndex?: number;
 }
 
 interface ExtraProps {
@@ -70,6 +71,7 @@ function EditMenuCard({
   link,
   onClick,
   preIcon,
+  tabIndex = 0,
   title
 }: Props): React.ReactElement<Props> {
   return (
@@ -81,6 +83,8 @@ function EditMenuCard({
       <div
         className={className}
         onClick={onClick}
+        onKeyPress={onClick}
+        tabIndex={tabIndex}
       >
         <div className='flex-container'>
           <div className='flex-group'>
@@ -89,7 +93,11 @@ function EditMenuCard({
               {title}
             </div>
             <div className='description'>
-              <span className='description-text'>{description}</span>
+              <span
+                className={`description-text ${title === 'Address' ? 'address' : title === 'Network' ? 'network' : ''}`}
+              >
+                {description}
+              </span>
               <div className='extra'>
                 <ExtraContent
                   extra={extra}
@@ -205,6 +213,14 @@ export default styled(EditMenuCard)(
       overflow: hidden;
       width: 80px;
       text-align: right;
+    }
+
+    .description-text.address {
+      width: 150px;
+    }
+
+    .description-text.network {
+      width: 120px;
     }
   }
 

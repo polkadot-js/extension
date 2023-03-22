@@ -11,12 +11,14 @@ interface Props extends ThemeProps {
   className?: string;
   url: string;
   disconnectElement?: React.ReactNode;
+  withoutProtocol?: boolean;
 }
 
-const FaviconBox: React.FC<Props> = function ({ className, disconnectElement, url }: Props) {
+const FaviconBox: React.FC<Props> = function ({ className, disconnectElement, url, withoutProtocol }: Props) {
   const [favicon, setFavicon] = useState<string>('');
 
   const origin = new URL(decodeURIComponent(url)).origin;
+  const strippedUrl = origin.replace(/^https?:\/\//, '');
 
   useEffect(() => {
     async function fetchFavicon() {
@@ -30,12 +32,14 @@ const FaviconBox: React.FC<Props> = function ({ className, disconnectElement, ur
 
   return (
     <div className={className}>
-      <img
-        className='icon'
-        src={favicon}
-      />
-      <span>{origin}</span>
-      {disconnectElement}
+      <div className='favicon-box-content'>
+        <img
+          className='icon'
+          src={favicon}
+        />
+        <span>{withoutProtocol ? strippedUrl : origin}</span>
+      </div>
+      <div className='disconnect-element'>{disconnectElement}</div>
     </div>
   );
 };
@@ -50,7 +54,32 @@ export default styled(FaviconBox)(
   margin: 0px 16px;    
   background: ${theme.inputBorderColor};
   border-radius: 8px;
+  transition: 0.2s ease;
+  justify-content: space-evenly;
 
+  .favicon-box-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .disconnect-element {
+    display: flex;
+  }
+
+  :hover {
+    background: ${theme.editCardBackgroundHover};
+    
+    .disconnect-element{
+       .remove-text {
+        color: ${theme.buttonBackgroundDangerHover};
+      }
+      .remove-icon {
+        background: ${theme.buttonBackgroundDangerHover};
+      }
+    }
+  }
 
   font-family: ${theme.secondaryFontFamily};
   font-style: normal;

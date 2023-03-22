@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import helpIcon from '../assets/help.svg';
 import { BackButton, Button, ButtonArea, Dropdown, LearnMore, ScrollWrapper, Svg, VerticalSpace } from '../components';
 import Address from '../components/Address';
+import { ALEPH_ZERO_GENESIS_HASH } from '../constants';
 import useGenesisHashOptions from '../hooks/useGenesisHashOptions';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
@@ -33,15 +34,23 @@ interface Props {
 }
 
 const CustomFooter = styled(HelperFooter)`
-flex-direction: row;
-display: flex;
-gap: 8px;
-
-
-.text-container {
+  flex-direction: row;
   display: flex;
-  gap: 4px;
-}
+  gap: 8px;
+  width: auto;
+  margin-bottom: 8px;
+
+  .wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    margin-left: -12px;
+  }
+
+  .text-container {
+    display: flex;
+    gap: 4px;
+  }
 `;
 
 const StyledAddress = styled(Address)`
@@ -109,18 +118,20 @@ function AccountNamePasswordCreation({
 
   const footer = (
     <CustomFooter>
-      <div className='icon-container'>
-        <Svg
-          className='icon'
-          src={helpIcon}
-        />
-      </div>
-      <div className='text-container'>
-        <span>
-          {t<string>("Don't know which network to choose?")}&nbsp;
-          <br />
-          <LearnMore href={LINKS.NETWORK} />
-        </span>
+      <div className='wrapper'>
+        <div className='icon-container'>
+          <Svg
+            className='icon'
+            src={helpIcon}
+          />
+        </div>
+        <div className='text-container'>
+          <span>
+            {t<string>("Don't know which network to choose?")}&nbsp;
+            <br />
+            <LearnMore href={LINKS.NETWORK} />
+          </span>
+        </div>
       </div>
     </CustomFooter>
   );
@@ -155,14 +166,15 @@ function AccountNamePasswordCreation({
               label={t<string>('Show on network')}
               onChange={_onChangeNetwork}
               options={options}
-              value={genesisHash}
+              value={genesisHash || ALEPH_ZERO_GENESIS_HASH}
             />
           )}
+          {!isDeriving && footer}
         </div>
       </ScrollWrapper>
       <VerticalSpace />
       {onBackClick && buttonLabel && (
-        <ButtonArea footer={!isDeriving && footer}>
+        <ButtonArea>
           {master && isDeriving ? (
             <Button
               onClick={_onBackClick}

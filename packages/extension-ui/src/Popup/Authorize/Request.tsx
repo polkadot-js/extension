@@ -8,7 +8,7 @@ import React, { useCallback, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
 import helpIcon from '../../assets/help.svg';
-import { AccountContext, ActionContext, Button, ButtonArea, LearnMore, Svg } from '../../components';
+import { AccountContext, ActionContext, BottomWrapper, Button, ButtonArea, LearnMore, Svg } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
@@ -26,14 +26,17 @@ interface Props extends ThemeProps {
 }
 
 const CustomButtonArea = styled(ButtonArea)`
-  padding: 0px;
-  margin-bottom: 8px;
+  backdrop-filter: blur(10px);
 `;
 
 const CustomFooter = styled(HelperFooter)`
   flex-direction: row;
   display: flex;
-  gap: 8px;
+  gap: 8px;  
+
+  .icon {
+    margin-bottom: 4px;
+  }
 
   .text-container {
     display: flex;
@@ -68,6 +71,7 @@ function Request({ authId, className, isFirst, request: { origin }, url }: Props
       await approveAuthRequest(authId, selectedAccounts);
       onAction();
       show(t('App connected'), 'success');
+      window.close();
     } catch (error) {
       console.error(error);
     }
@@ -104,22 +108,36 @@ function Request({ authId, className, isFirst, request: { origin }, url }: Props
   );
 
   return (
-    <div className={className}>
-      <AccountSelection url={url} />
-      <CustomButtonArea footer={footer}>
-        <Button
-          data-accept-request-button
-          onClick={_onClose}
-          secondary
-        >
-          {t<string>('Cancel')}
-        </Button>
-        {isFirst && <Button onClick={_onApprove}>{t<string>('Connect')}</Button>}
-      </CustomButtonArea>
-    </div>
+    <>
+      <div className={className}>
+        <AccountSelection url={url} />
+        <CustomButtonArea footer={footer}>
+          <Button
+            data-accept-request-button
+            onClick={_onClose}
+            secondary
+          >
+            {t<string>('Cancel')}
+          </Button>
+          {isFirst && <Button onClick={_onApprove}>{t<string>('Connect')}</Button>}
+        </CustomButtonArea>
+      </div>
+    </>
   );
 }
 
 export default styled(Request)`
   padding: 0px 16px;
+
+  & ${BottomWrapper} {
+    position: sticky;
+    bottom: -8px !important;
+  }
+
+  .accountList {
+    overflow-x: hidden;
+    padding-right: 2px;
+    padding-bottom: 16px;
+    height: 100%;
+  }
 `;

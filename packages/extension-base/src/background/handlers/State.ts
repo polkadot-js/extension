@@ -75,8 +75,7 @@ const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
 const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,
   height: 630,
-  left: 150,
-  top: 150,
+  state: 'normal',
   type: 'popup',
   url: NOTIFICATION_URL,
   width: 360
@@ -85,6 +84,7 @@ const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
 const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,
   height: 630,
+  state: 'normal',
   type: 'normal',
   url: NOTIFICATION_URL,
   width: 360
@@ -231,6 +231,10 @@ export default class State {
         (window): void => {
           if (window) {
             this.#windows.push(window.id || 0);
+
+            // We're adding chrome.windows.update to make sure that the extension popup is not fullscreened
+            // There is a bug in Chrome that causes the extension popup to be fullscreened when user has any fullscreened browser window opened on the main screen
+            chrome.windows.update(window.id || 0, { state: 'normal' }).catch(console.error);
           }
         });
   }

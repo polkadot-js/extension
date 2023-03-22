@@ -9,8 +9,16 @@ import styled from 'styled-components';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { AccountJson } from '@polkadot/extension-base/background/types';
+import { Z_INDEX } from '@polkadot/extension-ui/zindex';
 
-import { AccountContext, ActionContext, Button, PopupBorderContainer } from '../../components';
+import {
+  AccountContext,
+  ActionContext,
+  BottomWrapper,
+  Button,
+  ButtonArea,
+  PopupBorderContainer
+} from '../../components';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { getAuthList, updateAuthorization, updateAuthorizationDate } from '../../messaging';
@@ -29,9 +37,12 @@ const ButtonsGroup = styled.div`
   gap: 8px;
   padding-bottom: 0px;
   position: absolute;
-  bottom: 16px;
+  bottom: 8px;
   left: 0px;
   right: 0px;
+  height: 56px;
+  backdrop-filter: blur(10px);
+  z-index: ${Z_INDEX.BOTTOM_WRAPPER};
 `;
 
 function NewAccount({ className, location: { search } }: Props): React.ReactElement<Props> {
@@ -140,14 +151,27 @@ function NewAccount({ className, location: { search } }: Props): React.ReactElem
 }
 
 export default withRouter(styled(NewAccount)`
+  & ${BottomWrapper} {
+    position: sticky;
+    bottom: -8px !important;
+  }
 
   .content {
-    outline:  ${({ theme }: ThemeProps): string => theme.newTransactionBackground} solid 37px;
-    border-radius: 32px;
     margin-top: 8px;
-    overflow-y: hidden;
+    overflow-y: scroll;
     overflow-x: hidden;
     height: 584px;
+
+    ::-webkit-scrollbar-thumb {
+      background: ${({ theme }: ThemeProps): string => theme.boxBorderColor};
+      border-radius: 50px;  
+      width: 2px;  
+      border-right: 2px solid #111B24;
+    }
+  
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
   }
 
   .content-inner {

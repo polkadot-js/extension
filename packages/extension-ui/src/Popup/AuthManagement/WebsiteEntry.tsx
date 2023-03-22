@@ -18,11 +18,13 @@ interface Props extends ThemeProps {
   className?: string;
   info: AuthUrlInfo;
   url: string;
+  tabIndex?: number;
 }
 
 function WebsiteEntry({
   className = '',
   info: { authorizedAccounts, isAllowed },
+  tabIndex,
   url
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -30,6 +32,7 @@ function WebsiteEntry({
   const onAction = useContext(ActionContext);
   const _goTo = useCallback((path: string) => () => onAction(path), [onAction]);
   const origin = new URL(decodeURIComponent(url)).origin;
+  const strippedUrl = origin.replace(/^https?:\/\//, '');
 
   useEffect(() => {
     async function fetchFavicon() {
@@ -45,25 +48,29 @@ function WebsiteEntry({
     <div
       className={className}
       onClick={_goTo(`/url/manage?url=${encodeURIComponent(url)}`)}
+      onKeyPress={_goTo(`/url/manage?url=${encodeURIComponent(url)}`)}
+      tabIndex={tabIndex}
     >
       <div className='url-group'>
         <img
           className='favicon'
           src={favicon}
         />
-        <div className='url'>{origin}</div>
+        <div className='url'>{strippedUrl}</div>
       </div>
-      <span className='number-of-accounts'>
-        {authorizedAccounts && authorizedAccounts.length
-          ? t('{{total}} accounts', { replace: { total: authorizedAccounts.length } })
-          : isAllowed
-          ? t('all accounts')
-          : t('no accounts')}
-      </span>
-      <Svg
-        className='chevron'
-        src={chevronIcon}
-      />
+      <div className='accounts-group'>
+        <span className='number-of-accounts'>
+          {authorizedAccounts && authorizedAccounts.length
+            ? t('{{total}} accounts', { replace: { total: authorizedAccounts.length } })
+            : isAllowed
+            ? t('all accounts')
+            : t('no accounts')}
+        </span>
+        <Svg
+          className='chevron'
+          src={chevronIcon}
+        />
+      </div>
     </div>
   );
 }
@@ -78,7 +85,12 @@ export default styled(WebsiteEntry)(
   height: 48px;
   transition: 0.2s ease;
 
-  
+  .accounts-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
 
   &:hover {
     cursor: pointer;
@@ -130,10 +142,8 @@ export default styled(WebsiteEntry)(
     background: ${theme.iconNeutralColor};
   }
 
-  &:hover { 
-    .chevron {
-      background: ${theme.headerIconBackgroundHover};
-    }
+  &:hover .chevron {
+    background: ${theme.headerIconBackgroundHover};
   }
 
   .number-of-accounts {

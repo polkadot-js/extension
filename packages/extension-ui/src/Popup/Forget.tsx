@@ -13,6 +13,7 @@ import {
   AccountContext,
   ActionContext,
   Address,
+  AnimatedSvg,
   Button,
   ButtonArea,
   LearnMore,
@@ -69,17 +70,26 @@ function Forget({
     onAction('/');
   }, [address, onAction, show, t]);
 
+  const CustomFooter = styled(HelperFooter)`
+  .wrapper {
+    display: flex;
+    gap: 8px;
+    margin-left: -12px;
+  }`;
+
   const footer = (
-    <HelperFooter>
-      <Svg
-        className='icon'
-        src={helpIcon}
-      />
-      <span>
-        {t<string>('How to restore your account?')}&nbsp;
-        <LearnMore href={LINKS.FORGET} />
-      </span>
-    </HelperFooter>
+    <CustomFooter>
+      <div className='wrapper'>
+        <Svg
+          className='icon'
+          src={helpIcon}
+        />
+        <span>
+          {t<string>('How to restore your account?')}&nbsp;
+          <LearnMore href={LINKS.FORGET} />
+        </span>
+      </div>
+    </CustomFooter>
   );
 
   return (
@@ -91,7 +101,7 @@ function Forget({
       />
       <div className={className}>
         <div className='text-container'>
-          <Svg
+          <AnimatedSvg
             className='forgetIcon'
             src={animatedForget}
           />
@@ -166,7 +176,6 @@ export default withRouter(
     margin: 0 auto;
     width: 96px;
     height: 96px;
-    background: ${theme.dangerBackground};
   }
 
 `

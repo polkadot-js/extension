@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
 
 import Spinner from './Spinner';
@@ -23,6 +23,7 @@ interface Props extends ThemeProps {
 }
 
 function Button({ children, className = '', isBusy, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const _onClick = useCallback((): void => {
     if (isBusy || isDisabled) {
       return;
@@ -38,11 +39,19 @@ function Button({ children, className = '', isBusy, isDisabled, onClick, to }: P
     }
   }, [isBusy, isDisabled, onClick, to]);
 
+  const onMouseLeave = useCallback(() => {
+    if (buttonRef.current) {
+      buttonRef.current.blur();
+    }
+  }, []);
+
   return (
     <button
       className={`${className}${isDisabled || isBusy ? ' isDisabled' : ''}${isBusy ? ' isBusy' : ''}`}
       disabled={isDisabled || isBusy}
       onClick={_onClick}
+      ref={buttonRef}
+      onMouseLeave={onMouseLeave}
     >
       <div className='children'>{children}</div>
       <Spinner className='busyOverlay' />
@@ -63,7 +72,7 @@ export default styled(Button)(
       ? theme.buttonTertiaryBackground
       : theme.buttonBackground
   };
-  
+
   cursor: pointer;
   display: block;
   width: ${tertiary ? 'max-content' : '100%'};
@@ -83,7 +92,7 @@ export default styled(Button)(
       : theme.buttonTextColor
   };
   font-family: ${theme.secondaryFontFamily};
-  font-weigth: 500;
+  font-weight: 500;
   font-size: 16px;
   line-height: 135%;
   padding: ${tertiary ? '2px 0px;' : '0 1rem'};
@@ -116,12 +125,11 @@ export default styled(Button)(
 
   &:focus {
     outline: none;
-    border: ${
-      secondary ? theme.buttonSecondaryBorderFocused : tertiary ? theme.buttonTertiaryBorder : theme.buttonBorderFocused
-    };
+    border: ${secondary ? theme.buttonSecondaryBorderFocused : tertiary ? 'none' : theme.buttonBorderFocused};
   }
 
   &:not(:disabled):hover, &:active {
+    border: none;
     background: ${
       isDanger
         ? theme.buttonBackgroundDangerHover
@@ -151,6 +159,10 @@ export default styled(Button)(
         ? 'none'
         : theme.buttonHoverBoxShadow
     };
+  }
+
+  &:active .children {
+    margin-top: 2px;
   }
   
   .busyOverlay,

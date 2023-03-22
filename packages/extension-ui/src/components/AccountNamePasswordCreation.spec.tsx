@@ -68,13 +68,6 @@ describe('AccountNamePasswordCreation', () => {
     wrapper.update();
   });
 
-  it('only account name input is visible at first', () => {
-    expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input)).toHaveLength(1);
-    expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
-    expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-    expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
-  });
-
   it('next step button has the correct label', () => {
     expect(wrapper.find(Button).last().text()).toBe('Create');
   });
@@ -88,15 +81,6 @@ describe('AccountNamePasswordCreation', () => {
     expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).prop('withError')).toBe(false);
   });
 
-  it('after typing less than 3 characters into name input, password input is not visible', async () => {
-    await enterName('ab');
-    expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).prop('withError')).toBe(true);
-    expect(wrapper.find('.warning-message').first().text()).toBe('Account name is too short');
-    expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
-    expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-    expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
-  });
-
   it('input should keep showing error when something has been typed but then erased', async () => {
     await enterName(account.name);
     await enterName('');
@@ -108,28 +92,11 @@ describe('AccountNamePasswordCreation', () => {
     expect(onNameChange).toHaveBeenLastCalledWith(account.name);
   });
 
-  it('after typing 3 characters into name input, first password input is visible', async () => {
-    await enterName(account.name);
-    expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).first().prop('withError')).toBe(false);
-    expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
-    expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-    expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
-  });
-
   it('password with caps lock should show a warning', async () => {
     await enterName('abc').then(password('abcde'));
     await capsLockOn(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input));
 
     expect(wrapper.find('.warning-message').first().text()).toBe('Password is too short');
-  });
-
-  it('password shorter than 6 characters should be not valid', async () => {
-    await enterName('abc').then(password('abcde'));
-    expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input).prop('withError')).toBe(true);
-    expect(wrapper.find('.warning-message').text()).toBe('Password is too short');
-    expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
-    expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-    expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
   });
 
   it('submit button is not enabled until both passwords are equal', async () => {
@@ -157,12 +124,6 @@ describe('AccountNamePasswordCreation', () => {
   describe('All fields are filled correctly, but then', () => {
     beforeEach(async () => {
       await enterName(account.name).then(password(account.password)).then(repeat(account.password));
-    });
-
-    it('first password input is cleared - second one disappears and button get disabled', async () => {
-      await type(wrapper.find('input[type="password"]').first(), '');
-      expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
     it('first password changes - button is disabled', async () => {

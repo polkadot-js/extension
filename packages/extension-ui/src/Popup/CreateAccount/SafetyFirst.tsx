@@ -8,7 +8,7 @@ import styled from 'styled-components';
 
 import animatedLockIcon from '../../assets/anim_locked.svg';
 import helpIcon from '../../assets/help.svg';
-import { Button, ButtonArea, LearnMore, Svg, VerticalSpace } from '../../components';
+import { AnimatedSvg, Button, ButtonArea, LearnMore, Svg, VerticalSpace } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
 import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
@@ -28,7 +28,7 @@ const WrapperRow = styled.div`
 
 const StyledFooter = styled(HelperFooter)`
   .icon {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 `;
 
@@ -55,7 +55,7 @@ function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props
     <>
       <div className={className}>
         <div className='top'>
-          <Svg
+          <AnimatedSvg
             className='icon'
             src={animatedLockIcon}
           />
@@ -99,7 +99,7 @@ export default React.memo(
         margin: 0 auto;
         width: 96px;
         height: 96px;
-        background: ${theme.warningColor};
+        // background: ${theme.warningColor};
       }
 
       .heading {

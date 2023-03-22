@@ -5,6 +5,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { AccountContext, ActionContext } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
+import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri } from '../../messaging';
@@ -28,7 +29,7 @@ function ImportSeed(): React.ReactElement {
   const [step, setStep] = useState<number>(1);
   const [type, setType] = useState(DEFAULT_TYPE);
   const [path, setPath] = useState<string | null>(null);
-  const [genesis, setGenesis] = useState('');
+  const [genesis, setGenesis] = useState(ALEPH_ZERO_GENESIS_HASH);
   const [seed, setSeed] = useState<string | null>(null);
   const chain = useMetadata(account && account.genesis, true);
 

@@ -1,20 +1,31 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
+import add from '../assets/add.svg';
 import { ThemeProps } from '../types';
+import Svg from './Svg';
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
-const StyledLink = styled(Link)`
+const StyledLink = styled(Link)<{ isExpanded: boolean }>`
   text-decoration: none;
+  border-radius: ${({ isExpanded }) => (isExpanded ? '24px' : '50%')};
+
+  &:focus {
+    outline: 1px solid ${({ theme }: ThemeProps) => theme.addButtonFocusBorder};
+  }
+
+  &:active {
+    .container {
+      margin-top: 2px;
+    }
+  }
 `;
 
 const AddButton: React.FC<Props> = function ({ className }: Props) {
@@ -30,16 +41,20 @@ const AddButton: React.FC<Props> = function ({ className }: Props) {
 
   return (
     <StyledLink
+      className={className}
+      isExpanded={isExpanded}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       to={'/account/add-menu'}
     >
       <div className={className}>
-        <FontAwesomeIcon
-          className='icon'
-          icon={faPlus}
-        />
-        {isExpanded && <span className='expanded'>Add Account</span>}
+        <div className='container'>
+          <img
+            className='icon'
+            src={add}
+          />
+          {isExpanded && <span className='expanded'>Add Account</span>}
+        </div>
       </div>
     </StyledLink>
   );
@@ -47,7 +62,7 @@ const AddButton: React.FC<Props> = function ({ className }: Props) {
 
 export default styled(AddButton)(
   ({ theme }: ThemeProps) => `
-
+  
   display: flex;
   margin-left:auto;
   margin-right:auto;
@@ -60,16 +75,18 @@ export default styled(AddButton)(
   border-radius: 50%;
   padding:0px;
   transition: 0.2s ease;
+
+  .container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
   
   &:disabled {
     cursor: default;
     background: ${theme.addButtonBackground};
     opacity: 0.3
-  }
-
-  &:focus{
-    outline: none;
-    border: ${theme.addButtonFocusBorder};
   }
 
   &:not(:disabled):hover, &:active {
@@ -82,8 +99,8 @@ export default styled(AddButton)(
   }
 
   .icon {
-    width: 15px;
-    height: 15px;
+    width: 20px;
+    height: 20px;
   }
 
   &:hover {

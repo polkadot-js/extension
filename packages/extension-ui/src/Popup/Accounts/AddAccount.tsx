@@ -124,7 +124,7 @@ export default React.memo(
   .button-container{
     display: flex;
     margin: 0 auto;
-    margin-top: 40px;
+    margin-top: 24px;
     width: 180px;
     padding: 16px;
     height: 80px;
@@ -172,6 +172,7 @@ export default React.memo(
     letter-spacing: 0.04em;
     max-width: 312px;
     color: ${theme.subTextColor};
+    margin-top: 0px;
   }
 `
   )

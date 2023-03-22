@@ -48,9 +48,23 @@ function InputWithLabel({
     [onChange]
   );
 
+  const [focused, setIsFocused] = React.useState(false);
+
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    if (onBlur) {
+      onBlur();
+    }
+
+    setIsFocused(false);
+  }, [onBlur]);
+
   return (
     <Label
-      active={value && value?.length > 0}
+      active={focused || (value && value?.length > 0)}
       className={`${className || ''} ${withoutMargin ? 'withoutMargin' : ''}`}
       label={label}
     >
@@ -60,8 +74,9 @@ function InputWithLabel({
         autoFocus={isFocused}
         defaultValue={defaultValue || undefined}
         disabled={disabled}
-        onBlur={onBlur}
+        onBlur={handleBlur}
         onChange={_onChange}
+        onFocus={handleFocus}
         placeholder={placeholder}
         readOnly={isReadOnly}
         spellCheck={false}
@@ -78,7 +93,7 @@ export default styled(InputWithLabel)(
   margin-bottom: 16px;
  
   > ${Input} {
-    padding-top: ${!label.trim() ? '0px' : '4px'};
+    padding-top: ${!label.trim() ? '0px' : '11px'};
  }
 
   &.withoutMargin {

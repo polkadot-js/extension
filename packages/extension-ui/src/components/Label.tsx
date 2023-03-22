@@ -24,7 +24,7 @@ function Label({ active = false, children, className, label }: Props): React.Rea
 
 export default styled(Label)(
   ({ active, theme }: Props) => `
-  color: ${theme.subTextColor};
+  color: ${theme.labelColor};
   display: inline-block;
   position: relative;
   width: 100%;
@@ -33,10 +33,9 @@ export default styled(Label)(
     font-size: ${active ? theme.inputLabelFontSize : '16px'};
     line-height: 14px;
     letter-spacing: 0.04em;
-    opacity: 0.65;
     margin-bottom: 8px;
     position: absolute;
-    top: ${active ? '6px' : '22px'};
+    top: ${active ? '9px' : '22px'};
     left: 16px;
     transition: all 0.2s ease;
     pointer-events: none;

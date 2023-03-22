@@ -23,6 +23,7 @@ import {
   VerticalSpace
 } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
+import { ALEPH_ZERO_TESTNET_GENESIS_HASH } from '../../constants';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';
@@ -34,7 +35,19 @@ interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
 }
 
 const CustomFooter = styled(HelperFooter)`
+  width: auto;
+  margin-bottom: 24px;
   gap: 12px;
+
+  .wrapper {
+    display: flex;
+    gap: 8px;
+    margin-left: -12px;
+  };
+`;
+
+const CustomButtonArea = styled(ButtonArea)`
+  padding-top:8px;
 `;
 
 function EditNetwork({
@@ -56,7 +69,8 @@ function EditNetwork({
   const isExternal = Boolean(account?.isExternal);
 
   const [genesis, setGenesis] = useState<string | undefined | null>(account?.genesisHash);
-  const [checked, setChecked] = useState(false);
+  const isTestNet = account?.genesisHash === ALEPH_ZERO_TESTNET_GENESIS_HASH;
+  const [checked, setChecked] = useState(isTestNet);
 
   const toggleChecked = useCallback(() => setChecked((checked) => !checked), []);
 
@@ -80,27 +94,35 @@ function EditNetwork({
 
   const footer = (
     <CustomFooter>
-      <Svg
-        className='icon'
-        src={helpIcon}
-      />
-      <span>
-        {t<string>('Not sure which to choose?')}&nbsp;
-        <LearnMore href={LINKS.NETWORK} />
-      </span>
+      <div className='wrapper'>
+        <Svg
+          className='icon'
+          src={helpIcon}
+        />
+        <span>
+          {t<string>('Not sure which to choose?')}&nbsp;
+          <LearnMore href={LINKS.NETWORK} />
+        </span>
+      </div>
     </CustomFooter>
   );
 
   return (
     <>
-      <Header
-        text={t<string>('Account network')}
-        withBackArrow
-        withHelp
-      />
       <ScrollWrapper>
+        <Header
+          className='header'
+          text={t<string>('Account network')}
+          withBackArrow
+          withBackdrop
+          withHelp
+        />
         <div className={className}>
-          <div className='checkbox-container'>
+          <div
+            className='checkbox-container'
+            onKeyPress={toggleChecked}
+            tabIndex={0}
+          >
             <Checkbox
               checked={checked}
               label={t<string>('Show test networks')}
@@ -113,23 +135,24 @@ function EditNetwork({
             options={options}
             withTestNetwork={checked}
           />
+          {footer}
         </div>
+        <CustomButtonArea>
+          <Button
+            onClick={_goTo(`/account/edit-menu/${address}?isExternal=${isExternal.toString()}`)}
+            secondary
+          >
+            {t<string>('Cancel')}
+          </Button>
+          <Button
+            isDisabled={!hasGenesisChanged}
+            onClick={_saveChanges}
+          >
+            {t<string>('Change')}
+          </Button>
+        </CustomButtonArea>
       </ScrollWrapper>
       <VerticalSpace />
-      <ButtonArea footer={footer}>
-        <Button
-          onClick={_goTo(`/account/edit-menu/${address}?isExternal=${isExternal.toString()}`)}
-          secondary
-        >
-          {t<string>('Cancel')}
-        </Button>
-        <Button
-          isDisabled={!hasGenesisChanged}
-          onClick={_saveChanges}
-        >
-          {t<string>('Change')}
-        </Button>
-      </ButtonArea>
     </>
   );
 }

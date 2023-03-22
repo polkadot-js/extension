@@ -10,7 +10,7 @@ import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handl
 
 import animTrusted from '../../assets/anim_trusted.svg';
 import helpIcon from '../../assets/help.svg';
-import { ButtonArea, LearnMore, Svg, VerticalSpace } from '../../components';
+import { AnimatedSvg, ButtonArea, LearnMore, ScrollWrapper, Svg, VerticalSpace } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
 import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
@@ -33,7 +33,21 @@ const CustomButtonArea = styled(ButtonArea)`
 const CustomFooter = styled(HelperFooter)`
   margin-bottom: 8px;
   gap: 8px;
-  justify-content: flex-start;
+
+  .wrapper {
+    display: flex;
+    gap: 8px;
+    margin-right: 40px;
+  };
+`;
+
+const CustomScrollWrapper = styled(ScrollWrapper)`
+  ::-webkit-scrollbar-thumb {
+    border-right: none;
+    border-left: 4px solid rgb(17, 27, 36);
+  }
+
+  padding-right: 0px;
 `;
 
 function AuthManagement({ className }: Props): React.ReactElement<Props> {
@@ -51,14 +65,16 @@ function AuthManagement({ className }: Props): React.ReactElement<Props> {
 
   const footer = (
     <CustomFooter>
-      <Svg
-        className='icon'
-        src={helpIcon}
-      />
-      <span>
-        {t<string>('What are trusted apps?')}&nbsp;
-        <LearnMore href={LINKS.TRUSTED_APPS} />
-      </span>
+      <div className='wrapper'>
+        <Svg
+          className='icon'
+          src={helpIcon}
+        />
+        <span>
+          {t<string>('What are trusted apps?')}&nbsp;
+          <LearnMore href={LINKS.TRUSTED_APPS} />
+        </span>
+      </div>
     </CustomFooter>
   );
 
@@ -66,7 +82,6 @@ function AuthManagement({ className }: Props): React.ReactElement<Props> {
     <>
       <Header
         goToFnOverride={goTo('/account/settings')}
-        smallMargin
         text={t<string>('Trusted Apps')}
         withBackArrow
         withHelp
@@ -74,7 +89,7 @@ function AuthManagement({ className }: Props): React.ReactElement<Props> {
       <div className={className}>
         {!authList || !hasAuthList ? (
           <div className='empty-list'>
-            <Svg
+            <AnimatedSvg
               className='animated-trusted'
               src={animTrusted}
             />
@@ -86,17 +101,18 @@ function AuthManagement({ className }: Props): React.ReactElement<Props> {
             </span>
           </div>
         ) : (
-          <>
+          <CustomScrollWrapper>
             <div className='website-list'>
               {Object.entries<AuthUrlInfo>(authList).map(([url, info]) => (
                 <WebsiteEntry
                   info={info}
                   key={url}
                   url={url}
+                  tabIndex={0}
                 />
               ))}
             </div>
-          </>
+          </CustomScrollWrapper>
         )}
       </div>
       <VerticalSpace />
@@ -126,7 +142,6 @@ export default styled(AuthManagement)`
   .animated-trusted {
     width: 96px;
     height: 96px;
-    background: ${({ theme }: ThemeProps) => theme.trustedBackground};
   }
   
 

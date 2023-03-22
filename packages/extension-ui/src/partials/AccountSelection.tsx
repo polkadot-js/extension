@@ -7,11 +7,15 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import styled from 'styled-components';
 
 import plusIcon from '../assets/add.svg';
-import { AccountContext, FaviconBox, Svg } from '../components';
+import border from '../assets/border.svg';
+import { AccountContext, Svg } from '../components';
 import Checkbox from '../components/Checkbox';
+import FaviconBox from '../components/FaviconBox';
 import useTranslation from '../hooks/useTranslation';
 import Account from '../Popup/Accounts/Account';
 import AccountsTree from '../Popup/Accounts/AccountsTree';
+import { createGroupedAccountData } from '../util/createGroupedAccountData';
+import { Z_INDEX } from '../zindex';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -27,8 +31,15 @@ const StyledCheckbox = styled(Checkbox)`
   margin-right: 8px;
 `;
 
+const StyledFaviconBox = styled(FaviconBox)`
+  :hover {
+    background: ${({ theme }: ThemeProps) => theme.inputBorderColor};
+  }
+`;
+
 function AccounSelection({
   className,
+
   onChange,
   showHidden = false,
   url,
@@ -39,6 +50,7 @@ function AccounSelection({
   const [isIndeterminate, setIsIndeterminate] = useState(false);
   const allVisibleAccounts = useMemo(() => accounts.filter(({ isHidden }) => !isHidden), [accounts]);
   const noAccountSelected = useMemo(() => selectedAccounts.length === 0, [selectedAccounts.length]);
+  const { flattened } = createGroupedAccountData(hierarchy);
   const allDisplayedAddresses = useMemo(
     () => (showHidden ? accounts.map(({ address }) => address) : allVisibleAccounts.map(({ address }) => address)),
     [accounts, allVisibleAccounts, showHidden]
@@ -72,8 +84,15 @@ function AccounSelection({
     <div className={className}>
       {withWarning && (
         <div className='withWarning'>
+          <Svg
+            className='border'
+            src={border}
+          />
           <div className='heading'>{t<string>('Connect app')}</div>
-          <FaviconBox url={url} />
+          <StyledFaviconBox
+            url={url}
+            withoutProtocol
+          />
           <div className='separator'>
             <div className='line'></div>
             <Svg
@@ -89,14 +108,16 @@ function AccounSelection({
           </div>
         </div>
       )}
-      <StyledCheckbox
-        checked={areAllAccountsSelected}
-        className='accountTree-checkbox'
-        indeterminate={isIndeterminate}
-        label={t('Select all')}
-        onChange={_onSelectAllToggle}
-      />
-      <div className='accountList'>
+      {flattened.length > 1 && (
+        <StyledCheckbox
+          checked={areAllAccountsSelected}
+          className='accountTree-checkbox'
+          indeterminate={isIndeterminate}
+          label={t('Select all')}
+          onChange={_onSelectAllToggle}
+        />
+      )}
+      <div className={`accountList ${flattened.length > 1 ? '' : 'select-all-margin'}`}>
         {hierarchy.map(
           (json, index): React.ReactNode => (
             <AccountsTree
@@ -121,9 +142,33 @@ export default styled(AccounSelection)(
   // due to internal padding
   margin: 0px -16px;
 
+  .select-all-margin {
+    margin-top: 22px;
+  }
+  
+  .accountList {
+    ${AccountsTree}:only-child {
+      padding-bottom: 100px;
+    }
+  }
+
+  .border {
+    z-index: ${Z_INDEX.BORDER};
+    position: absolute;
+    top: 0;
+    pointer-events: none;
+    background: ${theme.newTransactionBackground};
+    height: 600px;
+    width: 360px;
+  }
+
+  ${Checkbox} label span {
+    left: -10px;
+  }
+
   .accountList {
     overflow-x: hidden;
-    height: 190px;
+    height: 180px;
     scrollbar-color: ${theme.boxBorderColor};
     scrollbar-width: 2px;
     padding-right: 2px;

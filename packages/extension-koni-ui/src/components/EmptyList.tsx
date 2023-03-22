@@ -39,12 +39,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const EmptyList = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    overflow: 'hidden',
     marginTop: 48,
     display: 'flex',
     flexWrap: 'wrap',
     gap: token.padding,
     flexDirection: 'column',
     alignContent: 'center',
+    position: 'relative',
+    zIndex: 2,
 
     '.empty_text_container': {
       display: 'flex',

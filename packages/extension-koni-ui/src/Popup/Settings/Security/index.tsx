@@ -5,7 +5,7 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { saveCameraSetting, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
@@ -17,8 +17,6 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-
-import settings from '@polkadot/ui-settings';
 
 type Props = ThemeProps;
 
@@ -61,10 +59,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const isPopup = useIsPopup();
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
+  const { camera } = useSelector((state: RootState) => state.settings);
 
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
 
-  const [camera, setCamera] = useState(settings.camera === 'on');
   const [loading, setLoading] = useState(false);
 
   const onBack = useCallback(() => {
@@ -82,24 +80,28 @@ const Component: React.FC<Props> = (props: Props) => {
   const updateCamera = useCallback((currentValue: boolean) => {
     return () => {
       setLoading(true);
-      settings.set({ camera: currentValue ? 'off' : 'on' });
+
+      let openNewTab = false;
 
       if (!currentValue) {
         if (isPopup) {
-          windowOpen('/settings/security')
-            .catch((e: Error) => {
-              console.log(e);
-              settings.set({ camera: 'off' });
-            });
-
-          return;
+          openNewTab = true;
         }
       }
 
-      setTimeout(() => {
-        setCamera(settings.camera === 'on');
-        setLoading(false);
-      }, 300);
+      saveCameraSetting(!currentValue)
+        .then(() => {
+          if (openNewTab) {
+            windowOpen('/settings/security')
+              .catch((e: Error) => {
+                console.log(e);
+              });
+          }
+        })
+        .catch(console.error)
+        .finally(() => {
+          setLoading(false);
+        });
     };
   }, [isPopup]);
 

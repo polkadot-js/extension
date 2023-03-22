@@ -63,7 +63,7 @@ export function subscribeBalance (addresses: string[], chainInfoMap: Record<stri
   };
 }
 
-async function subscribeSubstrateBalance (addresses: string[], chainInfo: _ChainInfo, chain: string, networkAPI: _SubstrateApi, evmApiMap: Record<string, _EvmApi>, callBack: (rs: BalanceItem) => void) {
+export async function subscribeSubstrateBalance (addresses: string[], chainInfo: _ChainInfo, chain: string, networkAPI: _SubstrateApi, evmApiMap: Record<string, _EvmApi>, callBack: (rs: BalanceItem) => void) {
   let unsubNativeToken: () => void;
 
   if (_BALANCE_CHAIN_GROUP.crab.includes(chain)) {

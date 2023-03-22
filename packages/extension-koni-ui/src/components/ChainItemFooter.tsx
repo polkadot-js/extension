@@ -7,7 +7,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { updateChainActiveState } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Switch } from '@subwallet/react-ui';
-import { DotsThree } from 'phosphor-react';
+import { PencilSimpleLine } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import { NavigateFunction } from 'react-router';
 import styled from 'styled-components';
@@ -63,7 +63,7 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
       {
         showDetailNavigation && <Button
           icon={<Icon
-            phosphorIcon={DotsThree}
+            phosphorIcon={PencilSimpleLine}
             size='sm'
             type='phosphor'
           />}

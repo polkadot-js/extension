@@ -164,7 +164,10 @@ const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
           </Form.Item>
         </Form>
 
-        <FreeBalance />
+        <FreeBalance
+          address={from}
+          chain={chain}
+        />
       </TransactionContent>
       <TransactionFooter
         className={`${className}-transaction-footer`}

@@ -15,6 +15,26 @@ if (!global.chrome.extension) {
   };
 }
 
+function migrateStorageKeys () {
+  if (!localStorage.getItem('__is_storage_keys_migrated__')) {
+    const currentKeys = getLocalStorageKeys();
+
+    const newKeys: string[] = [];
+
+    currentKeys.forEach((k) => {
+      if (!newKeys.includes(k)) {
+        newKeys.push(k);
+      }
+    });
+
+    setLocalStorageItem('__storage_keys__', newKeys);
+
+    localStorage.setItem('__is_storage_keys_migrated__', '1');
+  }
+}
+
+migrateStorageKeys();
+
 export function getLocalStorageKeys (): string[] {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return getLocalStorageItem('__storage_keys__', []);
@@ -22,6 +42,10 @@ export function getLocalStorageKeys (): string[] {
 
 export function setLocalStorageKeys (key: string) {
   const currentKeys = getLocalStorageKeys();
+
+  if (currentKeys.includes(key)) {
+    return;
+  }
 
   currentKeys.push(key);
   setLocalStorageItem('__storage_keys__', currentKeys);
@@ -62,6 +86,20 @@ global.chrome.runtime = {
   lastError: undefined
 };
 
+global.chrome.windows = {
+  // @ts-ignore
+  getCurrent: () => {
+    // void
+  }
+};
+
+global.chrome.tabs = {
+  // @ts-ignore
+  query: () => {
+    // void
+  }
+};
+
 global.chrome.storage = {
   local: {
     // @ts-ignore
@@ -69,7 +107,10 @@ global.chrome.storage = {
       keys: string[] | undefined | null,
       callback: (val: object) => void
     ) => {
-      keys = getLocalStorageKeys();
+      if (!keys) {
+        keys = getLocalStorageKeys();
+      }
+
       const rs: Record<string, any> = {};
 
       keys.forEach((k) => {

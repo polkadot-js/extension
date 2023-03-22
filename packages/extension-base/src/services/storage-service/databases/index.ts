@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import Dexie, { Table, Transaction } from 'dexie';
 
 const DEFAULT_DATABASE = 'SubWalletDB_v2';
@@ -34,6 +34,7 @@ export interface IMigration {
 }
 
 export default class KoniDatabase extends Dexie {
+  public price!: Table<PriceJson, object>;
   public balances!: Table<IBalance, object>;
 
   public nfts!: Table<INft, object>;
@@ -51,7 +52,7 @@ export default class KoniDatabase extends Dexie {
 
   private schemaVersion: number;
 
-  public constructor (name = DEFAULT_DATABASE, schemaVersion = 7) {
+  public constructor (name = DEFAULT_DATABASE, schemaVersion = 8) {
     super(name);
     this.schemaVersion = schemaVersion;
 
@@ -61,6 +62,7 @@ export default class KoniDatabase extends Dexie {
       // Primary key is always the first entry
       chain: 'slug',
       asset: 'slug',
+      price: 'currency',
       balances: '[tokenSlug+address], tokenSlug, address',
       nfts: '[chain+address+collectionId+id], [address+chain], chain, id, address, collectionId, name',
       nftCollections: '[chain+collectionId], chain, collectionId, collectionName',

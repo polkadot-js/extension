@@ -17,6 +17,7 @@ import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Da
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -146,13 +147,20 @@ enum FilterValue {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
-  const rawHistoryList = useSelector((root: RootState) => root.transactionHistory.historyList);
-  const { currentAccount } = useSelector((root: RootState) => root.accountState);
+
   const dataContext = useContext(DataContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  const { accounts, currentAccount } = useSelector((root: RootState) => root.accountState);
+  const { historyList: rawHistoryList } = useSelector((root: RootState) => root.transactionHistory);
+
+  const { chain, extrinsicHash } = useParams();
+
   const [selectedItem, setSelectedItem] = useState<TransactionHistoryDisplayItem | null>(null);
-  const accounts = useSelector((root: RootState) => root.accountState.accounts);
+  const [forceOpen, setForceOpen] = useState(false);
+
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
   const filterFunction = useMemo<(item: TransactionHistoryDisplayItem) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
@@ -283,6 +291,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
   }, [activeModal]);
+
+  useEffect(() => {
+    if (extrinsicHash && chain) {
+      setForceOpen(true);
+    }
+  }, [extrinsicHash, chain]);
+
+  useEffect(() => {
+    if (extrinsicHash && chain && forceOpen) {
+      const existed = historyList.find((item) => item.chain === chain && item.extrinsicHash === extrinsicHash);
+
+      if (existed) {
+        setSelectedItem(existed);
+      }
+
+      setForceOpen(false);
+    }
+  }, [chain, extrinsicHash, forceOpen, historyList]);
 
   useEffect(() => {
     if (selectedItem) {

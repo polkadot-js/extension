@@ -10,16 +10,17 @@ import settings from '@polkadot/ui-settings';
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
 const initialState = {
+  // Polkadot settings
+  ...settings.get(),
+
   // UI settings
   isShowBalance: false,
   isShowZeroBalance: true,
   accountAllLogo: '',
   theme: ThemeNames.DARK,
   language: 'en',
-  browserConfirmationType: 'extension',
-
-  // Polkadot settings
-  ...settings.get(),
+  browserConfirmationType: 'popup',
+  camera: false,
 
   // AuthUrls
   authUrls: {},
@@ -39,15 +40,16 @@ const settingsSlice = createSlice({
 
       return {
         ...state,
-        // todo: will save language, theme, isShowZeroBalance in background
+        // todo: will save language, theme, isShowZeroBalance, camera in background
         browserConfirmationType: payload.browserConfirmationType,
         isShowBalance: payload.isShowBalance,
         accountAllLogo: payload.accountAllLogo,
+        camera: payload.camera,
         reduxStatus: ReduxStatus.READY
       };
     },
     updateAppSettings (state, action: PayloadAction<SettingsStruct>) {
-      const payload = action.payload;
+      const { camera, notification, ...payload } = action.payload;
 
       return {
         ...state,

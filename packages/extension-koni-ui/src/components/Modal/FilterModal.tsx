@@ -84,7 +84,11 @@ function Component (props: Props): React.ReactElement<Props> {
 export const FilterModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.ant-sw-modal-body': {
-      paddingBottom: 12
+      paddingBottom: token.paddingXS
+    },
+
+    '.ant-sw-modal-footer': {
+      borderTop: 0
     },
 
     '.__option-item': {

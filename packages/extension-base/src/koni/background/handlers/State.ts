@@ -15,6 +15,7 @@ import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/cha
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParachain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
+import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import { PriceService } from '@subwallet/extension-base/services/price-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
@@ -121,6 +122,7 @@ export default class KoniState {
 
   private lazyMap: Record<string, unknown> = {};
 
+  readonly notificationService: NotificationService;
   // TODO: consider making chainService public (or getter) and call function directly
   private chainService: ChainService;
   public dbService: DatabaseService;
@@ -142,13 +144,14 @@ export default class KoniState {
 
     this.dbService = new DatabaseService();
 
+    this.notificationService = new NotificationService();
     this.chainService = new ChainService(this.dbService);
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService, this.settingService);
     this.priceService = new PriceService(this.dbService, this.chainService);
     this.balanceService = new BalanceService(this.chainService);
     this.historyService = new HistoryService(this.dbService, this.chainService);
-    this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceService, this.historyService);
+    this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceService, this.historyService, this.notificationService);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');

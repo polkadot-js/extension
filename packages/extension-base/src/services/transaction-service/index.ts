@@ -3,7 +3,7 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
@@ -37,17 +37,19 @@ export default class TransactionService {
   private readonly requestService: RequestService;
   private readonly balanceService: BalanceService;
   private readonly historyService: HistoryService;
+  private readonly notificationService: NotificationService;
   private readonly transactionSubject: BehaviorSubject<Record<string, SWTransaction>> = new BehaviorSubject<Record<string, SWTransaction>>({});
 
   private get transactions (): Record<string, SWTransaction> {
     return this.transactionSubject.getValue();
   }
 
-  constructor (chainService: ChainService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService) {
+  constructor (chainService: ChainService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService, notificationService: NotificationService) {
     this.chainService = chainService;
     this.requestService = requestService;
     this.balanceService = balanceService;
     this.historyService = historyService;
+    this.notificationService = notificationService;
   }
 
   private get allTransactions (): SWTransaction[] {
@@ -420,7 +422,13 @@ export default class TransactionService {
       blockHash: blockHash || ''
     }).catch(console.error);
 
-    NotificationService.createNotification('Transaction completed', `Transaction ${transaction?.extrinsicHash} completed`, this.getTransactionLink(id));
+    this.notificationService.notify({
+      type: NotificationType.SUCCESS,
+      title: 'Transaction completed',
+      message: `Transaction ${transaction?.extrinsicHash} completed`,
+      action: { url: this.getTransactionLink(id) },
+      notifyViaBrowser: true
+    });
   }
 
   private onFailed ({ blockHash, blockNumber, errors, id }: TransactionEventResponse) {
@@ -437,7 +445,13 @@ export default class TransactionService {
         blockHash: blockHash || ''
       }).catch(console.error);
 
-      NotificationService.createNotification('Transaction failed', `Transaction ${transaction?.extrinsicHash} failed`, this.getTransactionLink(id));
+      this.notificationService.notify({
+        type: NotificationType.ERROR,
+        title: 'Transaction failed',
+        message: `Transaction ${transaction?.extrinsicHash} failed`,
+        action: { url: this.getTransactionLink(id) },
+        notifyViaBrowser: true
+      });
     }
 
     // Log transaction errors

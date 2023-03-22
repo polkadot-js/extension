@@ -136,15 +136,21 @@ const Component: React.FC<Props> = (props: Props) => {
       });
   }, [nominatorMetadata, notify, t]);
 
+  const handleClaimRewardAction = useCallback(() => {
+    console.log(reward);
+  }, [reward]);
+
   const onPressItem = useCallback(
     (item: ActionListType) => {
       if (item.action === StakingAction.WITHDRAW) {
         return () => handleWithdrawalAction();
+      } else if (item.action === StakingAction.CLAIM_REWARD) {
+        return () => handleClaimRewardAction();
       }
 
       return () => navigate(item.value, { state: { chainStakingMetadata, nominatorMetadata, staking, reward, hideTabList: true } as StakingDataOption });
     },
-    [chainStakingMetadata, handleWithdrawalAction, navigate, nominatorMetadata, reward, staking]
+    [chainStakingMetadata, handleClaimRewardAction, handleWithdrawalAction, navigate, nominatorMetadata, reward, staking]
   );
 
   const availableActions = useCallback(() => {

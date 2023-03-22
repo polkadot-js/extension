@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { reformatAddress } from '@subwallet/extension-base/utils';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -37,11 +38,19 @@ function Component ({ className = '', disabled, id = modalId, label, onBlur, onC
     return account?.name;
   }, [accounts, value]);
 
-  const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
-    const val = event.target.value;
+  const parseAndChangeValue = useCallback((value: string) => {
+    const val = value.trim();
 
-    onChange && onChange({ target: { value: val } });
+    if (isAddress(val)) {
+      onChange && onChange({ target: { value: reformatAddress(val, 42) } });
+    } else {
+      onChange && onChange({ target: { value: val } });
+    }
   }, [onChange]);
+
+  const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
+    parseAndChangeValue(event.target.value);
+  }, [parseAndChangeValue]);
 
   const onOpenScanner = useOpenQrScanner(id);
 
@@ -51,8 +60,8 @@ function Component ({ className = '', disabled, id = modalId, label, onBlur, onC
 
   const onSuccess = useCallback((result: ScannerResult) => {
     inactiveModal(id);
-    onChange && onChange({ target: { value: result.text } });
-  }, [inactiveModal, id, onChange]);
+    parseAndChangeValue(result.text);
+  }, [inactiveModal, id, parseAndChangeValue]);
 
   // todo: Will work with "Manage address book" feature later
   return (

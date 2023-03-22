@@ -12,7 +12,6 @@ import { AccountAuthType, AccountJson, AllowedPath, AuthorizeRequest, MessageTyp
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
-import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { parseSubstrateTransaction } from '@subwallet/extension-base/koni/api/dotsama/parseTransaction';
 import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
 import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-base/koni/api/nft/transfer';
@@ -1490,7 +1489,6 @@ export default class KoniExtension {
     const [errors, , , tokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
 
     const warnings: TransactionWarning[] = [];
-    const substrateApiMap = this.#koniState.getSubstrateApiMap();
     const evmApiMap = this.#koniState.getEvmApiMap();
     const chainInfo = this.#koniState.getChainInfo(networkKey);
 
@@ -1505,11 +1503,11 @@ export default class KoniExtension {
     let transaction: ValidateTransactionResponseInput['transaction'];
 
     // Get native token amount
-    const freeBalance = await getFreeBalance(networkKey, from, substrateApiMap, evmApiMap, tokenSlug);
+    const freeBalance = await this.#koniState.balanceService.getTokenFreeBalance(from, networkKey, tokenSlug);
 
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
       chainType = ChainType.EVM;
-      const txVal: string = transferAll ? freeBalance : (value || '0');
+      const txVal: string = transferAll ? freeBalance.value : (value || '0');
 
       // Estimate with EVM API
       if (_isTokenEvmSmartContract(tokenInfo)) {
@@ -1533,7 +1531,7 @@ export default class KoniExtension {
 
     // Additional validator
     const additionalValidator = (swTran: SWTransactionResponse) => {
-      if (new BN(freeBalance).lt(new BN(transferAmount.value))) {
+      if (new BN(freeBalance.value).lt(new BN(transferAmount.value))) {
         swTran.errors?.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
       }
 
@@ -1700,21 +1698,25 @@ export default class KoniExtension {
     return await this.#koniState.validateCustomAsset(data);
   }
 
-  private async subscribeAddressFreeBalance ({ address,
-    networkKey,
-    token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<string> {
+  private async getAddressFreeBalance ({ address, networkKey, token }: RequestFreeBalance): Promise<AmountData> {
+    return await this.#koniState.balanceService.getTokenFreeBalance(address, networkKey, token);
+  }
+
+  private async subscribeAddressFreeBalance ({ address, networkKey, token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<AmountData> {
     const cb = createSubscription<'pri(freeBalance.subscribe)'>(id, port);
+
+    const [unsub, currentFreeBalance] = await this.#koniState.balanceService.subscribeTokenFreeBalance(address, networkKey, token, cb);
 
     this.createUnsubscriptionHandle(
       id,
-      await subscribeFreeBalance(networkKey, address, this.#koniState.getSubstrateApiMap(), this.#koniState.getEvmApiMap(), token, cb)
+      unsub
     );
 
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
     });
 
-    return id;
+    return currentFreeBalance;
   }
 
   private async transferCheckReferenceCount ({ address, networkKey }: RequestTransferCheckReferenceCount): Promise<boolean> {
@@ -3166,6 +3168,8 @@ export default class KoniExtension {
         return await this.transferCheckSupporting(request as RequestTransferCheckSupporting);
       case 'pri(transfer.getExistentialDeposit)':
         return this.transferGetExistentialDeposit(request as RequestTransferExistentialDeposit);
+      case 'pri(freeBalance.get)':
+        return this.getAddressFreeBalance(request as RequestFreeBalance);
       case 'pri(freeBalance.subscribe)':
         return this.subscribeAddressFreeBalance(request as RequestFreeBalance, id, port);
       case 'pri(subscription.cancel)':

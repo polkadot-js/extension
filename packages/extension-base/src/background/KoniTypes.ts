@@ -620,6 +620,13 @@ export type HandleBasicTx = (data: TransactionResponse) => void;
 
 export type TxErrorCode = TransferTxErrorType | TransactionErrorType
 
+export enum BalanceErrorType {
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  TOKEN_ERROR = 'TOKEN_ERROR',
+  TIMEOUT = 'TIMEOUT',
+  GET_BALANCE_ERROR = 'GET_BALANCE_ERROR',
+}
+
 export type TransactionWarningType = BasicTxWarningCode
 
 export enum ProviderErrorType {
@@ -1891,7 +1898,8 @@ export interface KoniRequestSignatures {
   'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, SupportTransferResponse];
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];
   'pri(subscription.cancel)': [string, boolean];
-  'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
+  'pri(freeBalance.get)': [RequestFreeBalance, AmountData];
+  'pri(freeBalance.subscribe)': [RequestFreeBalance, AmountData, AmountData];
 
   // Transfer
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ValidateTransactionResponse];

@@ -49,10 +49,7 @@ export default class DatabaseService {
 
   async getPriceStore () {
     try {
-      console.log('abcd');
       const rs = await this.stores.price.table.get('usd');
-
-      console.log('abcd', rs);
 
       return rs;
     } catch (e) {
@@ -61,6 +58,10 @@ export default class DatabaseService {
   }
 
   // Balance
+  async getStoredBalance () {
+    return this.stores.balance.table.toArray();
+  }
+
   async updateBalanceStore (address: string, item: BalanceItem) {
     if (item.state === APIItemState.READY) {
       this.logger.log(`Updating balance for [${item.tokenSlug}]`);

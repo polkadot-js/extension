@@ -237,7 +237,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       return Promise.reject(t('Invalid Recipient address'));
     }
 
-    const { chain, destChain, from } = form.getFieldsValue();
+    const { chain, destChain, from, to } = form.getFieldsValue();
 
     const isOnChain = chain === destChain;
 
@@ -257,7 +257,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     } else {
       const isDestChainEvmCompatible = _isChainEvmCompatible(chainInfoMap[destChain]);
 
-      if (isDestChainEvmCompatible !== isEthereumAddress(destChain)) {
+      if (isDestChainEvmCompatible !== isEthereumAddress(to)) {
         // todo: change message later
         return Promise.reject(t(`Cross chain: The recipient address must be ${isDestChainEvmCompatible ? 'EVM' : 'substrate'} type`));
       }
@@ -514,7 +514,11 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           </Form.Item>
         </Form>
 
-        <FreeBalance tokenSlug={currentTokenSlug} />
+        <FreeBalance
+          address={contextFrom}
+          chain={contextChain}
+          tokenSlug={currentTokenSlug}
+        />
       </TransactionContent>
       <TransactionFooter
         className={`${className} -transaction-footer`}

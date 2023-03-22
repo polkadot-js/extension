@@ -11,7 +11,105 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountExternalError, AccountsWithCurrentAddress, AssetSettingUpdateReq, BalanceJson, BrowserConfirmationType, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, NominationPoolInfo, NominatorMetadata, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestChangeMasterPassword, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestNftForceUpdate, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrSignEvm, RequestQrSignSubstrate, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, UiSettings, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AccountExternalError,
+  AccountsWithCurrentAddress,
+  AmountData,
+  AssetSettingUpdateReq,
+  BalanceJson,
+  BrowserConfirmationType,
+  ChainStakingMetadata,
+  ConfirmationDefinitions,
+  ConfirmationsQueue,
+  ConfirmationType,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  KeyringState,
+  NftCollection,
+  NftJson,
+  NftTransactionRequest,
+  NftTransactionResponse,
+  NftTransferExtra,
+  NominationPoolInfo,
+  NominatorMetadata,
+  OptionInputAddress,
+  PriceJson,
+  RequestAccountCreateExternalV2,
+  RequestAccountCreateHardwareMultiple,
+  RequestAccountCreateHardwareV2,
+  RequestAccountCreateSuriV2,
+  RequestAccountCreateWithSecretKey,
+  RequestAccountMeta,
+  RequestAuthorizationBlock,
+  RequestAuthorizationPerSite,
+  RequestBondingSubmit,
+  RequestChangeMasterPassword,
+  RequestCrossChainTransfer,
+  RequestDeriveCreateMultiple,
+  RequestDeriveCreateV3,
+  RequestDeriveValidateV2,
+  RequestFreeBalance,
+  RequestGetDeriveAccounts,
+  RequestGetTransaction,
+  RequestJsonRestoreV2,
+  RequestKeyringExportMnemonic,
+  RequestMigratePassword,
+  RequestNftForceUpdate,
+  RequestParseEvmContractInput,
+  RequestParseTransactionSubstrate,
+  RequestQrSignEvm,
+  RequestQrSignSubstrate,
+  RequestSettingsType,
+  RequestSigningApprovePasswordV2,
+  RequestStakeCancelWithdrawal,
+  RequestStakeClaimReward,
+  RequestStakeWithdrawal,
+  RequestSubscribeBalance,
+  RequestSubscribeBalancesVisibility,
+  RequestSubscribeCrowdloan,
+  RequestSubscribeNft,
+  RequestSubscribePrice,
+  RequestSubscribeStaking,
+  RequestSubscribeStakingReward,
+  RequestSubstrateNftSubmitTransaction,
+  RequestTransfer,
+  RequestTransferCheckReferenceCount,
+  RequestTransferCheckSupporting,
+  RequestTransferExistentialDeposit,
+  RequestTuringCancelStakeCompound,
+  RequestTuringStakeCompound,
+  RequestUnbondingSubmit,
+  RequestUnlockKeyring,
+  ResponseAccountCreateSuriV2,
+  ResponseAccountCreateWithSecretKey,
+  ResponseAccountExportPrivateKey,
+  ResponseAccountIsLocked,
+  ResponseAccountMeta,
+  ResponseChangeMasterPassword,
+  ResponseCheckPublicAndSecretKey,
+  ResponseDeriveValidateV2,
+  ResponseGetDeriveAccounts,
+  ResponseKeyringExportMnemonic,
+  ResponseMigratePassword,
+  ResponseParseEvmContractInput,
+  ResponseParseTransactionSubstrate,
+  ResponsePrivateKeyValidateV2,
+  ResponseQrParseRLP,
+  ResponseQrSignEvm,
+  ResponseQrSignSubstrate,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  ResponseUnlockKeyring,
+  StakingJson,
+  StakingRewardJson,
+  StakingType,
+  SupportTransferResponse,
+  ThemeNames,
+  TransactionHistoryItem,
+  UiSettings,
+  ValidateNetworkResponse,
+  ValidatorInfo
+} from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
@@ -665,7 +763,11 @@ export async function cancelSubscription (request: string): Promise<boolean> {
   return sendMessage('pri(subscription.cancel)', request);
 }
 
-export async function subscribeFreeBalance (request: RequestFreeBalance, callback: (balance: string) => void): Promise<string> {
+export async function getFreeBalance (request: RequestFreeBalance): Promise<AmountData> {
+  return sendMessage('pri(freeBalance.get)', request);
+}
+
+export async function subscribeFreeBalance (request: RequestFreeBalance, callback: (balance: AmountData) => void): Promise<AmountData> {
   return sendMessage('pri(freeBalance.subscribe)', request, callback);
 }
 

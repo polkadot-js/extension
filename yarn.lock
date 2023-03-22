@@ -6102,7 +6102,7 @@ __metadata:
     "@subwallet/extension-inject": ^0.8.1
     "@subwallet/extension-mocks": ^0.8.1
     "@subwallet/keyring": ^0.0.4
-    "@subwallet/react-ui": 5.1.2-b31
+    "@subwallet/react-ui": 5.1.2-b33
     "@subwallet/ui-keyring": ^0.0.3
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -6216,9 +6216,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b31":
-  version: 5.1.2-b31
-  resolution: "@subwallet/react-ui@npm:5.1.2-b31"
+"@subwallet/react-ui@npm:5.1.2-b33":
+  version: 5.1.2-b33
+  resolution: "@subwallet/react-ui@npm:5.1.2-b33"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -6286,7 +6286,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: f08dab8b4efcc51a4da0d2e62bc90eda16fe1566bfff419a166d561c1c2f94599228b5ec2c317dba3132f4609f9a7173eba2784ac44679b5b9950ac1caab6258
+  checksum: 172b9631603aca290a7f1b6bd9845369c88bdd04149615975c128a521c8b98d12adbe0d583c0ecc486313d42a026d220480aafa748bc4b685b01997f2e6421b4
   languageName: node
   linkType: hard
 

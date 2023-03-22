@@ -3,7 +3,6 @@
 
 import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
-import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
@@ -11,6 +10,7 @@ import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotifi
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { deriveAccountV3, editAccount, forgetAccount } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { copyToClipboard } from '@subwallet/extension-koni-ui/util/dom';
@@ -80,11 +80,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const walletNamePrefixIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
-      case SIGN_MODE.LEDGER:
+      case AccountSignMode.LEDGER:
         return Swatches;
-      case SIGN_MODE.QR:
+      case AccountSignMode.QR:
         return QrCode;
-      case SIGN_MODE.READ_ONLY:
+      case AccountSignMode.READ_ONLY:
         return Eye;
       default:
         return User;

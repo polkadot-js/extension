@@ -133,11 +133,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     );
   }, [activeModal]);
 
-  const closeSortingModal = () => {
+  const closeSortingModal = useCallback(() => {
     inactiveModal(SORTING_MODAL_ID);
-  };
+  }, [inactiveModal]);
 
-  const renderSelected = (item: NominationPoolDataType) => {
+  const renderSelected = useCallback((item: NominationPoolDataType) => {
     return (
       <div className={'__selected-item'}>
         <div className={'__selected-item-name common-text'}>
@@ -166,16 +166,20 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         </div>
       </div>
     );
-  };
+  }, [onClickBookBtn, onClickLightningBtn]);
 
-  const onChangeSortOpt = (value: string) => {
+  const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value);
     closeSortingModal();
-  };
+  }, [closeSortingModal]);
 
-  const onClickActionBtn = () => {
+  const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
-  };
+  }, [activeModal]);
+
+  const onCloseDetail = useCallback(() => {
+    inactiveModal(PoolDetailModalId);
+  }, [inactiveModal]);
 
   return (
     <>
@@ -191,6 +195,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         inputClassName={`${className} pool-selector-input`}
         itemKey={'id'}
         items={filteredList}
+        label={label}
+        onClickActionBtn={onClickActionBtn}
         onSelect={_onSelectItem}
         placeholder={placeholder || t('Select pool')}
         prefix={
@@ -201,6 +207,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           />
         }
         renderItem={renderItem}
+        renderSelected={renderSelected}
+        renderWhenEmpty={renderEmpty}
         rightIconProps={{
           icon: <Icon phosphorIcon={SortAscending} />,
           onClick: () => {
@@ -213,19 +221,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         selected={value || ''}
         showActionBtn
         title={t('Select pool')}
-
-        label={label}
-        // eslint-disable-next-line react/jsx-no-bind
-        onClickActionBtn={onClickActionBtn}
-        renderWhenEmpty={renderEmpty}
-        // eslint-disable-next-line react/jsx-no-bind
-        renderSelected={renderSelected}
       />
 
       <FilterModal
         id={FILTER_MODAL_ID}
         onApplyFilter={onApplyFilter}
-        // eslint-disable-next-line react/jsx-no-bind
         onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
@@ -234,9 +234,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       <SortingModal
         id={SORTING_MODAL_ID}
-        // eslint-disable-next-line react/jsx-no-bind
         onCancel={closeSortingModal}
-        // eslint-disable-next-line react/jsx-no-bind
         onChangeOption={onChangeSortOpt}
         optionSelection={sortSelection}
         options={sortingOptions}
@@ -244,8 +242,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       {viewDetailItem && <PoolDetailModal
         decimals={0}
-        // eslint-disable-next-line react/jsx-no-bind
-        onCancel={() => inactiveModal(PoolDetailModalId)}
+        onCancel={onCloseDetail}
         selectedNominationPool={viewDetailItem}
         status={'active'}
       />}

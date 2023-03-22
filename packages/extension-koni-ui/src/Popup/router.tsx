@@ -79,12 +79,12 @@ const AccountExport = new LazyLoader(() => import('@subwallet/extension-koni-ui/
 
 const Transaction = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Transaction'));
 const TransactionDone = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/TransactionDone'));
-const SendFund = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/SendFund'));
-const SendNFT = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/SendNFT'));
-const Stake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Stake'));
-const Unstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Unstake'));
-const CancelUnstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/CancelUnstake'));
-const ClaimReward = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/ClaimReward'));
+const SendFund = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund'));
+const SendNFT = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendNFT'));
+const Stake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake'));
+const Unstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Unstake'));
+const CancelUnstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/CancelUnstake'));
+const ClaimReward = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/ClaimReward'));
 const ErrorFallback = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/ErrorFallback'));
 
 // A Placeholder page
@@ -132,7 +132,7 @@ export const router = createHashRouter([
         children: [
           SendFund.generateRouterObject('send-fund'),
           SendNFT.generateRouterObject('send-nft'),
-          Stake.generateRouterObject('stake'),
+          Stake.generateRouterObject('stake/:type/:chain'),
           Unstake.generateRouterObject('unstake'),
           CancelUnstake.generateRouterObject('cancel-unstake'),
           ClaimReward.generateRouterObject('claim-reward'),

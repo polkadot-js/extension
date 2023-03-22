@@ -17,7 +17,7 @@ export type ValidatorDataType = ValidatorInfo & {
   symbol: string;
 }
 
-const useGetValidatorList = (chain: string, type: StakingType) => {
+const useGetValidatorList = (chain: string, type: StakingType): NominationPoolDataType[] | ValidatorDataType[] => {
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
   const chainInfo = useFetchChainInfo(chain);
 

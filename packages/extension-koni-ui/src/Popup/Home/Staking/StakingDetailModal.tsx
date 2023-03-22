@@ -59,8 +59,10 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
   const onClickStakeMoreBtn = useCallback(() => {
     inactiveModal(STAKING_DETAIL_MODAL_ID);
-    setTimeout(() => navigate('/transaction/stake', { state: { chainStakingMetadata, nominatorMetadata, hideTabList: true } as StakingDataOption }), 300);
-  }, [chainStakingMetadata, inactiveModal, navigate, nominatorMetadata]);
+    setTimeout(() => {
+      navigate(`/transaction/stake/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
+    }, 300);
+  }, [inactiveModal, navigate, nominatorMetadata]);
 
   const chainInfo = useFetchChainInfo(staking.chain);
   const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
@@ -68,7 +70,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const onClickUnstakeBtn = useCallback(() => {
     inactiveModal(STAKING_DETAIL_MODAL_ID);
     setTimeout(() => navigate('/transaction/unstake', { state: { chainStakingMetadata, nominatorMetadata, hideTabList: true } as StakingDataOption }), 300);
-  }, [inactiveModal, navigate, nominatorMetadata]);
+  }, [chainStakingMetadata, inactiveModal, navigate, nominatorMetadata]);
 
   const footer = () => {
     return (

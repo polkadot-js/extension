@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 export default function useGetNominatorInfo (chain?: string, type?: StakingType, address?: string): NominatorMetadata[] {
-  const nominatorMetadataList = useSelector((state: RootState) => state.staking.nominatorMetadataList);
+  const { nominatorMetadataList } = useSelector((state: RootState) => state.staking);
 
   return useMemo(() => {
     if (!chain && !type) {

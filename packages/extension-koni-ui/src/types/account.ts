@@ -11,3 +11,19 @@ export interface WordItem {
   index: number;
   label: string;
 }
+
+export enum AccountAddressType {
+  ETHEREUM = 'ethereum',
+  SUBSTRATE = 'substrate',
+  ALL = 'all',
+  UNKNOWN = 'unknown',
+}
+
+export enum AccountSignMode {
+  PASSWORD = 'password',
+  QR = 'qr',
+  LEDGER = 'ledger',
+  READ_ONLY = 'readonly',
+  ALL_ACCOUNT = 'all',
+  UNKNOWN = 'unknown'
+}

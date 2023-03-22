@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import {getBondingOptions, getNominationPoolOptions} from '@subwallet/extension-koni-ui/messaging';
+import { getBondingOptions, getNominationPoolOptions } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 
 export function getUnstakingPeriod (unstakingPeriod?: number) {

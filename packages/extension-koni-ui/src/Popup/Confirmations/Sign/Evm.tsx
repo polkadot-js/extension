@@ -3,9 +3,9 @@
 
 import { ConfirmationDefinitions, ConfirmationResult } from '@subwallet/extension-base/background/KoniTypes';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { EvmSignatureSupportType } from '@subwallet/extension-koni-ui/types/confirmation';
 import { isEvmMessage } from '@subwallet/extension-koni-ui/util';
 import { getSignMode } from '@subwallet/extension-koni-ui/util/account';
@@ -60,9 +60,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const approveIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
-      case SIGN_MODE.QR:
+      case AccountSignMode.QR:
         return QrCode;
-      case SIGN_MODE.LEDGER:
+      case AccountSignMode.LEDGER:
         return Swatches;
       default:
         return CheckCircle;
@@ -106,7 +106,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onConfirm = useCallback(() => {
     switch (signMode) {
-      case SIGN_MODE.QR:
+      case AccountSignMode.QR:
         onConfirmQr();
         break;
       default:
@@ -143,7 +143,7 @@ const Component: React.FC<Props> = (props: Props) => {
         {t('Approve')}
       </Button>
       {
-        signMode === SIGN_MODE.QR && (
+        signMode === AccountSignMode.QR && (
           <DisplayPayloadModal>
             <EvmQr
               address={account.address}
@@ -153,7 +153,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </DisplayPayloadModal>
         )
       }
-      {signMode === SIGN_MODE.QR && <ScanSignature onSignature={onApproveSignature} />}
+      {signMode === AccountSignMode.QR && <ScanSignature onSignature={onApproveSignature} />}
     </div>
   );
 };

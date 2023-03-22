@@ -364,12 +364,21 @@ export default class TransactionService {
 
         break;
       case ExtrinsicType.STAKING_UNBOND:
-      case ExtrinsicType.STAKING_LEAVE_POOL: {
-        const data = parseTransactionData<ExtrinsicType.STAKING_LEAVE_POOL>(transaction.data);
+        {
+          const data = parseTransactionData<ExtrinsicType.STAKING_UNBOND>(transaction.data);
 
-        historyItem.to = data.validatorAddress || '';
-        historyItem.amount = { ...baseNativeAmount, value: data.amount.toString() || '0' };
-      }
+          historyItem.to = data.validatorAddress || '';
+          historyItem.amount = { ...baseNativeAmount, value: data.amount.toString() || '0' };
+        }
+
+        break;
+      case ExtrinsicType.STAKING_LEAVE_POOL:
+        {
+          const data = parseTransactionData<ExtrinsicType.STAKING_LEAVE_POOL>(transaction.data);
+
+          historyItem.to = data.nominatorMetadata.address || '';
+          historyItem.amount = { ...baseNativeAmount, value: data.amount.toString() || '0' };
+        }
 
         break;
       case ExtrinsicType.STAKING_CLAIM_REWARD: {

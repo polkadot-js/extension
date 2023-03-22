@@ -3,13 +3,14 @@
 
 import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActions, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import { submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
 import { ArrowArcLeft, ArrowCircleDown, IconProps, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -31,50 +32,6 @@ type ActionListType = {
   action: StakingAction
 }
 
-const ACTION_LIST: ActionListType[] = [
-  {
-    backgroundIconColor: 'green-6',
-    icon: PlusCircle,
-    label: 'Stake more',
-    value: '/transaction/stake',
-    action: StakingAction.STAKE
-  },
-  {
-    backgroundIconColor: 'magenta-6',
-    icon: MinusCircle,
-    label: 'Unstake funds',
-    value: '/transaction/unstake',
-    action: StakingAction.UNSTAKE
-  },
-  {
-    backgroundIconColor: 'geekblue-6',
-    icon: ArrowCircleDown,
-    label: 'Withdraw',
-    value: '/transaction/withdraw',
-    action: StakingAction.WITHDRAW
-  },
-  {
-    backgroundIconColor: 'green-7',
-    icon: Wallet,
-    label: 'Claim rewards',
-    value: '/transaction/claim-reward',
-    action: StakingAction.CLAIM_REWARD
-  },
-  {
-    backgroundIconColor: 'purple-8',
-    icon: ArrowArcLeft,
-    label: 'Cancel unstake',
-    value: '/transaction/cancel-unstake',
-    action: StakingAction.CANCEL_UNSTAKE
-  }
-  // {
-  //   backgroundIconColor: 'blue-7',
-  //   icon: Alarm,
-  //   label: 'Compound',
-  //   value: '/transaction/compound'
-  // }
-];
-
 export type StakingDataOption = {
   staking?: StakingItem;
   reward?: StakingRewardItem;
@@ -90,6 +47,52 @@ const Component: React.FC<Props> = (props: Props) => {
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
   const notify = useNotification();
+
+  const actionList: ActionListType[] = useMemo(() => {
+    return [
+      {
+        backgroundIconColor: 'green-6',
+        icon: PlusCircle,
+        label: 'Stake more',
+        value: `/transaction/stake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`,
+        action: StakingAction.STAKE
+      },
+      {
+        backgroundIconColor: 'magenta-6',
+        icon: MinusCircle,
+        label: 'Unstake funds',
+        value: '/transaction/unstake',
+        action: StakingAction.UNSTAKE
+      },
+      {
+        backgroundIconColor: 'geekblue-6',
+        icon: ArrowCircleDown,
+        label: 'Withdraw',
+        value: '/transaction/withdraw',
+        action: StakingAction.WITHDRAW
+      },
+      {
+        backgroundIconColor: 'green-7',
+        icon: Wallet,
+        label: 'Claim rewards',
+        value: '/transaction/claim-reward',
+        action: StakingAction.CLAIM_REWARD
+      },
+      {
+        backgroundIconColor: 'purple-8',
+        icon: ArrowArcLeft,
+        label: 'Cancel unstake',
+        value: '/transaction/cancel-unstake',
+        action: StakingAction.CANCEL_UNSTAKE
+      }
+      // {
+      //   backgroundIconColor: 'blue-7',
+      //   icon: Alarm,
+      //   label: 'Compound',
+      //   value: '/transaction/compound'
+      // }
+    ];
+  }, [chainStakingMetadata?.chain, chainStakingMetadata?.type]);
 
   const onCancel = useCallback(
     () => {
@@ -170,7 +173,7 @@ const Component: React.FC<Props> = (props: Props) => {
       onCancel={onCancel}
       title={t('Actions')}
     >
-      {ACTION_LIST.map((item) => (
+      {actionList.map((item) => (
         <SettingItem
           className={`action-more-item ${availableActions().includes(item.action) ? '' : 'disabled'}`}
           key={item.label}

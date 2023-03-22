@@ -3,12 +3,12 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByGenesisHash';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { isSubstrateMessage } from '@subwallet/extension-koni-ui/util';
 import { getSignMode } from '@subwallet/extension-koni-ui/util/account';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
@@ -35,7 +35,7 @@ const handleCancel = async (id: string) => await cancelSignRequest(id);
 
 const handleSignature = async (id: string, { signature }: SigData) => await approveSignSignature(id, signature);
 
-const modeCanSignMessage: SIGN_MODE[] = [SIGN_MODE.QR, SIGN_MODE.PASSWORD];
+const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { account, className, id, payload } = props;
@@ -48,14 +48,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const signMode = useMemo(() => getSignMode(account), [account]);
 
-  const isLedger = useMemo(() => signMode === SIGN_MODE.LEDGER, [signMode]);
+  const isLedger = useMemo(() => signMode === AccountSignMode.LEDGER, [signMode]);
   const isMessage = isSubstrateMessage(payload);
 
   const approveIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
-      case SIGN_MODE.QR:
+      case AccountSignMode.QR:
         return QrCode;
-      case SIGN_MODE.LEDGER:
+      case AccountSignMode.LEDGER:
         return Swatches;
       default:
         return CheckCircle;
@@ -147,10 +147,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onConfirm = useCallback(() => {
     switch (signMode) {
-      case SIGN_MODE.QR:
+      case AccountSignMode.QR:
         onConfirmQr();
         break;
-      case SIGN_MODE.LEDGER:
+      case AccountSignMode.LEDGER:
         onConfirmLedger();
         break;
       default:
@@ -185,7 +185,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onClick={onConfirm}
       >
         {
-          signMode !== SIGN_MODE.LEDGER
+          signMode !== AccountSignMode.LEDGER
             ? t('Approve')
             : !isLedgerConnected
               ? t('Refresh')
@@ -193,7 +193,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }
       </Button>
       {
-        signMode === SIGN_MODE.QR && (
+        signMode === AccountSignMode.QR && (
           <DisplayPayloadModal>
             <SubstrateQr
               address={account.address}
@@ -203,7 +203,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </DisplayPayloadModal>
         )
       }
-      {signMode === SIGN_MODE.QR && <ScanSignature onSignature={onApproveSignature} />}
+      {signMode === AccountSignMode.QR && <ScanSignature onSignature={onApproveSignature} />}
     </div>
   );
 };

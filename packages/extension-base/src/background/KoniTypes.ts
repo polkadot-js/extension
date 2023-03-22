@@ -466,6 +466,7 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.STAKING_CANCEL_WITHDRAWAL]: RequestStakeCancelWithdrawal,
   [ExtrinsicType.STAKING_COMPOUNDING]: RequestTuringStakeCompound,
   [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: RequestTuringCancelStakeCompound,
+  [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: any,
   [ExtrinsicType.EVM_EXECUTE]: any,
   [ExtrinsicType.UNKNOWN]: any
 }

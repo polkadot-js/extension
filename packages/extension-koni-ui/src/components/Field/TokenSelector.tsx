@@ -8,7 +8,7 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, InputRef, Logo, SelectModal } from '@subwallet/react-ui';
 import TokenItem from '@subwallet/react-ui/es/web3-block/token-item';
 import { CheckCircle } from 'phosphor-react';
-import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
+import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 export type TokenItemType = {
@@ -80,6 +80,18 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       />
     );
   }, [token]);
+
+  useEffect(() => {
+    if (!value) {
+      onSelect(items[0]?.slug || '');
+    } else {
+      const existed = items.find((item) => item.slug === value);
+
+      if (!existed) {
+        onSelect(items[0]?.slug || '');
+      }
+    }
+  }, [value, items, onSelect]);
 
   return (
     <SelectModal

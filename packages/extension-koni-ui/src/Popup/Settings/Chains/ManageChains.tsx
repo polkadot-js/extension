@@ -85,10 +85,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
-    return <NetworkToggleItem
-      chainInfo={chainInfo}
-      key={chainInfo.slug}
-    />;
+    return (
+      <NetworkToggleItem
+        chainInfo={chainInfo}
+        isShowSubLogo={true}
+        key={chainInfo.slug}
+      />
+    );
   }, []);
 
   const emptyTokenList = useCallback(() => {
@@ -104,11 +107,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const subHeaderButton: ButtonProps[] = useMemo(() => {
     return [
       {
-        icon: <Icon
-          phosphorIcon={Plus}
-          size='sm'
-          type='phosphor'
-        />,
+        icon: (
+          <Icon
+            phosphorIcon={Plus}
+            size='md'
+            type='phosphor'
+          />
+        ),
         onClick: () => {
           navigate('/settings/chains/import', { state: { isExternalRequest: false } });
         }

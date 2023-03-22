@@ -144,7 +144,7 @@ export default class KoniState {
 
     this.chainService = new ChainService(this.dbService);
     this.settingService = new SettingService();
-    this.requestService = new RequestService(this.chainService);
+    this.requestService = new RequestService(this.chainService, this.settingService);
     this.priceService = new PriceService(this.dbService, this.chainService);
     this.balanceService = new BalanceService(this.chainService);
     this.historyService = new HistoryService(this.dbService, this.chainService);
@@ -244,12 +244,6 @@ export default class KoniState {
 
   public saveMetadata (meta: MetadataDef): void {
     this.requestService.saveMetadata(meta);
-  }
-
-  public setNotification (notification: string): boolean {
-    this.requestService.setNotification(notification);
-
-    return true;
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
@@ -836,6 +830,19 @@ export default class KoniState {
       this.settingService.setSettings(newSettings, () => {
         callback && callback(newSettings);
       });
+    });
+  }
+
+  public setCamera (value: boolean): void {
+    this.settingService.getSettings((settings) => {
+      const newSettings = {
+        ...settings,
+        camera: value
+      };
+
+      console.log(newSettings, value);
+
+      this.settingService.setSettings(newSettings);
     });
   }
 

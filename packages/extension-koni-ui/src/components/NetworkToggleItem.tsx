@@ -11,12 +11,12 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  chainInfo: ChainInfoWithState,
-
+  chainInfo: ChainInfoWithState;
+  isShowSubLogo?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chainInfo, className } = props;
+  const { chainInfo, className, isShowSubLogo = false } = props;
   const navigate = useNavigate();
   const connectSymbol = (chainInfo.connectionStatus === _ChainConnectionStatus.CONNECTED) ? '__connected__' : '__disconnected__';
 
@@ -24,7 +24,7 @@ const Component: React.FC<Props> = (props: Props) => {
     <NetworkItem
       className={className}
       dividerPadding={56}
-      isShowSubLogo
+      isShowSubLogo={isShowSubLogo}
       key={chainInfo.slug}
       name={chainInfo.name}
       networkKey={chainInfo.slug}

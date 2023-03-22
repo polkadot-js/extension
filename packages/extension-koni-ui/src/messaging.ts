@@ -252,6 +252,10 @@ export async function saveBrowserConfirmationType (type: BrowserConfirmationType
   return sendMessage('pri(settings.saveBrowserConfirmationType)', type, callback);
 }
 
+export async function saveCameraSetting (value: boolean): Promise<boolean> {
+  return sendMessage('pri(settings.saveCamera)', { camera: value });
+}
+
 export async function saveTheme (theme: ThemeNames, callback: (data: RequestSettingsType) => void): Promise<boolean> {
   return sendMessage('pri(settings.saveTheme)', theme, callback);
 }

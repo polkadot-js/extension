@@ -3,7 +3,6 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
-import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { useGetChainSlugsByAccountType } from '@subwallet/extension-koni-ui/hooks/screen/home/useGetChainSlugsByAccountType';
@@ -24,10 +23,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const tokenGroupStructure = useTokenGroup(chainsByAccountType);
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
 
-  const onOpenCustomizeModal = useCallback(() => {
-    activeModal(CUSTOMIZE_MODAL);
-  }, [activeModal]);
-
   const onOpenGlobalSearchToken = useCallback(() => {
     activeModal(GlobalSearchTokenModalId);
   }, [activeModal]);
@@ -45,8 +40,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       >
         <div className={`home home-container ${className}`}>
           <Layout.Home
-            onClickFilterIcon={onOpenCustomizeModal}
             onClickSearchIcon={onOpenGlobalSearchToken}
+            showFilterIcon
+            showSearchIcon
           >
             <Outlet />
           </Layout.Home>

@@ -2,33 +2,46 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import { ButtonProps, Icon } from '@subwallet/react-ui';
+import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
 import { FadersHorizontal, MagnifyingGlass } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 type Props = {
   children?: React.ReactNode;
+  showFilterIcon?: boolean;
+  showSearchIcon?: boolean;
   onClickFilterIcon?: () => void;
   onClickSearchIcon?: () => void;
   showTabBar?: boolean
 };
 
-const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showTabBar }: Props) => {
+const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, showSearchIcon, showTabBar }: Props) => {
   const navigate = useNavigate();
+  const { activeModal } = useContext(ModalContext);
+
+  const onOpenCustomizeModal = useCallback(() => {
+    activeModal(CUSTOMIZE_MODAL);
+  }, [activeModal]);
 
   const headerIcons = useMemo<ButtonProps[]>(() => {
-    return [
-      {
+    const icons: ButtonProps[] = [];
+
+    if (showFilterIcon) {
+      icons.push({
         icon: (
           <Icon
             phosphorIcon={FadersHorizontal}
             size='md'
           />
         ),
-        onClick: onClickFilterIcon
-      },
-      {
+        onClick: onClickFilterIcon || onOpenCustomizeModal
+      });
+    }
+
+    if (showSearchIcon) {
+      icons.push({
         icon: (
           <Icon
             phosphorIcon={MagnifyingGlass}
@@ -36,9 +49,11 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showTabBar }: Pr
           />
         ),
         onClick: onClickSearchIcon
-      }
-    ];
-  }, [onClickFilterIcon, onClickSearchIcon]);
+      });
+    }
+
+    return icons;
+  }, [onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon]);
 
   const onClickListIcon = useCallback(() => {
     navigate('/settings/list');

@@ -112,7 +112,7 @@ function Component ({ className }: Props) {
   }, [disabledRightBtn, onClickRightBtn, showRightBtn]);
 
   return (
-    <Layout.Home showTabBar={false}>
+    <Layout.Home showFilterIcon>
       <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, setTransactionType, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>

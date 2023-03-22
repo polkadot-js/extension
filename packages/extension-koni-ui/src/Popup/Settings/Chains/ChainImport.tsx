@@ -9,6 +9,7 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
@@ -270,9 +271,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return <></>;
   }, [isShowConnectionStatus, isValidating, providerValidation.status, token]);
 
+  useFocusFormItem(form, 'provider');
+
   return (
     <PageWrapper className={`chain_import ${className}`}>
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         leftFooterButton={{
           onClick: onBack,
           children: 'Cancel'
@@ -292,17 +295,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onClick: onSubmit,
           children: 'Save'
         }}
-        showBackButton={true}
-        showSubHeader={true}
-        subHeaderBackground={'transparent'}
-        subHeaderCenter={true}
         subHeaderIcons={[
           {
             icon: <InfoIcon />,
             onClick: handleClickSubheaderButton
           }
         ]}
-        subHeaderPaddingVertical={true}
         title={t<string>('Import chain')}
       >
         <div className={'chain_import__container'}>
@@ -443,7 +441,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             </div>
           </Form>
         </div>
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }

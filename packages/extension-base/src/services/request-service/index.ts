@@ -10,6 +10,7 @@ import MetadataRequestHandler from '@subwallet/extension-base/services/request-s
 import PopupHandler from '@subwallet/extension-base/services/request-service/handler/PopupHandler';
 import SubstrateRequestHandler from '@subwallet/extension-base/services/request-service/handler/SubstrateRequestHandler';
 import { AuthUrls, MetaRequest } from '@subwallet/extension-base/services/request-service/types';
+import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -19,6 +20,7 @@ import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 export default class RequestService {
   // Common
   readonly #chainService: ChainService;
+  readonly settingService: SettingService;
   readonly #popupHandler: PopupHandler;
   readonly #metadataRequestHandler: MetadataRequestHandler;
   readonly #authRequestHandler: AuthRequestHandler;
@@ -26,8 +28,9 @@ export default class RequestService {
   readonly #evmRequestHandler: EvmRequestHandler;
 
   // Common
-  constructor (chainService: ChainService) {
+  constructor (chainService: ChainService, settingService: SettingService) {
     this.#chainService = chainService;
+    this.settingService = settingService;
     this.#popupHandler = new PopupHandler(this);
     this.#metadataRequestHandler = new MetadataRequestHandler(this);
     this.#authRequestHandler = new AuthRequestHandler(this, this.#chainService);
@@ -53,13 +56,6 @@ export default class RequestService {
   }
 
   // Popup
-
-  public setNotification (notification: string): boolean {
-    this.#popupHandler.setNotification(notification);
-
-    return true;
-  }
-
   public get popup () {
     return this.#popupHandler.popup;
   }

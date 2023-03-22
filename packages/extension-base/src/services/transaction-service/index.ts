@@ -151,12 +151,12 @@ export default class TransactionService {
     const transferNative = validationResponse.transferNativeAmount || '0';
     const nativeTokenInfo = this.chainService.getNativeTokenInfo(chain);
 
-    const balance = await this.balanceService.getFreeBalance(chain, address, this.chainService.getSubstrateApiMap(), this.chainService.getEvmApiMap());
+    const balance = await this.balanceService.getTokenFreeBalance(address, chain, nativeTokenInfo.slug);
 
     const existentialDeposit = nativeTokenInfo.minAmount || '0';
 
     const feeNum = parseInt(estimateFee.value);
-    const balanceNum = parseInt(balance);
+    const balanceNum = parseInt(balance.value);
     const edNum = parseInt(existentialDeposit);
     const transferNativeNum = parseInt(transferNative);
 

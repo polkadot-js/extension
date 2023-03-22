@@ -5,7 +5,6 @@ import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { changeAuthorizationBlock, changeAuthorizationPerSite } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -305,9 +304,6 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
       footer={actionButtons}
       id={id}
       onCancel={onCancel}
-      rightIconProps={{
-        icon: <InfoIcon />
-      }}
       title={t('Connect website')}
     >
       <ConfirmationGeneralInfo
@@ -326,7 +322,8 @@ export const ConnectWebsiteModal = styled(Component)<Props>(({ theme: { token } 
   return ({
     '.ant-sw-modal-body': {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      paddingBottom: 0
     },
 
     '.dual-logo-container': {
@@ -382,6 +379,7 @@ export const ConnectWebsiteModal = styled(Component)<Props>(({ theme: { token } 
 
     '.ant-sw-modal-footer': {
       display: 'flex',
+      borderTop: 0,
 
       '.ant-btn + .ant-btn.ant-btn': {
         marginInlineStart: token.sizeSM

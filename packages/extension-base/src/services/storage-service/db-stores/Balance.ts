@@ -29,29 +29,4 @@ export default class BalanceStore extends BaseStoreWithAddress<IBalance> {
   async removeBySlugs (tokenSlugs: string[]) {
     return this.table.where('tokenSlug').anyOfIgnoreCase(tokenSlugs).delete();
   }
-
-  // private balanceSub!: Subscription;
-  // liveQueryBalance (address: string, cb: (result: BalanceJson) => void) {
-  //   if (this.balanceSub) {
-  //     this.balanceSub.unsubscribe();
-  //   }
-  //
-  //   const subscription = liveQuery(
-  //     () => this.table.where('address').equals(address).toArray()
-  //   );
-  //
-  //   this.balanceSub = subscription.subscribe({
-  //     next: (rs) => {
-  //       const data = this.convertToJsonObject(rs);
-  //
-  //       if (Object.keys(data).length) {
-  //         const res: BalanceJson = { details: data };
-  //
-  //         cb(res);
-  //       }
-  //     }
-  //   });
-  //
-  //   return this.balanceSub;
-  // }
 }

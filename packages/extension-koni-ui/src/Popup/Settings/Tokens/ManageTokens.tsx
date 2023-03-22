@@ -213,7 +213,15 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.manage_tokens__container': {
       paddingTop: token.padding,
       paddingBottom: token.paddingSM,
-      flex: 1
+      flex: 1,
+
+      'button + button': {
+        marginLeft: token.marginXS
+      }
+    },
+
+    '.manage_tokens__right_item_container': {
+      marginLeft: -token.marginXXS
     }
   });
 });

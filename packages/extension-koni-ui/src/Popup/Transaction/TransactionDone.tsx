@@ -1,16 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, PageIcon } from '@subwallet/react-ui';
 import { CheckCircle } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -18,43 +15,43 @@ import styled from 'styled-components';
 type Props = ThemeProps
 
 // Todo: move this to utils and reuse in extension-base/src/services/transaction-service/index.ts
-function getTransactionLink (chainInfo: _ChainInfo | undefined, extrinsicHash: string, chainType: 'ethereum' | 'substrate'): string | undefined {
-  if (!chainInfo) {
-    return undefined;
-  }
-
-  if (chainType === 'ethereum') {
-    const explorerLink = chainInfo?.evmInfo?.blockExplorer;
-
-    if (explorerLink) {
-      return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}tx/${extrinsicHash}`);
-    }
-  } else {
-    const explorerLink = chainInfo?.substrateInfo?.blockExplorer;
-
-    if (explorerLink) {
-      return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}extrinsic/${extrinsicHash}`);
-    }
-  }
-
-  return undefined;
-}
+// function getTransactionLink (chainInfo: _ChainInfo | undefined, extrinsicHash: string, chainType: 'ethereum' | 'substrate'): string | undefined {
+//   if (!chainInfo) {
+//     return undefined;
+//   }
+//
+//   if (chainType === 'ethereum') {
+//     const explorerLink = chainInfo?.evmInfo?.blockExplorer;
+//
+//     if (explorerLink) {
+//       return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}tx/${extrinsicHash}`);
+//     }
+//   } else {
+//     const explorerLink = chainInfo?.substrateInfo?.blockExplorer;
+//
+//     if (explorerLink) {
+//       return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}extrinsic/${extrinsicHash}`);
+//     }
+//   }
+//
+//   return undefined;
+// }
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { chain, chainType, extrinsicHash } = useParams<{chain: string, extrinsicHash: string, chainType: 'ethereum' | 'substrate'}>();
-  const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
-  const transactionLink = useMemo(
-    () => getTransactionLink(chainInfoMap[chain || ''], extrinsicHash || '', chainType || 'substrate'),
-    [chain, chainInfoMap, chainType, extrinsicHash]);
+  const { chain, extrinsicHash } = useParams<{chain: string, extrinsicHash: string}>();
 
   const viewInExplorer = useCallback(
     () => {
-      window.open(transactionLink);
+      if (chain && extrinsicHash) {
+        navigate(`/home/history/${chain}/${extrinsicHash}`);
+      } else {
+        navigate('/home/history');
+      }
     },
-    [transactionLink]
+    [chain, extrinsicHash, navigate]
   );
 
   const goHome = useCallback(

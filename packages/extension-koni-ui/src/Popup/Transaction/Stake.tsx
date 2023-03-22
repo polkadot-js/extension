@@ -330,6 +330,8 @@ const Component: React.FC<Props> = (props: Props) => {
               }
 
               <FreeBalance
+                address={transactionContext.from}
+                chain={transactionContext.chain}
                 className={'account-free-balance'}
                 label={t('Available balance:')}
               />
@@ -397,6 +399,8 @@ const Component: React.FC<Props> = (props: Props) => {
               }
 
               <FreeBalance
+                address={transactionContext.from}
+                chain={transactionContext.chain}
                 className={'account-free-balance'}
                 label={t('Available balance:')}
               />

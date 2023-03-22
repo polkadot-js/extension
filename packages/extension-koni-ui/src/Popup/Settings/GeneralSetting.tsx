@@ -312,6 +312,10 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
         marginTop: token.marginXS
       },
 
+      '.ant-select-modal-input-custom': {
+        width: 'unset'
+      },
+
       '.__trigger-item .ant-web3-block-right-item': {
         color: token.colorTextLight4
       },

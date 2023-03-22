@@ -1,55 +1,63 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { getFreeBalance } from '@subwallet/extension-koni-ui/messaging';
 import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Number, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps & {
-  label?: string;
+  address?: string,
   tokenSlug?: string;
+  label?: string;
+  chain?: string;
 }
 
-const Component = ({ className, label, tokenSlug }: Props) => {
+const Component = ({ address, chain, className, label, tokenSlug }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const balanceMap = useSelector((state: RootState) => state.balance.balanceMap);
+  const [nativeTokenBalance, setNativeTokenBalance] = useState<AmountData>({ value: '0', symbol: '', decimals: 18 });
+  const [tokenBalance, setTokenBalance] = useState<AmountData>({ value: '0', symbol: '', decimals: 18 });
   const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
   const transactionContext = useContext(TransactionContext);
   const chainInfo = useMemo(() => (chainInfoMap[transactionContext.chain]), [chainInfoMap, transactionContext.chain]);
-  const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
   const nativeTokenSlug = chainInfo ? _getChainNativeTokenSlug(chainInfo) : undefined;
 
-  const nativeChainAsset = useMemo(() => {
-    return nativeTokenSlug ? assetRegistryMap[nativeTokenSlug] : undefined;
-  }, [assetRegistryMap, nativeTokenSlug]);
+  useEffect(() => {
+    let cancel = false;
 
-  const nativeTokenBalance: string = (() => {
-    if (nativeTokenSlug && balanceMap[nativeTokenSlug]) {
-      return balanceMap[nativeTokenSlug].free || '0';
+    if (address && chain && nativeTokenSlug) {
+      getFreeBalance({ address, networkKey: chain })
+        .then((balance) => {
+          !cancel && setNativeTokenBalance(balance);
+        })
+        .catch(console.error);
+
+      if (tokenSlug && tokenSlug !== nativeTokenSlug) {
+        getFreeBalance({ address, networkKey: chain, token: tokenSlug })
+          .then((balance) => {
+            !cancel && setTokenBalance(balance);
+          })
+          .catch(console.error);
+      }
     }
 
-    return '0';
-  })();
+    return () => {
+      cancel = true;
+    };
+  }, [address, chain, nativeTokenSlug, tokenSlug]);
 
-  const currentChainAsset = useMemo(() => {
-    return tokenSlug ? assetRegistryMap[tokenSlug] : undefined;
-  }, [assetRegistryMap, tokenSlug]);
-
-  const currentTokenBalance: string = (() => {
-    if (tokenSlug && balanceMap[tokenSlug]) {
-      return balanceMap[tokenSlug].free || '0';
-    }
-
-    return '0';
-  })();
+  if (!address && !chain) {
+    return <></>;
+  }
 
   return (
     <Typography.Paragraph className={CN(className, 'free-balance')}>
@@ -57,13 +65,13 @@ const Component = ({ className, label, tokenSlug }: Props) => {
       {
         !!nativeTokenSlug && (
           <Number
-            decimal={nativeChainAsset?.decimals || 18}
+            decimal={nativeTokenBalance.decimals || 18}
             decimalColor={token.colorTextTertiary}
             intColor={token.colorTextTertiary}
             size={14}
-            suffix={nativeChainAsset?.symbol}
+            suffix={nativeTokenBalance.symbol}
             unitColor={token.colorTextTertiary}
-            value={nativeTokenBalance}
+            value={nativeTokenBalance.value}
           />
         )
       }
@@ -72,13 +80,13 @@ const Component = ({ className, label, tokenSlug }: Props) => {
           <>
             <span className={'__name'}>{t('and')}</span>
             <Number
-              decimal={currentChainAsset?.decimals || 18}
+              decimal={tokenBalance?.decimals || 18}
               decimalColor={token.colorTextTertiary}
               intColor={token.colorTextTertiary}
               size={14}
-              suffix={currentChainAsset?.symbol}
+              suffix={tokenBalance?.symbol}
               unitColor={token.colorTextTertiary}
-              value={currentTokenBalance}
+              value={tokenBalance.value}
             />
           </>
         )

@@ -76,7 +76,7 @@ export interface LocalUiSettings {
   isShowZeroBalance: boolean,
 }
 
-export interface AppSettings extends LocalUiSettings, UiSettings, SettingsStruct, BaseReduxStore {
+export interface AppSettings extends LocalUiSettings, UiSettings, Omit<SettingsStruct, 'camera' | 'notification'>, BaseReduxStore {
   authUrls: Record<string, AuthUrlInfo>,
   mediaAllowed: boolean
 }

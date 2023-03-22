@@ -1,12 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata } from '@subwallet/extension-base/background/KoniTypes';
+import { NominatorMetadata, RequestUnbondingSubmit } from '@subwallet/extension-base/background/KoniTypes';
+import { isUnbondFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import PoolSelector from '@subwallet/extension-koni-ui/components/Field/PoolSelector';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
+import { submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import BondedBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/BondedBalance';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
@@ -46,6 +48,14 @@ const Component: React.FC<Props> = (props: Props) => {
     return _getChainNativeTokenBasicInfo(chainInfo);
   }, [chainInfo]);
 
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [warnings, setWarnings] = useState<string[]>([]);
+
+  const mustChooseValidator = useCallback(() => {
+    return isUnbondFromValidator(nominatorMetadata);
+  }, [nominatorMetadata]);
+
   const [form] = Form.useForm<StakeFromProps>();
   const formDefault = {
     from: transactionContext.from,
@@ -59,8 +69,36 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const submitTransaction = useCallback(() => {
-    // TODO: submit transaction
-  }, []);
+    const value = form.getFieldValue('value') as string;
+    const selectedValidator = nominatorMetadata.nominations[0].validatorAddress;
+
+    const params: RequestUnbondingSubmit = {
+      amount: value,
+      chain: nominatorMetadata.chain,
+      nominatorMetadata
+    };
+
+    if (mustChooseValidator()) {
+      params.validatorAddress = ''; // TODO
+    }
+
+    submitUnbonding(params)
+      .then((result) => {
+        const { errors, extrinsicHash, warnings } = result;
+
+        if (errors.length || warnings.length) {
+          setLoading(false);
+          setErrors(errors.map((e) => e.message));
+          setWarnings(warnings.map((w) => w.message));
+        } else if (extrinsicHash) {
+          transactionContext.onDone(extrinsicHash);
+        }
+      })
+      .catch((e: Error) => {
+        setLoading(false);
+        setErrors([e.message]);
+      });
+  }, [form, mustChooseValidator, nominatorMetadata, transactionContext]);
 
   return (
     <>
@@ -72,8 +110,8 @@ const Component: React.FC<Props> = (props: Props) => {
           onValuesChange={onFieldsChange}
         >
           <BondedBalance
-            chainInfo={chainInfo}
             bondedBalance={nominatorMetadata.activeStake}
+            chainInfo={chainInfo}
             className={'bonded-balance'}
           />
 

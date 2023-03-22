@@ -4,11 +4,10 @@
 import { RequestBondingSubmit } from '@subwallet/extension-base/background/KoniTypes';
 import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
+import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
 import CN from 'classnames';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { BaseTransactionConfirmationProps } from './Base';
@@ -20,12 +19,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const data = transaction.data as RequestBondingSubmit;
 
   const { t } = useTranslation();
-
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
-
-  const chainInfo = useMemo(() => {
-    return chainInfoMap[transaction.chain];
-  }, [chainInfoMap, transaction.chain]);
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(transaction.chain);
 
   return (
     <div className={CN(className)}>
@@ -38,16 +32,16 @@ const Component: React.FC<Props> = (props: Props) => {
         hasBackgroundWrapper
       >
         <MetaInfo.Number
-          decimals={0}
+          decimals={decimals}
           label={t('Unbond amount')}
-          suffix={chainInfo?.substrateInfo?.symbol}
+          suffix={symbol}
           value={data.amount}
         />
 
         <MetaInfo.Number
-          decimals={chainInfo?.substrateInfo?.decimals || 0}
+          decimals={decimals}
           label={t('Estimated fee')}
-          suffix={chainInfo?.substrateInfo?.symbol}
+          suffix={symbol}
           value={transaction.estimateFee?.value || 0}
         />
       </MetaInfo>

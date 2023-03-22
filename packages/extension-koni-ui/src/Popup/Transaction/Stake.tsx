@@ -89,6 +89,7 @@ const Component: React.FC<Props> = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [stakingType, setStakingType] = useState<StakingType>(defaultTab === 0 ? StakingType.POOLED : StakingType.NOMINATED);
+  // TODO: chainStakingMetadata is sometimes null
   const { _chainStakingMetadata, _nominatorMetadata } = useGetStakeData(currentAccount?.address || '', stakingType, chainStakingMetadata, nominatorMetadata, form.getFieldsValue().token);
 
   const defaultSlug = useMemo(() => {
@@ -142,6 +143,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onFieldsChange = useCallback(({ from, nominate, token, value }: Partial<StakeFromProps>, values: StakeFromProps) => {
     // TODO: field change
+
+    console.log('onChangeField', value);
 
     if (from) {
       transactionContext.setFrom(from);
@@ -201,7 +204,7 @@ const Component: React.FC<Props> = (props: Props) => {
           const selectedPool = getSelectedPool(pool);
 
           bondingPromise = submitPoolBonding({
-            amount: value,
+            amount: value, // TODO: value is wrong
             chain: transactionContext.chain,
             nominatorMetadata: _nominatorMetadata,
             selectedPool: selectedPool as NominationPoolInfo,

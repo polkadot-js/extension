@@ -1,24 +1,34 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { SigningRequest } from '@subwallet/extension-base/background/types';
-import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
-import useParseSubstrateRequestPayload from '@subwallet/extension-koni-ui/hooks/confirmation/useParseSubstrateRequestPayload';
-import CancelUnstakeTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/CancelUnstake';
-import ClaimRewardTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/ClaimReward';
+import {ConfirmationDefinitions, ExtrinsicType} from '@subwallet/extension-base/background/KoniTypes';
+import {SigningRequest} from '@subwallet/extension-base/background/types';
+import {SWTransactionResult} from '@subwallet/extension-base/services/transaction-service/types';
+import useParseSubstrateRequestPayload
+  from '@subwallet/extension-koni-ui/hooks/confirmation/useParseSubstrateRequestPayload';
+import CancelUnstakeTransactionConfirmation
+  from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/CancelUnstake';
+import ClaimRewardTransactionConfirmation
+  from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/ClaimReward';
 import UnstakeTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/Unstake';
-import WithdrawTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/Withdraw';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ConfirmationQueueItem } from '@subwallet/extension-koni-ui/stores/base/RequestState';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import WithdrawTransactionConfirmation
+  from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/Withdraw';
+import {RootState} from '@subwallet/extension-koni-ui/stores';
+import {ConfirmationQueueItem} from '@subwallet/extension-koni-ui/stores/base/RequestState';
+import {ThemeProps} from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
-import React, { useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import React, {useCallback, useMemo} from 'react';
+import {useSelector} from 'react-redux';
 import styled from 'styled-components';
 
-import { EvmSignArea, SubstrateSignArea } from '../Sign';
-import { BaseTransactionConfirmation, BondTransactionConfirmation, JoinPoolTransactionConfirmation, SendNftTransactionConfirmation, TransferBlock } from './parts';
+import {EvmSignArea, SubstrateSignArea} from '../Sign';
+import {
+  BaseTransactionConfirmation,
+  BondTransactionConfirmation,
+  JoinPoolTransactionConfirmation,
+  SendNftTransactionConfirmation,
+  TransferBlock
+} from './parts';
 
 interface Props extends ThemeProps {
   confirmation: ConfirmationQueueItem;
@@ -36,6 +46,8 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
       return JoinPoolTransactionConfirmation;
     case ExtrinsicType.STAKING_BOND:
       return BondTransactionConfirmation;
+    case ExtrinsicType.STAKING_UNBOND:
+      return UnstakeTransactionConfirmation;
     case ExtrinsicType.STAKING_LEAVE_POOL:
       return UnstakeTransactionConfirmation;
     case ExtrinsicType.STAKING_WITHDRAW:

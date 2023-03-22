@@ -403,14 +403,17 @@ export type BrowserConfirmationType = 'extension'|'popup'|'window';
 
 export interface UiSettings {
   // language: LanguageType,
-  browserConfirmationType: BrowserConfirmationType,
+  browserConfirmationType: BrowserConfirmationType;
   // isShowZeroBalance: boolean,
   isShowBalance: boolean;
   accountAllLogo: string;
   theme: ThemeNames;
+  camera: boolean;
 }
 
 export type RequestSettingsType = UiSettings;
+
+export type RequestCameraSettings = { camera: boolean };
 
 export interface RandomTestRequest {
   start: number;
@@ -619,6 +622,13 @@ export interface NftTransactionResponse extends SWTransactionResponse {
 export type HandleBasicTx = (data: TransactionResponse) => void;
 
 export type TxErrorCode = TransferTxErrorType | TransactionErrorType
+
+export enum BalanceErrorType {
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  TOKEN_ERROR = 'TOKEN_ERROR',
+  TIMEOUT = 'TIMEOUT',
+  GET_BALANCE_ERROR = 'GET_BALANCE_ERROR',
+}
 
 export type TransactionWarningType = BasicTxWarningCode
 
@@ -1774,6 +1784,7 @@ export interface ActiveCronAndSubscriptionMap {
   cron: Record<CronServiceType, boolean>;
 }
 
+// Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
   'pri(staking.submitTuringCancelCompound)': [RequestTuringCancelStakeCompound, SWTransactionResponse];
@@ -1883,6 +1894,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
+  'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];
@@ -1891,7 +1903,8 @@ export interface KoniRequestSignatures {
   'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, SupportTransferResponse];
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];
   'pri(subscription.cancel)': [string, boolean];
-  'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
+  'pri(freeBalance.get)': [RequestFreeBalance, AmountData];
+  'pri(freeBalance.subscribe)': [RequestFreeBalance, AmountData, AmountData];
 
   // Transfer
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ValidateTransactionResponse];

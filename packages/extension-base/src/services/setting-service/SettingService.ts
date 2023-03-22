@@ -22,7 +22,8 @@ export default class SettingService {
             // isShowZeroBalance: true,
             isShowBalance: false,
             accountAllLogo: '',
-            theme: ThemeNames.DARK
+            theme: ThemeNames.DARK,
+            camera: false
           }
         );
       } else {

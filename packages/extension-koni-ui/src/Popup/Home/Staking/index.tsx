@@ -46,6 +46,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { data: stakingItems, priceMap } = useGetStakingList();
+
   const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filterFunction = useMemo<(item: StakingDataType) => boolean>(() => {

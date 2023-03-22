@@ -93,6 +93,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
         renderItem={renderItem}
         renderSelected={renderSelected}
         selected={value || ''}
+        title={label || placeholder || t('Select service')}
       />
     </>
   );

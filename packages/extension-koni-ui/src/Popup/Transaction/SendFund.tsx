@@ -462,6 +462,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               <TokenSelector
                 disabled={!tokenItems.length}
                 items={tokenItems}
+                placeholder={t('Select token')}
                 showChainInSelected
               />
             </Form.Item>

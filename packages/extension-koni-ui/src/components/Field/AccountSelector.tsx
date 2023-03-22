@@ -93,7 +93,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
         searchPlaceholder={t('Search name')}
         searchableMinCharactersCount={2}
         selected={value || ''}
-        title={label}
+        title={label || placeholder || t('Select account')}
       />
     </>
   );

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainStakingMetadata, NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { getStakingAvailableActions, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
@@ -25,7 +26,7 @@ type ActionListType = {
   icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>,
   label: string,
   value: string,
-  action: string
+  action: StakingAction
 }
 
 const ACTION_LIST: ActionListType[] = [
@@ -34,35 +35,35 @@ const ACTION_LIST: ActionListType[] = [
     icon: PlusCircle,
     label: 'Stake more',
     value: '/transaction/stake',
-    action: 'stake'
+    action: StakingAction.STAKE
   },
   {
     backgroundIconColor: 'magenta-6',
     icon: MinusCircle,
     label: 'Unstake funds',
     value: '/transaction/unstake',
-    action: 'unstake'
+    action: StakingAction.UNSTAKE
   },
   {
     backgroundIconColor: 'geekblue-6',
     icon: ArrowCircleDown,
     label: 'Withdraw',
     value: '/transaction/withdraw',
-    action: 'withdraw'
+    action: StakingAction.WITHDRAW
   },
   {
     backgroundIconColor: 'green-7',
     icon: Wallet,
     label: 'Claim rewards',
     value: '/transaction/claim-reward',
-    action: 'claim-reward'
+    action: StakingAction.CLAIM_REWARD
   },
   {
     backgroundIconColor: 'purple-8',
     icon: ArrowArcLeft,
     label: 'Cancel unstake',
     value: '/transaction/cancel-unstake',
-    action: 'cancel-unstake'
+    action: StakingAction.CANCEL_UNSTAKE
   }
   // {
   //   backgroundIconColor: 'blue-7',
@@ -102,10 +103,12 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 
   const availableActions = useCallback(() => {
-    const result: string[] = [];
+    if (!nominatorMetadata) {
+      return [];
+    }
 
-    return result;
-  }, []);
+    return getStakingAvailableActions(nominatorMetadata);
+  }, [nominatorMetadata]);
 
   return (
     <SwModal

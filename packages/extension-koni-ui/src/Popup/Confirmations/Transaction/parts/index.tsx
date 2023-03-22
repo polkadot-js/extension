@@ -6,5 +6,6 @@ export { default as BaseTransactionConfirmation } from './Base';
 export { default as SendNftTransactionConfirmation } from './SendNft';
 export { default as BondTransactionConfirmation } from './Bond';
 export { default as JoinPoolTransactionConfirmation } from './JoinPool';
+export { default as LeavePoolTransactionConfirmation } from './LeavePool';
 
 export * from './TransferBlock';

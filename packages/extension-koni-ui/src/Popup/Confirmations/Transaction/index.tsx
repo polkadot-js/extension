@@ -7,7 +7,7 @@ import { SWTransactionResult } from '@subwallet/extension-base/services/transact
 import useParseSubstrateRequestPayload from '@subwallet/extension-koni-ui/hooks/confirmation/useParseSubstrateRequestPayload';
 import CancelUnstakeTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/CancelUnstake';
 import ClaimRewardTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/ClaimReward';
-import UnstakeTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/Unstake';
+import UnbondTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/Unbond';
 import WithdrawTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction/parts/Withdraw';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ConfirmationQueueItem } from '@subwallet/extension-koni-ui/stores/base/RequestState';
@@ -18,7 +18,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { EvmSignArea, SubstrateSignArea } from '../Sign';
-import { BaseTransactionConfirmation, BondTransactionConfirmation, JoinPoolTransactionConfirmation, SendNftTransactionConfirmation, TransferBlock } from './parts';
+import { BaseTransactionConfirmation, BondTransactionConfirmation, JoinPoolTransactionConfirmation, LeavePoolTransactionConfirmation, SendNftTransactionConfirmation, TransferBlock } from './parts';
 
 interface Props extends ThemeProps {
   confirmation: ConfirmationQueueItem;
@@ -34,10 +34,12 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
       return SendNftTransactionConfirmation;
     case ExtrinsicType.STAKING_JOIN_POOL:
       return JoinPoolTransactionConfirmation;
+    case ExtrinsicType.STAKING_LEAVE_POOL:
+      return LeavePoolTransactionConfirmation;
     case ExtrinsicType.STAKING_BOND:
       return BondTransactionConfirmation;
-    case ExtrinsicType.STAKING_LEAVE_POOL:
-      return UnstakeTransactionConfirmation;
+    case ExtrinsicType.STAKING_UNBOND:
+      return UnbondTransactionConfirmation;
     case ExtrinsicType.STAKING_WITHDRAW:
       return WithdrawTransactionConfirmation;
     case ExtrinsicType.STAKING_CLAIM_REWARD:

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationInfo, NominatorMetadata, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, StakingType, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
@@ -304,31 +304,45 @@ export function getStakingAvailableActions (nominatorMetadata: NominatorMetadata
 
   if (nominatorMetadata.activeStake && bnActiveStake.gt(BN_ZERO)) {
     result.push(StakingAction.UNSTAKE);
+
+    const isChainAllowClaimReward = _STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain) || _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
+
+    if (nominatorMetadata.type === StakingType.POOLED || isChainAllowClaimReward) {
+      result.push(StakingAction.CLAIM_REWARD);
+    }
   }
 
-  if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain)) {
+  if (nominatorMetadata.unstakings.length > 0) {
+    result.push(StakingAction.CANCEL_UNSTAKE);
+    let hasClaimable = false;
 
-  } else if (_STAKING_CHAIN_GROUP.para.includes(nominatorMetadata.chain)) {
-
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain)) {
-
-  } else {
-    if (nominatorMetadata.unstakings.length > 0) {
-      result.push(StakingAction.CANCEL_UNSTAKE);
-      let hasClaimable = false;
-
-      for (const unstaking of nominatorMetadata.unstakings) {
-        if (unstaking.status === UnstakingStatus.CLAIMABLE) {
-          hasClaimable = true;
-          break;
-        }
+    for (const unstaking of nominatorMetadata.unstakings) {
+      if (unstaking.status === UnstakingStatus.CLAIMABLE) {
+        hasClaimable = true;
+        break;
       }
+    }
 
-      if (hasClaimable) {
-        result.push(StakingAction.WITHDRAW);
-      }
+    if (hasClaimable) {
+      result.push(StakingAction.WITHDRAW);
     }
   }
 
   return result;
+}
+
+export function isUnbondFromValidator (nominatorMetadata: NominatorMetadata) {
+  if (nominatorMetadata.type === StakingType.POOLED) {
+    return true;
+  }
+
+  if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain)) {
+    return true;
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain)) {
+    return true;
+  } else if (_STAKING_CHAIN_GROUP.para.includes(nominatorMetadata.chain)) {
+    return true;
+  }
+
+  return false;
 }

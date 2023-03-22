@@ -204,7 +204,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         searchPlaceholder={t('Search validator')}
         searchableMinCharactersCount={2}
         selected={value || ''}
-        title={t('Select validator')}
+        title={label || placeholder || t('Select validator')}
       />
 
       <FilterModal

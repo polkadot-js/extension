@@ -2997,6 +2997,22 @@ export default class KoniExtension {
     return convertRs(transactionsSubject.getValue());
   }
 
+  private subscribeNotifications (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(notifications.subscribe)'>(id, port);
+    const notificationSubject = this.#koniState.notificationService.getNotificationSubject();
+
+    const notificationSubscription = notificationSubject.subscribe((rs) => {
+      cb(rs);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      notificationSubscription.unsubscribe();
+      this.cancelSubscription(id);
+    });
+
+    return notificationSubject.value;
+  }
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -3359,6 +3375,10 @@ export default class KoniExtension {
         return this.getTransaction(request as RequestGetTransaction);
       case 'pri(transactions.subscribe)':
         return this.subscribeTransactions(id, port);
+
+      // Notification
+      case 'pri(notifications.subscribe)':
+        return this.subscribeNotifications(id, port);
 
       // Default
       default:

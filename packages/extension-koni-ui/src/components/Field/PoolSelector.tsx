@@ -211,7 +211,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         searchableMinCharactersCount={2}
         selected={value || ''}
         showActionBtn
-        title={t('Select pool')}
+        title={label || placeholder || t('Select pool')}
       />
 
       <FilterModal

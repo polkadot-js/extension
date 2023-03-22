@@ -99,7 +99,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       searchPlaceholder={t('Search token')}
       searchableMinCharactersCount={2}
       selected={value || ''}
-      title={label}
+      title={label || placeholder || t('Select token')}
     />
   );
 }

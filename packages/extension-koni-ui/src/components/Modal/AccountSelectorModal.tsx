@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
+
+import GeneralEmptyList from '../GeneralEmptyList';
 
 interface Props extends ThemeProps {
   id?: string,
@@ -18,7 +19,7 @@ interface Props extends ThemeProps {
 
 export const AccountSelectorModalId = 'accountSelectorModalId';
 
-const renderEmpty = () => <EmptyAccount />;
+const renderEmpty = () => <GeneralEmptyList />;
 
 function Component ({ className = '', id = AccountSelectorModalId, items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();

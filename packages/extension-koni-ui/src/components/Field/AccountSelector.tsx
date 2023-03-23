@@ -18,9 +18,13 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+import GeneralEmptyList from '../GeneralEmptyList';
+
 interface Props extends ThemeProps, BasicInputWrapper {
   filter?: (account: AccountJson) => boolean
 }
+
+const renderEmpty = () => <GeneralEmptyList />;
 
 function defaultFiler (account: AccountJson): boolean {
   return !isAccountAll(account.address);
@@ -89,6 +93,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
         }
         renderItem={renderItem}
         renderSelected={renderSelected}
+        renderWhenEmpty={renderEmpty}
         searchFunction={searchFunction}
         searchPlaceholder={t<string>('Search name')}
         searchableMinCharactersCount={2}

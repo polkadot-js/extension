@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import { TokenSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenSelectionItem';
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -10,6 +9,8 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
+
+import GeneralEmptyList from '../../GeneralEmptyList';
 
 interface Props extends ThemeProps {
   onSelectItem?: (item: _ChainAsset) => void,
@@ -19,7 +20,7 @@ interface Props extends ThemeProps {
 
 export const ReceiveTokensSelectorModalId = 'receiveTokensSelectorModalId';
 
-const renderEmpty = () => <EmptyAccount />;
+const renderEmpty = () => <GeneralEmptyList />;
 
 function Component ({ address, className = '', items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();

@@ -23,11 +23,14 @@ import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 interface Props extends BasicInputWrapper, ThemeProps {
   showAddressBook?: boolean;
   showScanner?: boolean;
+  autoReformatValue?: boolean;
 }
 
 const modalId = 'input-account-address-modal';
 
-function Component ({ className = '', disabled, id = modalId, label, onBlur, onChange, onFocus, placeholder, readOnly, showAddressBook, showScanner, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component ({ autoReformatValue,
+  className = '', disabled, id = modalId, label, onBlur, onChange, onFocus,
+  placeholder, readOnly, showAddressBook, showScanner, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
   const inputRef = useForwardInputRef(ref);
@@ -41,12 +44,16 @@ function Component ({ className = '', disabled, id = modalId, label, onBlur, onC
   const parseAndChangeValue = useCallback((value: string) => {
     const val = value.trim();
 
-    if (isAddress(val)) {
-      onChange && onChange({ target: { value: reformatAddress(val, 42) } });
-    } else {
-      onChange && onChange({ target: { value: val } });
+    if (autoReformatValue) {
+      if (isAddress(val)) {
+        onChange && onChange({ target: { value: reformatAddress(val, 42) } });
+
+        return;
+      }
     }
-  }, [onChange]);
+
+    onChange && onChange({ target: { value: val } });
+  }, [onChange, autoReformatValue]);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     parseAndChangeValue(event.target.value);

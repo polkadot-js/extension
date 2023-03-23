@@ -221,7 +221,7 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.manage_tokens__right_item_container': {
-      marginLeft: -token.marginXXS
+      marginRight: -token.marginXXS
     }
   });
 });

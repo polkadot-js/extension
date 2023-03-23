@@ -9,6 +9,8 @@ import { AccountAddressType } from '@subwallet/extension-koni-ui/types/account';
 import { getAccountAddressType } from '@subwallet/extension-koni-ui/util';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import {StakingType} from "@subwallet/extension-base/background/KoniTypes";
+import {_STAKING_CHAIN_GROUP} from "@subwallet/extension-base/services/chain-service/constants";
 
 const isChainTypeValid = (chainInfo: _ChainInfo, address?: string): boolean => {
   const addressType = getAccountAddressType(address);
@@ -26,25 +28,40 @@ const isChainTypeValid = (chainInfo: _ChainInfo, address?: string): boolean => {
   }
 };
 
-export default function useGetSupportedStakingTokens (address?: string, chain?: string): _ChainAsset[] {
+export default function useGetSupportedStakingTokens (type: StakingType, address?: string, chain?: string): _ChainAsset[] {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
 
   return useMemo(() => {
     const result: _ChainAsset[] = [];
 
-    Object.values(chainInfoMap).forEach((chainInfo) => {
-      if (_isChainSupportSubstrateStaking(chainInfo)) {
-        const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
+    if (type === StakingType.NOMINATED) {
+      Object.values(chainInfoMap).forEach((chainInfo) => {
+        if (_isChainSupportSubstrateStaking(chainInfo)) {
+          const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
 
-        if (assetRegistryMap[nativeTokenSlug] &&
-          isChainTypeValid(chainInfo, address) &&
-          (!chain || chain === ALL_KEY || chain === chainInfo.slug)
-        ) {
-          result.push(assetRegistryMap[nativeTokenSlug]);
+          if (assetRegistryMap[nativeTokenSlug] &&
+            isChainTypeValid(chainInfo, address) &&
+            (!chain || chain === ALL_KEY || chain === chainInfo.slug)
+          ) {
+            result.push(assetRegistryMap[nativeTokenSlug]);
+          }
         }
-      }
-    });
+      });
+    } else {
+      Object.values(chainInfoMap).forEach((chainInfo) => {
+        if (_isChainSupportSubstrateStaking(chainInfo) && _STAKING_CHAIN_GROUP.nominationPool.includes(chainInfo.slug)) {
+          const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
+
+          if (assetRegistryMap[nativeTokenSlug] &&
+            isChainTypeValid(chainInfo, address) &&
+            (!chain || chain === ALL_KEY || chain === chainInfo.slug)
+          ) {
+            result.push(assetRegistryMap[nativeTokenSlug]);
+          }
+        }
+      });
+    }
 
     return result;
   }, [address, assetRegistryMap, chainInfoMap, chain]);

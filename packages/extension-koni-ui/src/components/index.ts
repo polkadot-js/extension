@@ -7,6 +7,7 @@ export { default as EmptyList } from './EmptyList';
 export { default as LoadingScreen } from './LoadingScreen';
 export { default as MetaInfo } from './MetaInfo';
 export { default as NetworkToggleItem } from './NetworkToggleItem';
+export { default as RadioGroup } from './RadioGroup';
 export { default as ScreenTab } from './ScreenTab';
 export { default as SelectValidatorInput } from './SelectValidatorInput';
 export { default as WordPhrase } from './WordPhrase';

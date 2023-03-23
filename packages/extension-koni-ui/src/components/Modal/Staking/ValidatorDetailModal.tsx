@@ -3,44 +3,47 @@
 
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingStatus, StakingStatusType } from '@subwallet/extension-koni-ui/util/stakingStatus';
-import { SwModal, SwNumberProps } from '@subwallet/react-ui';
-import React from 'react';
+import { SwModal } from '@subwallet/react-ui';
+import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  onCancel: () => void,
-  validatorAddress: string,
-  validatorName: string,
-  status: StakingStatusType,
-  minStake: SwNumberProps['value'],
-  ownStake: SwNumberProps['value'],
-  decimals: number,
-  symbol: string,
-  earningEstimated: SwNumberProps['value'],
-  commission: SwNumberProps['value']
+  onCancel?: () => void;
+  status: StakingStatusType;
+  validatorItem: ValidatorDataType;
 };
 
 export const ValidatorDetailModalId = 'validatorDetailModalId';
 
-function Component ({ className,
-  commission, decimals,
-  earningEstimated,
-  minStake,
-  onCancel,
-  ownStake,
-  status,
-  symbol,
-  validatorAddress,
-  validatorName }: Props): React.ReactElement<Props> {
+function Component (props: Props): React.ReactElement<Props> {
+  const { className, onCancel, status, validatorItem } = props;
+  const { address: validatorAddress,
+    commission,
+    decimals,
+    expectedReturn: earningEstimated = '',
+    identity: validatorName = '',
+    minBond: minStake,
+    ownStake,
+    symbol } = validatorItem;
   const { t } = useTranslation();
+
+  const { inactiveModal } = useContext(ModalContext);
+
+  const _onCancel = useCallback(() => {
+    inactiveModal(ValidatorDetailModalId);
+
+    onCancel && onCancel();
+  }, [inactiveModal, onCancel]);
 
   return (
     <SwModal
       className={className}
       id={ValidatorDetailModalId}
-      onCancel={onCancel}
+      onCancel={_onCancel}
       title={t('Validator details')}
     >
       <MetaInfo
@@ -96,7 +99,5 @@ function Component ({ className,
 }
 
 export const ValidatorDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  return ({
-
-  });
+  return ({});
 });

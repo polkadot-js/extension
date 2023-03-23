@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationInfo, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -9,6 +9,7 @@ import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/Sort
 import { PoolDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal';
 import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingPoolItem';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
+import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, InputRef, SelectModal, useExcludeModal } from '@subwallet/react-ui';
@@ -24,9 +25,9 @@ import EmptyAccount from '../Account/EmptyAccount';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
+  from: string;
   onClickBookBtn?: (e: SyntheticEvent) => void;
   onClickLightningBtn?: (e: SyntheticEvent) => void;
-  nominationPoolList?: NominationInfo[];
 }
 
 const SORTING_MODAL_ID = 'pool-sorting-modal';
@@ -81,27 +82,30 @@ const renderEmpty = () => <EmptyAccount />;
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, id = 'pool-selector', label, nominationPoolList, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
-  const nominationPoolValueList = nominationPoolList && nominationPoolList.length ? nominationPoolList.map((item) => item.validatorAddress) : [];
-  const items = useGetValidatorList(chain, StakingType.POOLED) as NominationPoolDataType[];
-  const { activeModal, inactiveModal } = useContext(ModalContext);
-  const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
-  const [sortSelection, setSortSelection] = useState<string>('');
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
-  const filteredList = useMemo(() => {
-    return getFilteredList(items, selectedFilters);
-  }, [items, selectedFilters]);
+  const { chain, className = '', disabled, from, id = 'pool-selector', label, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
 
   useExcludeModal(id);
 
   const { t } = useTranslation();
 
-  useEffect(() => {
-    if (items && items.length && !value) {
-      onChange && onChange({ target: { value: parseInt(nominationPoolValueList[0]) as unknown as string } });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  const nominatorMetadata = useGetNominatorInfo(chain, StakingType.POOLED, from);
+  const items = useGetValidatorList(chain, StakingType.POOLED) as NominationPoolDataType[];
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const nominationPoolValueList = useMemo((): string[] => {
+    return nominatorMetadata[0]?.nominations.map((item) => item.validatorAddress) || [];
+  }, [nominatorMetadata]);
+
+  const filteredList = useMemo(() => {
+    return getFilteredList(items, selectedFilters);
+  }, [items, selectedFilters]);
+
+  const isDisabled = useMemo(() => disabled || !!nominationPoolValueList.length, [disabled, nominationPoolValueList.length]);
+
+  const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
+  const [sortSelection, setSortSelection] = useState<string>('');
 
   const _onSelectItem = useCallback((value: string) => {
     onChange && onChange({ target: { value } });
@@ -146,19 +150,25 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
         <div className={'__selected-item-right-part common-text'}>
           <Button
-            icon={<Icon
-              phosphorIcon={Book}
-              size='sm'
-            />}
+            disabled={isDisabled}
+            icon={(
+              <Icon
+                phosphorIcon={Book}
+                size='sm'
+              />
+            )}
             onClick={onClickBookBtn}
             size='xs'
             type='ghost'
           />
           <Button
-            icon={<Icon
-              phosphorIcon={Lightning}
-              size='sm'
-            />}
+            disabled={isDisabled}
+            icon={(
+              <Icon
+                phosphorIcon={Lightning}
+                size='sm'
+              />
+            )}
             onClick={onClickLightningBtn}
             size='xs'
             type='ghost'
@@ -166,7 +176,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         </div>
       </div>
     );
-  }, [onClickBookBtn, onClickLightningBtn]);
+  }, [onClickBookBtn, onClickLightningBtn, isDisabled]);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value);
@@ -181,16 +191,24 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     inactiveModal(PoolDetailModalId);
   }, [inactiveModal]);
 
+  useEffect(() => {
+    onChange && onChange({ target: { value: parseInt(nominationPoolValueList[0]) as unknown as string } });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nominationPoolValueList]);
+
   return (
     <>
       <SelectModal
         actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
         className={`${className} modal-full`}
-        closeIcon={<Icon
-          phosphorIcon={CaretLeft}
-          size='md'
-        />}
-        disabled={disabled}
+        closeIcon={(
+          <Icon
+            phosphorIcon={CaretLeft}
+            size='md'
+          />
+        )}
+        disabled={disabled || !!nominationPoolValueList.length}
         id={id}
         inputClassName={`${className} pool-selector-input`}
         itemKey={'id'}
@@ -199,13 +217,13 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         onClickActionBtn={onClickActionBtn}
         onSelect={_onSelectItem}
         placeholder={placeholder || t('Select pool')}
-        prefix={
+        prefix={(
           <Avatar
             size={20}
             theme={value ? isEthereumAddress(value) ? 'ethereum' : 'polkadot' : undefined}
             value={value}
           />
-        }
+        )}
         renderItem={renderItem}
         renderSelected={renderSelected}
         renderWhenEmpty={renderEmpty}

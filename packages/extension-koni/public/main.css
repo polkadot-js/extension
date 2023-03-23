@@ -299,29 +299,29 @@ mark {
   background-color: #feffe6;
 }
 
-/* width */
-::-webkit-scrollbar {
-  width: 4px;
-  width: 4px;
-}
+/*!* width *!*/
+/*::-webkit-scrollbar {*/
+/*  width: 4px;*/
+/*  width: 4px;*/
+/*}*/
 
-/* Track */
-::-webkit-scrollbar-track {
-  border-radius: 2px;
-  width: 0;
-  background-color: transparent;
-}
+/*!* Track *!*/
+/*::-webkit-scrollbar-track {*/
+/*  border-radius: 2px;*/
+/*  width: 0;*/
+/*  background-color: transparent;*/
+/*}*/
 
-/* Handle */
-::-webkit-scrollbar-thumb {
-  border-radius: 2px;
-  background-color: rgba(128, 128, 128, 0.18);
-}
+/*!* Handle *!*/
+/*::-webkit-scrollbar-thumb {*/
+/*  border-radius: 2px;*/
+/*  background-color: rgba(128, 128, 128, 0.18);*/
+/*}*/
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(128, 128, 128, 0.27);
-}
+/*!* Handle on hover *!*/
+/*::-webkit-scrollbar-thumb:hover {*/
+/*    background-color: rgba(128, 128, 128, 0.27);*/
+/*}*/
 
 /**::-webkit-scrollbar-thumb {*/
 /*  border-radius: 4px;*/
@@ -333,6 +333,17 @@ mark {
 /*  scrollbar-color: rgba(128, 128, 128, 0.5) transparent;*/
 /*  scrollbar-gutter: auto;*/
 /*}*/
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+*::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
 
 /*SubWallet main css*/
 *, :after, :before {

@@ -154,7 +154,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           className={'manage_chains__container'}
           enableSearchInput
           filterBy={filterFunction}
-          ignoreScrollbar={chainInfoList.length > 7}
           list={chainInfoList}
           mode={'boxed'}
           onClickActionBtn={openFilterModal}

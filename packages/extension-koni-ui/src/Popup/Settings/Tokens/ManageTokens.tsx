@@ -152,7 +152,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           enableSearchInput={true}
           filterBy={filterFunction}
           gridGap={'14px'}
-          ignoreScrollbar={assetItems.length > 7}
           list={assetItems}
           minColumnWidth={'172px'}
           mode={'boxed'}

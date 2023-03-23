@@ -389,14 +389,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           filterBy={filterFunction}
           groupBy={groupBy}
           groupSeparator={groupSeparator}
-          ignoreScrollbar={historyList.length > 4}
           list={historyList}
           onClickActionBtn={onClickActionBtn}
           renderItem={renderItem}
           renderWhenEmpty={emptyList}
           searchFunction={searchFunc}
           searchMinCharactersCount={2}
-          searchPlaceholder={t('Search history')}
+          searchPlaceholder={t<string>('Search history')}
           showActionBtn
         />
       </PageWrapper>

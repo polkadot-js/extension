@@ -20,7 +20,6 @@ import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
-import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import classNames from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -76,7 +75,7 @@ function Component (): React.ReactElement {
           topBlockRef.current.style.top = `${containerProps.top}px`;
           topBlockRef.current.style.left = `${containerProps.left}px`;
           topBlockRef.current.style.right = `${containerProps.right}px`;
-          topBlockRef.current.style.width = `${containerProps.width - getScrollbarWidth()}px`;
+          topBlockRef.current.style.width = `${containerProps.width}px`;
 
           setTimeout(() => {
             if (topBlockRef.current) {
@@ -275,8 +274,7 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
       flexDirection: 'column',
       overflowY: 'auto',
       overflowX: 'hidden',
-      paddingTop: 210,
-      marginRight: -getScrollbarWidth()
+      paddingTop: 210
     },
 
     '.__scroll-container': {

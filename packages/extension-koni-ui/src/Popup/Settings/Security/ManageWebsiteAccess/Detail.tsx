@@ -212,14 +212,13 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
         <SwList.Section
           displayRow
           enableSearchInput
-          ignoreScrollbar={accountItems.length > 7}
           list={accountItems}
           renderItem={renderItem}
           renderWhenEmpty={renderEmptyList}
           rowGap = {'8px'}
           searchFunction={searchFunc}
           searchMinCharactersCount={2}
-          searchPlaceholder={t('Search account')} // todo: i18n this
+          searchPlaceholder={t<string>('Search account')}
         />
 
         <ActionModal

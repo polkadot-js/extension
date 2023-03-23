@@ -71,14 +71,13 @@ const Component: React.FC<Props> = (props: Props) => {
       className={CN(className)}
       displayRow
       enableSearchInput
-      ignoreScrollbar={chainInfoList.length > 5}
       list={chainInfoList}
       renderItem={renderChainItem}
       renderWhenEmpty={emptyChainList}
       rowGap={'8px'}
       searchFunction={chainSearchFunc}
       searchMinCharactersCount={2}
-      searchPlaceholder={t('Chain name')}
+      searchPlaceholder={t<string>('Chain name')}
     />
   );
 };

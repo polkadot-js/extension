@@ -19,7 +19,6 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
-import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import classNames from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -143,7 +142,7 @@ function Component (): React.ReactElement {
           topBlockRef.current.style.top = `${containerProps.top}px`;
           topBlockRef.current.style.left = `${containerProps.left}px`;
           topBlockRef.current.style.right = `${containerProps.right}px`;
-          topBlockRef.current.style.width = `${containerProps.width - getScrollbarWidth()}px`;
+          topBlockRef.current.style.width = `${containerProps.width}px`;
 
           setTimeout(() => {
             if (topBlockRef.current) {
@@ -341,8 +340,7 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
       position: 'relative',
       display: 'flex',
       flexDirection: 'column',
-      paddingTop: 206,
-      marginRight: -getScrollbarWidth()
+      paddingTop: 206
     },
 
     '.__scroll-container': {

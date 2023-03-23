@@ -80,13 +80,12 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
       <SwList.Section
         displayRow
         enableSearchInput
-        ignoreScrollbar={tokenBalances.length > 5}
         list={tokenBalances}
         renderItem={renderItem}
         rowGap = {'8px'}
         searchFunction={searchFunc}
         searchMinCharactersCount={2}
-        searchPlaceholder={t('Token name')}
+        searchPlaceholder={t<string>('Token name')}
       />
     </SwModal>
   );

@@ -83,13 +83,12 @@ function Component ({ address, className = '', itemFilter, onSelectItem }: Props
     >
       <SwList.Section
         enableSearchInput={true}
-        ignoreScrollbar={items.length > 5}
         list={items}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
-        searchPlaceholder={t('Search chain')}
+        searchPlaceholder={t<string>('Search chain')}
       />
     </SwModal>
   );

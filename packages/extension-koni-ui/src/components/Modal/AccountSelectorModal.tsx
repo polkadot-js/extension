@@ -74,13 +74,12 @@ function Component ({ className = '', id = AccountSelectorModalId, itemFilter, o
     >
       <SwList.Section
         enableSearchInput={true}
-        ignoreScrollbar={items.length > 6}
         list={items}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
-        searchPlaceholder={t('Search account')}
+        searchPlaceholder={t<string>('Search account')}
       />
     </SwModal>
   );

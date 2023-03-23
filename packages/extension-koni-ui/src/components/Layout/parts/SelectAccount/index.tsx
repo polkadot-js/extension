@@ -295,7 +295,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         className={className}
         footer={<SelectAccountFooter />}
         id={modalId}
-        ignoreScrollbar={accounts.length > 3}
         ignoreScrollbarMethod='padding'
         inputWidth={'100%'}
         itemKey='address'
@@ -305,7 +304,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         renderSelected={renderSelectedItem}
         renderWhenEmpty={renderEmpty}
         searchFunction={searchAccountFunction}
-        searchPlaceholder={t('Account name')}
+        searchPlaceholder={t<string>('Account name')}
         searchableMinCharactersCount={2}
         selected={currentAccount?.address || ''}
         shape='round'

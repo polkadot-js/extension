@@ -25,12 +25,6 @@ const SwTabPanel = ({ children, label }: ChildProps) => {
   );
 };
 
-const SwTabExtra = ({ children }: Omit<ChildProps, 'label'>) => {
-  return (
-    children
-  );
-};
-
 const Component = (props: Props) => {
   const { children, className, defaultIndex = 0, hideTabList = false, onSelectTab } = props;
 
@@ -47,7 +41,7 @@ const Component = (props: Props) => {
       <TabList className={CN('react-tabs__tab-list', { '__hide-tab-list': hideTabList })}>
         {
           tabLabelList.map((label) => (
-            label ? <Tab key={label}>{label}</Tab> : undefined
+            <Tab key={label}>{label}</Tab>
           ))
         }
       </TabList>
@@ -100,13 +94,11 @@ const _ScreenTab = styled(Component)<Props>(({ theme: { token } }: Props) => {
 });
 
 type CompoundedComponent = React.ForwardRefExoticComponent<Omit<Props, 'theme'>> & {
-  SwTabPanel: typeof SwTabPanel,
-  SwTabExtra: typeof SwTabExtra,
+  SwTabPanel: typeof SwTabPanel
 };
 
 const ScreenTab = _ScreenTab as unknown as CompoundedComponent;
 
 ScreenTab.SwTabPanel = SwTabPanel;
-ScreenTab.SwTabExtra = SwTabExtra;
 
 export default ScreenTab;

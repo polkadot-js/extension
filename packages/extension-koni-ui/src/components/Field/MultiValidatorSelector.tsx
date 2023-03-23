@@ -64,14 +64,22 @@ const renderEmpty = () => <EmptyAccount />;
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', id = 'multi-validator-selector', isSingleSelect = false, nominations, onChange } = props;
+
+  const { t } = useTranslation();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  useExcludeModal(id);
+
   const items = useGetValidatorList(chain, StakingType.NOMINATED) as ValidatorDataType[];
+
   const nominatorValueList = useMemo(() => {
     return nominations && nominations.length ? nominations.map((item) => `${item.validatorAddress}___${item.validatorIdentity || ''}`) : [];
   }, [nominations]);
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
   const filterFunction = useMemo<(item: ValidatorDataType) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
@@ -83,28 +91,29 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       return false;
     };
   }, [selectedFilters]);
+
   const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator } = useSelectValidators(id, nominatorValueList, onChange, isSingleSelect);
-  const { t } = useTranslation();
 
-  useExcludeModal(id);
-
-  useEffect(() => {
-    onApplyChangeValidators();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
-
-  const closeSortingModal = () => {
+  const closeSortingModal = useCallback(() => {
     inactiveModal(SORTING_MODAL_ID);
-  };
+  }, [inactiveModal]);
 
-  const onChangeSortOpt = (value: string) => {
+  const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value);
     closeSortingModal();
-  };
+  }, [closeSortingModal]);
 
   const onClickItem = useCallback((value: string) => {
     onChangeSelectedValidator(value);
   }, [onChangeSelectedValidator]);
+
+  const onClickMore = useCallback((item: ValidatorDataType) => {
+    return (e: SyntheticEvent) => {
+      e.stopPropagation();
+      setViewDetailItem(item);
+      activeModal(ValidatorDetailModalId);
+    };
+  }, [activeModal]);
 
   const renderItem = useCallback((item: ValidatorDataType) => {
     return (
@@ -114,17 +123,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         isNominated={nominatorValueList.includes(`${item.address}___${item.identity || ''}`)}
         isSelected={changeValidators.includes(`${item.address}___${item.identity || ''}`)}
         key={item.address}
-        validatorInfo={item}
         onClick={onClickItem}
-        // eslint-disable-next-line react/jsx-no-bind
-        onClickMoreBtn={(e: SyntheticEvent) => {
-          e.stopPropagation();
-          setViewDetailItem(item);
-          activeModal(ValidatorDetailModalId);
-        }}
+        onClickMoreBtn={onClickMore(item)}
+        validatorInfo={item}
       />
     );
-  }, [activeModal, changeValidators, nominatorValueList, onClickItem]);
+  }, [changeValidators, nominatorValueList, onClickItem, onClickMore]);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -141,31 +145,36 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     );
   }, []);
 
-  const renderFooter = () => (
-    <Button
-      block
-      icon={<Icon
-        phosphorIcon={CheckCircle}
-        weight={'fill'}
-      />}
-      // eslint-disable-next-line react/jsx-no-bind
-      onClick={onApplyChangeValidators}
-    >
-      {t(`Apply ${changeValidators.length} validators`)}
-    </Button>
-  );
+  useEffect(() => {
+    onApplyChangeValidators();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
 
   return (
     <>
       <SwModal
         className={`${className} modal-full`}
-        closeIcon={<Icon
-          phosphorIcon={CaretLeft}
-          size='md'
-        />}
-        footer={renderFooter()}
+        closeIcon={(
+          <Icon
+            phosphorIcon={CaretLeft}
+            size='md'
+          />
+        )}
+        footer={(
+          <Button
+            block
+            icon={(
+              <Icon
+                phosphorIcon={CheckCircle}
+                weight={'fill'}
+              />
+            )}
+            onClick={onApplyChangeValidators}
+          >
+            {t(`Apply ${changeValidators.length} validators`)}
+          </Button>
+        )}
         id={id}
-        // eslint-disable-next-line react/jsx-no-bind
         onCancel={onCancelSelectValidator}
 
         rightIconProps={{
@@ -178,7 +187,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       >
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-          className={''}
           enableSearchInput={true}
           filterBy={filterFunction}
           list={items}
@@ -195,7 +203,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       <FilterModal
         id={FILTER_MODAL_ID}
         onApplyFilter={onApplyFilter}
-        // eslint-disable-next-line react/jsx-no-bind
         onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
@@ -204,9 +211,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       <SortingModal
         id={SORTING_MODAL_ID}
-        // eslint-disable-next-line react/jsx-no-bind
         onCancel={closeSortingModal}
-        // eslint-disable-next-line react/jsx-no-bind
         onChangeOption={onChangeSortOpt}
         optionSelection={sortSelection}
         options={sortingOptions}
@@ -214,17 +219,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       {viewDetailItem &&
         <ValidatorDetailModal
-          commission={viewDetailItem.commission}
-          decimals={0}
-          earningEstimated={viewDetailItem.expectedReturn || ''}
-          minStake={viewDetailItem.minBond}
-          // eslint-disable-next-line react/jsx-no-bind
-          onCancel={() => inactiveModal(ValidatorDetailModalId)}
-          ownStake={viewDetailItem.ownStake}
           status={'active'}
-          symbol={viewDetailItem.symbol}
-          validatorAddress={viewDetailItem.address}
-          validatorName={viewDetailItem.identity || ''}
+          validatorItem={viewDetailItem}
         />
       }
 
@@ -237,6 +233,12 @@ const MultiValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { 
     '.ant-sw-modal-header': {
       paddingTop: token.paddingXS,
       paddingBottom: token.paddingLG
+    },
+
+    '.ant-sw-modal-body': {
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column'
     },
 
     '.ant-sw-modal-footer': {

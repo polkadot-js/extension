@@ -86,7 +86,7 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
         rowGap = {'8px'}
         searchFunction={searchFunc}
         searchMinCharactersCount={2}
-        searchPlaceholder={t('Token name')}
+        searchPlaceholder={t<string>('Token name')}
       />
     </SwModal>
   );

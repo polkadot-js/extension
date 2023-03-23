@@ -182,7 +182,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           renderItem={renderItem}
           renderWhenEmpty={renderEmpty}
           searchFunction={searchFunction}
-          searchPlaceholder={t('Search validator')}
+          searchPlaceholder={t<string>('Search validator')}
           searchableMinCharactersCount={2}
           showActionBtn
         />

@@ -219,7 +219,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         renderWhenEmpty={renderEmptyList}
         searchFunction={searchFunc}
         searchMinCharactersCount={2}
-        searchPlaceholder={t('Search website')}
+        searchPlaceholder={t<string>('Search website')}
         showActionBtn
       />
 

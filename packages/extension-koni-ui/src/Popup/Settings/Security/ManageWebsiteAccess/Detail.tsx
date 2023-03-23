@@ -219,7 +219,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
           rowGap = {'8px'}
           searchFunction={searchFunc}
           searchMinCharactersCount={2}
-          searchPlaceholder={t('Search account')} // todo: i18n this
+          searchPlaceholder={t<string>('Search account')}
         />
 
         <ActionModal

@@ -96,7 +96,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       renderItem={renderItem}
       renderSelected={renderTokenSelected}
       searchFunction={searchFunction}
-      searchPlaceholder={t('Search token')}
+      searchPlaceholder={t<string>('Search token')}
       searchableMinCharactersCount={2}
       selected={value || ''}
       title={label || placeholder || t('Select token')}

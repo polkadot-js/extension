@@ -49,8 +49,10 @@ export default function useGetSupportedStakingTokens (type: StakingType, address
         }
       });
     } else {
+      console.log('1');
       Object.values(chainInfoMap).forEach((chainInfo) => {
         if (_isChainSupportSubstrateStaking(chainInfo) && _STAKING_CHAIN_GROUP.nominationPool.includes(chainInfo.slug)) {
+          console.log('2');
           const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
 
           if (assetRegistryMap[nativeTokenSlug] &&
@@ -64,5 +66,5 @@ export default function useGetSupportedStakingTokens (type: StakingType, address
     }
 
     return result;
-  }, [address, assetRegistryMap, chainInfoMap, chain]);
+  }, [type, chainInfoMap, assetRegistryMap, address, chain]);
 }

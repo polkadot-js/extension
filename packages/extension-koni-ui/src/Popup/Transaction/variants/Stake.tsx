@@ -114,12 +114,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const currentPool = Form.useWatch('pool', form);
   const currentNominator = Form.useWatch('nominate', form);
 
-  const currentChain = (stakingChain === ALL_KEY ? _getOriginChainOfAsset(currentTokenSlug) : stakingChain);
+  const currentChain = (stakingChain === ALL_KEY ? currentTokenSlug?.split('-')[0] : stakingChain); // TODO
 
   const chainStakingMetadata = useGetChainStakingMetadata(currentChain);
   const nominatorMetadata = useGetNominatorInfo(currentChain, stakingType, currentFrom);
 
-  const tokenList = useGetSupportedStakingTokens(currentFrom, stakingChain);
+  const tokenList = useGetSupportedStakingTokens(stakingType, currentFrom, stakingChain);
   const [loading, setLoading] = useState(false);
 
   // TODO: should do better to get validators info

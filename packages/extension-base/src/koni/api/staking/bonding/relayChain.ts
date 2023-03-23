@@ -413,10 +413,10 @@ export async function getRelayCancelWithdrawalExtrinsic (substrateApi: _Substrat
 
 // Pooling txs
 
-export async function getPoolingClaimRewardExtrinsic (substrateApi: _SubstrateApi, isReBond: boolean = true) {
+export async function getPoolingClaimRewardExtrinsic (substrateApi: _SubstrateApi, bondReward = true) {
   const chainApi = await substrateApi.isReady;
 
-  if (isReBond) {
+  if (bondReward) {
     return chainApi.api.tx.nominationPools.bondExtra('Rewards');
   }
 

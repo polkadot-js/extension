@@ -1530,8 +1530,9 @@ export type RequestStakeWithdrawal = InternalRequestSign<StakeWithdrawalParams>;
 export interface StakeClaimRewardParams extends BaseRequestSign {
   address: string,
   chain: string,
-  validatorAddress?: string,
-  stakingType: StakingType
+  stakingType: StakingType,
+  unclaimedReward?: string,
+  bondReward?: boolean
 }
 
 export type RequestStakeClaimReward = InternalRequestSign<StakeClaimRewardParams>;

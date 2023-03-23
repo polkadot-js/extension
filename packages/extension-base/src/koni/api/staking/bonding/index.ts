@@ -92,14 +92,14 @@ export async function getWithdrawalExtrinsic (substrateApi: _SubstrateApi, chain
   return getRelayWithdrawalExtrinsic(substrateApi, nominatorMetadata.address);
 }
 
-export async function getClaimRewardExtrinsic (substrateApi: _SubstrateApi, chain: string, address: string, stakingType: StakingType, validatorAddress?: string) {
+export async function getClaimRewardExtrinsic (substrateApi: _SubstrateApi, chain: string, address: string, stakingType: StakingType, bondReward = true) {
   if (stakingType === StakingType.POOLED) {
-    return getPoolingClaimRewardExtrinsic(substrateApi); // TODO
+    return getPoolingClaimRewardExtrinsic(substrateApi, bondReward);
   } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
     return getAmplitudeClaimRewardExtrinsic(substrateApi);
   }
 
-  return getAstarClaimRewardExtrinsic(substrateApi, validatorAddress as string, address);
+  return getAstarClaimRewardExtrinsic(substrateApi, address);
 }
 
 export async function getCancelWithdrawalExtrinsic (substrateApi: _SubstrateApi, chain: string, selectedUnstaking: UnstakingInfo) {

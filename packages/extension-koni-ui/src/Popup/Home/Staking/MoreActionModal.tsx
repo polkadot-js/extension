@@ -5,7 +5,7 @@ import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, Stakin
 import { getStakingAvailableActions, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
-import { submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
+import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
@@ -140,8 +140,31 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [nominatorMetadata, notify, t]);
 
   const handleClaimRewardAction = useCallback(() => {
-    console.log(reward);
-  }, [reward]);
+    submitStakeClaimReward({
+      address: nominatorMetadata.address,
+      chain: nominatorMetadata.chain,
+      stakingType: nominatorMetadata.type,
+      unclaimedReward: reward?.unclaimedReward
+    })
+      .then((result) => {
+        const { errors, extrinsicHash, warnings } = result;
+
+        if (errors.length || warnings.length) {
+          notify({
+            message: t('Error')
+          });
+          // setErrors(errors.map((e) => e.message));
+          // setWarnings(warnings.map((w) => w.message));
+        } else if (extrinsicHash) {
+          console.log('all good');
+        }
+      })
+      .catch((e: Error) => {
+        notify({
+          message: t('Error')
+        });
+      });
+  }, [nominatorMetadata, notify, reward?.unclaimedReward, t]);
 
   const onPressItem = useCallback(
     (item: ActionListType) => {

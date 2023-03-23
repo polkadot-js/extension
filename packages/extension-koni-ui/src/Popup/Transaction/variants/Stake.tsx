@@ -14,9 +14,8 @@ import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Fiel
 import PoolSelector from '@subwallet/extension-koni-ui/components/Field/PoolSelector';
 import { TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import { StakingNetworkDetailModal, StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
+import { StakingNetworkDetailModal } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import RadioGroup from '@subwallet/extension-koni-ui/components/RadioGroup';
-import SelectValidatorInput from '@subwallet/extension-koni-ui/components/SelectValidatorInput';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetChainStakingMetadata';
@@ -34,7 +33,6 @@ import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
 import { RadioChangeEvent } from '@subwallet/react-ui/es/radio/interface';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -47,10 +45,10 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 type Props = ThemeProps
 
 interface StakeFromProps extends TransactionFormBaseProps {
-  token: string
-  value: string
-  nominate: string,
-  pool: number
+  token: string;
+  value: string;
+  nominate: string;
+  pool: string;
 }
 
 const parseNominations = (nomination: string) => {
@@ -91,35 +89,31 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const dataContext = useContext(DataContext);
   const { chain, from, onDone, setChain, setDisabledRightBtn, setFrom, setShowRightBtn, setTransactionType } = useContext(TransactionContext);
-  const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const defaultTab = useMemo(() => {
+  const [stakingType, setStakingType] = useState<StakingType>(() => {
     switch (_stakingType) {
       case StakingType.POOLED:
-        return 0;
+        return StakingType.POOLED;
       case StakingType.NOMINATED:
-        return 1;
+        return StakingType.NOMINATED;
       default:
-        return 0;
+        return StakingType.POOLED;
     }
-  }, [_stakingType]);
-
-  const [stakingType, setStakingType] = useState<StakingType>(defaultTab === 0 ? StakingType.POOLED : StakingType.NOMINATED);
+  });
 
   const [form] = useForm<StakeFromProps>();
 
   const currentValue = Form.useWatch('value', form);
-  const currentFrom = Form.useWatch('from', form);
   const currentTokenSlug = Form.useWatch('token', form);
   const currentPool = Form.useWatch('pool', form);
   const currentNominator = Form.useWatch('nominate', form);
 
-  const currentChain = (stakingChain === ALL_KEY ? currentTokenSlug?.split('-')[0] : stakingChain); // TODO
+  const currentChain = (stakingChain === ALL_KEY ? (currentTokenSlug && _getOriginChainOfAsset(currentTokenSlug)) : stakingChain);
 
   const chainStakingMetadata = useGetChainStakingMetadata(currentChain);
-  const nominatorMetadata = useGetNominatorInfo(currentChain, stakingType, currentFrom);
+  const nominatorMetadata = useGetNominatorInfo(currentChain, stakingType, from);
 
-  const tokenList = useGetSupportedStakingTokens(stakingType, currentFrom, stakingChain);
+  const tokenList = useGetSupportedStakingTokens(stakingType, from, stakingChain);
   const [loading, setLoading] = useState(false);
 
   // TODO: should do better to get validators info
@@ -159,7 +153,7 @@ const Component: React.FC<Props> = (props: Props) => {
       setFrom(from);
     }
 
-    if (token) {
+    if (token !== undefined) {
       const chain = _getOriginChainOfAsset(token);
 
       setChain(chain);
@@ -188,11 +182,11 @@ const Component: React.FC<Props> = (props: Props) => {
     return result;
   }, [chain, validatorInfoMap]);
 
-  const getSelectedPool = useCallback((poolId: number | undefined) => {
+  const getSelectedPool = useCallback((poolId?: string) => {
     const nominationPoolList = nominationPoolInfoMap[chain];
 
     for (const pool of nominationPoolList) {
-      if (pool.id === poolId) {
+      if (String(pool.id) === poolId) {
         return pool;
       }
     }
@@ -282,23 +276,15 @@ const Component: React.FC<Props> = (props: Props) => {
     return null;
   }, [chainStakingMetadata, decimals, symbol, t]);
 
-  const onCloseInfoModal = useCallback(() => {
-    inactiveModal(StakingNetworkDetailModalId);
-  }, [inactiveModal]);
-
-  const onActiveValidatorSelector = useCallback(() => {
-    activeModal('multi-validator-selector');
-  }, [activeModal]);
-
   const isDisabledStakeBtn = useMemo(() => {
-    const isDisabled = !currentTokenSlug || currentValue === '0' || !currentValue || currentFrom === ALL_ACCOUNT_KEY;
+    const isDisabled = !currentTokenSlug || currentValue === '0' || !currentValue || from === ALL_ACCOUNT_KEY;
 
     if (stakingType === StakingType.POOLED) {
       return isDisabled || !currentPool;
     } else {
       return isDisabled || !currentNominator;
     }
-  }, [currentFrom, currentNominator, currentPool, currentTokenSlug, currentValue, stakingType]);
+  }, [from, currentNominator, currentPool, currentTokenSlug, currentValue, stakingType]);
 
   const onChangeTab = useCallback((event: RadioChangeEvent) => {
     setStakingType(event.target.value as StakingType);
@@ -323,11 +309,13 @@ const Component: React.FC<Props> = (props: Props) => {
     setDisabledRightBtn(!chainStakingMetadata);
   }, [chainStakingMetadata, setDisabledRightBtn]);
 
-  useEffect(() => { // fetch validators when change stakingType
+  useEffect(() => {
+    // fetch validators when change chain
+    // _stakingType is predefined form start
     if (!!chain && !!from) {
-      fetchChainValidators(chain, stakingType);
+      fetchChainValidators(chain, _stakingType || ALL_KEY);
     }
-  }, [from, stakingType, chain]);
+  }, [from, _stakingType, chain]);
 
   return (
     <>
@@ -401,7 +389,10 @@ const Component: React.FC<Props> = (props: Props) => {
               <Form.Item
                 hideError
                 name={'value'}
-                rules={[{ required: true }]}
+                rules={[
+                  { required: true },
+                  { max: 100 }
+                ]}
               >
                 <AmountInput
                   decimals={decimals}
@@ -416,22 +407,10 @@ const Component: React.FC<Props> = (props: Props) => {
             >
               <PoolSelector
                 chain={chain}
-                from={currentFrom}
+                from={from}
                 label={t('Select pool')}
               />
             </Form.Item>
-
-            {
-              stakingType === StakingType.NOMINATED &&
-              (
-                <SelectValidatorInput
-                  disabled={!currentTokenSlug}
-                  label={t('Select validator')}
-                  onClick={onActiveValidatorSelector}
-                  value={currentNominator}
-                />
-              )
-            }
 
             <Form.Item
               hidden={stakingType !== StakingType.NOMINATED}
@@ -439,8 +418,7 @@ const Component: React.FC<Props> = (props: Props) => {
             >
               <MultiValidatorSelector
                 chain={currentTokenSlug ? chain : ''}
-                id={'multi-validator-selector'}
-                nominations={(currentFrom && nominatorMetadata[0]) ? nominatorMetadata[0].nominations : undefined}
+                from={currentTokenSlug ? from : ''}
               />
             </Form.Item>
           </Form>
@@ -482,7 +460,6 @@ const Component: React.FC<Props> = (props: Props) => {
             inflation={chainStakingMetadata.inflation}
             maxValidatorPerNominator={chainStakingMetadata.maxValidatorPerNominator}
             minimumActive={{ decimals, value: chainStakingMetadata.minStake, symbol }}
-            onCancel={onCloseInfoModal}
             unstakingPeriod={chainStakingMetadata.unstakingPeriod}
           />
         )

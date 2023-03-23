@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import { getBondingOptions, getNominationPoolOptions } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 
@@ -29,18 +30,29 @@ export function getWaitingTime (waitingTime?: number, untilWithdraw?: boolean) {
   }
 }
 
-export function fetchChainValidators (chain: string, stakingType: StakingType) {
-  if (stakingType === StakingType.NOMINATED) {
-    getBondingOptions(chain, stakingType)
-      .then((result) => {
-        store.dispatch({ type: 'bonding/updateChainValidators', payload: { chain, validators: result } });
-      })
-      .catch(console.error);
-  } else {
-    getNominationPoolOptions(chain)
-      .then((result) => {
-        store.dispatch({ type: 'bonding/updateNominationPools', payload: { chain, pools: result } });
-      })
-      .catch(console.error);
+const fetchChainValidator = (chain: string) => {
+  getBondingOptions(chain, StakingType.NOMINATED)
+    .then((result) => {
+      store.dispatch({ type: 'bonding/updateChainValidators', payload: { chain, validators: result } });
+    })
+    .catch(console.error);
+};
+
+const fetchChainPool = (chain: string) => {
+  getNominationPoolOptions(chain)
+    .then((result) => {
+      store.dispatch({ type: 'bonding/updateNominationPools', payload: { chain, pools: result } });
+    })
+    .catch(console.error);
+};
+
+export function fetchChainValidators (chain: string, stakingType: string) {
+  if (stakingType === ALL_KEY) {
+    fetchChainValidator(chain);
+    fetchChainPool(chain);
+  } else if (stakingType === StakingType.NOMINATED) {
+    fetchChainValidator(chain);
+  } else if (stakingType === StakingType.POOLED) {
+    fetchChainPool(chain);
   }
 }

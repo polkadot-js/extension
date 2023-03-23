@@ -6,6 +6,7 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { BackgroundIcon, Button, Icon, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
+import CN from 'classnames';
 import { CheckCircle, DotsThree, Medal } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,10 +22,11 @@ type Props = ThemeProps & {
   isSelected?: boolean;
   showSelectedIcon?: boolean;
   isNominated?: boolean;
+  disabled?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { apy, className, isNominated, isSelected, onClick, onClickMoreBtn, showSelectedIcon = true, validatorInfo } = props;
+  const { apy, className, disabled, isNominated, isSelected, onClick, onClickMoreBtn, showSelectedIcon = true, validatorInfo } = props;
   const { token } = useTheme() as Theme;
 
   const { t } = useTranslation();
@@ -37,14 +39,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <div
-      className={className}
-      onClick={_onSelect}
+      className={CN(className, { disabled: disabled })}
+      onClick={disabled ? undefined : _onSelect}
     >
       <Web3Block
         className={'validator-item-content'}
         leftItem={
           <SwAvatar
-            identPrefix={42}
             isShowSubIcon={validatorInfo.isVerified}
             size={40}
             subIcon={<BackgroundIcon
@@ -110,6 +111,15 @@ const StakingValidatorItem = styled(Component)<Props>(({ theme: { token } }: Pro
     // padding: token.paddingSM,
     borderRadius: token.borderRadiusLG,
     background: token.colorBgSecondary,
+
+    '&.disabled': {
+      opacity: token.opacityDisable,
+
+      '.ant-web3-block:hover': {
+        cursor: 'not-allowed',
+        background: token.colorBgSecondary
+      }
+    },
 
     '.validator-item-content': {
       borderRadius: token.borderRadiusLG

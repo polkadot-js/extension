@@ -5,47 +5,54 @@ import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/F
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useState } from 'react';
 
-export function useSelectValidators (modalId: string, defaultSelectedValidators: string[], onChange?: BasicOnChangeFunction, isSingleSelect?: boolean) {
-  const [selectedValidators, setSelectedValidators] = useState<string[]>(defaultSelectedValidators);
-  const [changeValidators, setChangeValidators] = useState<string[]>(selectedValidators);
+export function useSelectValidators (modalId: string, onChange?: BasicOnChangeFunction, isSingleSelect?: boolean) {
+  const [defaultSelected, setDefaultSelected] = useState<string[]>([]);
+  const [changeValidators, setChangeValidators] = useState<string[]>([]);
   const { inactiveModal } = useContext(ModalContext);
 
-  const onChangeSelectedValidator = useCallback((value: string) => {
-    if (!changeValidators.includes(value)) {
-      if (!isSingleSelect) {
-        setChangeValidators([...changeValidators, value]);
-      } else {
-        if (changeValidators.length < 1) {
-          setChangeValidators([...changeValidators, value]);
-        }
-      }
-    } else {
-      const newSelectedFilters: string[] = [];
+  const onApplyChange = useCallback((changeValidators: string[]) => {
+    onChange && onChange({ target: { value: changeValidators.join(',') } });
+    inactiveModal(modalId);
+  }, [inactiveModal, modalId, onChange]);
 
-      changeValidators.forEach((changeVal) => {
-        if (changeVal !== value) {
-          newSelectedFilters.push(changeVal);
+  const onChangeSelectedValidator = useCallback((changeVal: string) => {
+    setChangeValidators((changeValidators) => {
+      if (!changeValidators.includes(changeVal)) {
+        let result;
+
+        if (isSingleSelect) {
+          result = [...defaultSelected, changeVal];
+          onApplyChange(result);
+        } else {
+          result = [...changeValidators, changeVal];
         }
-      });
-      setChangeValidators(newSelectedFilters);
-    }
-  }, [changeValidators, isSingleSelect]);
+
+        return result;
+      } else {
+        return changeValidators.filter((item) => item !== changeVal);
+      }
+    });
+  }, [defaultSelected, isSingleSelect, onApplyChange]);
 
   const onApplyChangeValidators = useCallback(() => {
-    onChange && onChange({ target: { value: changeValidators.join(',') } });
-    setSelectedValidators(changeValidators);
-    inactiveModal(modalId);
-  }, [changeValidators, inactiveModal, modalId, onChange]);
+    onApplyChange(changeValidators);
+  }, [changeValidators, onApplyChange]);
 
   const onCancelSelectValidator = useCallback(() => {
-    setChangeValidators(selectedValidators);
+    setChangeValidators(defaultSelected);
     inactiveModal(modalId);
-  }, [inactiveModal, modalId, selectedValidators]);
+  }, [defaultSelected, inactiveModal, modalId]);
+
+  const onInitValidators = useCallback((selected: string) => {
+    setDefaultSelected(selected.split(','));
+    setChangeValidators(selected.split(','));
+  }, []);
 
   return {
     onChangeSelectedValidator,
-    onApplyChangeValidators,
     changeValidators,
-    onCancelSelectValidator
+    onApplyChangeValidators,
+    onCancelSelectValidator,
+    onInitValidators
   };
 }

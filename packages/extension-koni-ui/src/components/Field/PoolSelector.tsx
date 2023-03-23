@@ -102,7 +102,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return getFilteredList(items, selectedFilters);
   }, [items, selectedFilters]);
 
-  const isDisabled = useMemo(() => disabled || !!nominationPoolValueList.length, [disabled, nominationPoolValueList.length]);
+  const isDisabled = useMemo(() =>
+    disabled ||
+    !!nominationPoolValueList.length ||
+    !items.length
+  , [disabled, items.length, nominationPoolValueList.length]
+  );
 
   const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<string>('');
@@ -192,8 +197,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [inactiveModal]);
 
   useEffect(() => {
-    onChange && onChange({ target: { value: parseInt(nominationPoolValueList[0]) as unknown as string } });
-
+    onChange && onChange({ target: { value: nominationPoolValueList[0] } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nominationPoolValueList]);
 
@@ -208,10 +212,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             size='md'
           />
         )}
-        disabled={disabled || !!nominationPoolValueList.length}
+        disabled={isDisabled}
         id={id}
         inputClassName={`${className} pool-selector-input`}
-        itemKey={'id'}
+        itemKey={'idStr'}
         items={filteredList}
         label={label}
         onClickActionBtn={onClickActionBtn}

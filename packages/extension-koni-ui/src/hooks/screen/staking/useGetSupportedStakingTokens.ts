@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenSlug, _isChainEvmCompatible, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -9,8 +11,6 @@ import { AccountAddressType } from '@subwallet/extension-koni-ui/types/account';
 import { getAccountAddressType } from '@subwallet/extension-koni-ui/util';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import {StakingType} from "@subwallet/extension-base/background/KoniTypes";
-import {_STAKING_CHAIN_GROUP} from "@subwallet/extension-base/services/chain-service/constants";
 
 const isChainTypeValid = (chainInfo: _ChainInfo, address?: string): boolean => {
   const addressType = getAccountAddressType(address);
@@ -49,10 +49,8 @@ export default function useGetSupportedStakingTokens (type: StakingType, address
         }
       });
     } else {
-      console.log('1');
       Object.values(chainInfoMap).forEach((chainInfo) => {
         if (_isChainSupportSubstrateStaking(chainInfo) && _STAKING_CHAIN_GROUP.nominationPool.includes(chainInfo.slug)) {
-          console.log('2');
           const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
 
           if (assetRegistryMap[nativeTokenSlug] &&

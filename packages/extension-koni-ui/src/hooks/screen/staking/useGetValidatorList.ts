@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 export type NominationPoolDataType = NominationPoolInfo & {
   symbol: string;
   decimals: number;
+  idStr: string;
 }
 
 export type ValidatorDataType = ValidatorInfo & {
@@ -38,7 +39,8 @@ const useGetValidatorList = (chain: string, type: StakingType): NominationPoolDa
           const nominationPoolItem: NominationPoolDataType = {
             ...item,
             decimals,
-            symbol
+            symbol,
+            idStr: item.id.toString()
           };
 
           result.push(nominationPoolItem);

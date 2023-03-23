@@ -226,17 +226,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       {viewDetailItem &&
         <ValidatorDetailModal
-          commission={viewDetailItem.commission}
-          decimals={0}
-          earningEstimated={viewDetailItem.expectedReturn || ''}
-          minStake={viewDetailItem.minBond}
-          // eslint-disable-next-line react/jsx-no-bind
-          onCancel={() => inactiveModal(ValidatorDetailModalId)}
-          ownStake={viewDetailItem.ownStake}
           status={'active'}
-          symbol={viewDetailItem.symbol}
-          validatorAddress={viewDetailItem.address}
-          validatorName={viewDetailItem.identity || ''}
+          validatorItem={viewDetailItem}
         />
       }
     </>

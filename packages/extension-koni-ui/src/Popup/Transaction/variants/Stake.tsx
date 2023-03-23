@@ -301,9 +301,7 @@ const Component: React.FC<Props> = (props: Props) => {
   useEffect(() => {
     setTransactionType(ExtrinsicType.STAKING_JOIN_POOL);
     setShowRightBtn(true);
-    setChain(chainStakingMetadata ? chainStakingMetadata.chain : '');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setShowRightBtn, setTransactionType]);
 
   useEffect(() => {
     setDisabledRightBtn(!chainStakingMetadata);

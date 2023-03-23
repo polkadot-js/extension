@@ -10,16 +10,19 @@ export function useSelectValidators (modalId: string, onChange?: BasicOnChangeFu
   const [changeValidators, setChangeValidators] = useState<string[]>([]);
   const { inactiveModal } = useContext(ModalContext);
 
-  const onApplyChange = useCallback((changeValidators: string[]) => {
+  const onApplyChange = useCallback((changeValidators: string[], close = true) => {
     onChange && onChange({ target: { value: changeValidators.join(',') } });
-    inactiveModal(modalId);
+
+    if (close) {
+      inactiveModal(modalId);
+    }
   }, [inactiveModal, modalId, onChange]);
 
   const onChangeSelectedValidator = useCallback((changeVal: string) => {
     setChangeValidators((changeValidators) => {
-      if (!changeValidators.includes(changeVal)) {
-        let result;
+      let result: string[];
 
+      if (!changeValidators.includes(changeVal)) {
         if (isSingleSelect) {
           result = [...defaultSelected, changeVal];
           onApplyChange(result);
@@ -29,7 +32,14 @@ export function useSelectValidators (modalId: string, onChange?: BasicOnChangeFu
 
         return result;
       } else {
-        return changeValidators.filter((item) => item !== changeVal);
+        result = changeValidators.filter((item) => item !== changeVal);
+
+        if (isSingleSelect) {
+          onApplyChange(result, false);
+          setDefaultSelected(result);
+        }
+
+        return result;
       }
     });
   }, [defaultSelected, isSingleSelect, onApplyChange]);

@@ -81,7 +81,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const maxCount = chainStakingMetadata?.maxValidatorPerNominator || 1;
 
-  const isRelayChain = useMemo(() => !_STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
+  const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
   const nominations = useMemo(() => nominatorMetadata[0]?.nominations, [nominatorMetadata]);
   // TODO: restore
   const isSingleSelect = useMemo(() => _isSingleSelect || !isRelayChain, [_isSingleSelect, isRelayChain]);
@@ -153,6 +153,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         key={item.address}
         onClick={onClickItem(maxCount, changeValidators.length)}
         onClickMoreBtn={onClickMore(item)}
+        showUnSelectedIcon={isRelayChain}
         validatorInfo={item}
       />
     );

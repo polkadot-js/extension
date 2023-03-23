@@ -20,13 +20,13 @@ type Props = ThemeProps & {
   onClickMoreBtn: (e: SyntheticEvent) => void;
   apy: string;
   isSelected?: boolean;
-  showSelectedIcon?: boolean;
+  showUnSelectedIcon?: boolean;
   isNominated?: boolean;
   disabled?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { apy, className, disabled, isNominated, isSelected, onClick, onClickMoreBtn, showSelectedIcon = true, validatorInfo } = props;
+  const { apy, className, disabled, isNominated, isSelected, onClick, onClickMoreBtn, showUnSelectedIcon = true, validatorInfo } = props;
   const { token } = useTheme() as Theme;
 
   const { t } = useTranslation();
@@ -84,7 +84,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
         rightItem={
           <>
-            {showSelectedIcon && <Icon
+            {(showUnSelectedIcon || isSelected) && <Icon
               className={'right-item__select-icon'}
               iconColor={isSelected ? token.colorSuccess : token.colorTextLight4}
               phosphorIcon={CheckCircle}

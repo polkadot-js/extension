@@ -14,7 +14,7 @@ export default function useScanExplorerAddressUrl (chain: string, address: strin
   let route = '';
 
   // TODO: this is just a temporary fix, improve later
-  if (blockExplorer.includes('subscan.io')) {
+  if (blockExplorer && blockExplorer.includes('subscan.io')) {
     route = 'account';
   } else {
     route = 'address';

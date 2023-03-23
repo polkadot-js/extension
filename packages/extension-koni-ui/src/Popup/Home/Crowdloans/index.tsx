@@ -338,7 +338,7 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-sw-list-section': {
       height: '100%'
-    },
+    }
   });
 });
 

@@ -122,7 +122,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <SwList.Section
         displayRow={true}
         enableSearchInput={true}
-        ignoreScrollbar={filtered && filtered.length > 6}
         list={filtered}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}
@@ -143,10 +142,6 @@ const DeriveAccountModal = styled(Component)<Props>(({ theme: { token } }: Props
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden'
-    },
-
-    '.ant-sw-list-wrapper': {
-      overflowY: 'auto'
     },
 
     '.ant-web3-block': {

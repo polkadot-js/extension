@@ -83,7 +83,6 @@ function Component ({ address, className = '', itemFilter, onSelectItem }: Props
     >
       <SwList.Section
         enableSearchInput={true}
-        ignoreScrollbar={items.length > 5}
         list={items}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}

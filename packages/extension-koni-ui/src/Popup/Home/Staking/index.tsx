@@ -146,7 +146,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           />}
           enableSearchInput={true}
           filterBy={filterFunction}
-          ignoreScrollbar={stakingItems.length > 3}
           list={stakingItems}
           onClickActionBtn={onClickActionBtn}
           renderItem={renderItem}

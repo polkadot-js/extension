@@ -71,7 +71,6 @@ const Component: React.FC<Props> = (props: Props) => {
       className={CN(className)}
       displayRow
       enableSearchInput
-      ignoreScrollbar={chainInfoList.length > 5}
       list={chainInfoList}
       renderItem={renderChainItem}
       renderWhenEmpty={emptyChainList}

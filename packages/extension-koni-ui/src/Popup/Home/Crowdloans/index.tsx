@@ -269,7 +269,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           enableSearchInput={true}
-          ignoreScrollbar={items.length > 4}
           list={filteredList}
           onClickActionBtn={onClickActionBtn}
           pagination={{
@@ -340,10 +339,6 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.ant-sw-list-section': {
       height: '100%'
     },
-
-    '.ant-sw-list-wrapper': {
-      overflow: 'auto'
-    }
   });
 });
 

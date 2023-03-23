@@ -212,7 +212,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
         enableSearchInput
         filterBy={filterFunction}
-        ignoreScrollbar={websiteAccessItems.length > 8}
         list={websiteAccessItems}
         onClickActionBtn={onClickActionBtn}
         renderItem={renderItem}

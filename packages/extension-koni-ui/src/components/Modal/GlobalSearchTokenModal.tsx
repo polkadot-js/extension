@@ -80,7 +80,6 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
       <SwList.Section
         displayRow
         enableSearchInput
-        ignoreScrollbar={tokenBalances.length > 5}
         list={tokenBalances}
         renderItem={renderItem}
         rowGap = {'8px'}

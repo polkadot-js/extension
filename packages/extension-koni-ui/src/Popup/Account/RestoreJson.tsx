@@ -350,7 +350,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           >
             <SwList.Section
               displayRow={true}
-              ignoreScrollbar={accountsInfo.length > 5}
               list={accountsInfo}
               renderItem={renderItem}
               rowGap='var(--row-gap)'

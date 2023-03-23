@@ -181,7 +181,7 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const Unstake = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const Unbond = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.bonded-balance, .free-balance': {
       marginBottom: token.marginXS
@@ -193,4 +193,4 @@ const Unstake = styled(Component)<Props>(({ theme: { token } }: Props) => {
   };
 });
 
-export default Unstake;
+export default Unbond;

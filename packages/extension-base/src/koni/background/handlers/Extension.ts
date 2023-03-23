@@ -2418,7 +2418,7 @@ export default class KoniExtension {
       chain,
       transaction: extrinsic,
       data: inputData,
-      extrinsicType: ExtrinsicType.STAKING_CANCEL_WITHDRAWAL,
+      extrinsicType: ExtrinsicType.STAKING_CANCEL_UNSTAKE,
       chainType: ChainType.SUBSTRATE
     });
   }

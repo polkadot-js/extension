@@ -444,7 +444,6 @@ export enum ExtrinsicType {
   STAKING_CLAIM_REWARD = 'staking.claim_reward',
   STAKING_WITHDRAW = 'staking.withdraw',
   STAKING_COMPOUNDING = 'staking.compounding',
-  STAKING_CANCEL_WITHDRAWAL = 'staking.cancel_withdrawal',
   STAKING_CANCEL_COMPOUNDING = 'staking.cancel_compounding',
   STAKING_CANCEL_UNSTAKE = 'staking.cancel_unstake',
   EVM_EXECUTE = 'evm.execute',
@@ -463,10 +462,9 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.STAKING_UNBOND]: RequestUnbondingSubmit,
   [ExtrinsicType.STAKING_CLAIM_REWARD]: RequestStakeClaimReward,
   [ExtrinsicType.STAKING_WITHDRAW]: RequestStakeWithdrawal,
-  [ExtrinsicType.STAKING_CANCEL_WITHDRAWAL]: RequestStakeCancelWithdrawal,
   [ExtrinsicType.STAKING_COMPOUNDING]: RequestTuringStakeCompound,
   [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: RequestTuringCancelStakeCompound,
-  [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: any,
+  [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: RequestStakeCancelWithdrawal,
   [ExtrinsicType.EVM_EXECUTE]: any,
   [ExtrinsicType.UNKNOWN]: any
 }

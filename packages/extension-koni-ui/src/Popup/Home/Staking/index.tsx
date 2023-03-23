@@ -83,7 +83,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   const onClickItem = useCallback((item: StakingDataType) => {
-    if (isAccountAll(item.staking.address)) {
+    if (!isAccountAll(item.staking.address)) {
       setSelectedItem(item);
 
       activeModal(STAKING_DETAIL_MODAL_ID);

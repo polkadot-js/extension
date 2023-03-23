@@ -1776,6 +1776,25 @@ export interface ActiveCronAndSubscriptionMap {
   cron: Record<CronServiceType, boolean>;
 }
 
+export enum NotificationType {
+  INFO = 'info',
+  SUCCESS = 'success',
+  WARNING = 'warning',
+  ERROR = 'error',
+}
+export interface Notification {
+  id: number;
+  type: NotificationType;
+  title: string;
+  message: string;
+  notifyViaBrowser?: boolean;
+  action?: {
+    url?: string; // Add more action in the future
+  }
+}
+
+export type NotificationParams = Omit<Notification, 'id'>;
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1955,6 +1974,9 @@ export interface KoniRequestSignatures {
   // Get Transaction
   'pri(transactions.getOne)': [RequestGetTransaction, SWTransactionResult];
   'pri(transactions.subscribe)': [null, Record<string, SWTransactionResult>, Record<string, SWTransactionResult>];
+
+  // Notification
+  'pri(notifications.subscribe)': [null, Notification[], Notification[]];
 
   // Mobile
   'mobile(ping)': [null, string];

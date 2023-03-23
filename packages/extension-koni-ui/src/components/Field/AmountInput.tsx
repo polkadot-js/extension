@@ -6,7 +6,7 @@ import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks/form/useF
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Input, InputRef } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import React, { ChangeEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useState } from 'react';
+import React, { ChangeEventHandler, ClipboardEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -87,20 +87,38 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     onChange && onChange({ target: { value: transformVal } });
   }, [decimals, getMaxLengthText, onChange]);
 
+  const onKeyDown = useCallback(
+    (event: React.KeyboardEvent<Element>): void => {
+      if (event.key.length === 1) {
+        const { selectionEnd: j, selectionStart: i, value } = event.target as HTMLInputElement;
+        const newValue = `${value.substring(0, i || 0)}${event.key}${value.substring(j || 0)}`;
+
+        if (!(/^(0|[1-9]\d*)(\.\d*)?$/).test(newValue)) {
+          event.preventDefault();
+        }
+      }
+    },
+    []
+  );
+
+  const onPaste = useCallback<ClipboardEventHandler<HTMLInputElement>>((event) => {
+    event.preventDefault();
+  }, []);
+
   return (
     <Input
       className={className}
       disabled={disabled}
       id={props.id}
       label={props.label}
-      maxLength={5}
       onBlur={props.onBlur}
       onChange={onChangeInput}
+      onKeyDown={onKeyDown}
+      onPaste={onPaste}
       placeholder={props.placeholder || t('Amount')}
       readOnly={props.readOnly}
       ref={inputRef}
       suffix={suffix()}
-      type={'number'}
       value={inputValue}
     />
   );

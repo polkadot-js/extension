@@ -80,7 +80,7 @@ function Component ({ className = '', id = AccountSelectorModalId, itemFilter, o
         renderWhenEmpty={renderEmpty}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
-        searchPlaceholder={t('Search account')}
+        searchPlaceholder={t<string>('Search account')}
       />
     </SwModal>
   );

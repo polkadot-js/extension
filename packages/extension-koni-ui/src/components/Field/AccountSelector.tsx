@@ -95,10 +95,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
         renderItem={renderItem}
         renderSelected={renderSelected}
         searchFunction={searchFunction}
-        searchPlaceholder={t('Search name')}
+        searchPlaceholder={t<string>('Search name')}
         searchableMinCharactersCount={2}
         selected={value || ''}
-        title={label}
+        title={label || placeholder || t('Select account')}
       />
     </>
   );

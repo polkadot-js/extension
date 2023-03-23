@@ -79,10 +79,10 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       renderItem={renderItem}
       renderSelected={renderChainSelected}
       searchFunction={searchFunction}
-      searchPlaceholder={t('Search chain')}
+      searchPlaceholder={t<string>('Search chain')}
       searchableMinCharactersCount={2}
       selected={value || ''}
-      title={label}
+      title={label || placeholder || t('Select chain')}
     />
   );
 }

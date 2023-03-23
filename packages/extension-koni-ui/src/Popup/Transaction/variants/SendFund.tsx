@@ -13,7 +13,7 @@ import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInp
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
-import { makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { getFreeBalance, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
@@ -186,7 +186,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const chainStateMap = useSelector((state: RootState) => state.chainStore.chainStateMap);
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
-  const balanceMap = useSelector((state: RootState) => state.balance.balanceMap);
+  const [maxTransfer, setMaxTransfer] = useState<string>('0');
   const { chain: contextChain,
     from: contextFrom,
     onDone: contextOnDone,
@@ -369,14 +369,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return currentTokenSlug ? assetRegistryMap[currentTokenSlug] : undefined;
   }, [assetRegistryMap, currentTokenSlug]);
 
-  const maxTransfer: string = (() => {
-    if (currentTokenSlug && balanceMap[currentTokenSlug]) {
-      return balanceMap[currentTokenSlug].free || '0';
-    }
-
-    return '0';
-  })();
-
   useEffect(() => {
     const { from, token } = form.getFieldsValue();
 
@@ -427,6 +419,26 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }
   }, [accounts, tokenItems, assetRegistryMap, form, contextSetChain, chainInfoMap]);
 
+  useEffect(() => {
+    let cancel = false;
+
+    if (currentFrom && currentTokenSlug) {
+      getFreeBalance({
+        address: currentFrom,
+        networkKey: assetRegistryMap[currentTokenSlug].originChain,
+        token: currentTokenSlug
+      })
+        .then((balance) => {
+          !cancel && setMaxTransfer(balance.value);
+        })
+        .catch(console.error);
+    }
+
+    return () => {
+      cancel = true;
+    };
+  }, [currentFrom, assetRegistryMap, currentTokenSlug]);
+
   // Focus the first field
   // useEffect(() => {
   //   const focusField = isAllAccount ? 'from' : 'token';
@@ -462,6 +474,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               <TokenSelector
                 disabled={!tokenItems.length}
                 items={tokenItems}
+                placeholder={t('Select token')}
                 showChainInSelected
               />
             </Form.Item>

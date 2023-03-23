@@ -7,11 +7,14 @@ import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
 import { changeHeaderLogo } from '@subwallet/react-ui';
+import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import React, { useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -37,6 +40,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const { isOpenPModal, openPModal } = usePredefinedModal();
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
+  const notify = useNotification();
 
   const needMigrate = useMemo(
     () => !!accounts
@@ -45,6 +49,33 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       .length
     , [accounts]
   );
+
+  useEffect(() => {
+    let cancel = false;
+    let lastNotifyTime = new Date().getTime();
+
+    subscribeNotifications((rs) => {
+      rs.sort((a, b) => a.id - b.id)
+        .forEach(({ action, id, message, title, type }) => {
+          if (!cancel && id > lastNotifyTime) {
+            const notificationItem: NotificationProps = { message: title || message, type };
+
+            if (action?.url) {
+              notificationItem.onClick = () => {
+                window.open(action.url);
+              };
+            }
+
+            notify(notificationItem);
+            lastNotifyTime = id;
+          }
+        });
+    }).catch(console.error);
+
+    return () => {
+      cancel = true;
+    };
+  }, [notify]);
 
   // Update goBack number
   useEffect(() => {

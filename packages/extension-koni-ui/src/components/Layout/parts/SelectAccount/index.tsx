@@ -305,7 +305,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         renderSelected={renderSelectedItem}
         renderWhenEmpty={renderEmpty}
         searchFunction={searchAccountFunction}
-        searchPlaceholder={t('Account name')}
+        searchPlaceholder={t<string>('Account name')}
         searchableMinCharactersCount={2}
         selected={currentAccount?.address || ''}
         shape='round'

@@ -396,7 +396,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           renderWhenEmpty={emptyList}
           searchFunction={searchFunc}
           searchMinCharactersCount={2}
-          searchPlaceholder={t('Search history')}
+          searchPlaceholder={t<string>('Search history')}
           showActionBtn
         />
       </PageWrapper>

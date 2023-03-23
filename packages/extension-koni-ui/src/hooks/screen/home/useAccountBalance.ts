@@ -202,6 +202,14 @@ function getAccountBalance (
 
     const tokenGroupPriceId = multiChainAsset ? _getMultiChainAssetPriceId(multiChainAsset) : _getAssetPriceId(assetRegistryMap[tokenGroupKey]);
 
+    // make sure priceId exists and token group has monetary value
+    // todo: check if multiChainAsset has monetary value too (after Nampc updates the background)
+    if (!tokenGroupPriceId || (assetRegistryMap[tokenGroupKey] && !_isAssetValuable(assetRegistryMap[tokenGroupKey]))) {
+      tokenGroupBalanceMap[tokenGroupKey] = tokenGroupBalance;
+
+      return;
+    }
+
     const priceValue = priceMap[tokenGroupPriceId] || 0;
     const price24hValue = price24hMap[tokenGroupPriceId] || 0;
 

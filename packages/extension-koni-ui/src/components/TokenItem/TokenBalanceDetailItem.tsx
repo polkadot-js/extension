@@ -3,14 +3,14 @@
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { ActivityIndicator, BalanceItem, Icon, Number } from '@subwallet/react-ui';
+import { ActivityIndicator, BalanceItem, BalanceItemProps, Icon, Number } from '@subwallet/react-ui';
 import classNames from 'classnames';
-import { DotsThree } from 'phosphor-react';
+import { CaretRight } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
 
 type Props = TokenBalanceItemType & ThemeProps & {
-  onClickDotsIcon?: () => void,
+  onClick?: BalanceItemProps['onPressItem'],
 };
 
 function Component (
@@ -19,7 +19,7 @@ function Component (
     className = '',
     isReady,
     logoKey,
-    onClickDotsIcon,
+    onClick,
     priceValue,
     slug,
     symbol,
@@ -48,6 +48,7 @@ function Component (
         }
         name={symbol}
         networkMainLogoShape={'squircle'}
+        onPressItem={onClick}
         price={priceValue}
         rightItem={
           (
@@ -57,7 +58,6 @@ function Component (
                   className={'__value'}
                   decimal={0}
                   decimalOpacity={0.45}
-                  suffix={symbol}
                   value={total.value}
                 />
                 <Number
@@ -74,12 +74,11 @@ function Component (
 
               <div
                 className={'__icon-wrapper'}
-                onClick={isReady ? onClickDotsIcon : undefined}
               >
                 {isReady
                   ? (
                     <Icon
-                      phosphorIcon={DotsThree}
+                      phosphorIcon={CaretRight}
                       size='sm'
                       type='phosphor'
                     />
@@ -123,25 +122,16 @@ export const TokenBalanceDetailItem = styled(Component)<Props>(({ theme: { token
     },
 
     '.ant-web3-block-middle-item': {
-      '.ant-number': {
-        fontSize: token.fontSizeSM,
-        lineHeight: token.lineHeightSM
-      }
-    },
-
-    '&.-price-decrease .ant-web3-block-middle-item': {
-      '.ant-number': {
-        lineHeight: token.lineHeightSM
-      },
-      '.ant-number .ant-typography': {
-        color: `${token.colorError} !important`
-      }
+      overflow: 'hidden'
     },
 
     '.__chain-name': {
       color: token.colorTextLight4,
       fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightSM
+      lineHeight: token.lineHeightSM,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
     },
 
     '.ant-loading-icon': {

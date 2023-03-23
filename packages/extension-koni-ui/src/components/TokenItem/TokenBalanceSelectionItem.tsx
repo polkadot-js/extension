@@ -58,7 +58,6 @@ function Component (
                   className={'__value'}
                   decimal={0}
                   decimalOpacity={0.45}
-                  suffix={symbol}
                   value={total.value}
                 />
                 <Number
@@ -122,25 +121,16 @@ export const TokenBalanceSelectionItem = styled(Component)<Props>(({ theme: { to
     },
 
     '.ant-web3-block-middle-item': {
-      '.ant-number': {
-        fontSize: token.fontSizeSM,
-        lineHeight: token.lineHeightSM
-      }
-    },
-
-    '&.-price-decrease .ant-web3-block-middle-item': {
-      '.ant-number': {
-        lineHeight: token.lineHeightSM
-      },
-      '.ant-number .ant-typography': {
-        color: `${token.colorError} !important`
-      }
+      overflow: 'hidden'
     },
 
     '.__chain-name': {
       color: token.colorTextLight4,
       fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightSM
+      lineHeight: token.lineHeightSM,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
     },
 
     '.ant-loading-icon': {

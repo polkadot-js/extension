@@ -188,7 +188,7 @@ function Component (): React.ReactElement {
     setCurrentTokenInfo(undefined);
   }, []);
 
-  const onClickThreeDots = useCallback((item: TokenBalanceItemType) => {
+  const onClickItem = useCallback((item: TokenBalanceItemType) => {
     return () => {
       setCurrentTokenInfo({
         slug: item.slug,
@@ -258,7 +258,7 @@ function Component (): React.ReactElement {
             <TokenBalanceDetailItem
               key={item.slug}
               {...item}
-              onClickDotsIcon={onClickThreeDots(item)}
+              onClick={onClickItem(item)}
             />
           ))
         }

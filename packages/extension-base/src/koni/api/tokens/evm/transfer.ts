@@ -126,6 +126,8 @@ export async function getERC721Transaction (
   const contract = new web3Api.api.eth.Contract(_ERC721_ABI, contractAddress);
   const gasPrice = await web3Api.api.eth.getGasPrice();
 
+  console.log('gasPrice', gasPrice);
+
   return {
     from: senderAddress,
     gasPrice,

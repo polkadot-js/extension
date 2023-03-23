@@ -322,8 +322,6 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
         currentPage++;
       }
 
-      console.log('Fetching history page ' + currentPage.toString(), lastId);
-
       const response = await MultiChainTxClient.query<TransactionByAddress, QueryInput>({
         query,
         variables: { addresses, olderThanId: lastId }
@@ -332,7 +330,6 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
 
       if (needProcessedData.length > 0) {
         lastId = response.data.transactionsByAddress[needProcessedData.length - 1].id;
-        console.log(lastId);
         responseData.push(...needProcessedData);
       } else {
         break;
@@ -341,8 +338,6 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
       break;
     }
   }
-
-  console.log(responseData.map((r) => r.id));
 
   const histories = [] as TransactionHistoryItem[];
   const lowerAddresses = addresses.map((a) => a.toLowerCase());

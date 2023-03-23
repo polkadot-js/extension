@@ -4,7 +4,9 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 
+// @ts-ignore
 export function parseTransactionData<T extends ExtrinsicType> (data: unknown): ExtrinsicDataTypeMap[T] {
+  // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return data as ExtrinsicDataTypeMap[T];
 }

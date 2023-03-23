@@ -353,13 +353,18 @@ export default class TransactionService {
         break;
       case ExtrinsicType.CROWDLOAN:
         break;
-      case ExtrinsicType.STAKING_BOND:
+      case ExtrinsicType.STAKING_BOND: {
+        const data = parseTransactionData<ExtrinsicType.STAKING_BOND>(transaction.data);
+
+        historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
+      }
+
+        break;
       case ExtrinsicType.STAKING_JOIN_POOL: {
         const data = parseTransactionData<ExtrinsicType.STAKING_JOIN_POOL>(transaction.data);
 
-        historyItem.amount = { ...baseNativeAmount, value: data.amount.toString() || '0' };
-        // Todo: Need fill data
-        // historyItem.to = data.nominatorMetadata;
+        historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
+        historyItem.to = data.selectedPool.name || data.selectedPool.id.toString();
       }
 
         break;
@@ -368,7 +373,7 @@ export default class TransactionService {
           const data = parseTransactionData<ExtrinsicType.STAKING_UNBOND>(transaction.data);
 
           historyItem.to = data.validatorAddress || '';
-          historyItem.amount = { ...baseNativeAmount, value: data.amount.toString() || '0' };
+          historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
         }
 
         break;
@@ -377,14 +382,14 @@ export default class TransactionService {
           const data = parseTransactionData<ExtrinsicType.STAKING_LEAVE_POOL>(transaction.data);
 
           historyItem.to = data.nominatorMetadata.address || '';
-          historyItem.amount = { ...baseNativeAmount, value: data.amount.toString() || '0' };
+          historyItem.amount = { ...baseNativeAmount, value: data.amount || '0' };
         }
 
         break;
       case ExtrinsicType.STAKING_CLAIM_REWARD: {
         const data = parseTransactionData<ExtrinsicType.STAKING_CLAIM_REWARD>(transaction.data);
 
-        historyItem.to = data.validatorAddress || '';
+        historyItem.amount = { ...baseNativeAmount, value: data.unclaimedReward || '0' };
       }
 
         break;

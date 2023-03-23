@@ -6,36 +6,24 @@ import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyA
 import { TokenSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenSelectionItem';
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useGetTokensBySettings from '@subwallet/extension-koni-ui/hooks/screen/home/useGetTokensBySettings';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   onSelectItem?: (item: _ChainAsset) => void,
   address?: string,
-  itemFilter?: (item: _ChainAsset) => boolean
+  items: _ChainAsset[]
 }
 
 export const ReceiveTokensSelectorModalId = 'receiveTokensSelectorModalId';
 
 const renderEmpty = () => <EmptyAccount />;
 
-function Component ({ address, className = '', itemFilter, onSelectItem }: Props): React.ReactElement<Props> {
+function Component ({ address, className = '', items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const itemsMap = useGetTokensBySettings(address);
-
-  const items = useMemo<_ChainAsset[]>(() => {
-    const _items = Object.values(itemsMap);
-
-    if (itemFilter) {
-      return _items.filter(itemFilter);
-    }
-
-    return _items;
-  }, [itemFilter, itemsMap]);
 
   const searchFunction = useCallback((item: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();

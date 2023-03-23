@@ -2,33 +2,25 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { isAccountAll } from '@subwallet/extension-base/utils';
 import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   id?: string,
   onSelectItem: (item: AccountJson) => void,
-  itemFilter?: (account: AccountJson) => boolean
+  items: AccountJson[]
 }
 
 export const AccountSelectorModalId = 'accountSelectorModalId';
 
 const renderEmpty = () => <EmptyAccount />;
 
-function defaultFiler (account: AccountJson): boolean {
-  return !isAccountAll(account.address);
-}
-
-function Component ({ className = '', id = AccountSelectorModalId, itemFilter, onSelectItem }: Props): React.ReactElement<Props> {
-  const items = useSelector((state: RootState) => state.accountState.accounts).filter(itemFilter || defaultFiler);
+function Component ({ className = '', id = AccountSelectorModalId, items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
 

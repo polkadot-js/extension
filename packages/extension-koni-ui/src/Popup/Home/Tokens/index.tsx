@@ -1,28 +1,24 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { AccountJson } from '@subwallet/extension-base/background/types';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { AccountSelectorModal, AccountSelectorModalId } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
-import ReceiveQrModal, { ReceiveSelectedResult } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
-import { ReceiveTokensSelectorModalId, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
+import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
+import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
+import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenGroupBalanceItem';
-import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import useReceiveQR from '@subwallet/extension-koni-ui/hooks/screen/home/useReceiveQR';
 import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/UpperBlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
-import { Button, Icon, ModalContext } from '@subwallet/react-ui';
+import { Button, Icon } from '@subwallet/react-ui';
 import classNames from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -50,15 +46,15 @@ function Component (): React.ReactElement {
   const topBlockRef = useRef<HTMLDivElement>(null);
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
-  const { activeModal, inactiveModal } = useContext(ModalContext);
-
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const notify = useNotification();
-
-  const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(
-    { selectedAccount: currentAccount?.address }
-  );
+  const { accountSelectorItems,
+    onOpenReceive,
+    openSelectAccount,
+    openSelectToken,
+    selectedAccount,
+    selectedNetwork,
+    tokenSelectorItems } = useReceiveQR();
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;
@@ -146,48 +142,6 @@ function Component (): React.ReactElement {
   [navigate]
   );
 
-  const onOpenReceive = useCallback(() => {
-    if (!currentAccount) {
-      activeModal(AccountSelectorModalId);
-
-      return;
-    }
-
-    if (isAccountAll(currentAccount.address)) {
-      activeModal(AccountSelectorModalId);
-    } else {
-      if (currentAccount.originGenesisHash) {
-        const network = findNetworkJsonByGenesisHash(chainInfoMap, currentAccount.originGenesisHash);
-
-        if (network) {
-          setReceiveSelectedResult((prevState) => ({ ...prevState, selectedNetwork: network.slug }));
-          activeModal(RECEIVE_QR_MODAL);
-
-          return;
-        }
-      }
-
-      activeModal(ReceiveTokensSelectorModalId);
-    }
-  }, [activeModal, chainInfoMap, currentAccount]);
-
-  const openSelectAccount = useCallback((account: AccountJson) => {
-    setReceiveSelectedResult({ selectedAccount: account.address });
-    activeModal(ReceiveTokensSelectorModalId);
-    inactiveModal(AccountSelectorModalId);
-  }, [activeModal, inactiveModal]);
-
-  const openSelectToken = useCallback((item: _ChainAsset) => {
-    setReceiveSelectedResult((prevState) => ({ ...prevState, selectedNetwork: item.originChain }));
-  }, []);
-
-  useEffect(() => {
-    setReceiveSelectedResult((prev) => ({
-      ...prev,
-      selectedAccount: currentAccount?.address
-    }));
-  }, [currentAccount?.address]);
-
   return (
     <div
       className={'tokens-screen-container'}
@@ -245,11 +199,13 @@ function Component (): React.ReactElement {
       </div>
 
       <AccountSelectorModal
+        items={accountSelectorItems}
         onSelectItem={openSelectAccount}
       />
 
       <TokensSelectorModal
-        address={selectedAccount || currentAccount?.address}
+        address={selectedAccount}
+        items={tokenSelectorItems}
         onSelectItem={openSelectToken}
       />
 

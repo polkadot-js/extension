@@ -9,9 +9,9 @@ import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwall
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { MODE_CAN_SIGN } from '@subwallet/extension-koni-ui/constants/signing';
 import { AccountAddressType, AccountSignMode, AccountType } from '@subwallet/extension-koni-ui/types';
-import { getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
-import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util/index';
-import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
+import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
+import reformatAddress from '@subwallet/extension-koni-ui/util/account/reformatAddress';
+import { getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
 import { AccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/types';
 
 import { decodeAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';

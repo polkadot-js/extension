@@ -4,7 +4,7 @@
 import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { WordItem } from '@subwallet/extension-koni-ui/types/account';
-import { convertToWords } from '@subwallet/extension-koni-ui/util/seedPhrase';
+import { convertToWords } from '@subwallet/extension-koni-ui/util/account/seedPhrase';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CopySimple } from 'phosphor-react';

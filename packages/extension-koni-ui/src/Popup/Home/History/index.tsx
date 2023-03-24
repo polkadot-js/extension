@@ -11,7 +11,7 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import { HistoryDetailModal, HistoryDetailModalId } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
+import { customFormatDate } from '@subwallet/extension-koni-ui/util/common/customFormatDate';
 import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, DownloadSimple, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';

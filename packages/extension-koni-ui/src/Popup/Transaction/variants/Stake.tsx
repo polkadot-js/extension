@@ -1,11 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicType, NominationPoolInfo, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getOriginChainOfAsset, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
@@ -22,7 +20,7 @@ import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/scree
 import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import useGetSupportedStakingTokens from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetSupportedStakingTokens';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
-import { fetchChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
+import { accountFilterFunc, fetchChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
@@ -30,6 +28,7 @@ import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extensi
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { parseNominations } from '@subwallet/extension-koni-ui/util/transaction/stake';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
 import { RadioChangeEvent } from '@subwallet/react-ui/es/radio/interface';
@@ -40,8 +39,6 @@ import { useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-
 type Props = ThemeProps
 
 interface StakeFromProps extends TransactionFormBaseProps {
@@ -50,36 +47,6 @@ interface StakeFromProps extends TransactionFormBaseProps {
   nominate: string;
   pool: string;
 }
-
-const parseNominations = (nomination: string) => {
-  const infoList = nomination.split(',');
-
-  const result: string[] = [];
-
-  infoList.forEach((info) => {
-    result.push(info.split('___')[0]);
-  });
-
-  return result;
-};
-
-const accountFilterFunc = (chainInfoMap: Record<string, _ChainInfo>, stakingChain?: string): ((account: AccountJson) => boolean) => {
-  return (account: AccountJson) => {
-    if (stakingChain && stakingChain !== ALL_KEY) {
-      const chain = chainInfoMap[stakingChain];
-
-      if (!chain) {
-        return !isAccountAll(account.address);
-      }
-
-      const isEvmChain = _isChainEvmCompatible(chain);
-
-      return !isAccountAll(account.address) && isEvmChain === isEthereumAddress(account.address);
-    } else {
-      return !isAccountAll(account.address);
-    }
-  };
-};
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -289,6 +256,24 @@ const Component: React.FC<Props> = (props: Props) => {
   const onChangeTab = useCallback((event: RadioChangeEvent) => {
     setStakingType(event.target.value as StakingType);
   }, []);
+
+  useEffect(() => {
+    const address = currentAccount?.address || '';
+
+    if (address) {
+      if (!isAccountAll(address)) {
+        setFrom(address);
+      }
+    }
+  }, [currentAccount?.address, setFrom]);
+
+  useEffect(() => {
+    if (defaultSlug) {
+      const chain = _getOriginChainOfAsset(defaultSlug);
+
+      setChain(chain);
+    }
+  }, [defaultSlug, setChain]);
 
   useEffect(() => {
     if (chainStakingMetadata) {

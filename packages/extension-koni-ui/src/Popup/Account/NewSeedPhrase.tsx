@@ -17,7 +17,7 @@ import { createAccountSuriV2, createSeedV2 } from '@subwallet/extension-koni-ui/
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NewSeedPhraseState } from '@subwallet/extension-koni-ui/types/account';
-import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account/account';
 import { Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';

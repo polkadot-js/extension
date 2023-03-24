@@ -115,7 +115,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         setViewDetailItem(item);
         activeModal(ValidatorDetailModalId);
       }}
-      showSelectedIcon={false}
+      showUnSelectedIcon={false}
       validatorInfo={item}
     />
   ), [activeModal]);

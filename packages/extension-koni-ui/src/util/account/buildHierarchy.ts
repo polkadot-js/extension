@@ -3,9 +3,9 @@
 
 import type { AccountJson, AccountWithChildren } from '@subwallet/extension-base/background/types';
 
-import { isAccountAll } from '@subwallet/extension-koni-ui/util/accountAll';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util/account/accountAll';
 
-import getNetworkMap from './getNetworkMap';
+import getNetworkMap from '../chain/getNetworkMap';
 
 type ChildFilter = (account: AccountJson) => AccountWithChildren;
 

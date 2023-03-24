@@ -5,7 +5,7 @@ import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { StakingStatus, StakingStatusType } from '@subwallet/extension-koni-ui/util/stakingStatus';
+import { StakingStatus, StakingStatusType } from '@subwallet/extension-koni-ui/util/transaction/stakingStatus';
 import { SwModal } from '@subwallet/react-ui';
 import React from 'react';
 import styled from 'styled-components';

@@ -4,6 +4,7 @@
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
+import { getValidatorKey } from '@subwallet/extension-koni-ui/util/transaction/stake';
 import { BackgroundIcon, Button, Icon, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
@@ -32,7 +33,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const _onSelect = useCallback(() => {
-    onClick && onClick(`${validatorInfo.address}___${validatorInfo.identity || ''}`);
+    onClick && onClick(getValidatorKey(validatorInfo.address, validatorInfo.identity));
   },
   [onClick, validatorInfo.address, validatorInfo.identity]
   );

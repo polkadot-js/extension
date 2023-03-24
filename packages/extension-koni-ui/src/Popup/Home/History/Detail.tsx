@@ -10,7 +10,7 @@ import { TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/Popu
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
+import { customFormatDate } from '@subwallet/extension-koni-ui/util/common/customFormatDate';
 import { Button, Icon, SwIconProps, SwModal } from '@subwallet/react-ui';
 import { ArrowSquareUpRight, CheckCircle, ProhibitInset, Spinner, StopCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';

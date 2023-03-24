@@ -8,7 +8,7 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { saveCameraSetting, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account/account';
 import { BackgroundIcon, Icon, SettingItem, Switch } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Camera, CaretRight, GlobeHemisphereEast, Key } from 'phosphor-react';

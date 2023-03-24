@@ -10,7 +10,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { isSubstrateMessage } from '@subwallet/extension-koni-ui/util';
-import { getSignMode } from '@subwallet/extension-koni-ui/util/account';
+import { getSignMode } from '@subwallet/extension-koni-ui/util/account/account';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, QrCode, Swatches, XCircle } from 'phosphor-react';

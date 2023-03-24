@@ -41,9 +41,9 @@ const Component: React.FC<Props> = (props: Props) => {
   const [nominatorMetadata] = useState(locationState?.nominatorMetadata as NominatorMetadata);
   const { decimals, symbol } = useGetNativeTokenBasicInfo(nominatorMetadata.chain);
 
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-  const [warnings, setWarnings] = useState<string[]>([]);
+  const [, setLoading] = useState(false);
+  const [, setErrors] = useState<string[]>([]);
+  const [, setWarnings] = useState<string[]>([]);
 
   const isAll = isAccountAll(currentAccount?.address || '');
   const [form] = Form.useForm<StakeFromProps>();

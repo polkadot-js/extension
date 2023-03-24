@@ -4,7 +4,7 @@
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
-import { i18nPromise } from '@subwallet/extension-koni-ui/util/i18n';
+import { i18nPromise } from '@subwallet/extension-koni-ui/util/common/i18n';
 import React, { ComponentType, ReactNode } from 'react';
 import { createHashRouter, Outlet, useLocation } from 'react-router-dom';
 

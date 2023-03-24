@@ -105,16 +105,28 @@ const SelectValidatorInput = styled(Component)<Props>(({ theme: { token } }: Pro
     borderRadius: token.borderRadiusLG,
     padding: `${token.paddingXS}px ${token.paddingSM}px ${token.paddingXXS}px`,
     cursor: 'pointer',
-    border: '2px solid transparent',
-    transition: 'border-color 0.3s',
+
+    '&:before': {
+      content: '""',
+      border: '2px solid transparent',
+      borderRadius: token.borderRadiusLG,
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+      top: 0,
+      left: 0,
+      transition: `border-color ${token.motionDurationSlow}`
+    },
+
+    '&:hover': {
+      '&:before': {
+        borderColor: token.colorPrimaryBorderHover
+      }
+    },
 
     '&.-disabled': {
       cursor: 'not-allowed',
       border: 'none'
-    },
-
-    '&:hover': {
-      borderColor: token.colorPrimaryBorderHover
     },
 
     '.select-validator-input__label': {

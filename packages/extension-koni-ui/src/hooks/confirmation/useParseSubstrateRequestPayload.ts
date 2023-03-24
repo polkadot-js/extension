@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RequestSign } from '@subwallet/extension-base/background/types';
-import { isRawPayload } from '@subwallet/extension-koni-ui/util/request/substrate';
+import { isRawPayload } from '@subwallet/extension-koni-ui/util/confirmation/request/substrate';
 import { useMemo } from 'react';
 
 import { TypeRegistry } from '@polkadot/types';

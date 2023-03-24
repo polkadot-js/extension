@@ -15,6 +15,7 @@ import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/scree
 import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { getValidatorKey } from '@subwallet/extension-koni-ui/util/transaction/stake';
 import { Button, Icon, InputRef, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
@@ -83,11 +84,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
   const nominations = useMemo(() => nominatorMetadata[0]?.nominations, [nominatorMetadata]);
-  // TODO: restore
   const isSingleSelect = useMemo(() => _isSingleSelect || !isRelayChain, [_isSingleSelect, isRelayChain]);
 
   const nominatorValueList = useMemo(() => {
-    return nominations && nominations.length ? nominations.map((item) => `${item.validatorAddress}___${item.validatorIdentity || ''}`) : [];
+    return nominations && nominations.length ? nominations.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)) : [];
   }, [nominations]);
 
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
@@ -139,7 +139,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [activeModal]);
 
   const renderItem = useCallback((item: ValidatorDataType) => {
-    const key = `${item.address}___${item.identity || ''}`;
+    const key = getValidatorKey(item.address, item.identity);
     const selected = changeValidators.includes(key);
     const nominated = nominatorValueList.includes(key);
 
@@ -179,7 +179,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [activeModal, id]);
 
   useEffect(() => {
-    const selected = nominations?.map((item) => `${item.validatorAddress}___${item.validatorIdentity || ''}`).join(',') || '';
+    const selected = nominations?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || '';
 
     onInitValidators(selected);
     onChange && onChange({ target: { value: selected } });

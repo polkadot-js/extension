@@ -13,8 +13,8 @@ import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/ty
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import { copyToClipboard } from '@subwallet/extension-koni-ui/util/dom';
-import { convertFieldToObject } from '@subwallet/extension-koni-ui/util/form';
+import { copyToClipboard } from '@subwallet/extension-koni-ui/util/common/dom';
+import { convertFieldToObject } from '@subwallet/extension-koni-ui/util/form/form';
 import { BackgroundIcon, Button, Field, Form, Icon, Input, QRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, Swatches, TrashSimple, User } from 'phosphor-react';

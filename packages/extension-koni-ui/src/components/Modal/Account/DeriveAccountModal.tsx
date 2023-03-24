@@ -3,7 +3,6 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { canDerive } from '@subwallet/extension-base/utils';
-import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
@@ -24,11 +23,13 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 
+import GeneralEmptyList from '../../GeneralEmptyList';
+
 type Props = ThemeProps;
 
 const modalId = DERIVE_ACCOUNT_MODAL;
 
-const renderEmpty = () => <EmptyAccount />;
+const renderEmpty = () => <GeneralEmptyList />;
 
 const renderLoaderIcon = (x: React.ReactNode): React.ReactNode => {
   return (

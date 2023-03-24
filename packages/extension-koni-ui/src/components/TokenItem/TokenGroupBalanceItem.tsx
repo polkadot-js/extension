@@ -49,7 +49,6 @@ function Component (
                   className={'__value'}
                   decimal={0}
                   decimalOpacity={0.45}
-                  suffix={symbol}
                   value={total.value}
                 />
                 <Number

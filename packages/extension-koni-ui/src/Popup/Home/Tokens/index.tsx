@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
@@ -17,8 +17,8 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { Button, Icon } from '@subwallet/react-ui';
 import classNames from 'classnames';
-import { FadersHorizontal } from 'phosphor-react';
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import { Coins, FadersHorizontal } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -142,6 +142,18 @@ function Component (): React.ReactElement {
   [navigate]
   );
 
+  const tokenGroupBalanceItems = useMemo<TokenBalanceItemType[]>(() => {
+    const result: TokenBalanceItemType[] = [];
+
+    sortedTokenGroups.forEach((tokenGroupSlug) => {
+      if (tokenGroupBalanceMap[tokenGroupSlug]) {
+        result.push(tokenGroupBalanceMap[tokenGroupSlug]);
+      }
+    });
+
+    return result;
+  }, [sortedTokenGroups, tokenGroupBalanceMap]);
+
   return (
     <div
       className={'tokens-screen-container'}
@@ -170,13 +182,7 @@ function Component (): React.ReactElement {
         className={'__scroll-container'}
       >
         {
-          sortedTokenGroups.map((tokenGroupKey) => {
-            const item = tokenGroupBalanceMap[tokenGroupKey];
-
-            if (!item) {
-              return null;
-            }
-
+          tokenGroupBalanceItems.map((item) => {
             return (
               <TokenGroupBalanceItem
                 key={item.slug}
@@ -185,6 +191,16 @@ function Component (): React.ReactElement {
               />
             );
           })
+        }
+        {
+          !tokenGroupBalanceItems.length && (
+            <EmptyList
+              className={'__empty-list'}
+              emptyMessage={t('Add tokens to get started.')}
+              emptyTitle={t('No tokens found')}
+              phosphorIcon={Coins}
+            />
+          )
         }
         <div className={'__scroll-footer'}>
           <Button
@@ -220,6 +236,11 @@ function Component (): React.ReactElement {
 const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, token } }: ThemeProps) => {
   return ({
     overflow: 'hidden',
+
+    '.__empty-list': {
+      marginTop: token.marginSM,
+      marginBottom: token.marginSM
+    },
 
     '.tokens-screen-container': {
       height: '100%',

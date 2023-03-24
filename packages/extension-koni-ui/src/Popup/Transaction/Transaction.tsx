@@ -6,13 +6,14 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useChainChecker from '@subwallet/extension-koni-ui/hooks/chain/useChainChecker';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { Dispatch, SetStateAction, useCallback, useContext, useMemo, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -82,6 +83,12 @@ function Component ({ className }: Props) {
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw')
   }), [t]);
   const { goBack } = useDefaultNavigate();
+
+  const checkChain = useChainChecker();
+
+  useEffect(() => {
+    checkChain(chain);
+  }, [chain, checkChain]);
 
   // Navigate to finish page
   const onDone = useCallback(

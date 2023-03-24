@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import { getBondingOptions, getNominationPoolOptions } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -63,20 +63,30 @@ export function fetchChainValidators (chain: string, stakingType: string) {
   }
 }
 
-export const accountFilterFunc = (chainInfoMap: Record<string, _ChainInfo>, stakingChain?: string): ((account: AccountJson) => boolean) => {
+const defaultAccountFilter = (stakingType: StakingType, chain?: _ChainInfo): ((account: AccountJson) => boolean) => {
+  return (account: AccountJson) => {
+    if (account.originGenesisHash && chain && _getSubstrateGenesisHash(chain) !== account.originGenesisHash) {
+      return false;
+    }
+
+    if (isAccountAll(account.address)) {
+      return false;
+    }
+
+    return !(stakingType === StakingType.POOLED && isEthereumAddress(account.address));
+  };
+};
+
+export const accountFilterFunc = (chainInfoMap: Record<string, _ChainInfo>, stakingType: StakingType, stakingChain?: string): ((account: AccountJson) => boolean) => {
   return (account: AccountJson) => {
     if (stakingChain && stakingChain !== ALL_KEY) {
       const chain = chainInfoMap[stakingChain];
-
-      if (!chain) {
-        return !isAccountAll(account.address);
-      }
-
+      const defaultFilter = defaultAccountFilter(stakingType, chain);
       const isEvmChain = _isChainEvmCompatible(chain);
 
-      return !isAccountAll(account.address) && isEvmChain === isEthereumAddress(account.address);
+      return defaultFilter(account) && isEvmChain === isEthereumAddress(account.address);
     } else {
-      return !isAccountAll(account.address);
+      return defaultAccountFilter(stakingType)(account);
     }
   };
 };

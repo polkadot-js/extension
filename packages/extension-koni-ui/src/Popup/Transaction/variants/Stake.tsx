@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, NominationPoolInfo, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { ExtrinsicType, NominationPoolInfo, NominatorMetadata, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
@@ -10,12 +10,13 @@ import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/A
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Field/MultiValidatorSelector';
 import PoolSelector from '@subwallet/extension-koni-ui/components/Field/PoolSelector';
+import RadioGroup from '@subwallet/extension-koni-ui/components/Field/RadioGroup';
 import { TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { StakingNetworkDetailModal } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
-import RadioGroup from '@subwallet/extension-koni-ui/components/RadioGroup';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useGetBalance, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetChainStakingMetadata';
 import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import useGetSupportedStakingTokens from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetSupportedStakingTokens';
@@ -25,27 +26,36 @@ import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/Fr
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
 import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/util/form/form';
 import { parseNominations } from '@subwallet/extension-koni-ui/util/transaction/stake';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import { useForm } from '@subwallet/react-ui/es/form/Form';
-import { RadioChangeEvent } from '@subwallet/react-ui/es/radio/interface';
+import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
 type Props = ThemeProps
 
-interface StakeFromProps extends TransactionFormBaseProps {
-  token: string;
-  value: string;
-  nominate: string;
-  pool: string;
+enum FormFieldName {
+  TOKEN = 'token',
+  VALUE = 'value',
+  NOMINATE = 'nominate',
+  POOL = 'pool',
+  TYPE = 'type',
+}
+
+interface StakeFormProps extends TransactionFormBaseProps {
+  [FormFieldName.TOKEN]: string;
+  [FormFieldName.VALUE]: string;
+  [FormFieldName.NOMINATE]: string;
+  [FormFieldName.POOL]: string;
+  [FormFieldName.TYPE]: StakingType;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -57,7 +67,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const dataContext = useContext(DataContext);
   const { chain, from, onDone, setChain, setDisabledRightBtn, setFrom, setShowRightBtn, setTransactionType } = useContext(TransactionContext);
 
-  const [stakingType, setStakingType] = useState<StakingType>(() => {
+  const defaultStakingType: StakingType = useMemo(() => {
     switch (_stakingType) {
       case StakingType.POOLED:
         return StakingType.POOLED;
@@ -66,32 +76,63 @@ const Component: React.FC<Props> = (props: Props) => {
       default:
         return StakingType.POOLED;
     }
-  });
+  }, [_stakingType]);
 
-  const [form] = useForm<StakeFromProps>();
+  const [form] = useForm<StakeFormProps>();
 
-  const currentValue = Form.useWatch('value', form);
-  const currentTokenSlug = Form.useWatch('token', form);
-  const currentPool = Form.useWatch('pool', form);
-  const currentNominator = Form.useWatch('nominate', form);
+  const [isDisable, setIsDisable] = useState(true);
 
-  const currentChain = (stakingChain === ALL_KEY ? (currentTokenSlug && _getOriginChainOfAsset(currentTokenSlug)) : stakingChain);
+  const currentTokenSlug = Form.useWatch(FormFieldName.TOKEN, form);
+  const stakingType = Form.useWatch(FormFieldName.TYPE, form);
 
-  const chainStakingMetadata = useGetChainStakingMetadata(currentChain);
-  const nominatorMetadata = useGetNominatorInfo(currentChain, stakingType, from);
-
+  const chainStakingMetadata = useGetChainStakingMetadata(chain);
+  const nominatorMetadataList = useGetNominatorInfo(chain, stakingType, from);
+  const nominatorMetadata: NominatorMetadata | undefined = useMemo(() => nominatorMetadataList[0], [nominatorMetadataList]);
+  const { nativeTokenBalance } = useGetBalance(chain, from);
   const tokenList = useGetSupportedStakingTokens(stakingType, from, stakingChain);
+
+  const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
   const [loading, setLoading] = useState(false);
 
   // TODO: should do better to get validators info
-  const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state: RootState) => state.bonding);
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
-  const { currentAccount } = useSelector((state: RootState) => state.accountState);
+  const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state) => state.bonding);
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const { currentAccount } = useSelector((state) => state.accountState);
+  const { assetRegistry } = useSelector((state) => state.assetRegistry);
 
-  const [{ decimals, symbol }, setNativeTokenBasicInfo] = useState<{ decimals: number, symbol: string }>({
-    decimals: 0,
-    symbol: 'Unit'
-  });
+  const existentialDeposit = useMemo(() => {
+    const assetInfo = assetRegistry[currentTokenSlug];
+
+    if (assetInfo) {
+      return assetInfo.minAmount || '0';
+    }
+
+    return '0';
+  }, [assetRegistry, currentTokenSlug]);
+
+  const maxValue = useMemo(() => {
+    const balance = new BigN(nativeTokenBalance.value);
+    const ed = new BigN(existentialDeposit);
+
+    if (ed.gte(balance)) {
+      return '0';
+    } else {
+      return balance.minus(ed).toString();
+    }
+  }, [existentialDeposit, nativeTokenBalance.value]);
+
+  const { decimals, symbol } = useMemo((): { symbol: string, decimals: number } => {
+    if (chain) {
+      const chainInfo = chainInfoMap[chain];
+
+      return _getChainNativeTokenBasicInfo(chainInfo);
+    }
+
+    return {
+      decimals: 0,
+      symbol: 'Unit'
+    };
+  }, [chainInfoMap, chain]);
 
   const isAllAccount = isAccountAll(currentAccount?.address || '');
 
@@ -105,16 +146,25 @@ const Component: React.FC<Props> = (props: Props) => {
     return '';
   }, [chainInfoMap, stakingChain]);
 
-  const formDefault = useMemo(() => {
+  const formDefault: StakeFormProps = useMemo(() => {
     return {
       from: from,
-      token: defaultSlug,
-      value: '0'
+      chain: chain,
+      [FormFieldName.VALUE]: '0',
+      [FormFieldName.POOL]: '',
+      [FormFieldName.NOMINATE]: '',
+      [FormFieldName.TOKEN]: defaultSlug,
+      [FormFieldName.TYPE]: defaultStakingType
     };
-  }, [defaultSlug, from]);
+  }, [defaultSlug, from, defaultStakingType, chain]);
 
-  const onValuesChange = useCallback(({ from, nominate, token, value }: Partial<StakeFromProps>, values: StakeFromProps) => {
-    // TODO: field change
+  const onFieldsChange: FormCallbacks<StakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+    const { error } = simpleCheckForm(changedFields, allFields);
+
+    const allMap = convertFieldToObject<StakeFormProps>(allFields);
+    const changesMap = convertFieldToObject<StakeFormProps>(changedFields);
+
+    const { from, [FormFieldName.TOKEN]: token } = changesMap;
 
     if (from) {
       setFrom(from);
@@ -126,10 +176,22 @@ const Component: React.FC<Props> = (props: Props) => {
       setChain(chain);
     }
 
-    if (nominate) {
-      form.setFieldValue('nominate', nominate);
+    const checkEmpty: Record<string, boolean> = {};
+
+    const stakingType = allMap[FormFieldName.TYPE];
+
+    for (const [key, value] of Object.entries(allMap)) {
+      checkEmpty[key] = !!value;
     }
-  }, [form, setChain, setFrom]);
+
+    if (stakingType === StakingType.NOMINATED) {
+      checkEmpty.pool = true;
+    } else if (stakingType === StakingType.POOLED) {
+      checkEmpty.nominate = true;
+    }
+
+    setIsDisable(error || Object.values(checkEmpty).some((value) => !value));
+  }, [setChain, setFrom]);
 
   const getSelectedValidators = useCallback((nominations: string[]) => {
     const validatorList = validatorInfoMap[chain];
@@ -161,58 +223,58 @@ const Component: React.FC<Props> = (props: Props) => {
     return undefined;
   }, [nominationPoolInfoMap, chain]);
 
-  const submitTransaction = useCallback(() => {
-    form.validateFields()
-      .then((values) => {
-        setLoading(true);
-        const { from, nominate, pool, value } = values;
-        let bondingPromise: Promise<SWTransactionResponse>;
+  const onSubmit: FormCallbacks<StakeFormProps>['onFinish'] = useCallback((values: StakeFormProps) => {
+    if (!nominatorMetadata) {
+      return;
+    }
 
-        if (pool) {
-          const selectedPool = getSelectedPool(pool);
+    setLoading(true);
+    const { from, nominate, pool, value } = values;
+    let bondingPromise: Promise<SWTransactionResponse>;
 
-          bondingPromise = submitPoolBonding({
-            amount: value, // TODO: value is wrong
-            chain: chain,
-            nominatorMetadata: nominatorMetadata[0],
-            selectedPool: selectedPool as NominationPoolInfo,
-            address: from
-          });
-        } else {
-          const selectedValidators = getSelectedValidators(parseNominations(nominate));
+    if (pool) {
+      const selectedPool = getSelectedPool(pool);
 
-          bondingPromise = submitBonding({
-            amount: value,
-            chain: chain,
-            nominatorMetadata: nominatorMetadata[0],
-            selectedValidators,
-            type: StakingType.NOMINATED
-          });
-        }
-
-        bondingPromise
-          .then((response) => {
-            const { errors, extrinsicHash, warnings } = response;
-
-            if (errors.length || warnings.length) {
-              console.log('failed', errors, warnings);
-              setLoading(false);
-              // setErrors(errors.map((e) => e.message));
-              // setWarnings(warnings.map((w) => w.message));
-            } else if (extrinsicHash) {
-              onDone(extrinsicHash);
-            }
-          })
-          .catch((error) => {
-            setLoading(false);
-            console.log(error);
-          });
-      })
-      .catch((error: Error) => {
-        console.log(error);
-        setLoading(false);
+      bondingPromise = submitPoolBonding({
+        amount: value, // TODO: value is wrong
+        chain: chain,
+        nominatorMetadata: nominatorMetadata,
+        selectedPool: selectedPool as NominationPoolInfo,
+        address: from
       });
-  }, [nominatorMetadata, chain, form, getSelectedPool, getSelectedValidators, onDone]);
+    } else {
+      const selectedValidators = getSelectedValidators(parseNominations(nominate));
+
+      bondingPromise = submitBonding({
+        amount: value,
+        chain: chain,
+        nominatorMetadata: nominatorMetadata,
+        selectedValidators,
+        type: StakingType.NOMINATED
+      });
+    }
+
+    setTimeout(() => {
+      bondingPromise
+        .then((response) => {
+          const { errors, extrinsicHash, warnings } = response;
+
+          if (errors.length || warnings.length) {
+            console.log('failed', errors, warnings);
+            // setErrors(errors.map((e) => e.message));
+            // setWarnings(warnings.map((w) => w.message));
+          } else if (extrinsicHash) {
+            onDone(extrinsicHash);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }, 300);
+  }, [nominatorMetadata, chain, getSelectedPool, getSelectedValidators, onDone]);
 
   const getMetaInfo = useCallback(() => {
     if (chainStakingMetadata) {
@@ -223,39 +285,35 @@ const Component: React.FC<Props> = (props: Props) => {
           spaceSize={'xs'}
           valueColorScheme={'light'}
         >
-          {chainStakingMetadata.expectedReturn && <MetaInfo.Number
-            label={t('Estimated earnings:')}
-            suffix={'% / year'}
-            value={chainStakingMetadata.expectedReturn}
-          />}
+          {
+            chainStakingMetadata.expectedReturn &&
+            (
+              <MetaInfo.Number
+                label={t('Estimated earnings:')}
+                suffix={'% / year'}
+                value={chainStakingMetadata.expectedReturn}
+              />
+            )
+          }
 
-          {chainStakingMetadata.minStake && <MetaInfo.Number
-            decimals={decimals}
-            label={t('Minimum active:')}
-            suffix={symbol}
-            value={chainStakingMetadata.minStake}
-            valueColorSchema={'success'}
-          />}
+          {
+            chainStakingMetadata.minStake &&
+            (
+              <MetaInfo.Number
+                decimals={decimals}
+                label={t('Minimum active:')}
+                suffix={symbol}
+                value={chainStakingMetadata.minStake}
+                valueColorSchema={'success'}
+              />
+            )
+          }
         </MetaInfo>
       );
     }
 
     return null;
   }, [chainStakingMetadata, decimals, symbol, t]);
-
-  const isDisabledStakeBtn = useMemo(() => {
-    const isDisabled = !currentTokenSlug || currentValue === '0' || !currentValue || from === ALL_ACCOUNT_KEY;
-
-    if (stakingType === StakingType.POOLED) {
-      return isDisabled || !currentPool;
-    } else {
-      return isDisabled || !currentNominator;
-    }
-  }, [from, currentNominator, currentPool, currentTokenSlug, currentValue, stakingType]);
-
-  const onChangeTab = useCallback((event: RadioChangeEvent) => {
-    setStakingType(event.target.value as StakingType);
-  }, []);
 
   useEffect(() => {
     const address = currentAccount?.address || '';
@@ -268,20 +326,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [currentAccount?.address, setFrom]);
 
   useEffect(() => {
-    if (defaultSlug) {
-      const chain = _getOriginChainOfAsset(defaultSlug);
-
-      setChain(chain);
+    if (stakingChain && stakingChain !== ALL_KEY) {
+      setChain(stakingChain);
     }
-  }, [defaultSlug, setChain]);
-
-  useEffect(() => {
-    if (chainStakingMetadata) {
-      const chainInfo = chainInfoMap[chainStakingMetadata.chain];
-
-      setNativeTokenBasicInfo(_getChainNativeTokenBasicInfo(chainInfo));
-    }
-  }, [chainInfoMap, chainStakingMetadata]);
+  }, [setChain, stakingChain]);
 
   useEffect(() => {
     setTransactionType(ExtrinsicType.STAKING_JOIN_POOL);
@@ -311,14 +359,15 @@ const Component: React.FC<Props> = (props: Props) => {
             className={'form-container form-space-sm'}
             form={form}
             initialValues={formDefault}
-            onValuesChange={onValuesChange}
+            onFieldsChange={onFieldsChange}
+            onFinish={onSubmit}
           >
             <Form.Item
               className='staking-type'
               hidden={_stakingType !== ALL_KEY}
+              name={FormFieldName.TYPE}
             >
               <RadioGroup
-                onChange={onChangeTab}
                 optionType='button'
                 options={[
                   {
@@ -330,22 +379,21 @@ const Component: React.FC<Props> = (props: Props) => {
                     value: StakingType.NOMINATED
                   }
                 ]}
-                value={stakingType}
               />
             </Form.Item>
             <Form.Item
               hidden={!isAllAccount}
               name={'from'}
             >
-              <AccountSelector filter={accountFilterFunc(chainInfoMap, stakingChain)} />
+              <AccountSelector filter={accountFilterFunc(chainInfoMap, stakingType, chain || stakingChain)} />
             </Form.Item>
 
             {
               !isAllAccount &&
               (
-                <Form.Item name={'token'}>
+                <Form.Item name={FormFieldName.TOKEN}>
                   <TokenSelector
-                    disabled={stakingChain !== ALL_KEY}
+                    disabled={stakingChain !== ALL_KEY || !from}
                     items={tokenList}
                     prefixShape='circle'
                   />
@@ -361,32 +409,56 @@ const Component: React.FC<Props> = (props: Props) => {
             />
 
             <div className={'form-row'}>
-              {isAllAccount && <Form.Item name={'token'}>
-                <TokenSelector
-                  disabled={stakingChain !== ALL_KEY}
-                  items={tokenList}
-                  prefixShape='circle'
-                />
-              </Form.Item>}
+              {
+                isAllAccount &&
+                (
+                  <Form.Item name={FormFieldName.TOKEN}>
+                    <TokenSelector
+                      disabled={stakingChain !== ALL_KEY || !from}
+                      items={tokenList}
+                      prefixShape='circle'
+                    />
+                  </Form.Item>
+                )
+              }
 
               <Form.Item
                 hideError
-                name={'value'}
+                name={FormFieldName.VALUE}
                 rules={[
                   { required: true },
-                  { max: 100 }
+                  ({ getFieldValue }) => ({
+                    validator: (_, value: string) => {
+                      const type = getFieldValue(FormFieldName.TYPE) as StakingType;
+                      const val = new BigN(value);
+
+                      if (type === StakingType.POOLED) {
+                        if (val.lte(0)) {
+                          return Promise.reject(new Error('Value must be greater then 0'));
+                        }
+                      } else {
+                        if (!nominatorMetadata?.isBondedBefore || !isRelayChain) {
+                          if (val.lte(0)) {
+                            return Promise.reject(new Error('Value must be greater then 0'));
+                          }
+                        }
+                      }
+
+                      return Promise.resolve();
+                    }
+                  })
                 ]}
               >
                 <AmountInput
                   decimals={decimals}
-                  maxValue={'10000'} // TODO
+                  maxValue={maxValue}
                 />
               </Form.Item>
             </div>
 
             <Form.Item
               hidden={stakingType !== StakingType.POOLED}
-              name={'pool'}
+              name={FormFieldName.POOL}
             >
               <PoolSelector
                 chain={chain}
@@ -397,7 +469,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
             <Form.Item
               hidden={stakingType !== StakingType.NOMINATED}
-              name={'nominate'}
+              name={FormFieldName.NOMINATE}
             >
               <MultiValidatorSelector
                 chain={currentTokenSlug ? chain : ''}
@@ -421,7 +493,7 @@ const Component: React.FC<Props> = (props: Props) => {
         warnings={[]}
       >
         <Button
-          disabled={isDisabledStakeBtn}
+          disabled={isDisable}
           icon={(
             <Icon
               phosphorIcon={PlusCircle}
@@ -429,7 +501,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={submitTransaction}
+          onClick={form.submit}
         >
           {t('Stake')}
         </Button>

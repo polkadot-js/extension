@@ -153,7 +153,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         key={item.address}
         onClick={onClickItem(maxCount, changeValidators.length)}
         onClickMoreBtn={onClickMore(item)}
-        showUnSelectedIcon={isRelayChain}
         validatorInfo={item}
       />
     );
@@ -204,7 +203,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           />
         )}
         footer={(
-          !isSingleSelect &&
           <Button
             block
             icon={(

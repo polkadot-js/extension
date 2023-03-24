@@ -114,7 +114,7 @@ const StakingValidatorItem = styled(Component)<Props>(({ theme: { token } }: Pro
     background: token.colorBgSecondary,
 
     '&.disabled': {
-      opacity: token.opacityDisable,
+      // opacity: token.opacityDisable,
 
       '.ant-web3-block:hover': {
         cursor: 'not-allowed',

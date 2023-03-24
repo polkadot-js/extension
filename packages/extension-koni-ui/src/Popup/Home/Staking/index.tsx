@@ -173,20 +173,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         {
           !!(selectedItem && selectedItem.nominatorMetadata && selectedItem.chainStakingMetadata) &&
           (
-            <>
-              <StakingDetailModal
-                chainStakingMetadata={selectedItem.chainStakingMetadata}
-                nominatorMetadata={selectedItem.nominatorMetadata}
-              />
-              <MoreActionModal
-                chainStakingMetadata={selectedItem?.chainStakingMetadata}
-                nominatorMetadata={selectedItem?.nominatorMetadata}
-                reward={selectedItem?.reward}
-                staking={selectedItem?.staking}
-              />
-            </>
+            <StakingDetailModal
+              chainStakingMetadata={selectedItem.chainStakingMetadata}
+              nominatorMetadata={selectedItem.nominatorMetadata}
+            />
           )
         }
+        <MoreActionModal
+          chainStakingMetadata={selectedItem?.chainStakingMetadata}
+          nominatorMetadata={selectedItem?.nominatorMetadata}
+          reward={selectedItem?.reward}
+          staking={selectedItem?.staking}
+        />
       </Layout.Base>
     </PageWrapper>
   );

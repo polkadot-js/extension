@@ -143,7 +143,7 @@ const SelectValidatorInput = styled(Component)<Props>(({ theme: { token } }: Pro
     },
 
     '.select-validator-input__avatar-gr': {
-      paddingRight: token.paddingXS
+      marginRight: token.paddingXS
     },
 
     '.select-validator-input__content': {

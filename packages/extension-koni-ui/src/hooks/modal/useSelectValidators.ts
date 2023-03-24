@@ -10,14 +10,6 @@ export function useSelectValidators (modalId: string, onChange?: BasicOnChangeFu
   const [changeValidators, setChangeValidators] = useState<string[]>([]);
   const { inactiveModal } = useContext(ModalContext);
 
-  const onApplyChange = useCallback((changeValidators: string[], close = true) => {
-    onChange && onChange({ target: { value: changeValidators.join(',') } });
-
-    if (close) {
-      inactiveModal(modalId);
-    }
-  }, [inactiveModal, modalId, onChange]);
-
   const onChangeSelectedValidator = useCallback((changeVal: string) => {
     setChangeValidators((changeValidators) => {
       let result: string[];
@@ -25,7 +17,6 @@ export function useSelectValidators (modalId: string, onChange?: BasicOnChangeFu
       if (!changeValidators.includes(changeVal)) {
         if (isSingleSelect) {
           result = [...defaultSelected, changeVal];
-          onApplyChange(result);
         } else {
           result = [...changeValidators, changeVal];
         }
@@ -34,19 +25,16 @@ export function useSelectValidators (modalId: string, onChange?: BasicOnChangeFu
       } else {
         result = changeValidators.filter((item) => item !== changeVal);
 
-        if (isSingleSelect) {
-          onApplyChange(result, false);
-          setDefaultSelected(result);
-        }
-
         return result;
       }
     });
-  }, [defaultSelected, isSingleSelect, onApplyChange]);
+  }, [defaultSelected, isSingleSelect]);
 
   const onApplyChangeValidators = useCallback(() => {
-    onApplyChange(changeValidators);
-  }, [changeValidators, onApplyChange]);
+    onChange && onChange({ target: { value: changeValidators.join(',') } });
+
+    inactiveModal(modalId);
+  }, [changeValidators, inactiveModal, modalId, onChange]);
 
   const onCancelSelectValidator = useCallback(() => {
     setChangeValidators(defaultSelected);
@@ -54,8 +42,13 @@ export function useSelectValidators (modalId: string, onChange?: BasicOnChangeFu
   }, [defaultSelected, inactiveModal, modalId]);
 
   const onInitValidators = useCallback((selected: string) => {
-    setDefaultSelected(selected.split(','));
-    setChangeValidators(selected.split(','));
+    if (!selected) {
+      setDefaultSelected([]);
+      setChangeValidators([]);
+    } else {
+      setDefaultSelected(selected.split(','));
+      setChangeValidators(selected.split(','));
+    }
   }, []);
 
   return {

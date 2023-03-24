@@ -19,7 +19,7 @@ type Props = ThemeProps & {
   staking?: StakingItem;
   reward?: StakingRewardItem;
   chainStakingMetadata?: ChainStakingMetadata;
-  nominatorMetadata: NominatorMetadata;
+  nominatorMetadata?: NominatorMetadata;
 }
 
 export const MORE_ACTION_MODAL = 'more-action-modal';
@@ -102,6 +102,10 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 
   const handleWithdrawalAction = useCallback(() => {
+    if (!nominatorMetadata) {
+      return;
+    }
+
     const unstakingInfo = getWithdrawalInfo(nominatorMetadata);
 
     if (!unstakingInfo) {
@@ -140,6 +144,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [nominatorMetadata, notify, t]);
 
   const handleClaimRewardAction = useCallback(() => {
+    if (!nominatorMetadata) {
+      return;
+    }
+
     submitStakeClaimReward({
       address: nominatorMetadata.address,
       chain: nominatorMetadata.chain,

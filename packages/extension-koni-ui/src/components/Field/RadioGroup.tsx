@@ -2,19 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Radio, RadioGroupProps } from '@subwallet/react-ui';
-import React from 'react';
+import { InputRef, Radio, RadioGroupProps } from '@subwallet/react-ui';
+import React, { ForwardedRef, forwardRef } from 'react';
 import styled from 'styled-components';
 
-type Props = ThemeProps & RadioGroupProps;
+import { BasicInputWrapper } from './Base';
 
-const Component: React.FC<Props> = (props: Props) => {
+type Props = ThemeProps & RadioGroupProps & BasicInputWrapper;
+
+const Component: React.ForwardRefRenderFunction<InputRef, Props> = (props: Props, ref: ForwardedRef<InputRef>) => {
   return (
     <Radio.Group {...props} />
   );
 };
 
-const RadioGroup = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const RadioGroup = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
     '&.ant-radio-group': {
       display: 'flex',

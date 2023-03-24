@@ -4,7 +4,7 @@
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getNftTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -62,6 +62,8 @@ function getNftTypeSupported (chainInfo: _ChainInfo) {
 
   return result;
 }
+
+const renderEmpty = () => <GeneralEmptyList />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -351,6 +353,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 prefix={selectedChain !== '' && originChainLogo()}
                 renderItem={renderChainOption}
                 renderSelected={renderChainSelected}
+                renderWhenEmpty={renderEmpty}
                 searchFunction={searchChain}
                 searchPlaceholder={'Search network'}
                 searchableMinCharactersCount={2}

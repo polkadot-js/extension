@@ -299,7 +299,12 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       marginTop: token.margin,
       display: 'flex',
       flexWrap: 'wrap',
-      gap: token.marginXS
+      gap: token.marginXS,
+      overflow: 'hidden'
+    },
+
+    '.ant-field-container': {
+      overflow: 'hidden'
     },
 
     '.nft_item_detail__section_title': {

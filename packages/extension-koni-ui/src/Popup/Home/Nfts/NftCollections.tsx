@@ -117,7 +117,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           displayGrid={true}
           enableSearchInput={true}
           gridGap={'14px'}
-          ignoreScrollbar={nftCollections.length > 4}
           list={nftCollections}
           minColumnWidth={'160px'}
           renderItem={renderNftCollection}

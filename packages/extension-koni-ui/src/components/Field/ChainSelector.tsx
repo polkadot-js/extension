@@ -11,9 +11,13 @@ import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
+import GeneralEmptyList from '../GeneralEmptyList';
+
 interface Props extends ThemeProps, BasicInputWrapper {
   items: ChainItemType[]
 }
+
+const renderEmpty = () => <GeneralEmptyList />;
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { className = '', disabled, id = 'address-input', items, label, placeholder, value } = props;
@@ -78,6 +82,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       prefix={value !== '' && chainLogo}
       renderItem={renderItem}
       renderSelected={renderChainSelected}
+      renderWhenEmpty={renderEmpty}
       searchFunction={searchFunction}
       searchPlaceholder={t<string>('Search chain')}
       searchableMinCharactersCount={2}

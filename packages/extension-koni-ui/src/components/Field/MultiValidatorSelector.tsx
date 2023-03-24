@@ -3,7 +3,6 @@
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
-import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
@@ -23,6 +22,7 @@ import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContex
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
+import GeneralEmptyList from '../GeneralEmptyList';
 import SelectValidatorInput from '../SelectValidatorInput';
 
 interface Props extends ThemeProps, BasicInputWrapper {
@@ -66,7 +66,7 @@ const filterOptions = [
   }
 ];
 
-const renderEmpty = () => <EmptyAccount />;
+const renderEmpty = () => <GeneralEmptyList />;
 const defaultModalId = 'multi-validator-selector';
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {

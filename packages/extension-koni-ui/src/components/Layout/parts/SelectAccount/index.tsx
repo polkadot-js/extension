@@ -3,7 +3,6 @@
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
 import AccountCardSelection from '@subwallet/extension-koni-ui/components/Account/Card/AccountCardSelection';
-import EmptyAccount from '@subwallet/extension-koni-ui/components/Account/EmptyAccount';
 import AccountBriefInfo from '@subwallet/extension-koni-ui/components/Account/Info/AccountBriefInfo';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import { SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
@@ -28,6 +27,7 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+import GeneralEmptyList from '../../../GeneralEmptyList';
 import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
 import SelectAccountFooter from '../SelectAccount/Footer';
 
@@ -51,7 +51,7 @@ const iconMap = {
 
 const ConnectWebsiteId = 'connectWebsiteId';
 
-const renderEmpty = () => <EmptyAccount />;
+const renderEmpty = () => <GeneralEmptyList />;
 
 const modalId = SELECT_ACCOUNT_MODAL;
 
@@ -295,7 +295,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         className={className}
         footer={<SelectAccountFooter />}
         id={modalId}
-        ignoreScrollbar={accounts.length > 3}
         ignoreScrollbarMethod='padding'
         inputWidth={'100%'}
         itemKey='address'

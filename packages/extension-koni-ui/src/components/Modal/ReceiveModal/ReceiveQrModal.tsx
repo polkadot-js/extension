@@ -18,11 +18,6 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
-export type ReceiveSelectedResult = {
-  selectedAccount?: string;
-  selectedNetwork?: string;
-};
-
 interface Props extends ThemeProps {
   address?: string;
   selectedNetwork?: string;

@@ -20,6 +20,8 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+import GeneralEmptyList from '../GeneralEmptyList';
+
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
   onClickBookBtn?: (e: SyntheticEvent) => void;
@@ -74,6 +76,8 @@ const getFilteredList = (items: ValidatorDataType[], filters: string[]) => {
 
   return filteredList;
 };
+
+const renderEmpty = () => <GeneralEmptyList />;
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
@@ -194,6 +198,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         }
         renderItem={renderItem}
         renderSelected={renderSelected}
+        renderWhenEmpty={renderEmpty}
         rightIconProps={{
           icon: <Icon phosphorIcon={SortAscending} />,
           onClick: () => {

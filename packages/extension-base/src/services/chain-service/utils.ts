@@ -325,12 +325,24 @@ export function _getAssetDecimals (assetInfo: _ChainAsset): number {
   return assetInfo.decimals || 0;
 }
 
-export function _getBlockExplorerFromChain (chainInfo: _ChainInfo): string {
+export function _getBlockExplorerFromChain (chainInfo: _ChainInfo): string | undefined {
+  let blockExplorer;
+
   if (_isPureEvmChain(chainInfo)) {
-    return chainInfo?.evmInfo?.blockExplorer || '';
+    blockExplorer = chainInfo?.evmInfo?.blockExplorer;
+  } else {
+    blockExplorer = chainInfo?.substrateInfo?.blockExplorer;
   }
 
-  return chainInfo?.substrateInfo?.blockExplorer || '';
+  if (!blockExplorer) {
+    return undefined;
+  }
+
+  if (blockExplorer !== '' && !blockExplorer.endsWith('/')) {
+    return `${blockExplorer}/`;
+  } else {
+    return blockExplorer;
+  }
 }
 
 export function _parseMetadataForSmartContractAsset (contractAddress: string): Record<string, string> {

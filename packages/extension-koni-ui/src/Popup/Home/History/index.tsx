@@ -389,7 +389,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           filterBy={filterFunction}
           groupBy={groupBy}
           groupSeparator={groupSeparator}
-          ignoreScrollbar={historyList.length > 4}
           list={historyList}
           onClickActionBtn={onClickActionBtn}
           renderItem={renderItem}

@@ -1,25 +1,22 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { AccountJson } from '@subwallet/extension-base/background/types';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
-import { AccountSelectorModal, AccountSelectorModalId } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
-import ReceiveQrModal, { ReceiveSelectedResult } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
-import { ReceiveTokensSelectorModalId, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
+import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
+import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
+import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
-import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import useReceiveQR from '@subwallet/extension-koni-ui/hooks/screen/home/useReceiveQR';
 import { DetailModal } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailUpperBlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
-import { getScrollbarWidth } from '@subwallet/react-ui/es/style';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import classNames from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -60,13 +57,18 @@ function Component (): React.ReactElement {
   const { slug: tokenGroupSlug } = useParams();
   const { accountBalance: { tokenBalanceMap, tokenGroupBalanceMap }, tokenGroupStructure: { tokenGroupMap } } = useContext(HomeContext);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-  const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
   const notify = useNotification();
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(
-    { selectedAccount: currentAccount?.address });
   const navigate = useNavigate();
+
+  const { accountSelectorItems,
+    onOpenReceive,
+    openSelectAccount,
+    openSelectToken,
+    selectedAccount,
+    selectedNetwork,
+    tokenSelectorItems } = useReceiveQR(tokenGroupSlug);
 
   const symbol = useMemo<string>(() => {
     if (tokenGroupSlug) {
@@ -143,7 +145,7 @@ function Component (): React.ReactElement {
           topBlockRef.current.style.top = `${containerProps.top}px`;
           topBlockRef.current.style.left = `${containerProps.left}px`;
           topBlockRef.current.style.right = `${containerProps.right}px`;
-          topBlockRef.current.style.width = `${containerProps.width - getScrollbarWidth()}px`;
+          topBlockRef.current.style.width = `${containerProps.width}px`;
 
           setTimeout(() => {
             if (topBlockRef.current) {
@@ -186,7 +188,7 @@ function Component (): React.ReactElement {
     setCurrentTokenInfo(undefined);
   }, []);
 
-  const onClickThreeDots = useCallback((item: TokenBalanceItemType) => {
+  const onClickItem = useCallback((item: TokenBalanceItemType) => {
     return () => {
       setCurrentTokenInfo({
         slug: item.slug,
@@ -216,48 +218,6 @@ function Component (): React.ReactElement {
   },
   [navigate, symbol]
   );
-
-  const onOpenReceive = useCallback(() => {
-    if (isAllAccount) {
-      activeModal(AccountSelectorModalId);
-    } else {
-      if (tokenBalanceItems.length === 1) {
-        setReceiveSelectedResult((prev) => ({ ...prev, selectedNetwork: tokenBalanceItems[0].chain }));
-        activeModal(RECEIVE_QR_MODAL);
-
-        return;
-      }
-
-      activeModal(ReceiveTokensSelectorModalId);
-    }
-  }, [activeModal, isAllAccount, tokenBalanceItems]);
-
-  const openSelectAccount = useCallback((account: AccountJson) => {
-    setReceiveSelectedResult({ selectedAccount: account.address });
-
-    if (tokenBalanceItems.length === 1) {
-      setReceiveSelectedResult((prev) => ({ ...prev, selectedNetwork: tokenBalanceItems[0].chain }));
-      activeModal(RECEIVE_QR_MODAL);
-    } else {
-      activeModal(ReceiveTokensSelectorModalId);
-    }
-
-    inactiveModal(AccountSelectorModalId);
-  }, [activeModal, inactiveModal, tokenBalanceItems]);
-
-  const openSelectToken = useCallback((item: _ChainAsset) => {
-    setReceiveSelectedResult((prevState) => ({ ...prevState, selectedNetwork: item.originChain }));
-  }, []);
-
-  const tokensSelectorFiller = useMemo<((item: _ChainAsset) => boolean) | undefined>(() => {
-    if (tokenBalanceItems.length < 2) {
-      return undefined;
-    }
-
-    const acceptSlugs = tokenBalanceItems.map((t) => t.slug);
-
-    return (item: _ChainAsset) => acceptSlugs.includes(item.slug);
-  }, [tokenBalanceItems]);
 
   useEffect(() => {
     if (currentTokenInfo) {
@@ -298,7 +258,7 @@ function Component (): React.ReactElement {
             <TokenBalanceDetailItem
               key={item.slug}
               {...item}
-              onClickDotsIcon={onClickThreeDots(item)}
+              onClick={onClickItem(item)}
             />
           ))
         }
@@ -312,12 +272,13 @@ function Component (): React.ReactElement {
       />
 
       <AccountSelectorModal
+        items={accountSelectorItems}
         onSelectItem={openSelectAccount}
       />
 
       <TokensSelectorModal
-        address={selectedAccount || currentAccount?.address}
-        itemFilter={tokensSelectorFiller}
+        address={selectedAccount}
+        items={tokenSelectorItems}
         onSelectItem={openSelectToken}
       />
 
@@ -341,8 +302,7 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
       position: 'relative',
       display: 'flex',
       flexDirection: 'column',
-      paddingTop: 206,
-      marginRight: -getScrollbarWidth()
+      paddingTop: 206
     },
 
     '.__scroll-container': {

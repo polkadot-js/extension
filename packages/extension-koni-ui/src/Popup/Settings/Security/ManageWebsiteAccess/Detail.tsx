@@ -212,7 +212,6 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
         <SwList.Section
           displayRow
           enableSearchInput
-          ignoreScrollbar={accountItems.length > 7}
           list={accountItems}
           renderItem={renderItem}
           renderWhenEmpty={renderEmptyList}

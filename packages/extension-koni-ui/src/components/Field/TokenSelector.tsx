@@ -11,6 +11,8 @@ import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
+import GeneralEmptyList from '../GeneralEmptyList';
+
 export type TokenItemType = {
   name: string,
   slug: string,
@@ -23,6 +25,8 @@ interface Props extends ThemeProps, BasicInputWrapper {
   showChainInSelected?: boolean,
   prefixShape?: 'circle' | 'none' | 'squircle' | 'square';
 }
+
+const renderEmpty = () => <GeneralEmptyList />;
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { className = '', disabled, id = 'token-select', items, label, placeholder, showChainInSelected = false, value } = props;
@@ -107,6 +111,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       prefix={value !== '' && chainLogo}
       renderItem={renderItem}
       renderSelected={renderTokenSelected}
+      renderWhenEmpty={renderEmpty}
       searchFunction={searchFunction}
       searchPlaceholder={t<string>('Search token')}
       searchableMinCharactersCount={2}

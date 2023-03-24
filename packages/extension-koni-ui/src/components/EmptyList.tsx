@@ -21,7 +21,7 @@ const Component: React.FC<Props> = (props: Props) => {
     <div className={className}>
       <div className={'empty_icon_wrapper'}>
         <PageIcon
-          color={token['gray-3']}
+          color={token['gray-4']}
           iconProps={{
             phosphorIcon,
             weight: 'fill'

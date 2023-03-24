@@ -6,7 +6,8 @@ import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
-import React, { useCallback, useContext } from 'react';
+import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
+import React, { useCallback, useContext, useRef } from 'react';
 import styled from 'styled-components';
 
 import GeneralEmptyList from '../GeneralEmptyList';
@@ -24,9 +25,11 @@ const renderEmpty = () => <GeneralEmptyList />;
 function Component ({ className = '', id = AccountSelectorModalId, items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
+  const sectionRef = useRef<SwListSectionRef>(null);
 
   const onCancel = useCallback(() => {
     inactiveModal(id);
+    sectionRef.current?.setSearchValue('');
   }, [id, inactiveModal]);
 
   const searchFunction = useCallback((item: AccountJson, searchText: string) => {
@@ -68,6 +71,7 @@ function Component ({ className = '', id = AccountSelectorModalId, items, onSele
       <SwList.Section
         enableSearchInput={true}
         list={items}
+        ref={sectionRef}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}
         searchFunction={searchFunction}

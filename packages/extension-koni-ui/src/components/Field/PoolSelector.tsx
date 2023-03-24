@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -27,7 +28,6 @@ interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
   from: string;
   onClickBookBtn?: (e: SyntheticEvent) => void;
-  onClickLightningBtn?: (e: SyntheticEvent) => void;
 }
 
 const SORTING_MODAL_ID = 'pool-sorting-modal';
@@ -82,7 +82,7 @@ const renderEmpty = () => <EmptyAccount />;
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, from, id = 'pool-selector', label, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
+  const { chain, className = '', disabled, from, id = 'pool-selector', label, onChange, onClickBookBtn, placeholder, value } = props;
 
   useExcludeModal(id);
 
@@ -127,20 +127,31 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     );
   }, []);
 
+  const onClickMore = useCallback((item: NominationPoolDataType) => {
+    return (e: SyntheticEvent) => {
+      e.stopPropagation();
+      setViewDetailItem(item);
+      activeModal(PoolDetailModalId);
+    };
+  }, [activeModal]);
+
+  const onClickLightningBtn = useCallback((e: SyntheticEvent) => {
+    e.stopPropagation();
+    const poolId = PREDEFINED_STAKING_POOL[chain];
+
+    poolId !== undefined && onChange && onChange({ target: { value: String(poolId) } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chain]);
+
   const renderItem = useCallback((item: NominationPoolDataType) => {
     return (
       <StakingPoolItem
         {...item}
         className={'pool-item'}
-        // eslint-disable-next-line react/jsx-no-bind
-        onClickMoreBtn={(e: SyntheticEvent) => {
-          e.stopPropagation();
-          setViewDetailItem(item);
-          activeModal(PoolDetailModalId);
-        }}
+        onClickMoreBtn={onClickMore(item)}
       />
     );
-  }, [activeModal]);
+  }, [onClickMore]);
 
   const closeSortingModal = useCallback(() => {
     inactiveModal(SORTING_MODAL_ID);
@@ -152,36 +163,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         <div className={'__selected-item-name common-text'}>
           {item.name}
         </div>
-
-        <div className={'__selected-item-right-part common-text'}>
-          <Button
-            disabled={isDisabled}
-            icon={(
-              <Icon
-                phosphorIcon={Book}
-                size='sm'
-              />
-            )}
-            onClick={onClickBookBtn}
-            size='xs'
-            type='ghost'
-          />
-          <Button
-            disabled={isDisabled}
-            icon={(
-              <Icon
-                phosphorIcon={Lightning}
-                size='sm'
-              />
-            )}
-            onClick={onClickLightningBtn}
-            size='xs'
-            type='ghost'
-          />
-        </div>
       </div>
     );
-  }, [onClickBookBtn, onClickLightningBtn, isDisabled]);
+  }, []);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value);
@@ -242,6 +226,34 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         searchableMinCharactersCount={2}
         selected={value || ''}
         showActionBtn
+        suffix={(
+          <>
+            <Button
+              disabled={isDisabled}
+              icon={(
+                <Icon
+                  phosphorIcon={Book}
+                  size='sm'
+                />
+              )}
+              onClick={onClickBookBtn}
+              size='xs'
+              type='ghost'
+            />
+            <Button
+              disabled={isDisabled}
+              icon={(
+                <Icon
+                  phosphorIcon={Lightning}
+                  size='sm'
+                />
+              )}
+              onClick={onClickLightningBtn}
+              size='xs'
+              type='ghost'
+            />
+          </>
+        )}
         title={label || placeholder || t('Select pool')}
       />
 
@@ -262,12 +274,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         options={sortingOptions}
       />
 
-      {viewDetailItem && <PoolDetailModal
+      <PoolDetailModal
         decimals={0}
         onCancel={onCloseDetail}
         selectedNominationPool={viewDetailItem}
         status={'active'}
-      />}
+      />
     </>
   );
 };
@@ -301,10 +313,7 @@ const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }:
     },
 
     '.ant-select-modal-input-wrapper': {
-      height: 44,
-      ' > span': {
-        display: 'none'
-      }
+      height: 44
     }
   };
 });

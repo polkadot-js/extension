@@ -14,14 +14,14 @@ type Props = ThemeProps & {
   decimals: number,
   onCancel: () => void,
   status: StakingStatusType,
-  selectedNominationPool: NominationPoolDataType
+  selectedNominationPool?: NominationPoolDataType
 };
 
 export const PoolDetailModalId = 'poolDetailModalId';
 
 function Component ({ className, decimals, onCancel, selectedNominationPool, status }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { address, memberCounter, name, symbol } = selectedNominationPool;
+  const { address = '', memberCounter = 0, name, symbol } = selectedNominationPool || {};
 
   return (
     <SwModal

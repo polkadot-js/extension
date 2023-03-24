@@ -149,6 +149,7 @@ const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
             validateTrigger='onBlur'
           >
             <AddressInput
+              autoReformatValue
               label={t('Send to account')}
               showScanner={true}
             />

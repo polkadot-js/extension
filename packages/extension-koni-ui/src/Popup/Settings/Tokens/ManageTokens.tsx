@@ -152,7 +152,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           enableSearchInput={true}
           filterBy={filterFunction}
           gridGap={'14px'}
-          ignoreScrollbar={assetItems.length > 7}
           list={assetItems}
           minColumnWidth={'172px'}
           mode={'boxed'}
@@ -221,7 +220,7 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.manage_tokens__right_item_container': {
-      marginLeft: -token.marginXXS
+      marginRight: -token.marginXXS
     }
   });
 });

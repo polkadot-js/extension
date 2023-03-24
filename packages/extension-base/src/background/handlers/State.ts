@@ -5,7 +5,8 @@ import type { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/type
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 import type { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
 
-import { RequestSettingsType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
+import { DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from '@subwallet/extension-base/services/setting-service/constants';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@subwallet/extension-chains';
@@ -218,11 +219,11 @@ export default class State {
         update(
           {
           // language: 'en',
-            browserConfirmationType: 'extension',
+            browserConfirmationType: DEFAULT_NOTIFICATION_TYPE,
             // isShowZeroBalance: true,
             isShowBalance: false,
             accountAllLogo: '',
-            theme: ThemeNames.DARK,
+            theme: DEFAULT_THEME,
             camera: false
           }
         );

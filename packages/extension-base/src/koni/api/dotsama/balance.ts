@@ -12,7 +12,7 @@ import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/toke
 import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { _BALANCE_CHAIN_GROUP, _BALANCE_TOKEN_GROUP, _PURE_EVM_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isPureEvmChain, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isPureEvmChain, _isSmartContractToken, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses, sumBN } from '@subwallet/extension-base/utils';
 import { Contract } from 'web3-eth-contract';
 
@@ -117,7 +117,7 @@ async function subscribeWithAccountMulti (addresses: string[], chainInfo: _Chain
 
     let pooledStakingBalance = BN_ZERO;
 
-    if (networkAPI.query.nominationPools) {
+    if (_isSubstrateRelayChain(chainInfo) && networkAPI.query.nominationPools) {
       const poolMemberDatas = await networkAPI.query.nominationPools.poolMembers.multi(addresses);
 
       for (const _poolMemberData of poolMemberDatas) {
@@ -132,13 +132,15 @@ async function subscribeWithAccountMulti (addresses: string[], chainInfo: _Chain
     }
 
     balances.forEach((balance: AccountInfo) => {
-      total = total.add(balance.data?.free?.toBn() || new BN(0));
+      total = total.add(balance.data?.free?.toBn() || new BN(0)); // reserved is seperated
       reserved = reserved.add(balance.data?.reserved?.toBn() || new BN(0));
       miscFrozen = miscFrozen.add(balance.data?.miscFrozen?.toBn() || new BN(0));
       feeFrozen = feeFrozen.add(balance.data?.feeFrozen?.toBn() || new BN(0));
     });
 
     let locked = reserved.add(miscFrozen);
+
+    total = total.add(reserved); // total = free + reserved
 
     if (pooledStakingBalance.gt(BN_ZERO)) {
       total = total.add(pooledStakingBalance);

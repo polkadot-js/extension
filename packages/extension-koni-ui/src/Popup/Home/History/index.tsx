@@ -13,7 +13,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
 import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
-import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, DownloadSimple, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
+import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -209,16 +209,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const filterOptions = useMemo(() => {
     return [
-      { label: 'Send token transaction', value: FilterValue.SEND },
-      { label: 'Receive token transaction', value: FilterValue.RECEIVED },
-      { label: 'NFT transaction', value: FilterValue.NFT },
-      { label: 'Stake transaction', value: FilterValue.STAKE },
-      { label: 'Claim reward transaction', value: FilterValue.CLAIM },
-      { label: 'Crowdloan transaction', value: FilterValue.CROWDLOAN },
-      { label: 'Successful transaction', value: FilterValue.SUCCESSFUL },
-      { label: 'Failed transaction', value: FilterValue.FAILED }
+      { label: t('Send token transaction'), value: FilterValue.SEND },
+      { label: t('Receive token transaction'), value: FilterValue.RECEIVED },
+      { label: t('NFT transaction'), value: FilterValue.NFT },
+      { label: t('Stake transaction'), value: FilterValue.STAKE },
+      { label: t('Claim reward transaction'), value: FilterValue.CLAIM },
+      // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
+      { label: t('Successful transaction'), value: FilterValue.SUCCESSFUL },
+      { label: t('Failed transaction'), value: FilterValue.FAILED }
     ];
-  }, []);
+  }, [t]);
 
   const accountMap = useMemo(() => {
     return accounts.reduce((accMap, cur) => {
@@ -368,17 +368,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           center={false}
           className={'history-header'}
           paddingVertical
-          rightButtons={[
-            {
-              icon: (
-                <Icon
-                  phosphorIcon={DownloadSimple}
-                  size={'md'}
-                  type='phosphor'
-                />
-              )
-            }
-          ]}
+          // todo: enable this code if support download feature
+          // rightButtons={[
+          //   {
+          //     icon: (
+          //       <Icon
+          //         phosphorIcon={DownloadSimple}
+          //         size={'md'}
+          //         type='phosphor'
+          //       />
+          //     )
+          //   }
+          // ]}
           showBackButton={false}
           title={t('History')}
         />

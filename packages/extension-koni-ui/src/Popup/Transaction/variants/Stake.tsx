@@ -229,10 +229,10 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     setLoading(true);
-    const { from, nominate, pool, value } = values;
+    const { from, [FormFieldName.NOMINATE]: nominate, [FormFieldName.POOL]: pool, [FormFieldName.VALUE]: value, [FormFieldName.TYPE]: type } = values;
     let bondingPromise: Promise<SWTransactionResponse>;
 
-    if (pool) {
+    if (pool && type === StakingType.POOLED) {
       const selectedPool = getSelectedPool(pool);
 
       bondingPromise = submitPoolBonding({

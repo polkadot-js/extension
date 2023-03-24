@@ -205,6 +205,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         footer={(
           <Button
             block
+            disabled={!changeValidators.length}
             icon={(
               <Icon
                 phosphorIcon={CheckCircle}

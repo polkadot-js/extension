@@ -5,7 +5,7 @@ import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getOriginChainOfAsset, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
@@ -132,7 +132,18 @@ function getTokenItems (
 }
 
 function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<string, _AssetRef>, chainInfoMap: Record<string, _ChainInfo>): ChainItemType[] {
+  if (!tokenSlug) {
+    return [];
+  }
+
   const result: ChainItemType[] = [];
+  const originChain = chainInfoMap[_getOriginChainOfAsset(tokenSlug)];
+
+  // Firstly, push the originChain of token
+  result.push({
+    name: originChain.name,
+    slug: originChain.slug
+  });
 
   Object.values(xcmRefMap).forEach((xcmRef) => {
     if (xcmRef.srcAsset === tokenSlug) {
@@ -190,8 +201,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(currentTokenSlug, xcmRefMap, chainInfoMap);
   }, [chainInfoMap, currentTokenSlug, xcmRefMap]);
-
-  console.log('destChainItems', destChainItems);
 
   const tokenItems = useMemo<TokenItemType[]>(() => {
     return getTokenItems(

@@ -1629,7 +1629,7 @@ export default class KoniExtension {
       extrinsic = await createXcmExtrinsic({
         destinationTokenInfo,
         originTokenInfo,
-        sendingValue: value || '0',
+        sendingValue: value,
         recipient: to,
         chainInfoMap: chainInfoMap,
         substrateApiMap: substrateApiMap

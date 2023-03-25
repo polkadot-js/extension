@@ -1,53 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { astarEstimateCrossChainFee, astarGetXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm/astar';
-import { moonbeamEstimateCrossChainFee, moonbeamGetXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm/moonbeamXcm';
-import { statemintEstimateCrossChainFee, statemintGetXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm/statemintXcm';
-import { substrateEstimateCrossChainFee, substrateGetXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm/substrateXcm';
+import { astarGetXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm/astar';
+import { moonbeamGetXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm/moonbeamXcm';
+import { statemintGetXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm/statemintXcm';
+import { substrateGetXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm/substrateXcm';
 import { _XCM_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _isNativeToken, _isXcmPathSupported } from '@subwallet/extension-base/services/chain-service/utils';
-import { KeyringPair } from '@subwallet/keyring/types';
+import { _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { EventRecord } from '@polkadot/types/interfaces';
-
-export async function estimateCrossChainFee (
-  sender: KeyringPair,
-  recipient: string,
-  sendingValue: string,
-  originTokenInfo: _ChainAsset,
-  destinationTokenInfo: _ChainAsset,
-  chainInfoMap: Record<string, _ChainInfo>,
-  substrateApiMap: Record<string, _SubstrateApi>,
-  assetRefMap: Record<string, _AssetRef>
-): Promise<string> {
-  if (!_isXcmPathSupported(originTokenInfo.slug, destinationTokenInfo.slug, assetRefMap)) {
-    console.log('Unsupported xcm');
-
-    return '0';
-  }
-
-  const originNetworkKey = originTokenInfo.originChain;
-  const destinationNetworkKey = destinationTokenInfo.originChain;
-
-  if (_XCM_CHAIN_GROUP.moonbeam.includes(originNetworkKey)) {
-    return moonbeamEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, recipient, sender, sendingValue, substrateApiMap, originTokenInfo, chainInfoMap);
-  }
-
-  if (_XCM_CHAIN_GROUP.astar.includes(originNetworkKey)) {
-    return astarEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, recipient, sender, sendingValue, substrateApiMap, originTokenInfo, chainInfoMap);
-  }
-
-  if (_XCM_CHAIN_GROUP.statemine.includes(originNetworkKey)) {
-    return statemintEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, recipient, sender, sendingValue, substrateApiMap, originTokenInfo, chainInfoMap);
-  }
-
-  return substrateEstimateCrossChainFee(originNetworkKey, destinationNetworkKey, recipient, sender, sendingValue, substrateApiMap, originTokenInfo, chainInfoMap);
-}
 
 interface CreateXcmExtrinsicProps {
   originTokenInfo: _ChainAsset;
@@ -85,64 +50,6 @@ export const createXcmExtrinsic = async ({ chainInfoMap,
 
   return extrinsic;
 };
-
-interface MakeCrossChainTransferProps {
-  originTokenInfo: _ChainAsset;
-  destinationTokenInfo: _ChainAsset;
-  recipient: string;
-  sender: KeyringPair;
-  sendingValue: string;
-  substrateApiMap: Record<string, _SubstrateApi>;
-  chainInfoMap: Record<string, _ChainInfo>;
-  assetRefMap: Record<string, _AssetRef>;
-  callback: (data: TransactionResponse) => void;
-}
-
-export async function makeCrossChainTransfer ({ assetRefMap,
-  callback,
-  chainInfoMap,
-  destinationTokenInfo,
-  originTokenInfo,
-  recipient,
-  sender,
-  sendingValue,
-  substrateApiMap }: MakeCrossChainTransferProps): Promise<void> {
-  // const txState: TransactionResponse = {};
-  //
-  // const originNetworkKey = originTokenInfo.originChain;
-  //
-  // if (!_isXcmPathSupported(originTokenInfo.slug, destinationTokenInfo.slug, assetRefMap)) {
-  //   callback(getUnsupportedResponse());
-  //
-  //   return;
-  // }
-
-  // const substrateApi = await substrateApiMap[originNetworkKey].isReady;
-  //
-  // const extrinsic = await createXcmExtrinsic({
-  //   destinationTokenInfo,
-  //   originTokenInfo,
-  //   sendingValue: sendingValue,
-  //   recipient: recipient,
-  //   chainInfoMap: chainInfoMap,
-  //   substrateApiMap: substrateApiMap
-  // });
-  //
-  // const updateResponseTxResult = (response: TransactionResponse, records: EventRecord[]) => {
-  //   updateXcmResponseTxResult(originNetworkKey, originTokenInfo, response, records);
-  // };
-
-  // await signAndSendExtrinsic({
-  //   type: SignerType.PASSWORD,
-  //   substrateApi: substrateApi,
-  //   callback: callback,
-  //   extrinsic: extrinsic,
-  //   txState: txState,
-  //   address: sender.address,
-  //   updateResponseTxResult: updateResponseTxResult,
-  //   errorMessage: 'error xcm transfer'
-  // });
-}
 
 // TODO: add + refine logic for more chains
 export function updateXcmResponseTxResult (

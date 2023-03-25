@@ -3,6 +3,7 @@
 
 import { ExtrinsicType, NominationInfo, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
@@ -83,7 +84,21 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [currentValidator, nominatorMetadata]);
 
   const mustChooseValidator = useMemo(() => {
-    return isActionFromValidator(stakingType, stakingChain || '');
+    const _stakingChain = stakingChain || '';
+
+    if (stakingType === StakingType.POOLED) {
+      return false;
+    }
+
+    if (_STAKING_CHAIN_GROUP.astar.includes(_stakingChain)) {
+      return true;
+    } else if (_STAKING_CHAIN_GROUP.amplitude.includes(_stakingChain)) {
+      return true;
+    } else if (_STAKING_CHAIN_GROUP.para.includes(_stakingChain)) {
+      return true;
+    }
+
+    return false;
   }, [stakingChain, stakingType]);
 
   const bondedValue = useMemo((): string => {
@@ -181,24 +196,27 @@ const Component: React.FC<Props> = (props: Props) => {
       unbondingPromise = submitUnbonding(params);
     }
 
-    unbondingPromise
-      .then((result) => {
-        const { errors, extrinsicHash, warnings } = result;
+    setLoading(true);
 
-        if (errors.length || warnings.length) {
-          setErrors(errors.map((e) => e.message));
-          setWarnings(warnings.map((w) => w.message));
-        } else if (extrinsicHash) {
-          onDone(extrinsicHash);
-        }
-      })
-      .catch((e: Error) => {
-        setErrors([e.message]);
-      })
-      .finally(() => {
-        setLoading(false);
-      })
-    ;
+    setTimeout(() => {
+      unbondingPromise
+        .then((result) => {
+          const { errors, extrinsicHash, warnings } = result;
+
+          if (errors.length || warnings.length) {
+            setErrors(errors.map((e) => e.message));
+            setWarnings(warnings.map((w) => w.message));
+          } else if (extrinsicHash) {
+            onDone(extrinsicHash);
+          }
+        })
+        .catch((e: Error) => {
+          setErrors([e.message]);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }, 300);
   }, [mustChooseValidator, nominatorMetadata, onDone]);
 
   const renderBounded = useCallback(() => {
@@ -264,8 +282,9 @@ const Component: React.FC<Props> = (props: Props) => {
                     name={FormFieldName.VALIDATOR}
                   >
                     <NominationSelector
+                      disabled={!from}
                       label={t('Select collator')}
-                      nominators={nominatorMetadata?.nominations || []}
+                      nominators={ from ? nominatorMetadata?.nominations || [] : []}
                     />
                   </Form.Item>
 

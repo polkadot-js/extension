@@ -6,7 +6,7 @@ import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwalle
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AssetSetting, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
@@ -25,7 +25,6 @@ import TransactionService from '@subwallet/extension-base/services/transaction-s
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { CurrentAccountStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { decodePair } from '@subwallet/keyring/pair/decode';
@@ -80,8 +79,6 @@ export default class KoniState {
   private injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
   private readonly providers: Providers;
   private readonly unsubscriptionMap: Record<string, () => void> = {};
-
-  private assetSettingStore = new AssetSettingStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly accountRefStore = new AccountRefStore();
   private readonly keyringStateSubject = new Subject<KeyringState>();
@@ -124,15 +121,14 @@ export default class KoniState {
 
   readonly notificationService: NotificationService;
   // TODO: consider making chainService public (or getter) and call function directly
-  private chainService: ChainService;
-  public dbService: DatabaseService;
+  readonly chainService: ChainService;
+  readonly dbService: DatabaseService;
   private cron: KoniCron;
   private subscription: KoniSubscription;
   private logger: Logger;
   private ready = false;
-  private readonly settingService: SettingService;
-  private readonly requestService: RequestService;
-
+  readonly settingService: SettingService;
+  readonly requestService: RequestService;
   readonly transactionService: TransactionService;
   readonly historyService: HistoryService;
   readonly priceService: PriceService;
@@ -148,7 +144,7 @@ export default class KoniState {
     this.chainService = new ChainService(this.dbService);
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService, this.settingService);
-    this.priceService = new PriceService(this.dbService, this.chainService);
+    this.priceService = new PriceService(this.serviceInfoSubject, this.dbService, this.chainService);
     this.balanceService = new BalanceService(this.chainService);
     this.historyService = new HistoryService(this.dbService, this.chainService);
     this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceService, this.historyService, this.notificationService);
@@ -277,37 +273,9 @@ export default class KoniState {
     return balanceMap;
   }
 
-  private initAssetSetting () {
-    this.assetSettingStore.get('AssetSetting', (storedAssetSettings) => {
-      const activeChainSlugs = this.chainService.getActiveChainSlugs();
-      const assetRegistry = this.chainService.getAssetRegistry();
-
-      const assetSettings: Record<string, AssetSetting> = storedAssetSettings || {};
-
-      if (Object.keys(assetSettings).length === 0) { // only initiate the first time
-        Object.values(assetRegistry).forEach((assetInfo) => {
-          const isSettingExisted = assetInfo.slug in assetSettings;
-
-          // Set visible for every enabled chains
-          if (activeChainSlugs.includes(assetInfo.originChain) && !isSettingExisted) {
-            // Setting only exist when set either by chain settings or user
-            assetSettings[assetInfo.slug] = {
-              visible: true
-            };
-          }
-        });
-
-        this.setAssetSettings(assetSettings);
-      }
-
-      this.logger.log('Done init asset settings');
-    });
-  }
-
   public init () {
     this.chainService.init(() => {
       this.onReady(); // TODO: do better than a callback
-      this.initAssetSetting();
       this.updateServiceInfo();
 
       this.startSubscription();
@@ -706,7 +674,7 @@ export default class KoniState {
 
     if (authUrls[shortenUrl]) {
       if (chainInfo && !_isChainEnabled(chainState)) {
-        this.enableChain(networkKey);
+        await this.enableChain(networkKey);
       }
 
       authUrls[shortenUrl].currentEvmNetworkKey = networkKey;
@@ -733,7 +701,7 @@ export default class KoniState {
           const useAddress = changeAddress || address;
 
           if (chainInfo && !_isChainEnabled(chainState)) {
-            this.enableChain(networkKey);
+            this.enableChain(networkKey).catch(console.error);
           }
 
           if (useAddress !== ALL_ACCOUNT_KEY) {
@@ -1018,36 +986,6 @@ export default class KoniState {
     return this.chainService.getAllPriceIds();
   }
 
-  public setAssetSettings (assetSettings: Record<string, AssetSetting>): void {
-    this.assetSettingStore.set('AssetSetting', assetSettings);
-  }
-
-  public getAssetSettings (update: (value: Record<string, AssetSetting>) => void) {
-    this.assetSettingStore.get('AssetSetting', (rs) => {
-      update(rs);
-    });
-  }
-
-  public updateAssetSetting (assetSlug: string, assetSetting: AssetSetting) {
-    this.assetSettingStore.get('AssetSetting', (currentAssetSettings) => {
-      this.assetSettingStore.set('AssetSetting', {
-        ...currentAssetSettings,
-        [assetSlug]: assetSetting
-      });
-    });
-
-    // if chain not enabled, then automatically enable
-    if (assetSetting.visible) {
-      const assetInfo = this.chainService.getAssetBySlug(assetSlug);
-
-      this.chainService.enableChain(assetInfo.originChain);
-    }
-  }
-
-  public subscribeAssetSettings () {
-    return this.assetSettingStore.getSubject();
-  }
-
   public getSmartContractNfts () {
     return this.chainService.getSmartContractNfts();
   }
@@ -1106,11 +1044,11 @@ export default class KoniState {
     return this.chainService.subscribeMultiChainAssetMap();
   }
 
-  public upsertCustomToken (data: _ChainAsset) {
+  public async upsertCustomToken (data: _ChainAsset) {
     const tokenSlug = this.chainService.upsertCustomToken(data);
 
     if (_isAssetFungibleToken(data)) {
-      this.updateAssetSetting(tokenSlug, { visible: true });
+      await this.chainService.updateAssetSetting(tokenSlug, { visible: true });
     }
 
     this.updateServiceInfo();
@@ -1139,11 +1077,11 @@ export default class KoniState {
     return this.chainService.getActiveChainInfoMap();
   }
 
-  public upsertChainInfo (data: _NetworkUpsertParams): boolean {
+  public async upsertChainInfo (data: _NetworkUpsertParams): Promise<boolean> {
     const newNativeTokenSlug = this.chainService.upsertChain(data);
 
     if (newNativeTokenSlug) {
-      this.updateAssetSetting(newNativeTokenSlug, { visible: true });
+      await this.chainService.updateAssetSetting(newNativeTokenSlug, { visible: true });
     }
 
     this.updateServiceInfo();
@@ -1188,22 +1126,9 @@ export default class KoniState {
     return result;
   };
 
-  public updateAssetSettingByChain (chainSlug: string, visible: boolean) {
-    this.assetSettingStore.get('AssetSetting', (storedAssetSettings) => {
-      const assetsByChain = this.chainService.getFungibleTokensByChain(chainSlug);
-      const assetSettings: Record<string, AssetSetting> = storedAssetSettings || {};
-
-      Object.values(assetsByChain).forEach((assetInfo) => {
-        assetSettings[assetInfo.slug] = { visible };
-      });
-
-      this.setAssetSettings(assetSettings);
-    });
-  }
-
-  public disableChain (chainSlug: string): boolean {
+  public async disableChain (chainSlug: string): Promise<boolean> {
     // const defaultChains = this.getDefaultNetworkKeys();
-    this.updateAssetSettingByChain(chainSlug, false);
+    await this.chainService.updateAssetSettingByChain(chainSlug, false);
 
     const result = this.chainService.disableChain(chainSlug);
 
@@ -1212,9 +1137,9 @@ export default class KoniState {
     return result;
   }
 
-  public enableChain (chainSlug: string, enableTokens = true): boolean {
+  public async enableChain (chainSlug: string, enableTokens = true): Promise<boolean> {
     if (enableTokens) {
-      this.updateAssetSettingByChain(chainSlug, true);
+      await this.chainService.updateAssetSettingByChain(chainSlug, true);
     }
 
     const result = this.chainService.enableChain(chainSlug);
@@ -1703,7 +1628,7 @@ export default class KoniState {
 
     const setUpSingleMode = ({ networkKeys, theme }: SingleModeJson) => {
       networkKeys.forEach((key) => {
-        this.enableChain(key);
+        this.enableChain(key).catch(console.error);
       });
 
       const chainInfo = this.chainService.getChainInfoByKey(networkKeys[0]);

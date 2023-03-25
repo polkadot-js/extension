@@ -945,22 +945,14 @@ export default class KoniExtension {
     return true;
   }
 
-  private getAssetSetting (): Promise<Record<string, AssetSetting>> {
-    return new Promise<Record<string, AssetSetting>>((resolve, reject) => {
-      this.#koniState.getAssetSettings((rs: Record<string, AssetSetting>) => {
-        resolve(rs);
-      });
-    });
+  private async getAssetSetting (): Promise<Record<string, AssetSetting>> {
+    return this.#koniState.chainService.getAssetSettings();
   }
 
   private subscribeAssetSetting (id: string, port: chrome.runtime.Port): Promise<Record<string, AssetSetting>> {
     const cb = createSubscription<'pri(assetSetting.getSubscription)'>(id, port);
 
-    const assetSettingSubscription = this.#koniState.subscribeAssetSettings().subscribe({
-      next: (rs) => {
-        cb(rs);
-      }
-    });
+    const assetSettingSubscription = this.#koniState.chainService.subscribeAssetSettings().subscribe(cb);
 
     this.createUnsubscriptionHandle(id, assetSettingSubscription.unsubscribe);
 
@@ -971,9 +963,9 @@ export default class KoniExtension {
     return this.getAssetSetting();
   }
 
-  private updateAssetSetting (params: AssetSettingUpdateReq): boolean {
+  private async updateAssetSetting (params: AssetSettingUpdateReq) {
     try {
-      this.#koniState.updateAssetSetting(params.tokenSlug, params.assetSetting);
+      await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
 
       return true;
     } catch (e) {
@@ -1667,9 +1659,9 @@ export default class KoniExtension {
     });
   }
 
-  private upsertChain (data: _NetworkUpsertParams): boolean {
+  private async upsertChain (data: _NetworkUpsertParams): Promise<boolean> {
     try {
-      return this.#koniState.upsertChainInfo(data);
+      return await this.#koniState.upsertChainInfo(data);
     } catch (e) {
       console.error(e);
 
@@ -1681,12 +1673,12 @@ export default class KoniExtension {
     return this.#koniState.removeCustomChain(networkKey);
   }
 
-  private disableChain (networkKey: string): boolean {
+  private disableChain (networkKey: string): Promise<boolean> {
     return this.#koniState.disableChain(networkKey);
   }
 
-  private enableChain (networkKey: string): boolean {
-    return this.#koniState.enableChain(networkKey);
+  private async enableChain (networkKey: string): Promise<boolean> {
+    return await this.#koniState.enableChain(networkKey);
   }
 
   private async validateNetwork ({ existedChainSlug,
@@ -1708,9 +1700,9 @@ export default class KoniExtension {
     }
   }
 
-  private upsertCustomToken (data: _ChainAsset) {
+  private async upsertCustomToken (data: _ChainAsset) {
     try {
-      this.#koniState.upsertCustomToken(data);
+      await this.#koniState.upsertCustomToken(data);
 
       return true;
     } catch (e) {
@@ -1805,11 +1797,9 @@ export default class KoniExtension {
     return { ...rs, isSendingSelf };
   }
 
-  private enableChains (targetKeys: string[]) {
+  private async enableChains (targetKeys: string[]) {
     try {
-      for (const networkKey of targetKeys) {
-        this.enableChain(networkKey);
-      }
+      await Promise.all(targetKeys.map((networkKey) => this.enableChain(networkKey)));
     } catch (e) {
       return false;
     }
@@ -3175,25 +3165,25 @@ export default class KoniExtension {
       case 'pri(chainService.getSupportedContractTypes)':
         return this.getSupportedSmartContractTypes();
       case 'pri(chainService.enableChain)':
-        return this.enableChain(request as string);
+        return await this.enableChain(request as string);
       case 'pri(chainService.disableChain)':
-        return this.disableChain(request as string);
+        return await this.disableChain(request as string);
       case 'pri(chainService.removeChain)':
         return this.removeCustomChain(request as string);
       case 'pri(chainService.validateCustomChain)':
         return await this.validateNetwork(request as ValidateNetworkRequest);
       case 'pri(chainService.upsertChain)':
-        return this.upsertChain(request as _NetworkUpsertParams);
+        return await this.upsertChain(request as _NetworkUpsertParams);
       case 'pri(chainService.resetDefaultChains)':
         return this.resetDefaultNetwork();
       case 'pri(chainService.enableChains)':
-        return this.enableChains(request as string[]);
+        return await this.enableChains(request as string[]);
       case 'pri(chainService.subscribeAssetRegistry)':
         return this.subscribeAssetRegistry(id, port);
       case 'pri(chainService.subscribeMultiChainAssetMap)':
         return this.subscribeMultiChainAssetMap(id, port);
       case 'pri(chainService.upsertCustomAsset)':
-        return this.upsertCustomToken(request as _ChainAsset);
+        return await this.upsertCustomToken(request as _ChainAsset);
       case 'pri(chainService.deleteCustomAsset)':
         return this.deleteCustomAsset(request as string);
       case 'pri(chainService.validateCustomAsset)':
@@ -3201,7 +3191,7 @@ export default class KoniExtension {
       case 'pri(assetSetting.getSubscription)':
         return this.subscribeAssetSetting(id, port);
       case 'pri(assetSetting.update)':
-        return this.updateAssetSetting(request as AssetSettingUpdateReq);
+        return await this.updateAssetSetting(request as AssetSettingUpdateReq);
 
       case 'pri(transfer.checkReferenceCount)':
         return await this.transferCheckReferenceCount(request as RequestTransferCheckReferenceCount);

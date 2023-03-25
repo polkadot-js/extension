@@ -10,7 +10,7 @@ import { approveAuthRequestV2, cancelAuthRequestV2, rejectAuthRequestV2 } from '
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account/account';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { PlusCircle, ShieldSlash, XCircle } from 'phosphor-react';

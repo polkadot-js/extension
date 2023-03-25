@@ -6,7 +6,7 @@ import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotifi
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
+import reformatAddress from '@subwallet/extension-koni-ui/util/account/reformatAddress';
 import { Button, Icon } from '@subwallet/react-ui';
 import TokenItem, { TokenItemProps } from '@subwallet/react-ui/es/web3-block/token-item';
 import classNames from 'classnames';

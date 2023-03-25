@@ -7,8 +7,8 @@ import { _ChainState } from '@subwallet/extension-base/services/chain-service/ty
 import { _isChainEnabled, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { createTransactionFromRLP } from '@subwallet/extension-base/utils/eth';
 import { EthereumParsedData, ParsedData, SubstrateCompletedParsedData, SubstrateMultiParsedData } from '@subwallet/extension-koni-ui/types/scanner';
-import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
-import { findNetworkJsonByGenesisHash, getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account/account';
+import { findNetworkJsonByGenesisHash, getNetworkJsonByInfo } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
 import BigN from 'bignumber.js';
 
 import { compactFromU8a, hexStripPrefix, hexToU8a, u8aToHex } from '@polkadot/util';

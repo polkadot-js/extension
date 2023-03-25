@@ -7,7 +7,7 @@ import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { Icon, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { User, Users } from 'phosphor-react';
-import React, { SyntheticEvent, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -42,6 +42,13 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
     return getConvertedBalanceValue(balanceValue, Number(`${priceMap[staking.chain] || 0}`));
   }, [balanceValue, priceMap, staking.chain]);
 
+  const _onClickRightIcon = useCallback((e?: SyntheticEvent) => {
+    e && e.stopPropagation();
+    onClickRightIcon(stakingData);
+  }, [onClickRightIcon, stakingData]);
+
+  const _onPressItem = useCallback(() => onClickItem(stakingData), [onClickItem, stakingData]);
+
   return (
     <StakingItem
       className={className}
@@ -49,13 +56,8 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
       decimal={0}
       displayToken={staking.nativeToken}
       networkKey={staking.chain}
-      // eslint-disable-next-line react/jsx-no-bind
-      onClickRightIcon={(e?: SyntheticEvent) => {
-        e && e.stopPropagation();
-        onClickRightIcon(stakingData);
-      }}
-      // eslint-disable-next-line react/jsx-no-bind
-      onPressItem={() => onClickItem(stakingData)}
+      onClickRightIcon={_onClickRightIcon}
+      onPressItem={_onPressItem}
       stakingNetwork={staking.name}
       stakingType={getStakingTypeTag(staking.type)}
       stakingValue={balanceValue}

@@ -11,7 +11,7 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import { HistoryDetailModal, HistoryDetailModalId } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
+import { customFormatDate } from '@subwallet/extension-koni-ui/util/common/customFormatDate';
 import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, DownloadSimple, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -78,8 +78,8 @@ function isTypeTransfer (txType: ExtrinsicType) {
 
 function isTypeStaking (txType: ExtrinsicType) {
   return [
-    ExtrinsicType.STAKING_STAKE,
-    ExtrinsicType.STAKING_UNSTAKE,
+    ExtrinsicType.STAKING_JOIN_POOL,
+    ExtrinsicType.STAKING_LEAVE_POOL,
     ExtrinsicType.STAKING_BOND,
     ExtrinsicType.STAKING_UNBOND,
     ExtrinsicType.STAKING_WITHDRAW,
@@ -235,8 +235,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     received: t('Receive'),
     [ExtrinsicType.SEND_NFT]: t('NFT'),
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan'),
-    [ExtrinsicType.STAKING_STAKE]: t('Stake'),
-    [ExtrinsicType.STAKING_UNSTAKE]: t('Unstake'),
+    [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake'),
+    [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake'),
     [ExtrinsicType.STAKING_BOND]: t('Bond'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward'),
@@ -249,8 +249,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     received: t('Receive transaction'),
     [ExtrinsicType.SEND_NFT]: t('NFT transaction'),
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan transaction'),
-    [ExtrinsicType.STAKING_STAKE]: t('Stake transaction'),
-    [ExtrinsicType.STAKING_UNSTAKE]: t('Unstake transaction'),
+    [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake transaction'),
+    [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake transaction'),
     [ExtrinsicType.STAKING_BOND]: t('Bond transaction'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond transaction'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward transaction'),

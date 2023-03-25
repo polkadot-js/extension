@@ -24,7 +24,7 @@ export interface ExtraToken {
   tokensScreenInfoBackgroundColor: string,
 }
 
-export declare type Theme = {
+export type Theme = {
   id: ThemeNames;
   name: string;
   token: GlobalToken;

@@ -76,8 +76,8 @@ function Component ({ className }: Props) {
   const titleMap = useMemo<Record<string, string>>(() => ({
     [ExtrinsicType.TRANSFER_BALANCE]: t('Transfer'),
     [ExtrinsicType.SEND_NFT]: t('Transfer NFT'),
-    [ExtrinsicType.STAKING_STAKE]: t('Add to Bond'),
-    [ExtrinsicType.STAKING_UNSTAKE]: t('Remove Bond'),
+    [ExtrinsicType.STAKING_JOIN_POOL]: t('Add to Bond'),
+    [ExtrinsicType.STAKING_LEAVE_POOL]: t('Remove Bond'),
     [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim reward'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw')
@@ -101,7 +101,7 @@ function Component ({ className }: Props) {
   );
 
   const onClickRightBtn = useCallback(() => {
-    if (transactionType === ExtrinsicType.STAKING_STAKE) {
+    if (transactionType === ExtrinsicType.STAKING_JOIN_POOL) {
       activeModal(StakingNetworkDetailModalId);
     }
   }, [activeModal, transactionType]);

@@ -16,7 +16,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account';
+import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account/account';
 import { BackgroundIcon, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Plug, Plugs, PlugsConnected } from 'phosphor-react';

@@ -14,8 +14,8 @@ import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchMo
 import { deriveAccountV3 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account';
-import { renderModalSelector } from '@subwallet/extension-koni-ui/util/dom';
+import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account/account';
+import { renderModalSelector } from '@subwallet/extension-koni-ui/util/common/dom';
 import { Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { SpinnerGap } from 'phosphor-react';

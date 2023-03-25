@@ -2,36 +2,32 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React, { useContext, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps & {
   label?: string;
-  bondedBalance?: string | number | BigN
+  bondedBalance?: string | number | BigN;
+  decimals: number;
+  symbol: string;
 }
 
-const Component = ({ bondedBalance, className, label }: Props) => {
+const Component = ({ bondedBalance, className, decimals, label, symbol }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
-  const transactionContext = useContext(TransactionContext);
-  const chainInfo = useMemo(() => (chainInfoMap[transactionContext.chain]), [chainInfoMap, transactionContext.chain]);
 
   return (
     <Typography.Paragraph className={CN(className, 'bonded-balance')}>
       <Number
-        decimal={chainInfo?.substrateInfo?.decimals || chainInfo?.evmInfo?.decimals || 18}
+        decimal={decimals}
         decimalColor={token.colorTextTertiary}
         intColor={token.colorTextTertiary}
         size={14}
-        suffix={chainInfo?.substrateInfo?.symbol || chainInfo?.evmInfo?.symbol || ''}
+        suffix={symbol}
         unitColor={token.colorTextTertiary}
         value={bondedBalance || 0}
       />

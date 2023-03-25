@@ -6,14 +6,16 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import SwStakingItem from '@subwallet/extension-koni-ui/components/StakingItem/SwStakingItem';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
-import MoreActionModal, { MORE_ACTION_MODAL, StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import MoreActionModal, { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -46,6 +48,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { data: stakingItems, priceMap } = useGetStakingList();
+
   const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filterFunction = useMemo<(item: StakingDataType) => boolean>(() => {
@@ -80,16 +83,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   const onClickItem = useCallback((item: StakingDataType) => {
-    setSelectedItem(item);
+    if (!isAccountAll(item.staking.address)) {
+      setSelectedItem(item);
 
-    activeModal(STAKING_DETAIL_MODAL_ID);
+      activeModal(STAKING_DETAIL_MODAL_ID);
+    }
   }, [activeModal]);
 
   const subHeaderButton: ButtonProps[] = [
     {
       icon: rightIcon,
       onClick: () => {
-        navigate('/transaction/stake', { state: { chainStakingMetadata: undefined, nominatorMetadata: undefined, hideTabList: false } as StakingDataOption });
+        navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`);
       }
     }
   ];
@@ -165,12 +170,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           options={FILTER_OPTIONS}
         />
 
-        {!!(selectedItem && selectedItem.nominatorMetadata && selectedItem.chainStakingMetadata) &&
-          <StakingDetailModal
-            chainStakingMetadata={selectedItem.chainStakingMetadata}
-            nominatorMetadata={selectedItem.nominatorMetadata}
-          />}
-
+        {
+          !!(selectedItem && selectedItem.nominatorMetadata && selectedItem.chainStakingMetadata) &&
+          (
+            <StakingDetailModal
+              chainStakingMetadata={selectedItem.chainStakingMetadata}
+              nominatorMetadata={selectedItem.nominatorMetadata}
+            />
+          )
+        }
         <MoreActionModal
           chainStakingMetadata={selectedItem?.chainStakingMetadata}
           nominatorMetadata={selectedItem?.nominatorMetadata}

@@ -4,6 +4,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from '@subwallet/extension-base/services/setting-service/constants';
 import { AppSettings, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 import settings from '@polkadot/ui-settings';
@@ -17,9 +18,9 @@ const initialState = {
   isShowBalance: false,
   isShowZeroBalance: true,
   accountAllLogo: '',
-  theme: ThemeNames.DARK,
+  theme: DEFAULT_THEME,
   language: 'en',
-  browserConfirmationType: 'popup',
+  browserConfirmationType: DEFAULT_NOTIFICATION_TYPE,
   camera: false,
 
   // AuthUrls

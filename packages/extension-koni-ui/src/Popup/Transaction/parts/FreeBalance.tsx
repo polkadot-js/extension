@@ -1,17 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { useGetBalance } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { getFreeBalance } from '@subwallet/extension-koni-ui/messaging';
-import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Number, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps & {
@@ -24,36 +19,8 @@ type Props = ThemeProps & {
 const Component = ({ address, chain, className, label, tokenSlug }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const [nativeTokenBalance, setNativeTokenBalance] = useState<AmountData>({ value: '0', symbol: '', decimals: 18 });
-  const [tokenBalance, setTokenBalance] = useState<AmountData>({ value: '0', symbol: '', decimals: 18 });
-  const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
-  const transactionContext = useContext(TransactionContext);
-  const chainInfo = useMemo(() => (chainInfoMap[transactionContext.chain]), [chainInfoMap, transactionContext.chain]);
-  const nativeTokenSlug = chainInfo ? _getChainNativeTokenSlug(chainInfo) : undefined;
 
-  useEffect(() => {
-    let cancel = false;
-
-    if (address && chain && nativeTokenSlug) {
-      getFreeBalance({ address, networkKey: chain })
-        .then((balance) => {
-          !cancel && setNativeTokenBalance(balance);
-        })
-        .catch(console.error);
-
-      if (tokenSlug && tokenSlug !== nativeTokenSlug) {
-        getFreeBalance({ address, networkKey: chain, token: tokenSlug })
-          .then((balance) => {
-            !cancel && setTokenBalance(balance);
-          })
-          .catch(console.error);
-      }
-    }
-
-    return () => {
-      cancel = true;
-    };
-  }, [address, chain, nativeTokenSlug, tokenSlug]);
+  const { nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug);
 
   if (!address && !chain) {
     return <></>;

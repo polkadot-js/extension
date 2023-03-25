@@ -3,8 +3,11 @@
 
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { toShort } from '@subwallet/extension-koni-ui/util';
+import { getValidatorKey } from '@subwallet/extension-koni-ui/util/transaction/stake';
 import { BackgroundIcon, Button, Icon, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
+import CN from 'classnames';
 import { CheckCircle, DotsThree, Medal } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,31 +21,32 @@ type Props = ThemeProps & {
   onClickMoreBtn: (e: SyntheticEvent) => void;
   apy: string;
   isSelected?: boolean;
-  showSelectedIcon?: boolean;
+  showUnSelectedIcon?: boolean;
+  isNominated?: boolean;
+  disabled?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { apy, className, isSelected, onClick, onClickMoreBtn, showSelectedIcon = true, validatorInfo } = props;
+  const { apy, className, disabled, isNominated, isSelected, onClick, onClickMoreBtn, showUnSelectedIcon = true, validatorInfo } = props;
   const { token } = useTheme() as Theme;
 
   const { t } = useTranslation();
 
   const _onSelect = useCallback(() => {
-    onClick && onClick(`${validatorInfo.address}-${validatorInfo.identity || ''}`);
+    onClick && onClick(getValidatorKey(validatorInfo.address, validatorInfo.identity));
   },
   [onClick, validatorInfo.address, validatorInfo.identity]
   );
 
   return (
     <div
-      className={className}
-      onClick={_onSelect}
+      className={CN(className, { disabled: disabled })}
+      onClick={disabled ? undefined : _onSelect}
     >
       <Web3Block
         className={'validator-item-content'}
         leftItem={
           <SwAvatar
-            identPrefix={42}
             isShowSubIcon={validatorInfo.isVerified}
             size={40}
             subIcon={<BackgroundIcon
@@ -58,13 +62,13 @@ const Component: React.FC<Props> = (props: Props) => {
         middleItem={
           <>
             <div className={'middle-item__name-wrapper'}>
-              <div className={'middle-item__name'}>{validatorInfo.identity}</div>
-              <Icon
+              <div className={'middle-item__name'}>{validatorInfo.identity || toShort(validatorInfo.address)}</div>
+              {isNominated && <Icon
                 iconColor={token.colorSuccess}
                 phosphorIcon={Medal}
                 size={'xs'}
                 weight={'fill'}
-              />
+              />}
             </div>
 
             <div className={'middle-item__info'}>
@@ -81,7 +85,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
         rightItem={
           <>
-            {showSelectedIcon && <Icon
+            {(showUnSelectedIcon || isSelected) && <Icon
               className={'right-item__select-icon'}
               iconColor={isSelected ? token.colorSuccess : token.colorTextLight4}
               phosphorIcon={CheckCircle}
@@ -108,6 +112,15 @@ const StakingValidatorItem = styled(Component)<Props>(({ theme: { token } }: Pro
     // padding: token.paddingSM,
     borderRadius: token.borderRadiusLG,
     background: token.colorBgSecondary,
+
+    '&.disabled': {
+      // opacity: token.opacityDisable,
+
+      '.ant-web3-block:hover': {
+        cursor: 'not-allowed',
+        background: token.colorBgSecondary
+      }
+    },
 
     '.validator-item-content': {
       borderRadius: token.borderRadiusLG

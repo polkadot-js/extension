@@ -946,5 +946,8 @@
   "General settings": "",
   "Wallet theme": "",
   "Languages": "",
-  "Browser confirmation type": ""
+  "Browser confirmation type": "",
+  "Transaction fee": "",
+  "Withdrawal amount": "",
+  "Withdrawal fee": ""
 }

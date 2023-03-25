@@ -6,7 +6,7 @@ import { ExternalRequestPromise, ExternalRequestPromiseStatus, HandleBasicTx, Tr
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
 import { _BALANCE_PARSING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
-import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { BN, hexToBn } from '@polkadot/util';
@@ -100,9 +100,15 @@ export async function getERC20TransactionObject (
   }
 
   const transferData = generateTransferData(to, transferValue);
-  const gasPrice = await evmApi.api.eth.getGasPrice();
+  const [gasLimit, gasPrice] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    erc20Contract.methods.transfer(to, transferValue).estimateGas({ from }) as number,
+    evmApi.api.eth.getGasPrice()
+  ]);
+
   const transactionObject = {
     gasPrice: gasPrice,
+    gas: gasLimit,
     from,
     to: assetAddress,
     data: transferData
@@ -124,11 +130,17 @@ export async function getERC721Transaction (
   tokenId: string): Promise<TransactionConfig> {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const contract = new web3Api.api.eth.Contract(_ERC721_ABI, contractAddress);
-  const gasPrice = await web3Api.api.eth.getGasPrice();
+
+  const [gasLimit, gasPrice] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).estimateGas({ from: senderAddress }) as number,
+    web3Api.api.eth.getGasPrice()
+  ]);
 
   return {
     from: senderAddress,
     gasPrice,
+    gas: gasLimit,
     to: contractAddress,
     value: '0x00',
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment

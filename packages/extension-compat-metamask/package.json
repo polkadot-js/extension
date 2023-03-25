@@ -18,15 +18,15 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.45.4-0-x",
+  "version": "0.45.4",
   "main": "index.js",
   "dependencies": {
     "@metamask/detect-provider": "^1.2.0",
-    "@polkadot/extension-inject": "^0.45.4-0-x",
-    "@polkadot/types": "^10.1.4",
-    "@polkadot/util": "^11.1.1",
+    "@polkadot/extension-inject": "^0.45.4",
+    "@polkadot/types": "^10.2.1",
+    "@polkadot/util": "^11.1.2",
     "tslib": "^2.5.0",
-    "web3": "^1.8.2"
+    "web3": "^1.9.0"
   },
   "peerDependencies": {
     "@polkadot/util": "*"

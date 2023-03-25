@@ -31,7 +31,7 @@ export default function useChainChecker () {
 
     if (chainState) {
       if (!chainState.active) {
-        const message = t('Chain {{name}} is turned off', { replace: { name: chainInfo?.name } });
+        const message = t('{{name}} is not ready to use, do you want to turn it on?', { replace: { name: chainInfo?.name } });
 
         const _onEnabled = () => {
           enableChain(chain).then(() => {
@@ -46,7 +46,7 @@ export default function useChainChecker () {
           // eslint-disable-next-line react/jsx-no-bind
           onClick={_onEnabled}
           schema={'warning'}
-          size={'xs'}
+          size={'md'}
         >
           {t('Turn it on')}
         </Button>;

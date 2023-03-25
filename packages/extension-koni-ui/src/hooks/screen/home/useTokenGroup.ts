@@ -6,7 +6,7 @@ import { _getMultiChainAsset, _isNativeTokenBySlug } from '@subwallet/extension-
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AssetRegistryStore } from '@subwallet/extension-koni-ui/stores/types';
 import { TokenGroupHookType } from '@subwallet/extension-koni-ui/types/hook';
-import { isTokenAvailable } from '@subwallet/extension-koni-ui/util/chainAndAsset';
+import { isTokenAvailable } from '@subwallet/extension-koni-ui/util/chain/chainAndAsset';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 

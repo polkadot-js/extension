@@ -114,8 +114,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
           <Form.Item name={'collator'}>
             <NominationSelector
-              chain={'polkadot'}
+              disabled={!transactionContext.from}
               label={t('Select collator')}
+              nominators={ transactionContext.from ? nominatorMetadata?.nominations || [] : []}
             />
           </Form.Item>
 

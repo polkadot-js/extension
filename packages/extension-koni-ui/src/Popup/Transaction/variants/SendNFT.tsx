@@ -14,7 +14,7 @@ import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/p
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
 import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Form, Icon, Image, Typography } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import CN from 'classnames';
@@ -193,9 +193,12 @@ const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
 };
 
 const SendNFT = styled(Component)(({ theme }) => {
+  const token = (theme as Theme).token;
+
   return ({
     '.nft_item_detail h5': {
-      marginBottom: 16 // Not found 16 in margin token list
+      marginTop: token.marginXS,
+      marginBottom: token.margin
     }
   });
 });

@@ -13,7 +13,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate } from '@subwallet/extension-koni-ui/util/common/customFormatDate';
 import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
-import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, DownloadSimple, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
+import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -115,7 +115,7 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
 
     displayData = {
       className: `-${item.type} -${item.status}`,
-      title: titleMap.received,
+      title: titleMap[item.type],
       typeName: `${typeName} ${displayStatus} - ${time}`,
       name: nameMap[item.type],
       icon: getIcon(item)
@@ -209,16 +209,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const filterOptions = useMemo(() => {
     return [
-      { label: 'Send token transaction', value: FilterValue.SEND },
-      { label: 'Receive token transaction', value: FilterValue.RECEIVED },
-      { label: 'NFT transaction', value: FilterValue.NFT },
-      { label: 'Stake transaction', value: FilterValue.STAKE },
-      { label: 'Claim reward transaction', value: FilterValue.CLAIM },
-      { label: 'Crowdloan transaction', value: FilterValue.CROWDLOAN },
-      { label: 'Successful transaction', value: FilterValue.SUCCESSFUL },
-      { label: 'Failed transaction', value: FilterValue.FAILED }
+      { label: t('Send token transaction'), value: FilterValue.SEND },
+      { label: t('Receive token transaction'), value: FilterValue.RECEIVED },
+      { label: t('NFT transaction'), value: FilterValue.NFT },
+      { label: t('Stake transaction'), value: FilterValue.STAKE },
+      { label: t('Claim reward transaction'), value: FilterValue.CLAIM },
+      // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
+      { label: t('Successful transaction'), value: FilterValue.SUCCESSFUL },
+      { label: t('Failed transaction'), value: FilterValue.FAILED }
     ];
-  }, []);
+  }, [t]);
 
   const accountMap = useMemo(() => {
     return accounts.reduce((accMap, cur) => {
@@ -281,12 +281,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onOpenDetail = useCallback((item: TransactionHistoryDisplayItem) => {
     return () => {
       setSelectedItem(item);
+      activeModal(HistoryDetailModalId);
     };
-  }, []);
+  }, [activeModal]);
 
   const onCloseDetail = useCallback(() => {
-    setSelectedItem(null);
-  }, []);
+    inactiveModal(HistoryDetailModalId);
+  }, [inactiveModal]);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -310,14 +311,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [chain, extrinsicHash, forceOpen, historyList]);
 
-  useEffect(() => {
-    if (selectedItem) {
-      activeModal(HistoryDetailModalId);
-    } else {
-      inactiveModal(HistoryDetailModalId);
-    }
-  }, [activeModal, selectedItem, inactiveModal]);
-
   const emptyList = useCallback(() => {
     return <EmptyList
       emptyMessage={t('Your transactions history will appear here!')}
@@ -331,7 +324,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return (
         <HistoryItem
           item={item}
-          key={item.extrinsicHash}
+          key={`${item.extrinsicHash}-${item.address}`}
           onClick={onOpenDetail(item)}
         />
       );
@@ -368,17 +361,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           center={false}
           className={'history-header'}
           paddingVertical
-          rightButtons={[
-            {
-              icon: (
-                <Icon
-                  phosphorIcon={DownloadSimple}
-                  size={'md'}
-                  type='phosphor'
-                />
-              )
-            }
-          ]}
+          // todo: enable this code if support download feature
+          // rightButtons={[
+          //   {
+          //     icon: (
+          //       <Icon
+          //         phosphorIcon={DownloadSimple}
+          //         size={'md'}
+          //         type='phosphor'
+          //       />
+          //     )
+          //   }
+          // ]}
           showBackButton={false}
           title={t('History')}
         />
@@ -399,12 +393,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           showActionBtn
         />
       </PageWrapper>
-      {!!selectedItem && (
-        <HistoryDetailModal
-          data={selectedItem}
-          onCancel={onCloseDetail}
-        />
-      )}
+
+      <HistoryDetailModal
+        data={selectedItem}
+        onCancel={onCloseDetail}
+      />
 
       <FilterModal
         id={FILTER_MODAL_ID}

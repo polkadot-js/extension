@@ -17,7 +17,7 @@ import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account/account';
-import { BackgroundIcon, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
+import { BackgroundIcon, Logo, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Plug, Plugs, PlugsConnected } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -149,7 +149,15 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         className={className}
         genesisHash={item.genesisHash}
         isSelected={_selected}
+        isShowSubIcon
         onPressMoreBtn={onClickDetailAccount(item.address)}
+        subIcon={(
+          <Logo
+            network={isEthereumAddress(item.address) ? 'ethereum' : 'polkadot'}
+            shape={'circle'}
+            size={16}
+          />
+        )}
       />
     );
   }, [className, onClickDetailAccount]);

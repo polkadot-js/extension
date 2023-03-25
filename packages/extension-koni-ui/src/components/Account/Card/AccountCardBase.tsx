@@ -8,7 +8,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { Button, Icon, SwIconProps } from '@subwallet/react-ui';
 import AccountCard, { AccountCardProps } from '@subwallet/react-ui/es/web3-block/account-card';
-import { DotsThree, Eye, QrCode, Swatches } from 'phosphor-react';
+import { Eye, PencilSimpleLine, QrCode, Swatches } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -78,7 +78,7 @@ function Component (props: _AccountCardProps): React.ReactElement<_AccountCardPr
         {showMoreBtn && <Button
           icon={
             <Icon
-              phosphorIcon={DotsThree}
+              phosphorIcon={PencilSimpleLine}
               size='sm'
             />
           }

@@ -49,3 +49,5 @@ export function isSameAs <T> (expectedValue: T, errorText: string): Validator<T>
       : Result.ok(value);
   };
 }
+
+export * from './base';

@@ -7,9 +7,9 @@ import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
-import { ArrowArcLeft, ArrowCircleDown, IconProps, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
+import { ArrowArcLeft, ArrowCircleDown, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -25,11 +25,12 @@ type Props = ThemeProps & {
 export const MORE_ACTION_MODAL = 'more-action-modal';
 
 type ActionListType = {
-  backgroundIconColor: keyof GlobalToken,
-  icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>,
-  label: string,
-  value: string,
-  action: StakingAction
+  backgroundIconColor: keyof GlobalToken;
+  icon: PhosphorIcon;
+  label: string;
+  action: StakingAction;
+  onClick: () => void;
+  disabled: boolean;
 }
 
 export type StakingDataOption = {
@@ -47,52 +48,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
   const notify = useNotification();
-
-  const actionList: ActionListType[] = useMemo(() => {
-    return [
-      {
-        backgroundIconColor: 'green-6',
-        icon: PlusCircle,
-        label: 'Stake more',
-        value: `/transaction/stake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`,
-        action: StakingAction.STAKE
-      },
-      {
-        backgroundIconColor: 'magenta-6',
-        icon: MinusCircle,
-        label: 'Unstake funds',
-        value: '/transaction/unstake',
-        action: StakingAction.UNSTAKE
-      },
-      {
-        backgroundIconColor: 'geekblue-6',
-        icon: ArrowCircleDown,
-        label: 'Withdraw',
-        value: '/transaction/withdraw',
-        action: StakingAction.WITHDRAW
-      },
-      {
-        backgroundIconColor: 'green-7',
-        icon: Wallet,
-        label: 'Claim rewards',
-        value: '/transaction/claim-reward',
-        action: StakingAction.CLAIM_REWARD
-      },
-      {
-        backgroundIconColor: 'purple-8',
-        icon: ArrowArcLeft,
-        label: 'Cancel unstake',
-        value: '/transaction/cancel-unstake',
-        action: StakingAction.CANCEL_UNSTAKE
-      }
-      // {
-      //   backgroundIconColor: 'blue-7',
-      //   icon: Alarm,
-      //   label: 'Compound',
-      //   value: '/transaction/compound'
-      // }
-    ];
-  }, [chainStakingMetadata?.chain, chainStakingMetadata?.type]);
 
   const onCancel = useCallback(
     () => {
@@ -118,7 +73,7 @@ const Component: React.FC<Props> = (props: Props) => {
       nominatorMetadata
     };
 
-    if (isActionFromValidator(nominatorMetadata)) {
+    if (isActionFromValidator(nominatorMetadata.type, nominatorMetadata.chain)) {
       params.validatorAddress = unstakingInfo.validatorAddress;
     }
 
@@ -174,19 +129,6 @@ const Component: React.FC<Props> = (props: Props) => {
       });
   }, [nominatorMetadata, notify, reward?.unclaimedReward, t]);
 
-  const onPressItem = useCallback(
-    (item: ActionListType) => {
-      if (item.action === StakingAction.WITHDRAW) {
-        return () => handleWithdrawalAction();
-      } else if (item.action === StakingAction.CLAIM_REWARD) {
-        return () => handleClaimRewardAction();
-      }
-
-      return () => navigate(item.value, { state: { chainStakingMetadata, nominatorMetadata, staking, reward, hideTabList: true } as StakingDataOption });
-    },
-    [chainStakingMetadata, handleClaimRewardAction, handleWithdrawalAction, navigate, nominatorMetadata, reward, staking]
-  );
-
   const availableActions = useCallback(() => {
     if (!nominatorMetadata) {
       return [];
@@ -194,6 +136,64 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return getStakingAvailableActions(nominatorMetadata);
   }, [nominatorMetadata]);
+
+  const onNavigate = useCallback((url: string) => {
+    return () => {
+      // TODO: Remove state
+      navigate(url, { state: { chainStakingMetadata, nominatorMetadata, staking, reward, hideTabList: true } as StakingDataOption });
+    };
+  }, [chainStakingMetadata, navigate, nominatorMetadata, reward, staking]);
+
+  const actionList: ActionListType[] = useMemo((): ActionListType[] => {
+    return [
+      {
+        action: StakingAction.STAKE,
+        backgroundIconColor: 'green-6',
+        disabled: false,
+        icon: PlusCircle,
+        label: 'Stake more',
+        onClick: onNavigate(`/transaction/stake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
+      },
+      {
+        action: StakingAction.UNSTAKE,
+        backgroundIconColor: 'magenta-6',
+        disabled: !nominatorMetadata,
+        icon: MinusCircle,
+        label: 'Unstake funds',
+        onClick: onNavigate(`/transaction/unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
+      },
+      {
+        action: StakingAction.WITHDRAW,
+        backgroundIconColor: 'geekblue-6',
+        disabled: !nominatorMetadata,
+        icon: ArrowCircleDown,
+        label: 'Withdraw',
+        onClick: handleWithdrawalAction
+      },
+      {
+        action: StakingAction.CLAIM_REWARD,
+        backgroundIconColor: 'green-7',
+        disabled: !nominatorMetadata,
+        icon: Wallet,
+        label: 'Claim rewards',
+        onClick: handleClaimRewardAction
+      },
+      {
+        action: StakingAction.CANCEL_UNSTAKE,
+        backgroundIconColor: 'purple-8',
+        disabled: false,
+        icon: ArrowArcLeft,
+        label: 'Cancel unstake',
+        onClick: onNavigate('/transaction/cancel-unstake')
+      }
+      // {
+      //   backgroundIconColor: 'blue-7',
+      //   icon: Alarm,
+      //   label: 'Compound',
+      //   value: '/transaction/compound'
+      // }
+    ];
+  }, [chainStakingMetadata?.chain, chainStakingMetadata?.type, handleClaimRewardAction, handleWithdrawalAction, nominatorMetadata, onNavigate]);
 
   return (
     <SwModal
@@ -215,7 +215,7 @@ const Component: React.FC<Props> = (props: Props) => {
             weight='fill'
           />}
           name={item.label}
-          onPressItem={onPressItem(item)}
+          onPressItem={item.onClick}
         />
       ))}
     </SwModal>

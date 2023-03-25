@@ -1,72 +1,160 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominationInfo, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import PoolSelector from '@subwallet/extension-koni-ui/components/Field/PoolSelector';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
+import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetChainStakingMetadata';
+import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
-import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import { accountFilterFunc } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/base';
 import BondedBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/BondedBalance';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
 import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/util/form/form';
+import { validateUnStakeValue } from '@subwallet/extension-koni-ui/util/form/validators/staking/unstake';
 import { Button, Form, Icon } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
+import CN from 'classnames';
 import { MinusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router';
 import styled from 'styled-components';
 
-type Props = ThemeProps
+type Props = ThemeProps;
+
+enum FormFieldName {
+  VALUE = 'value',
+  VALIDATOR = 'validator'
+}
 
 interface UnstakeFromProps extends TransactionFormBaseProps {
-  token: string,
-  value: string,
-  validator?: string,
-  from: string
+  [FormFieldName.VALUE]: string;
+  [FormFieldName.VALIDATOR]?: string;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className = '' } = props;
-  const transactionContext = useContext(TransactionContext);
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-  const isAll = isAccountAll(currentAccount?.address || '');
-  const location = useLocation();
-  const [locationState] = useState<StakingDataOption>(location?.state as StakingDataOption);
-  const [nominatorMetadata] = useState(locationState?.nominatorMetadata as NominatorMetadata);
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(nominatorMetadata.chain);
-
-  const [, setLoading] = useState(false);
-  const [, setErrors] = useState<string[]>([]);
-  const [, setWarnings] = useState<string[]>([]);
-
-  const mustChooseValidator = useCallback(() => {
-    return isActionFromValidator(nominatorMetadata);
-  }, [nominatorMetadata]);
-
-  const [form] = Form.useForm<UnstakeFromProps>();
-  const formDefault = {
-    from: transactionContext.from,
-    value: '0'
-  };
-
-  const onFieldsChange = useCallback(({ from }: Partial<UnstakeFromProps>, values: UnstakeFromProps) => {
-    // TODO: field change
-  }, []);
+  const { chain: stakingChain, type: _stakingType } = useParams();
+  const stakingType = _stakingType as StakingType;
 
   const { t } = useTranslation();
 
-  const submitTransaction = useCallback(() => {
-    const value = form.getFieldValue('value') as string;
+  const dataContext = useContext(DataContext);
+  const { chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
+
+  const currentAccount = useSelector((state) => state.accountState.currentAccount);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const isAll = isAccountAll(currentAccount?.address || '');
+
+  const [form] = Form.useForm<UnstakeFromProps>();
+
+  const formDefault = useMemo((): UnstakeFromProps => ({
+    from: from,
+    chain: chain,
+    [FormFieldName.VALIDATOR]: '',
+    [FormFieldName.VALUE]: '0'
+  }), [chain, from]);
+
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(stakingChain || '');
+  const chainStakingMetadata = useGetChainStakingMetadata(stakingChain);
+  const nominatorInfo = useGetNominatorInfo(stakingChain, stakingType, from);
+  const nominatorMetadata = nominatorInfo[0];
+
+  const currentValidator = Form.useWatch(FormFieldName.VALIDATOR, form);
+  const selectedValidator = useMemo((): NominationInfo | undefined => {
+    if (nominatorMetadata) {
+      return nominatorMetadata.nominations.find((item) => item.validatorAddress === currentValidator);
+    } else {
+      return undefined;
+    }
+  }, [currentValidator, nominatorMetadata]);
+
+  const mustChooseValidator = useMemo(() => {
+    return isActionFromValidator(stakingType, stakingChain || '');
+  }, [stakingChain, stakingType]);
+
+  const bondedValue = useMemo((): string => {
+    if (!mustChooseValidator) {
+      return nominatorMetadata?.activeStake || '0';
+    } else {
+      return selectedValidator?.activeStake || '0';
+    }
+  }, [mustChooseValidator, nominatorMetadata?.activeStake, selectedValidator?.activeStake]);
+
+  const minValue = useMemo((): string => {
+    if (stakingType === StakingType.POOLED) {
+      return chainStakingMetadata?.minJoinNominationPool || '0';
+    } else {
+      const minChain = new BigN(chainStakingMetadata?.minStake || '0');
+      const minValidator = new BigN(selectedValidator?.validatorMinStake || '0');
+
+      return minChain.gt(minValidator) ? minChain.toString() : minValidator.toString();
+    }
+  }, [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, selectedValidator?.validatorMinStake, stakingType]);
+
+  const unBondedTime = useMemo((): string => {
+    if (chainStakingMetadata) {
+      const time = chainStakingMetadata.unstakingPeriod;
+
+      if (time >= 24) {
+        const days = Math.floor(time / 24);
+        const hours = time - days * 24;
+
+        return `${days} ${t('days')}${hours ? ` ${hours} ${t('hours')}` : ''}`;
+      } else {
+        return `${time} ${t('hours')}`;
+      }
+    } else {
+      return t('unknown time');
+    }
+  }, [chainStakingMetadata, t]);
+
+  const [loading, setLoading] = useState(false);
+  const [isDisable, setIsDisable] = useState(true);
+  const [, setErrors] = useState<string[]>([]);
+  const [, setWarnings] = useState<string[]>([]);
+
+  const onFieldsChange: FormCallbacks<UnstakeFromProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+    // TODO: field change
+    const { error } = simpleCheckForm(changedFields, allFields);
+
+    const allMap = convertFieldToObject<UnstakeFromProps>(allFields);
+    const changesMap = convertFieldToObject<UnstakeFromProps>(changedFields);
+
+    const { from } = changesMap;
+
+    if (from) {
+      setFrom(from);
+    }
+
+    const checkEmpty: Record<string, boolean> = {};
+
+    for (const [key, value] of Object.entries(allMap)) {
+      checkEmpty[key] = !!value;
+    }
+
+    if (!mustChooseValidator) {
+      checkEmpty[FormFieldName.VALIDATOR] = true;
+    }
+
+    setIsDisable(error || Object.values(checkEmpty).some((value) => !value));
+  }, [mustChooseValidator, setFrom]);
+
+  const onSubmit: FormCallbacks<UnstakeFromProps>['onFinish'] = useCallback((values: UnstakeFromProps) => {
+    const { [FormFieldName.VALUE]: value } = values;
     // const selectedValidator = nominatorMetadata.nominations[0].validatorAddress;
 
     let unbondingPromise: Promise<SWTransactionResponse>;
@@ -86,7 +174,7 @@ const Component: React.FC<Props> = (props: Props) => {
         nominatorMetadata
       };
 
-      if (mustChooseValidator()) {
+      if (mustChooseValidator) {
         params.validatorAddress = ''; // TODO
       }
 
@@ -98,77 +186,140 @@ const Component: React.FC<Props> = (props: Props) => {
         const { errors, extrinsicHash, warnings } = result;
 
         if (errors.length || warnings.length) {
-          setLoading(false);
           setErrors(errors.map((e) => e.message));
           setWarnings(warnings.map((w) => w.message));
         } else if (extrinsicHash) {
-          transactionContext.onDone(extrinsicHash);
+          onDone(extrinsicHash);
         }
       })
       .catch((e: Error) => {
-        setLoading(false);
         setErrors([e.message]);
-      });
-  }, [form, mustChooseValidator, nominatorMetadata, transactionContext]);
+      })
+      .finally(() => {
+        setLoading(false);
+      })
+    ;
+  }, [mustChooseValidator, nominatorMetadata, onDone]);
+
+  const renderBounded = useCallback(() => {
+    return (
+      <BondedBalance
+        bondedBalance={bondedValue}
+        className={'bonded-balance'}
+        decimals={decimals}
+        symbol={symbol}
+      />
+    );
+  }, [bondedValue, decimals, symbol]);
+
+  useEffect(() => {
+    const address = currentAccount?.address || '';
+
+    if (address) {
+      if (!isAccountAll(address)) {
+        setFrom(address);
+      }
+    }
+  }, [currentAccount?.address, setFrom]);
+
+  useEffect(() => {
+    setTransactionType(ExtrinsicType.STAKING_LEAVE_POOL);
+  }, [setTransactionType]);
+
+  useEffect(() => {
+    setChain(stakingChain || '');
+  }, [setChain, stakingChain]);
 
   return (
     <>
       <TransactionContent>
-        <Form
-          className={`${className} form-container form-space-sm`}
-          form={form}
-          initialValues={formDefault}
-          onValuesChange={onFieldsChange}
-        >
-          <BondedBalance
-            bondedBalance={nominatorMetadata.activeStake}
-            className={'bonded-balance'}
-            decimals={decimals}
-            symbol={symbol}
-          />
+        <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
+          <Form
+            className={`${className} form-container form-space-xxs`}
+            form={form}
+            initialValues={formDefault}
+            name='unstake-form'
+            onFieldsChange={onFieldsChange}
+            onFinish={onSubmit}
+          >
+            {isAll &&
+              <Form.Item name={'from'}>
+                <AccountSelector
+                  filter={accountFilterFunc(chainInfoMap, stakingType, stakingChain)}
+                  label={t('Unstake from account')}
+                />
+              </Form.Item>
+            }
+            <FreeBalance
+              address={from}
+              chain={chain}
+              className={'free-balance'}
+              label={t('Available balance:')}
+            />
 
-          {isAll &&
-            <Form.Item name={'from'}>
-              <AccountSelector label={t('Unstake from account')} />
+            {
+              mustChooseValidator && (
+                <>
+                  <Form.Item
+                    name={FormFieldName.VALIDATOR}
+                  >
+                    <NominationSelector
+                      label={t('Select collator')}
+                      nominators={nominatorMetadata?.nominations || []}
+                    />
+                  </Form.Item>
+
+                  {renderBounded()}
+                </>
+              )
+            }
+
+            <Form.Item
+              // hideError={true}
+              name={FormFieldName.VALUE}
+              rules={[
+                { required: true },
+                validateUnStakeValue(minValue, bondedValue, decimals)
+              ]}
+            >
+              <AmountInput
+                decimals={decimals}
+                maxValue={bondedValue}
+              />
             </Form.Item>
-          }
 
-          <Form.Item name={'validator'}>
-            <PoolSelector
-              chain={transactionContext.chain}
-              from={transactionContext.from}
-              label={t('Select validator')}
-            />
-          </Form.Item>
+            {!mustChooseValidator && renderBounded()}
 
-          <FreeBalance
-            address={transactionContext.from}
-            chain={transactionContext.chain}
-            className={'free-balance'}
-            label={t('Transferable:')}
-          />
-
-          <Form.Item name={'value'}>
-            <AmountInput
-              decimals={decimals}
-              maxValue={nominatorMetadata.activeStake}
-            />
-          </Form.Item>
-
-          <div className={'text-light-4'}>{t('Once unbonded, your funds to become available after 28 days.')}</div>
-        </Form>
+            <div className={CN('text-light-4', { mt: mustChooseValidator })}>
+              {
+                t(
+                  'Once unbonded, your funds would be available after {{time}}.',
+                  {
+                    replace:
+                      {
+                        time: unBondedTime
+                      }
+                  }
+                )
+              }
+            </div>
+          </Form>
+        </PageWrapper>
       </TransactionContent>
       <TransactionFooter
         errors={[]}
         warnings={[]}
       >
         <Button
-          icon={<Icon
-            phosphorIcon={MinusCircle}
-            weight={'fill'}
-          />}
-          loading={false}
-          onClick={submitTransaction}
+          disabled={isDisable}
+          icon={(
+            <Icon
+              phosphorIcon={MinusCircle}
+              weight={'fill'}
+            />
+          )}
+          loading={loading}
+          onClick={form.submit}
         >
           {t('Submit')}
         </Button>
@@ -180,11 +331,15 @@ const Component: React.FC<Props> = (props: Props) => {
 const Unbond = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.bonded-balance, .free-balance': {
-      marginBottom: token.marginXS
+      marginBottom: token.margin
     },
 
     '.meta-info': {
       marginTop: token.paddingSM
+    },
+
+    '.mt': {
+      marginTop: token.marginSM
     }
   };
 });

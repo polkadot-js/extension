@@ -9,8 +9,8 @@ import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
-import { MORE_ACTION_MODAL, StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
-import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
+import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { toShort } from '@subwallet/extension-koni-ui/util';
@@ -69,8 +69,8 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
   const onClickUnstakeBtn = useCallback(() => {
     inactiveModal(STAKING_DETAIL_MODAL_ID);
-    setTimeout(() => navigate('/transaction/unstake', { state: { chainStakingMetadata, nominatorMetadata, hideTabList: true } as StakingDataOption }), 300);
-  }, [chainStakingMetadata, inactiveModal, navigate, nominatorMetadata]);
+    setTimeout(() => navigate(`/transaction/unstake/${nominatorMetadata.type}/${nominatorMetadata.chain}`), 300);
+  }, [inactiveModal, navigate, nominatorMetadata]);
 
   const footer = () => {
     return (

@@ -499,10 +499,13 @@ export interface TransactionHistoryItemJson {
   total: number
 }
 
-export interface AmountData {
-  value: string,
-  decimals: number,
-  symbol: string
+export interface BasicTokenInfo {
+  decimals: number;
+  symbol: string;
+}
+
+export interface AmountData extends BasicTokenInfo {
+  value: string;
 }
 
 export interface XCMTransactionAdditionalInfo {

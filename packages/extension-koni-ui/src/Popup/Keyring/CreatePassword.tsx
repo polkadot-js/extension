@@ -5,7 +5,7 @@ import { AlertBox, Layout, PageWrapper } from '@subwallet/extension-koni-ui/comp
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
-import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/constants/rules';
+import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/util/form/validators/password';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';

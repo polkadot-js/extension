@@ -21,7 +21,8 @@ import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/scree
 import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import useGetSupportedStakingTokens from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetSupportedStakingTokens';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
-import { accountFilterFunc, fetchChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
+import { accountFilterFunc } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/base';
+import { fetchChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
 import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
@@ -385,7 +386,7 @@ const Component: React.FC<Props> = (props: Props) => {
               hidden={!isAllAccount}
               name={'from'}
             >
-              <AccountSelector filter={accountFilterFunc(chainInfoMap, stakingType, chain || stakingChain)} />
+              <AccountSelector filter={accountFilterFunc(chainInfoMap, stakingType, stakingChain)} />
             </Form.Item>
 
             {
@@ -434,12 +435,12 @@ const Component: React.FC<Props> = (props: Props) => {
 
                       if (type === StakingType.POOLED) {
                         if (val.lte(0)) {
-                          return Promise.reject(new Error('Value must be greater then 0'));
+                          return Promise.reject(new Error('Value must be greater than 0'));
                         }
                       } else {
                         if (!nominatorMetadata?.isBondedBefore || !isRelayChain) {
                           if (val.lte(0)) {
-                            return Promise.reject(new Error('Value must be greater then 0'));
+                            return Promise.reject(new Error('Value must be greater than 0'));
                           }
                         }
                       }

@@ -331,16 +331,16 @@ export function getStakingAvailableActions (nominatorMetadata: NominatorMetadata
   return result;
 }
 
-export function isActionFromValidator (nominatorMetadata: NominatorMetadata) {
-  if (nominatorMetadata.type === StakingType.POOLED) {
+export function isActionFromValidator (stakingType: StakingType, chain: string) {
+  if (stakingType === StakingType.POOLED) {
     return true;
   }
 
-  if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain)) {
+  if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
     return true;
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain)) {
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
     return true;
-  } else if (_STAKING_CHAIN_GROUP.para.includes(nominatorMetadata.chain)) {
+  } else if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
     return true;
   }
 

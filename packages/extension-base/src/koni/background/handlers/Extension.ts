@@ -643,6 +643,10 @@ export default class KoniExtension {
       const nonReadonlyAccounts = this.getNonReadonlyAccounts();
 
       Object.keys(value).forEach((url) => {
+        if (!value[url].isAllowed) {
+          return;
+        }
+
         const targetAccounts = this.filterAccountsByAccountAuthType(nonReadonlyAccounts, value[url].accountAuthType);
 
         targetAccounts.forEach((address) => {
@@ -1101,7 +1105,9 @@ export default class KoniExtension {
       if (value && Object.keys(value).length) {
         Object.keys(value).forEach((url) => {
           addresses.forEach((address) => {
-            value[url].isAllowedMap[address] = isAllowed;
+            if (this.isAddressValidWithAuthType(address, value[url].accountAuthType)) {
+              value[url].isAllowedMap[address] = isAllowed;
+            }
           });
         });/**/
 

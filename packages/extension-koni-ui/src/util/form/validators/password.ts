@@ -1,51 +1,35 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ValidateState, ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
+import { FormRule } from '@subwallet/extension-koni-ui/types';
 
-interface PasswordLengthValidator {
-  status?: ValidateStatus;
-  minLength?: number;
-  errorText?: string;
-  tooltip?: `${string}$min${string}` | string;
-}
+export const MinPasswordLength = 6;
 
-const DEFAULT_LENGTH_VALIDATOR: PasswordLengthValidator = {
-  status: 'warning',
-  minLength: 6,
-  errorText: 'Password is too short',
-  tooltip: 'Password required at least $min character'
+export const renderBasePasswordRules = (fieldName: string): FormRule[] => {
+  return [
+    {
+      message: `${fieldName} is too short`,
+      min: MinPasswordLength
+    },
+    {
+      message: `${fieldName} is required`,
+      required: true
+    }
+  ];
 };
 
-export const passwordValidateLength = (validator?: PasswordLengthValidator): ((value: string) => null | ValidateState) => {
-  const { errorText = 'Password is too short',
-    minLength = 6,
-    status = 'warning',
-    tooltip = 'Password required at least $min character' } = Object.assign({}, DEFAULT_LENGTH_VALIDATOR, validator);
+export const renderBaseConfirmPasswordRules = (passwordFieldName: string): FormRule[] => {
+  return [
+    ({ getFieldValue }) => ({
+      validator: (_, value) => {
+        const password = getFieldValue(passwordFieldName) as string;
 
-  return (value: string) => {
-    if (value.length < minLength) {
-      return {
-        status: status,
-        message: errorText,
-        tooltip: tooltip.replace('$min', minLength.toString())
-      };
-    } else {
-      return null;
-    }
-  };
-};
+        if (!value || password === value) {
+          return Promise.resolve();
+        }
 
-export const confirmPasswordValidate = (expect: string): ((value: string) => null | ValidateState) => {
-  return (value: string) => {
-    if (value !== expect) {
-      return {
-        status: 'error',
-        message: 'Passwords do not match',
-        tooltip: 'Passwords do not match'
-      };
-    } else {
-      return null;
-    }
-  };
+        return Promise.reject(new Error('Passwords do not match!'));
+      }
+    })
+  ];
 };

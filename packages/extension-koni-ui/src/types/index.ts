@@ -94,3 +94,4 @@ export interface SigData {
 }
 
 export * from './account';
+export * from './form';

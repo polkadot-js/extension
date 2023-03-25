@@ -86,7 +86,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     if (!isAccountAll(item.staking.address)) {
       setSelectedItem(item);
 
-      activeModal(STAKING_DETAIL_MODAL_ID);
+      setTimeout(() => {
+        activeModal(STAKING_DETAIL_MODAL_ID);
+      }, 100);
     }
   }, [activeModal]);
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType, NominatorMetadata } from '@subwallet/extension-base/background/KoniTypes';
-import { MetaInfo, ValidatorSelector } from '@subwallet/extension-koni-ui/components';
+import { MetaInfo, NominationSelector } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
@@ -113,7 +113,7 @@ const Component: React.FC<Props> = (props: Props) => {
           />
 
           <Form.Item name={'collator'}>
-            <ValidatorSelector
+            <NominationSelector
               chain={'polkadot'}
               label={t('Select collator')}
             />

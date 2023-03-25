@@ -2,13 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, SupportTransferResponse, TransactionResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { SupportTransferResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { _BALANCE_TOKEN_GROUP, _TRANSFER_CHAIN_GROUP, _TRANSFER_NOT_SUPPORTED_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
-import { KeyringPair } from '@subwallet/keyring/types';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount } from '@polkadot/types/interfaces';
@@ -107,105 +105,6 @@ export async function checkSupportTransfer (networkKey: string, tokenInfo: _Chai
   return result;
 }
 
-export async function estimateFee (
-  networkKey: string,
-  fromKeypair: KeyringPair | undefined,
-  to: string, value: string | undefined,
-  transferAll: boolean,
-  substrateApiMap: Record<string, _SubstrateApi>,
-  tokenInfo: _ChainAsset
-): Promise<[string, string | undefined]> {
-  let fee = '0';
-  // eslint-disable-next-line
-  let feeSymbol = undefined;
-
-  if (fromKeypair === undefined) {
-    return [fee, feeSymbol];
-  }
-
-  const chainApi = await substrateApiMap[networkKey].isReady;
-  const api = chainApi.api;
-  const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
-  const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
-  const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
-  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
-
-  if (_isTokenWasmSmartContract(tokenInfo) && api.query.contracts) { // for PSP tokens
-    const contractPromise = getPSP22ContractPromise(api, _getContractAddressOfToken(tokenInfo));
-    const paymentInfo = await contractPromise.tx['psp22::transfer']({ gasLimit: '10000' }, to, value, {}) // gasLimit is arbitrary since it's only estimating fee
-      .paymentInfo(fromKeypair);
-
-    fee = paymentInfo.partialFee.toString();
-  } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && _isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
-    // Note: currently 'karura', 'acala', 'acala_testnet' do not support transfer all
-    // if (transferAll) {
-    //   const freeBalanceString = await getFreeBalance(networkKey, fromKeypair.address, tokenInfo.symbol);
-    //
-    //   const paymentInfo = await api.tx.currencies
-    //     .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, freeBalanceString)
-    //     .paymentInfo(fromKeypair);
-    //
-    //   return paymentInfo.partialFee.toString();
-    if (value) {
-      const paymentInfo = await api.tx.currencies
-        .transfer(to, _getTokenOnChainInfo(tokenInfo), value)
-        .paymentInfo(fromKeypair);
-
-      fee = paymentInfo.partialFee.toString();
-    }
-  } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxTokensSupported) {
-    if (transferAll) {
-      const paymentInfo = await api.tx.tokens
-        .transferAll(to, _getTokenOnChainInfo(tokenInfo), false)
-        .paymentInfo(fromKeypair);
-
-      fee = paymentInfo.partialFee.toString();
-    } else if (value) {
-      const paymentInfo = await api.tx.tokens
-        .transfer(to, _getTokenOnChainInfo(tokenInfo), new BN(value))
-        .paymentInfo(fromKeypair);
-
-      fee = paymentInfo.partialFee.toString();
-    }
-  } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported) {
-    if (transferAll) {
-      // currently genshiro_testnet, genshiro, equilibrium_parachain do not have transfer all method for tokens
-    } else if (value) {
-      const paymentInfo = await api.tx.eqBalances.transfer(_getTokenOnChainInfo(tokenInfo), to, value)
-        .paymentInfo(fromKeypair.address, { nonce: -1 });
-
-      fee = paymentInfo.partialFee.toString();
-    }
-  } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && !_isNativeToken(tokenInfo) && _BALANCE_TOKEN_GROUP.bitcountry.includes(tokenInfo.symbol)) {
-    const paymentInfo = await api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value).paymentInfo(fromKeypair);
-
-    fee = paymentInfo.partialFee.toString();
-  } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
-    const paymentInfo = await api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value).paymentInfo(fromKeypair);
-
-    fee = paymentInfo.partialFee.toString();
-  } else if (isTxBalancesSupported && (_isNativeToken(tokenInfo) || (!_isNativeToken(tokenInfo) && _TRANSFER_CHAIN_GROUP.crab.includes(networkKey) && _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)))) {
-    if (transferAll) {
-      const paymentInfo = await api.tx.balances.transferAll(to, false).paymentInfo(fromKeypair);
-
-      fee = paymentInfo.partialFee.toString();
-    } else if (value) {
-      const paymentInfo = await api.tx.balances.transfer(to, new BN(value)).paymentInfo(fromKeypair);
-
-      fee = paymentInfo.partialFee.toString();
-    }
-  }
-
-  return [fee, feeSymbol];
-}
-
-export function getUnsupportedResponse (): TransactionResponse {
-  return {
-    status: false,
-    errors: [new TransactionError(BasicTxErrorType.UNSUPPORTED, 'The transaction of current network is unsupported')]
-  };
-}
-
 interface CreateTransferExtrinsicProps {
   substrateApi: _SubstrateApi;
   networkKey: string,
@@ -238,22 +137,19 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     if (transferAll) {
       // currently Acala, Karura, Acala testnet do not have transfer all method for sub token
     } else if (value) {
-      transfer = api.tx.currencies
-        .transfer(to, _getTokenOnChainInfo(tokenInfo), value);
+      transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
     }
   } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxTokensSupported) {
     if (transferAll) {
-      transfer = api.tx.tokens
-        .transferAll(to, _getTokenOnChainInfo(tokenInfo), false);
+      transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo), false);
     } else if (value) {
-      transfer = api.tx.tokens
-        .transfer(to, _getTokenOnChainInfo(tokenInfo), new BN(value));
+      transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo), new BN(value));
     }
   } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported) {
     if (transferAll) {
       // currently genshiro_testnet, genshiro, equilibrium_parachain do not have transfer all method for tokens
     } else if (value) {
-      transfer = api.tx.eqBalances.transfer(_getTokenOnChainInfo(tokenInfo), to, value);
+      transfer = api.tx.eqBalances.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
     }
   } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
     if (transferAll) {
@@ -261,7 +157,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     } else if (value) {
       transfer = api.tx.kton.transfer(to, new BN(value));
     }
-  } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && tokenInfo && tokenInfo.symbol === 'BIT') {
+  } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && !_isNativeToken(tokenInfo)) {
     transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
   } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
     transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
@@ -272,6 +168,9 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
       transfer = api.tx.balances.transfer(to, new BN(value));
     }
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  console.log('transfer extrinsic: ', transfer?.toHex());
 
   return [transfer, transferAmount || value];
 };

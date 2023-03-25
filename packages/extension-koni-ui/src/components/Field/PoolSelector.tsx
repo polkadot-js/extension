@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -9,6 +10,7 @@ import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/Sort
 import { PoolDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal';
 import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingPoolItem';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
+import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, InputRef, SelectModal, useExcludeModal } from '@subwallet/react-ui';
@@ -20,11 +22,12 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+import EmptyAccount from '../Account/EmptyAccount';
+
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
+  from: string;
   onClickBookBtn?: (e: SyntheticEvent) => void;
-  onClickLightningBtn?: (e: SyntheticEvent) => void;
-  nominationPoolList?: NominationInfo[];
 }
 
 const SORTING_MODAL_ID = 'pool-sorting-modal';
@@ -75,27 +78,39 @@ const getFilteredList = (items: NominationPoolDataType[], filters: string[]) => 
   return filteredList;
 };
 
+const renderEmpty = () => <EmptyAccount />;
+
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, id = 'pool-selector', label, nominationPoolList, onChange, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
-  const nominationPoolValueList = nominationPoolList && nominationPoolList.length ? nominationPoolList.map((item) => item.validatorAddress) : [];
-  const items = useGetValidatorList(chain, 'pool') as NominationPoolDataType[];
-  const { activeModal, inactiveModal } = useContext(ModalContext);
-  const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
-  const [sortSelection, setSortSelection] = useState<string>('');
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
-  const filteredList = useMemo(() => {
-    return getFilteredList(items, selectedFilters);
-  }, [items, selectedFilters]);
+  const { chain, className = '', disabled, from, id = 'pool-selector', label, onChange, onClickBookBtn, placeholder, value } = props;
 
   useExcludeModal(id);
 
   const { t } = useTranslation();
 
-  useEffect(() => {
-    onChange && onChange({ target: { value: nominationPoolValueList[0] } });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  const nominatorMetadata = useGetNominatorInfo(chain, StakingType.POOLED, from);
+  const items = useGetValidatorList(chain, StakingType.POOLED) as NominationPoolDataType[];
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const nominationPoolValueList = useMemo((): string[] => {
+    return nominatorMetadata[0]?.nominations.map((item) => item.validatorAddress) || [];
+  }, [nominatorMetadata]);
+
+  const filteredList = useMemo(() => {
+    return getFilteredList(items, selectedFilters);
+  }, [items, selectedFilters]);
+
+  const isDisabled = useMemo(() =>
+    disabled ||
+    !!nominationPoolValueList.length ||
+    !items.length
+  , [disabled, items.length, nominationPoolValueList.length]
+  );
+
+  const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
+  const [sortSelection, setSortSelection] = useState<string>('');
 
   const _onSelectItem = useCallback((value: string) => {
     onChange && onChange({ target: { value } });
@@ -112,94 +127,94 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     );
   }, []);
 
+  const onClickMore = useCallback((item: NominationPoolDataType) => {
+    return (e: SyntheticEvent) => {
+      e.stopPropagation();
+      setViewDetailItem(item);
+      activeModal(PoolDetailModalId);
+    };
+  }, [activeModal]);
+
+  const onClickLightningBtn = useCallback((e: SyntheticEvent) => {
+    e.stopPropagation();
+    const poolId = PREDEFINED_STAKING_POOL[chain];
+
+    poolId !== undefined && onChange && onChange({ target: { value: String(poolId) } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chain]);
+
   const renderItem = useCallback((item: NominationPoolDataType) => {
     return (
       <StakingPoolItem
         {...item}
         className={'pool-item'}
-        // eslint-disable-next-line react/jsx-no-bind
-        onClickMoreBtn={(e: SyntheticEvent) => {
-          e.stopPropagation();
-          setViewDetailItem(item);
-          activeModal(PoolDetailModalId);
-        }}
+        onClickMoreBtn={onClickMore(item)}
       />
     );
-  }, [activeModal]);
+  }, [onClickMore]);
 
-  const closeSortingModal = () => {
+  const closeSortingModal = useCallback(() => {
     inactiveModal(SORTING_MODAL_ID);
-  };
+  }, [inactiveModal]);
 
-  const renderSelected = (item: NominationPoolDataType) => {
+  const renderSelected = useCallback((item: NominationPoolDataType) => {
     return (
       <div className={'__selected-item'}>
         <div className={'__selected-item-name common-text'}>
           {item.name}
         </div>
-
-        <div className={'__selected-item-right-part common-text'}>
-          <Button
-            icon={<Icon
-              phosphorIcon={Book}
-              size='sm'
-            />}
-            onClick={onClickBookBtn}
-            size='xs'
-            type='ghost'
-          />
-          <Button
-            icon={<Icon
-              phosphorIcon={Lightning}
-              size='sm'
-            />}
-            onClick={onClickLightningBtn}
-            size='xs'
-            type='ghost'
-          />
-        </div>
       </div>
     );
-  };
+  }, []);
 
-  const onChangeSortOpt = (value: string) => {
+  const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value);
     closeSortingModal();
-  };
+  }, [closeSortingModal]);
 
-  const onClickActionBtn = () => {
+  const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
-  };
+  }, [activeModal]);
+
+  const onCloseDetail = useCallback(() => {
+    inactiveModal(PoolDetailModalId);
+  }, [inactiveModal]);
+
+  useEffect(() => {
+    onChange && onChange({ target: { value: nominationPoolValueList[0] } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nominationPoolValueList]);
 
   return (
     <>
       <SelectModal
         actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
         className={`${className} modal-full`}
-        closeIcon={<Icon
-          phosphorIcon={CaretLeft}
-          size='md'
-        />}
-        disabled={disabled}
+        closeIcon={(
+          <Icon
+            phosphorIcon={CaretLeft}
+            size='md'
+          />
+        )}
+        disabled={isDisabled}
         id={id}
         inputClassName={`${className} pool-selector-input`}
-        itemKey={'address'}
+        itemKey={'idStr'}
         items={filteredList}
         label={label}
-        // eslint-disable-next-line react/jsx-no-bind
         onClickActionBtn={onClickActionBtn}
         onSelect={_onSelectItem}
         placeholder={placeholder || t('Select pool')}
-        prefix={
+        prefix={(
           <Avatar
             size={20}
             theme={value ? isEthereumAddress(value) ? 'ethereum' : 'polkadot' : undefined}
             value={value}
           />
-        }
+        )}
         renderItem={renderItem}
-        // eslint-disable-next-line react/jsx-no-bind
         renderSelected={renderSelected}
+        renderWhenEmpty={renderEmpty}
         rightIconProps={{
           icon: <Icon phosphorIcon={SortAscending} />,
           onClick: () => {
@@ -211,13 +226,40 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         searchableMinCharactersCount={2}
         selected={value || ''}
         showActionBtn
+        suffix={(
+          <>
+            <Button
+              disabled={isDisabled}
+              icon={(
+                <Icon
+                  phosphorIcon={Book}
+                  size='sm'
+                />
+              )}
+              onClick={onClickBookBtn}
+              size='xs'
+              type='ghost'
+            />
+            <Button
+              disabled={isDisabled}
+              icon={(
+                <Icon
+                  phosphorIcon={Lightning}
+                  size='sm'
+                />
+              )}
+              onClick={onClickLightningBtn}
+              size='xs'
+              type='ghost'
+            />
+          </>
+        )}
         title={label || placeholder || t('Select pool')}
       />
 
       <FilterModal
         id={FILTER_MODAL_ID}
         onApplyFilter={onApplyFilter}
-        // eslint-disable-next-line react/jsx-no-bind
         onCancel={onCloseFilterModal}
         onChangeOption={onChangeFilterOption}
         optionSelectionMap={filterSelectionMap}
@@ -226,21 +268,18 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       <SortingModal
         id={SORTING_MODAL_ID}
-        // eslint-disable-next-line react/jsx-no-bind
         onCancel={closeSortingModal}
-        // eslint-disable-next-line react/jsx-no-bind
         onChangeOption={onChangeSortOpt}
         optionSelection={sortSelection}
         options={sortingOptions}
       />
 
-      {viewDetailItem && <PoolDetailModal
+      <PoolDetailModal
         decimals={0}
-        // eslint-disable-next-line react/jsx-no-bind
-        onCancel={() => inactiveModal(PoolDetailModalId)}
+        onCancel={onCloseDetail}
         selectedNominationPool={viewDetailItem}
         status={'active'}
-      />}
+      />
     </>
   );
 };
@@ -274,10 +313,7 @@ const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }:
     },
 
     '.ant-select-modal-input-wrapper': {
-      height: 44,
-      ' > span': {
-        display: 'none'
-      }
+      height: 44
     }
   };
 });

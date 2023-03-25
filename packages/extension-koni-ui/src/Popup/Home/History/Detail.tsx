@@ -10,7 +10,7 @@ import { TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/Popu
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
+import { customFormatDate } from '@subwallet/extension-koni-ui/util/common/customFormatDate';
 import { Button, Icon, SwIconProps, SwModal } from '@subwallet/react-ui';
 import { ArrowSquareUpRight, CheckCircle, ProhibitInset, Spinner, StopCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
@@ -33,8 +33,8 @@ function isTypeTransfer (txType: ExtrinsicType) {
 
 function isTypeStaking (txType: ExtrinsicType) {
   return [
-    ExtrinsicType.STAKING_STAKE,
-    ExtrinsicType.STAKING_UNSTAKE,
+    ExtrinsicType.STAKING_JOIN_POOL,
+    ExtrinsicType.STAKING_LEAVE_POOL,
     ExtrinsicType.STAKING_BOND,
     ExtrinsicType.STAKING_UNBOND,
     ExtrinsicType.STAKING_WITHDRAW,
@@ -62,8 +62,8 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
     [ExtrinsicType.TRANSFER_XCM]: t('Transfer'),
     [ExtrinsicType.SEND_NFT]: t('NFT'),
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan'),
-    [ExtrinsicType.STAKING_STAKE]: t('Stake'),
-    [ExtrinsicType.STAKING_UNSTAKE]: t('Unstake'),
+    [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake'),
+    [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake'),
     [ExtrinsicType.STAKING_BOND]: t('Bond'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim reward'),
@@ -73,8 +73,8 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
   };
 
   const stakingTypeNameMap: Record<string, string> = {
-    [ExtrinsicType.STAKING_STAKE]: t('Stake'),
-    [ExtrinsicType.STAKING_UNSTAKE]: t('Unstake'),
+    [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake'),
+    [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake'),
     [ExtrinsicType.STAKING_BOND]: t('Bond'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw'),

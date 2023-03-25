@@ -5870,14 +5870,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:^0.0.13":
-  version: 0.0.13
-  resolution: "@subwallet/chain-list@npm:0.0.13"
+"@subwallet/chain-list@npm:^0.0.17":
+  version: 0.0.17
+  resolution: "@subwallet/chain-list@npm:0.0.17"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: 61517843ec63df9c394622d249540a7dcaf2de1f3108a97c286b70b2348131826a188566c5c79abb7af89dd989b789c8be069a5498294ef8175dc22e52d9450e
+  checksum: 2a3e5b70e29cb82563035ad85f8c408573b962f1e056d6cb884bedc8d7299603d055345287352c51cb6d2ab390e9a6f4f05a8f297014cb94c87b965c1ad8faed
   languageName: node
   linkType: hard
 
@@ -5939,7 +5939,7 @@ __metadata:
     "@sora-substrate/type-definitions": ^1.12.4
     "@subsocial/types": ^0.6.8
     "@substrate/connect": ^0.7.18
-    "@subwallet/chain-list": ^0.0.16
+    "@subwallet/chain-list": ^0.0.17
     "@subwallet/extension-base": ^0.8.1
     "@subwallet/extension-chains": ^0.8.1
     "@subwallet/extension-dapp": ^0.8.1
@@ -6095,14 +6095,14 @@ __metadata:
     "@polkadot/util-crypto": ^10.2.1
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": ^0.0.16
+    "@subwallet/chain-list": ^0.0.17
     "@subwallet/extension-base": ^0.8.1
     "@subwallet/extension-chains": ^0.8.1
     "@subwallet/extension-dapp": ^0.8.1
     "@subwallet/extension-inject": ^0.8.1
     "@subwallet/extension-mocks": ^0.8.1
     "@subwallet/keyring": ^0.0.4
-    "@subwallet/react-ui": 5.1.2-b35
+    "@subwallet/react-ui": 5.1.2-b36
     "@subwallet/ui-keyring": ^0.0.3
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -6216,9 +6216,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b35":
-  version: 5.1.2-b35
-  resolution: "@subwallet/react-ui@npm:5.1.2-b35"
+"@subwallet/react-ui@npm:5.1.2-b36":
+  version: 5.1.2-b36
+  resolution: "@subwallet/react-ui@npm:5.1.2-b36"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -6286,7 +6286,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: d4e51e78f83dcacbe80a924e9a8343cd902ead180a705e4a6c4684e81e7b4227f910a347a473e4e886d8bb180328e49c70dc6a27218102c9b0c47476d723e71e
+  checksum: 811ab2d71ca2dd1ffdb4b9696e7d801ff3b84fcb5997b9f16f31321d06fb8afe286c75be98cc10a4860c4c83dbe3d734899cd59caf91825bfc7b84bca9e9db57
   languageName: node
   linkType: hard
 

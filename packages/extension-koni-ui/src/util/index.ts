@@ -8,13 +8,13 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
 import { Recoded } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util/accountAll';
-import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util/account/accountAll';
+import reformatAddress from '@subwallet/extension-koni-ui/util/account/reformatAddress';
 
 import { decodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-import { findAccountByAddress } from './account';
+import { findAccountByAddress } from './account/account';
 
 // todo: Refactor this file
 
@@ -209,10 +209,10 @@ export function getScanExplorerAddressInfoUrl (networkKey: string, address: stri
 
 export const detectThemeAvatar = (address?: string) => isEthereumAddress(address) ? 'ethereum' : 'polkadot';
 
-export { toAddress } from './toAddress';
-export { openInNewTab } from '@subwallet/extension-koni-ui/util/browser';
-export { isSubstrateMessage, isEvmMessage } from './confirmation';
+export { toAddress } from './account/toAddress';
+export { openInNewTab } from '@subwallet/extension-koni-ui/util/common/browser';
+export { isSubstrateMessage, isEvmMessage } from './confirmation/confirmation';
 
-export * from './account';
-export * from './common';
-export * from './accountAll';
+export * from './account/account';
+export * from './common/common';
+export * from './account/accountAll';

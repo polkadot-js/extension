@@ -66,6 +66,10 @@ export function _isPureSubstrateChain (chainInfo: _ChainInfo) {
 }
 
 export function _getOriginChainOfAsset (assetSlug: string) {
+  if (assetSlug.startsWith(_CUSTOM_PREFIX)) {
+    return assetSlug.split('-')[1];
+  }
+
   return assetSlug.split('-')[0];
 }
 

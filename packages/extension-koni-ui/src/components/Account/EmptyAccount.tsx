@@ -46,7 +46,8 @@ const EmptyAccount = styled(Component)<Props>(({ theme: { token } }: Props) => {
       color: token.colorTextHeading,
       fontWeight: token.headingFontWeight,
       fontSize: token.fontSizeHeading5,
-      lineHeight: token.lineHeightHeading5
+      lineHeight: token.lineHeightHeading5,
+      paddingTop: token.padding
     },
 
     '.description': {

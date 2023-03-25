@@ -169,8 +169,7 @@ export default function useGetStakingList () {
         if (
           stakingItem.chain === chainStakingMetadata.chain
         ) {
-          stakingDataType.chainStakingMetadata = chainStakingMetadata;
-
+          stakingDataType.chainStakingMetadata = { ...chainStakingMetadata, type: stakingItem.type };
           break;
         }
       }

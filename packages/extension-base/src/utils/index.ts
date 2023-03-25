@@ -333,3 +333,7 @@ export function parseNumberToDisplay (amount: BN, decimals: number | undefined) 
 
   return formattedString.toString();
 }
+
+export function isSameAddress (address1: string, address2: string) {
+  return reformatAddress(address1, 0) === reformatAddress(address2, 0); // TODO: maybe there's a better way
+}

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 
 export const findChainInfoByGenesisHash = (chainMap: Record<string, _ChainInfo>, genesisHash?: string): _ChainInfo | null => {
   if (!genesisHash) {
@@ -9,7 +10,7 @@ export const findChainInfoByGenesisHash = (chainMap: Record<string, _ChainInfo>,
   }
 
   for (const chainInfo of Object.values(chainMap)) {
-    if (chainInfo.substrateInfo?.genesisHash.toLowerCase() === genesisHash.toLowerCase()) {
+    if (_getSubstrateGenesisHash(chainInfo)?.toLowerCase() === genesisHash.toLowerCase()) {
       return chainInfo;
     }
   }

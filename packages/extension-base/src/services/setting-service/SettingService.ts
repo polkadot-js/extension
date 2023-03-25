@@ -1,9 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestSettingsType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { Subject } from 'rxjs';
+
+import { DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from './constants';
 
 export default class SettingService {
   private readonly settingsStore = new SettingsStore();
@@ -18,11 +20,11 @@ export default class SettingService {
         update(
           {
           // language: 'en',
-            browserConfirmationType: 'extension',
+            browserConfirmationType: DEFAULT_NOTIFICATION_TYPE,
             // isShowZeroBalance: true,
             isShowBalance: false,
             accountAllLogo: '',
-            theme: ThemeNames.DARK,
+            theme: DEFAULT_THEME,
             camera: false
           }
         );

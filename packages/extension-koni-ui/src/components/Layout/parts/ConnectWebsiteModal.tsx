@@ -9,7 +9,7 @@ import { changeAuthorizationBlock, changeAuthorizationPerSite } from '@subwallet
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress } from '@subwallet/extension-koni-ui/util';
-import { accountCanSign, getSignMode } from '@subwallet/extension-koni-ui/util/account';
+import { accountCanSign, getSignMode } from '@subwallet/extension-koni-ui/util/account/account';
 import { Button, Icon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, GlobeHemisphereWest, ShieldCheck, ShieldSlash, XCircle } from 'phosphor-react';

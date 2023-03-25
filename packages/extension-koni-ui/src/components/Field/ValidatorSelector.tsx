@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ValidatorDetailModal, ValidatorDetailModalId } from '@subwallet/extension-koni-ui/components';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
@@ -82,7 +82,7 @@ const renderEmpty = () => <GeneralEmptyList />;
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', disabled, id = 'validator-selector', label, onClickBookBtn, onClickLightningBtn, placeholder, value } = props;
-  const items = useGetValidatorList(chain, 'nominate') as ValidatorDataType[];
+  const items = useGetValidatorList(chain, StakingType.NOMINATED) as ValidatorDataType[];
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [sortSelection, setSortSelection] = useState<string>('');
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
@@ -119,7 +119,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         setViewDetailItem(item);
         activeModal(ValidatorDetailModalId);
       }}
-      showSelectedIcon={false}
+      showUnSelectedIcon={false}
       validatorInfo={item}
     />
   ), [activeModal]);
@@ -231,17 +231,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       {viewDetailItem &&
         <ValidatorDetailModal
-          commission={viewDetailItem.commission}
-          decimals={0}
-          earningEstimated={viewDetailItem.expectedReturn || ''}
-          minStake={viewDetailItem.minBond}
-          // eslint-disable-next-line react/jsx-no-bind
-          onCancel={() => inactiveModal(ValidatorDetailModalId)}
-          ownStake={viewDetailItem.ownStake}
           status={'active'}
-          symbol={viewDetailItem.symbol}
-          validatorAddress={viewDetailItem.address}
-          validatorName={viewDetailItem.identity || ''}
+          validatorItem={viewDetailItem}
         />
       }
     </>

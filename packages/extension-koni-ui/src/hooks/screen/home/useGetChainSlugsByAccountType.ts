@@ -6,8 +6,8 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account';
-import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import { findAccountByAddress } from '@subwallet/extension-koni-ui/util/account/account';
+import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 

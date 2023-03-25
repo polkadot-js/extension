@@ -46,11 +46,13 @@ const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [form] = Form.useForm<SendNFTFormProps>();
-  const formDefault = {
-    from,
-    chain,
-    to: ''
-  };
+  const formDefault = useMemo(() => {
+    return {
+      from,
+      chain,
+      to: ''
+    };
+  }, [chain, from]);
 
   const validateRecipientAddress = useCallback((rule: Rule, _recipientAddress: string): Promise<void> => {
     if (from === form.getFieldValue('to')) {
@@ -93,8 +95,6 @@ const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
         // Handle transfer action
         sendPromise.then((rs) => {
           const { errors, extrinsicHash, warnings } = rs;
-
-          console.debug(rs);
 
           if (errors.length || warnings.length) {
             setLoading(false);

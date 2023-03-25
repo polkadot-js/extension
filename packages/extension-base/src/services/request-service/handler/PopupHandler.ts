@@ -4,6 +4,7 @@
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { BrowserConfirmationType, RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
 import RequestService from '@subwallet/extension-base/services/request-service';
+import { DEFAULT_NOTIFICATION_TYPE } from '@subwallet/extension-base/services/setting-service/constants';
 
 const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
 
@@ -25,7 +26,7 @@ const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {
 
 export default class PopupHandler {
   readonly #requestService: RequestService;
-  #notification: BrowserConfirmationType = 'popup';
+  #notification: BrowserConfirmationType = DEFAULT_NOTIFICATION_TYPE;
   #windows: number[] = [];
 
   constructor (requestService: RequestService) {

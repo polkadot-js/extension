@@ -13,7 +13,7 @@ import useGoBackSelectAccount from '@subwallet/extension-koni-ui/hooks/modal/use
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { renderModalSelector } from '@subwallet/extension-koni-ui/util/dom';
+import { renderModalSelector } from '@subwallet/extension-koni-ui/util/common/dom';
 import { BackgroundIcon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Leaf, ShareNetwork } from 'phosphor-react';

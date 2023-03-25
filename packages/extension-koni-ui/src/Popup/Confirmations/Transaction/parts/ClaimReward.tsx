@@ -1,14 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestBondingSubmit } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestStakeClaimReward } from '@subwallet/extension-base/background/KoniTypes';
 import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
+import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
 import CN from 'classnames';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { BaseTransactionConfirmationProps } from './Base';
@@ -17,15 +16,12 @@ type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
-  const data = transaction.data as RequestBondingSubmit;
+  const data = transaction.data as RequestStakeClaimReward;
 
   const { t } = useTranslation();
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(data.chain);
 
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
-
-  const chainInfo = useMemo(() => {
-    return chainInfoMap[transaction.chain];
-  }, [chainInfoMap, transaction.chain]);
+  // TODO: missing check box to bond reward, only show when stakingType = POOLED
 
   return (
     <div className={CN(className)}>
@@ -37,17 +33,19 @@ const Component: React.FC<Props> = (props: Props) => {
         className={'meta-info'}
         hasBackgroundWrapper
       >
-        <MetaInfo.Number
-          decimals={0}
-          label={t('Reward claiming')}
-          suffix={chainInfo?.substrateInfo?.symbol}
-          value={data.amount}
-        />
+        {
+          data.unclaimedReward && <MetaInfo.Number
+            decimals={decimals}
+            label={t('Unclaimed reward')}
+            suffix={symbol}
+            value={data.unclaimedReward}
+          />
+        }
 
         <MetaInfo.Number
-          decimals={chainInfo?.substrateInfo?.decimals || 0}
-          label={t('Reward claiming fee')}
-          suffix={chainInfo?.substrateInfo?.symbol}
+          decimals={decimals}
+          label={t('Transaction fee')}
+          suffix={symbol}
           value={transaction.estimateFee?.value || 0}
         />
       </MetaInfo>

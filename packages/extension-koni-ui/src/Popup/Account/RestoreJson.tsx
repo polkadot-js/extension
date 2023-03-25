@@ -14,7 +14,7 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
-import { isKeyringPairs$Json } from '@subwallet/extension-koni-ui/util/typeGuards';
+import { isKeyringPairs$Json } from '@subwallet/extension-koni-ui/util/account/typeGuards';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
 import { Form, Icon, Input, ModalContext, SettingItem, SwList, SwModal, Upload } from '@subwallet/react-ui';
 import { UploadChangeParam, UploadFile } from '@subwallet/react-ui/es/upload/interface';

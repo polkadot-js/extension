@@ -3,7 +3,6 @@
 
 import { ExtrinsicType, NominationInfo, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
@@ -84,21 +83,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [currentValidator, nominatorMetadata]);
 
   const mustChooseValidator = useMemo(() => {
-    const _stakingChain = stakingChain || '';
-
-    if (stakingType === StakingType.POOLED) {
-      return false;
-    }
-
-    if (_STAKING_CHAIN_GROUP.astar.includes(_stakingChain)) {
-      return true;
-    } else if (_STAKING_CHAIN_GROUP.amplitude.includes(_stakingChain)) {
-      return true;
-    } else if (_STAKING_CHAIN_GROUP.para.includes(_stakingChain)) {
-      return true;
-    }
-
-    return false;
+    return isActionFromValidator(stakingType, stakingChain || '');
   }, [stakingChain, stakingType]);
 
   const bondedValue = useMemo((): string => {

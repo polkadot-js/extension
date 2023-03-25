@@ -56,4 +56,3 @@ export function fetchChainValidators (chain: string, stakingType: string) {
     fetchChainPool(chain);
   }
 }
-

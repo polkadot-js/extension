@@ -333,7 +333,7 @@ export function getStakingAvailableActions (nominatorMetadata: NominatorMetadata
 
 export function isActionFromValidator (stakingType: StakingType, chain: string) {
   if (stakingType === StakingType.POOLED) {
-    return true;
+    return false;
   }
 
   if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {

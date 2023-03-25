@@ -1623,7 +1623,7 @@ export default class KoniExtension {
     }
 
     if (fromKeyPair && destinationTokenInfo) {
-      const substrateApiMap = this.#koniState.getSubstrateApiMap();
+      const substrateApi = this.#koniState.getSubstrateApi(originNetworkKey);
       const chainInfoMap = this.#koniState.getChainInfoMap();
 
       extrinsic = await createXcmExtrinsic({
@@ -1632,7 +1632,7 @@ export default class KoniExtension {
         sendingValue: value,
         recipient: to,
         chainInfoMap: chainInfoMap,
-        substrateApiMap: substrateApiMap
+        substrateApi
       });
     }
 

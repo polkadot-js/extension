@@ -190,22 +190,25 @@ export const _BALANCE_PARSING_CHAIN_GROUP = {
 // XCM------------------------------------------------------------------------------------------------------------------
 
 export const _XCM_CHAIN_GROUP = {
-  moonbeam: ['moonbeam', 'moonriver', 'moonbase'],
-  astar: ['astar', 'shiden'],
-  statemine: ['statemint', 'statemine'],
-  bifrost: ['bifrost'],
-  genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
-  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay'],
-  acala: ['karura', 'acala', 'acala_testnet'],
-  astarEvm: ['astarEvm', 'shidenEvm']
+  polkadotXcm: ['astar', 'shiden', 'statemine', 'statemint'],
+  xcmPallet: ['polkadot', 'kusama'],
+  // default is xTokens pallet
+  // moonbeam: ['moonbeam', 'moonriver', 'moonbase'],
+  // astar: ['astar', 'shiden'],
+  // statemine: ['statemint', 'statemine'],
+  // bifrost: ['bifrost'],
+  // genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
+  // kintsugi: ['kintsugi', 'kintsugi_test', 'interlay'],
+  // acala: ['karura', 'acala', 'acala_testnet'],
+  // astarEvm: ['astarEvm', 'shidenEvm']
 };
 
 export const _XCM_CHAIN_USE_LIMITED_WEIGHT = ['acala', 'karura', 'statemint'];
 
 export const _XCM_TYPE = {
-  RP: `${_SubstrateChainType.RELAYCHAIN}-${_SubstrateChainType.PARACHAIN}`,
-  PP: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.PARACHAIN}`,
-  PR: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.RELAYCHAIN}`
+  RP: `${_SubstrateChainType.RELAYCHAIN}-${_SubstrateChainType.PARACHAIN}`, // DMP
+  PP: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.PARACHAIN}`, // HRMP
+  PR: `${_SubstrateChainType.PARACHAIN}-${_SubstrateChainType.RELAYCHAIN}` // UMP
 };
 
 export const _DEFAULT_ACTIVE_CHAINS = [

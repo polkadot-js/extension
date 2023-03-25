@@ -264,13 +264,12 @@ export function _getXcmAssetId (tokenInfo: _ChainAsset) {
   return tokenInfo.metadata?.assetId as string || '-1';
 }
 
-export function _getXcmTransferType (originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo) {
-  return `${originChainInfo.substrateInfo?.chainType || ''}-${destinationChainInfo.substrateInfo?.chainType || ''}`;
+export function _getXcmAssetMultilocation (tokenInfo: _ChainAsset) {
+  return tokenInfo.metadata?.multilocation as Record<string, any>;
 }
 
-export function _getXcmAssetMultilocation (tokenInfo: _ChainAsset) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return tokenInfo.metadata?.xcmMultilocation || {};
+export function _getXcmTransferType (originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo) {
+  return `${originChainInfo.substrateInfo?.chainType || ''}-${destinationChainInfo.substrateInfo?.chainType || ''}`;
 }
 
 export function _isSubstrateRelayChain (chainInfo: _ChainInfo) {

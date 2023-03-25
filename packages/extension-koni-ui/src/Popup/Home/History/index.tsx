@@ -115,7 +115,7 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
 
     displayData = {
       className: `-${item.type} -${item.status}`,
-      title: titleMap.received,
+      title: titleMap[item.type],
       typeName: `${typeName} ${displayStatus} - ${time}`,
       name: nameMap[item.type],
       icon: getIcon(item)
@@ -281,12 +281,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onOpenDetail = useCallback((item: TransactionHistoryDisplayItem) => {
     return () => {
       setSelectedItem(item);
+      activeModal(HistoryDetailModalId);
     };
-  }, []);
+  }, [activeModal]);
 
   const onCloseDetail = useCallback(() => {
-    setSelectedItem(null);
-  }, []);
+    inactiveModal(HistoryDetailModalId);
+  }, [inactiveModal]);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -310,14 +311,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [chain, extrinsicHash, forceOpen, historyList]);
 
-  useEffect(() => {
-    if (selectedItem) {
-      activeModal(HistoryDetailModalId);
-    } else {
-      inactiveModal(HistoryDetailModalId);
-    }
-  }, [activeModal, selectedItem, inactiveModal]);
-
   const emptyList = useCallback(() => {
     return <EmptyList
       emptyMessage={t('Your transactions history will appear here!')}
@@ -331,7 +324,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return (
         <HistoryItem
           item={item}
-          key={item.extrinsicHash}
+          key={`${item.extrinsicHash}-${item.address}`}
           onClick={onOpenDetail(item)}
         />
       );
@@ -400,12 +393,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           showActionBtn
         />
       </PageWrapper>
-      {!!selectedItem && (
-        <HistoryDetailModal
-          data={selectedItem}
-          onCancel={onCloseDetail}
-        />
-      )}
+
+      <HistoryDetailModal
+        data={selectedItem}
+        onCancel={onCloseDetail}
+      />
 
       <FilterModal
         id={FILTER_MODAL_ID}

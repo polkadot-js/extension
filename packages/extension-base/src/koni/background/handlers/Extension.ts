@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
-import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
@@ -1621,16 +1621,16 @@ export default class KoniExtension {
     }
 
     if (fromKeyPair && destinationTokenInfo) {
-      const substrateApiMap = this.#koniState.getSubstrateApiMap();
+      const substrateApi = this.#koniState.getSubstrateApi(originNetworkKey);
       const chainInfoMap = this.#koniState.getChainInfoMap();
 
       extrinsic = await createXcmExtrinsic({
         destinationTokenInfo,
         originTokenInfo,
-        sendingValue: value || '0',
+        sendingValue: value,
         recipient: to,
         chainInfoMap: chainInfoMap,
-        substrateApiMap: substrateApiMap
+        substrateApi
       });
     }
 
@@ -2923,6 +2923,23 @@ export default class KoniExtension {
     return this.#koniState.getMultiChainAssetMap();
   }
 
+  private subscribeXcmRefMap (id: string, port: chrome.runtime.Port): Record<string, _AssetRef> {
+    const cb = createSubscription<'pri(chainService.subscribeXcmRefMap)'>(id, port);
+    const xcmRefSubscription = this.#koniState.subscribeXcmRefMap().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, xcmRefSubscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.getXcmRefMap();
+  }
+
   private getSupportedSmartContractTypes () {
     return this.#koniState.getSupportedSmartContractTypes();
   }
@@ -3168,6 +3185,8 @@ export default class KoniExtension {
         return this.subscribeChainInfoMap(id, port);
       case 'pri(chainService.subscribeChainStateMap)':
         return this.subscribeChainStateMap(id, port);
+      case 'pri(chainService.subscribeXcmRefMap)':
+        return this.subscribeXcmRefMap(id, port);
       case 'pri(chainService.getSupportedContractTypes)':
         return this.getSupportedSmartContractTypes();
       case 'pri(chainService.enableChain)':

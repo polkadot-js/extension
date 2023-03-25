@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import {_AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset} from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
@@ -1820,7 +1820,8 @@ export interface KoniRequestSignatures {
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeChainStateMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeAssetRegistry)': [null, Record<string, any>, Record<string, any>];
-  'pri(chainService.subscribeMultiChainAssetMap)': [null, Record<string, any>, Record<string, any>];
+  'pri(chainService.subscribeMultiChainAssetMap)': [null, Record<string, _MultiChainAsset>, Record<string, _MultiChainAsset>];
+  'pri(chainService.subscribeXcmRefMap)': [null, Record<string, _AssetRef>, Record<string, _AssetRef>];
   'pri(chainService.upsertChain)': [_NetworkUpsertParams, boolean];
   'pri(chainService.enableChains)': [string[], boolean];
   'pri(chainService.disableChains)': [string[], boolean];

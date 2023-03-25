@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainInfoMap } from '@subwallet/chain-list';
-import { _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
@@ -1016,6 +1016,10 @@ export default class KoniState {
     return this.chainService.getMultiChainAssetMap();
   }
 
+  public getXcmRefMap () {
+    return this.chainService.getXcmRefMap();
+  }
+
   public getAssetByChainAndAsset (chain: string, assetTypes: _AssetType[]) {
     return this.chainService.getAssetByChainAndType(chain, assetTypes);
   }
@@ -1042,6 +1046,10 @@ export default class KoniState {
 
   public subscribeMultiChainAssetMap (): Subject<Record<string, _MultiChainAsset>> {
     return this.chainService.subscribeMultiChainAssetMap();
+  }
+
+  public subscribeXcmRefMap (): Subject<Record<string, _AssetRef>> {
+    return this.chainService.subscribeXcmRefMap();
   }
 
   public async upsertCustomToken (data: _ChainAsset) {

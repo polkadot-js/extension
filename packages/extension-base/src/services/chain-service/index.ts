@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AssetRefMap, ChainAssetMap, ChainInfoMap, MultiChainAssetMap } from '@subwallet/chain-list';
-import { _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
 import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
@@ -40,6 +40,7 @@ export class ChainService {
   private chainStateMapSubject = new Subject<Record<string, _ChainState>>();
   private assetRegistrySubject = new Subject<Record<string, _ChainAsset>>();
   private multiChainAssetMapSubject = new Subject<Record<string, _MultiChainAsset>>();
+  private xcmRefMapSubject = new Subject<Record<string, _AssetRef>>();
 
   // Todo: Update to new store indexed DB
   private store: AssetSettingStore = new AssetSettingStore();
@@ -59,6 +60,7 @@ export class ChainService {
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
     this.multiChainAssetMapSubject.next(MultiChainAssetMap);
+    this.xcmRefMapSubject.next(this.getXcmRefMap());
 
     this.logger = createLogger('chain-service');
 
@@ -67,6 +69,18 @@ export class ChainService {
   }
 
   // Getter
+  public getXcmRefMap () {
+    const result: Record<string, _AssetRef> = {};
+
+    Object.entries(AssetRefMap).forEach(([key, assetRef]) => {
+      if (assetRef.path === _AssetRefPath.XCM) {
+        result[key] = assetRef;
+      }
+    });
+
+    return result;
+  }
+
   public getEvmApi (slug: string) {
     return this.evmChainHandler.getEvmApiByChain(slug);
   }
@@ -104,6 +118,10 @@ export class ChainService {
 
   public subscribeMultiChainAssetMap () {
     return this.multiChainAssetMapSubject;
+  }
+
+  public subscribeXcmRefMap () {
+    return this.xcmRefMapSubject;
   }
 
   public subscribeChainStateMap () {

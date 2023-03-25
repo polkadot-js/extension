@@ -1,4 +1,4 @@
-     605	Jaco                          	0.45.4 (#1240)
+     606	Jaco                          	Add repo dev req. for Node.js (#1241)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

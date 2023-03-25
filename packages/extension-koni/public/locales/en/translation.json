@@ -949,5 +949,10 @@
   "Browser confirmation type": "",
   "Transaction fee": "",
   "Withdrawal amount": "",
-  "Withdrawal fee": ""
+  "Withdrawal fee": "",
+  "Chain {{name}} is connected": "",
+  "{{name}} is not ready to use, do you want to turn it on?": "",
+  "Chain {{name}} is connecting": "",
+  "Turn it on": "",
+  "Chain {{name}} is disconnected": ""
 }

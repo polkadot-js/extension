@@ -13,7 +13,7 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
-  "version": "0.45.4-0-x",
+  "version": "0.45.4",
   "versions": {
     "git": "0.45.4-0-x",
     "npm": "0.45.3"
@@ -40,19 +40,19 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.72.15",
-    "@types/node": "^18.15.3",
-    "i18next-scanner": "^4.1.1",
+    "@polkadot/dev": "^0.72.24",
+    "@types/node": "^18.15.9",
+    "i18next-scanner": "^4.2.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^10.1.4",
-    "@polkadot/keyring": "^11.1.1",
-    "@polkadot/networks": "^11.1.1",
-    "@polkadot/types": "^10.1.4",
-    "@polkadot/util": "^11.1.1",
-    "@polkadot/util-crypto": "^11.1.1",
-    "@polkadot/x-fetch": "^11.1.1",
+    "@polkadot/api": "^10.2.1",
+    "@polkadot/keyring": "^11.1.2",
+    "@polkadot/networks": "^11.1.2",
+    "@polkadot/types": "^10.2.1",
+    "@polkadot/util": "^11.1.2",
+    "@polkadot/util-crypto": "^11.1.2",
+    "@polkadot/x-fetch": "^11.1.2",
     "safe-buffer": "^5.2.1",
     "typescript": "^5.0.2"
   }

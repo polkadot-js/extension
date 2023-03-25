@@ -18,12 +18,12 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.45.4-0-x",
+  "version": "0.45.4",
   "main": "index.js",
   "dependencies": {
-    "@polkadot/extension-inject": "^0.45.4-0-x",
-    "@polkadot/util": "^11.1.1",
-    "@polkadot/util-crypto": "^11.1.1",
+    "@polkadot/extension-inject": "^0.45.4",
+    "@polkadot/util": "^11.1.2",
+    "@polkadot/util-crypto": "^11.1.2",
     "tslib": "^2.5.0"
   },
   "peerDependencies": {

@@ -3,9 +3,9 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ApiMap, NftTransferExtra, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_CHAIN_NOMINATOR_METADATA, CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-base/constants';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_CHAIN_NOMINATOR_METADATA, CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-base/constants';
 import { KoniSubscription } from '@subwallet/extension-base/koni/background/subscription';
-import { _ChainConnectionStatus, _ChainState, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Subject, Subscription } from 'rxjs';
 
@@ -80,7 +80,6 @@ export class KoniCron {
       }
 
       if (Object.keys(this.state.getSubstrateApiMap()).length !== 0 || Object.keys(this.state.getEvmApiMap()).length !== 0) {
-        this.updateApiMapStatus();
         this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap());
         this.refreshStakingReward(currentAccountInfo.address);
         this.refreshStakingRewardFastInterval(currentAccountInfo.address);
@@ -106,7 +105,6 @@ export class KoniCron {
       if (Object.keys(this.state.getSubstrateApiMap()).length !== 0 || Object.keys(this.state.getEvmApiMap()).length !== 0) {
         this.resetNft(currentAccountInfo.address);
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
-        this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
         this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
@@ -141,7 +139,6 @@ export class KoniCron {
 
         if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
           this.addCron('refreshNft', this.refreshNft(address, serviceInfo.chainApiMap, this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
-          this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
           this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
           this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
           this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
@@ -191,43 +188,6 @@ export class KoniCron {
     this.state.getCurrentAccount(({ address }) => {
       this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
     });
-  };
-
-  updateApiMapStatus = () => {
-    const apiMap = this.state.getApiMap();
-    const chainStateMap = this.state.getChainStateMap();
-
-    for (const [key, substrateApi] of Object.entries(apiMap.substrate)) {
-      let status: _ChainConnectionStatus = _ChainConnectionStatus.CONNECTING;
-
-      if (substrateApi.isApiConnected) {
-        status = _ChainConnectionStatus.CONNECTED;
-      }
-
-      if (!chainStateMap[key].connectionStatus) {
-        this.state.updateNetworkStatus(key, status);
-      } else if (chainStateMap[key].connectionStatus && chainStateMap[key].connectionStatus !== status) {
-        this.state.updateNetworkStatus(key, status);
-      }
-    }
-
-    for (const [key, evmApi] of Object.entries(apiMap.evm)) {
-      evmApi.api.eth.net.isListening()
-        .then(() => {
-          if (!chainStateMap[key].connectionStatus) {
-            this.state.updateNetworkStatus(key, _ChainConnectionStatus.CONNECTED);
-          } else if (chainStateMap[key].connectionStatus && chainStateMap[key].connectionStatus !== _ChainConnectionStatus.CONNECTED) {
-            this.state.updateNetworkStatus(key, _ChainConnectionStatus.CONNECTED);
-          }
-        })
-        .catch(() => {
-          if (!chainStateMap[key].connectionStatus) {
-            this.state.updateNetworkStatus(key, _ChainConnectionStatus.CONNECTING);
-          } else if (chainStateMap[key].connectionStatus && chainStateMap[key].connectionStatus !== _ChainConnectionStatus.CONNECTING) {
-            this.state.updateNetworkStatus(key, _ChainConnectionStatus.CONNECTING);
-          }
-        });
-    }
   };
 
   refreshNft = (address: string, apiMap: ApiMap, smartContractNfts: _ChainAsset[], chainInfoMap: Record<string, _ChainInfo>) => {

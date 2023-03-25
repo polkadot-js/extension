@@ -4,6 +4,7 @@
 import { AssetRefMap, ChainAssetMap, ChainInfoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
 import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
@@ -41,6 +42,8 @@ export class ChainService {
 
   private logger: Logger;
 
+  private refreshChainStateTimeout: NodeJS.Timeout | undefined;
+
   constructor (dbService: DatabaseService) {
     this.dbService = dbService;
 
@@ -53,6 +56,8 @@ export class ChainService {
     this.multiChainAssetMapSubject.next(MultiChainAssetMap);
 
     this.logger = createLogger('chain-service');
+
+    this.refreshChainStateInterval(3000);
   }
 
   // Getter
@@ -491,6 +496,7 @@ export class ChainService {
     this.lockChainInfoMap = true;
     chainStateMap[chainSlug].active = true;
     this.initApiForChain(chainInfo);
+    this.refreshChainStateInterval(1000);
 
     this.dbService.updateChainStore({
       ...chainInfo,
@@ -514,6 +520,8 @@ export class ChainService {
 
     this.lockChainInfoMap = true;
     chainStateMap[chainSlug].active = false;
+    // Set disconnect state for inactive chain
+    chainStateMap[chainSlug].connectionStatus = _ChainConnectionStatus.DISCONNECTED;
     this.destroyApiForChain(chainInfo);
 
     this.dbService.updateChainStore({
@@ -1160,5 +1168,62 @@ export class ChainService {
     // });
 
     return this.substrateChainHandler.resumeAllApis();
+  }
+
+  // Interval update api status
+  private refreshChainStateInterval (delay = 0) {
+    clearTimeout(this.refreshChainStateTimeout);
+
+    setTimeout(() => {
+      this.updateApiMapStatus();
+
+      this.refreshChainStateTimeout = setTimeout(() => {
+        this.updateApiMapStatus();
+        this.refreshChainStateInterval();
+      }, CRON_GET_API_MAP_STATUS);
+    }, delay);
+  }
+
+  private updateApiMapStatus () {
+    const substrateApiMap = this.getSubstrateApiMap();
+    const evmApiMap = this.getEvmApiMap();
+    const chainStateMap = this.getChainStateMap();
+    let update = false;
+
+    function updateState (current: _ChainState, status: _ChainConnectionStatus) {
+      if (current.connectionStatus !== status) {
+        current.connectionStatus = status;
+        update = true;
+      }
+    }
+
+    Object.entries(chainStateMap).forEach(([chain, chainState]) => {
+      if (chainState.active) {
+        if (substrateApiMap[chain]) {
+          const api = substrateApiMap[chain];
+
+          if (api) {
+            updateState(chainState, _ChainConnectionStatus.CONNECTED);
+
+            return;
+          }
+        } else if (evmApiMap[chain]) {
+          const api = evmApiMap[chain];
+
+          if (api) {
+            updateState(chainState, _ChainConnectionStatus.CONNECTED);
+
+            return;
+          }
+        }
+      }
+
+      updateState(chainState, _ChainConnectionStatus.DISCONNECTED);
+    });
+
+    if (update) {
+      console.log('Update chain connection state');
+      this.chainStateMapSubject.next(chainStateMap);
+    }
   }
 }

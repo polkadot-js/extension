@@ -3,19 +3,23 @@
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetAccountInfoByAddress from '@subwallet/extension-koni-ui/hooks/screen/common/useGetAccountInfoByAddress';
 import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl';
 import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
 import { CaretLeft, Info, PaperPlaneTilt } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
+import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -47,17 +51,32 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const originChainInfo = useGetChainInfo(nftItem.chain);
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem.owner || '');
   const accountExternalUrl = useScanExplorerAddressUrl(nftItem.chain, nftItem.owner);
+  const accounts = useSelector((root: RootState) => root.accountState.accounts);
+  const notify = useNotification();
 
   const onClickSend = useCallback(() => {
+    if (nftItem && nftItem.owner) {
+      const ownerAddress = reformatAddress(nftItem.owner, 42);
+      const owner = accounts.find((a) => a.address === ownerAddress);
+
+      if (owner?.isReadOnly) {
+        notify({
+          message: t('The NFT owner is a read-only account, you cannot send the NFT with it'),
+          type: 'info',
+          duration: 3
+        });
+
+        return;
+      }
+    }
+
     navigate('/transaction/send-nft', { state: { collectionInfo, nftItem } });
-  }, [collectionInfo, navigate, nftItem]);
+  }, [accounts, collectionInfo, navigate, nftItem, notify, t]);
 
   const subHeaderRightButton: ButtonProps[] = [
     {
       children: t<string>('Send'),
-      onClick: () => {
-        navigate('/transaction/send-nft', { state: { collectionInfo, nftItem } });
-      }
+      onClick: onClickSend
     }
   ];
 

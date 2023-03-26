@@ -2797,6 +2797,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['MAIN_NET'],
     nativeToken: 'JOY',
     decimals: 10
+  },
+  aventus: {
+    key: 'aventus',
+    chain: 'Aventus Polkadot',
+    genesisHash: '0x8b5c955b5c8fd7112562327e3859473df4e3dff49bd72a113dbb668d2cfa20d7',
+    ss58Format: 42,
+    providers: {
+      Aventus: 'wss://public-rpc.mainnet.aventus.io'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Aventus',
+    groups: ['POLKADOT_PARACHAIN'],
+    nativeToken: 'AVT',
+    decimals: 18
   }
 };
 

@@ -143,6 +143,11 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['NEER']
+      },
+      kintsugi: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['KINT', 'kBTC']
       }
     }
   },
@@ -236,17 +241,32 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
       }
     }
   },
-  // kintsugi: {
-  //   type: 'p',
-  //   isEthereum: false,
-  //   relationMap: {
-  //     moonriver: {
-  //       type: 'p',
-  //       isEthereum: true,
-  //       supportedToken: ['KINT', 'kBTC']
-  //     }
-  //   }
-  // },
+  kintsugi: {
+    type: 'p',
+    isEthereum: false,
+    relationMap: {
+      moonriver: {
+        type: 'p',
+        isEthereum: true,
+        supportedToken: ['KINT', 'kBTC']
+      },
+      karura: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['KINT', 'kBTC']
+      },
+      heiko: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['KINT', 'kBTC']
+      },
+      bifrost: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['KINT', 'kBTC']
+      }
+    }
+  },
   bifrost: { // bifrost on kusama
     type: 'p',
     isEthereum: false,

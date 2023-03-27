@@ -37,7 +37,14 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
     },
 
     '.main-page-container': {
-      border: `1px solid ${token.colorBgInput}`
+      border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`,
+      borderBottomWidth: token.lineWidth * 2
+    },
+
+    '.modal-full': {
+      '.ant-sw-modal-content': {
+        boxShadow: `inset 0 0 0 ${token.lineWidth}px ${token.colorBgInput}, inset 0 ${token.lineWidth}px 0 ${token.lineWidth}px ${token.colorBgInput}`
+      }
     },
 
     '.text-secondary': {

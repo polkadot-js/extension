@@ -64,6 +64,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const formDefault = useMemo((): UnstakeFromProps => ({
     from: from,
     chain: chain,
+    asset: '',
     [FormFieldName.VALIDATOR]: '',
     [FormFieldName.VALUE]: '0'
   }), [chain, from]);
@@ -124,8 +125,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
-  const [, setErrors] = useState<string[]>([]);
-  const [, setWarnings] = useState<string[]>([]);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [warnings, setWarnings] = useState<string[]>([]);
 
   const onFieldsChange: FormCallbacks<UnstakeFromProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
@@ -311,8 +312,8 @@ const Component: React.FC<Props> = (props: Props) => {
         </PageWrapper>
       </TransactionContent>
       <TransactionFooter
-        errors={[]}
-        warnings={[]}
+        errors={errors}
+        warnings={warnings}
       >
         <Button
           disabled={isDisable}

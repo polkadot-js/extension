@@ -1,12 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { formatBalance, toShort } from '@subwallet/extension-koni-ui/util';
+import { formatBalance } from '@subwallet/extension-koni-ui/util';
 import { Icon, Web3Block } from '@subwallet/react-ui';
-import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React from 'react';
@@ -14,13 +13,13 @@ import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps & {
-  nominationInfo: NominationInfo;
+  unstakingInfo: UnstakingInfo;
   isSelected?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, isSelected, nominationInfo } = props;
-  const { chain } = nominationInfo;
+  const { className, isSelected, unstakingInfo } = props;
+  const { chain } = unstakingInfo;
 
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
@@ -32,26 +31,20 @@ const Component: React.FC<Props> = (props: Props) => {
       className={CN(className)}
     >
       <Web3Block
-        className={'validator-item-content'}
-        leftItem={
-          <SwAvatar
-            size={40}
-            value={nominationInfo.validatorAddress}
-          />
-        }
+        className={'unstake-item-content'}
         middleItem={
           <>
             <div className={'middle-item__name-wrapper'}>
-              <div className={'middle-item__name'}>{nominationInfo.validatorIdentity || toShort(nominationInfo.validatorAddress)}</div>
+              <div className={'middle-item__name'}>{unstakingInfo.status}</div>
             </div>
 
             <div className={'middle-item__info'}>
               <div className={'middle-item__active-stake'}>
                 <span>
-                  {t('Bonded:')}
+                  {t('Claimable:')}
                 </span>
                 <span>
-                  &nbsp;{formatBalance(nominationInfo.activeStake, decimals)}&nbsp;
+                  &nbsp;{formatBalance(unstakingInfo.claimable, decimals)}&nbsp;
                 </span>
                 <span>{symbol}</span>
               </div>
@@ -76,12 +69,12 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const StakingNominationItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const StakingUnstakeItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     borderRadius: token.borderRadiusLG,
     background: token.colorBgSecondary,
 
-    '.validator-item-content': {
+    '.unstake-item-content': {
       borderRadius: token.borderRadiusLG
     },
 
@@ -121,4 +114,4 @@ const StakingNominationItem = styled(Component)<Props>(({ theme: { token } }: Pr
   };
 });
 
-export default StakingNominationItem;
+export default StakingUnstakeItem;

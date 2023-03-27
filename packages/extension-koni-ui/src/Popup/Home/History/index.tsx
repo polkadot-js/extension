@@ -305,11 +305,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       if (existed) {
         setSelectedItem(existed);
+        activeModal(HistoryDetailModalId);
       }
 
       setForceOpen(false);
     }
-  }, [chain, extrinsicHash, forceOpen, historyList]);
+  }, [activeModal, chain, extrinsicHash, forceOpen, historyList]);
 
   const emptyList = useCallback(() => {
     return <EmptyList

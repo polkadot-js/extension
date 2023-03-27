@@ -17,7 +17,7 @@ import { createAccountSuriV2, createSeedV2 } from '@subwallet/extension-koni-ui/
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NewSeedPhraseState } from '@subwallet/extension-koni-ui/types/account';
-import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account/account';
 import { Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
@@ -39,19 +39,21 @@ const FooterIcon = (
 
 let seedPhrase = '';
 
-const loader = new Promise<string>((resolve, reject) => {
-  createSeedV2(undefined, undefined, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
-    .then((response): void => {
-      const phrase = response.seed;
+const loader = () => {
+  return new Promise<string>((resolve, reject) => {
+    createSeedV2(undefined, undefined, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
+      .then((response): void => {
+        const phrase = response.seed;
 
-      seedPhrase = phrase;
-      resolve(phrase);
-    })
-    .catch((e: Error) => {
-      console.error(e);
-      reject(e);
-    });
-});
+        seedPhrase = phrase;
+        resolve(phrase);
+      })
+      .catch((e: Error) => {
+        console.error(e);
+        reject(e);
+      });
+  });
+};
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
@@ -113,7 +115,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <PageWrapper
       className={CN(className)}
-      resolve={loader}
+      resolve={loader()}
     >
       <Layout.WithSubHeaderOnly
         onBack={onBack}

@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Rule } from 'rc-field-form/lib/interface';
+import { FormRule } from '@subwallet/extension-koni-ui/types';
 
 export const MinPasswordLength = 6;
 
-export const renderBasePasswordRules = (fieldName: string): Rule[] => {
+export const renderBasePasswordRules = (fieldName: string): FormRule[] => {
   return [
     {
       message: `${fieldName} is too short`,
@@ -18,7 +18,7 @@ export const renderBasePasswordRules = (fieldName: string): Rule[] => {
   ];
 };
 
-export const renderBaseConfirmPasswordRules = (passwordFieldName: string): Rule[] => {
+export const renderBaseConfirmPasswordRules = (passwordFieldName: string): FormRule[] => {
   return [
     ({ getFieldValue }) => ({
       validator: (_, value) => {

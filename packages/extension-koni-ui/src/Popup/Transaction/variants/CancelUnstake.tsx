@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { MetaInfo, ValidatorSelector } from '@subwallet/extension-koni-ui/components';
+import { ExtrinsicType, NominatorMetadata } from '@subwallet/extension-base/background/KoniTypes';
+import { MetaInfo, NominationSelector } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
+import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
+import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingInfo } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
@@ -18,7 +18,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { Button, Form, Icon, Number } from '@subwallet/react-ui';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -35,9 +35,16 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className = '' } = props;
   const transactionContext = useContext(TransactionContext);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
+
   const location = useLocation();
-  const { chainStakingMetadata, nominatorMetadata } = location.state as StakingDataOption;
+  const [locationState] = useState<StakingDataOption>(location?.state as StakingDataOption);
+  const [nominatorMetadata] = useState(locationState?.nominatorMetadata as NominatorMetadata);
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(nominatorMetadata.chain);
+
+  const [, setLoading] = useState(false);
+  const [, setErrors] = useState<string[]>([]);
+  const [, setWarnings] = useState<string[]>([]);
+
   const isAll = isAccountAll(currentAccount?.address || '');
   const [form] = Form.useForm<StakeFromProps>();
   const formDefault = {
@@ -45,12 +52,12 @@ const Component: React.FC<Props> = (props: Props) => {
     value: '0'
   };
   const unstakingInfo = nominatorMetadata && getUnstakingInfo(nominatorMetadata.unstakings, form.getFieldsValue().from);
-  const chainInfo = chainStakingMetadata && chainInfoMap[chainStakingMetadata.chain];
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo as _ChainInfo);
+
+  // TODO: choose record from unstakingInfo instead of number input
 
   useEffect(() => {
     transactionContext.setTransactionType(ExtrinsicType.STAKING_CANCEL_UNSTAKE);
-    transactionContext.setChain(chainStakingMetadata ? chainStakingMetadata.chain : '');
+    transactionContext.setChain(nominatorMetadata.chain);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactionContext]);
 
@@ -61,8 +68,27 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const submitTransaction = useCallback(() => {
-    // TODO: submit transaction
-  }, []);
+    submitStakeCancelWithdrawal({
+      address: nominatorMetadata.address,
+      chain: nominatorMetadata.chain,
+      selectedUnstaking: nominatorMetadata.unstakings[0] // TODO: should be selected by user
+    })
+      .then((result) => {
+        const { errors, extrinsicHash, warnings } = result;
+
+        if (errors.length || warnings.length) {
+          setLoading(false);
+          setErrors(errors.map((e) => e.message));
+          setWarnings(warnings.map((w) => w.message));
+        } else if (extrinsicHash) {
+          transactionContext.onDone(extrinsicHash);
+        }
+      })
+      .catch((error: Error) => {
+        setLoading(false);
+        setErrors([error.message]);
+      });
+  }, [nominatorMetadata.address, nominatorMetadata.chain, nominatorMetadata.unstakings, transactionContext]);
 
   return (
     <>
@@ -87,9 +113,10 @@ const Component: React.FC<Props> = (props: Props) => {
           />
 
           <Form.Item name={'collator'}>
-            <ValidatorSelector
-              chain={'polkadot'}
+            <NominationSelector
+              disabled={!transactionContext.from}
               label={t('Select collator')}
+              nominators={ transactionContext.from ? nominatorMetadata?.nominations || [] : []}
             />
           </Form.Item>
 
@@ -129,7 +156,7 @@ const Component: React.FC<Props> = (props: Props) => {
               valueAlign={'left'}
             >
               <Number
-                decimal={10}
+                decimal={decimals}
                 suffix={symbol}
                 value={'20000'}
               />

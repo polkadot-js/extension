@@ -14,12 +14,13 @@ import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchMo
 import { deriveAccountV3 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account';
-import { renderModalSelector } from '@subwallet/extension-koni-ui/util/dom';
+import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account/account';
+import { renderModalSelector } from '@subwallet/extension-koni-ui/util/common/dom';
 import { Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
+import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
 import { SpinnerGap } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 
@@ -48,6 +49,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const notify = useNotification();
+  const sectionRef = useRef<SwListSectionRef>(null);
 
   const { checkActive, inactiveModal } = useContext(ModalContext);
 
@@ -64,9 +66,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     [accounts]
   );
 
+  const clearSearch = useCallback(() => {
+    sectionRef.current?.setSearchValue('');
+  }, []);
+
   const onCancel = useCallback(() => {
     inactiveModal(modalId);
-  }, [inactiveModal]);
+    clearSearch();
+  }, [clearSearch, inactiveModal]);
 
   useClickOutSide(isActive || !!selected, renderModalSelector(className), onCancel);
 
@@ -79,6 +86,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           address: account.address
         }).then(() => {
           inactiveModal(modalId);
+          clearSearch();
         }).catch((e: Error) => {
           notify({
             message: e.message,
@@ -89,7 +97,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         });
       }, 500);
     };
-  }, [inactiveModal, notify]);
+  }, [clearSearch, inactiveModal, notify]);
 
   const renderItem = useCallback((account: AccountJson): React.ReactNode => {
     const disabled = !!selected;
@@ -109,7 +117,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     );
   }, [onSelectAccount, selected, token.sizeLG]);
 
-  const onBack = useSwitchModal(modalId, CREATE_ACCOUNT_MODAL);
+  const onBack = useSwitchModal(modalId, CREATE_ACCOUNT_MODAL, clearSearch);
 
   return (
     <SwModal
@@ -124,6 +132,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         displayRow={true}
         enableSearchInput={true}
         list={filtered}
+        ref={sectionRef}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}
         rowGap='var(--row-gap)'

@@ -8,7 +8,7 @@ import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import styled from 'styled-components';
 
 export type ChildProps = {
-  label: string;
+  label?: string;
   children: React.ReactElement;
 }
 
@@ -45,7 +45,6 @@ const Component = (props: Props) => {
           ))
         }
       </TabList>
-
       {
         React.Children.map(children, (child) => (
           <TabPanel>
@@ -95,7 +94,7 @@ const _ScreenTab = styled(Component)<Props>(({ theme: { token } }: Props) => {
 });
 
 type CompoundedComponent = React.ForwardRefExoticComponent<Omit<Props, 'theme'>> & {
-  SwTabPanel: typeof SwTabPanel,
+  SwTabPanel: typeof SwTabPanel
 };
 
 const ScreenTab = _ScreenTab as unknown as CompoundedComponent;

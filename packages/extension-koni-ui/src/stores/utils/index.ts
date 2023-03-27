@@ -12,7 +12,7 @@ import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { AppSettings } from '@subwallet/extension-koni-ui/stores/types';
-import { buildHierarchy } from '@subwallet/extension-koni-ui/util/buildHierarchy';
+import { buildHierarchy } from '@subwallet/extension-koni-ui/util/account/buildHierarchy';
 
 // Setup redux stores
 

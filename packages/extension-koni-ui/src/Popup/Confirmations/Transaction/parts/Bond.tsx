@@ -1,14 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestBondingSubmit } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestBondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
+import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
 import CN from 'classnames';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { BaseTransactionConfirmationProps } from './Base';
@@ -21,11 +20,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
 
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
-
-  const chainInfo = useMemo(() => {
-    return chainInfoMap[transaction.chain];
-  }, [chainInfoMap, transaction.chain]);
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(transaction.chain);
 
   return (
     <div className={CN(className)}>
@@ -37,17 +32,29 @@ const Component: React.FC<Props> = (props: Props) => {
         className={'meta-info'}
         hasBackgroundWrapper
       >
+        {/* <MetaInfo.Account */}
+        {/*   address={'5DnokDpMdNEH8cApsZoWQnjsggADXQmGWUb6q8ZhHeEwvncL'} */}
+        {/*   label={t('Validator')} */}
+        {/*   networkPrefix={42} */}
+        {/* /> */}
+
+        <MetaInfo.AccountGroup
+          accounts={data.selectedValidators}
+          content={t(`${data.selectedValidators.length} selected validators`)}
+          label={t(data.type === StakingType.POOLED ? 'Pool' : 'Validators')}
+        />
+
         <MetaInfo.Number
-          decimals={0}
-          label={t('Unbond amount')}
-          suffix={chainInfo?.substrateInfo?.symbol}
+          decimals={decimals}
+          label={t('Amount')}
+          suffix={symbol}
           value={data.amount}
         />
 
         <MetaInfo.Number
-          decimals={chainInfo?.substrateInfo?.decimals || 0}
+          decimals={decimals}
           label={t('Estimated fee')}
-          suffix={chainInfo?.substrateInfo?.symbol}
+          suffix={symbol}
           value={transaction.estimateFee?.value || 0}
         />
       </MetaInfo>
@@ -55,8 +62,8 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const UnstakeTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const BondTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {};
 });
 
-export default UnstakeTransactionConfirmation;
+export default BondTransactionConfirmation;

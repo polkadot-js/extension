@@ -7,11 +7,11 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isAccountAll } from '@subwallet/extension-base/utils';
-import { MODE_CAN_SIGN, SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
-import { AccountType } from '@subwallet/extension-koni-ui/types';
-import { getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
-import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util/index';
-import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
+import { MODE_CAN_SIGN } from '@subwallet/extension-koni-ui/constants/signing';
+import { AccountAddressType, AccountSignMode, AccountType } from '@subwallet/extension-koni-ui/types';
+import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
+import reformatAddress from '@subwallet/extension-koni-ui/util/account/reformatAddress';
+import { getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
 import { AccountInfoByNetwork } from '@subwallet/extension-koni-ui/util/types';
 
 import { decodeAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
@@ -52,29 +52,29 @@ export const findAccountByAddress = (accounts: AccountJson[], address?: string):
   }
 };
 
-export const getSignMode = (account: AccountJson | null | undefined): SIGN_MODE => {
+export const getSignMode = (account: AccountJson | null | undefined): AccountSignMode => {
   if (!account) {
-    return SIGN_MODE.UNKNOWN;
+    return AccountSignMode.UNKNOWN;
   } else {
     if (account.address === ALL_ACCOUNT_KEY) {
-      return SIGN_MODE.ALL_ACCOUNT;
+      return AccountSignMode.ALL_ACCOUNT;
     } else {
       if (account.isExternal) {
         if (account.isHardware) {
-          return SIGN_MODE.LEDGER;
+          return AccountSignMode.LEDGER;
         } else if (account.isReadOnly) {
-          return SIGN_MODE.READ_ONLY;
+          return AccountSignMode.READ_ONLY;
         } else {
-          return SIGN_MODE.QR;
+          return AccountSignMode.QR;
         }
       } else {
-        return SIGN_MODE.PASSWORD;
+        return AccountSignMode.PASSWORD;
       }
     }
   }
 };
 
-export const accountCanSign = (signMode: SIGN_MODE): boolean => {
+export const accountCanSign = (signMode: AccountSignMode): boolean => {
   return MODE_CAN_SIGN.includes(signMode);
 };
 
@@ -95,4 +95,26 @@ export const formatAccountAddress = (account: AccountJson, networkInfo: _ChainIn
   const isEthereum = account.type === 'ethereum' || (!!networkInfo && _isChainEvmCompatible(networkInfo));
 
   return reformatAddress(account.address, prefix, isEthereum);
+};
+
+export const getAccountAddressType = (address?: string): AccountAddressType => {
+  if (!address) {
+    return AccountAddressType.UNKNOWN;
+  }
+
+  if (address === ALL_ACCOUNT_KEY) {
+    return AccountAddressType.ALL;
+  }
+
+  if (isEthereumAddress(address)) {
+    return AccountAddressType.ETHEREUM;
+  }
+
+  try {
+    decodeAddress(address);
+
+    return AccountAddressType.SUBSTRATE;
+  } catch (e) {
+    return AccountAddressType.UNKNOWN;
+  }
 };

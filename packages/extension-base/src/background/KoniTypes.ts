@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset} from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
@@ -436,14 +436,14 @@ export enum ExtrinsicType {
   TRANSFER_XCM = 'transfer.xcm',
   SEND_NFT = 'send_nft',
   CROWDLOAN = 'crowdloan',
-  STAKING_STAKE = 'staking.stake',
-  STAKING_UNSTAKE = 'staking.unstake',
+  STAKING_JOIN_POOL = 'staking.join_pool',
+  STAKING_LEAVE_POOL = 'staking.leave_pool',
+  STAKING_POOL_WITHDRAW = 'staking.pool_withdraw',
   STAKING_BOND = 'staking.bond',
   STAKING_UNBOND = 'staking.unbond',
   STAKING_CLAIM_REWARD = 'staking.claim_reward',
   STAKING_WITHDRAW = 'staking.withdraw',
   STAKING_COMPOUNDING = 'staking.compounding',
-  STAKING_CANCEL_WITHDRAWAL = 'staking.cancel_withdrawal',
   STAKING_CANCEL_COMPOUNDING = 'staking.cancel_compounding',
   STAKING_CANCEL_UNSTAKE = 'staking.cancel_unstake',
   EVM_EXECUTE = 'evm.execute',
@@ -456,16 +456,16 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.TRANSFER_XCM]: RequestCrossChainTransfer,
   [ExtrinsicType.SEND_NFT]: NftTransactionRequest,
   [ExtrinsicType.CROWDLOAN]: any,
-  [ExtrinsicType.STAKING_STAKE]: RequestBondingSubmit,
-  [ExtrinsicType.STAKING_UNSTAKE]: RequestUnbondingSubmit,
-  [ExtrinsicType.STAKING_BOND]: RequestBondingSubmit,
+  [ExtrinsicType.STAKING_JOIN_POOL]: RequestStakePoolingBonding,
+  [ExtrinsicType.STAKING_LEAVE_POOL]: RequestStakePoolingUnbonding,
+  [ExtrinsicType.STAKING_BOND]: RequestStakePoolingBonding,
   [ExtrinsicType.STAKING_UNBOND]: RequestUnbondingSubmit,
-  [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: any,
   [ExtrinsicType.STAKING_CLAIM_REWARD]: RequestStakeClaimReward,
   [ExtrinsicType.STAKING_WITHDRAW]: RequestStakeWithdrawal,
-  [ExtrinsicType.STAKING_CANCEL_WITHDRAWAL]: RequestStakeCancelWithdrawal,
   [ExtrinsicType.STAKING_COMPOUNDING]: RequestTuringStakeCompound,
   [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: RequestTuringCancelStakeCompound,
+  [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: RequestStakeCancelWithdrawal,
+  [ExtrinsicType.STAKING_POOL_WITHDRAW]: any,
   [ExtrinsicType.EVM_EXECUTE]: any,
   [ExtrinsicType.UNKNOWN]: any
 }
@@ -499,10 +499,13 @@ export interface TransactionHistoryItemJson {
   total: number
 }
 
-export interface AmountData {
-  value: string,
-  decimals: number,
-  symbol: string
+export interface BasicTokenInfo {
+  decimals: number;
+  symbol: string;
+}
+
+export interface AmountData extends BasicTokenInfo {
+  value: string;
 }
 
 export interface XCMTransactionAdditionalInfo {
@@ -1199,7 +1202,6 @@ export interface BasicTxInfo {
 
 export interface BondingOptionParams {
   chain: string;
-  address: string;
   type: StakingType;
 }
 
@@ -1494,7 +1496,7 @@ export interface ChainBondingInfo {
 export interface BondingSubmitParams extends BaseRequestSign {
   chain: string,
   type: StakingType,
-  nominatorMetadata: NominatorMetadata,
+  nominatorMetadata?: NominatorMetadata,
   amount: string,
   selectedValidators: ValidatorInfo[],
   lockPeriod?: number // in month
@@ -1514,10 +1516,11 @@ export interface UnbondingSubmitParams extends BaseRequestSign {
 
 export type RequestUnbondingSubmit = InternalRequestSign<UnbondingSubmitParams>;
 
-// Withdraw
+// WithdrawStake
 
 export interface StakeWithdrawalParams extends BaseRequestSign {
   nominatorMetadata: NominatorMetadata,
+  unstakingInfo: UnstakingInfo,
   chain: string,
   validatorAddress?: string
 }
@@ -1529,8 +1532,9 @@ export type RequestStakeWithdrawal = InternalRequestSign<StakeWithdrawalParams>;
 export interface StakeClaimRewardParams extends BaseRequestSign {
   address: string,
   chain: string,
-  validatorAddress?: string,
-  stakingType: StakingType
+  stakingType: StakingType,
+  unclaimedReward?: string,
+  bondReward?: boolean
 }
 
 export type RequestStakeClaimReward = InternalRequestSign<StakeClaimRewardParams>;
@@ -1562,14 +1566,6 @@ export interface StakePoolingUnbondingParams extends BaseRequestSign {
 }
 
 export type RequestStakePoolingUnbonding = InternalRequestSign<StakePoolingUnbondingParams>;
-
-export interface StakePoolingWithdrawalParams extends BaseRequestSign {
-  nominatorMetadata: NominatorMetadata,
-  chain: string,
-  isReBond: boolean
-}
-
-export type RequestStakePoolingWithdrawal = InternalRequestSign<StakePoolingWithdrawalParams>;
 
 export interface DelegationItem {
   owner: string,
@@ -1819,7 +1815,6 @@ export interface KoniRequestSignatures {
   'pri(bonding.getNominationPoolOptions)': [string, NominationPoolInfo[]];
   'pri(bonding.nominationPool.submitBonding)': [RequestStakePoolingBonding, SWTransactionResponse];
   'pri(bonding.nominationPool.submitUnbonding)': [RequestStakePoolingUnbonding, SWTransactionResponse];
-  'pri(bonding.nominationPool.submitWithdrawal)': [RequestStakePoolingWithdrawal, SWTransactionResponse];
 
   // Chains, assets functions
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];

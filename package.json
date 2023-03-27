@@ -71,7 +71,7 @@
     "@polkadot/util": "^10.2.1",
     "@polkadot/util-crypto": "^10.2.1",
     "@polkadot/x-fetch": "^10.2.1",
-    "@subwallet/chain-list": "^0.0.19",
+    "@subwallet/chain-list": "^0.0.20",
     "@subwallet/keyring": "^0.0.4",
     "@subwallet/ui-keyring": "^0.0.3",
     "babel-core": "^7.0.0-bridge.0",

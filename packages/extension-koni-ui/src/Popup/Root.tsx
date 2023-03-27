@@ -12,7 +12,7 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isNoAccount } from '@subwallet/extension-koni-ui/util/account';
+import { isNoAccount } from '@subwallet/extension-koni-ui/util/account/account';
 import { changeHeaderLogo } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import React, { useContext, useEffect, useMemo } from 'react';

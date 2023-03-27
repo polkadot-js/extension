@@ -112,6 +112,12 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       }
     },
 
+    '.form-space-xxs': {
+      '.ant-form-item': {
+        marginBottom: token.marginXXS
+      }
+    },
+
     '.form-row': {
       display: 'flex',
       gap: token.sizeSM,

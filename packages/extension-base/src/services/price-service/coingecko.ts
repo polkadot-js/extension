@@ -12,11 +12,10 @@ interface GeckoItem {
   symbol: string
 }
 
-export const getTokenPrice = async (priceIds: Array<string>, currency = 'usd'): Promise<PriceJson> => {
+export const getTokenPrice = async (priceIds: Set<string>, currency = 'usd'): Promise<PriceJson> => {
   try {
-    // const inverseMap: Record<string, string> = {};
-    const idStr = priceIds.join(',');
-    const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=1000&ids=${idStr}`);
+    const idStr = Array.from(priceIds).join(',');
+    const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=250&ids=${idStr}`);
 
     if (res.status !== 200) {
       console.warn('Failed to get token price');
@@ -32,11 +31,6 @@ export const getTokenPrice = async (priceIds: Array<string>, currency = 'usd'): 
 
       priceMap[val.id] = currentPrice;
       price24hMap[val.id] = price24h;
-
-      // if (inverseMap[val.id]) {
-      //   priceMap[inverseMap[val.id]] = currentPrice;
-      //   price24hMap[inverseMap[val.id]] = price24h;
-      // }
     });
 
     return {

@@ -9,7 +9,7 @@ import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
-import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/validators/form';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/form/form';
 import { Button, Form, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useState } from 'react';

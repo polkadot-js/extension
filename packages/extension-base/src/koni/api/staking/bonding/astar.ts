@@ -481,7 +481,7 @@ export async function handleAstarClaimRewardTxInfo (address: string, networkKey:
   }
 }
 
-export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi, dappAddress: string, address: string) {
+export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi, address: string) {
   const apiPromise = await substrateApi.isReady;
 
   const [_stakedDapps, _currentEra] = await Promise.all([

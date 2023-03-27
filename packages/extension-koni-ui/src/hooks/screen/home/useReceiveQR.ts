@@ -10,7 +10,7 @@ import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType } from '@subwallet/extension-koni-ui/types';
 import { getAccountType, isAccountAll as checkIsAccountAll } from '@subwallet/extension-koni-ui/util';
-import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -111,9 +111,7 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
 
     return Object.values(assetRegistryMap).filter((asset) => {
       if (_isAssetFungibleToken(asset)) {
-        const chainSlug = assetRegistryMap[asset.slug].originChain;
-
-        if (_isChainEvmCompatible(chainInfoMap[chainSlug]) === isEthereumAddress(_selectedAccount)) {
+        if (_isChainEvmCompatible(chainInfoMap[asset.originChain]) === isEthereumAddress(_selectedAccount)) {
           if (tokenGroupSlug) {
             return _getMultiChainAsset(asset) === tokenGroupSlug;
           }

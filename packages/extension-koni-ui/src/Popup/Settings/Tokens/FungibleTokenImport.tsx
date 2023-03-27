@@ -25,6 +25,7 @@ import styled, { useTheme } from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import ChainLogoMap from '../../../assets/logo';
+import GeneralEmptyList from '../../../components/GeneralEmptyList';
 
 type Props = ThemeProps
 
@@ -61,6 +62,8 @@ function getTokenTypeSupported (chainInfo: _ChainInfo) {
 
   return result;
 }
+
+const renderEmpty = () => <GeneralEmptyList />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -356,6 +359,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 prefix={selectedChain !== '' && originChainLogo()}
                 renderItem={renderChainOption}
                 renderSelected={renderChainSelected}
+                renderWhenEmpty={renderEmpty}
                 searchFunction={searchChain}
                 searchPlaceholder={'Search chain'}
                 searchableMinCharactersCount={2}

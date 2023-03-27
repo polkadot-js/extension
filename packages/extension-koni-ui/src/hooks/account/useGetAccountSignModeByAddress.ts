@@ -1,15 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
-import { getSignMode } from '@subwallet/extension-koni-ui/util/account';
+import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
+import { getSignMode } from '@subwallet/extension-koni-ui/util/account/account';
 import { useMemo } from 'react';
 
-const useGetAccountSignModeByAddress = (address?: string): SIGN_MODE => {
+const useGetAccountSignModeByAddress = (address?: string): AccountSignMode => {
   const account = useGetAccountByAddress(address);
 
-  return useMemo((): SIGN_MODE => {
+  return useMemo((): AccountSignMode => {
     return getSignMode(account);
   }, [account]);
 };

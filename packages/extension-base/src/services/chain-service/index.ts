@@ -3,7 +3,7 @@
 
 import { AssetRefMap, ChainAssetMap, ChainInfoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
-import { ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
 import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
@@ -13,7 +13,8 @@ import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _Da
 import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import { Subject } from 'rxjs';
+import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
+import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 
 import { logger as createLogger } from '@polkadot/util/logger';
@@ -40,6 +41,10 @@ export class ChainService {
   private assetRegistrySubject = new Subject<Record<string, _ChainAsset>>();
   private multiChainAssetMapSubject = new Subject<Record<string, _MultiChainAsset>>();
   private xcmRefMapSubject = new Subject<Record<string, _AssetRef>>();
+
+  // Todo: Update to new store indexed DB
+  private store: AssetSettingStore = new AssetSettingStore();
+  private assetSettingSubject = new BehaviorSubject({} as Record<string, AssetSetting>);
 
   private logger: Logger;
 
@@ -457,6 +462,9 @@ export class ChainService {
       if (callback) {
         callback();
       }
+
+      // Init asset setting after enable chain
+      this.initAssetSettings().catch(console.error);
     }).catch((e) => this.logger.error(e));
   }
 
@@ -1243,5 +1251,84 @@ export class ChainService {
       console.log('Update chain connection state');
       this.chainStateMapSubject.next(chainStateMap);
     }
+  }
+
+  public async initAssetSettings () {
+    const assetSettings = await this.getAssetSettings();
+    const activeChainSlugs = this.getActiveChainSlugs();
+    const assetRegistry = this.getAssetRegistry();
+
+    if (Object.keys(assetSettings).length === 0) { // only initiate the first time
+      Object.values(assetRegistry).forEach((assetInfo) => {
+        const isSettingExisted = assetInfo.slug in assetSettings;
+
+        // Set visible for every enabled chains
+        if (activeChainSlugs.includes(assetInfo.originChain) && !isSettingExisted) {
+          // Setting only exist when set either by chain settings or user
+          assetSettings[assetInfo.slug] = {
+            visible: true
+          };
+        }
+      });
+
+      this.setAssetSettings(assetSettings);
+    }
+
+    console.log('Done init asset settings');
+  }
+
+  public setAssetSettings (assetSettings: Record<string, AssetSetting>): void {
+    this.assetSettingSubject.next(assetSettings);
+    this.store.set('AssetSetting', assetSettings);
+  }
+
+  public async getStoreAssetSettings (): Promise<Record<string, AssetSetting>> {
+    return new Promise((resolve) => {
+      this.store.get('AssetSetting', resolve);
+    });
+  }
+
+  public async getAssetSettings (): Promise<Record<string, AssetSetting>> {
+    if (Object.keys(this.assetSettingSubject.value).length === 0) {
+      const assetSettings = (await this.getStoreAssetSettings() || {});
+
+      this.assetSettingSubject.next(assetSettings);
+    }
+
+    return this.assetSettingSubject.value;
+  }
+
+  public async updateAssetSetting (assetSlug: string, assetSetting: AssetSetting) {
+    const currentAssetSettings = await this.getAssetSettings();
+
+    // Update settings
+    currentAssetSettings[assetSlug] = assetSetting;
+    this.setAssetSettings(currentAssetSettings);
+
+    if (assetSetting.visible) {
+      const assetInfo = this.getAssetBySlug(assetSlug);
+      const chainState = this.getChainStateByKey(assetInfo.originChain);
+
+      // if chain not enabled, then automatically enable
+      if (chainState && !chainState.active) {
+        this.enableChain(chainState.slug);
+      }
+    }
+  }
+
+  public async updateAssetSettingByChain (chainSlug: string, visible: boolean) {
+    const storedAssetSettings = await this.getAssetSettings();
+    const assetsByChain = this.getFungibleTokensByChain(chainSlug);
+    const assetSettings: Record<string, AssetSetting> = storedAssetSettings || {};
+
+    Object.values(assetsByChain).forEach((assetInfo) => {
+      assetSettings[assetInfo.slug] = { visible };
+    });
+
+    this.setAssetSettings(assetSettings);
+  }
+
+  public subscribeAssetSettings () {
+    return this.assetSettingSubject;
   }
 }

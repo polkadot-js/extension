@@ -7,7 +7,8 @@ import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
-import React, { useCallback, useContext } from 'react';
+import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
+import React, { useCallback, useContext, useRef } from 'react';
 import styled from 'styled-components';
 
 import GeneralEmptyList from '../../GeneralEmptyList';
@@ -25,6 +26,7 @@ const renderEmpty = () => <GeneralEmptyList />;
 function Component ({ address, className = '', items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const sectionRef = useRef<SwListSectionRef>(null);
 
   const searchFunction = useCallback((item: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -36,6 +38,7 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
 
   const onCancel = useCallback(() => {
     inactiveModal(ReceiveTokensSelectorModalId);
+    sectionRef.current?.setSearchValue('');
   }, [inactiveModal]);
 
   const onClickQrBtn = useCallback((item: _ChainAsset) => {
@@ -73,6 +76,7 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
       <SwList.Section
         enableSearchInput={true}
         list={items}
+        ref={sectionRef}
         renderItem={renderItem}
         renderWhenEmpty={renderEmpty}
         searchFunction={searchFunction}

@@ -1,15 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO } from '@polkadot/util';
-
-export const REVOKE_ACTION = 'revoke';
-export const BOND_LESS_ACTION = 'bondLess';
-export const DECREASE_ACTION = 'decrease'; // for bifrost
 
 export interface PalletNominationPoolsPoolMember {
   poolId: number,
@@ -291,4 +287,77 @@ export function isUnstakeAll (selectedValidator: string, nominations: Nomination
   }
 
   return isUnstakeAll;
+}
+
+export enum StakingAction {
+  STAKE = 'STAKE',
+  UNSTAKE = 'UNSTAKE',
+  WITHDRAW = 'WITHDRAW',
+  CLAIM_REWARD = 'CLAIM_REWARD',
+  CANCEL_UNSTAKE = 'CANCEL_UNSTAKE'
+}
+
+export function getStakingAvailableActions (nominatorMetadata: NominatorMetadata): StakingAction[] {
+  const result: StakingAction[] = [StakingAction.STAKE];
+
+  const bnActiveStake = new BN(nominatorMetadata.activeStake);
+
+  if (nominatorMetadata.activeStake && bnActiveStake.gt(BN_ZERO)) {
+    result.push(StakingAction.UNSTAKE);
+
+    const isChainAllowClaimReward = _STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain) || _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
+
+    if (nominatorMetadata.type === StakingType.POOLED || isChainAllowClaimReward) {
+      result.push(StakingAction.CLAIM_REWARD);
+    }
+  }
+
+  if (nominatorMetadata.unstakings.length > 0) {
+    result.push(StakingAction.CANCEL_UNSTAKE);
+    let hasClaimable = false;
+
+    for (const unstaking of nominatorMetadata.unstakings) {
+      if (unstaking.status === UnstakingStatus.CLAIMABLE) {
+        hasClaimable = true;
+        break;
+      }
+    }
+
+    if (hasClaimable) {
+      result.push(StakingAction.WITHDRAW);
+    }
+  }
+
+  return result;
+}
+
+export function isActionFromValidator (stakingType: StakingType, chain: string) {
+  if (stakingType === StakingType.POOLED) {
+    return false;
+  }
+
+  if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+    return true;
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
+    return true;
+  } else if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+    return true;
+  }
+
+  return false;
+}
+
+export function getWithdrawalInfo (nominatorMetadata: NominatorMetadata) {
+  const unstakings = nominatorMetadata.unstakings;
+
+  let result: UnstakingInfo | undefined;
+
+  for (const unstaking of unstakings) {
+    if (unstaking.status === UnstakingStatus.CLAIMABLE) {
+      result = unstaking; // only get the first withdrawal
+      break;
+    }
+  }
+
+  return result;
 }

@@ -41,8 +41,8 @@ export const getOutputValuesFromString: (input: string, power: number) => string
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className, decimals, disabled, maxValue, onChange } = props;
-  const [inputValue, setInputValue] = useState('');
+  const { className, decimals, disabled, maxValue, onChange, value } = props;
+  const [inputValue, setInputValue] = useState(value);
   const inputRef = useForwardInputRef(ref);
 
   const { t } = useTranslation();

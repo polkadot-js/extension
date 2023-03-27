@@ -2,6 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { FormFieldData } from '@subwallet/extension-koni-ui/types/form';
+import { FieldData } from 'rc-field-form/lib/interface';
+
+export function convertFieldToObject<T = Record<string, any>> (fields: FieldData[]) {
+  const rs = fields.reduce((data, { name, value }) => {
+    data[name as string] = value;
+
+    return data;
+  }, {} as Record<string, unknown>);
+
+  return rs as T;
+}
 
 export const simpleCheckForm = (changedFields: FormFieldData[], allFields: FormFieldData[]) => {
   const error = allFields.map((data) => data.errors || [])

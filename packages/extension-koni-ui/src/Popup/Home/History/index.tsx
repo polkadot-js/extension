@@ -11,9 +11,9 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import { HistoryDetailModal, HistoryDetailModalId } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate } from '@subwallet/extension-koni-ui/util/customFormatDate';
+import { customFormatDate } from '@subwallet/extension-koni-ui/util/common/customFormatDate';
 import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
-import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, DownloadSimple, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
+import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -78,8 +78,8 @@ function isTypeTransfer (txType: ExtrinsicType) {
 
 function isTypeStaking (txType: ExtrinsicType) {
   return [
-    ExtrinsicType.STAKING_STAKE,
-    ExtrinsicType.STAKING_UNSTAKE,
+    ExtrinsicType.STAKING_JOIN_POOL,
+    ExtrinsicType.STAKING_LEAVE_POOL,
     ExtrinsicType.STAKING_BOND,
     ExtrinsicType.STAKING_UNBOND,
     ExtrinsicType.STAKING_WITHDRAW,
@@ -115,7 +115,7 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
 
     displayData = {
       className: `-${item.type} -${item.status}`,
-      title: titleMap.received,
+      title: titleMap[item.type],
       typeName: `${typeName} ${displayStatus} - ${time}`,
       name: nameMap[item.type],
       icon: getIcon(item)
@@ -209,16 +209,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const filterOptions = useMemo(() => {
     return [
-      { label: 'Send token transaction', value: FilterValue.SEND },
-      { label: 'Receive token transaction', value: FilterValue.RECEIVED },
-      { label: 'NFT transaction', value: FilterValue.NFT },
-      { label: 'Stake transaction', value: FilterValue.STAKE },
-      { label: 'Claim reward transaction', value: FilterValue.CLAIM },
-      { label: 'Crowdloan transaction', value: FilterValue.CROWDLOAN },
-      { label: 'Successful transaction', value: FilterValue.SUCCESSFUL },
-      { label: 'Failed transaction', value: FilterValue.FAILED }
+      { label: t('Send token transaction'), value: FilterValue.SEND },
+      { label: t('Receive token transaction'), value: FilterValue.RECEIVED },
+      { label: t('NFT transaction'), value: FilterValue.NFT },
+      { label: t('Stake transaction'), value: FilterValue.STAKE },
+      { label: t('Claim reward transaction'), value: FilterValue.CLAIM },
+      // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
+      { label: t('Successful transaction'), value: FilterValue.SUCCESSFUL },
+      { label: t('Failed transaction'), value: FilterValue.FAILED }
     ];
-  }, []);
+  }, [t]);
 
   const accountMap = useMemo(() => {
     return accounts.reduce((accMap, cur) => {
@@ -235,8 +235,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     received: t('Receive'),
     [ExtrinsicType.SEND_NFT]: t('NFT'),
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan'),
-    [ExtrinsicType.STAKING_STAKE]: t('Stake'),
-    [ExtrinsicType.STAKING_UNSTAKE]: t('Unstake'),
+    [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake'),
+    [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake'),
     [ExtrinsicType.STAKING_BOND]: t('Bond'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward'),
@@ -249,8 +249,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     received: t('Receive transaction'),
     [ExtrinsicType.SEND_NFT]: t('NFT transaction'),
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan transaction'),
-    [ExtrinsicType.STAKING_STAKE]: t('Stake transaction'),
-    [ExtrinsicType.STAKING_UNSTAKE]: t('Unstake transaction'),
+    [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake transaction'),
+    [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake transaction'),
     [ExtrinsicType.STAKING_BOND]: t('Bond transaction'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond transaction'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward transaction'),
@@ -281,12 +281,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onOpenDetail = useCallback((item: TransactionHistoryDisplayItem) => {
     return () => {
       setSelectedItem(item);
+      activeModal(HistoryDetailModalId);
     };
-  }, []);
+  }, [activeModal]);
 
   const onCloseDetail = useCallback(() => {
-    setSelectedItem(null);
-  }, []);
+    inactiveModal(HistoryDetailModalId);
+  }, [inactiveModal]);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -310,14 +311,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [chain, extrinsicHash, forceOpen, historyList]);
 
-  useEffect(() => {
-    if (selectedItem) {
-      activeModal(HistoryDetailModalId);
-    } else {
-      inactiveModal(HistoryDetailModalId);
-    }
-  }, [activeModal, selectedItem, inactiveModal]);
-
   const emptyList = useCallback(() => {
     return <EmptyList
       emptyMessage={t('Your transactions history will appear here!')}
@@ -331,7 +324,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return (
         <HistoryItem
           item={item}
-          key={item.extrinsicHash}
+          key={`${item.extrinsicHash}-${item.address}`}
           onClick={onOpenDetail(item)}
         />
       );
@@ -368,17 +361,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           center={false}
           className={'history-header'}
           paddingVertical
-          rightButtons={[
-            {
-              icon: (
-                <Icon
-                  phosphorIcon={DownloadSimple}
-                  size={'md'}
-                  type='phosphor'
-                />
-              )
-            }
-          ]}
+          // todo: enable this code if support download feature
+          // rightButtons={[
+          //   {
+          //     icon: (
+          //       <Icon
+          //         phosphorIcon={DownloadSimple}
+          //         size={'md'}
+          //         type='phosphor'
+          //       />
+          //     )
+          //   }
+          // ]}
           showBackButton={false}
           title={t('History')}
         />
@@ -399,12 +393,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           showActionBtn
         />
       </PageWrapper>
-      {!!selectedItem && (
-        <HistoryDetailModal
-          data={selectedItem}
-          onCancel={onCloseDetail}
-        />
-      )}
+
+      <HistoryDetailModal
+        data={selectedItem}
+        onCancel={onCloseDetail}
+      />
 
       <FilterModal
         id={FILTER_MODAL_ID}

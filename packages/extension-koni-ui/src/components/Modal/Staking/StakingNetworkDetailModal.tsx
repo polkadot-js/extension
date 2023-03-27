@@ -5,14 +5,14 @@ import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/stakingHandler';
+import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Number, SwModal, SwNumberProps } from '@subwallet/react-ui';
-import React from 'react';
+import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  onCancel: () => void,
   activeNominators?: [SwNumberProps['value'], SwNumberProps['value']],
   estimatedEarning?: SwNumberProps['value'],
   inflation?: SwNumberProps['value'],
@@ -29,9 +29,13 @@ function Component ({ activeNominators,
   inflation,
   maxValidatorPerNominator,
   minimumActive,
-  onCancel,
   unstakingPeriod }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { inactiveModal } = useContext(ModalContext);
+
+  const onCancel = useCallback(() => {
+    inactiveModal(StakingNetworkDetailModalId);
+  }, [inactiveModal]);
 
   return (
     <SwModal

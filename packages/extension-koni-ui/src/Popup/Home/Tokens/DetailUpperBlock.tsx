@@ -5,7 +5,7 @@ import { PREDEFINED_TRANSAK_TOKEN } from '@subwallet/extension-koni-ui/constants
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getAccountType } from '@subwallet/extension-koni-ui/util/account';
+import { getAccountType } from '@subwallet/extension-koni-ui/util/account/account';
 import { Button, Icon, Number } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import { ArrowFatLinesDown, CaretLeft, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';

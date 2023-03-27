@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SIGN_MODE } from '@subwallet/extension-koni-ui/constants/signing';
 import useAccountAvatarInfo from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarInfo';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { Button, Icon, SwIconProps } from '@subwallet/react-ui';
 import AccountCard, { AccountCardProps } from '@subwallet/react-ui/es/web3-block/account-card';
-import { DotsThree, Eye, QrCode, Swatches } from 'phosphor-react';
+import { Eye, PencilSimpleLine, QrCode, Swatches } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -32,17 +32,17 @@ function Component (props: _AccountCardProps): React.ReactElement<_AccountCardPr
 
   const iconProps: SwIconProps | undefined = useMemo((): SwIconProps | undefined => {
     switch (signMode) {
-      case SIGN_MODE.LEDGER:
+      case AccountSignMode.LEDGER:
         return {
           type: 'phosphor',
           phosphorIcon: Swatches
         };
-      case SIGN_MODE.QR:
+      case AccountSignMode.QR:
         return {
           type: 'phosphor',
           phosphorIcon: QrCode
         };
-      case SIGN_MODE.READ_ONLY:
+      case AccountSignMode.READ_ONLY:
         return {
           type: 'phosphor',
           phosphorIcon: Eye
@@ -78,7 +78,7 @@ function Component (props: _AccountCardProps): React.ReactElement<_AccountCardPr
         {showMoreBtn && <Button
           icon={
             <Icon
-              phosphorIcon={DotsThree}
+              phosphorIcon={PencilSimpleLine}
               size='sm'
             />
           }

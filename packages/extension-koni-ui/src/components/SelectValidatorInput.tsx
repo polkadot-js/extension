@@ -5,8 +5,8 @@ import AvatarGroup, { BaseAccountInfo } from '@subwallet/extension-koni-ui/compo
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Book, DotsThree } from 'phosphor-react';
-import React, { useMemo } from 'react';
+import { Book, Lightning } from 'phosphor-react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -17,16 +17,17 @@ type Props = ThemeProps & {
   placeholder?: string;
   value: string;
   onClick: () => void;
+  disabled?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, label, onClick, placeholder, value } = props;
+  const { className, disabled, label, onClick, placeholder, value } = props;
   const { t } = useTranslation();
 
   const addressList = useMemo(() => {
     if (value) {
       const addressList: BaseAccountInfo[] = value.split(',').map((item) => {
-        const itemInfo = item.split('-');
+        const itemInfo = item.split('___');
 
         return {
           address: itemInfo[0],
@@ -52,13 +53,19 @@ const Component: React.FC<Props> = (props: Props) => {
       return t(`Selected ${valueList.length} validator`);
     }
 
-    return valueList[0].split('-')[1];
+    return valueList[0].split('___')[1];
   };
+
+  const _onClick = useCallback(() => {
+    !disabled && onClick();
+  }, [disabled, onClick]);
 
   return (
     <div
-      className={CN(className)}
-      onClick={onClick}
+      className={CN(className, {
+        '-disabled': disabled
+      })}
+      onClick={_onClick}
     >
       <div className={'select-validator-input__label'}>{label}</div>
       <div className={'select-validator-input__content-wrapper'}>
@@ -69,6 +76,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className={'select-validator-input__content'}>{renderContent()}</div>
         <div className={'select-validator-input__button-wrapper'}>
           <Button
+            disabled={disabled}
             icon={<Icon
               phosphorIcon={Book}
               size={'sm'}
@@ -77,8 +85,9 @@ const Component: React.FC<Props> = (props: Props) => {
             type={'ghost'}
           />
           <Button
+            disabled={disabled}
             icon={<Icon
-              phosphorIcon={DotsThree}
+              phosphorIcon={Lightning}
               size={'sm'}
             />}
             size={'xs'}
@@ -96,17 +105,36 @@ const SelectValidatorInput = styled(Component)<Props>(({ theme: { token } }: Pro
     borderRadius: token.borderRadiusLG,
     padding: `${token.paddingXS}px ${token.paddingSM}px ${token.paddingXXS}px`,
     cursor: 'pointer',
-    border: '2px solid transparent',
-    transition: 'border-color 0.3s',
+
+    '&:before': {
+      content: '""',
+      border: '2px solid transparent',
+      borderRadius: token.borderRadiusLG,
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+      top: 0,
+      left: 0,
+      transition: `border-color ${token.motionDurationSlow}`
+    },
 
     '&:hover': {
-      borderColor: token.colorPrimaryBorderHover
+      '&:before': {
+        borderColor: token.colorPrimaryBorderHover
+      }
+    },
+
+    '&.-disabled': {
+      cursor: 'not-allowed',
+      border: 'none'
     },
 
     '.select-validator-input__label': {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
-      color: token.colorTextLight4
+      color: token.colorTextLight4,
+      position: 'relative',
+      zIndex: 0
     },
 
     '.select-validator-input__content-wrapper': {
@@ -115,7 +143,7 @@ const SelectValidatorInput = styled(Component)<Props>(({ theme: { token } }: Pro
     },
 
     '.select-validator-input__avatar-gr': {
-      paddingRight: token.paddingXS
+      marginRight: token.paddingXS
     },
 
     '.select-validator-input__content': {
@@ -123,7 +151,8 @@ const SelectValidatorInput = styled(Component)<Props>(({ theme: { token } }: Pro
       paddingRight: token.paddingXS,
       textOverflow: 'ellipsis',
       overflow: 'hidden',
-      whiteSpace: 'nowrap'
+      whiteSpace: 'nowrap',
+      zIndex: 0
     },
 
     '.select-validator-input__button-wrapper': {

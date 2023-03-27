@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset, _SubstrateChainType } from '@subwallet/chain-list/types';
+import { BasicTokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _ChainState, _CUSTOM_PREFIX, _SMART_CONTRACT_STANDARDS } from '@subwallet/extension-base/services/chain-service/types';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -66,6 +67,10 @@ export function _isPureSubstrateChain (chainInfo: _ChainInfo) {
 }
 
 export function _getOriginChainOfAsset (assetSlug: string) {
+  if (assetSlug.startsWith(_CUSTOM_PREFIX)) {
+    return assetSlug.split('-')[1];
+  }
+
   return assetSlug.split('-')[0];
 }
 
@@ -203,7 +208,14 @@ export function _getTokenTypesSupportedByChain (chainInfo: _ChainInfo): _AssetTy
   return result;
 }
 
-export function _getChainNativeTokenBasicInfo (chainInfo: _ChainInfo) {
+export function _getChainNativeTokenBasicInfo (chainInfo: _ChainInfo): BasicTokenInfo {
+  if (!chainInfo) {
+    return {
+      symbol: '',
+      decimals: -1
+    };
+  }
+
   if (chainInfo.substrateInfo !== null) { // substrate by default
     return {
       symbol: chainInfo.substrateInfo.symbol,

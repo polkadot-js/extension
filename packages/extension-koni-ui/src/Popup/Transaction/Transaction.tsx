@@ -5,6 +5,7 @@ import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
+import { TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useChainChecker from '@subwallet/extension-koni-ui/hooks/chain/useChainChecker';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -73,15 +74,15 @@ function Component ({ className }: Props) {
   const [transactionType, setTransactionType] = useState<ExtrinsicType>(ExtrinsicType.TRANSFER_BALANCE);
   const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
   const [disabledRightBtn, setDisabledRightBtn] = useState<boolean>(false);
-  const titleMap = useMemo<Record<string, string>>(() => ({
-    [ExtrinsicType.TRANSFER_BALANCE]: t('Transfer'),
-    [ExtrinsicType.SEND_NFT]: t('Transfer NFT'),
-    [ExtrinsicType.STAKING_STAKE]: t('Add to Bond'),
-    [ExtrinsicType.STAKING_UNSTAKE]: t('Remove Bond'),
-    [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake'),
-    [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim reward'),
-    [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw')
-  }), [t]);
+  const titleMap = useMemo<Record<string, string>>(() => {
+    const result: Record<string, string> = {};
+
+    for (const [key, value] of Object.entries(TRANSACTION_TITLE_MAP)) {
+      result[key] = t(value);
+    }
+
+    return result;
+  }, [t]);
   const { goBack } = useDefaultNavigate();
 
   const checkChain = useChainChecker();
@@ -101,7 +102,7 @@ function Component ({ className }: Props) {
   );
 
   const onClickRightBtn = useCallback(() => {
-    if (transactionType === ExtrinsicType.STAKING_STAKE) {
+    if (transactionType === ExtrinsicType.STAKING_JOIN_POOL) {
       activeModal(StakingNetworkDetailModalId);
     }
   }, [activeModal, transactionType]);

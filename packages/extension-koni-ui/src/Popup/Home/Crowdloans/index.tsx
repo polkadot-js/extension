@@ -2,22 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan';
-import { Button, Checkbox, CrowdloanItem, Icon, ModalContext, SwList, SwModal, Tag } from '@subwallet/react-ui';
-import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
+import { CrowdloanItem, Icon, ModalContext, SwList, Tag } from '@subwallet/react-ui';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
-type Props = ThemeProps
-
-const TOKENS_PER_PAGE = 10;
+type Props = ThemeProps;
 
 enum FilterValue {
   POLKADOT_PARACHAIN = 'Polkadot parachain',
@@ -25,13 +23,6 @@ enum FilterValue {
   WINNER = 'completed',
   FAIL = 'failed'
 }
-
-const FILTER_OPTIONS = [
-  { label: 'Polkadot parachain', value: FilterValue.POLKADOT_PARACHAIN },
-  { label: 'Kusama parachain', value: FilterValue.KUSAMA_PARACHAIN },
-  { label: 'Win', value: FilterValue.WINNER },
-  { label: 'Fail', value: FilterValue.FAIL }
-];
 
 function getTagColor (paraState?: CrowdloanParaState) {
   if (!paraState) {
@@ -61,80 +52,51 @@ function getRelayParentKey (groupDisplayName: string) {
   }
 }
 
-function getFilteredList (items: CrowdloanItemType[], filters: FilterValue[]) {
-  const filteredList: CrowdloanItemType[] = [];
-
-  items.forEach((item) => {
-    let isValidationPassed = filters.length <= 0;
-
-    for (const filter of filters) {
-      switch (filter) {
-        case FilterValue.POLKADOT_PARACHAIN:
-          isValidationPassed = item.relayParentDisplayName === 'Polkadot parachain';
-          break;
-        case FilterValue.KUSAMA_PARACHAIN:
-          isValidationPassed = item.relayParentDisplayName === 'Kusama parachain';
-          break;
-        case FilterValue.WINNER:
-          isValidationPassed = item.paraState === CrowdloanParaState.COMPLETED.valueOf();
-          break;
-        case FilterValue.FAIL:
-          isValidationPassed = item.paraState === CrowdloanParaState.FAILED.valueOf();
-          break;
-        default:
-          isValidationPassed = false;
-          break;
-      }
-
-      if (isValidationPassed) {
-        break; // only need to satisfy 1 filter (OR)
-      }
-    }
-
-    if (isValidationPassed) {
-      filteredList.push(item);
-    }
-  });
-
-  return filteredList;
-}
-
 const FILTER_MODAL_ID = 'crowdloan-filter-modal';
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const items: CrowdloanItemType[] = useGetCrowdloanList();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
-  const [selectedFilters, setSelectedFilters] = useState<FilterValue[]>([]);
-  const [changeFilters, setChangeFilters] = useState<FilterValue[]>(selectedFilters);
-  const [filteredList, setFilteredList] = useState<CrowdloanItemType[]>([]);
-  const [paging, setPaging] = useState(TOKENS_PER_PAGE);
-  const allCrowdloanList = useMemo(() => {
-    return getFilteredList(items, selectedFilters);
-  }, [items, selectedFilters]);
+  const { activeModal } = useContext(ModalContext);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
-  useEffect(() => {
-    setFilteredList(allCrowdloanList.slice(0, TOKENS_PER_PAGE));
-    setPaging(TOKENS_PER_PAGE);
-  }, [allCrowdloanList]);
+  const filterOptions = useMemo(() => [
+    { label: t('Polkadot parachain'), value: FilterValue.POLKADOT_PARACHAIN },
+    { label: t('Kusama parachain'), value: FilterValue.KUSAMA_PARACHAIN },
+    { label: t('Win'), value: FilterValue.WINNER },
+    { label: t('Fail'), value: FilterValue.FAIL }
+  ], [t]);
 
-  // load more
-  const hasMore = useMemo(() => {
-    return allCrowdloanList.length > filteredList.length;
-  }, [allCrowdloanList.length, filteredList.length]);
-
-  const loadMoreItems = useCallback(() => {
-    setTimeout(() => {
-      if (hasMore) {
-        const nextPaging = paging + TOKENS_PER_PAGE;
-        const to = nextPaging > allCrowdloanList.length ? allCrowdloanList.length : nextPaging;
-
-        setFilteredList(allCrowdloanList.slice(0, to));
-        setPaging(nextPaging);
+  const filterFunction = useMemo<(item: CrowdloanItemType) => boolean>(() => {
+    return (item) => {
+      if (!selectedFilters.length) {
+        return true;
       }
-    }, 50);
-  }, [allCrowdloanList, hasMore, paging]);
+
+      for (const filter of selectedFilters) {
+        if (filter === FilterValue.POLKADOT_PARACHAIN) {
+          if (item.relayParentDisplayName === 'Polkadot parachain') {
+            return true;
+          }
+        } else if (filter === FilterValue.KUSAMA_PARACHAIN) {
+          if (item.relayParentDisplayName === 'Kusama parachain') {
+            return true;
+          }
+        } else if (filter === FilterValue.WINNER) {
+          if (item.paraState === CrowdloanParaState.COMPLETED) {
+            return true;
+          }
+        } else if (filter === FilterValue.FAIL) {
+          if (item.paraState === CrowdloanParaState.FAILED) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    };
+  }, [selectedFilters]);
 
   // filter
   const onClickActionBtn = useCallback(
@@ -144,48 +106,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     },
     [activeModal]
   );
-
-  const onChangeFilterOpt = useCallback((e: CheckboxChangeEvent) => {
-    const changedValue = e.target.value as FilterValue;
-
-    if (e.target.checked) {
-      setChangeFilters([...changeFilters, changedValue]);
-    } else {
-      const newSelectedFilters: FilterValue[] = [];
-
-      changeFilters.forEach((filterVal) => {
-        if (filterVal !== changedValue) {
-          newSelectedFilters.push(filterVal);
-        }
-      });
-      setChangeFilters(newSelectedFilters);
-    }
-  }, [changeFilters]);
-
-  const closeFilterModal = useCallback(() => {
-    inactiveModal(FILTER_MODAL_ID);
-  }, [inactiveModal]);
-
-  const onApplyFilter = useCallback(() => {
-    inactiveModal(FILTER_MODAL_ID);
-    setSelectedFilters(changeFilters);
-  }, [changeFilters, inactiveModal]);
-
-  const filterModalFooter = useCallback(() => {
-    return (
-      <Button
-        block={true}
-        icon={<Icon
-          phosphorIcon={FadersHorizontal}
-          type='phosphor'
-          weight={'bold'}
-        />}
-        onClick={onApplyFilter}
-      >
-        <span className={'crowdloan__token_filter_button'}>{t('Apply filter')}</span>
-      </Button>
-    );
-  }, [t, onApplyFilter]);
 
   const searchFunction = useCallback((item: CrowdloanItemType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -268,15 +188,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       >
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-          enableSearchInput={true}
-          list={filteredList}
+          enableSearchInput
+          filterBy={filterFunction}
+          list={items}
           onClickActionBtn={onClickActionBtn}
-          pagination={{
-            hasMore,
-            loadMore: loadMoreItems
-          }}
           renderItem={renderItem}
-          renderOnScroll={false}
           renderWhenEmpty={emptyCrowdloanList}
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
@@ -284,34 +200,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           showActionBtn
         />
 
-        <SwModal
-          className={className}
-          footer={filterModalFooter()}
+        <FilterModal
           id={FILTER_MODAL_ID}
-          onCancel={closeFilterModal}
-          title={t('Filter')}
-        >
-          <div className={'crowdloan__filter_option_wrapper'}>
-            {
-              FILTER_OPTIONS.map((opt) => {
-                return (
-                  <div
-                    className={'crowdloan__filter_option'}
-                    key={opt.label}
-                  >
-                    <Checkbox
-                      checked={changeFilters.includes(opt.value)}
-                      onChange={onChangeFilterOpt}
-                      value={opt.value}
-                    >
-                      {opt.label}
-                    </Checkbox>
-                  </div>
-                );
-              })
-            }
-          </div>
-        </SwModal>
+          onApplyFilter={onApplyFilter}
+          onCancel={onCloseFilterModal}
+          onChangeOption={onChangeFilterOption}
+          optionSelectionMap={filterSelectionMap}
+          options={filterOptions}
+        />
       </Layout.Base>
     </PageWrapper>
   );

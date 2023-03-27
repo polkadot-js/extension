@@ -17,7 +17,7 @@ type Props = NominationPoolDataType & ThemeProps & {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { address, bondedAmount, className, name, onClickMoreBtn, symbol } = props;
+  const { address, bondedAmount, className, id, name, onClickMoreBtn, symbol } = props;
 
   const { t } = useTranslation();
 
@@ -34,7 +34,7 @@ const Component: React.FC<Props> = (props: Props) => {
       }
       middleItem={
         <div className={'middle-item'}>
-          <div className={'middle-item__name'}>{name}</div>
+          <div className={'middle-item__name'}>{name || `Pool #${id}`}</div>
           <div className={'middle-item__bond-amount'}>
             <span className={'middle-item__bond-amount-label'}>{t('Bonded: ')}</span>
             <Number
@@ -71,9 +71,16 @@ const StakingPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
     borderRadius: token.borderRadiusLG,
     background: token.colorBgSecondary,
 
+    '.ant-web3-block-middle-item': {
+      paddingRight: token.padding
+    },
+
     '.middle-item__name': {
       fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG
+      lineHeight: token.lineHeightLG,
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap'
     },
 
     '.middle-item__bond-amount-label, .middle-item__bond-amount-number': {

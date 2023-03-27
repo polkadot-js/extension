@@ -2,16 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { Icon as _PhosphorIcon } from 'phosphor-react';
 
-import { Theme } from '../themes';
+import { Theme as _Theme } from '../themes';
 
-export { Theme };
-export { Icon as PhosphorIcon } from 'phosphor-react';
+export type Theme = _Theme;
+export type PhosphorIcon = _PhosphorIcon;
 
 export type AccountType = 'ALL' | 'ETHEREUM' | 'SUBSTRATE';
 
 export interface ThemeProps {
-  theme: Theme;
+  theme: _Theme;
   className?: string;
 }
 
@@ -91,3 +92,6 @@ export interface ModalQrProps {
 export interface SigData {
   signature: `0x${string}`;
 }
+
+export * from './account';
+export * from './form';

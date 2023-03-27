@@ -413,8 +413,12 @@ export async function getRelayCancelWithdrawalExtrinsic (substrateApi: _Substrat
 
 // Pooling txs
 
-export async function getPoolingClaimRewardExtrinsic (substrateApi: _SubstrateApi) {
+export async function getPoolingClaimRewardExtrinsic (substrateApi: _SubstrateApi, bondReward = true) {
   const chainApi = await substrateApi.isReady;
+
+  if (bondReward) {
+    return chainApi.api.tx.nominationPools.bondExtra('Rewards');
+  }
 
   return chainApi.api.tx.nominationPools.claimPayout();
 }
@@ -436,12 +440,8 @@ export async function getPoolingUnbondingExtrinsic (substrateApi: _SubstrateApi,
   return chainApi.api.tx.nominationPools.unbond({ Id: nominatorMetadata.address }, amount);
 }
 
-export async function getPoolingWithdrawalExtrinsic (substrateApi: _SubstrateApi, nominatorMetadata: NominatorMetadata, isReBond: boolean) {
+export async function getPoolingWithdrawalExtrinsic (substrateApi: _SubstrateApi, nominatorMetadata: NominatorMetadata) {
   const chainApi = await substrateApi.isReady;
-
-  if (isReBond) {
-    return chainApi.api.tx.nominationPools.bondExtra('Rewards');
-  }
 
   if (chainApi.api.tx.nominationPools.withdrawUnbonded.meta.args.length === 2) {
     const _slashingSpans = (await chainApi.api.query.staking.slashingSpans(nominatorMetadata.address)).toHuman() as Record<string, any>;

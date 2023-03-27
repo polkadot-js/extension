@@ -23,7 +23,8 @@ const persistConfig = {
   version: 1,
   storage: storage,
   whitelist: [
-    'settings'
+    'settings',
+    'staking'
   ]
 };
 

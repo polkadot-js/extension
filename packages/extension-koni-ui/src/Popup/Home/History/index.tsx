@@ -88,7 +88,7 @@ function isTypeStaking (txType: ExtrinsicType) {
 
 function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, string>, titleMap: Record<string, string>): TransactionHistoryDisplayData {
   let displayData: TransactionHistoryDisplayData;
-  const time = customFormatDate(item.time, '#hh#:#mm# #AMPM#');
+  const time = customFormatDate(item.time, '#hhhh#:#mm#');
 
   const displayStatus = item.status === ExtrinsicStatus.FAIL ? 'fail' : '';
 
@@ -264,7 +264,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       const toName = accountMap[item.to?.toLowerCase()] || '';
 
       return { ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) };
-    }).sort((a, b) => b.time > a.time ? 1 : -1);
+    }).sort((a, b) => (b.time - a.time));
 
     // Filter current account records
     const currentAddress = currentAccount?.address;

@@ -7,7 +7,7 @@ import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import { TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import useChainChecker from '@subwallet/extension-koni-ui/hooks/chain/useChainChecker';
+import useAssetChecker from '@subwallet/extension-koni-ui/hooks/chain/useAssetChecker';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -30,6 +30,7 @@ interface Props extends ThemeProps {
 export interface TransactionFormBaseProps {
   from: string,
   chain: string
+  asset: string
 }
 
 export interface TransactionContextProps extends TransactionFormBaseProps {
@@ -37,6 +38,7 @@ export interface TransactionContextProps extends TransactionFormBaseProps {
   setTransactionType: Dispatch<SetStateAction<ExtrinsicType>>,
   setFrom: Dispatch<SetStateAction<string>>,
   setChain: Dispatch<SetStateAction<string>>,
+  setAsset: Dispatch<SetStateAction<string>>,
   onDone: (extrinsicHash: string) => void,
   onClickRightBtn: () => void,
   setShowRightBtn: Dispatch<SetStateAction<boolean>>
@@ -53,6 +55,9 @@ export const TransactionContext = React.createContext<TransactionContextProps>({
   chain: '',
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   setChain: (value) => {},
+  asset: '',
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setAsset: (value) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   onDone: (extrinsicHash) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -71,6 +76,7 @@ function Component ({ className }: Props) {
   const { currentAccount, isAllAccount } = useSelector((root: RootState) => root.accountState);
   const [from, setFrom] = useState(!isAllAccount ? currentAccount?.address || '' : '');
   const [chain, setChain] = useState('');
+  const [asset, setAsset] = useState('');
   const [transactionType, setTransactionType] = useState<ExtrinsicType>(ExtrinsicType.TRANSFER_BALANCE);
   const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
   const [disabledRightBtn, setDisabledRightBtn] = useState<boolean>(false);
@@ -85,11 +91,11 @@ function Component ({ className }: Props) {
   }, [t]);
   const { goBack } = useDefaultNavigate();
 
-  const checkChain = useChainChecker();
+  const checkAsset = useAssetChecker();
 
   useEffect(() => {
-    checkChain(chain);
-  }, [chain, checkChain]);
+    asset !== '' && checkAsset(asset);
+  }, [asset, checkAsset]);
 
   // Navigate to finish page
   const onDone = useCallback(
@@ -124,7 +130,7 @@ function Component ({ className }: Props) {
       showFilterIcon
       showTabBar={false}
     >
-      <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, setTransactionType, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn }}>
+      <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, setTransactionType, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn, asset, setAsset }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
             <SwSubHeader

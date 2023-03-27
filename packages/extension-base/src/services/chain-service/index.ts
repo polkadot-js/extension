@@ -65,7 +65,6 @@ export class ChainService {
     this.logger = createLogger('chain-service');
 
     this.refreshChainStateInterval(3000);
-    this.initAssetSettings().catch(console.error);
   }
 
   // Getter
@@ -463,6 +462,9 @@ export class ChainService {
       if (callback) {
         callback();
       }
+
+      // Init asset setting after enable chain
+      this.initAssetSettings().catch(console.error);
     }).catch((e) => this.logger.error(e));
   }
 
@@ -1288,7 +1290,7 @@ export class ChainService {
 
   public async getAssetSettings (): Promise<Record<string, AssetSetting>> {
     if (Object.keys(this.assetSettingSubject.value).length === 0) {
-      const assetSettings = await this.getStoreAssetSettings();
+      const assetSettings = (await this.getStoreAssetSettings() || {});
 
       this.assetSettingSubject.next(assetSettings);
     }

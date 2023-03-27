@@ -54,7 +54,7 @@ export default function useAssetChecker () {
         onClick={_onEnabled}
         schema={'warning'}
         size={'md'}
-                  >
+      >
         {t('Turn it on')}
       </Button>;
 

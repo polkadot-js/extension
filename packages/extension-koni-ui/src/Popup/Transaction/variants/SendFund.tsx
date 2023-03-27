@@ -175,6 +175,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { chain: contextChain,
     from: contextFrom,
     onDone: contextOnDone,
+    setAsset: contextSetAsset,
     setChain: contextSetChain,
     setFrom: contextSetFrom } = useContext(TransactionContext);
 
@@ -285,6 +286,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         });
 
         contextSetChain(chain);
+        contextSetAsset(part.token);
       }
 
       setErrors([]);

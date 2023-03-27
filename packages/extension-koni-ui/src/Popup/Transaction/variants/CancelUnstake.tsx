@@ -1,94 +1,118 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, NominatorMetadata } from '@subwallet/extension-base/background/KoniTypes';
-import { MetaInfo, NominationSelector } from '@subwallet/extension-koni-ui/components';
-import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
-import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
+import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountSelector, CancelUnstakeSelector } from '@subwallet/extension-koni-ui/components';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
-import { StakingDataOption } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
-import { getUnstakingInfo } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
-import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
-import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
-import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
-import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { Button, Form, Icon, Number } from '@subwallet/react-ui';
+import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
+import { Button, Form, Icon } from '@subwallet/react-ui';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router';
 import styled from 'styled-components';
 
-type Props = ThemeProps
+import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
+import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
-interface StakeFromProps extends TransactionFormBaseProps {
-  token: string
-  value: string
+type Props = ThemeProps;
+
+enum FormFieldName {
+  UNSTAKE = 'unstake'
+}
+
+interface CancelUnstakeFormProps extends TransactionFormBaseProps {
+  [FormFieldName.UNSTAKE]: '';
 }
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className = '' } = props;
-  const transactionContext = useContext(TransactionContext);
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
 
-  const location = useLocation();
-  const [locationState] = useState<StakingDataOption>(location?.state as StakingDataOption);
-  const [nominatorMetadata] = useState(locationState?.nominatorMetadata as NominatorMetadata);
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(nominatorMetadata.chain);
+  const { chain: stakingChain, type: _stakingType } = useParams();
+  const stakingType = _stakingType as StakingType;
 
-  const [, setLoading] = useState(false);
-  const [, setErrors] = useState<string[]>([]);
-  const [, setWarnings] = useState<string[]>([]);
+  const { asset, chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
+  const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
 
-  const isAll = isAccountAll(currentAccount?.address || '');
-  const [form] = Form.useForm<StakeFromProps>();
-  const formDefault = {
-    from: transactionContext.from,
-    value: '0'
-  };
-  const unstakingInfo = nominatorMetadata && getUnstakingInfo(nominatorMetadata.unstakings, form.getFieldsValue().from);
+  const nominatorInfo = useGetNominatorInfo(stakingChain, stakingType, from);
+  const nominatorMetadata = nominatorInfo[0];
 
-  // TODO: choose record from unstakingInfo instead of number input
+  const [isDisable, setIsDisable] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [warnings, setWarnings] = useState<string[]>([]);
 
-  useEffect(() => {
-    transactionContext.setTransactionType(ExtrinsicType.STAKING_CANCEL_UNSTAKE);
-    transactionContext.setChain(nominatorMetadata.chain);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transactionContext]);
+  const [form] = Form.useForm<CancelUnstakeFormProps>();
+  const formDefault = useMemo((): CancelUnstakeFormProps => ({
+    from: from,
+    chain: chain,
+    asset: asset,
+    [FormFieldName.UNSTAKE]: ''
+  }), [asset, chain, from]);
 
-  const onFieldsChange = useCallback(({ from }: Partial<StakeFromProps>, values: StakeFromProps) => {
+  const onFieldsChange: FormCallbacks<CancelUnstakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
-  }, []);
+    const { empty, error } = simpleCheckForm(changedFields, allFields);
+
+    const changesMap = convertFieldToObject<CancelUnstakeFormProps>(changedFields);
+
+    const { from } = changesMap;
+
+    if (from !== undefined) {
+      setFrom(from);
+    }
+
+    setIsDisable(empty || error);
+  }, [setFrom]);
 
   const { t } = useTranslation();
 
-  const submitTransaction = useCallback(() => {
-    submitStakeCancelWithdrawal({
-      address: nominatorMetadata.address,
-      chain: nominatorMetadata.chain,
-      selectedUnstaking: nominatorMetadata.unstakings[0] // TODO: should be selected by user
-    })
-      .then((result) => {
-        const { errors, extrinsicHash, warnings } = result;
+  const onSubmit: FormCallbacks<CancelUnstakeFormProps>['onFinish'] = useCallback((values: CancelUnstakeFormProps) => {
+    setLoading(true);
 
-        if (errors.length || warnings.length) {
-          setLoading(false);
-          setErrors(errors.map((e) => e.message));
-          setWarnings(warnings.map((w) => w.message));
-        } else if (extrinsicHash) {
-          transactionContext.onDone(extrinsicHash);
-        }
+    const { [FormFieldName.UNSTAKE]: unstakeIndex } = values;
+
+    setTimeout(() => {
+      submitStakeCancelWithdrawal({
+        address: from,
+        chain: chain,
+        selectedUnstaking: nominatorMetadata.unstakings[parseInt(unstakeIndex)] // TODO: should be selected by user
       })
-      .catch((error: Error) => {
-        setLoading(false);
-        setErrors([error.message]);
-      });
-  }, [nominatorMetadata.address, nominatorMetadata.chain, nominatorMetadata.unstakings, transactionContext]);
+        .then((result) => {
+          const { errors, extrinsicHash, warnings } = result;
+
+          if (errors.length || warnings.length) {
+            setLoading(false);
+            setErrors(errors.map((e) => e.message));
+            setWarnings(warnings.map((w) => w.message));
+          } else if (extrinsicHash) {
+            onDone(extrinsicHash);
+          }
+        })
+        .catch((error: Error) => {
+          setLoading(false);
+          setErrors([error.message]);
+        });
+    }, 300);
+  }, [chain, from, nominatorMetadata.unstakings, onDone]);
+
+  useEffect(() => {
+    const address = currentAccount?.address || '';
+
+    if (address) {
+      if (!isAccountAll(address)) {
+        setFrom(address);
+      }
+    }
+  }, [currentAccount?.address, setFrom]);
+
+  useEffect(() => {
+    setChain(stakingChain || '');
+    setTransactionType(ExtrinsicType.STAKING_CANCEL_UNSTAKE);
+  }, [setChain, setTransactionType, stakingChain]);
 
   return (
     <>
@@ -97,96 +121,59 @@ const Component: React.FC<Props> = (props: Props) => {
           className={`${className} form-container form-space-sm`}
           form={form}
           initialValues={formDefault}
-          onValuesChange={onFieldsChange}
+          onFieldsChange={onFieldsChange}
+          onFinish={onSubmit}
         >
-          {isAll &&
+          {isAllAccount &&
             <Form.Item name={'from'}>
               <AccountSelector />
             </Form.Item>
           }
 
           <FreeBalance
-            address={transactionContext.from}
-            chain={transactionContext.chain}
+            address={from}
+            chain={chain}
             className={'free-balance'}
-            label={t('Transferable:')}
+            label={t('Available balance:')}
           />
 
-          <Form.Item name={'collator'}>
-            <NominationSelector
-              disabled={!transactionContext.from}
-              label={t('Select collator')}
-              nominators={ transactionContext.from ? nominatorMetadata?.nominations || [] : []}
+          <Form.Item name={FormFieldName.UNSTAKE}>
+            <CancelUnstakeSelector
+              chain={chain}
+              disabled={!from}
+              label={t('Select unstake')}
+              nominators={ from ? nominatorMetadata?.unstakings || [] : []}
             />
           </Form.Item>
-
-          <MetaInfo
-            className={'unstaked-field'}
-            labelColorScheme={'gray'}
-            spaceSize={'sm'}
-            valueColorScheme={'gray'}
-          >
-            <MetaInfo.Default
-              className={'cancel-unstake-info-item'}
-              label={t('Unstaked:')}
-              valueAlign={'left'}
-            >
-              <Number
-                decimal={decimals}
-                suffix={symbol}
-                value={unstakingInfo?.claimable || '0'}
-              />
-            </MetaInfo.Default>
-          </MetaInfo>
-
-          <Form.Item name={'value'}>
-            <AmountInput
-              decimals={decimals}
-              maxValue={'10000'}
-            />
-          </Form.Item>
-
-          <MetaInfo
-            labelColorScheme={'gray'}
-            valueColorScheme={'gray'}
-          >
-            <MetaInfo.Default
-              className={'cancel-unstake-info-item'}
-              label={t('Transaction fee:')}
-              valueAlign={'left'}
-            >
-              <Number
-                decimal={decimals}
-                suffix={symbol}
-                value={'20000'}
-              />
-            </MetaInfo.Default>
-          </MetaInfo>
         </Form>
       </TransactionContent>
       <TransactionFooter
-        errors={[]}
-        warnings={[]}
+        errors={errors}
+        warnings={warnings}
       >
         <Button
-          icon={<Icon
-            phosphorIcon={XCircle}
-            weight={'fill'}
-          />}
-          loading={false}
-          onClick={submitTransaction}
+          disabled={loading}
+          icon={(
+            <Icon
+              phosphorIcon={XCircle}
+              weight='fill'
+            />
+          )}
           schema={'secondary'}
         >
           {t('Cancel')}
         </Button>
 
         <Button
-          icon={<Icon
-            phosphorIcon={ArrowCircleRight}
-            weight={'fill'}
-          />}
-          loading={false}
-          onClick={submitTransaction}
+          disabled={isDisable}
+          icon={(
+            <Icon
+              phosphorIcon={ArrowCircleRight}
+              weight='fill'
+            />
+          )}
+          loading={loading}
+          onClick={form.submit}
         >
           {t('Submit')}
         </Button>

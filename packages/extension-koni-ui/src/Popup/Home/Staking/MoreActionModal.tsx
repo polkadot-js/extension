@@ -184,7 +184,7 @@ const Component: React.FC<Props> = (props: Props) => {
         disabled: false,
         icon: ArrowArcLeft,
         label: 'Cancel unstake',
-        onClick: onNavigate('/transaction/cancel-unstake')
+        onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
       }
       // {
       //   backgroundIconColor: 'blue-7',

@@ -14,7 +14,7 @@ import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import { StakingStatus } from '@subwallet/extension-koni-ui/util/transaction/stakingStatus';
+import { StakingStatus } from '@subwallet/extension-koni-ui/constants/stakingStatus';
 import { Button, Icon, Number, SwModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';

@@ -340,7 +340,7 @@ export default class TransactionService {
         const data = parseTransactionData<ExtrinsicType.TRANSFER_XCM>(transaction.data);
 
         historyItem.to = data.to;
-        const { decimals, symbol } = this.chainService.getAssetBySlug(data.sendingTokenSlug);
+        const { decimals, symbol } = this.chainService.getAssetBySlug(data.tokenSlug);
 
         historyItem.amount = { value: data.value || '0', decimals: decimals || 0, symbol };
       }

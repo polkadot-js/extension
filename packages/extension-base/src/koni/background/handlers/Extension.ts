@@ -1614,11 +1614,11 @@ export default class KoniExtension {
   }
 
   private async makeCrossChainTransfer (inputData: RequestCrossChainTransfer): Promise<SWTransactionResponse> {
-    const { destinationNetworkKey, from, originNetworkKey, sendingTokenSlug, to, value } = inputData;
-    const [errors, fromKeyPair, , originTokenInfo, destinationTokenInfo] = this.validateCrossChainTransfer(destinationNetworkKey, sendingTokenSlug, from, value);
+    const { destinationNetworkKey, from, originNetworkKey, tokenSlug, to, value } = inputData;
+    const [errors, fromKeyPair, , originTokenInfo, destinationTokenInfo] = this.validateCrossChainTransfer(destinationNetworkKey, tokenSlug, from, value);
     let extrinsic: SubmittableExtrinsic<'promise'> | null = null;
 
-    if (errors) {
+    if (errors.length > 0) {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors(errors);
     }
 
@@ -1631,7 +1631,7 @@ export default class KoniExtension {
         originTokenInfo,
         sendingValue: value,
         recipient: to,
-        chainInfoMap: chainInfoMap,
+        chainInfoMap,
         substrateApi
       });
     }

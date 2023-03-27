@@ -2,10 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
-import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AssetSetting,
+  RequestCheckCrossChainTransfer,
+  RequestTransfer
+} from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
-import { _getOriginChainOfAsset, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getOriginChainOfAsset, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
@@ -23,7 +27,6 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SendFundParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
 import { findAccountByAddress } from '@subwallet/extension-koni-ui/util';
-import { isTokenAvailable } from '@subwallet/extension-koni-ui/util/chainAndAsset';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
@@ -82,9 +85,11 @@ function getTokenItems (
       return [];
     }
 
+    const chainAsset = assetRegistry[tokenGroupSlug];
+    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset.originChain : true;
+
     if (isSetTokenSlug) {
-      if (isAssetTypeValid(assetRegistry[tokenGroupSlug], chainInfoMap, isAccountEthereum) &&
-        isTokenAvailable(assetRegistry[tokenGroupSlug], assetSettingMap, chainStateMap, false, ledgerNetwork)) {
+      if (isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger) {
         const { name, originChain, slug, symbol } = assetRegistry[tokenGroupSlug];
 
         return [
@@ -104,8 +109,9 @@ function getTokenItems (
   const items: TokenItemType[] = [];
 
   Object.values(assetRegistry).forEach((chainAsset) => {
-    if (!(isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) &&
-      isTokenAvailable(chainAsset, assetSettingMap, chainStateMap, false, ledgerNetwork))) {
+    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset.originChain : true;
+
+    if (!(isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger)) {
       return;
     }
 
@@ -319,17 +325,17 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             to: to,
             tokenSlug: token,
             value: value
-          });
+          } as RequestTransfer);
         } else {
           // Make cross chain transfer
           sendPromise = makeCrossChainTransfer({
             destinationNetworkKey: destChain,
             from,
             originNetworkKey: chain,
-            sendingTokenSlug: token,
+            tokenSlug: token,
             to,
             value
-          });
+          } as RequestCheckCrossChainTransfer);
         }
 
         // Handle transfer action
@@ -355,6 +361,10 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const currentChainAsset = useMemo(() => {
     return currentTokenSlug ? assetRegistry[currentTokenSlug] : undefined;
   }, [assetRegistry, currentTokenSlug]);
+
+  const decimals = useMemo(() => {
+    return currentChainAsset ? _getAssetDecimals(currentChainAsset) : 0;
+  }, [currentChainAsset]);
 
   useEffect(() => {
     const { from, token } = form.getFieldsValue();
@@ -476,7 +486,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               validateTrigger='onBlur'
             >
               <AmountInput
-                decimals={currentChainAsset?.decimals || 18}
+                decimals={decimals}
                 maxValue={maxTransfer}
               />
             </Form.Item>

@@ -4,6 +4,7 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { TokenSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenSelectionItem';
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useAssetChecker from '@subwallet/extension-koni-ui/hooks/chain/useAssetChecker';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
@@ -27,6 +28,7 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const sectionRef = useRef<SwListSectionRef>(null);
+  const checkAsset = useAssetChecker();
 
   const searchFunction = useCallback((item: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -44,10 +46,11 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
   const onClickQrBtn = useCallback((item: _ChainAsset) => {
     return () => {
       onSelectItem && onSelectItem(item);
+      checkAsset(item.slug);
       inactiveModal(ReceiveTokensSelectorModalId);
       activeModal(RECEIVE_QR_MODAL);
     };
-  }, [activeModal, inactiveModal, onSelectItem]);
+  }, [activeModal, checkAsset, inactiveModal, onSelectItem]);
 
   const renderItem = useCallback((item: _ChainAsset) => {
     return (

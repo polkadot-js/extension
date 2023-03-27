@@ -175,8 +175,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { chain: contextChain,
     from: contextFrom,
     onDone: contextOnDone,
-    setChain: contextSetChain,
     setAsset: contextSetAsset,
+    setChain: contextSetChain,
     setFrom: contextSetFrom } = useContext(TransactionContext);
 
   const [loading, setLoading] = useState(false);

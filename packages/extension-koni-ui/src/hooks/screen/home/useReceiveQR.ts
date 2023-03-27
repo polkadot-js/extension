@@ -109,9 +109,11 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
       return [assetRegistryMap[tokenGroupSlug]];
     }
 
+    const isEvmAddress = isEthereumAddress(_selectedAccount);
+
     return Object.values(assetRegistryMap).filter((asset) => {
       if (_isAssetFungibleToken(asset)) {
-        if (_isChainEvmCompatible(chainInfoMap[asset.originChain]) === isEthereumAddress(_selectedAccount)) {
+        if (_isChainEvmCompatible(chainInfoMap[asset.originChain]) === isEvmAddress) {
           if (tokenGroupSlug) {
             return _getMultiChainAsset(asset) === tokenGroupSlug;
           }

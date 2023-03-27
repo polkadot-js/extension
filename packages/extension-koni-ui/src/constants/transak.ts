@@ -5,57 +5,57 @@ export type TransakTokenInfo = {
   transakNetwork: string,
   chain: string,
   symbol: string,
-  key: string,
+  slug: string,
   support: 'ETHEREUM' | 'SUBSTRATE'
 }
 
 export const PREDEFINED_TRANSAK_TOKEN: Record<string, TransakTokenInfo> = {
-  DOT: {
+  'polkadot-NATIVE-DOT': {
     transakNetwork: 'mainnet',
     chain: 'polkadot',
-    key: 'DOT|polkadot|mainnet',
+    slug: 'polkadot-NATIVE-DOT',
     symbol: 'DOT',
     support: 'SUBSTRATE'
   },
-  KSM: {
+  'kusama-NATIVE-KSM': {
     transakNetwork: 'mainnet',
     chain: 'kusama',
-    key: 'KSM|kusama|mainnet',
+    slug: 'kusama-NATIVE-KSM',
     symbol: 'KSM',
     support: 'SUBSTRATE'
   },
-  ASTR: {
+  'astar-NATIVE-ASTR': {
     transakNetwork: 'mainnet',
     chain: 'astar',
-    key: 'ASTR|astar|mainnet',
+    slug: 'astar-NATIVE-ASTR',
     symbol: 'ASTR',
     support: 'SUBSTRATE'
   },
-  GLMR: {
+  'moonbeam-NATIVE-GLMR': {
     transakNetwork: 'mainnet',
     chain: 'moonbeam',
-    key: 'GLMR|moonbeam|mainnet',
+    slug: 'moonbeam-NATIVE-GLMR',
     symbol: 'GLMR',
     support: 'ETHEREUM'
   },
-  MOVR: {
+  'moonriver-NATIVE-MOVR': {
     transakNetwork: 'moonriver',
     chain: 'moonriver',
-    key: 'MOVR|moonriver|moonriver',
+    slug: 'moonriver-NATIVE-MOVR',
     symbol: 'MOVR',
     support: 'ETHEREUM'
   },
-  ETH: {
+  'ethereum-NATIVE-ETH': {
     transakNetwork: 'ethereum',
     chain: 'ethereum',
-    key: 'ETH|ethereum|ethereum',
+    slug: 'ethereum-NATIVE-ETH',
     symbol: 'ETH',
     support: 'ETHEREUM'
   },
-  BNB: {
+  'binance-NATIVE-BNB': {
     transakNetwork: 'bsc',
     chain: 'binance',
-    key: 'BNB|binance|bsc',
+    slug: 'binance-NATIVE-BNB',
     symbol: 'BNB',
     support: 'ETHEREUM'
   }

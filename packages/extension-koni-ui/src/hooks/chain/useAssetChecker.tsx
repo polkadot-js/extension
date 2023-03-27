@@ -22,10 +22,10 @@ export default function useAssetChecker () {
     if (enablingAsset && assetSettingMap[enablingAsset]?.visible) {
       const assetInfo = assetRegistry[enablingAsset];
       const chainInfo = chainInfoMap[assetInfo.originChain];
-      const message = t('{{name}} on {{chainName}} is turned on.', { replace: { name: assetInfo?.name, chainName: chainInfo?.name } });
+      const message = t('{{name}} on {{chainName}} is turned on.', { replace: { name: assetInfo?.symbol, chainName: chainInfo?.name } });
 
       notify({ message, type: NotificationType.SUCCESS, duration: 1.5 });
-      setEnablingAsset(null);
+      // setEnablingAsset(null);
     }
   }, [enablingAsset, chainInfoMap, chainStateMap, notify, t, assetSettingMap, assetRegistry]);
 
@@ -35,43 +35,43 @@ export default function useAssetChecker () {
     const chainState = chainStateMap[assetInfo.originChain];
     const chainInfo = chainInfoMap[assetInfo.originChain];
 
-    if (assetSetting) {
-      if (!assetSetting.visible) {
-        const message = t('{{name}} on {{chainName}} is not ready to use, do you want to turn it on?', { replace: { name: assetInfo?.name, chainName: chainInfo?.name } });
+    console.log(assetSlug, assetSetting);
 
-        const _onEnabled = () => {
-          updateAssetSetting({ tokenSlug: assetSlug, assetSetting: { visible: true } }).then(() => {
-            const chainInfo = chainInfoMap[assetSlug];
+    if ((assetInfo && !assetSetting) || !assetSetting.visible) {
+      const message = t('{{name}} on {{chainName}} is not ready to use, do you want to turn it on?', { replace: { name: assetInfo?.symbol, chainName: chainInfo?.name } });
 
-            setEnablingAsset(assetSlug);
-            notify({ message: t('{{name}} on {{chainName}} is turning on.', { replace: { name: assetInfo?.name, chainName: chainInfo?.name } }), duration: 1.5 });
-          }).catch(console.error);
-        };
+      const _onEnabled = () => {
+        updateAssetSetting({ tokenSlug: assetSlug, assetSetting: { visible: true } }).then(() => {
+          const chainInfo = chainInfoMap[assetSlug];
 
-        const btn = <Button
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={_onEnabled}
-          schema={'warning'}
-          size={'md'}
-        >
-          {t('Turn it on')}
-        </Button>;
+          setEnablingAsset(assetSlug);
+          notify({ message: t('{{name}} on {{chainName}} is turning on.', { replace: { name: assetInfo?.symbol, chainName: chainInfo?.name } }), duration: 1.5 });
+        }).catch(console.error);
+      };
 
-        notify({
-          message,
-          type: NotificationType.WARNING,
-          duration: 3,
-          btn
-        });
-      } else if (chainState && chainState.connectionStatus === _ChainConnectionStatus.DISCONNECTED) {
-        const message = t('Chain {{name}} is disconnected', { replace: { name: chainInfo?.name } });
+      const btn = <Button
+        // eslint-disable-next-line react/jsx-no-bind
+        onClick={_onEnabled}
+        schema={'warning'}
+        size={'md'}
+                  >
+        {t('Turn it on')}
+      </Button>;
 
-        notify({
-          message,
-          type: NotificationType.ERROR,
-          duration: 3
-        });
-      }
+      notify({
+        message,
+        type: NotificationType.WARNING,
+        duration: 3,
+        btn
+      });
+    } else if (chainState && chainState.connectionStatus === _ChainConnectionStatus.DISCONNECTED) {
+      const message = t('Chain {{name}} is disconnected', { replace: { name: chainInfo?.name } });
+
+      notify({
+        message,
+        type: NotificationType.ERROR,
+        duration: 3
+      });
     }
   }, [assetRegistry, assetSettingMap, chainInfoMap, chainStateMap, notify, t]);
 

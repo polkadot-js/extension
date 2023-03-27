@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
+import { StakingStatus, StakingStatusType } from '@subwallet/extension-koni-ui/constants/stakingStatus';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { StakingStatus, StakingStatusType } from '@subwallet/extension-koni-ui/constants/stakingStatus';
 import { SwModal } from '@subwallet/react-ui';
 import React from 'react';
 import styled from 'styled-components';

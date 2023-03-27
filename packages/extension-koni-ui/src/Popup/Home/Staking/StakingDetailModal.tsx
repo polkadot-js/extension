@@ -6,6 +6,7 @@ import { isShowNominationByValidator } from '@subwallet/extension-base/koni/api/
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
+import { StakingStatus } from '@subwallet/extension-koni-ui/constants/stakingStatus';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
@@ -14,7 +15,6 @@ import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import { StakingStatus } from '@subwallet/extension-koni-ui/constants/stakingStatus';
 import { Button, Icon, Number, SwModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';

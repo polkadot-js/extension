@@ -291,7 +291,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
       setErrors([]);
     },
-    [assetRegistry, form, contextSetChain, contextSetFrom]
+    [form, contextSetFrom, assetRegistry, contextSetChain, contextSetAsset]
   );
 
   // Submit transaction

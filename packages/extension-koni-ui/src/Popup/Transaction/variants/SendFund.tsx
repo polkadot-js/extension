@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
-import {
-  AssetSetting,
-  RequestCheckCrossChainTransfer,
-  RequestTransfer
-} from '@subwallet/extension-base/background/KoniTypes';
+import { AssetSetting, RequestCheckCrossChainTransfer, RequestTransfer } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -27,7 +23,7 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SendFundParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
 import { findAccountByAddress } from '@subwallet/extension-koni-ui/util';
-import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/getNetworkJsonByGenesisHash';
+import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';

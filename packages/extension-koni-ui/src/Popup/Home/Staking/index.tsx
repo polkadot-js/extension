@@ -43,10 +43,12 @@ const rightIcon = <Icon
 />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
-  const dataContext = useContext(DataContext);
-  const { activeModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const dataContext = useContext(DataContext);
+  const { activeModal } = useContext(ModalContext);
+
   const { data: stakingItems, priceMap } = useGetStakingList();
 
   const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);

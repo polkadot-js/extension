@@ -12,13 +12,14 @@ export interface BasicInputEvent<T = string> {
 export type BasicOnChangeFunction<T = string> = (event: BasicInputEvent) => void;
 
 export interface BasicInputWrapper<T = string> {
-  id?: string,
-  label?: string,
-  placeholder?: string
-  value?: T,
-  disabled?: boolean,
-  onChange?: BasicOnChangeFunction<T>,
-  onBlur?: InputProps['onBlur'],
-  onFocus?: InputProps['onFocus'],
-  readOnly?: boolean,
+  id?: string;
+  label?: string;
+  placeholder?: string;
+  value?: T;
+  disabled?: boolean;
+  loading?: boolean;
+  onChange?: BasicOnChangeFunction<T>;
+  onBlur?: InputProps['onBlur'];
+  onFocus?: InputProps['onFocus'];
+  readOnly?: boolean;
 }

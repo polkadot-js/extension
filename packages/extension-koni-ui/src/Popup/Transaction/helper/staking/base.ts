@@ -20,6 +20,10 @@ const defaultAccountFilter = (stakingType: StakingType, chain?: _ChainInfo): ((a
       return false;
     }
 
+    if (account.isReadOnly) {
+      return false;
+    }
+
     return !(stakingType === StakingType.POOLED && isEthereumAddress(account.address));
   };
 };

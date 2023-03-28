@@ -70,7 +70,7 @@ const renderEmpty = () => <GeneralEmptyList />;
 const defaultModalId = 'multi-validator-selector';
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, onChange, value } = props;
+  const { chain, className = '', from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, onChange, value, loading } = props;
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
@@ -106,7 +106,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     };
   }, [selectedFilters]);
 
-  const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator, onInitValidators } = useSelectValidators(id, onChange, isSingleSelect);
+  const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator, onInitValidators } = useSelectValidators(id, maxCount, onChange, isSingleSelect);
 
   const closeSortingModal = useCallback(() => {
     inactiveModal(SORTING_MODAL_ID);
@@ -117,17 +117,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     closeSortingModal();
   }, [closeSortingModal]);
 
-  const onClickItem = useCallback((maxCount: number, chosen: number): (value: string) => void => {
-    return (value: string) => {
-      if (chosen >= maxCount) {
-        // Todo: notify
-        console.log('max validator');
-
-        return;
-      }
-
-      onChangeSelectedValidator(value);
-    };
+  const onClickItem = useCallback((value: string) => {
+    onChangeSelectedValidator(value);
   }, [onChangeSelectedValidator]);
 
   const onClickMore = useCallback((item: ValidatorDataType) => {
@@ -151,12 +142,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         isNominated={nominated}
         isSelected={selected}
         key={item.address}
-        onClick={onClickItem(maxCount, changeValidators.length)}
+        onClick={onClickItem}
         onClickMoreBtn={onClickMore(item)}
         validatorInfo={item}
       />
     );
-  }, [changeValidators, isRelayChain, maxCount, nominatorValueList, onClickItem, onClickMore]);
+  }, [changeValidators, isRelayChain, nominatorValueList, onClickItem, onClickMore]);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -191,6 +182,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       <SelectValidatorInput
         disabled={!chain || !from}
         label={t('Select validator')}
+        loading={loading}
         onClick={onActiveValidatorSelector}
         value={value || ''}
       />

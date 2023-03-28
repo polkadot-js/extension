@@ -1,12 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, NominationInfo, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { ExtrinsicType, NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
+import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
@@ -45,6 +48,19 @@ interface UnstakeFormProps extends TransactionFormBaseProps {
   [FormFieldName.VALIDATOR]?: string;
 }
 
+const _accountFilterFunc = (
+  allNominator: NominatorMetadata[],
+  chainInfoMap: Record<string, _ChainInfo>,
+  stakingType: StakingType,
+  stakingChain?: string
+): (account: AccountJson) => boolean => {
+  return (account: AccountJson): boolean => {
+    const nominator = allNominator.find((item) => item.address.toLowerCase() === account.address.toLowerCase());
+
+    return new BigN(nominator?.activeStake || BN_ZERO).gt(BN_ZERO) && accountFilterFunc(chainInfoMap, stakingType, stakingChain)(account);
+  };
+};
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className = '' } = props;
   const { chain: stakingChain, type: _stakingType } = useParams();
@@ -71,6 +87,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { decimals, symbol } = useGetNativeTokenBasicInfo(stakingChain || '');
   const chainStakingMetadata = useGetChainStakingMetadata(stakingChain);
+  const allNominatorInfo = useGetNominatorInfo(stakingChain, stakingType);
   const nominatorInfo = useGetNominatorInfo(stakingChain, stakingType, from);
   const nominatorMetadata = nominatorInfo[0];
 
@@ -249,7 +266,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {isAll &&
               <Form.Item name={'from'}>
                 <AccountSelector
-                  filter={accountFilterFunc(chainInfoMap, stakingType, stakingChain)}
+                  filter={_accountFilterFunc(allNominatorInfo, chainInfoMap, stakingType, stakingChain)}
                   label={t('Unstake from account')}
                 />
               </Form.Item>

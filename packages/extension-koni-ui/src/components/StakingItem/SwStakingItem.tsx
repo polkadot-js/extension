@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { Icon, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
@@ -18,9 +19,9 @@ interface Props extends ThemeProps {
   onClickItem: (item: StakingDataType) => void,
 }
 
-function getStakingTypeTag (stakingType: string) {
-  const tagColor = stakingType === 'nominated' ? 'success' : 'warning';
-  const tagIcon = stakingType === 'nominated' ? Users : User;
+const getStakingTypeTag = (stakingType: StakingType) => {
+  const tagColor = stakingType === StakingType.POOLED ? 'success' : 'warning';
+  const tagIcon: PhosphorIcon = stakingType === StakingType.POOLED ? Users : User;
 
   return (
     <Tag
@@ -31,7 +32,7 @@ function getStakingTypeTag (stakingType: string) {
       {capitalize(stakingType)}
     </Tag>
   );
-}
+};
 
 const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickRightIcon, priceMap, stakingData }: Props) => {
   const { staking } = stakingData;

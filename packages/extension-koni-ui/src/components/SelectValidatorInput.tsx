@@ -3,7 +3,8 @@
 
 import AvatarGroup, { BaseAccountInfo } from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon } from '@subwallet/react-ui';
+import { toShort } from '@subwallet/extension-koni-ui/util';
+import { ActivityIndicator, Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Book, Lightning } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
@@ -18,10 +19,11 @@ type Props = ThemeProps & {
   value: string;
   onClick: () => void;
   disabled?: boolean;
+  loading?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, disabled, label, onClick, placeholder, value } = props;
+  const { className, disabled, label, loading, onClick, placeholder, value } = props;
   const { t } = useTranslation();
 
   const addressList = useMemo(() => {
@@ -53,17 +55,18 @@ const Component: React.FC<Props> = (props: Props) => {
       return t(`Selected ${valueList.length} validator`);
     }
 
-    return valueList[0].split('___')[1];
+    return valueList[0].split('___')[1] || toShort(valueList[0].split('___')[0]);
   };
 
   const _onClick = useCallback(() => {
-    !disabled && onClick();
-  }, [disabled, onClick]);
+    (!disabled && !loading) && onClick();
+  }, [disabled, onClick, loading]);
 
   return (
     <div
       className={CN(className, {
-        '-disabled': disabled
+        '-disabled': disabled,
+        '-loading': loading
       })}
       onClick={_onClick}
     >
@@ -75,24 +78,37 @@ const Component: React.FC<Props> = (props: Props) => {
         />}
         <div className={'select-validator-input__content'}>{renderContent()}</div>
         <div className={'select-validator-input__button-wrapper'}>
-          <Button
-            disabled={disabled}
-            icon={<Icon
-              phosphorIcon={Book}
-              size={'sm'}
-            />}
-            size={'xs'}
-            type={'ghost'}
-          />
-          <Button
-            disabled={disabled}
-            icon={<Icon
-              phosphorIcon={Lightning}
-              size={'sm'}
-            />}
-            size={'xs'}
-            type={'ghost'}
-          />
+          {
+            loading
+              ? (
+                <ActivityIndicator
+                  loading={true}
+                  size={16}
+                />
+              )
+              : (
+                <>
+                  <Button
+                    disabled={disabled}
+                    icon={<Icon
+                      phosphorIcon={Book}
+                      size={'sm'}
+                    />}
+                    size={'xs'}
+                    type={'ghost'}
+                  />
+                  <Button
+                    disabled={disabled}
+                    icon={<Icon
+                      phosphorIcon={Lightning}
+                      size={'sm'}
+                    />}
+                    size={'xs'}
+                    type={'ghost'}
+                  />
+                </>
+              )
+          }
         </div>
       </div>
     </div>
@@ -127,6 +143,19 @@ const SelectValidatorInput = styled(Component)<Props>(({ theme: { token } }: Pro
     '&.-disabled': {
       cursor: 'not-allowed',
       border: 'none'
+    },
+
+    '&.-loading': {
+      cursor: 'not-allowed',
+      border: 'none',
+
+      '.select-validator-input__button-wrapper': {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: token.controlHeightLG,
+        marginRight: 0
+      }
     },
 
     '.select-validator-input__label': {

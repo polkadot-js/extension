@@ -13,6 +13,7 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { toShort } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, InputRef, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { Book, CaretLeft, FadersHorizontal, Lightning, SortAscending } from 'phosphor-react';
@@ -82,7 +83,7 @@ const renderEmpty = () => <EmptyAccount />;
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, from, id = 'pool-selector', label, onChange, onClickBookBtn, placeholder, value } = props;
+  const { chain, className = '', disabled, from, id = 'pool-selector', label, onChange, onClickBookBtn, placeholder, value, loading } = props;
 
   useExcludeModal(id);
 
@@ -161,7 +162,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return (
       <div className={'__selected-item'}>
         <div className={'__selected-item-name common-text'}>
-          {item.name}
+          {item.name || toShort(item.address)}
         </div>
       </div>
     );
@@ -202,6 +203,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         itemKey={'idStr'}
         items={filteredList}
         label={label}
+        loading={loading}
         onClickActionBtn={onClickActionBtn}
         onSelect={_onSelectItem}
         placeholder={placeholder || t('Select pool')}
@@ -289,6 +291,10 @@ const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }:
     '.ant-sw-modal-header': {
       paddingTop: token.paddingXS,
       paddingBottom: token.paddingLG
+    },
+
+    '.ant-sw-modal-content': {
+      paddingBottom: token.padding
     },
 
     '&.pool-selector-input': {

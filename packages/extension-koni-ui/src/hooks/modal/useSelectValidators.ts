@@ -5,7 +5,7 @@ import { BasicOnChangeFunction } from '@subwallet/extension-koni-ui/components/F
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useState } from 'react';
 
-export function useSelectValidators (modalId: string, onChange?: BasicOnChangeFunction, isSingleSelect?: boolean) {
+export function useSelectValidators (modalId: string, maxCount: number, onChange?: BasicOnChangeFunction, isSingleSelect?: boolean) {
   const [defaultSelected, setDefaultSelected] = useState<string[]>([]);
   const [changeValidators, setChangeValidators] = useState<string[]>([]);
   const { inactiveModal } = useContext(ModalContext);
@@ -15,6 +15,10 @@ export function useSelectValidators (modalId: string, onChange?: BasicOnChangeFu
       let result: string[];
 
       if (!changeValidators.includes(changeVal)) {
+        if ((isSingleSelect ? defaultSelected : changeValidators).length >= maxCount) {
+          return changeValidators;
+        }
+
         if (isSingleSelect) {
           result = [...defaultSelected, changeVal];
         } else {
@@ -28,7 +32,7 @@ export function useSelectValidators (modalId: string, onChange?: BasicOnChangeFu
         return result;
       }
     });
-  }, [defaultSelected, isSingleSelect]);
+  }, [defaultSelected, isSingleSelect, maxCount]);
 
   const onApplyChangeValidators = useCallback(() => {
     onChange && onChange({ target: { value: changeValidators.join(',') } });

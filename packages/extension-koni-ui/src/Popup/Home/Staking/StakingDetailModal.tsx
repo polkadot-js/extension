@@ -3,6 +3,7 @@
 
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
@@ -17,6 +18,7 @@ import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, Number, SwModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import CN from 'classnames';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -50,7 +52,10 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   }, [stakingData, chain, type]);
   const { decimals, reward, staking } = data || { staking: {}, reward: {} };
   const { t } = useTranslation();
+
+  const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
   const modalTitle = type === StakingType.NOMINATED.valueOf() ? 'Nominate details' : 'Pooled details';
+
   const account = useGetAccountByAddress(staking.address);
   const stakingTypeNameMap: Record<string, string> = {
     nominated: t('Nominated'),
@@ -175,7 +180,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
       id={STAKING_DETAIL_MODAL_ID}
       maskClosable={true}
       onCancel={onCloseModal}
-      title={modalTitle}
+      title={t(modalTitle)}
     >
       <MetaInfo>
         <MetaInfo.Account
@@ -296,21 +301,41 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
               valueColorScheme={'light'}
             >
               <>
-                {nominations.map((item) => (
-                  <MetaInfo.Number
-                    className={'__nomination-field'}
-                    decimals={decimals}
-                    key={`${item.validatorAddress}-${item.activeStake}-${item.validatorIdentity || item.validatorMinStake || item.chain}`}
-                    label={<AccountItem
-                      address={item.validatorAddress}
-                      className={'__nomination-label'}
-                      name={item.validatorIdentity}
-                    />}
-                    suffix={staking.nativeToken}
-                    value={item.activeStake || ''}
-                    valueColorSchema={'gray'}
-                  />
-                ))}
+                {nominations.map((item) => {
+                  if (isRelayChain && type === StakingType.NOMINATED) {
+                    return (
+                      <MetaInfo.Default
+                        className={CN('__nomination-field', 'stand-alone')}
+                        key={`${item.validatorAddress}-${item.activeStake}-${item.validatorIdentity || item.validatorMinStake || item.chain}`}
+                        label={(
+                          <AccountItem
+                            address={item.validatorAddress}
+                            className={'__nomination-label'}
+                            name={item.validatorIdentity}
+                          />
+                        )}
+                      >
+
+                      </MetaInfo.Default>
+                    );
+                  }
+
+                  return (
+                    <MetaInfo.Number
+                      className={'__nomination-field'}
+                      decimals={decimals}
+                      key={`${item.validatorAddress}-${item.activeStake}-${item.validatorIdentity || item.validatorMinStake || item.chain}`}
+                      label={<AccountItem
+                        address={item.validatorAddress}
+                        className={'__nomination-label'}
+                        name={item.validatorIdentity}
+                      />}
+                      suffix={staking.nativeToken}
+                      value={item.activeStake || ''}
+                      valueColorSchema={'gray'}
+                    />
+                  );
+                })}
               </>
             </MetaInfo>
           </>
@@ -391,6 +416,12 @@ const StakingDetailModal = styled(Component)<Props>(({ theme: { token } }: Props
     '.__nomination-field': {
       '> .__col': {
         overflow: 'hidden'
+      },
+
+      '&.stand-alone': {
+        '.__col.-to-right': {
+          flexGrow: 0
+        }
       }
     },
 

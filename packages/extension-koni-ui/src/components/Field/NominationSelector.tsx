@@ -141,10 +141,7 @@ const NominationSelector = styled(forwardRef(Component))<Props>(({ theme: { toke
     },
 
     '.ant-select-modal-input-wrapper': {
-      height: 44,
-      ' > span': {
-        display: 'none'
-      }
+      height: 44
     }
   };
 });

@@ -20,39 +20,65 @@ export function getUnstakingPeriod (unstakingPeriod?: number) {
   return '';
 }
 
-export function getWaitingTime (waitingTime?: number, untilWithdraw?: boolean) {
+export function getWaitingTime (waitingTime?: number) {
   const days = waitingTime ? Number(waitingTime / 24).toFixed(2) : 0;
 
   if (days < 1) {
-    return 'Soon';
+    if (days) {
+      return 'Withdraw in less than 1 day';
+    } else {
+      return 'Available for withdraw';
+    }
   } else {
-    return `${days} ${untilWithdraw ? 'until withdraw' : 'next days'}`;
+    return `Withdraw in ${days} days`;
   }
 }
 
-const fetchChainValidator = (chain: string) => {
-  getBondingOptions(chain, StakingType.NOMINATED)
-    .then((result) => {
-      store.dispatch({ type: 'bonding/updateChainValidators', payload: { chain, validators: result } });
-    })
-    .catch(console.error);
+const fetchChainValidator = (chain: string, unmount: boolean, setValidatorLoading: (value: boolean) => void) => {
+  if (!unmount) {
+    setValidatorLoading(true);
+    getBondingOptions(chain, StakingType.NOMINATED)
+      .then((result) => {
+        store.dispatch({ type: 'bonding/updateChainValidators', payload: { chain, validators: result } });
+      })
+      .catch(console.error)
+      .finally(() => {
+        if (!unmount) {
+          setValidatorLoading(false);
+        }
+      });
+  }
 };
 
-const fetchChainPool = (chain: string) => {
-  getNominationPoolOptions(chain)
-    .then((result) => {
-      store.dispatch({ type: 'bonding/updateNominationPools', payload: { chain, pools: result } });
-    })
-    .catch(console.error);
+const fetchChainPool = (chain: string, unmount: boolean, setPoolLoading: (value: boolean) => void) => {
+  if (!unmount) {
+    setPoolLoading(true);
+    getNominationPoolOptions(chain)
+      .then((result) => {
+        store.dispatch({ type: 'bonding/updateNominationPools', payload: { chain, pools: result } });
+      })
+      .catch(console.error)
+      .finally(() => {
+        if (!unmount) {
+          setPoolLoading(false);
+        }
+      });
+  }
 };
 
-export function fetchChainValidators (chain: string, stakingType: string) {
+export function fetchChainValidators (
+  chain: string,
+  stakingType: string,
+  unmount: boolean,
+  setPoolLoading: (value: boolean) => void,
+  setValidatorLoading: (value: boolean) => void
+) {
   if (stakingType === ALL_KEY) {
-    fetchChainValidator(chain);
-    fetchChainPool(chain);
+    fetchChainValidator(chain, unmount, setValidatorLoading);
+    fetchChainPool(chain, unmount, setPoolLoading);
   } else if (stakingType === StakingType.NOMINATED) {
-    fetchChainValidator(chain);
+    fetchChainValidator(chain, unmount, setValidatorLoading);
   } else if (stakingType === StakingType.POOLED) {
-    fetchChainPool(chain);
+    fetchChainPool(chain, unmount, setPoolLoading);
   }
 }

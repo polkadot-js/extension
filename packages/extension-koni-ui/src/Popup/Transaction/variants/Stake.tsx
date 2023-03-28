@@ -3,7 +3,7 @@
 
 import { ExtrinsicType, NominationPoolInfo, NominatorMetadata, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _getChainNativeTokenBasicInfo, _getChainNativeTokenSlug, _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
@@ -42,6 +42,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
 type Props = ThemeProps
 
 enum FormFieldName {
@@ -67,7 +69,17 @@ const Component: React.FC<Props> = (props: Props) => {
   const dataContext = useContext(DataContext);
   const { asset, chain, from, onDone, setAsset, setChain, setDisabledRightBtn, setFrom, setShowRightBtn, setTransactionType } = useContext(TransactionContext);
 
+  // TODO: should do better to get validators info
+  const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state) => state.bonding);
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const { currentAccount } = useSelector((state) => state.accountState);
+  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+
   const defaultStakingType: StakingType = useMemo(() => {
+    if (isEthereumAddress(currentAccount?.address)) {
+      return StakingType.NOMINATED;
+    }
+
     switch (_stakingType) {
       case StakingType.POOLED:
         return StakingType.POOLED;
@@ -76,7 +88,7 @@ const Component: React.FC<Props> = (props: Props) => {
       default:
         return StakingType.POOLED;
     }
-  }, [_stakingType]);
+  }, [_stakingType, currentAccount?.address]);
 
   const [form] = useForm<StakeFormProps>();
 
@@ -92,12 +104,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
   const [loading, setLoading] = useState(false);
-
-  // TODO: should do better to get validators info
-  const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state) => state.bonding);
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
-  const { currentAccount } = useSelector((state) => state.accountState);
-  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+  const [poolLoading, setPoolLoading] = useState(false);
+  const [validatorLoading, setValidatorLoading] = useState(false);
 
   const existentialDeposit = useMemo(() => {
     const assetInfo = assetRegistry[asset];
@@ -173,8 +181,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
     setIsDisable(error || Object.values(checkEmpty).some((value) => !value));
   }, [setAsset, setChain, setFrom]);
-
-  console.log(asset);
 
   const getSelectedValidators = useCallback((nominations: string[]) => {
     const validatorList = validatorInfoMap[chain];
@@ -328,11 +334,17 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [chainStakingMetadata, setDisabledRightBtn]);
 
   useEffect(() => {
+    let unmount = false;
+
     // fetch validators when change chain
     // _stakingType is predefined form start
     if (!!chain && !!from) {
-      fetchChainValidators(chain, _stakingType || ALL_KEY);
+      fetchChainValidators(chain, _stakingType || ALL_KEY, unmount, setPoolLoading, setValidatorLoading);
     }
+
+    return () => {
+      unmount = true;
+    };
   }, [from, _stakingType, chain]);
 
   return (
@@ -451,6 +463,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 chain={chain}
                 from={from}
                 label={t('Select pool')}
+                loading={poolLoading}
               />
             </Form.Item>
 
@@ -461,13 +474,14 @@ const Component: React.FC<Props> = (props: Props) => {
               <MultiValidatorSelector
                 chain={asset ? chain : ''}
                 from={asset ? from : ''}
+                loading={validatorLoading}
               />
             </Form.Item>
           </Form>
           {
             chainStakingMetadata && (
               <>
-                <Divider />
+                <Divider className='staking-divider' />
                 {getMetaInfo()}
               </>
             )
@@ -527,6 +541,11 @@ const Stake = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.react-tabs__tab-list': {
       marginLeft: 0,
       marginRight: 0
+    },
+
+    '.staking-divider': {
+      marginTop: token.margin + 2,
+      marginBottom: token.marginSM
     }
   };
 });

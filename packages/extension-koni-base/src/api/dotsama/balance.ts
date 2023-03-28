@@ -9,6 +9,7 @@ import { getRegistry, getTokenInfo } from '@subwallet/extension-koni-base/api/do
 import { getEVMBalance } from '@subwallet/extension-koni-base/api/tokens/evm/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
+import { getDefaultWeightV2, WasmContractResponse } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 import { state } from '@subwallet/extension-koni-base/background/handlers';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, SUB_TOKEN_REFRESH_BALANCE_INTERVAL, SUBSCRIBE_BALANCE_FAST_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils';
@@ -21,7 +22,6 @@ import { DeriveBalancesAll } from '@polkadot/api-derive/types';
 import { AccountInfo, Balance } from '@polkadot/types/interfaces';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
-import {getDefaultWeightV2} from "@subwallet/extension-koni-base/api/tokens/wasm/utils";
 
 type EqBalanceItem = [number, { positive: number }];
 type EqBalanceV0 = {
@@ -130,8 +130,9 @@ function subscribePSP22Balance (addresses: string[], networkKey: string, api: Ap
         const contract = PSP22ContractMap[symbol];
         const balances = await Promise.all(addresses.map(async (address): Promise<string> => {
           const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(api) }, address);
+          const balanceObj = _balanceOf?.output?.toJSON() as unknown as WasmContractResponse;
 
-          return _balanceOf.output ? _balanceOf.output.toString() : '0';
+          return _balanceOf.output ? (balanceObj.ok as string) : '0';
         }));
 
         free = sumBN(balances.map((bal) => new BN(bal || 0)));

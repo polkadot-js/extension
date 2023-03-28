@@ -15,7 +15,7 @@ export const DEFAULT_WASM_TOKENS: WasmTokenJson = {
       smartContract: '5DGHdeY4SXsZ2w8RZrgXXJwHXXe2Qg8LCnUoDTr3tnBnu2BC',
       chain: 'alephTest',
       symbol: 'PANX',
-      decimals: 12,
+      decimals: 10,
       type: CustomTokenType.psp22,
       isCustom: true
     }
@@ -24,12 +24,6 @@ export const DEFAULT_WASM_TOKENS: WasmTokenJson = {
     {
       name: 'AFRICA’S POLKADOT EVENT',
       smartContract: '5CPwou5girStP4ALMF2GMAU1tRkDHt2qmm5pi6zmxTHUntCM',
-      chain: 'alephTest',
-      type: CustomTokenType.psp34
-    },
-    {
-      name: 'AzeroPunks',
-      smartContract: '5H8H2upyuxUAzU1NcHzt97DhTqQkmcp3u4quaM246uHBm5fL',
       chain: 'alephTest',
       type: CustomTokenType.psp34
     }

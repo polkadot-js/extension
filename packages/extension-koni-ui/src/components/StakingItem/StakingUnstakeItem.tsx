@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { Avatar } from '@subwallet/extension-koni-ui/components';
 import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { formatBalance } from '@subwallet/extension-koni-ui/util';
-import { Icon, Web3Block } from '@subwallet/react-ui';
+import { toShort } from '@subwallet/extension-koni-ui/util';
+import { Icon, Number, Web3Block } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle } from 'phosphor-react';
-import React from 'react';
+import { CheckCircle, Spinner } from 'phosphor-react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
 
@@ -19,12 +20,66 @@ type Props = ThemeProps & {
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, isSelected, unstakingInfo } = props;
-  const { chain } = unstakingInfo;
+  const { chain, claimable, status, validatorAddress } = unstakingInfo;
 
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
 
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
+
+  const leftItem = useMemo((): React.ReactNode => {
+    if (!validatorAddress) {
+      return undefined;
+    } else {
+      return <Avatar value={validatorAddress} />;
+    }
+  }, [validatorAddress]);
+
+  const middleItem = useMemo((): React.ReactNode => {
+    return (
+      <>
+        {
+          validatorAddress && (
+            <div className={'middle-item__name-wrapper'}>
+              <div className={'middle-item__name'}>{toShort(validatorAddress)}</div>
+            </div>
+          )
+        }
+
+        <div className={CN('middle-item__info', `status-${status}`)}>
+          <Icon
+            iconColor='var(--icon-color)'
+            phosphorIcon={status === UnstakingStatus.CLAIMABLE ? CheckCircle : Spinner}
+            size='sm'
+            weight='fill'
+          />
+          <span>{status === UnstakingStatus.CLAIMABLE ? t('Withdraw now') : t('Waiting')}</span>
+        </div>
+      </>
+    );
+  }, [status, t, validatorAddress]);
+
+  const rightItem = useMemo((): React.ReactNode => {
+    return (
+      <>
+        <Number
+          className={'__selected-item-value'}
+          decimal={decimals}
+          decimalOpacity={0.45}
+          size={token.fontSizeHeading6}
+          suffix={symbol}
+          value={claimable}
+        />
+        <Icon
+          className={'right-item__select-icon'}
+          iconColor={isSelected ? token.colorSuccess : token.colorTransparent}
+          phosphorIcon={CheckCircle}
+          size='sm'
+          weight='fill'
+        />
+      </>
+    );
+  }, [claimable, decimals, isSelected, symbol, token.colorSuccess, token.colorTransparent, token.fontSizeHeading6]);
 
   return (
     <div
@@ -32,38 +87,9 @@ const Component: React.FC<Props> = (props: Props) => {
     >
       <Web3Block
         className={'unstake-item-content'}
-        middleItem={
-          <>
-            <div className={'middle-item__name-wrapper'}>
-              <div className={'middle-item__name'}>{unstakingInfo.status}</div>
-            </div>
-
-            <div className={'middle-item__info'}>
-              <div className={'middle-item__active-stake'}>
-                <span>
-                  {t('Claimable:')}
-                </span>
-                <span>
-                  &nbsp;{formatBalance(unstakingInfo.claimable, decimals)}&nbsp;
-                </span>
-                <span>{symbol}</span>
-              </div>
-            </div>
-          </>
-        }
-
-        rightItem={
-          isSelected &&
-          (
-            <Icon
-              className={'right-item__select-icon'}
-              iconColor={token.colorSuccess}
-              phosphorIcon={CheckCircle}
-              size={'sm'}
-              weight={'fill'}
-            />
-          )
-        }
+        leftItem={leftItem}
+        middleItem={middleItem}
+        rightItem={rightItem}
       />
     </div>
   );
@@ -97,9 +123,23 @@ const StakingUnstakeItem = styled(Component)<Props>(({ theme: { token } }: Props
     },
 
     '.middle-item__info': {
-      fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightSM,
-      color: token.colorTextLight4
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: token.sizeXXS,
+
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      color: 'var(--color)',
+      '--icon-color': 'var(--color)'
+    },
+
+    [`.status-${UnstakingStatus.CLAIMABLE}`]: {
+      '--color': token.colorSuccess
+    },
+
+    [`.status-${UnstakingStatus.UNLOCKING}`]: {
+      '--color': token['gold-6']
     },
 
     '.middle-item__active-stake': {

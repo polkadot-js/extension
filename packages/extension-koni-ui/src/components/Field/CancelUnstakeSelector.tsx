@@ -1,18 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { GeneralEmptyList, StakingUnstakeItem } from '@subwallet/extension-koni-ui/components';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { formatBalance } from '@subwallet/extension-koni-ui/util';
-import { InputRef, SelectModal } from '@subwallet/react-ui';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Icon, InputRef, Number, SelectModal } from '@subwallet/react-ui';
 import CN from 'classnames';
+import { CheckCircle, Spinner } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
@@ -36,6 +36,7 @@ const renderItem = (item: UnstakingInfo, isSelected: boolean) => (
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', disabled, id = 'cancel-unstake', label, nominators, placeholder, value } = props;
 
+  const { token } = useTheme() as Theme;
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
 
   const items = useMemo((): UnstakeItem[] => {
@@ -49,14 +50,25 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const renderSelected = useCallback(
     (item: UnstakingInfo) => {
       return (
-        <div className={'__selected-item'}>
-          <div className={'__selected-item-name common-text'}>
-            {(formatBalance(item.claimable, decimals))}&nbsp;{symbol}
-          </div>
+        <div className={CN('__selected-item', 'common-text', `status-${item.status}`)}>
+          <Icon
+            iconColor='var(--icon-color)'
+            phosphorIcon={item.status === UnstakingStatus.CLAIMABLE ? CheckCircle : Spinner}
+            size='sm'
+            weight='fill'
+          />
+          <Number
+            className={'__selected-item-value'}
+            decimal={decimals}
+            decimalOpacity={0.45}
+            size={token.fontSizeHeading6}
+            suffix={symbol}
+            value={item.claimable}
+          />
         </div>
       );
     },
-    [decimals, symbol]
+    [decimals, symbol, token.fontSizeHeading6]
   );
 
   useEffect(() => {
@@ -87,7 +99,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         renderSelected={renderSelected}
         renderWhenEmpty={renderEmpty}
         selected={value || ''}
-        title={label || placeholder || t('Select unstake')}
+        title={t('Unstake request')}
       />
     </>
   );
@@ -96,30 +108,29 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 const CancelUnstakeSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
     '&.cancel-unstake-input': {
+      [`.status-${UnstakingStatus.CLAIMABLE}`]: {
+        '--icon-color': token.colorSuccess
+      },
+
+      [`.status-${UnstakingStatus.UNLOCKING}`]: {
+        '--icon-color': token['gold-6']
+      },
+
       '.__selected-item': {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        color: token.colorTextLight1,
         whiteSpace: 'nowrap',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        gap: token.sizeXS
       },
-      '.__selected-item-name': {
-        textOverflow: 'ellipsis',
-        fontWeight: token.headingFontWeight,
-        overflow: 'hidden'
-      },
-      '.__selected-item-right-part': {
-        color: token.colorTextLight4,
-        paddingLeft: token.sizeXXS
+      '.__selected-item-value': {
+        fontWeight: token.bodyFontWeight,
+        lineHeight: token.lineHeightHeading6
       }
     },
 
     '.ant-select-modal-input-wrapper': {
-      height: 44,
-      ' > span': {
-        display: 'none'
-      }
+      height: 44
     }
   };
 });

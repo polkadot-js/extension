@@ -6,6 +6,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountSelector, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
@@ -56,6 +57,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { stakingRewardMap } = useSelector((state) => state.staking);
 
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
+  const { goHome } = useDefaultNavigate();
 
   const rewardList = useMemo((): StakingRewardItem[] => {
     return stakingRewardMap.filter((item) => item.chain === chain && item.type === stakingType);
@@ -184,14 +186,18 @@ const Component: React.FC<Props> = (props: Props) => {
                 }
               </MetaInfo>
             </Form.Item>
-            <Form.Item
-              name={FormFieldName.BOND_REWARD}
-              valuePropName='checked'
-            >
-              <Checkbox>
-                <span className={'__option-label'}>Bond reward</span>
-              </Checkbox>
-            </Form.Item>
+            {
+              stakingType === StakingType.POOLED && (
+                <Form.Item
+                  name={FormFieldName.BOND_REWARD}
+                  valuePropName='checked'
+                >
+                  <Checkbox>
+                    <span className={'__option-label'}>Bond reward</span>
+                  </Checkbox>
+                </Form.Item>
+              )
+            }
           </Form>
         </PageWrapper>
       </TransactionContent>
@@ -208,6 +214,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           schema={'secondary'}
+          onClick={goHome}
         >
           {t('Cancel')}
         </Button>

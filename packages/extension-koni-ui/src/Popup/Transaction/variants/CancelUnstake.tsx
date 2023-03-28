@@ -5,6 +5,7 @@ import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background
 import { AccountSelector, CancelUnstakeSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -37,7 +38,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const dataContext = useContext(DataContext);
   const { asset, chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
+
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
+
+  const { goHome } = useDefaultNavigate();
 
   const nominatorInfo = useGetNominatorInfo(stakingChain, stakingType, from);
   const nominatorMetadata = nominatorInfo[0];
@@ -142,7 +146,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <CancelUnstakeSelector
                 chain={chain}
                 disabled={!from}
-                label={t('Select unstake')}
+                label={t('Select unstake request')}
                 nominators={ from ? nominatorMetadata?.unstakings || [] : []}
               />
             </Form.Item>
@@ -162,6 +166,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           schema={'secondary'}
+          onClick={goHome}
         >
           {t('Cancel')}
         </Button>

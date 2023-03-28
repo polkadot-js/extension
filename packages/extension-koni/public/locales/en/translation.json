@@ -968,5 +968,10 @@
   "days": "",
   "hours": "",
   "unknown time": "",
-  "Once unbonded, your funds would be available after {{time}}.": ""
+  "Once unbonded, your funds would be available after {{time}}.": "",
+  "Select unstake": "",
+  "Claimable:": "",
+  "{{name}} on {{chainName}} is turned on.": "",
+  "{{name}} on {{chainName}} is not ready to use, do you want to turn it on?": "",
+  "{{name}} on {{chainName}} is turning on.": ""
 }

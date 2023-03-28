@@ -1745,7 +1745,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18,
-    blockExplorer: 'https://subspace.subscan.io'
+    blockExplorer: 'https://explorer.subspace.network/#/gemini-2a'
   },
   subspace_gemini_3c: {
     key: 'subspace_gemini_3c',
@@ -1763,7 +1763,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['TEST_NET'],
     nativeToken: 'tSSC',
     decimals: 18,
-    blockExplorer: 'https://subspace.github.io/blockexplorer/#/gemini-3c'
+    blockExplorer: 'https://explorer.subspace.network/#/gemini-3c'
   },
   origintrail: {
     key: 'origintrail',

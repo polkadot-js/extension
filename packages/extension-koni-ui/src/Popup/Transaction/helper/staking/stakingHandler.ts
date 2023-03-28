@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
 import { getBondingOptions, getNominationPoolOptions } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 

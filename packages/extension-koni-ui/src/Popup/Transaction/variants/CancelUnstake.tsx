@@ -4,9 +4,7 @@
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountSelector, CancelUnstakeSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
+import { useDefaultNavigate, useGetNominatorInfo, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
@@ -105,6 +103,8 @@ const Component: React.FC<Props> = (props: Props) => {
     }, 300);
   }, [chain, from, nominatorMetadata.unstakings, onDone]);
 
+  const onPreCheckReadOnly = usePreCheckReadOnly(from);
+
   useEffect(() => {
     const address = currentAccount?.address || '';
 
@@ -165,8 +165,8 @@ const Component: React.FC<Props> = (props: Props) => {
               weight='fill'
             />
           )}
-          schema={'secondary'}
           onClick={goHome}
+          schema={'secondary'}
         >
           {t('Cancel')}
         </Button>
@@ -180,9 +180,9 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={form.submit}
+          onClick={onPreCheckReadOnly(form.submit)}
         >
-          {t('Submit')}
+          {t('Continue')}
         </Button>
       </TransactionFooter>
     </>

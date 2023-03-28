@@ -5,36 +5,14 @@ import { ExtrinsicType, NominationPoolInfo, NominatorMetadata, StakingType, Vali
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
-import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import MultiValidatorSelector from '@subwallet/extension-koni-ui/components/Field/MultiValidatorSelector';
-import PoolSelector from '@subwallet/extension-koni-ui/components/Field/PoolSelector';
-import RadioGroup from '@subwallet/extension-koni-ui/components/Field/RadioGroup';
-import { TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import { StakingNetworkDetailModal } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
+import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetBalance, useGetNativeTokenSlug, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
-import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetChainStakingMetadata';
-import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
-import useGetSupportedStakingTokens from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetSupportedStakingTokens';
+import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
-import { accountFilterFunc } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/base';
-import { fetchChainValidators } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
-import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
-import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
-import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
-import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/util/form/form';
-import { parseNominations } from '@subwallet/extension-koni-ui/util/transaction/stake';
+import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertFieldToObject, isAccountAll, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
-import { useForm } from '@subwallet/react-ui/es/form/Form';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -43,6 +21,10 @@ import { useParams } from 'react-router';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+
+import { accountFilterFunc, fetchChainValidators } from '../helper';
+import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
+import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
 type Props = ThemeProps
 
@@ -67,7 +49,16 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chain: stakingChain, type: _stakingType } = useParams();
 
   const dataContext = useContext(DataContext);
-  const { asset, chain, from, onDone, setAsset, setChain, setDisabledRightBtn, setFrom, setShowRightBtn, setTransactionType } = useContext(TransactionContext);
+  const { asset,
+    chain,
+    from,
+    onDone,
+    setAsset,
+    setChain,
+    setDisabledRightBtn,
+    setFrom,
+    setShowRightBtn,
+    setTransactionType } = useContext(TransactionContext);
 
   // TODO: should do better to get validators info
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state) => state.bonding);
@@ -90,7 +81,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [_stakingType, currentAccount?.address]);
 
-  const [form] = useForm<StakeFormProps>();
+  const [form] = Form.useForm<StakeFormProps>();
 
   const [isDisable, setIsDisable] = useState(true);
 
@@ -106,6 +97,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [poolLoading, setPoolLoading] = useState(false);
   const [validatorLoading, setValidatorLoading] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [warnings, setWarnings] = useState<string[]>([]);
 
   const existentialDeposit = useMemo(() => {
     const assetInfo = assetRegistry[asset];
@@ -213,12 +206,12 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [nominationPoolInfoMap, chain]);
 
   const onSubmit: FormCallbacks<StakeFormProps>['onFinish'] = useCallback((values: StakeFormProps) => {
-    if (!nominatorMetadata) {
-      return;
-    }
-
     setLoading(true);
-    const { from, [FormFieldName.NOMINATE]: nominate, [FormFieldName.POOL]: pool, [FormFieldName.VALUE]: value, [FormFieldName.TYPE]: type } = values;
+    const { from,
+      [FormFieldName.NOMINATE]: nominate,
+      [FormFieldName.POOL]: pool,
+      [FormFieldName.VALUE]: value,
+      [FormFieldName.TYPE]: type } = values;
     let bondingPromise: Promise<SWTransactionResponse>;
 
     if (pool && type === StakingType.POOLED) {
@@ -249,9 +242,8 @@ const Component: React.FC<Props> = (props: Props) => {
           const { errors, extrinsicHash, warnings } = response;
 
           if (errors.length || warnings.length) {
-            console.log('failed', errors, warnings);
-            // setErrors(errors.map((e) => e.message));
-            // setWarnings(warnings.map((w) => w.message));
+            setErrors(errors.map((e) => e.message));
+            setWarnings(warnings.map((w) => w.message));
           } else if (extrinsicHash) {
             onDone(extrinsicHash);
           }
@@ -303,6 +295,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return null;
   }, [chainStakingMetadata, decimals, symbol, t]);
+
+  const onPreCheckReadOnly = usePreCheckReadOnly(from);
 
   useEffect(() => {
     const address = currentAccount?.address || '';
@@ -490,8 +484,8 @@ const Component: React.FC<Props> = (props: Props) => {
       </TransactionContent>
 
       <TransactionFooter
-        errors={[]}
-        warnings={[]}
+        errors={errors}
+        warnings={warnings}
       >
         <Button
           disabled={isDisable}
@@ -502,7 +496,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={form.submit}
+          onClick={onPreCheckReadOnly(form.submit)}
         >
           {t('Stake')}
         </Button>

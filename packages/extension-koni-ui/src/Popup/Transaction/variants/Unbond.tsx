@@ -6,27 +6,13 @@ import { ExtrinsicType, NominationInfo, NominatorMetadata, RequestStakePoolingUn
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
-import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
+import { AccountSelector, AmountInput, NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
-import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetChainStakingMetadata';
-import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
+import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
-import { accountFilterFunc } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/base';
-import BondedBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/BondedBalance';
-import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
-import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
-import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
-import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/util/form/form';
-import { validateUnStakeValue } from '@subwallet/extension-koni-ui/util/form/validators/staking/unstake';
+import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertFieldToObject, isAccountAll, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/util';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -35,6 +21,10 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
+
+import { accountFilterFunc } from '../helper';
+import { BondedBalance, FreeBalance, TransactionContent, TransactionFooter } from '../parts';
+import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
 type Props = ThemeProps;
 
@@ -233,6 +223,8 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [bondedValue, decimals, symbol]);
 
+  const onPreCheckReadOnly = usePreCheckReadOnly(from);
+
   useEffect(() => {
     const address = currentAccount?.address || '';
 
@@ -341,7 +333,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={form.submit}
+          onClick={onPreCheckReadOnly(form.submit)}
         >
           {t('Submit')}
         </Button>

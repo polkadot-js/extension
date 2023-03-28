@@ -3,8 +3,8 @@
 
 import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActions, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
-import { useIsReadOnlyAccount, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
+import { usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
@@ -53,8 +53,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { inactiveModal } = useContext(ModalContext);
 
   const { currentAccount } = useSelector((state) => state.accountState);
-
-  const isReadOnlyAccount = useIsReadOnlyAccount(currentAccount?.address);
 
   const onCancel = useCallback(
     () => {
@@ -209,19 +207,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return result;
   }, [chainStakingMetadata?.chain, chainStakingMetadata?.type, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);
 
-  const onClickItem = useCallback((onClick: () => void) => {
-    return () => {
-      if (isReadOnlyAccount) {
-        notify({
-          message: t('The account you are using is read-only, you cannot use this feature with it'),
-          type: 'info',
-          duration: 3
-        });
-      } else {
-        onClick();
-      }
-    };
-  }, [isReadOnlyAccount, notify, t]);
+  const onClickItem = usePreCheckReadOnly(currentAccount?.address);
 
   return (
     <SwModal

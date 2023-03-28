@@ -8,7 +8,7 @@ import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/servi
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
 import { StakingStatus } from '@subwallet/extension-koni-ui/constants/stakingStatus';
-import { useGetAccountByAddress,useIsReadOnlyAccount, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetAccountByAddress, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
@@ -24,8 +24,6 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
-
-import useNotification from '../../../hooks/common/useNotification';
 
 interface Props extends ThemeProps {
   nominatorMetadata: NominatorMetadata;
@@ -48,14 +46,14 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const notify = useNotification();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { currentAccount } = useSelector((state) => state.accountState);
 
-  const isReadOnlyAccount = useIsReadOnlyAccount(currentAccount?.address);
   const { data: stakingData } = useGetStakingList();
+
+  const onClickFooterButton = usePreCheckReadOnly(currentAccount?.address);
 
   const [seeMore, setSeeMore] = useState<boolean>(false);
 
@@ -91,20 +89,6 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
     activeModal(MORE_ACTION_MODAL);
     inactiveModal(STAKING_DETAIL_MODAL_ID);
   }, [activeModal, inactiveModal]);
-
-  const onClickFooterButton = useCallback((onClick: () => void) => {
-    return () => {
-      if (isReadOnlyAccount) {
-        notify({
-          message: t('The account you are using is read-only, you cannot use this feature with it'),
-          type: 'info',
-          duration: 3
-        });
-      } else {
-        onClick();
-      }
-    };
-  }, [isReadOnlyAccount, notify, t]);
 
   const footer = () => {
     return (

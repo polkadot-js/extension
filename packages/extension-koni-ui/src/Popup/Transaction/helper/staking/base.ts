@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';

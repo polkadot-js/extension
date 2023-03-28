@@ -2,26 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
-import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
-import SwStakingItem from '@subwallet/extension-koni-ui/components/StakingItem/SwStakingItem';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
+import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem } from '@subwallet/extension-koni-ui/components';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useIsReadOnlyAccount, useNotification, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
-import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
-import MoreActionModal, { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
-import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingDetailModal';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
+import { useFilterModal, useGetStakingList, usePreCheckReadOnly, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+import MoreActionModal, { MORE_ACTION_MODAL } from './MoreActionModal';
+import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from './StakingDetailModal';
 
 type Props = ThemeProps
 
@@ -46,7 +40,6 @@ const rightIcon = <Icon
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const notify = useNotification();
 
   const dataContext = useContext(DataContext);
   const { activeModal } = useContext(ModalContext);
@@ -54,8 +47,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { data: stakingItems, priceMap } = useGetStakingList();
 
   const { currentAccount } = useSelector((state) => state.accountState);
-
-  const isReadOnlyAccount = useIsReadOnlyAccount(currentAccount?.address);
 
   const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
@@ -100,22 +91,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [activeModal]);
 
+  const preCheckReadOnly = usePreCheckReadOnly(currentAccount?.address);
+
   const subHeaderButton: ButtonProps[] = useMemo(() => ([
     {
       icon: rightIcon,
-      onClick: () => {
-        if (isReadOnlyAccount) {
-          notify({
-            message: t('The account you are using is read-only, you cannot use this feature with it'),
-            type: 'info',
-            duration: 3
-          });
-        } else {
-          navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`);
-        }
-      }
+      onClick: preCheckReadOnly(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`))
     }
-  ]), [isReadOnlyAccount, navigate, notify, t]);
+  ]), [preCheckReadOnly, navigate]);
 
   const renderItem = useCallback((item: StakingDataType) => {
     return (

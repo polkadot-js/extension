@@ -11,3 +11,4 @@ export { default as useGetAccountSignModeByAddress } from './useGetAccountSignMo
 export { default as useGetDefaultAccountName } from './useGetDefaultAccountName';
 export { default as useGoBackFromCreateAccount } from './useGoBackFromCreateAccount';
 export { default as useIsReadOnlyAccount } from './useIsReadOnlyAccount';
+export { default as usePreCheckReadOnly } from './usePreCheckReadOnly';

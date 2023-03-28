@@ -5,11 +5,10 @@ import { ExtrinsicType, StakingRewardItem, StakingType } from '@subwallet/extens
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountSelector, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { useDefaultNavigate, useGetNativeTokenBasicInfo, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
+import { convertFieldToObject, isAccountAll, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
 import { Button, Checkbox, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
@@ -18,7 +17,6 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
-import useGetNativeTokenBasicInfo from '../../../hooks/common/useGetNativeTokenBasicInfo';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
@@ -35,6 +33,10 @@ interface ClaimRewardFormProps extends TransactionFormBaseProps {
 const filterAccountFunc = (rewardList: StakingRewardItem[]): ((account: AccountJson) => boolean) => {
   return (account: AccountJson) => {
     if (isAccountAll(account.address)) {
+      return false;
+    }
+
+    if (account.isReadOnly) {
       return false;
     }
 
@@ -128,6 +130,8 @@ const Component: React.FC<Props> = (props: Props) => {
     }, 300);
   }, [chain, from, onDone, reward?.unclaimedReward, stakingType]);
 
+  const onPreCheckReadOnly = usePreCheckReadOnly(from);
+
   useEffect(() => {
     const address = currentAccount?.address || '';
 
@@ -142,6 +146,13 @@ const Component: React.FC<Props> = (props: Props) => {
     setChain(stakingChain || '');
     setTransactionType(ExtrinsicType.STAKING_CLAIM_REWARD);
   }, [setChain, setTransactionType, stakingChain]);
+
+  useEffect(() => {
+    // Trick to trigger validate when case single account
+    setTimeout(() => {
+      form.validateFields().finally(noop);
+    }, 500);
+  }, [form]);
 
   return (
     <>
@@ -213,8 +224,8 @@ const Component: React.FC<Props> = (props: Props) => {
               weight='fill'
             />
           )}
-          schema={'secondary'}
           onClick={goHome}
+          schema={'secondary'}
         >
           {t('Cancel')}
         </Button>
@@ -228,9 +239,9 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={form.submit}
+          onClick={onPreCheckReadOnly(form.submit)}
         >
-          {t('Submit')}
+          {t('Continue')}
         </Button>
       </TransactionFooter>
     </>

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActions, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -9,6 +9,7 @@ import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extens
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { ArrowArcLeft, ArrowCircleDown, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -30,7 +31,6 @@ type ActionListType = {
   label: string;
   action: StakingAction;
   onClick: () => void;
-  disabled: boolean;
 }
 
 export type StakingDataOption = {
@@ -103,6 +103,12 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
+    if (nominatorMetadata.type === StakingType.POOLED) {
+      navigate(`/transaction/claim-reward/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
+
+      return;
+    }
+
     submitStakeClaimReward({
       address: nominatorMetadata.address,
       chain: nominatorMetadata.chain,
@@ -127,9 +133,9 @@ const Component: React.FC<Props> = (props: Props) => {
           message: t('Error')
         });
       });
-  }, [nominatorMetadata, notify, reward?.unclaimedReward, t]);
+  }, [navigate, nominatorMetadata, notify, reward?.unclaimedReward, t]);
 
-  const availableActions = useCallback(() => {
+  const availableActions = useMemo(() => {
     if (!nominatorMetadata) {
       return [];
     }
@@ -145,11 +151,12 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [chainStakingMetadata, navigate, nominatorMetadata, reward, staking]);
 
   const actionList: ActionListType[] = useMemo((): ActionListType[] => {
-    return [
+    const isPool = chainStakingMetadata?.type === StakingType.POOLED;
+
+    const result: ActionListType[] = [
       {
         action: StakingAction.STAKE,
         backgroundIconColor: 'green-6',
-        disabled: false,
         icon: PlusCircle,
         label: 'Stake more',
         onClick: onNavigate(`/transaction/stake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
@@ -157,7 +164,6 @@ const Component: React.FC<Props> = (props: Props) => {
       {
         action: StakingAction.UNSTAKE,
         backgroundIconColor: 'magenta-6',
-        disabled: !nominatorMetadata,
         icon: MinusCircle,
         label: 'Unstake funds',
         onClick: onNavigate(`/transaction/unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
@@ -165,7 +171,6 @@ const Component: React.FC<Props> = (props: Props) => {
       {
         action: StakingAction.WITHDRAW,
         backgroundIconColor: 'geekblue-6',
-        disabled: !nominatorMetadata,
         icon: ArrowCircleDown,
         label: 'Withdraw',
         onClick: handleWithdrawalAction
@@ -173,18 +178,9 @@ const Component: React.FC<Props> = (props: Props) => {
       {
         action: StakingAction.CLAIM_REWARD,
         backgroundIconColor: 'green-7',
-        disabled: !nominatorMetadata,
         icon: Wallet,
         label: 'Claim rewards',
         onClick: handleClaimRewardAction
-      },
-      {
-        action: StakingAction.CANCEL_UNSTAKE,
-        backgroundIconColor: 'purple-8',
-        disabled: false,
-        icon: ArrowArcLeft,
-        label: 'Cancel unstake',
-        onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
       }
       // {
       //   backgroundIconColor: 'blue-7',
@@ -193,7 +189,19 @@ const Component: React.FC<Props> = (props: Props) => {
       //   value: '/transaction/compound'
       // }
     ];
-  }, [chainStakingMetadata?.chain, chainStakingMetadata?.type, handleClaimRewardAction, handleWithdrawalAction, nominatorMetadata, onNavigate]);
+
+    if (!isPool) {
+      result.push({
+        action: StakingAction.CANCEL_UNSTAKE,
+        backgroundIconColor: 'purple-8',
+        icon: ArrowArcLeft,
+        label: 'Cancel unstake',
+        onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
+      });
+    }
+
+    return result;
+  }, [chainStakingMetadata?.chain, chainStakingMetadata?.type, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);
 
   return (
     <SwModal
@@ -206,7 +214,12 @@ const Component: React.FC<Props> = (props: Props) => {
     >
       {actionList.map((item) => (
         <SettingItem
-          className={`action-more-item ${availableActions().includes(item.action) ? '' : 'disabled'}`}
+          className={CN(
+            'action-more-item',
+            {
+              disabled: !availableActions.includes(item.action)
+            }
+          )}
           key={item.label}
           leftItemIcon={<BackgroundIcon
             backgroundColor={token[item.backgroundIconColor] as string}
@@ -215,7 +228,7 @@ const Component: React.FC<Props> = (props: Props) => {
             weight='fill'
           />}
           name={item.label}
-          onPressItem={item.onClick}
+          onPressItem={!availableActions.includes(item.action) ? undefined : item.onClick}
         />
       ))}
     </SwModal>
@@ -229,7 +242,17 @@ const MoreActionModal = styled(Component)<Props>(({ theme: { token } }: Props) =
     },
 
     '.disabled': {
-      cursor: 'not-allowed'
+      cursor: 'not-allowed',
+      opacity: token.opacityDisable,
+
+      '.ant-web3-block': {
+        cursor: 'not-allowed'
+      },
+
+      '.ant-web3-block:hover': {
+        cursor: 'not-allowed',
+        background: token.colorBgSecondary
+      }
     }
   };
 });

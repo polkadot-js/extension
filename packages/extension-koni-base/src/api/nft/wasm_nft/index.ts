@@ -41,6 +41,10 @@ export class WasmNftApi extends BaseNftApi {
       return undefined;
     }
 
+    if (tokenUri.startsWith('/ipfs/')) {
+      return tokenUri;
+    }
+
     if (!tokenUri.includes('ipfs://') && !tokenUri.includes('ipfs://ipfs/')) {
       return `ipfs://${tokenUri}`;
     }

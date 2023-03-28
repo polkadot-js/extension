@@ -23,7 +23,7 @@ export const DEFAULT_WASM_TOKENS: WasmTokenJson = {
   psp34: [
     {
       name: 'AFRICA’S POLKADOT EVENT',
-      smartContract: '5CPwou5girStP4ALMF2GMAU1tRkDHt2qmm5pi6zmxTHUntCM',
+      smartContract: '5DVG2kveDY5msL6stCh83QAz6pNN1yLa2D3yfJnLVprYWsAq',
       chain: 'alephTest',
       type: CustomTokenType.psp34
     }

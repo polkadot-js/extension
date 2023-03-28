@@ -25,7 +25,7 @@ export function getWaitingTime (waitingTime?: number) {
 
   if (days < 1) {
     if (days) {
-      return 'Withdraw in less than 1 day';
+      return 'Withdraw in <1 day';
     } else {
       return 'Available for withdraw';
     }

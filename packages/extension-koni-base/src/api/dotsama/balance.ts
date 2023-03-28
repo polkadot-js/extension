@@ -21,6 +21,7 @@ import { DeriveBalancesAll } from '@polkadot/api-derive/types';
 import { AccountInfo, Balance } from '@polkadot/types/interfaces';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import {getDefaultWeightV2} from "@subwallet/extension-koni-base/api/tokens/wasm/utils";
 
 type EqBalanceItem = [number, { positive: number }];
 type EqBalanceV0 = {
@@ -128,7 +129,7 @@ function subscribePSP22Balance (addresses: string[], networkKey: string, api: Ap
       try {
         const contract = PSP22ContractMap[symbol];
         const balances = await Promise.all(addresses.map(async (address): Promise<string> => {
-          const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: -1 }, address);
+          const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(api) }, address);
 
           return _balanceOf.output ? _balanceOf.output.toString() : '0';
         }));

@@ -12,7 +12,7 @@ export const DEFAULT_WASM_TOKENS: WasmTokenJson = {
   psp22: [
     {
       name: 'PANX',
-      smartContract: '5CY8zDBjUDNwZBHdGbERtLLSZqY7dJYsm1KhY6tSorYvnSke',
+      smartContract: '5DGHdeY4SXsZ2w8RZrgXXJwHXXe2Qg8LCnUoDTr3tnBnu2BC',
       chain: 'alephTest',
       symbol: 'PANX',
       decimals: 12,
@@ -22,8 +22,14 @@ export const DEFAULT_WASM_TOKENS: WasmTokenJson = {
   ],
   psp34: [
     {
-      name: 'Praying Mantis Predators',
-      smartContract: '5Hg1xe6JAGZj92wxtj1ykAfQpwwRNqzAnvhZ3TuXZEmLU1Vw',
+      name: 'AFRICA’S POLKADOT EVENT',
+      smartContract: '5CPwou5girStP4ALMF2GMAU1tRkDHt2qmm5pi6zmxTHUntCM',
+      chain: 'alephTest',
+      type: CustomTokenType.psp34
+    },
+    {
+      name: 'AzeroPunks',
+      smartContract: '5H8H2upyuxUAzU1NcHzt97DhTqQkmcp3u4quaM246uHBm5fL',
       chain: 'alephTest',
       type: CustomTokenType.psp34
     }

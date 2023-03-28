@@ -40,9 +40,12 @@ export async function getPSP34Transaction (
   const contractPromise = getPSP34ContractPromise(apiPromise, contractAddress);
 
   try {
+    // @ts-ignore
+    const gasLimit = await getWasmContractGasLimit(apiPromise, senderAddress, 'psps34::transfer', contractPromise, {}, [recipientAddress, onChainOption, {}]);
+
     const [info, balance] = await Promise.all([
       // @ts-ignore
-      contractPromise.tx['psp34::transfer'](getWasmContractGasLimit(networkKey, apiPromise), recipientAddress, onChainOption, {}).paymentInfo(senderAddress),
+      contractPromise.tx['psp34::transfer']({ gasLimit }, recipientAddress, onChainOption, {}).paymentInfo(senderAddress),
       getFreeBalance(networkKey, senderAddress, dotSamaApiMap, web3ApiMap)
     ]);
 
@@ -83,12 +86,10 @@ export async function getPSP34TransferExtrinsic (networkKey: string, apiProp: Ap
   try {
     const contractPromise = getPSP34ContractPromise(apiProp.api, contractAddress);
     // @ts-ignore
-    const transferQuery = await contractPromise.query['psp34::transfer'](senderAddress, getWasmContractGasLimit(networkKey, apiProp.api), recipientAddress, onChainOption, {});
-
-    const gasLimit = ['astar', 'shiden', 'shibuya'].includes(networkKey) ? getWasmContractGasLimit(networkKey, apiProp.api) : { gasLimit: transferQuery.gasRequired.toString() };
+    const gasLimit = await getWasmContractGasLimit(apiProp.api, senderAddress, 'psps34::transfer', contractPromise, {}, [recipientAddress, onChainOption, {}]);
 
     // @ts-ignore
-    return contractPromise.tx['psp34::transfer'](gasLimit, recipientAddress, onChainOption, {});
+    return contractPromise.tx['psp34::transfer']({ gasLimit }, recipientAddress, onChainOption, {});
   } catch (e) {
     console.error('Error getting WASM NFT transfer extrinsic', e);
 

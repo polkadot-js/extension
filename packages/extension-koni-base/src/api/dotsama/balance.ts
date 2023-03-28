@@ -649,9 +649,10 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
 
         const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
 
-        const balanceOf = await contractPromise.query['psp22::balanceOf'](address, { gasLimit: -1 }, address);
+        const _balanceOf = await contractPromise.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(api) }, address);
+        const balanceObj = _balanceOf?.output?.toJSON() as unknown as WasmContractResponse;
 
-        return balanceOf.output ? balanceOf.output.toString() : '0';
+        return _balanceOf.output ? (balanceObj.ok as string) : '0';
       } else if (['genshiro_testnet', 'genshiro'].includes(networkKey)) {
         const asset = assetFromToken(token);
         const balance = await api.query.eqBalances.account(address, asset);
@@ -789,9 +790,11 @@ export async function subscribeFreeBalance (
 
           const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
 
-          contractPromise.query['psp22::balanceOf'](address, { gasLimit: -1 }, address)
-            .then((balanceOf) => {
-              update(balanceOf.output ? balanceOf.output.toString() : '0');
+          contractPromise.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(api) }, address)
+            .then((_balanceOf) => {
+              const balanceObj = _balanceOf?.output?.toJSON() as unknown as WasmContractResponse;
+
+              update(_balanceOf.output ? (balanceObj.ok as string) : '0');
             }).catch(console.error);
         };
 

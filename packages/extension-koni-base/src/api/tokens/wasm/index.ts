@@ -41,7 +41,7 @@ export async function getPSP34Transaction (
 
   try {
     // @ts-ignore
-    const gasLimit = await getWasmContractGasLimit(apiPromise, senderAddress, 'psps34::transfer', contractPromise, {}, [recipientAddress, onChainOption, {}]);
+    const gasLimit = await getWasmContractGasLimit(apiPromise, senderAddress, 'psp34::transfer', contractPromise, {}, [recipientAddress, onChainOption, {}]);
 
     const [info, balance] = await Promise.all([
       // @ts-ignore
@@ -62,20 +62,13 @@ export async function getPSP34Transaction (
   } catch (e) {
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    if (e.toString().includes('Error: createType(RuntimeDispatchInfo):: Struct: failed on weight: u64:: Assertion failed')) {
-      return {
-        error: false,
-        estimatedFee: `0.0000 ${networkJson.nativeToken as string}`,
-        balanceError: false
-      } as SubstrateNftTransaction;
-    }
+    return {
+      error: false,
+      estimatedFee: `0.0000 ${networkJson.nativeToken as string}`,
+      balanceError: false
+    } as SubstrateNftTransaction;
 
     console.error('error handling WASM NFT transfer', e);
-
-    return {
-      error: true,
-      balanceError: false
-    };
   }
 }
 
@@ -86,7 +79,7 @@ export async function getPSP34TransferExtrinsic (networkKey: string, apiProp: Ap
   try {
     const contractPromise = getPSP34ContractPromise(apiProp.api, contractAddress);
     // @ts-ignore
-    const gasLimit = await getWasmContractGasLimit(apiProp.api, senderAddress, 'psps34::transfer', contractPromise, {}, [recipientAddress, onChainOption, {}]);
+    const gasLimit = await getWasmContractGasLimit(apiProp.api, senderAddress, 'psp34::transfer', contractPromise, {}, [recipientAddress, onChainOption, {}]);
 
     // @ts-ignore
     return contractPromise.tx['psp34::transfer']({ gasLimit }, recipientAddress, onChainOption, {});

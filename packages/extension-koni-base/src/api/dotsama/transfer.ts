@@ -12,6 +12,7 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
+import {getWasmContractGasLimit} from "@subwallet/extension-koni-base/api/tokens/wasm/utils";
 
 export async function getExistentialDeposit (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<string> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
@@ -142,11 +143,12 @@ export async function estimateFee (
   const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
 
   if (tokenInfo && tokenInfo.contractAddress && tokenInfo.type && !apiProps.isEthereum && api.query.contracts) { // for PSP tokens
-    const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
-    const paymentInfo = await contractPromise.tx['psp22::transfer']({ gasLimit: '10000' }, to, value, {}) // gasLimit is arbitrary since it's only estimating fee
-      .paymentInfo(fromKeypair);
+    // const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
+    // const gasLimit = await getWasmContractGasLimit(api, fromKeypair.address as string, 'psp34::transfer', contractPromise, {}, [recipientAddress, onChainOption, {}]);
+    // const paymentInfo = await contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {}) // gasLimit is arbitrary since it's only estimating fee
+    //   .paymentInfo(fromKeypair);
 
-    fee = paymentInfo.partialFee.toString();
+    fee = '0';
   } else if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
     // Note: currently 'karura', 'acala', 'acala_testnet' do not support transfer all
     // if (transferAll) {
@@ -449,9 +451,10 @@ export const createTransferExtrinsic = async ({ apiProp, from, networkKey, to, t
 
   if (tokenInfo && tokenInfo.contractAddress && tokenInfo.type && !apiProp.isEthereum && api.query.contracts) {
     const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
-    const transferQuery = await contractPromise.query['psp22::transfer'](from, { gasLimit: -1 }, to, value, {});
-    const gasLimit = transferQuery.gasRequired.toString();
+    // @ts-ignore
+    const gasLimit = await getWasmContractGasLimit(apiProp.api, from, 'psp22::transfer', contractPromise, {}, [from, value, {}]);
 
+    // @ts-ignore
     transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
     transferAmount = value;
   } else if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {

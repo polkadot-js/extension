@@ -4,16 +4,22 @@
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { BrowserConfirmationType, RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
 import RequestService from '@subwallet/extension-base/services/request-service';
+import { getOS } from '@subwallet/extension-base/services/request-service/helper';
 import { DEFAULT_NOTIFICATION_TYPE } from '@subwallet/extension-base/services/setting-service/constants';
 
 const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
 
+const OS = getOS();
+
+const extraHeight = OS === 'Linux' ? 0 : 28;
+const extraWidth = OS === 'Windows' ? 16 : 0;
+
 const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,
-  height: 600 + 28,
+  height: 600 + extraHeight,
   type: 'popup',
   url: NOTIFICATION_URL,
-  width: 390
+  width: 390 + extraWidth
 };
 
 const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {

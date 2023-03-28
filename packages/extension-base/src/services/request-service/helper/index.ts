@@ -6,7 +6,8 @@ import { addMetadata } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 
 import { knownGenesis } from '@polkadot/networks/defaults';
-import {OSType} from "@subwallet/extension-base/services/request-service/types";
+
+import { OSType } from '../types';
 
 export const extractMetadata = (store: MetadataStore): void => {
   store.allMap((map): void => {

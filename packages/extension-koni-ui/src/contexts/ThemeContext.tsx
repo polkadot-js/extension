@@ -43,7 +43,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
 
     '.modal-full': {
       '.ant-sw-modal-content': {
-        boxShadow: `inset 0 0 0 ${token.lineWidth}px ${token.colorBgInput}, inset 0 ${token.lineWidth}px 0 ${token.lineWidth}px ${token.colorBgInput}`
+        boxShadow: `inset 0 0 0 ${token.lineWidth}px ${token.colorBgInput}, inset 0 -${token.lineWidth}px 0 ${token.lineWidth}px ${token.colorBgInput}`
       }
     },
 

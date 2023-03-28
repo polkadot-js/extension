@@ -1,65 +1,88 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountSelector, CancelUnstakeSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { ExtrinsicType, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
+import { AccountSelector, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
-import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
+import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
-import { Button, Form, Icon } from '@subwallet/react-ui';
+import { Button, Checkbox, Form, Icon } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
+import useGetNativeTokenBasicInfo from '../../../hooks/common/useGetNativeTokenBasicInfo';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
 type Props = ThemeProps;
 
 enum FormFieldName {
-  UNSTAKE = 'unstake'
+  BOND_REWARD = 'bond-reward'
 }
 
-interface CancelUnstakeFormProps extends TransactionFormBaseProps {
-  [FormFieldName.UNSTAKE]: string;
+interface ClaimRewardFormProps extends TransactionFormBaseProps {
+  [FormFieldName.BOND_REWARD]: boolean;
 }
+
+const filterAccountFunc = (rewardList: StakingRewardItem[]): ((account: AccountJson) => boolean) => {
+  return (account: AccountJson) => {
+    if (isAccountAll(account.address)) {
+      return false;
+    }
+
+    const exists = rewardList.find((item) => item.address === account.address);
+
+    return !!exists;
+  };
+};
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className = '' } = props;
+  const { className } = props;
 
   const { chain: stakingChain, type: _stakingType } = useParams();
   const stakingType = _stakingType as StakingType;
 
   const dataContext = useContext(DataContext);
   const { asset, chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
-  const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
 
-  const nominatorInfo = useGetNominatorInfo(stakingChain, stakingType, from);
-  const nominatorMetadata = nominatorInfo[0];
+  const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
+  const { stakingRewardMap } = useSelector((state) => state.staking);
+
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
+
+  const rewardList = useMemo((): StakingRewardItem[] => {
+    return stakingRewardMap.filter((item) => item.chain === chain && item.type === stakingType);
+  }, [chain, stakingRewardMap, stakingType]);
+
+  const reward = useMemo((): StakingRewardItem | undefined => {
+    return stakingRewardMap.find((item) => item.chain === chain && item.address === from && item.type === stakingType);
+  }, [chain, from, stakingRewardMap, stakingType]);
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
 
-  const [form] = Form.useForm<CancelUnstakeFormProps>();
-  const formDefault = useMemo((): CancelUnstakeFormProps => ({
+  const [form] = Form.useForm<ClaimRewardFormProps>();
+  const formDefault = useMemo((): ClaimRewardFormProps => ({
     from: from,
     chain: chain,
     asset: asset,
-    [FormFieldName.UNSTAKE]: ''
+    [FormFieldName.BOND_REWARD]: true
   }), [asset, chain, from]);
 
-  const onFieldsChange: FormCallbacks<CancelUnstakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<ClaimRewardFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
-    const { empty, error } = simpleCheckForm(changedFields, allFields);
+    const { error } = simpleCheckForm(changedFields, allFields);
 
-    const changesMap = convertFieldToObject<CancelUnstakeFormProps>(changedFields);
+    const changesMap = convertFieldToObject<ClaimRewardFormProps>(changedFields);
 
     const { from } = changesMap;
 
@@ -67,21 +90,23 @@ const Component: React.FC<Props> = (props: Props) => {
       setFrom(from);
     }
 
-    setIsDisable(empty || error);
+    setIsDisable(error);
   }, [setFrom]);
 
   const { t } = useTranslation();
 
-  const onSubmit: FormCallbacks<CancelUnstakeFormProps>['onFinish'] = useCallback((values: CancelUnstakeFormProps) => {
+  const onSubmit: FormCallbacks<ClaimRewardFormProps>['onFinish'] = useCallback((values: ClaimRewardFormProps) => {
     setLoading(true);
 
-    const { [FormFieldName.UNSTAKE]: unstakeIndex } = values;
+    const { [FormFieldName.BOND_REWARD]: bondReward } = values;
 
     setTimeout(() => {
-      submitStakeCancelWithdrawal({
+      submitStakeClaimReward({
         address: from,
         chain: chain,
-        selectedUnstaking: nominatorMetadata.unstakings[parseInt(unstakeIndex)]
+        bondReward: bondReward,
+        stakingType: stakingType,
+        unclaimedReward: reward?.unclaimedReward
       })
         .then((result) => {
           const { errors, extrinsicHash, warnings } = result;
@@ -99,7 +124,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setErrors([error.message]);
         });
     }, 300);
-  }, [chain, from, nominatorMetadata.unstakings, onDone]);
+  }, [chain, from, onDone, reward?.unclaimedReward, stakingType]);
 
   useEffect(() => {
     const address = currentAccount?.address || '';
@@ -113,7 +138,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     setChain(stakingChain || '');
-    setTransactionType(ExtrinsicType.STAKING_CANCEL_UNSTAKE);
+    setTransactionType(ExtrinsicType.STAKING_CLAIM_REWARD);
   }, [setChain, setTransactionType, stakingChain]);
 
   return (
@@ -121,7 +146,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <TransactionContent>
         <PageWrapper resolve={dataContext.awaitStores(['staking'])}>
           <Form
-            className={`${className} form-container form-space-sm`}
+            className={CN(className, 'form-container form-space-sm')}
             form={form}
             initialValues={formDefault}
             onFieldsChange={onFieldsChange}
@@ -129,7 +154,7 @@ const Component: React.FC<Props> = (props: Props) => {
           >
             {isAllAccount &&
               <Form.Item name={'from'}>
-                <AccountSelector />
+                <AccountSelector filter={filterAccountFunc(rewardList)} />
               </Form.Item>
             }
             <FreeBalance
@@ -138,13 +163,34 @@ const Component: React.FC<Props> = (props: Props) => {
               className={'free-balance'}
               label={t('Available balance:')}
             />
-            <Form.Item name={FormFieldName.UNSTAKE}>
-              <CancelUnstakeSelector
-                chain={chain}
-                disabled={!from}
-                label={t('Select unstake')}
-                nominators={ from ? nominatorMetadata?.unstakings || [] : []}
-              />
+            <Form.Item>
+              <MetaInfo
+                className='claim-reward-meta-info'
+                hasBackgroundWrapper={true}
+              >
+                <MetaInfo.Chain
+                  chain={chain}
+                  label={t('Network')}
+                />
+                {
+                  reward?.unclaimedReward && (
+                    <MetaInfo.Number
+                      decimals={decimals}
+                      label={t('Reward claiming')}
+                      suffix={symbol}
+                      value={reward.unclaimedReward}
+                    />
+                  )
+                }
+              </MetaInfo>
+            </Form.Item>
+            <Form.Item
+              name={FormFieldName.BOND_REWARD}
+              valuePropName='checked'
+            >
+              <Checkbox>
+                <span className={'__option-label'}>Bond reward</span>
+              </Checkbox>
             </Form.Item>
           </Form>
         </PageWrapper>
@@ -184,7 +230,7 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const CancelUnstake = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ClaimReward = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.unstaked-field, .free-balance': {
       marginBottom: token.marginXS
@@ -197,8 +243,12 @@ const CancelUnstake = styled(Component)<Props>(({ theme: { token } }: Props) => 
     '.cancel-unstake-info-item > .__col': {
       flex: 'initial',
       paddingRight: token.paddingXXS
+    },
+
+    '.claim-reward-meta-info': {
+      marginTop: token.marginXXS
     }
   };
 });
 
-export default CancelUnstake;
+export default ClaimReward;

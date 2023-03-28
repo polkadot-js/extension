@@ -72,13 +72,17 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
     setTimeout(() => navigate(`/transaction/unstake/${nominatorMetadata.type}/${nominatorMetadata.chain}`), 300);
   }, [inactiveModal, navigate, nominatorMetadata]);
 
+  const onClickMoreAction = useCallback(() => {
+    activeModal(MORE_ACTION_MODAL);
+    inactiveModal(STAKING_DETAIL_MODAL_ID);
+  }, [activeModal, inactiveModal]);
+
   const footer = () => {
     return (
       <div className='staking-detail-modal-footer'>
         <Button
           icon={<Icon phosphorIcon={DotsThree} />}
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => activeModal(MORE_ACTION_MODAL)}
+          onClick={onClickMoreAction}
           schema='secondary'
         />
         <Button

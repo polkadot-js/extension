@@ -40,7 +40,7 @@ enum FormFieldName {
   VALIDATOR = 'validator'
 }
 
-interface UnstakeFromProps extends TransactionFormBaseProps {
+interface UnstakeFormProps extends TransactionFormBaseProps {
   [FormFieldName.VALUE]: string;
   [FormFieldName.VALIDATOR]?: string;
 }
@@ -59,9 +59,9 @@ const Component: React.FC<Props> = (props: Props) => {
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const isAll = isAccountAll(currentAccount?.address || '');
 
-  const [form] = Form.useForm<UnstakeFromProps>();
+  const [form] = Form.useForm<UnstakeFormProps>();
 
-  const formDefault = useMemo((): UnstakeFromProps => ({
+  const formDefault = useMemo((): UnstakeFormProps => ({
     from: from,
     chain: chain,
     asset: '',
@@ -128,12 +128,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const [errors, setErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
 
-  const onFieldsChange: FormCallbacks<UnstakeFromProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<UnstakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
     const { error } = simpleCheckForm(changedFields, allFields);
 
-    const allMap = convertFieldToObject<UnstakeFromProps>(allFields);
-    const changesMap = convertFieldToObject<UnstakeFromProps>(changedFields);
+    const allMap = convertFieldToObject<UnstakeFormProps>(allFields);
+    const changesMap = convertFieldToObject<UnstakeFormProps>(changedFields);
 
     const { from } = changesMap;
 
@@ -154,7 +154,7 @@ const Component: React.FC<Props> = (props: Props) => {
     setIsDisable(error || Object.values(checkEmpty).some((value) => !value));
   }, [mustChooseValidator, setFrom]);
 
-  const onSubmit: FormCallbacks<UnstakeFromProps>['onFinish'] = useCallback((values: UnstakeFromProps) => {
+  const onSubmit: FormCallbacks<UnstakeFormProps>['onFinish'] = useCallback((values: UnstakeFormProps) => {
     const { [FormFieldName.VALUE]: value } = values;
     // const selectedValidator = nominatorMetadata.nominations[0].validatorAddress;
 

@@ -23,9 +23,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
 
-  const { checkActive, inactiveModal } = useContext(ModalContext);
-
-  const open = checkActive(modalId);
+  const { inactiveModal } = useContext(ModalContext);
 
   const closeModal = useCallback(() => {
     inactiveModal(modalId);
@@ -38,14 +36,11 @@ const Component: React.FC<Props> = (props: Props) => {
     openCamera();
   }, [openCamera, inactiveModal]);
 
-  if (!open) {
-    return null;
-  }
-
   return (
     <SwModal
       className={CN(className, 'modal-full')}
       closable={false}
+      destroyOnClose={true}
       id={modalId}
       transitionName={'fade'}
     >

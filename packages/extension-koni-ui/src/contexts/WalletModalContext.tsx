@@ -55,6 +55,8 @@ export const WalletModalContext = ({ children }: Props) => {
 
   const hasActiveModal = useMemo(() => !!activeList.length, [activeList.length]);
 
+  console.log(activeList);
+
   useExcludeModal('confirmations');
 
   useEffect(() => {

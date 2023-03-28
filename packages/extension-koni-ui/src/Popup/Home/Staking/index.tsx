@@ -8,6 +8,7 @@ import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/Filte
 import SwStakingItem from '@subwallet/extension-koni-ui/components/StakingItem/SwStakingItem';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useIsReadOnlyAccount, useNotification, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
@@ -45,11 +46,16 @@ const rightIcon = <Icon
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const notify = useNotification();
 
   const dataContext = useContext(DataContext);
   const { activeModal } = useContext(ModalContext);
 
   const { data: stakingItems, priceMap } = useGetStakingList();
+
+  const { currentAccount } = useSelector((state) => state.accountState);
+
+  const isReadOnlyAccount = useIsReadOnlyAccount(currentAccount?.address);
 
   const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
@@ -94,14 +100,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [activeModal]);
 
-  const subHeaderButton: ButtonProps[] = [
+  const subHeaderButton: ButtonProps[] = useMemo(() => ([
     {
       icon: rightIcon,
       onClick: () => {
-        navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`);
+        if (isReadOnlyAccount) {
+          notify({
+            message: t('The account you are using is read-only, you cannot use this feature with it'),
+            type: 'info',
+            duration: 3
+          });
+        } else {
+          navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`);
+        }
       }
     }
-  ];
+  ]), [isReadOnlyAccount, navigate, notify, t]);
 
   const renderItem = useCallback((item: StakingDataType) => {
     return (

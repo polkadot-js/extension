@@ -83,7 +83,7 @@ const renderEmpty = () => <EmptyAccount />;
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, from, id = 'pool-selector', label, onChange, onClickBookBtn, placeholder, value, loading } = props;
+  const { chain, className = '', disabled, from, id = 'pool-selector', label, loading, onChange, onClickBookBtn, placeholder, value } = props;
 
   useExcludeModal(id);
 
@@ -229,7 +229,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         selected={value || ''}
         showActionBtn
         suffix={(
-          <>
+          <div className='select-pool-suffix'>
             <Button
               disabled={isDisabled}
               icon={(
@@ -254,7 +254,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
               size='xs'
               type='ghost'
             />
-          </>
+          </div>
         )}
         title={label || placeholder || t('Select pool')}
       />
@@ -311,15 +311,18 @@ const PoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }:
         fontWeight: token.headingFontWeight,
         overflow: 'hidden'
       },
-      '.__selected-item-right-part': {
-        color: token.colorTextLight4,
-        paddingLeft: token.sizeXXS,
-        marginRight: `-${token.marginSM - 2}px`
+      '.ant-select-modal-input-wrapper': {
+        paddingTop: 0,
+        paddingBottom: token.paddingXXS
       }
     },
 
     '.ant-select-modal-input-wrapper': {
       height: 44
+    },
+
+    '.select-pool-suffix': {
+      marginRight: -token.marginSM + 2
     }
   };
 });

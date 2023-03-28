@@ -8,7 +8,7 @@ import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/servi
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
 import { StakingStatus } from '@subwallet/extension-koni-ui/constants/stakingStatus';
-import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
+import { useGetAccountByAddress,useIsReadOnlyAccount, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
@@ -25,6 +25,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
+import useNotification from '../../../hooks/common/useNotification';
+
 interface Props extends ThemeProps {
   nominatorMetadata: NominatorMetadata;
   chainStakingMetadata: ChainStakingMetadata;
@@ -39,24 +41,35 @@ export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) =
 const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominatorMetadata }: Props) => {
   const { expectedReturn, minStake, unstakingPeriod } = chainStakingMetadata;
   const { activeStake, address, chain, nominations, type, unstakings } = nominatorMetadata;
-  const [seeMore, setSeeMore] = useState<boolean>(false);
+  const showingOption = isShowNominationByValidator(chain);
+  const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
+  const modalTitle = type === StakingType.NOMINATED.valueOf() ? 'Nominate details' : 'Pooled details';
+
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
-  const showingOption = isShowNominationByValidator(chain);
+  const { t } = useTranslation();
+  const notify = useNotification();
+
   const { activeModal, inactiveModal } = useContext(ModalContext);
+
+  const { currentAccount } = useSelector((state) => state.accountState);
+
+  const isReadOnlyAccount = useIsReadOnlyAccount(currentAccount?.address);
   const { data: stakingData } = useGetStakingList();
+
+  const [seeMore, setSeeMore] = useState<boolean>(false);
+
   const data = useMemo((): StakingDataType => {
     return stakingData.find(
       (item) => item.staking.chain === chain && item.staking.type === type
     ) as StakingDataType;
   }, [stakingData, chain, type]);
   const { decimals, reward, staking } = data || { staking: {}, reward: {} };
-  const { t } = useTranslation();
 
-  const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
-  const modalTitle = type === StakingType.NOMINATED.valueOf() ? 'Nominate details' : 'Pooled details';
-
+  const chainInfo = useFetchChainInfo(staking.chain);
+  const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
   const account = useGetAccountByAddress(staking.address);
+
   const stakingTypeNameMap: Record<string, string> = {
     nominated: t('Nominated'),
     pooled: t('Pooled')
@@ -69,9 +82,6 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
     }, 300);
   }, [inactiveModal, navigate, nominatorMetadata]);
 
-  const chainInfo = useFetchChainInfo(staking.chain);
-  const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
-
   const onClickUnstakeBtn = useCallback(() => {
     inactiveModal(STAKING_DETAIL_MODAL_ID);
     setTimeout(() => navigate(`/transaction/unstake/${nominatorMetadata.type}/${nominatorMetadata.chain}`), 300);
@@ -81,6 +91,20 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
     activeModal(MORE_ACTION_MODAL);
     inactiveModal(STAKING_DETAIL_MODAL_ID);
   }, [activeModal, inactiveModal]);
+
+  const onClickFooterButton = useCallback((onClick: () => void) => {
+    return () => {
+      if (isReadOnlyAccount) {
+        notify({
+          message: t('The account you are using is read-only, you cannot use this feature with it'),
+          type: 'info',
+          duration: 3
+        });
+      } else {
+        onClick();
+      }
+    };
+  }, [isReadOnlyAccount, notify, t]);
 
   const footer = () => {
     return (
@@ -92,12 +116,12 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         />
         <Button
           className='__action-btn'
-          onClick={onClickUnstakeBtn}
+          onClick={onClickFooterButton(onClickUnstakeBtn)}
           schema='secondary'
         >{t('Unstake')}</Button>
         <Button
           className='__action-btn'
-          onClick={onClickStakeMoreBtn}
+          onClick={onClickFooterButton(onClickStakeMoreBtn)}
         >{t('Stake more')}</Button>
       </div>
     );

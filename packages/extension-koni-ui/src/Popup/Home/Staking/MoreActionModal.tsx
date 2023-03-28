@@ -4,6 +4,7 @@
 import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActions, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
+import { useIsReadOnlyAccount, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
@@ -42,12 +43,18 @@ export type StakingDataOption = {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chainStakingMetadata, className, nominatorMetadata, reward, staking } = props;
-  const { inactiveModal } = useContext(ModalContext);
+  const { chainStakingMetadata, className, nominatorMetadata, reward } = props;
+
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
   const notify = useNotification();
+
+  const { inactiveModal } = useContext(ModalContext);
+
+  const { currentAccount } = useSelector((state) => state.accountState);
+
+  const isReadOnlyAccount = useIsReadOnlyAccount(currentAccount?.address);
 
   const onCancel = useCallback(
     () => {
@@ -145,10 +152,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onNavigate = useCallback((url: string) => {
     return () => {
-      // TODO: Remove state
-      navigate(url, { state: { chainStakingMetadata, nominatorMetadata, staking, reward, hideTabList: true } as StakingDataOption });
+      navigate(url);
     };
-  }, [chainStakingMetadata, navigate, nominatorMetadata, reward, staking]);
+  }, [navigate]);
 
   const actionList: ActionListType[] = useMemo((): ActionListType[] => {
     const isPool = chainStakingMetadata?.type === StakingType.POOLED;
@@ -203,6 +209,20 @@ const Component: React.FC<Props> = (props: Props) => {
     return result;
   }, [chainStakingMetadata?.chain, chainStakingMetadata?.type, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);
 
+  const onClickItem = useCallback((onClick: () => void) => {
+    return () => {
+      if (isReadOnlyAccount) {
+        notify({
+          message: t('The account you are using is read-only, you cannot use this feature with it'),
+          type: 'info',
+          duration: 3
+        });
+      } else {
+        onClick();
+      }
+    };
+  }, [isReadOnlyAccount, notify, t]);
+
   return (
     <SwModal
       className={className}
@@ -224,11 +244,11 @@ const Component: React.FC<Props> = (props: Props) => {
           leftItemIcon={<BackgroundIcon
             backgroundColor={token[item.backgroundIconColor] as string}
             phosphorIcon={item.icon}
-            size={'sm'}
+            size='sm'
             weight='fill'
           />}
           name={item.label}
-          onPressItem={!availableActions.includes(item.action) ? undefined : item.onClick}
+          onPressItem={!availableActions.includes(item.action) ? undefined : onClickItem(item.onClick)}
         />
       ))}
     </SwModal>

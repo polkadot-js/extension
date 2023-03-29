@@ -30,7 +30,7 @@ export interface MultiHistoryData {
   id: string;
   signer: string;
   name: string;
-  timestamp: number;
+  timestamp: number | string;
   blockNumber: number;
   blockHash: string;
   explorerUrl: string;
@@ -272,10 +272,22 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
     }
   }
 
+  function toTimestamp (input: string | number): number {
+    try {
+      if (typeof input === 'string') {
+        return new Date(input).getTime();
+      } else {
+        return input;
+      }
+    } catch (e) {
+      return 0;
+    }
+  }
+
   return {
     address,
     origin: MULTI_CHAIN_URL,
-    time: historyItem.timestamp,
+    time: toTimestamp(historyItem.timestamp),
     chainType,
     from,
     direction: address === from ? TransactionDirection.SEND : TransactionDirection.RECEIVED,

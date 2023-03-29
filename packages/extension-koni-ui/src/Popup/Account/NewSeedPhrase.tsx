@@ -21,7 +21,7 @@ import { isNoAccount } from '@subwallet/extension-koni-ui/util/account/account';
 import { Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -36,24 +36,6 @@ const FooterIcon = (
     weight='fill'
   />
 );
-
-let seedPhrase = '';
-
-const loader = () => {
-  return new Promise<string>((resolve, reject) => {
-    createSeedV2(undefined, undefined, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
-      .then((response): void => {
-        const phrase = response.seed;
-
-        seedPhrase = phrase;
-        resolve(phrase);
-      })
-      .catch((e: Error) => {
-        console.error(e);
-        reject(e);
-      });
-  });
-};
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
@@ -71,6 +53,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { accounts } = useSelector((state: RootState) => state.accountState);
   const [accountTypes] = useState<KeypairType[]>((location.state as NewSeedPhraseState)?.accountTypes || []);
 
+  const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);
 
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
@@ -110,12 +93,24 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }, 500);
-  }, [accountName, accountTypes, onComplete, notify]);
+  }, [seedPhrase, accountName, accountTypes, onComplete, notify]);
+
+  useEffect(() => {
+    createSeedV2(undefined, undefined, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
+      .then((response): void => {
+        const phrase = response.seed;
+
+        setSeedPhrase(phrase);
+      })
+      .catch((e: Error) => {
+        console.error(e);
+      });
+  }, []);
 
   return (
     <PageWrapper
       className={CN(className)}
-      resolve={loader()}
+      resolve={new Promise((resolve) => !!seedPhrase && resolve(true))}
     >
       <Layout.WithSubHeaderOnly
         onBack={onBack}

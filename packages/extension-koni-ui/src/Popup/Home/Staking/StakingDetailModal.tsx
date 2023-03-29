@@ -6,6 +6,7 @@ import { isShowNominationByValidator } from '@subwallet/extension-base/koni/api/
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
+import { StakingStatus } from '@subwallet/extension-koni-ui/constants/stakingStatus';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
@@ -14,7 +15,6 @@ import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { toShort } from '@subwallet/extension-koni-ui/util';
-import { StakingStatus } from '@subwallet/extension-koni-ui/util/transaction/stakingStatus';
 import { Button, Icon, Number, SwModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
@@ -72,13 +72,17 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
     setTimeout(() => navigate(`/transaction/unstake/${nominatorMetadata.type}/${nominatorMetadata.chain}`), 300);
   }, [inactiveModal, navigate, nominatorMetadata]);
 
+  const onClickMoreAction = useCallback(() => {
+    activeModal(MORE_ACTION_MODAL);
+    inactiveModal(STAKING_DETAIL_MODAL_ID);
+  }, [activeModal, inactiveModal]);
+
   const footer = () => {
     return (
       <div className='staking-detail-modal-footer'>
         <Button
           icon={<Icon phosphorIcon={DotsThree} />}
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => activeModal(MORE_ACTION_MODAL)}
+          onClick={onClickMoreAction}
           schema='secondary'
         />
         <Button

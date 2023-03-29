@@ -58,6 +58,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       className={CN(className)}
       closeIcon={(<BackIcon />)}
       id={modalId}
+      maskClosable={false}
       onCancel={onBack}
       rightIconProps={{
         icon: <CloseIcon />,

@@ -8,6 +8,7 @@ import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/A
 import { ServiceSelector } from '@subwallet/extension-koni-ui/components/Field/BuyTokens/ServiceSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import { PREDEFINED_TRANSAK_TOKEN } from '@subwallet/extension-koni-ui/constants/transak';
+import useAssetChecker from '@subwallet/extension-koni-ui/hooks/chain/useAssetChecker';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -44,7 +45,7 @@ function getTokenItems (accountType: AccountType, ledgerNetwork?: string): Token
       if (info.chain === ledgerNetwork) {
         result.push({
           name: info.symbol,
-          slug: info.key,
+          slug: info.slug,
           symbol: info.symbol,
           originChain: info.chain
         });
@@ -53,7 +54,7 @@ function getTokenItems (accountType: AccountType, ledgerNetwork?: string): Token
       if (accountType === 'ALL' || accountType === info.support) {
         result.push({
           name: info.symbol,
-          slug: info.key,
+          slug: info.slug,
           symbol: info.symbol,
           originChain: info.chain
         });
@@ -68,7 +69,7 @@ const tokenKeyMapIsEthereum: Record<string, boolean> = (() => {
   const result: Record<string, boolean> = {};
 
   Object.values(PREDEFINED_TRANSAK_TOKEN).forEach((info) => {
-    result[info.key] = info.support === 'ETHEREUM';
+    result[info.slug] = info.support === 'ETHEREUM';
   });
 
   return result;
@@ -79,10 +80,11 @@ const TransakUrl = 'https://global.transak.com';
 function Component ({ className }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
   const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
-  const fixedTokenKey = currentSymbol ? PREDEFINED_TRANSAK_TOKEN[currentSymbol]?.key : undefined;
+  const fixedTokenKey = currentSymbol ? PREDEFINED_TRANSAK_TOKEN[currentSymbol]?.slug : undefined;
 
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+  const checkAsset = useAssetChecker();
 
   const [currentAddress] = useState<string | undefined>(currentAccount?.address);
   const { t } = useTranslation();
@@ -109,6 +111,10 @@ function Component ({ className }: Props) {
     return undefined;
   }, [accounts, chainInfoMap, selectedAddress]);
 
+  useEffect(() => {
+    selectedTokenKey && checkAsset(selectedTokenKey);
+  }, [checkAsset, selectedTokenKey]);
+
   const tokenItems = useMemo<TokenItemType[]>(() => {
     if (fixedTokenKey) {
       return getTokenItems('ALL', ledgerNetwork);
@@ -125,7 +131,8 @@ function Component ({ className }: Props) {
     const { address, service, tokenKey } = form.getFieldsValue();
 
     if (service === 'transak') {
-      const [token, chain, transakNetwork] = tokenKey.split('|');
+      console.debug(PREDEFINED_TRANSAK_TOKEN, selectedTokenKey);
+      const { chain, symbol, transakNetwork } = PREDEFINED_TRANSAK_TOKEN[selectedTokenKey];
       const networkPrefix = chainInfoMap[chain].substrateInfo?.addressPrefix;
 
       const walletAddress = tokenKeyMapIsEthereum[tokenKey]
@@ -134,9 +141,9 @@ function Component ({ className }: Props) {
 
       const params = {
         apiKey: '4b3bfb00-7f7c-44b3-844f-d4504f1065be',
-        defaultCryptoCurrency: token,
+        defaultCryptoCurrency: symbol,
         networks: transakNetwork,
-        cryptoCurrencyList: token,
+        cryptoCurrencyList: symbol,
         walletAddress
       };
 
@@ -144,13 +151,14 @@ function Component ({ className }: Props) {
 
       openInNewTab(`${TransakUrl}?${query}`)();
     }
-  }, [form, chainInfoMap]);
+  }, [form, selectedTokenKey, chainInfoMap]);
 
   const isSupportBuyTokens = useMemo(() => {
     if ((selectedService === 'transak') && selectedAddress && selectedTokenKey) {
-      const [symbol] = selectedTokenKey.split('|');
+      const transakInfo = PREDEFINED_TRANSAK_TOKEN[selectedTokenKey];
+      const accountType = getAccountType(selectedAddress);
 
-      return PREDEFINED_TRANSAK_TOKEN[symbol].support === getAccountType(selectedAddress) && tokenItems.find((item) => item.slug === selectedTokenKey);
+      return transakInfo && transakInfo.support === accountType && tokenItems.find((item) => item.slug === selectedTokenKey);
     }
 
     return false;

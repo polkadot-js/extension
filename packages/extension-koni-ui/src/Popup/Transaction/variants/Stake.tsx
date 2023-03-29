@@ -16,7 +16,8 @@ import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { StakingNetworkDetailModal } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/commont';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetBalance, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetBalance, useGetNativeTokenSlug, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
 import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetChainStakingMetadata';
 import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import useGetSupportedStakingTokens from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetSupportedStakingTokens';
@@ -44,7 +45,6 @@ import styled from 'styled-components';
 type Props = ThemeProps
 
 enum FormFieldName {
-  TOKEN = 'token',
   VALUE = 'value',
   NOMINATE = 'nominate',
   POOL = 'pool',
@@ -52,7 +52,6 @@ enum FormFieldName {
 }
 
 interface StakeFormProps extends TransactionFormBaseProps {
-  [FormFieldName.TOKEN]: string;
   [FormFieldName.VALUE]: string;
   [FormFieldName.NOMINATE]: string;
   [FormFieldName.POOL]: string;
@@ -66,7 +65,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chain: stakingChain, type: _stakingType } = useParams();
 
   const dataContext = useContext(DataContext);
-  const { chain, from, onDone, setChain, setDisabledRightBtn, setFrom, setShowRightBtn, setTransactionType } = useContext(TransactionContext);
+  const { asset, chain, from, onDone, setAsset, setChain, setDisabledRightBtn, setFrom, setShowRightBtn, setTransactionType } = useContext(TransactionContext);
 
   const defaultStakingType: StakingType = useMemo(() => {
     switch (_stakingType) {
@@ -83,7 +82,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [isDisable, setIsDisable] = useState(true);
 
-  const currentTokenSlug = Form.useWatch(FormFieldName.TOKEN, form);
   const stakingType = Form.useWatch(FormFieldName.TYPE, form);
 
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
@@ -102,14 +100,14 @@ const Component: React.FC<Props> = (props: Props) => {
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
 
   const existentialDeposit = useMemo(() => {
-    const assetInfo = assetRegistry[currentTokenSlug];
+    const assetInfo = assetRegistry[asset];
 
     if (assetInfo) {
       return assetInfo.minAmount || '0';
     }
 
     return '0';
-  }, [assetRegistry, currentTokenSlug]);
+  }, [assetRegistry, asset]);
 
   const maxValue = useMemo(() => {
     const balance = new BigN(nativeTokenBalance.value);
@@ -122,39 +120,20 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [existentialDeposit, nativeTokenBalance.value]);
 
-  const { decimals, symbol } = useMemo((): { symbol: string, decimals: number } => {
-    if (chain) {
-      const chainInfo = chainInfoMap[chain];
-
-      return _getChainNativeTokenBasicInfo(chainInfo);
-    }
-
-    return {
-      decimals: 0,
-      symbol: 'Unit'
-    };
-  }, [chainInfoMap, chain]);
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
 
   const isAllAccount = isAccountAll(currentAccount?.address || '');
 
-  const defaultSlug = useMemo(() => {
-    if (stakingChain && stakingChain !== ALL_KEY) {
-      const chainInfo = chainInfoMap[stakingChain];
-
-      return _getChainNativeTokenSlug(chainInfo);
-    }
-
-    return '';
-  }, [chainInfoMap, stakingChain]);
+  const defaultSlug = useGetNativeTokenSlug(stakingChain || '');
 
   const formDefault: StakeFormProps = useMemo(() => {
     return {
+      asset: defaultSlug,
       from: from,
       chain: chain,
       [FormFieldName.VALUE]: '0',
       [FormFieldName.POOL]: '',
       [FormFieldName.NOMINATE]: '',
-      [FormFieldName.TOKEN]: defaultSlug,
       [FormFieldName.TYPE]: defaultStakingType
     };
   }, [defaultSlug, from, defaultStakingType, chain]);
@@ -165,15 +144,16 @@ const Component: React.FC<Props> = (props: Props) => {
     const allMap = convertFieldToObject<StakeFormProps>(allFields);
     const changesMap = convertFieldToObject<StakeFormProps>(changedFields);
 
-    const { from, [FormFieldName.TOKEN]: token } = changesMap;
+    const { asset, from } = changesMap;
 
     if (from) {
       setFrom(from);
     }
 
-    if (token !== undefined) {
-      const chain = _getOriginChainOfAsset(token);
+    if (asset !== undefined) {
+      const chain = _getOriginChainOfAsset(asset);
 
+      setAsset(asset);
       setChain(chain);
     }
 
@@ -192,7 +172,9 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     setIsDisable(error || Object.values(checkEmpty).some((value) => !value));
-  }, [setChain, setFrom]);
+  }, [setAsset, setChain, setFrom]);
+
+  console.log(asset);
 
   const getSelectedValidators = useCallback((nominations: string[]) => {
     const validatorList = validatorInfoMap[chain];
@@ -333,6 +315,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [setChain, stakingChain]);
 
   useEffect(() => {
+    setAsset(defaultSlug);
+  }, [defaultSlug, setAsset]);
+
+  useEffect(() => {
     setTransactionType(ExtrinsicType.STAKING_JOIN_POOL);
     setShowRightBtn(true);
   }, [setShowRightBtn, setTransactionType]);
@@ -392,7 +378,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {
               !isAllAccount &&
               (
-                <Form.Item name={FormFieldName.TOKEN}>
+                <Form.Item name={'asset'}>
                   <TokenSelector
                     disabled={stakingChain !== ALL_KEY || !from}
                     items={tokenList}
@@ -413,7 +399,7 @@ const Component: React.FC<Props> = (props: Props) => {
               {
                 isAllAccount &&
                 (
-                  <Form.Item name={FormFieldName.TOKEN}>
+                  <Form.Item name={'asset'}>
                     <TokenSelector
                       disabled={stakingChain !== ALL_KEY || !from}
                       items={tokenList}
@@ -473,8 +459,8 @@ const Component: React.FC<Props> = (props: Props) => {
               name={FormFieldName.NOMINATE}
             >
               <MultiValidatorSelector
-                chain={currentTokenSlug ? chain : ''}
-                from={currentTokenSlug ? from : ''}
+                chain={asset ? chain : ''}
+                from={asset ? from : ''}
               />
             </Form.Item>
           </Form>

@@ -1524,15 +1524,6 @@ export default class KoniExtension {
       });
     }
 
-    // Additional validator
-    const additionalValidator = (swTran: SWTransactionResponse) => {
-      if (new BN(freeBalance.value).lt(new BN(transferAmount.value))) {
-        swTran.errors?.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-      }
-
-      return Promise.resolve();
-    };
-
     return this.#koniState.transactionService.handleTransaction({
       errors,
       warnings,
@@ -1542,7 +1533,6 @@ export default class KoniExtension {
       transferNativeAmount: isTransferNativeToken ? transferAmount.value : '0',
       transaction,
       data: inputData,
-      additionalValidator,
       extrinsicType: isTransferNativeToken ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.TRANSFER_TOKEN
     });
   }

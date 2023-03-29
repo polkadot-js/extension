@@ -196,14 +196,6 @@ export default class DatabaseService {
     return this.stores.nft.upsert({ ...nft, address } as INft);
   }
 
-  async deleteRemovedNftsFromCollection (chainHash: string, address: string, collectionId?: string, nftIds?: string[]) {
-    return this.stores.nft.deleteRemovedNftsFromCollection(chainHash, address, collectionId, nftIds);
-  }
-
-  deleteNftsFromRemovedCollection (chainHash: string, address: string, collectionIds: string[]) {
-    return this.stores.nft.deleteNftsFromRemovedCollection(chainHash, address, collectionIds);
-  }
-
   handleNftTransfer (chain: string, addresses: string[], nftItem: NftItem) {
     return this.stores.nft.deleteNftByAddresses(chain, addresses, nftItem);
   }

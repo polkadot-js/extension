@@ -3,7 +3,6 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { subscribeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
@@ -234,37 +233,20 @@ export class KoniSubscription {
   }
 
   initNftSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, smartContractNfts: _ChainAsset[], chainInfoMap: Record<string, _ChainInfo>) {
-    const { cronUpdate, forceUpdate, selectedNftCollection } = this.state.getNftTransfer();
+    nftHandler.setChainInfoMap(chainInfoMap);
+    nftHandler.setDotSamaApiMap(substrateApiMap);
+    nftHandler.setWeb3ApiMap(evmApiMap);
+    nftHandler.setAddresses(addresses);
 
-    if (forceUpdate && !cronUpdate) {
-      this.logger.log('skipping set nft state due to transfer');
-      this.state.setNftTransfer({
-        cronUpdate: true,
-        forceUpdate: true,
-        selectedNftCollection
-      } as NftTransferExtra);
-    } else { // after skipping 1 time of cron update
-      this.state.setNftTransfer({
-        cronUpdate: false,
-        forceUpdate: false,
-        selectedNftCollection
-      } as NftTransferExtra);
-
-      nftHandler.setChainInfoMap(chainInfoMap);
-      nftHandler.setDotSamaApiMap(substrateApiMap);
-      nftHandler.setWeb3ApiMap(evmApiMap);
-      nftHandler.setAddresses(addresses);
-
-      nftHandler.handleNfts(
-        smartContractNfts,
-        (...args) => this.state.updateNftData(...args),
-        (...args) => this.state.setNftCollection(...args)
-      )
-        .then(() => {
-          this.logger.log('nft state updated');
-        })
-        .catch(this.logger.log);
-    }
+    nftHandler.handleNfts(
+      smartContractNfts,
+      (...args) => this.state.updateNftData(...args),
+      (...args) => this.state.setNftCollection(...args)
+    )
+      .then(() => {
+        this.logger.log('nft state updated');
+      })
+      .catch(this.logger.log);
   }
 
   async subscribeStakingReward (address: string) {

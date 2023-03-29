@@ -193,6 +193,7 @@ export interface NftItem {
   id: string;
   chain: string;
   collectionId: string;
+  owner: string;
   originAsset?: string;
 
   name?: string;
@@ -203,7 +204,6 @@ export interface NftItem {
   properties?: Record<any, any> | null;
   type?: _AssetType.ERC721 | _AssetType.PSP34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
-  owner: string;
   onChainOption?: any; // for sending PSP-34 tokens, should be done better
 }
 
@@ -901,15 +901,6 @@ export enum ThemeNames {
   LIGHT = 'light',
   DARK = 'dark',
   SUBSPACE = 'subspace'
-}
-
-export type RequestNftForceUpdate = {
-  collectionId: string,
-  nft: NftItem,
-  isSendingSelf: boolean,
-  chain: string,
-  senderAddress: string,
-  recipientAddress: string
 }
 
 export enum NETWORK_ERROR {

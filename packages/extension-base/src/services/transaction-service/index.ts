@@ -270,10 +270,12 @@ export default class TransactionService {
     });
 
     emitter.on('success', (data: TransactionEventResponse) => {
+      this.handlePostProcessing(data.id);
       this.onSuccess(data);
     });
 
     emitter.on('error', (data: TransactionEventResponse) => {
+      // this.handlePostProcessing(data.id); // might enable this later
       this.onFailed({ ...data, errors: [...data.errors, new TransactionError(BasicTxErrorType.INTERNAL_ERROR)] });
     });
 
@@ -367,9 +369,6 @@ export default class TransactionService {
       case ExtrinsicType.SEND_NFT: {
         const inputData = parseTransactionData<ExtrinsicType.SEND_NFT>(transaction.data);
 
-        this.databaseService.handleNftTransfer(transaction.chain, [inputData.senderAddress, ALL_ACCOUNT_KEY], inputData.nftItem)
-          .catch(console.error);
-
         historyItem.to = inputData.recipientAddress;
       }
 
@@ -436,6 +435,27 @@ export default class TransactionService {
     this.updateTransaction(id, { extrinsicHash, status: ExtrinsicStatus.PROCESSING });
     this.historyService.insertHistory(this.transactionToHistory(id, eventLogs)).catch(console.error);
     console.log(`Transaction "${id}" is submitted with hash ${extrinsicHash || ''}`);
+  }
+
+  private handlePostProcessing (id: string) { // must be done after success/failure to make sure the transaction is finalized
+    const transaction = this.getTransaction(id);
+
+    switch (transaction.extrinsicType) {
+      case ExtrinsicType.SEND_NFT: {
+        const inputData = parseTransactionData<ExtrinsicType.SEND_NFT>(transaction.data);
+
+        const senderPair = keyring.getPair(inputData.senderAddress);
+        const recipientPair = keyring.getPair(inputData.recipientAddress);
+
+        this.databaseService.handleNftTransfer(transaction.chain, [senderPair.address, ALL_ACCOUNT_KEY], inputData.nftItem)
+          .catch(console.error);
+
+        if (recipientPair) {
+          this.databaseService.addNft(recipientPair.address, { ...inputData.nftItem, owner: recipientPair.address })
+            .catch(console.error);
+        }
+      }
+    }
   }
 
   private onSuccess ({ blockHash, blockNumber, id }: TransactionEventResponse) {

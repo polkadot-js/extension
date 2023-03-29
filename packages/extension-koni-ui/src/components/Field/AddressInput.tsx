@@ -2,23 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
-import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks/form/useForwardInputRef';
-import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
-import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useContext, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
+
+import { Avatar } from '../Avatar';
+import { QrScannerErrorNotice } from '../Qr';
+import { BasicInputWrapper } from './Base';
 
 interface Props extends BasicInputWrapper, ThemeProps {
   showAddressBook?: boolean;
@@ -32,9 +30,14 @@ function Component ({ autoReformatValue,
   className = '', disabled, id = modalId, label, onBlur, onChange, onFocus,
   placeholder, readOnly, showAddressBook, showScanner, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { t } = useTranslation();
+
   const { inactiveModal } = useContext(ModalContext);
+
+  const accounts = useSelector((root) => root.accountState.accounts);
+
   const inputRef = useForwardInputRef(ref);
-  const accounts = useSelector((root: RootState) => root.accountState.accounts);
+  const [scanError, setScanError] = useState('');
+
   const accountName = useMemo(() => {
     const account = accounts.find((acc) => acc.address.toLowerCase() === value?.toLowerCase());
 
@@ -61,14 +64,19 @@ function Component ({ autoReformatValue,
 
   const onOpenScanner = useOpenQrScanner(id);
 
-  const onScanError = useCallback(() => {
-    // do something
+  const onScanError = useCallback((error: string) => {
+    setScanError(error);
   }, []);
 
   const onSuccess = useCallback((result: ScannerResult) => {
+    setScanError('');
     inactiveModal(id);
     parseAndChangeValue(result.text);
   }, [inactiveModal, id, parseAndChangeValue]);
+
+  const onCloseScan = useCallback(() => {
+    setScanError('');
+  }, []);
 
   // todo: Will work with "Manage address book" feature later
   return (
@@ -138,8 +146,11 @@ function Component ({ autoReformatValue,
       {showScanner && <SwQrScanner
         className={className}
         id={id}
+        isError={!!scanError}
+        onClose={onCloseScan}
         onError={onScanError}
         onSuccess={onSuccess}
+        overlay={scanError && <QrScannerErrorNotice message={scanError} />}
       />}
     </>
   );

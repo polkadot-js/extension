@@ -269,7 +269,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
           </>
         )}
 
-        {transactionType === ExtrinsicType.STAKING_CLAIM_REWARD && (
+        {amount && (
           <MetaInfo.Number
             decimals={amount?.decimals || undefined}
             label={t('Amount')}

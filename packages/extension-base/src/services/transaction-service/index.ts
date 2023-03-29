@@ -370,6 +370,11 @@ export default class TransactionService {
         const inputData = parseTransactionData<ExtrinsicType.SEND_NFT>(transaction.data);
 
         historyItem.to = inputData.recipientAddress;
+        historyItem.amount = {
+          decimals: 0,
+          symbol: 'NFT',
+          value: '1'
+        };
       }
 
         break;

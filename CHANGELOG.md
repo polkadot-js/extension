@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.8.3 (Koni)
+Build date: Mar 29, 2023.
+
+Update:
+- Update explorer for Gemini 3c, 2a (#1089)
+- Equilibrium logo update (#1098)
+- Add XCM for Kusama --> Statemint (#1094)
+- Update logic for ink 4.0 and delete old PSP token (#1095)
+
 ## 0.8.2 (Koni)
 Build date: Mar 15, 2023.
 

@@ -6,7 +6,7 @@ import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/use
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Ledger } from '@polkadot/hw-ledger';
-import { LedgerAddress } from '@polkadot/hw-ledger/types';
+import { AccountOptions, LedgerAddress, LedgerSignature } from '@polkadot/hw-ledger/types';
 import { assert } from '@polkadot/util';
 
 import useTranslation from '../common/useTranslation';
@@ -24,6 +24,7 @@ interface Result extends StateBase {
   refresh: () => void;
   warning: string | null;
   getAddress: (accountIndex: number) => Promise<LedgerAddress>;
+  signTransaction: Ledger['sign'];
 }
 
 const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
@@ -131,6 +132,26 @@ export function useLedger (slug?: string, active = true): Result {
     }
   }, [ledger]);
 
+  const signTransaction = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
+    if (ledger) {
+      return new Promise((resolve, reject) => {
+        ledger.sign(message, accountOffset, addressOffset, accountOption)
+          .then((result) => {
+            resolve(result);
+          })
+          .catch((error: Error) => {
+            console.log(error);
+            setError(error.message);
+            reject(error);
+          });
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        reject(new Error("Can't find ledger"));
+      });
+    }
+  }, [ledger]);
+
   const refresh = useCallback(() => {
     setRefreshLock(true);
   }, []);
@@ -143,8 +164,9 @@ export function useLedger (slug?: string, active = true): Result {
     ledger,
     refresh,
     warning,
-    getAddress
+    getAddress,
+    signTransaction
   }),
-  [error, isLoading, isLocked, ledger, refresh, warning, getAddress]
+  [error, isLoading, isLocked, ledger, refresh, warning, getAddress, signTransaction]
   );
 }

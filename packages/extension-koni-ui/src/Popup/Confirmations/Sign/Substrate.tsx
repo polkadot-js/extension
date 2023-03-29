@@ -3,6 +3,7 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { useNotification } from '@subwallet/extension-koni-ui/hooks';
 import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByGenesisHash';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
@@ -14,7 +15,7 @@ import { getSignMode } from '@subwallet/extension-koni-ui/util/account/account';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, QrCode, Swatches, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -41,7 +42,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const { account, className, id, payload } = props;
 
   const { t } = useTranslation();
+  const notify = useNotification();
+
   const { activeModal } = useContext(ModalContext);
+
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
   const [loading, setLoading] = useState(false);
@@ -72,9 +76,19 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const chain = useGetChainInfoByGenesisHash(genesisHash);
 
-  const { isLoading: isLedgerLoading, isLocked, ledger, refresh: refreshLedger } = useLedger(chain?.slug, isLedger);
+  const { error: ledgerError,
+    isLoading: isLedgerLoading,
+    isLocked,
+    ledger,
+    refresh: refreshLedger,
+    signTransaction: ledgerSign,
+    warning: ledgerWarning } = useLedger(chain?.slug, isLedger);
 
-  const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [isLedgerLoading, isLocked, ledger]);
+  const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [
+    isLedgerLoading,
+    isLocked,
+    ledger
+  ]);
 
   // Handle buttons actions
   const onCancel = useCallback(() => {
@@ -132,10 +146,8 @@ const Component: React.FC<Props> = (props: Props) => {
     setTimeout(() => {
       const payloadU8a = payload.toU8a(true);
 
-      ledger
-        .sign(payloadU8a, account.accountIndex, account.addressOffset)
+      ledgerSign(payloadU8a, account.accountIndex, account.addressOffset)
         .then(({ signature }) => {
-          console.log(signature);
           onApproveSignature({ signature });
         })
         .catch((e: Error) => {
@@ -143,7 +155,16 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         });
     });
-  }, [account.accountIndex, account.addressOffset, isLedgerConnected, ledger, onApproveSignature, payload, refreshLedger]);
+  }, [
+    account.accountIndex,
+    account.addressOffset,
+    isLedgerConnected,
+    ledger,
+    ledgerSign,
+    onApproveSignature,
+    payload,
+    refreshLedger
+  ]);
 
   const onConfirm = useCallback(() => {
     switch (signMode) {
@@ -157,6 +178,20 @@ const Component: React.FC<Props> = (props: Props) => {
         onApprovePassword();
     }
   }, [onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
+
+  useEffect(() => {
+    !!ledgerError && notify({
+      message: ledgerError,
+      type: 'error'
+    });
+  }, [ledgerError, notify]);
+
+  useEffect(() => {
+    !!ledgerWarning && notify({
+      message: ledgerWarning,
+      type: 'warning'
+    });
+  }, [ledgerWarning, notify]);
 
   return (
     <div className={CN(className, 'confirmation-footer')}>

@@ -50,9 +50,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
           weight={'bold'}
         />}
         name={item.label}
-        rightItem={selected && <Icon
+        rightItem={<Icon
           customSize={'20px'}
-          iconColor={token.colorSuccess}
+          iconColor={selected ? token.colorSuccess : token.colorTransparent }
           phosphorIcon={CheckCircle}
           type='phosphor'
           weight={'fill'}
@@ -127,7 +127,8 @@ export const ProviderSelector = styled(forwardRef(Component))<Props>(({ theme: {
     },
 
     '.ant-web3-block .ant-web3-block-right-item': {
-      marginRight: 0
+      marginRight: 0,
+      marginLeft: token.marginSM * 2 - 2
     },
 
     '.ant-sw-modal-footer': {

@@ -73,6 +73,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return (
       <>
         <MetaInfo.Default
+          className='method-name'
           label={t('Method')}
           labelAlign='top'
         >
@@ -170,6 +171,16 @@ const EvmTransactionDetail = styled(Component)<Props>(({ theme: { token } }: Pro
 
     '.-to-right': {
       textAlign: 'right'
+    },
+
+    '.method-name': {
+      '.-to-right': {
+        flex: 2,
+
+        '.__value': {
+          wordBreak: 'break-word'
+        }
+      }
     },
 
     details: {

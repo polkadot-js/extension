@@ -350,7 +350,10 @@ const Component: React.FC<Props> = (props: Props) => {
                     type='password'
                   />
                 </Form.Item>
-                <Form.Item name={FormFieldName.TYPES}>
+                <Form.Item
+                  className='mb-0'
+                  name={FormFieldName.TYPES}
+                >
                   <div className='export-types-container'>
                     {
                       items.map((item) => {

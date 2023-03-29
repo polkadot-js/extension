@@ -144,6 +144,10 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       opacity: 0.4,
       cursor: 'not-allowed !important',
       backgroundColor: `${token.colorBgSecondary} !important`
+    },
+
+    '.mb-0': {
+      marginBottom: 0
     }
   });
 });

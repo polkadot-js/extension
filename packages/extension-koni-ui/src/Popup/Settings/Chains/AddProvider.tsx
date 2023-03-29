@@ -274,6 +274,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t<string>('Add new provider')}
       >
         <div className={'add_provider__container'}>
+          <div className='description'>
+            {t('Currently support WSS provider for Substrate networks and HTTP provider for EVM network')}
+          </div>
           <Form
             form={form}
             initialValues={formInitValues()}
@@ -368,9 +371,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 const AddProvider = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.add_provider__container': {
-      marginTop: 22,
-      marginRight: token.margin,
-      marginLeft: token.margin
+      padding: token.padding
+    },
+
+    '.description': {
+      padding: token.padding,
+      paddingTop: 0,
+      textAlign: 'center',
+      color: token.colorTextDescription,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6
     },
 
     '.ant-btn >span': {
@@ -384,7 +394,8 @@ const AddProvider = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.ant-input-container .ant-input-suffix': {
-      marginRight: 0
+      marginRight: 0,
+      marginLeft: token.margin + 2
     },
 
     '.ant-form-item': {

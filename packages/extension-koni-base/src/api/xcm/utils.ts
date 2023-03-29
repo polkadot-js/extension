@@ -55,6 +55,16 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
         type: 'p',
         isEthereum: false,
         supportedToken: ['KSM']
+      },
+      kintsugi: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['KSM']
+      },
+      statemine: {
+        type: 'p',
+        isEthereum: false,
+        supportedToken: ['KSM']
       }
     }
   },
@@ -244,6 +254,16 @@ export const SupportedCrossChainsMap: Record<string, CrossChainRelation> = {
   //       type: 'p',
   //       isEthereum: true,
   //       supportedToken: ['KINT', 'kBTC']
+  //     },
+  //     kusama: {
+  //       type: 'r',
+  //       isEthereum: false,
+  //       supportedToken: ['KSM']
+  //     },
+  //     statemine: {
+  //       type: 'p',
+  //       isEthereum: false,
+  //       supportedToken: ['USDT']
   //     }
   //   }
   // },

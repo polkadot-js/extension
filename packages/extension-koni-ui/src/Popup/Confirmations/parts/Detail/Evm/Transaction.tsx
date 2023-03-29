@@ -7,7 +7,8 @@ import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useGetChainInfoByChainId from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByChainId';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback } from 'react';
+import BigN from 'bignumber.js';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -33,6 +34,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const chainInfo = useGetChainInfoByChainId(chainId);
 
   const { t } = useTranslation();
+
+  const amount = useMemo((): number => {
+    return new BigN(convertToBigN(request.value) || 0).toNumber();
+  }, [request.value]);
 
   const handlerRenderArg = useCallback((data: EvmTransactionArg, parentName: string): JSX.Element => {
     const { children, name, value } = data;
@@ -113,12 +118,17 @@ const Component: React.FC<Props> = (props: Props) => {
         senderLabel={t('From')}
         senderName={account.name}
       />
-      <MetaInfo.Number
-        decimals={chainInfo?.evmInfo?.decimals}
-        label={t('Amount')}
-        suffix={chainInfo?.evmInfo?.symbol}
-        value={convertToBigN(request.value) || 0}
-      />
+      {
+        (!request.isToContract || amount !== 0) &&
+        (
+          <MetaInfo.Number
+            decimals={chainInfo?.evmInfo?.decimals}
+            label={t('Amount')}
+            suffix={chainInfo?.evmInfo?.symbol}
+            value={amount}
+          />
+        )
+      }
       <MetaInfo.Number
         decimals={chainInfo?.evmInfo?.decimals}
         label={t('Estimate gas')}

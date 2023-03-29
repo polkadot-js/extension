@@ -2,23 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ConfirmationDefinitions } from '@subwallet/extension-base/background/KoniTypes';
-import { AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
-import useConfirmationsInfo from '@subwallet/extension-koni-ui/hooks/screen/confirmation/useConfirmationInfo';
-import AddNetworkConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AddNetworkConfirmation';
-import AddTokenConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AddTokenConfirmation';
-import AuthorizeConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/AuthorizeConfirmation';
-import EvmSignatureConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/EvmSignatureConfirmation';
-import EvmTransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/EvmTransactionConfirmation';
-import MetadataConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/MetadataConfirmation';
-import SignConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/SignConfirmation';
-import TransactionConfirmation from '@subwallet/extension-koni-ui/Popup/Confirmations/Transaction';
+import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
+import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants/signing';
+import { useConfirmationsInfo } from '@subwallet/extension-koni-ui/hooks';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useEffect, useState } from 'react';
+import { isRawPayload } from '@subwallet/extension-koni-ui/util';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import ConfirmationHeader from './ConfirmationHeader';
+import { ConfirmationHeader } from './parts';
+import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
 
 type Props = ThemeProps
 
@@ -47,6 +42,83 @@ const Component = function ({ className }: Props) {
     setIndex((val) => Math.max(0, val - 1));
   }, []);
 
+  const content = useMemo((): React.ReactNode => {
+    if (!confirmation) {
+      return null;
+    }
+
+    if (confirmation.item.isInternal) {
+      return <TransactionConfirmation confirmation={confirmation} />;
+    }
+
+    if (NEED_SIGN_CONFIRMATION.includes(confirmation.type)) {
+      let account: AccountJson | undefined;
+      let canSign = true;
+      let isMessage = false;
+
+      if (confirmation.type === 'signingRequest') {
+        const request = confirmation.item as SigningRequest;
+        const _isMessage = isRawPayload(request.request.payload);
+
+        account = request.account;
+        canSign = !_isMessage || !account.isHardware;
+        isMessage = _isMessage;
+      } else if (confirmation.type === 'evmSignatureRequest' || confirmation.type === 'evmSendTransactionRequest') {
+        const request = confirmation.item as ConfirmationDefinitions['evmSignatureRequest' | 'evmSendTransactionRequest'][0];
+
+        account = request.payload.account;
+        canSign = request.payload.canSign;
+        isMessage = confirmation.type === 'evmSignatureRequest';
+      }
+
+      if (account?.isReadOnly || !canSign) {
+        return (
+          <NotSupportConfirmation
+            account={account}
+            isMessage={isMessage}
+            request={confirmation.item}
+            type={confirmation.type}
+          />
+        );
+      }
+    }
+
+    switch (confirmation.type) {
+      case 'addNetworkRequest':
+        return <AddNetworkConfirmation request={confirmation.item as ConfirmationDefinitions['addNetworkRequest'][0]} />;
+      case 'addTokenRequest':
+        return <AddTokenConfirmation request={confirmation.item as ConfirmationDefinitions['addTokenRequest'][0]} />;
+      case 'evmSignatureRequest':
+        return (
+          <EvmSignatureConfirmation
+            request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]}
+            type={confirmation.type}
+          />
+        );
+      case 'evmSendTransactionRequest':
+        return (
+          <EvmTransactionConfirmation
+            request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]}
+            type={confirmation.type}
+          />
+        );
+      case 'authorizeRequest':
+        return (
+          <AuthorizeConfirmation request={confirmation.item as AuthorizeRequest} />
+        );
+      case 'metadataRequest':
+        return (
+          <MetadataConfirmation request={confirmation.item as MetadataRequest} />
+        );
+      case 'signingRequest':
+        return (
+          <SignConfirmation request={confirmation.item as SigningRequest} />
+        );
+    }
+
+    return null;
+  }, [confirmation]);
+
   useEffect(() => {
     if (numberOfConfirmations) {
       if (index >= numberOfConfirmations) {
@@ -64,57 +136,7 @@ const Component = function ({ className }: Props) {
         onClickPrev={prevConfirmation}
         title={t(titleMap[confirmation?.type] || '')}
       />
-      {
-        confirmation?.item.isInternal
-          ? (
-            <TransactionConfirmation confirmation={confirmation} />
-          )
-          : (
-            <>
-              {
-                confirmation?.type === 'authorizeRequest' && (
-                  <AuthorizeConfirmation request={confirmation.item as AuthorizeRequest} />
-                )
-              }
-              {
-                confirmation?.type === 'metadataRequest' && (
-                  <MetadataConfirmation request={confirmation.item as MetadataRequest} />
-                )
-              }
-              {
-                confirmation?.type === 'signingRequest' && (
-                  <SignConfirmation request={confirmation.item as SigningRequest} />
-                )
-              }
-              {
-                confirmation?.type === 'evmSendTransactionRequest' && (
-                  <EvmTransactionConfirmation
-                    request={confirmation.item as ConfirmationDefinitions['evmSendTransactionRequest'][0]}
-                    type={confirmation.type}
-                  />
-                )
-              }
-              {
-                confirmation?.type === 'evmSignatureRequest' && (
-                  <EvmSignatureConfirmation
-                    request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]}
-                    type={confirmation.type}
-                  />
-                )
-              }
-              {
-                confirmation?.type === 'addTokenRequest' && (
-                  <AddTokenConfirmation request={confirmation.item as ConfirmationDefinitions['addTokenRequest'][0]} />
-                )
-              }
-              {
-                confirmation?.type === 'addNetworkRequest' && (
-                  <AddNetworkConfirmation request={confirmation.item as ConfirmationDefinitions['addNetworkRequest'][0]} />
-                )
-              }
-            </>
-          )
-      }
+      {content}
     </div>
   );
 };

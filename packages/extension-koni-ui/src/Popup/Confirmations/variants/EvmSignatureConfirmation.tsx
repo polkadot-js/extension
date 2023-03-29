@@ -1,36 +1,29 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SigningRequest } from '@subwallet/extension-base/background/types';
+import { ConfirmationsQueueItem, EvmSignatureRequest } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountItemWithName, ConfirmationGeneralInfo, ViewDetailIcon } from '@subwallet/extension-koni-ui/components';
-import useOpenDetailModal from '@subwallet/extension-koni-ui/hooks/confirmation/useOpenDetailModal';
-import useParseSubstrateRequestPayload from '@subwallet/extension-koni-ui/hooks/confirmation/useParseSubstrateRequestPayload';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isSubstrateMessage } from '@subwallet/extension-koni-ui/util';
+import { useOpenDetailModal } from '@subwallet/extension-koni-ui/hooks';
+import { EvmSignatureSupportType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { SignerPayloadJSON } from '@polkadot/types/types';
-
-import { BaseDetailModal, SubstrateExtrinsic, SubstrateMessageDetail } from './Detail';
-import { SubstrateSignArea } from './Sign';
+import { BaseDetailModal, EvmMessageDetail, EvmSignArea } from '../parts';
 
 interface Props extends ThemeProps {
-  request: SigningRequest;
+  type: EvmSignatureSupportType
+  request: ConfirmationsQueueItem<EvmSignatureRequest>
 }
 
-function Component ({ className, request }: Props) {
-  const { account } = request;
-
+function Component ({ className, request, type }: Props) {
+  const { id, payload } = request;
   const { t } = useTranslation();
-  const payload = useParseSubstrateRequestPayload(request.request);
+  const { account } = payload;
 
   const onClickDetail = useOpenDetailModal();
-
-  const isMessage = isSubstrateMessage(payload);
 
   return (
     <>
@@ -60,39 +53,32 @@ function Component ({ className, request }: Props) {
           </Button>
         </div>
       </div>
-      <SubstrateSignArea
-        account={account}
-        id={request.id}
-        payload={payload}
+      <EvmSignArea
+        id={id}
+        payload={request}
+        type={type}
       />
       <BaseDetailModal
-        title={isMessage ? t('Message details') : t('Transaction details')}
+        title={t('Message details')}
       >
-        {isMessage
-          ? (
-            <SubstrateMessageDetail bytes={payload} />
-          )
-          : (
-            <SubstrateExtrinsic
-              account={account}
-              payload={payload}
-              request={request.request.payload as SignerPayloadJSON}
-            />
-          )
-        }
+        <EvmMessageDetail payload={request.payload} />
       </BaseDetailModal>
     </>
   );
 }
 
-const SignConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => ({
+const EvmSignatureConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => ({
   '.account-list': {
     '.__prop-label': {
       marginRight: token.marginMD,
       width: '50%',
       float: 'left'
     }
+  },
+
+  '.__label': {
+    textAlign: 'left'
   }
 }));
 
-export default SignConfirmation;
+export default EvmSignatureConfirmation;

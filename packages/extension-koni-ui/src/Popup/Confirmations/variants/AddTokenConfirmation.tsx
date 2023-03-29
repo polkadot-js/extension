@@ -3,8 +3,8 @@
 
 import { ConfirmationDefinitions, ConfirmationResult } from '@subwallet/extension-base/background/KoniTypes';
 import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
-import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Confirmation/ConfirmationGeneralInfo';
-import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
+import { ConfirmationGeneralInfo } from '@subwallet/extension-koni-ui/components';
+import { useCopy } from '@subwallet/extension-koni-ui/hooks';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';

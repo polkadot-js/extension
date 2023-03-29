@@ -18,27 +18,14 @@ import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance
 import { Button, Icon } from '@subwallet/react-ui';
 import classNames from 'classnames';
 import { Coins, FadersHorizontal } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
 
-function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<Props> {
-  const dataContext = useContext(DataContext);
-
-  return (
-    <PageWrapper
-      className={`tokens ${className}`}
-      resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance'])}
-    >
-      <Component />
-    </PageWrapper>
-  );
-}
-
-function Component (): React.ReactElement {
+const Component = (): React.ReactElement => {
   const { t } = useTranslation();
   const [isShrink, setIsShrink] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -65,17 +52,15 @@ function Component (): React.ReactElement {
           const containerProps = containerRef.current.getBoundingClientRect();
 
           topBlockRef.current.style.position = 'fixed';
-          topBlockRef.current.style.transition = 'all 0s';
-          topBlockRef.current.style.opacity = '0';
-          topBlockRef.current.style.paddingTop = '0';
           topBlockRef.current.style.top = `${containerProps.top}px`;
           topBlockRef.current.style.left = `${containerProps.left}px`;
           topBlockRef.current.style.right = `${containerProps.right}px`;
           topBlockRef.current.style.width = `${containerProps.width}px`;
+          topBlockRef.current.style.opacity = '0';
+          topBlockRef.current.style.paddingTop = '0';
 
           setTimeout(() => {
             if (topBlockRef.current) {
-              topBlockRef.current.style.transition = 'opacity, padding-top 0.27s ease';
               topBlockRef.current.style.opacity = '1';
               topBlockRef.current.style.paddingTop = '32px';
             }
@@ -91,20 +76,42 @@ function Component (): React.ReactElement {
           topBlockRef.current.style.top = '0';
           topBlockRef.current.style.left = '0';
           topBlockRef.current.style.right = '0';
-          topBlockRef.current.style.right = '100%';
-          topBlockRef.current.style.transition = 'all 0s';
+          topBlockRef.current.style.width = '100%';
           topBlockRef.current.style.opacity = '0';
+          topBlockRef.current.style.paddingTop = '0';
 
           setTimeout(() => {
             if (topBlockRef.current) {
-              topBlockRef.current.style.transition = 'opacity 0.27s ease';
               topBlockRef.current.style.opacity = '1';
+              topBlockRef.current.style.paddingTop = '32px';
             }
           }, 100);
         }
 
         return false;
       });
+    }
+  }, []);
+
+  const handleResize = useCallback(() => {
+    const topPosition = containerRef.current?.scrollTop || 0;
+
+    if (topPosition > 80) {
+      if (topBlockRef.current && containerRef.current) {
+        const containerProps = containerRef.current.getBoundingClientRect();
+
+        topBlockRef.current.style.top = `${containerProps.top}px`;
+        topBlockRef.current.style.left = `${containerProps.left}px`;
+        topBlockRef.current.style.right = `${containerProps.right}px`;
+        topBlockRef.current.style.width = `${containerProps.width}px`;
+      }
+    } else {
+      if (topBlockRef.current) {
+        topBlockRef.current.style.top = '0';
+        topBlockRef.current.style.left = '0';
+        topBlockRef.current.style.right = '0';
+        topBlockRef.current.style.width = '100%';
+      }
     }
   }, []);
 
@@ -153,6 +160,14 @@ function Component (): React.ReactElement {
 
     return result;
   }, [sortedTokenGroups, tokenGroupBalanceMap]);
+
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [handleResize]);
 
   return (
     <div
@@ -231,7 +246,20 @@ function Component (): React.ReactElement {
       />
     </div>
   );
-}
+};
+
+const WrapperComponent = ({ className = '' }: ThemeProps): React.ReactElement<Props> => {
+  const dataContext = useContext(DataContext);
+
+  return (
+    <PageWrapper
+      className={`tokens ${className}`}
+      resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance'])}
+    >
+      <Component />
+    </PageWrapper>
+  );
+};
 
 const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, token } }: ThemeProps) => {
   return ({
@@ -271,6 +299,7 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
       display: 'flex',
       alignItems: 'center',
       backgroundImage: extendToken.tokensScreenSuccessBackgroundColor,
+      transition: 'opacity, padding-top 0.27s ease',
 
       '&.-is-shrink': {
         height: 104

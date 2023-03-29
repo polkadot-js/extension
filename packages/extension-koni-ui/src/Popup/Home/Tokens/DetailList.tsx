@@ -48,19 +48,22 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
 const TokenDetailModalId = 'tokenDetailModalId';
 
 function Component (): React.ReactElement {
-  const [isShrink, setIsShrink] = useState<boolean>(false);
-  const { goHome } = useDefaultNavigate();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const topBlockRef = useRef<HTMLDivElement>(null);
-  const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
-  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const { slug: tokenGroupSlug } = useParams();
-  const { accountBalance: { tokenBalanceMap, tokenGroupBalanceMap }, tokenGroupStructure: { tokenGroupMap } } = useContext(HomeContext);
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+
   const notify = useNotification();
   const { t } = useTranslation();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
+  const { goHome } = useDefaultNavigate();
+
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { accountBalance: { tokenBalanceMap, tokenGroupBalanceMap }, tokenGroupStructure: { tokenGroupMap } } = useContext(HomeContext);
+
+  const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
+  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
+  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const topBlockRef = useRef<HTMLDivElement>(null);
 
   const { accountSelectorItems,
     onOpenReceive,
@@ -120,15 +123,8 @@ function Component (): React.ReactElement {
     return [] as TokenBalanceItemType[];
   }, [tokenGroupSlug, tokenGroupMap, tokenBalanceMap]);
 
-  useEffect(() => {
-    setIsShrink(false);
-  }, [tokenGroupSlug]);
-
-  useEffect(() => {
-    if (!tokenBalanceItems.length) {
-      goHome();
-    }
-  }, [goHome, tokenBalanceItems.length]);
+  const [currentTokenInfo, setCurrentTokenInfo] = useState<CurrentSelectToken| undefined>(undefined);
+  const [isShrink, setIsShrink] = useState<boolean>(false);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;
@@ -139,7 +135,6 @@ function Component (): React.ReactElement {
           const containerProps = containerRef.current.getBoundingClientRect();
 
           topBlockRef.current.style.position = 'fixed';
-          topBlockRef.current.style.transition = 'all 0s';
           topBlockRef.current.style.opacity = '0';
           topBlockRef.current.style.paddingTop = '0';
           topBlockRef.current.style.top = `${containerProps.top}px`;
@@ -149,7 +144,6 @@ function Component (): React.ReactElement {
 
           setTimeout(() => {
             if (topBlockRef.current) {
-              topBlockRef.current.style.transition = 'opacity, padding-top 0.27s ease';
               topBlockRef.current.style.paddingTop = '8px';
               topBlockRef.current.style.opacity = '1';
             }
@@ -165,13 +159,11 @@ function Component (): React.ReactElement {
           topBlockRef.current.style.top = '0';
           topBlockRef.current.style.left = '0';
           topBlockRef.current.style.right = '0';
-          topBlockRef.current.style.right = '100%';
-          topBlockRef.current.style.transition = 'all 0s';
+          topBlockRef.current.style.width = '100%';
           topBlockRef.current.style.opacity = '0';
 
           setTimeout(() => {
             if (topBlockRef.current) {
-              topBlockRef.current.style.transition = 'opacity 0.27s ease';
               topBlockRef.current.style.opacity = '1';
             }
           }, 100);
@@ -182,7 +174,27 @@ function Component (): React.ReactElement {
     }
   }, []);
 
-  const [currentTokenInfo, setCurrentTokenInfo] = useState<CurrentSelectToken| undefined>(undefined);
+  const handleResize = useCallback(() => {
+    const topPosition = containerRef.current?.scrollTop || 0;
+
+    if (topPosition > 60) {
+      if (topBlockRef.current && containerRef.current) {
+        const containerProps = containerRef.current.getBoundingClientRect();
+
+        topBlockRef.current.style.top = `${containerProps.top}px`;
+        topBlockRef.current.style.left = `${containerProps.left}px`;
+        topBlockRef.current.style.right = `${containerProps.right}px`;
+        topBlockRef.current.style.width = `${containerProps.width}px`;
+      }
+    } else {
+      if (topBlockRef.current) {
+        topBlockRef.current.style.top = '0';
+        topBlockRef.current.style.left = '0';
+        topBlockRef.current.style.right = '0';
+        topBlockRef.current.style.width = '100%';
+      }
+    }
+  }, []);
 
   const onCloseDetail = useCallback(() => {
     setCurrentTokenInfo(undefined);
@@ -226,6 +238,24 @@ function Component (): React.ReactElement {
       inactiveModal(TokenDetailModalId);
     }
   }, [activeModal, currentTokenInfo, inactiveModal]);
+
+  useEffect(() => {
+    setIsShrink(false);
+  }, [tokenGroupSlug]);
+
+  useEffect(() => {
+    if (!tokenBalanceItems.length) {
+      goHome();
+    }
+  }, [goHome, tokenBalanceItems.length]);
+
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [handleResize]);
 
   return (
     <div
@@ -323,6 +353,7 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
       display: 'flex',
       alignItems: 'center',
       backgroundImage: extendToken.tokensScreenInfoBackgroundColor,
+      transition: 'opacity, padding-top 0.27s ease',
 
       '&.-is-shrink': {
         height: 128

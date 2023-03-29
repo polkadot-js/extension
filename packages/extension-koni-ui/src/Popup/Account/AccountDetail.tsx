@@ -259,7 +259,6 @@ const Component: React.FC<Props> = (props: Props) => {
                     backgroundColor='var(--wallet-name-icon-bg-color)'
                     iconColor='var(--wallet-name-icon-color)'
                     phosphorIcon={walletNamePrefixIcon}
-                    // size='xs'
                   />
                 )}
                 suffix={(
@@ -372,8 +371,8 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
         height: token.sizeMD,
 
         '.anticon': {
-          height: token.size,
-          width: token.size
+          height: token.sizeSM,
+          width: token.sizeSM
         }
       },
 

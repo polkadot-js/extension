@@ -8,9 +8,7 @@ import { isUrl } from '@subwallet/extension-base/utils';
 
 export interface HandleNftParams {
   updateItem: (chain: string, data: NftItem, owner: string) => void,
-  updateCollection: (chain: string, data: NftCollection) => void,
-  updateNftIds: (chain: string, owner: string, collectionId?: string, nftIds?: string[]) => void,
-  updateCollectionIds: (chain: string, address: string, collectionIds?: string[]) => void
+  updateCollection: (chain: string, data: NftCollection) => void
 }
 
 export abstract class BaseNftApi {

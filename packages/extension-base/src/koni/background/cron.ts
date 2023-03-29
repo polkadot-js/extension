@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ApiMap, NftTransferExtra, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiMap, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_CHAIN_NOMINATOR_METADATA, CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-base/constants';
 import { KoniSubscription } from '@subwallet/extension-base/koni/background/subscription';
 import { _ChainState, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -126,7 +126,6 @@ export class KoniCron {
 
         this.resetStakingReward();
         this.resetNft(address);
-        this.resetNftTransferMeta();
         this.removeCron('refreshNft');
 
         this.removeCron('refreshStakingReward');
@@ -205,13 +204,6 @@ export class KoniCron {
   resetStakingReward = () => {
     this.logger.log('Reset Staking Reward State');
     this.state.resetStakingReward();
-  };
-
-  resetNftTransferMeta = () => {
-    this.state.setNftTransfer({
-      cronUpdate: false,
-      forceUpdate: false
-    } as NftTransferExtra);
   };
 
   refreshStakingReward = (address: string) => {

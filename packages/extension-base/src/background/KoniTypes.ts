@@ -188,13 +188,6 @@ export enum CrowdloanParaState {
   FAILED = 'failed'
 }
 
-export interface NftTransferExtra {
-  cronUpdate: boolean;
-  forceUpdate: boolean;
-  selectedNftCollection?: NftCollection; // for rendering
-  nftItems?: NftItem[]; // for rendering, remaining nfts
-}
-
 export interface NftItem {
   // must-have
   id: string;
@@ -956,7 +949,8 @@ export interface NftTransactionRequest {
   recipientAddress: string,
 
   nftItemName?: string, // Use for confirmation view only
-  params: Record<string, any>
+  params: Record<string, any>,
+  nftItem: NftItem
 }
 
 export interface EvmNftTransaction extends ValidateTransactionResponse {
@@ -1844,10 +1838,6 @@ export interface KoniRequestSignatures {
   'pri(evmNft.getTransaction)': [NftTransactionRequest, EvmNftTransaction];
   'pri(substrateNft.submitTransaction)': [RequestSubstrateNftSubmitTransaction, NftTransactionResponse];
   'pri(substrateNft.getTransaction)': [NftTransactionRequest, SubstrateNftTransaction];
-  'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
-  'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];
-  'pri(nftTransfer.getSubscription)': [null, NftTransferExtra, NftTransferExtra];
-  'pri(nft.forceUpdate)': [RequestNftForceUpdate, boolean];
   'pri(nft.getNft)': [null, NftJson];
   'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson];
   'pri(nftCollection.getNftCollection)': [null, NftCollectionJson];

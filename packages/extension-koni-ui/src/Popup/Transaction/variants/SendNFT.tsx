@@ -80,7 +80,8 @@ const Component = ({ className = '' }: Props): React.ReactElement<Props> => {
             networkKey: chain,
             recipientAddress: to,
             nftItemName: nftItem?.name,
-            params
+            params,
+            nftItem
           });
         } else {
           // Send NFT with substrate interface

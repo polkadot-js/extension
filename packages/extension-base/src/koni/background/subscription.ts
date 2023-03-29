@@ -258,9 +258,8 @@ export class KoniSubscription {
       nftHandler.handleNfts(
         smartContractNfts,
         (...args) => this.state.updateNftData(...args),
-        (...args) => this.state.setNftCollection(...args),
-        (...args) => this.state.updateNftIds(...args),
-        (...args) => this.state.updateCollectionIds(...args))
+        (...args) => this.state.setNftCollection(...args)
+      )
         .then(() => {
           this.logger.log('nft state updated');
         })

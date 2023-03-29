@@ -6,6 +6,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
@@ -13,6 +14,7 @@ import { HistoryService } from '@subwallet/extension-base/services/history-servi
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
+import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
 import { getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEmitter, TransactionEventMap, TransactionEventResponse, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
@@ -36,6 +38,7 @@ import { HexString } from '@polkadot/util/types';
 
 export default class TransactionService {
   private readonly chainService: ChainService;
+  private readonly databaseService: DatabaseService;
   private readonly requestService: RequestService;
   private readonly balanceService: BalanceService;
   private readonly historyService: HistoryService;
@@ -46,12 +49,13 @@ export default class TransactionService {
     return this.transactionSubject.getValue();
   }
 
-  constructor (chainService: ChainService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService, notificationService: NotificationService) {
+  constructor (chainService: ChainService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService, notificationService: NotificationService, databaseService: DatabaseService) {
     this.chainService = chainService;
     this.requestService = requestService;
     this.balanceService = balanceService;
     this.historyService = historyService;
     this.notificationService = notificationService;
+    this.databaseService = databaseService;
   }
 
   private get allTransactions (): SWTransaction[] {
@@ -362,6 +366,9 @@ export default class TransactionService {
         break;
       case ExtrinsicType.SEND_NFT: {
         const inputData = parseTransactionData<ExtrinsicType.SEND_NFT>(transaction.data);
+
+        this.databaseService.handleNftTransfer(transaction.chain, [inputData.senderAddress, ALL_ACCOUNT_KEY], inputData.nftItem)
+          .catch(console.error);
 
         historyItem.to = inputData.recipientAddress;
       }

@@ -18,5 +18,5 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '0.6.6-1': ChangeRouteToHome,
   '0.7.5-0': ResetTransactionHistoryEventIdx,
   '0.7.9-0': RemoveWrongCrowdloan,
-  '0.8.2-0': ClearOldPspTokens
+  '0.8.3-0': ClearOldPspTokens
 };

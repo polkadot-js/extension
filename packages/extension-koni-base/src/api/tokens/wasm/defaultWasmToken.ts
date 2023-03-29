@@ -9,17 +9,7 @@ interface WasmTokenJson {
 }
 
 export const DEFAULT_WASM_TOKENS: WasmTokenJson = {
-  psp22: [
-    {
-      name: 'PANX',
-      smartContract: '5DGHdeY4SXsZ2w8RZrgXXJwHXXe2Qg8LCnUoDTr3tnBnu2BC',
-      chain: 'alephTest',
-      symbol: 'PANX',
-      decimals: 10,
-      type: CustomTokenType.psp22,
-      isCustom: true
-    }
-  ],
+  psp22: [],
   psp34: [
     {
       name: 'AFRICA’S POLKADOT EVENT',

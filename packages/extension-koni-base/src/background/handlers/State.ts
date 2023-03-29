@@ -227,7 +227,6 @@ export default class KoniState extends State {
             }
 
             mergedNetworkMap[key].crowdloanUrl = storedNetwork.crowdloanUrl;
-            mergedNetworkMap[key].blockExplorer = storedNetwork.blockExplorer;
             mergedNetworkMap[key].currentProviderMode = (mergedNetworkMap[key].currentProvider || '').startsWith('http') ? 'http' : 'ws';
           } else {
             if (Object.keys(PREDEFINED_GENESIS_HASHES).includes(storedNetwork.genesisHash)) { // merge networks with same genesis hash

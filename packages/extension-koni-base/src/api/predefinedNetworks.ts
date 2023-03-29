@@ -627,7 +627,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12,
     coinGeckoKey: 'aleph-zero',
     getStakingOnChain: true,
-    supportBonding: true
+    supportBonding: true,
+    supportSmartContract: [ContractType.wasm]
   },
   rmrk: {
     key: 'rmrk',

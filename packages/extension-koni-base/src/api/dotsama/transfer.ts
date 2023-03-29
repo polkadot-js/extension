@@ -7,12 +7,12 @@ import { SignerType } from '@subwallet/extension-base/signers/types';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { signAndSendExtrinsic } from '@subwallet/extension-koni-base/api/dotsama/shared/signAndSendExtrinsic';
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
+import { getWasmContractGasLimit } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
-import {getWasmContractGasLimit} from "@subwallet/extension-koni-base/api/tokens/wasm/utils";
 
 export async function getExistentialDeposit (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<string> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;

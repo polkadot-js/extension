@@ -1178,6 +1178,7 @@ export default class KoniExtension {
       });
     });
 
+    // Remove from auth list
     await new Promise<void>((resolve) => {
       this.#koniState.getAuthorize((value) => {
         if (value && Object.keys(value).length) {
@@ -1191,6 +1192,9 @@ export default class KoniExtension {
         }
       });
     });
+
+    // Remove history
+    await this.#koniState.historyService.removeHistoryByAddress(address);
 
     // Set current account to all account
     await new Promise<void>((resolve) => {

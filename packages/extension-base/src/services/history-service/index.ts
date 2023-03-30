@@ -117,4 +117,9 @@ export class HistoryService {
     await this.dbService.upsertHistory(historyItems);
     this.historySubject.next(await this.dbService.getHistories());
   }
+
+  async removeHistoryByAddress (address: string) {
+    await this.dbService.stores.transaction.removeAllByAddress(address);
+    this.historySubject.next(await this.dbService.getHistories());
+  }
 }

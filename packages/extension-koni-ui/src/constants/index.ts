@@ -3,6 +3,7 @@
 
 export * from './account';
 export * from './common';
+export * from './modal';
 export * from './number';
 export * from './signing';
 export * from './stakingStatus';

@@ -726,9 +726,9 @@ export default class KoniState {
 
   public async addNetworkConfirm (id: string, url: string, networkData: _NetworkUpsertParams) {
     return this.requestService.addConfirmation(id, url, 'addNetworkRequest', networkData)
-      .then(({ isApproved }) => {
+      .then(async ({ isApproved }) => {
         if (isApproved) {
-          this.chainService.upsertChain(networkData);
+          await this.upsertChainInfo(networkData);
 
           return null;
         } else {
@@ -739,9 +739,9 @@ export default class KoniState {
 
   public async addTokenConfirm (id: string, url: string, tokenInfo: AddTokenRequestExternal) {
     return this.requestService.addConfirmation(id, url, 'addTokenRequest', tokenInfo)
-      .then(({ isApproved }) => {
+      .then(async ({ isApproved }) => {
         if (isApproved) {
-          this.chainService.upsertCustomToken({
+          await this.upsertCustomToken({
             originChain: tokenInfo.originChain,
             slug: '',
             name: tokenInfo.name,

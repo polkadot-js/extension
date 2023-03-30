@@ -70,8 +70,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }
     }
 
-    navigate('/transaction/send-nft', { state: { collectionInfo, nftItem } });
-  }, [accounts, collectionInfo, navigate, nftItem, notify, t]);
+    navigate(`/transaction/send-nft/${nftItem.owner}/${nftItem.chain}/${nftItem.collectionId}/${nftItem.id}`);
+  }, [accounts, navigate, nftItem, notify, t]);
 
   const subHeaderRightButton: ButtonProps[] = [
     {

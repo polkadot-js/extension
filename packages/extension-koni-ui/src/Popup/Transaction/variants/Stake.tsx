@@ -140,7 +140,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [defaultSlug, from, defaultStakingType, chain]);
 
   const onFieldsChange: FormCallbacks<StakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
-    const { error } = simpleCheckForm(changedFields, allFields);
+    const { error } = simpleCheckForm(allFields);
 
     const allMap = convertFieldToObject<StakeFormProps>(allFields);
     const changesMap = convertFieldToObject<StakeFormProps>(changedFields);

@@ -36,7 +36,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [isDisable, setIsDisable] = useState(true);
 
   const onUpdate: FormCallbacks<LoginFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
-    const { empty, error } = simpleCheckForm(changedFields, allFields);
+    const { empty, error } = simpleCheckForm(allFields);
 
     setIsDisable(error || empty);
   }, []);

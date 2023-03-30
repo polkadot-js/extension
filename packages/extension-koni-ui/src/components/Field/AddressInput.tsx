@@ -75,8 +75,9 @@ function Component ({ autoReformatValue,
   }, [inactiveModal, id, parseAndChangeValue]);
 
   const onCloseScan = useCallback(() => {
+    inputRef?.current?.blur();
     setScanError('');
-  }, []);
+  }, [inputRef]);
 
   // todo: Will work with "Manage address book" feature later
   return (

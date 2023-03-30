@@ -72,7 +72,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, []);
 
   const onFieldsChange: Callbacks<ReadOnlyAccountInput>['onFieldsChange'] = useCallback((changes: FieldData[], allFields: FieldData[]) => {
-    const { empty, error } = simpleCheckForm(changes, allFields);
+    const { empty, error } = simpleCheckForm(allFields);
 
     setIsDisable(error || empty);
 

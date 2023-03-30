@@ -5,7 +5,7 @@ import { isAccountAll } from '@subwallet/extension-koni-ui/util/account/accountA
 
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
 
-export default function reformatAddress (address: string, networkPrefix: number, isEthereum = false): string {
+export default function reformatAddress (address: string, networkPrefix = 42, isEthereum = false): string {
   if (isAccountAll(address)) {
     return address;
   }

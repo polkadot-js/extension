@@ -137,7 +137,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onFieldsChange: FormCallbacks<UnstakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
-    const { error } = simpleCheckForm(changedFields, allFields);
+    const { error } = simpleCheckForm(allFields);
 
     const allMap = convertFieldToObject<UnstakeFormProps>(allFields);
     const changesMap = convertFieldToObject<UnstakeFormProps>(changedFields);

@@ -78,7 +78,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [goHome]);
 
   const onUpdate: Callbacks<ChangePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
-    const { empty, error } = simpleCheckForm(changedFields, allFields);
+    const { empty, error } = simpleCheckForm(allFields);
 
     setSubmitError('');
     setIsDisable(error || empty);

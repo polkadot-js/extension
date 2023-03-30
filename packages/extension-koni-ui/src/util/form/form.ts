@@ -14,7 +14,7 @@ export function convertFieldToObject<T = Record<string, any>> (fields: FieldData
   return rs as T;
 }
 
-export const simpleCheckForm = (changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+export const simpleCheckForm = (allFields: FormFieldData[]) => {
   const error = allFields.map((data) => data.errors || [])
     .reduce((old, value) => [...old, ...value])
     .some((value) => !!value);

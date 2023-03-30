@@ -41,7 +41,7 @@ export const getOutputValuesFromString: (input: string, power: number) => string
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className, decimals, disabled, maxValue, onChange, value, statusHelp } = props;
+  const { className, decimals, disabled, maxValue, onChange, statusHelp, value } = props;
   const [inputValue, setInputValue] = useState(value);
   const inputRef = useForwardInputRef(ref);
 
@@ -118,9 +118,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       placeholder={props.placeholder || t('Amount')}
       readOnly={props.readOnly}
       ref={inputRef}
+      statusHelp={statusHelp}
       suffix={suffix()}
       value={inputValue}
-      statusHelp={statusHelp}
     />
   );
 };

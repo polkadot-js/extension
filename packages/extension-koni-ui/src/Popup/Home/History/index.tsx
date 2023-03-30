@@ -11,6 +11,7 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import { HistoryDetailModal, HistoryDetailModalId } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { quickFormatToCompare } from '@subwallet/extension-koni-ui/util/account/reformatAddress';
 import { customFormatDate } from '@subwallet/extension-koni-ui/util/common/customFormatDate';
 import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
@@ -19,7 +20,6 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import {quickFormatToCompare} from "@subwallet/extension-koni-ui/util/account/reformatAddress";
 
 type Props = ThemeProps
 
@@ -275,7 +275,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       const fromName = accountMap[quickFormatToCompare(item.from) || ''];
       const toName = accountMap[quickFormatToCompare(item.to) || ''];
 
-      finalHistoryList.push({ ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) })
+      finalHistoryList.push({ ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) });
     });
 
     return finalHistoryList.sort((a, b) => (b.time - a.time));

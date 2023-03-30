@@ -7,7 +7,7 @@ import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
@@ -19,7 +19,7 @@ export const PREDEFINED_MODAL_NAMES = ['debugger', 'transaction', 'confirmations
 type PredefinedModalName = typeof PREDEFINED_MODAL_NAMES[number];
 
 export const usePredefinedModal = () => {
-  const [seachParam, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const openPModal = useCallback((name: PredefinedModalName | null) => {
     setSearchParams((prev) => {
       if (name) {
@@ -34,7 +34,7 @@ export const usePredefinedModal = () => {
 
   const isOpenPModal = useCallback(
     (popupName?: string) => {
-      const currentPopup = seachParam.get('popup');
+      const currentPopup = searchParams.get('popup');
 
       if (popupName) {
         return currentPopup === popupName;
@@ -42,18 +42,16 @@ export const usePredefinedModal = () => {
         return !!currentPopup;
       }
     },
-    [seachParam]
+    [searchParams]
   );
 
   return { openPModal, isOpenPModal };
 };
 
 export const WalletModalContext = ({ children }: Props) => {
-  const { activeList, activeModal, inactiveModals } = useContext(ModalContext);
+  const { activeModal, hasActiveModal, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
-
-  const hasActiveModal = useMemo(() => !!activeList.length, [activeList.length]);
 
   useExcludeModal('confirmations');
 

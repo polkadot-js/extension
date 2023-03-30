@@ -289,12 +289,12 @@ const Component: React.FC<Props> = (props: Props) => {
             }
 
             <Form.Item
-              // hideError={true}
               name={FormFieldName.VALUE}
               rules={[
-                { required: true },
+                { required: true, message: 'Value is required' },
                 validateUnStakeValue(minValue, bondedValue, decimals)
               ]}
+              statusHelpAsTooltip={true}
             >
               <AmountInput
                 decimals={decimals}

@@ -6,7 +6,7 @@ import EventEmitter from 'eventemitter3';
 import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import {EventRecord} from "@polkadot/types/interfaces";
+import { EventRecord } from '@polkadot/types/interfaces';
 
 export interface SWTransaction extends ValidateTransactionResponse {
   id: string;

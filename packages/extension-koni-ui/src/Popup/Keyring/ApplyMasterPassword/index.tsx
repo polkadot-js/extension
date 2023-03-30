@@ -113,7 +113,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, []);
 
   const onUpdate: Callbacks<MigratePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
-    const { empty, error } = simpleCheckForm(changedFields, allFields);
+    const { empty, error } = simpleCheckForm(allFields);
 
     setIsDisable(error || empty);
   }, []);

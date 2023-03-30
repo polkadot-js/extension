@@ -131,7 +131,7 @@ export const router = createHashRouter([
         ...Transaction.generateRouterObject('/transaction'),
         children: [
           SendFund.generateRouterObject('send-fund'),
-          SendNFT.generateRouterObject('send-nft'),
+          SendNFT.generateRouterObject('send-nft/:owner/:chain/:collectionId/:itemId'),
           Stake.generateRouterObject('stake/:type/:chain'),
           Unstake.generateRouterObject('unstake/:type/:chain'),
           CancelUnstake.generateRouterObject('cancel-unstake/:type/:chain'),

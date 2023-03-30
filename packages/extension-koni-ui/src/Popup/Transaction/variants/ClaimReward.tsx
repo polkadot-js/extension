@@ -84,7 +84,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onFieldsChange: FormCallbacks<ClaimRewardFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
-    const { error } = simpleCheckForm(changedFields, allFields);
+    const { error } = simpleCheckForm(allFields);
 
     const changesMap = convertFieldToObject<ClaimRewardFormProps>(changedFields);
 

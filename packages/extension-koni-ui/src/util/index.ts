@@ -212,8 +212,7 @@ export const detectThemeAvatar = (address?: string) => isEthereumAddress(address
 export { toAddress } from './account/toAddress';
 export { openInNewTab } from '@subwallet/extension-koni-ui/util/common/browser';
 
-export * from './account/account';
-export * from './account/accountAll';
+export * from './account';
 export * from './chain';
 export * from './confirmation';
 export * from './common';

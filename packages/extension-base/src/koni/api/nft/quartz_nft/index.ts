@@ -175,9 +175,6 @@ export default class QuartzNftApi extends BaseNftApi {
       ]);
 
       if (allNftId.length <= 0) {
-        // params.updateReady(true);
-        params.updateNftIds(this.chain, address);
-
         return;
       }
 
@@ -220,9 +217,6 @@ export default class QuartzNftApi extends BaseNftApi {
           // params.updateReady(true);
         }
       }));
-
-      params.updateCollectionIds(this.chain, address, Object.keys(collectionNftIds));
-      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(this.chain, address, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch quartz nft', e);
     }

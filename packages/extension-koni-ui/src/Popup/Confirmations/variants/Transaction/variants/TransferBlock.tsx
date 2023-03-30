@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useMemo } from 'react';
@@ -19,12 +20,16 @@ const Component: React.FC<Props> = ({ transaction }: Props) => {
   const xcmData = transaction.data as ExtrinsicDataTypeMap[ExtrinsicType.TRANSFER_XCM];
   const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
   const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
-  const tokenInfo = assetRegistryMap[data.tokenSlug];
+  const tokenInfo = assetRegistryMap[transaction.extrinsicType === ExtrinsicType.TRANSFER_XCM ? xcmData.tokenSlug : data.tokenSlug];
 
   const chainInfo = useMemo(
-    () => (data.networkKey ? chainInfoMap[transaction.chain] : null),
-    [chainInfoMap, data.networkKey, transaction.chain]
+    () => chainInfoMap[transaction.chain],
+    [chainInfoMap, transaction.chain]
   );
+
+  const { decimals: chainDecimals, symbol: chainSymbol } = useMemo(() => {
+    return _getChainNativeTokenBasicInfo(chainInfo);
+  }, [chainInfo]);
 
   return (
     <>
@@ -57,16 +62,16 @@ const Component: React.FC<Props> = ({ transaction }: Props) => {
 
       <MetaInfo hasBackgroundWrapper>
         <MetaInfo.Number
-          decimals={tokenInfo.decimals || 18}
+          decimals={tokenInfo.decimals || 0}
           label={t('Amount')}
           suffix={tokenInfo.symbol}
           value={data.value || 0}
         />
 
         <MetaInfo.Number
-          decimals={chainInfo?.substrateInfo?.decimals || chainInfo?.evmInfo?.decimals || 18}
+          decimals={chainDecimals}
           label={t('Estimated fee')}
-          suffix={chainInfo?.substrateInfo?.symbol}
+          suffix={chainSymbol}
           value={transaction.estimateFee?.value || 0}
         />
       </MetaInfo>

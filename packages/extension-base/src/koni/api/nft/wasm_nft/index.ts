@@ -242,8 +242,6 @@ export class WasmNftApi extends BaseNftApi {
       const balance = _balance.output ? _balance.output.toString() : '0';
 
       if (parseInt(balance) === 0) {
-        nftParams.updateNftIds(this.chain, address, smartContract, nftIds);
-
         return;
       }
 
@@ -291,8 +289,6 @@ export class WasmNftApi extends BaseNftApi {
       } catch (e) {
         console.error(`error parsing item for ${this.chain} nft`, e);
       }
-
-      nftParams.updateNftIds(this.chain, address, smartContract, nftIds);
     }));
 
     if (isFeatured) {

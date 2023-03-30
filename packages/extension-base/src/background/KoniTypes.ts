@@ -188,18 +188,12 @@ export enum CrowdloanParaState {
   FAILED = 'failed'
 }
 
-export interface NftTransferExtra {
-  cronUpdate: boolean;
-  forceUpdate: boolean;
-  selectedNftCollection?: NftCollection; // for rendering
-  nftItems?: NftItem[]; // for rendering, remaining nfts
-}
-
 export interface NftItem {
   // must-have
   id: string;
   chain: string;
   collectionId: string;
+  owner: string;
   originAsset?: string;
 
   name?: string;
@@ -210,7 +204,6 @@ export interface NftItem {
   properties?: Record<any, any> | null;
   type?: _AssetType.ERC721 | _AssetType.PSP34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
-  owner: string;
   onChainOption?: any; // for sending PSP-34 tokens, should be done better
 }
 
@@ -910,15 +903,6 @@ export enum ThemeNames {
   SUBSPACE = 'subspace'
 }
 
-export type RequestNftForceUpdate = {
-  collectionId: string,
-  nft: NftItem,
-  isSendingSelf: boolean,
-  chain: string,
-  senderAddress: string,
-  recipientAddress: string
-}
-
 export enum NETWORK_ERROR {
   INVALID_INFO_TYPE = 'invalidInfoType',
   INJECT_SCRIPT_DETECTED = 'injectScriptDetected',
@@ -956,7 +940,8 @@ export interface NftTransactionRequest {
   recipientAddress: string,
 
   nftItemName?: string, // Use for confirmation view only
-  params: Record<string, any>
+  params: Record<string, any>,
+  nftItem: NftItem
 }
 
 export interface EvmNftTransaction extends ValidateTransactionResponse {
@@ -1371,7 +1356,7 @@ export interface RequestCheckCrossChainTransfer extends BaseRequestSign {
   to: string,
   transferAll?: boolean,
   value: string,
-  sendingTokenSlug: string
+  tokenSlug: string
 }
 
 export type RequestCrossChainTransfer = InternalRequestSign<RequestCheckCrossChainTransfer>;
@@ -1844,10 +1829,6 @@ export interface KoniRequestSignatures {
   'pri(evmNft.getTransaction)': [NftTransactionRequest, EvmNftTransaction];
   'pri(substrateNft.submitTransaction)': [RequestSubstrateNftSubmitTransaction, NftTransactionResponse];
   'pri(substrateNft.getTransaction)': [NftTransactionRequest, SubstrateNftTransaction];
-  'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
-  'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];
-  'pri(nftTransfer.getSubscription)': [null, NftTransferExtra, NftTransferExtra];
-  'pri(nft.forceUpdate)': [RequestNftForceUpdate, boolean];
   'pri(nft.getNft)': [null, NftJson];
   'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson];
   'pri(nftCollection.getNftCollection)': [null, NftCollectionJson];

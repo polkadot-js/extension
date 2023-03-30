@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import BaseStoreWithAddressAndChain from '@subwallet/extension-base/services/storage-service/db-stores/BaseStoreWithAddressAndChain';
 import { liveQuery } from 'dexie';
 
@@ -41,6 +42,12 @@ export default class NftStore extends BaseStoreWithAddressAndChain<INft> {
       address,
       chain
     }).and((nft) => !collectionIds.some((item) => item === nft.collectionId));
+  }
+
+  deleteNftByAddresses (chain: string, addresses: string[], nftItem: NftItem) {
+    return this.table.where('address').anyOfIgnoreCase(addresses).filter((storedItem) => storedItem.chain === chain &&
+      storedItem.collectionId === nftItem.collectionId &&
+      storedItem.id === nftItem.id).delete();
   }
 
   deleteNftsByCollection (chain: string, collectionId: string) {

@@ -103,9 +103,6 @@ export class EvmNftApi extends BaseNftApi {
       const balance = (await contract.methods.balanceOf(address).call()) as unknown as number;
 
       if (Number(balance) === 0) {
-        // nftParams.updateReady(true);
-        nftParams.updateNftIds(this.chain, address, smartContract, nftIds);
-
         return;
       }
 
@@ -163,8 +160,6 @@ export class EvmNftApi extends BaseNftApi {
       } catch (e) {
         console.error('evm nft error', e);
       }
-
-      nftParams.updateNftIds(this.chain, address, smartContract, nftIds);
     }));
 
     if (ownItem) {

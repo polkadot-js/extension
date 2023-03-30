@@ -448,17 +448,13 @@ export default class TransactionService {
     switch (transaction.extrinsicType) {
       case ExtrinsicType.SEND_NFT: {
         const inputData = parseTransactionData<ExtrinsicType.SEND_NFT>(transaction.data);
+        const sender = keyring.getAccount(inputData.senderAddress);
+        const recipient = keyring.getAccount(inputData.recipientAddress);
 
-        const senderPair = keyring.getPair(inputData.senderAddress);
-        const recipientPair = keyring.getPair(inputData.recipientAddress);
-
-        this.databaseService.handleNftTransfer(transaction.chain, [senderPair.address, ALL_ACCOUNT_KEY], inputData.nftItem)
+        sender && this.databaseService.handleNftTransfer(transaction.chain, [sender.address, ALL_ACCOUNT_KEY], inputData.nftItem)
           .catch(console.error);
-
-        if (recipientPair) {
-          this.databaseService.addNft(recipientPair.address, { ...inputData.nftItem, owner: recipientPair.address })
-            .catch(console.error);
-        }
+        recipient && this.databaseService.addNft(recipient.address, { ...inputData.nftItem, owner: recipient.address })
+          .catch(console.error);
       }
     }
   }
@@ -702,10 +698,16 @@ export default class TransactionService {
         }
 
         if (txState.status.isInBlock) {
-          eventData.extrinsicHash = txState.txHash.toHex();
           eventData.eventLogs = txState.events;
-          emitter.emit('extrinsicHash', eventData);
 
+          if (!eventData.extrinsicHash || eventData.extrinsicHash === '') {
+            eventData.extrinsicHash = txState.txHash.toHex();
+            emitter.emit('extrinsicHash', eventData);
+          }
+        }
+
+        if (txState.status.isFinalized) {
+          eventData.eventLogs = txState.events;
           // TODO: push block hash and block number into eventData
           txState.events
             .filter(({ event: { section } }) => section === 'system')

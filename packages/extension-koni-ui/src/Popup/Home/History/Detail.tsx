@@ -121,26 +121,6 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
     }
 
     const chainInfo = chainInfoMap[data.chain];
-
-    if (data.status === 'processing') {
-      return;
-      // return (
-      //   <Button
-      //     block
-      //     icon={
-      //       <Icon
-      //         phosphorIcon={XCircle}
-      //         weight={'fill'}
-      //       />
-      //     }
-      //     onClick={onCancel}
-      //     schema={'error'}
-      //   >
-      //     {t('Cancel')}
-      //   </Button>
-      // );
-    }
-
     const link = (data.extrinsicHash && data.extrinsicHash !== '') && getTransactionLink(chainInfo, data.extrinsicHash);
 
     if (link) {

@@ -6,7 +6,7 @@ import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NftTransferExtra, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
@@ -98,18 +98,11 @@ export default class KoniState {
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
 
-  private nftTransferSubject = new Subject<NftTransferExtra>();
-  // Only for rendering nft after transfer
-  private nftTransferState: NftTransferExtra = {
-    cronUpdate: false,
-    forceUpdate: false
-  };
-
   private nftSubject = new Subject<NftJson>();
+
   private stakingSubject = new Subject<StakingJson>();
   private chainStakingMetadataSubject = new Subject<ChainStakingMetadata[]>();
   private stakingNominatorMetadataSubject = new Subject<NominatorMetadata[]>();
-
   private stakingRewardSubject = new Subject<StakingRewardJson>();
   private stakingRewardState: StakingRewardJson = {
     ready: false,
@@ -147,7 +140,7 @@ export default class KoniState {
     this.priceService = new PriceService(this.serviceInfoSubject, this.dbService, this.chainService);
     this.balanceService = new BalanceService(this.chainService);
     this.historyService = new HistoryService(this.dbService, this.chainService);
-    this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceService, this.historyService, this.notificationService);
+    this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');
@@ -448,28 +441,6 @@ export default class KoniState {
     this.dbService.updateNominatorMetadata(item).catch((e) => this.logger.warn(e));
   }
 
-  public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {
-    this.nftTransferState = data;
-
-    if (callback) {
-      callback(data);
-    }
-
-    this.nftTransferSubject.next(data);
-  }
-
-  public getNftTransfer (): NftTransferExtra {
-    return this.nftTransferState;
-  }
-
-  public getNftTransferSubscription (update: (value: NftTransferExtra) => void): void {
-    update(this.nftTransferState);
-  }
-
-  public subscribeNftTransfer () {
-    return this.nftTransferSubject;
-  }
-
   public setNftCollection (network: string, data: NftCollection, callback?: (data: NftCollection) => void): void {
     this.dbService.addNftCollection(data).catch((e) => this.logger.warn(e));
     callback && callback(data);
@@ -505,20 +476,12 @@ export default class KoniState {
     callback && callback(nftData);
   }
 
-  public updateNftIds (chain: string, address: string, collectionId?: string, nftIds?: string[]): void {
-    this.dbService.deleteRemovedNftsFromCollection(chain, address, collectionId, nftIds).catch((e) => this.logger.warn(e));
-  }
-
   public removeNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {
     return this.dbService.removeNfts(chain, address, collectionId, nftIds);
   }
 
   public deleteNftCollection (chain: string, collectionId: string) {
     return this.dbService.deleteNftCollection(chain, collectionId);
-  }
-
-  public updateCollectionIds (chain: string, address: string, collectionIds: string[] = []): void {
-    this.dbService.deleteNftsFromRemovedCollection(chain, address, collectionIds);
   }
 
   public async getNft (): Promise<NftJson | undefined> {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -44,7 +44,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal } = useContext(ModalContext);
 
   const { assetRegistry, assetSettingMap } = useSelector((state: RootState) => state.assetRegistry);
-  const assetItems = useMemo(() => Object.values(assetRegistry), [assetRegistry]);
+  const assetItems = useMemo(() => {
+    const allFungibleTokens: _ChainAsset[] = [];
+
+    Object.values(assetRegistry).forEach((asset) => {
+      if (_isAssetFungibleToken(asset)) {
+        allFungibleTokens.push(asset);
+      }
+    });
+
+    return allFungibleTokens;
+  }, [assetRegistry]);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filterFunction = useMemo<(item: _ChainAsset) => boolean>(() => {
     return (chainAsset) => {

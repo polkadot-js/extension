@@ -12,7 +12,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { customFormatDate } from '@subwallet/extension-koni-ui/util/common/customFormatDate';
 import { Button, Icon, SwIconProps, SwModal } from '@subwallet/react-ui';
-import { ArrowSquareUpRight, CheckCircle, ProhibitInset, Spinner, StopCircle, XCircle } from 'phosphor-react';
+import { ArrowSquareUpRight, CheckCircle, ProhibitInset, Spinner, StopCircle } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -123,21 +123,22 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
     const chainInfo = chainInfoMap[data.chain];
 
     if (data.status === 'processing') {
-      return (
-        <Button
-          block
-          icon={
-            <Icon
-              phosphorIcon={XCircle}
-              weight={'fill'}
-            />
-          }
-          onClick={onCancel}
-          schema={'error'}
-        >
-          {t('Cancel')}
-        </Button>
-      );
+      return;
+      // return (
+      //   <Button
+      //     block
+      //     icon={
+      //       <Icon
+      //         phosphorIcon={XCircle}
+      //         weight={'fill'}
+      //       />
+      //     }
+      //     onClick={onCancel}
+      //     schema={'error'}
+      //   >
+      //     {t('Cancel')}
+      //   </Button>
+      // );
     }
 
     const link = (data.extrinsicHash && data.extrinsicHash !== '') && getTransactionLink(chainInfo, data.extrinsicHash);
@@ -160,7 +161,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
     }
 
     return null;
-  }, [chainInfoMap, data, onCancel, openBlockExplorer, t]);
+  }, [chainInfoMap, data, openBlockExplorer, t]);
 
   const contentNode = useMemo(() => {
     if (!data) {
@@ -268,7 +269,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
           </>
         )}
 
-        {transactionType === ExtrinsicType.STAKING_CLAIM_REWARD && (
+        {amount && (
           <MetaInfo.Number
             decimals={amount?.decimals || undefined}
             label={t('Amount')}

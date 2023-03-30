@@ -6,6 +6,7 @@ import EventEmitter from 'eventemitter3';
 import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { EventRecord } from '@polkadot/types/interfaces';
 
 export interface SWTransaction extends ValidateTransactionResponse {
   id: string;
@@ -48,6 +49,7 @@ export interface TransactionEventResponse extends ValidateTransactionResponse {
   extrinsicHash?: string,
   blockHash?: string
   blockNumber?: number,
+  eventLogs?: EventRecord[]
 }
 export interface TransactionEventMap {
   extrinsicHash: (response: TransactionEventResponse) => void;

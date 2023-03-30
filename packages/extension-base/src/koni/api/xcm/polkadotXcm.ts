@@ -33,10 +33,7 @@ function getAssetLocation (tokenInfo: _ChainAsset, sendingValue: string) {
   return {
     V1: [
       {
-        id: {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          Concrete: multilocation
-        },
+        id: multilocation,
         fun: { Fungible: sendingValue }
       }
     ]

@@ -112,9 +112,6 @@ export class AcalaNftApi extends BaseNftApi {
 
     try {
       if (!assetIds || assetIds.length === 0) {
-        // params.updateReady(true);
-        params.updateNftIds(this.chain, address);
-
         return;
       }
 
@@ -161,9 +158,6 @@ export class AcalaNftApi extends BaseNftApi {
         params.updateCollection(this.chain, parsedCollection);
         // params.updateReady(true);
       }));
-
-      params.updateCollectionIds(this.chain, address, Object.keys(collectionNftIds));
-      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => params.updateNftIds(this.chain, address, collectionId, nftIds));
     } catch (e) {
       console.error('Failed to fetch acala nft', e);
     }

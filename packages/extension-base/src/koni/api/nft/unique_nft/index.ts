@@ -165,8 +165,6 @@ export default class UniqueNftApi extends BaseNftApi {
         }
       }));
 
-      params.updateCollectionIds(this.chain, address, allCollectionId.map((o) => o.toString()));
-
       await Promise.all(allCollectionId.map(async (collectionId) => {
         const collectionIdStr = collectionId.toString();
 
@@ -175,8 +173,6 @@ export default class UniqueNftApi extends BaseNftApi {
 
         collectionMap[collectionIdStr] = collection;
         const nftIds = Object.entries(nftMap).filter((item) => item[1] === collectionId).map((item) => item[0]);
-
-        params.updateNftIds(this.chain, collectionIdStr, address, nftIds);
 
         const parsedCollection: NftCollection = {
           collectionId: collectionIdStr,

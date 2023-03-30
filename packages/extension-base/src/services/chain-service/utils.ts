@@ -255,7 +255,7 @@ export function _isAssetSmartContractNft (assetInfo: _ChainAsset) {
 }
 
 export function _parseAssetRefKey (originTokenSlug: string, destinationTokenSlug: string) {
-  return `${originTokenSlug}-${destinationTokenSlug}`;
+  return `${originTokenSlug}___${destinationTokenSlug}`;
 }
 
 export function _isXcmPathSupported (originTokenSlug: string, destinationTokenSlug: string, assetRefMap: Record<string, _AssetRef>) {

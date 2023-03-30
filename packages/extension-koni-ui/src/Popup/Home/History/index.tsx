@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import {quickFormatToCompare} from "@subwallet/extension-koni-ui/util/account/reformatAddress";
 
 type Props = ThemeProps
 
@@ -259,23 +260,25 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   // Fill display data to history list
   const historyList = useMemo(() => {
-    const processedList = rawHistoryList.map((item: TransactionHistoryItem) => {
-      const fromName = accountMap[item.from?.toLowerCase()] || '';
-      const toName = accountMap[item.to?.toLowerCase()] || '';
+    const currentAddress = currentAccount?.address || '';
+    const currentAddressLowerCase = currentAddress.toLowerCase();
+    const isFilterByAddress = currentAccount?.address && !isAccountAll(currentAddress);
+    const finalHistoryList: TransactionHistoryDisplayItem[] = [];
 
-      return { ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) };
-    }).sort((a, b) => (b.time - a.time));
+    rawHistoryList.forEach((item: TransactionHistoryItem) => {
+      // Filter account by current account
+      if (isFilterByAddress && currentAddressLowerCase !== quickFormatToCompare(item.address)) {
+        return;
+      }
 
-    // Filter current account records
-    const currentAddress = currentAccount?.address;
+      // Format display name for account by address
+      const fromName = accountMap[quickFormatToCompare(item.from) || ''];
+      const toName = accountMap[quickFormatToCompare(item.to) || ''];
 
-    if (currentAddress && !isAccountAll(currentAddress)) {
-      return processedList.filter((item: TransactionHistoryItem) => {
-        return item.address === currentAddress;
-      });
-    }
+      finalHistoryList.push({ ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) })
+    });
 
-    return processedList;
+    return finalHistoryList.sort((a, b) => (b.time - a.time));
   }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap, currentAccount?.address]);
 
   const onOpenDetail = useCallback((item: TransactionHistoryDisplayItem) => {

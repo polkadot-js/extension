@@ -26,3 +26,17 @@ export default function reformatAddress (address: string, networkPrefix: number,
 
   return encodeAddress(publicKey, networkPrefix);
 }
+
+export function quickFormatToCompare (address?: string) {
+  if (!address) {
+    return address;
+  }
+
+  if (address.startsWith('5')) {
+    return address.toLowerCase();
+  } else if (address.startsWith('0x')) {
+    return address.toLowerCase();
+  } else {
+    return reformatAddress(address, 42).toLowerCase();
+  }
+}

@@ -8,7 +8,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { updateAssetSetting } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Button } from '@subwallet/react-ui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 export default function useAssetChecker () {
@@ -17,35 +17,36 @@ export default function useAssetChecker () {
   const { assetRegistry, assetSettingMap } = useSelector((root: RootState) => root.assetRegistry);
   const notify = useNotification();
   const [enablingAsset, setEnablingAsset] = useState<string | null>(null);
+  const asset = useRef<string | null>(null);
 
   useEffect(() => {
     if (enablingAsset && assetSettingMap[enablingAsset]?.visible) {
       const assetInfo = assetRegistry[enablingAsset];
-      const chainInfo = chainInfoMap[assetInfo.originChain];
-      const message = t('{{name}} on {{chainName}} is turned on.', { replace: { name: assetInfo?.symbol, chainName: chainInfo?.name } });
+      const message = t('{{name}} is turned on.', { replace: { name: assetInfo?.symbol } });
 
-      notify({ message, type: NotificationType.SUCCESS, duration: 1.5 });
-      // setEnablingAsset(null);
+      notify({ message, type: NotificationType.SUCCESS, duration: 1 });
+      setEnablingAsset(null);
     }
   }, [enablingAsset, chainInfoMap, chainStateMap, notify, t, assetSettingMap, assetRegistry]);
 
   const ensureAssetEnable = useCallback((assetSlug: string) => {
+    if (asset.current === assetSlug) {
+      return;
+    }
+
+    asset.current = assetSlug;
     const assetSetting = assetSettingMap[assetSlug];
     const assetInfo = assetRegistry[assetSlug];
     const chainState = chainStateMap[assetInfo.originChain];
     const chainInfo = chainInfoMap[assetInfo.originChain];
-
-    console.log(assetSlug, assetSetting);
 
     if ((assetInfo && !assetSetting) || !assetSetting.visible) {
       const message = t('{{name}} on {{chainName}} is not ready to use, do you want to turn it on?', { replace: { name: assetInfo?.symbol, chainName: chainInfo?.name } });
 
       const _onEnabled = () => {
         updateAssetSetting({ tokenSlug: assetSlug, assetSetting: { visible: true } }).then(() => {
-          const chainInfo = chainInfoMap[assetSlug];
-
           setEnablingAsset(assetSlug);
-          notify({ message: t('{{name}} on {{chainName}} is turning on.', { replace: { name: assetInfo?.symbol, chainName: chainInfo?.name } }), duration: 1.5 });
+          notify({ message: t('{{name}} is turning on.', { replace: { name: assetInfo?.symbol } }), duration: 1.5 });
         }).catch(console.error);
       };
 

@@ -138,7 +138,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onFinish={onSubmit}
           >
             <Form.Item
-              hideError={true}
               name={FormFieldName.OLD_PASSWORD}
               rules={[
                 {
@@ -146,6 +145,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   required: true
                 }
               ]}
+              statusHelpAsTooltip={true}
             >
               <Input
                 disabled={loading}
@@ -154,9 +154,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               />
             </Form.Item>
             <Form.Item
-              hideError={true}
               name={FormFieldName.PASSWORD}
               rules={newPasswordRules}
+              statusHelpAsTooltip={true}
             >
               <Input
                 disabled={loading}
@@ -166,9 +166,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               />
             </Form.Item>
             <Form.Item
-              hideError={true}
               name={FormFieldName.CONFIRM_PASSWORD}
               rules={confirmPasswordRules}
+              statusHelpAsTooltip={true}
             >
               <Input
                 disabled={loading}

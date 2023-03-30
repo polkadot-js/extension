@@ -416,7 +416,6 @@ const Component: React.FC<Props> = (props: Props) => {
               }
 
               <Form.Item
-                hideError
                 name={FormFieldName.VALUE}
                 rules={[
                   { required: true },
@@ -441,6 +440,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     }
                   })
                 ]}
+                statusHelpAsTooltip={true}
               >
                 <AmountInput
                   decimals={decimals}

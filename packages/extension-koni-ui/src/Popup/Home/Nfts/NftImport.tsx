@@ -384,6 +384,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Form.Item
               name='contractAddress'
               rules={[{ validator: contractAddressValidator }]}
+              statusHelpAsTooltip={true}
             >
               <AddressInput
                 disabled={selectedNftType === ''}
@@ -395,6 +396,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Form.Item
               name='collectionName'
               rules={[{ validator: collectionNameValidator }]}
+              statusHelpAsTooltip={true}
             >
               <Input
                 disabled={isCollectionNameDisabled()}

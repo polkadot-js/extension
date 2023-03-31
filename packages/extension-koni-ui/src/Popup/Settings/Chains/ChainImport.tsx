@@ -320,6 +320,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Form.Item
                     name={'provider'}
                     rules={[{ validator: providerValidator }]}
+                    statusHelpAsTooltip={true}
                     validateTrigger={['onBlur']}
                   >
                     <Input
@@ -419,6 +420,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Form.Item
                     name={'blockExplorer'}
                     rules={[{ validator: blockExplorerValidator }]}
+                    statusHelpAsTooltip={true}
                   >
                     <Input placeholder={t('Block explorer')} />
                   </Form.Item>
@@ -433,6 +435,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Form.Item
                     name={'crowdloanUrl'}
                     rules={[{ validator: crowdloanUrlValidator }]}
+                    statusHelpAsTooltip={true}
                   >
                     <Input placeholder={t('Crowdloan URL')} />
                   </Form.Item>

@@ -12,8 +12,7 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
+import { useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { getFreeBalance, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
@@ -165,7 +164,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { t } = useTranslation();
   const locationState = useLocation().state as SendFundParam;
   const [sendFundSlug] = useState<string | undefined>(locationState?.slug);
-  const notify = useNotification();
 
   const { asset, chain, from, onDone, setAsset, setChain, setFrom } = useContext(TransactionContext);
 
@@ -177,6 +175,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
   const [loading, setLoading] = useState(false);
   const [ignoreWarnings, setIgnoreWarnings] = useState(false);
+
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDone, setIgnoreWarnings);
 
   const [form] = Form.useForm<TransferFormProps>();
   const formDefault = useMemo(() => {
@@ -318,31 +318,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     setTimeout(() => {
       // Handle transfer action
       sendPromise
-        .then((rs) => {
-          const { errors, extrinsicHash, warnings } = rs;
-
-          if (errors.length || warnings.length) {
-            notify({
-              message: errors[0]?.message || warnings[0]?.message,
-              type: errors.length ? 'error' : 'warning'
-            });
-            setIgnoreWarnings(true);
-          } else if (extrinsicHash) {
-            onDone(extrinsicHash);
-          }
-        })
-        .catch((e: Error) => {
-          notify({
-            message: e.message,
-            type: 'error'
-          });
-        })
+        .then(onSuccess)
+        .catch(onError)
         .finally(() => {
           setLoading(false);
         })
       ;
     }, 300);
-  }, [chain, from, asset, ignoreWarnings, notify, onDone]);
+  }, [chain, from, asset, ignoreWarnings, onSuccess, onError]);
 
   const currentChainAsset = useMemo(() => {
     return asset ? assetRegistry[asset] : undefined;
@@ -465,6 +448,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
                   validator: validateAmount
                 }
               ]}
+              statusHelpAsTooltip={true}
               validateTrigger='onBlur'
             >
               <AmountInput
@@ -490,6 +474,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
                 validator: validateRecipientAddress
               }
             ]}
+            statusHelpAsTooltip={true}
             validateTrigger='onBlur'
           >
             <AddressInput

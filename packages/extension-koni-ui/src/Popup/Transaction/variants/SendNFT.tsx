@@ -227,6 +227,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props): React.ReactEleme
               rules={[
                 recipientValidator
               ]}
+              statusHelpAsTooltip={true}
               validateTrigger='onBlur'
             >
               <AddressInput

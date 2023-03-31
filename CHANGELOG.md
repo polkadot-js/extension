@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.8.4 (Koni)
+Build date: Mar 31, 2023.
+
+Update:
+- Integrate Aventus Network (#646)
+- Add ArtZero API & fix bug show NFT (#1112)
+- Update Azero block explorer (#1117)
+
+Bug fixes:
+- Fix bug importing PSP22 tokens (#1118)
+
 ## 0.8.3 (Koni)
 Build date: Mar 29, 2023.
 

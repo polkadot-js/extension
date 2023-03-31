@@ -333,8 +333,8 @@ export class WasmNftApi extends BaseNftApi {
         itemIndexes.push(i);
       }
 
-      try {
-        await Promise.all(itemIndexes.map(async (i) => {
+      await Promise.all(itemIndexes.map(async (i) => {
+        try {
           // @ts-ignore
           const _tokenByIndexResp = await contractPromise.query['psp34Enumerable::ownersTokenByIndex'](address, { gasLimit: getDefaultWeightV2(this.dotSamaApi?.api as ApiPromise) }, address, i);
 
@@ -342,7 +342,7 @@ export class WasmNftApi extends BaseNftApi {
             const rawTokenId = _tokenByIndexResp.output.toHuman() as Record<string, any>;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             const tokenIdObj = rawTokenId.Ok.Ok as Record<string, string>; // capital O, not normal o
-            const tokenId = Object.values(tokenIdObj)[0];
+            const tokenId = Object.values(tokenIdObj)[0].replaceAll(',', '');
 
             nftIds.push(tokenId);
 
@@ -368,10 +368,10 @@ export class WasmNftApi extends BaseNftApi {
               collectionImage = nftItem.image; // No default collection image
             }
           }
-        }));
-      } catch (e) {
-        console.error(`error parsing item for ${this.chain} nft`, e);
-      }
+        } catch (e) {
+          console.error(`error parsing item #${i} for ${this.chain} nft`, e);
+        }
+      }));
 
       nftParams.updateNftIds(this.chain, address, smartContract, nftIds);
     }));
@@ -423,7 +423,9 @@ export class WasmNftApi extends BaseNftApi {
         this.getCollectionAttributes(contractPromise)
       ]);
 
-      return await this.getItemsByCollection(contractPromise, attributeList, storedOnChain, smartContract, name, params, isCollectionFeatured);
+      console.log('isCollectionFeatured', this.chain, name, isCollectionFeatured);
+
+      return await this.getItemsByCollection(contractPromise, attributeList, storedOnChain, smartContract, name, params, false);
     }));
   }
 }

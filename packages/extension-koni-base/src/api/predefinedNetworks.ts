@@ -628,7 +628,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     coinGeckoKey: 'aleph-zero',
     getStakingOnChain: true,
     supportBonding: true,
-    supportSmartContract: [ContractType.wasm]
+    supportSmartContract: [ContractType.wasm],
+    blockExplorer: 'https://alephzero.subscan.io'
   },
   rmrk: {
     key: 'rmrk',

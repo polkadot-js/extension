@@ -18,8 +18,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
   const data = transaction.data as RequestStakePoolingBonding;
 
-  console.log('transaction', transaction);
-
   const { t } = useTranslation();
   const { decimals, symbol } = useGetNativeTokenBasicInfo(transaction.chain);
 

@@ -64,18 +64,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           oldPassword: oldPassword
         }).then((res) => {
           if (!res.status) {
-            setSubmitError(res.errors[0]);
+            form.setFields([{ name: FormFieldName.OLD_PASSWORD, errors: res.errors }]);
           } else {
             goHome();
           }
         }).catch((e: Error) => {
-          setSubmitError(e.message);
+          form.setFields([{ name: FormFieldName.OLD_PASSWORD, errors: [e.message] }]);
         }).finally(() => {
           setLoading(false);
         });
       }, 1000);
     }
-  }, [goHome]);
+  }, [form, goHome]);
 
   const onUpdate: Callbacks<ChangePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
     const { empty, error } = simpleCheckForm(allFields);

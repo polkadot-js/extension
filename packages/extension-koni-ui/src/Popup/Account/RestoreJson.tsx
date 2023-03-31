@@ -240,7 +240,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onChangePassword: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     const value = event.target.value;
 
-    setSubmitValidateState({});
+    if (!value) {
+      setSubmitValidateState({
+        message: 'Password is required',
+        status: 'error'
+      });
+    } else {
+      setSubmitValidateState({});
+    }
+
     setPassword(value);
   }, []);
 
@@ -325,7 +333,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             {
               requirePassword && (
                 <Form.Item
-                  help={submitValidateState.message}
                   validateStatus={submitValidateState.status}
                 >
                   <div className='input-label'>
@@ -335,6 +342,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                     id={`${formName}_${passwordField}`}
                     onChange={onChangePassword}
                     placeholder={t('Current password')}
+                    statusHelp={submitValidateState.message}
                     type='password'
                     value={password}
                   />

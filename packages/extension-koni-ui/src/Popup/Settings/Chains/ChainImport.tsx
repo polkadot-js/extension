@@ -13,7 +13,7 @@ import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFo
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
-import { ActivityIndicator, Col, Form, Icon, Input, Row, Tooltip } from '@subwallet/react-ui';
+import { ActivityIndicator, Col, Form, Icon, Input, Row } from '@subwallet/react-ui';
 import { FloppyDiskBack, Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
@@ -312,135 +312,106 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             form={form}
           >
             <div className={'chain_import__attributes_container'}>
-              <Tooltip
-                placement={'topLeft'}
-                title={t('Provider URL')}
+              <Form.Item
+                name={'provider'}
+                rules={[{ validator: providerValidator }]}
+                statusHelpAsTooltip={true}
+                validateTrigger={['onBlur']}
               >
-                <div>
-                  <Form.Item
-                    name={'provider'}
-                    rules={[{ validator: providerValidator }]}
-                    statusHelpAsTooltip={true}
-                    validateTrigger={['onBlur']}
-                  >
-                    <Input
-                      disabled={isValidating}
-                      placeholder={t('Provider URL')}
-                      prefix={<Icon
-                        customSize={'24px'}
-                        iconColor={token['gray-4']}
-                        phosphorIcon={ShareNetwork}
-                        type={'phosphor'}
-                        weight={'bold'}
-                      />}
-                      suffix={providerSuffix()}
+                <Input
+                  disabled={isValidating}
+                  placeholder={t('Provider URL')}
+                  prefix={(
+                    <Icon
+                      customSize={'24px'}
+                      iconColor={token['gray-4']}
+                      phosphorIcon={ShareNetwork}
+                      type={'phosphor'}
+                      weight={'bold'}
                     />
-                  </Form.Item>
-                </div>
-              </Tooltip>
+                  )}
+                  suffix={providerSuffix()}
+                  tooltip={t('Provider URL')}
+                  tooltipPlacement={'topLeft'}
+                />
+              </Form.Item>
 
               <Row gutter={token.paddingSM}>
                 <Col span={16}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('Chain name')}
-                  >
-                    <div>
-                      <Form.Item name={'name'}>
-                        <Input
-                          disabled={true}
-                          placeholder={t('Chain name')}
-                          prefix={<Icon
-                            customSize={'24px'}
-                            iconColor={token['gray-4']}
-                            phosphorIcon={Globe}
-                            type={'phosphor'}
-                            weight={'bold'}
-                          />}
-                        />
-                      </Form.Item>
-                    </div>
-                  </Tooltip>
+                  <Form.Item name={'name'}>
+                    <Input
+                      disabled={true}
+                      placeholder={t('Chain name')}
+                      prefix={<Icon
+                        customSize={'24px'}
+                        iconColor={token['gray-4']}
+                        phosphorIcon={Globe}
+                        type={'phosphor'}
+                        weight={'bold'}
+                      />}
+                      tooltip={t('Chain name')}
+                      tooltipPlacement={'topLeft'}
+                    />
+                  </Form.Item>
                 </Col>
                 <Col span={8}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('Symbol')}
-                  >
-                    <div>
-                      <Form.Item name={'symbol'}>
-                        <Input
-                          disabled={true}
-                          placeholder={t('Symbol')}
-                        />
-                      </Form.Item>
-                    </div>
-                  </Tooltip>
+                  <Form.Item name={'symbol'}>
+                    <Input
+                      disabled={true}
+                      placeholder={t('Symbol')}
+                      tooltip={t('Symbol')}
+                      tooltipPlacement={'topLeft'}
+                    />
+                  </Form.Item>
                 </Col>
               </Row>
 
               <Row gutter={token.paddingSM}>
                 <Col span={12}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('Price Id')}
-                  >
-                    <div>
-                      <Form.Item name={'priceId'}>
-                        <Input
-                          placeholder={t('Price Id')}
-                        />
-                      </Form.Item>
-                    </div>
-                  </Tooltip>
+                  <Form.Item name={'priceId'}>
+                    <Input
+                      placeholder={t('Price Id')}
+                      tooltip={t('Price Id')}
+                      tooltipPlacement={'topLeft'}
+                    />
+                  </Form.Item>
                 </Col>
 
                 <Col span={12}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('Chain type')}
-                  >
-                    <div>
-                      <Form.Item name={'type'}>
-                        <Input
-                          disabled={true}
-                          placeholder={t('Chain type')}
-                        />
-                      </Form.Item>
-                    </div>
-                  </Tooltip>
+                  <Form.Item name={'type'}>
+                    <Input
+                      disabled={true}
+                      placeholder={t('Chain type')}
+                      tooltip={t('Chain type')}
+                      tooltipPlacement={'topLeft'}
+                    />
+                  </Form.Item>
                 </Col>
               </Row>
 
-              <Tooltip
-                placement={'topLeft'}
-                title={t('Block explorer')}
+              <Form.Item
+                name={'blockExplorer'}
+                rules={[{ validator: blockExplorerValidator }]}
+                statusHelpAsTooltip={true}
               >
-                <div>
-                  <Form.Item
-                    name={'blockExplorer'}
-                    rules={[{ validator: blockExplorerValidator }]}
-                    statusHelpAsTooltip={true}
-                  >
-                    <Input placeholder={t('Block explorer')} />
-                  </Form.Item>
-                </div>
-              </Tooltip>
+                <Input
+                  placeholder={t('Block explorer')}
+                  tooltip={t('Block explorer')}
+                  tooltipPlacement={'topLeft'}
+                />
+              </Form.Item>
 
-              <Tooltip
-                placement={'topLeft'}
-                title={t('Crowdloan URL')}
+              <Form.Item
+                name={'crowdloanUrl'}
+                rules={[{ validator: crowdloanUrlValidator }]}
+                statusHelpAsTooltip={true}
               >
-                <div>
-                  <Form.Item
-                    name={'crowdloanUrl'}
-                    rules={[{ validator: crowdloanUrlValidator }]}
-                    statusHelpAsTooltip={true}
-                  >
-                    <Input placeholder={t('Crowdloan URL')} />
-                  </Form.Item>
-                </div>
-              </Tooltip>
+                <Input
+                  placeholder={t('Crowdloan URL')}
+                  tooltip={t('Crowdloan URL')}
+                  tooltipPlacement={'topLeft'}
+                />
+              </Form.Item>
             </div>
           </Form>
         </div>

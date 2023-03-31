@@ -4,7 +4,7 @@
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountSelector, CancelUnstakeSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useDefaultNavigate, useGetNominatorInfo, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useDefaultNavigate, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
@@ -34,20 +34,19 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chain: stakingChain, type: _stakingType } = useParams();
   const stakingType = _stakingType as StakingType;
 
+  const { t } = useTranslation();
+  const { goHome } = useDefaultNavigate();
+
   const dataContext = useContext(DataContext);
   const { asset, chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
 
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
-
-  const { goHome } = useDefaultNavigate();
 
   const nominatorInfo = useGetNominatorInfo(stakingChain, stakingType, from);
   const nominatorMetadata = nominatorInfo[0];
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-  const [warnings, setWarnings] = useState<string[]>([]);
 
   const [form] = Form.useForm<CancelUnstakeFormProps>();
   const formDefault = useMemo((): CancelUnstakeFormProps => ({
@@ -72,7 +71,7 @@ const Component: React.FC<Props> = (props: Props) => {
     setIsDisable(empty || error);
   }, [setFrom]);
 
-  const { t } = useTranslation();
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
   const onSubmit: FormCallbacks<CancelUnstakeFormProps>['onFinish'] = useCallback((values: CancelUnstakeFormProps) => {
     setLoading(true);
@@ -85,23 +84,13 @@ const Component: React.FC<Props> = (props: Props) => {
         chain: chain,
         selectedUnstaking: nominatorMetadata.unstakings[parseInt(unstakeIndex)]
       })
-        .then((result) => {
-          const { errors, extrinsicHash, warnings } = result;
-
-          if (errors.length || warnings.length) {
-            setLoading(false);
-            setErrors(errors.map((e) => e.message));
-            setWarnings(warnings.map((w) => w.message));
-          } else if (extrinsicHash) {
-            onDone(extrinsicHash);
-          }
-        })
-        .catch((error: Error) => {
+        .then(onSuccess)
+        .catch(onError)
+        .finally(() => {
           setLoading(false);
-          setErrors([error.message]);
         });
     }, 300);
-  }, [chain, from, nominatorMetadata.unstakings, onDone]);
+  }, [chain, from, nominatorMetadata.unstakings, onError, onSuccess]);
 
   const onPreCheckReadOnly = usePreCheckReadOnly(from);
 
@@ -154,8 +143,8 @@ const Component: React.FC<Props> = (props: Props) => {
         </PageWrapper>
       </TransactionContent>
       <TransactionFooter
-        errors={errors}
-        warnings={warnings}
+        errors={[]}
+        warnings={[]}
       >
         <Button
           disabled={loading}

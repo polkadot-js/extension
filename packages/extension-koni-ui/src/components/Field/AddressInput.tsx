@@ -26,9 +26,10 @@ interface Props extends BasicInputWrapper, ThemeProps {
 
 const modalId = 'input-account-address-modal';
 
-function Component ({ autoReformatValue,
-  className = '', disabled, id = modalId, label, onBlur, onChange, onFocus,
-  placeholder, readOnly, showAddressBook, showScanner, value }: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
+  const { autoReformatValue,
+    className = '', disabled, id = modalId, label, onBlur, onChange, onFocus,
+    placeholder, readOnly, showAddressBook, showScanner, statusHelp, value } = props;
   const { t } = useTranslation();
 
   const { inactiveModal } = useContext(ModalContext);
@@ -116,6 +117,7 @@ function Component ({ autoReformatValue,
         }
         readOnly={readOnly}
         ref={inputRef}
+        statusHelp={statusHelp}
         suffix={(
           <>
             {showAddressBook && <Button

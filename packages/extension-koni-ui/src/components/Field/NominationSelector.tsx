@@ -35,7 +35,7 @@ const renderItem = (item: NominationInfo, isSelected: boolean) => (
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className = '', disabled, id = 'nomination-selector', label, nominators, placeholder, value } = props;
+  const { className = '', disabled, id = 'nomination-selector', label, nominators, placeholder, statusHelp, value } = props;
   const { activeModal } = useContext(ModalContext);
 
   const filteredItems = useMemo(() => {
@@ -112,6 +112,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         searchPlaceholder={t<string>('Search validator')}
         searchableMinCharactersCount={2}
         selected={value || ''}
+        statusHelp={statusHelp}
         title={label || placeholder || t('Select validator')}
       />
     </>

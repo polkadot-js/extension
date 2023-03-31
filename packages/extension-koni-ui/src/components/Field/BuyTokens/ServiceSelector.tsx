@@ -33,7 +33,7 @@ const serviceItems: ServiceItem[] = [
 ];
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
-  const { className = '', disabled, id = 'service-selector', label, placeholder, value } = props;
+  const { className = '', disabled, id = 'service-selector', label, placeholder, statusHelp, value } = props;
   const { t } = useTranslation();
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
@@ -93,13 +93,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
         renderItem={renderItem}
         renderSelected={renderSelected}
         selected={value || ''}
+        statusHelp={statusHelp}
         title={label || placeholder || t('Select service')}
       />
     </>
   );
 };
 
-export const ServiceSelector = styled(forwardRef(Component))<Props>(({ theme: { logoMap, token } }: Props) => {
+export const ServiceSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return ({
     '&.service-selector-modal': {
       '.__option-item': {

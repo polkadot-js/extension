@@ -22,7 +22,7 @@ interface ProviderItemType {
 }
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
-  const { chainInfo, className = '', disabled, id = 'provider-selector', label, placeholder, value } = props;
+  const { chainInfo, className = '', disabled, id = 'provider-selector', label, placeholder, statusHelp, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
@@ -112,6 +112,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
       renderItem={renderItem}
       renderSelected={renderSelectedProvider}
       selected={value || ''}
+      statusHelp={statusHelp}
       title={label || placeholder || t('Select provider')}
     />
   );

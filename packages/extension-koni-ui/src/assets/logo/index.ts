@@ -61,9 +61,9 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   efinity: require('./75.Efinity.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  equilibrium: require('./108.Equilibrium.png'),
+  equilibrium: require('./EQ.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  equilibrium_parachain: require('./108.Equilibrium.png'),
+  equilibrium_parachain: require('./EQ.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   genshiro_testnet: require('./78.Genshiro.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -553,9 +553,9 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   tfa: require('./196.tfa.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  eq: require('./197.EQ.png'),
+  eq: require('./EQ.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  eqd: require('./198.EQD.png'),
+  eqd: require('./EQD.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   eqdot: require('./199.EQDOT.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

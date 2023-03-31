@@ -208,8 +208,6 @@ export class RmrkNftApi extends BaseNftApi {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         params.updateItem(this.chain, parsedItem, address);
 
-        console.log('parsedItem rmrk', parsedItem);
-
         let url = '';
 
         if (item.source === RMRK_SOURCE.SINGULAR_V1) {

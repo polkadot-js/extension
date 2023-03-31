@@ -149,8 +149,6 @@ export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolea
     ? getSubstrateConnectProvider(apiUrl.replace('light://substrate-connect/', ''))
     : new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
 
-  console.log(provider);
-
   // Init ApiPromise with selected provider
   let api: ApiPromise;
   const apiOption = { provider, typesBundle, typesChain: typesChain } as ApiOptions;

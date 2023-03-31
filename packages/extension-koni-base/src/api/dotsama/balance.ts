@@ -9,6 +9,7 @@ import { getRegistry, getTokenInfo } from '@subwallet/extension-koni-base/api/do
 import { getEVMBalance } from '@subwallet/extension-koni-base/api/tokens/evm/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/tokens/evm/web3';
 import { getPSP22ContractPromise } from '@subwallet/extension-koni-base/api/tokens/wasm';
+import { getDefaultWeightV2, WasmContractResponse } from '@subwallet/extension-koni-base/api/tokens/wasm/utils';
 import { state } from '@subwallet/extension-koni-base/background/handlers';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, SUB_TOKEN_REFRESH_BALANCE_INTERVAL, SUBSCRIBE_BALANCE_FAST_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils';
@@ -128,9 +129,10 @@ function subscribePSP22Balance (addresses: string[], networkKey: string, api: Ap
       try {
         const contract = PSP22ContractMap[symbol];
         const balances = await Promise.all(addresses.map(async (address): Promise<string> => {
-          const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: -1 }, address);
+          const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(api) }, address);
+          const balanceObj = _balanceOf?.output?.toJSON() as unknown as WasmContractResponse;
 
-          return _balanceOf.output ? _balanceOf.output.toString() : '0';
+          return _balanceOf.output ? (balanceObj.ok as string) : '0';
         }));
 
         free = sumBN(balances.map((bal) => new BN(bal || 0)));
@@ -647,9 +649,10 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
 
         const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
 
-        const balanceOf = await contractPromise.query['psp22::balanceOf'](address, { gasLimit: -1 }, address);
+        const _balanceOf = await contractPromise.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(api) }, address);
+        const balanceObj = _balanceOf?.output?.toJSON() as unknown as WasmContractResponse;
 
-        return balanceOf.output ? balanceOf.output.toString() : '0';
+        return _balanceOf.output ? (balanceObj.ok as string) : '0';
       } else if (['genshiro_testnet', 'genshiro'].includes(networkKey)) {
         const asset = assetFromToken(token);
         const balance = await api.query.eqBalances.account(address, asset);
@@ -787,9 +790,11 @@ export async function subscribeFreeBalance (
 
           const contractPromise = getPSP22ContractPromise(api, tokenInfo.contractAddress);
 
-          contractPromise.query['psp22::balanceOf'](address, { gasLimit: -1 }, address)
-            .then((balanceOf) => {
-              update(balanceOf.output ? balanceOf.output.toString() : '0');
+          contractPromise.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(api) }, address)
+            .then((_balanceOf) => {
+              const balanceObj = _balanceOf?.output?.toJSON() as unknown as WasmContractResponse;
+
+              update(_balanceOf.output ? (balanceObj.ok as string) : '0');
             }).catch(console.error);
         };
 

@@ -567,6 +567,7 @@ export enum BasicTxErrorType {
   SEND_TRANSACTION_FAILED = 'SEND_TRANSACTION_FAILED',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   UNSUPPORTED = 'UNSUPPORTED',
+  NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'NOT_ENOUGH_EXISTENTIAL_DEPOSIT',
 }
 
 export enum StakingTxErrorType {
@@ -922,7 +923,9 @@ export enum NETWORK_STATUS {
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type BaseRequestSign = {};
+export type BaseRequestSign = {
+  ignoreWarnings?: boolean;
+};
 
 // Internal request: request from extension, not dApp.
 export type InternalRequestSign<T extends BaseRequestSign> = Omit<T, 'password'>;

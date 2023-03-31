@@ -68,6 +68,7 @@ function Component (
           icon={<Icon
             phosphorIcon={ArrowFatLinesDown}
             size={isShrink ? 'sm' : 'md' }
+            weight={'duotone'}
           />}
           onClick={onOpenReceive}
           shape='squircle'
@@ -78,6 +79,7 @@ function Component (
           icon={<Icon
             phosphorIcon={PaperPlaneTilt}
             size={isShrink ? 'sm' : 'md' }
+            weight={'duotone'}
           />}
           onClick={onOpenSendFund}
           shape='squircle'
@@ -89,6 +91,7 @@ function Component (
             <Icon
               phosphorIcon={ShoppingCartSimple}
               size={isShrink ? 'sm' : 'md' }
+              weight={'duotone'}
             />
           }
           onClick={onOpenBuyTokens}

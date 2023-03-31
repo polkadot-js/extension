@@ -319,7 +319,6 @@ const Component: React.FC<Props> = (props: Props) => {
                 />
               </Form.Item>
               <Form.Item
-                hideError={true}
                 name={FormFieldName.PASSWORD}
                 rules={[
                   {
@@ -327,6 +326,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     required: true
                   }
                 ]}
+                statusHelpAsTooltip={true}
               >
                 <Input
                   label={t('Current password')}

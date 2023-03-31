@@ -47,13 +47,11 @@ const DEFAULT_ITEM: NftItem = {
   id: 'unknown'
 };
 
-const Component: React.FC<Props> = ({ className = '' }: Props): React.ReactElement<Props> => {
+const Component: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const { chain: nftChain = '', collectionId, itemId, owner = '' } = useParams();
-
-  const dataContext = useContext(DataContext);
 
   const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { nftCollections, nftItems } = useSelector((state) => state.nft);
@@ -194,7 +192,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props): React.ReactEleme
 
   useEffect(() => {
     if (nftItem === DEFAULT_ITEM || collectionInfo === DEFAULT_COLLECTION) {
-      navigate('home/nfts/collections');
+      navigate('/home/nfts/collections');
     }
   }, [collectionInfo, navigate, nftItem]);
 
@@ -204,56 +202,55 @@ const Component: React.FC<Props> = ({ className = '' }: Props): React.ReactEleme
   return (
     <>
       <TransactionContent className={CN('-transaction-content')}>
-        <PageWrapper resolve={dataContext.awaitStores(['nft'])}>
-          <div className={'nft_item_detail text-center'}>
-            <Image
-              height={120}
-              src={nftItem.image}
-            />
-            <Typography.Title level={5}>
-              {nftItem.name}
-            </Typography.Title>
-          </div>
-
-          <Form
-            className={'form-container form-space-sm'}
-            form={form}
-            initialValues={formDefault}
-            onFieldsChange={onFieldsChange}
-            onFinish={onSubmit}
-          >
-            <Form.Item
-              name={'to'}
-              rules={[
-                recipientValidator
-              ]}
-              validateTrigger='onBlur'
-            >
-              <AddressInput
-                autoReformatValue
-                label={t('Send to account')}
-                showScanner={true}
-              />
-            </Form.Item>
-
-            <Form.Item>
-              <ChainSelector
-                disabled={true}
-                items={chainInfo ? [{ name: chainInfo.name, slug: chainInfo.slug }] : []}
-                label={t('Network')}
-                value={collectionInfo.chain}
-              />
-            </Form.Item>
-          </Form>
-
-          <FreeBalance
-            address={from}
-            chain={chain}
+        <div className={'nft_item_detail text-center'}>
+          <Image
+            height={120}
+            src={nftItem.image}
           />
-        </PageWrapper>
+          <Typography.Title level={5}>
+            {nftItem.name}
+          </Typography.Title>
+        </div>
+
+        <Form
+          className={'form-container form-space-sm'}
+          form={form}
+          initialValues={formDefault}
+          onFieldsChange={onFieldsChange}
+          onFinish={onSubmit}
+        >
+          <Form.Item
+            name={'to'}
+            rules={[
+              recipientValidator
+            ]}
+            statusHelpAsTooltip={true}
+            validateTrigger='onBlur'
+          >
+            <AddressInput
+              autoReformatValue
+              label={t('Send to account')}
+              showScanner={true}
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <ChainSelector
+              disabled={true}
+              items={chainInfo ? [{ name: chainInfo.name, slug: chainInfo.slug }] : []}
+              label={t('Network')}
+              value={collectionInfo.chain}
+            />
+          </Form.Item>
+        </Form>
+
+        <FreeBalance
+          address={from}
+          chain={chain}
+        />
       </TransactionContent>
       <TransactionFooter
-        className={`${className}-transaction-footer`}
+        className={'send-nft-transaction-footer'}
         errors={errors}
         warnings={warnings}
       >
@@ -275,7 +272,22 @@ const Component: React.FC<Props> = ({ className = '' }: Props): React.ReactEleme
   );
 };
 
-const SendNFT = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const Wrapper: React.FC<Props> = (props: Props) => {
+  const { className } = props;
+
+  const dataContext = useContext(DataContext);
+
+  return (
+    <PageWrapper
+      className={className}
+      resolve={dataContext.awaitStores(['nft'])}
+    >
+      <Component />
+    </PageWrapper>
+  );
+};
+
+const SendNFT = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
     flex: 1,
     display: 'flex',

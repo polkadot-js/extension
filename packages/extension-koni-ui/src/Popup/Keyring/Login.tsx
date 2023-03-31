@@ -90,7 +90,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onFinish={onSubmit}
           >
             <Form.Item
-              hideError={true}
               name={FormFieldName.PASSWORD}
               rules={[
                 {
@@ -98,6 +97,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   required: true
                 }
               ]}
+              statusHelpAsTooltip={true}
             >
               <Input.Password
                 containerClassName='password-input'

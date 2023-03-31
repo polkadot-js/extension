@@ -162,9 +162,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onFinish={onSubmit}
           >
             <Form.Item
-              hideError={true}
               name={FormFieldName.PASSWORD}
               rules={passwordRules}
+              statusHelpAsTooltip={true}
             >
               <Input
                 onChange={onChangePassword}
@@ -173,9 +173,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               />
             </Form.Item>
             <Form.Item
-              hideError={true}
               name={FormFieldName.CONFIRM_PASSWORD}
               rules={confirmPasswordRules}
+              statusHelpAsTooltip={true}
             >
               <Input
                 placeholder={t('Confirm password')}

@@ -8,7 +8,7 @@ import type { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByGenesisHash';
-import useMetadata from '@subwallet/extension-koni-ui/hooks/confirmation/useMetadata';
+import useMetadata from '@subwallet/extension-koni-ui/hooks/transaction/confirmation/useMetadata';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { TFunction } from 'i18next';

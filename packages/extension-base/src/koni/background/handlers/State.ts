@@ -15,6 +15,7 @@ import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/cha
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParachain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
+import MigrationService from '@subwallet/extension-base/services/migration-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import { PriceService } from '@subwallet/extension-base/services/price-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
@@ -126,6 +127,7 @@ export default class KoniState {
   readonly historyService: HistoryService;
   readonly priceService: PriceService;
   readonly balanceService: BalanceService;
+  readonly migrationService: MigrationService;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor (providers: Providers = {}) {
@@ -141,10 +143,13 @@ export default class KoniState {
     this.balanceService = new BalanceService(this.chainService);
     this.historyService = new HistoryService(this.dbService, this.chainService);
     this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
+    this.migrationService = new MigrationService(this);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');
-    this.init();
+
+    // Init state
+    this.init().catch(console.error);
   }
 
   // Clone from polkadot.js
@@ -266,14 +271,14 @@ export default class KoniState {
     return balanceMap;
   }
 
-  public init () {
-    this.chainService.init(() => {
-      this.onReady(); // TODO: do better than a callback
-      this.updateServiceInfo();
+  public async init () {
+    await this.chainService.init();
+    await this.migrationService.run();
+    this.startSubscription();
+    this.updateServiceInfo();
 
-      this.startSubscription();
-      this.logger.log('Done init state');
-    });
+    this.onReady();
+    this.logger.log('Done init state');
   }
 
   private startSubscription () {

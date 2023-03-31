@@ -11,7 +11,7 @@ export function getUnstakingPeriod (unstakingPeriod?: number) {
     const days = unstakingPeriod / 24;
 
     if (days < 1) {
-      return 'Soon';
+      return `${unstakingPeriod} hours`;
     } else {
       return `${days} days`;
     }

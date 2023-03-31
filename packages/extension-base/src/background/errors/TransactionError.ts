@@ -42,6 +42,10 @@ const defaultErrorMap = {
     message: 'Send transaction failed',
     code: undefined
   },
+  NOT_ENOUGH_EXISTENTIAL_DEPOSIT: {
+    message: 'Not enough existential deposit',
+    code: undefined
+  },
   [BasicTxErrorType.UNSUPPORTED]: {
     message: 'This transaction is not supported',
     code: undefined

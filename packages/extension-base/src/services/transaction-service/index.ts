@@ -88,7 +88,7 @@ export default class TransactionService {
       errors: validationInput.errors || [],
       warnings: validationInput.warnings || []
     };
-    const { additionalValidator, address, chain, transaction } = validation;
+    const { additionalValidator, address, chain, edAsWarning, isTransferAll, transaction } = validation;
 
     // Check duplicate transaction
     validation.errors.push(...this.checkDuplicate(validationInput));
@@ -168,11 +168,17 @@ export default class TransactionService {
     const edNum = parseInt(existentialDeposit);
     const transferNativeNum = parseInt(transferNative);
 
-    if (transferNativeNum + feeNum > balanceNum) {
-      validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-    } else {
-      if (balanceNum - (transferNativeNum + feeNum) <= edNum) {
-        validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+    if (!isTransferAll) {
+      if (transferNativeNum + feeNum > balanceNum) {
+        validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+      } else {
+        if (balanceNum - (transferNativeNum + feeNum) <= edNum) {
+          if (edAsWarning) {
+            validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+          } else {
+            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+          }
+        }
       }
     }
 
@@ -241,6 +247,8 @@ export default class TransactionService {
     if (stopByErrors || stopByWarnings) {
       return validatedTransaction;
     }
+
+    validatedTransaction.warnings = [];
 
     const emitter = await this.addTransaction(validatedTransaction);
 
@@ -448,17 +456,13 @@ export default class TransactionService {
     switch (transaction.extrinsicType) {
       case ExtrinsicType.SEND_NFT: {
         const inputData = parseTransactionData<ExtrinsicType.SEND_NFT>(transaction.data);
+        const sender = keyring.getAccount(inputData.senderAddress);
+        const recipient = keyring.getAccount(inputData.recipientAddress);
 
-        const senderPair = keyring.getPair(inputData.senderAddress);
-        const recipientPair = keyring.getPair(inputData.recipientAddress);
-
-        this.databaseService.handleNftTransfer(transaction.chain, [senderPair.address, ALL_ACCOUNT_KEY], inputData.nftItem)
+        sender && this.databaseService.handleNftTransfer(transaction.chain, [sender.address, ALL_ACCOUNT_KEY], inputData.nftItem)
           .catch(console.error);
-
-        if (recipientPair) {
-          this.databaseService.addNft(recipientPair.address, { ...inputData.nftItem, owner: recipientPair.address })
-            .catch(console.error);
-        }
+        recipient && this.databaseService.addNft(recipient.address, { ...inputData.nftItem, owner: recipient.address })
+          .catch(console.error);
       }
     }
   }
@@ -659,7 +663,7 @@ export default class TransactionService {
             });
         } else {
           this.removeTransaction(id);
-          eventData.errors.push(new TransactionError(BasicTxErrorType.USER_REJECT_REQUEST, 'User Rejected'));
+          eventData.errors.push(new TransactionError(BasicTxErrorType.USER_REJECT_REQUEST));
           emitter.emit('error', eventData);
         }
       })
@@ -702,10 +706,16 @@ export default class TransactionService {
         }
 
         if (txState.status.isInBlock) {
-          eventData.extrinsicHash = txState.txHash.toHex();
           eventData.eventLogs = txState.events;
-          emitter.emit('extrinsicHash', eventData);
 
+          if (!eventData.extrinsicHash || eventData.extrinsicHash === '') {
+            eventData.extrinsicHash = txState.txHash.toHex();
+            emitter.emit('extrinsicHash', eventData);
+          }
+        }
+
+        if (txState.status.isFinalized) {
+          eventData.eventLogs = txState.events;
           // TODO: push block hash and block number into eventData
           txState.events
             .filter(({ event: { section } }) => section === 'system')

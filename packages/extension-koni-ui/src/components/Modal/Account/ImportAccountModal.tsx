@@ -1,22 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
-import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
-import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
-import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
-import useGoBackSelectAccount from '@subwallet/extension-koni-ui/hooks/modal/useGoBackSelectAccount';
+import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { useClickOutSide, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { renderModalSelector } from '@subwallet/extension-koni-ui/util/common/dom';
+import { renderModalSelector } from '@subwallet/extension-koni-ui/util';
 import { BackgroundIcon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileJs, Leaf, QrCode, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+
+import { BackIcon, CloseIcon } from '../../Icon';
+import { SettingItemSelection } from '../../Setting';
 
 type Props = ThemeProps;
 
@@ -33,10 +32,12 @@ const modalId = IMPORT_ACCOUNT_MODAL;
 const Component: React.FC<Props> = ({ className }: Props) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { checkActive, inactiveModal } = useContext(ModalContext);
   const { token } = useTheme() as Theme;
+
+  const { checkActive, inactiveModal } = useContext(ModalContext);
   const isActive = checkActive(modalId);
 
+  const isPopup = useIsPopup();
   const onBack = useGoBackSelectAccount(modalId);
 
   const onCancel = useCallback(() => {
@@ -52,6 +53,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     };
   }, [navigate, inactiveModal]);
 
+  const onClickJson = useCallback(() => {
+    if (isPopup) {
+      windowOpen('/accounts/restore-json').catch(console.error);
+    } else {
+      inactiveModal(modalId);
+      navigate('/accounts/restore-json');
+    }
+  }, [inactiveModal, isPopup, navigate]);
+
   const items = useMemo((): ImportAccountItem[] => [
     {
       backgroundColor: token['green-7'],
@@ -65,7 +75,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       icon: FileJs,
       key: 'restore-json',
       label: 'Restore from Polkadot {js}',
-      onClick: onClickItem('/accounts/restore-json')
+      onClick: onClickJson
     },
     {
       backgroundColor: token['gray-3'],
@@ -81,7 +91,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       label: 'Import by QR Code',
       onClick: onClickItem('/accounts/import-by-qr')
     }
-  ], [onClickItem, token]);
+  ], [onClickItem, token, onClickJson]);
 
   const renderIcon = useCallback((item: ImportAccountItem) => {
     return (

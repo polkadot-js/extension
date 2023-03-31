@@ -83,7 +83,7 @@ const renderEmpty = () => <EmptyAccount />;
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, from, id = 'pool-selector', label, loading, onChange, onClickBookBtn, placeholder, value } = props;
+  const { chain, className = '', disabled, from, id = 'pool-selector', label, loading, onChange, onClickBookBtn, placeholder, statusHelp, value } = props;
 
   useExcludeModal(id);
 
@@ -228,6 +228,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         searchableMinCharactersCount={2}
         selected={value || ''}
         showActionBtn
+        statusHelp={statusHelp}
         suffix={(
           <div className='select-pool-suffix'>
             <Button

@@ -90,6 +90,7 @@ function Component (
               <Icon
                 phosphorIcon={ArrowFatLinesDown}
                 size={isShrink ? 'sm' : 'md'}
+                weight={'duotone'}
               />
             )}
             onClick={onOpenReceive}
@@ -102,6 +103,7 @@ function Component (
               <Icon
                 phosphorIcon={PaperPlaneTilt}
                 size={isShrink ? 'sm' : 'md'}
+                weight={'duotone'}
               />
             )}
             onClick={onOpenSendFund}
@@ -115,6 +117,7 @@ function Component (
               <Icon
                 phosphorIcon={ShoppingCartSimple}
                 size={isShrink ? 'sm' : 'md'}
+                weight={'duotone'}
               />
             )}
             onClick={onOpenBuyTokens}

@@ -238,7 +238,6 @@ const Component: React.FC<Props> = (props: Props) => {
           >
             <Form.Item
               className={CN('account-field')}
-              hideError={true}
               name={FormFieldName.NAME}
               rules={[
                 {
@@ -247,6 +246,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   required: true
                 }
               ]}
+              statusHelpAsTooltip={true}
             >
               <Input
                 className='account-name-input'

@@ -255,6 +255,7 @@ const Component = ({ className }: ComponentProps) => {
       <Form.Item
         name='payload'
         rules={[{ validator: payloadValidator }]}
+        statusHelpAsTooltip={true}
         validateTrigger={['onBlur']}
       >
         <Input.TextArea

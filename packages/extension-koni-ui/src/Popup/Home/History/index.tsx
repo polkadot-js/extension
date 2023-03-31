@@ -148,17 +148,10 @@ enum FilterValue {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-
   const dataContext = useContext(DataContext);
-  const { activeModal, inactiveModal } = useContext(ModalContext);
-
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount } = useSelector((root: RootState) => root.accountState);
   const { historyList: rawHistoryList } = useSelector((root: RootState) => root.transactionHistory);
-
-  const { chain, extrinsicHash } = useParams();
-
-  const [selectedItem, setSelectedItem] = useState<TransactionHistoryDisplayItem | null>(null);
-  const [forceOpen, setForceOpen] = useState(false);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
@@ -281,6 +274,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return finalHistoryList.sort((a, b) => (b.time - a.time));
   }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap, currentAccount?.address]);
 
+  // Handle detail modal
+  const { chain, extrinsicHash } = useParams();
+  const [selectedItem, setSelectedItem] = useState<TransactionHistoryDisplayItem | null>(null);
+  const [openDetailLink, setOpenDetailLink] = useState<boolean>(!!chain && !!extrinsicHash);
+
   const onOpenDetail = useCallback((item: TransactionHistoryDisplayItem) => {
     return () => {
       setSelectedItem(item);
@@ -290,6 +288,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const onCloseDetail = useCallback(() => {
     inactiveModal(HistoryDetailModalId);
+    setSelectedItem(null);
+    setOpenDetailLink(false);
   }, [inactiveModal]);
 
   const onClickActionBtn = useCallback(() => {
@@ -297,23 +297,27 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   useEffect(() => {
-    if (extrinsicHash && chain) {
-      setForceOpen(true);
-    }
-  }, [extrinsicHash, chain]);
-
-  useEffect(() => {
-    if (extrinsicHash && chain && forceOpen) {
+    if (extrinsicHash && chain && openDetailLink) {
       const existed = historyList.find((item) => item.chain === chain && item.extrinsicHash === extrinsicHash);
 
       if (existed) {
         setSelectedItem(existed);
         activeModal(HistoryDetailModalId);
       }
-
-      setForceOpen(false);
     }
-  }, [activeModal, chain, extrinsicHash, forceOpen, historyList]);
+  }, [activeModal, chain, extrinsicHash, openDetailLink, historyList]);
+
+  useEffect(() => {
+    if (checkActive(HistoryDetailModalId)) {
+      setSelectedItem((selected) => {
+        if (selected) {
+          return historyList.find((x) => (x.chain === selected.chain && x.address === selected.address && x.extrinsicHash === selected.extrinsicHash)) || selected;
+        } else {
+          return selected;
+        }
+      });
+    }
+  }, [checkActive, historyList]);
 
   const emptyList = useCallback(() => {
     return <EmptyList

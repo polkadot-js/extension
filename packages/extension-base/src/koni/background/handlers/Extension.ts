@@ -272,6 +272,7 @@ export default class KoniExtension {
     };
   }
 
+  // TODO: move to request service
   private signingApproveSignature ({ id, signature }: RequestSigningApproveSignature): boolean {
     const queued = this.#koniState.getSignRequest(id);
 
@@ -284,6 +285,7 @@ export default class KoniExtension {
     return true;
   }
 
+  // TODO: move to request service
   private signingCancel ({ id }: RequestSigningCancel): boolean {
     const queued = this.#koniState.getSignRequest(id);
 
@@ -291,7 +293,7 @@ export default class KoniExtension {
 
     const { reject } = queued;
 
-    reject(new Error('Cancelled'));
+    reject(new TransactionError(BasicTxErrorType.USER_REJECT_REQUEST));
 
     return true;
   }
@@ -1497,6 +1499,7 @@ export default class KoniExtension {
 
     // Get native token amount
     const freeBalance = await this.#koniState.balanceService.getTokenFreeBalance(from, networkKey, tokenSlug);
+    let edAsWarning = false;
 
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
       chainType = ChainType.EVM;
@@ -1513,6 +1516,7 @@ export default class KoniExtension {
           transaction,
           transferAmount.value
         ] = await getEVMTransactionObject(chainInfo, to, txVal, !!transferAll, evmApiMap);
+        edAsWarning = true;
       }
     } else {
       const substrateApi = this.#koniState.getSubstrateApi(networkKey);
@@ -1526,7 +1530,10 @@ export default class KoniExtension {
         to: to,
         substrateApi
       });
+      edAsWarning = true;
     }
+
+    const transferNativeAmount = isTransferNativeToken ? transferAmount.value : '0';
 
     return this.#koniState.transactionService.handleTransaction({
       errors,
@@ -1534,10 +1541,13 @@ export default class KoniExtension {
       address: from,
       chain: networkKey,
       chainType,
-      transferNativeAmount: isTransferNativeToken ? transferAmount.value : '0',
+      transferNativeAmount,
       transaction,
       data: inputData,
-      extrinsicType: isTransferNativeToken ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.TRANSFER_TOKEN
+      extrinsicType: isTransferNativeToken ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.TRANSFER_TOKEN,
+      ignoreWarnings: transferAll,
+      isTransferAll: transferAll,
+      edAsWarning: edAsWarning
     });
   }
 

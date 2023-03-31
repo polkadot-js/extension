@@ -22,4 +22,5 @@ export interface BasicInputWrapper<T = string> {
   onBlur?: InputProps['onBlur'];
   onFocus?: InputProps['onFocus'];
   readOnly?: boolean;
+  statusHelp?: string;
 }

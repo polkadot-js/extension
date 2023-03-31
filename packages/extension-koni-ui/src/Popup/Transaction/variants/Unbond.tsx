@@ -9,7 +9,7 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { AccountSelector, AmountInput, NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/util';
@@ -132,8 +132,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
-  const [errors, setErrors] = useState<string[]>([]);
-  const [warnings, setWarnings] = useState<string[]>([]);
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
   const onFieldsChange: FormCallbacks<UnstakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
@@ -193,24 +192,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
     setTimeout(() => {
       unbondingPromise
-        .then((result) => {
-          const { errors, extrinsicHash, warnings } = result;
-
-          if (errors.length || warnings.length) {
-            setErrors(errors.map((e) => e.message));
-            setWarnings(warnings.map((w) => w.message));
-          } else if (extrinsicHash) {
-            onDone(extrinsicHash);
-          }
-        })
-        .catch((e: Error) => {
-          setErrors([e.message]);
-        })
+        .then(onSuccess)
+        .catch(onError)
         .finally(() => {
           setLoading(false);
         });
     }, 300);
-  }, [mustChooseValidator, nominatorMetadata, onDone]);
+  }, [mustChooseValidator, nominatorMetadata, onError, onSuccess]);
 
   const renderBounded = useCallback(() => {
     return (
@@ -289,12 +277,12 @@ const Component: React.FC<Props> = (props: Props) => {
             }
 
             <Form.Item
-              // hideError={true}
               name={FormFieldName.VALUE}
               rules={[
-                { required: true },
+                { required: true, message: 'Value is required' },
                 validateUnStakeValue(minValue, bondedValue, decimals)
               ]}
+              statusHelpAsTooltip={true}
             >
               <AmountInput
                 decimals={decimals}
@@ -321,8 +309,8 @@ const Component: React.FC<Props> = (props: Props) => {
         </PageWrapper>
       </TransactionContent>
       <TransactionFooter
-        errors={errors}
-        warnings={warnings}
+        errors={[]}
+        warnings={[]}
       >
         <Button
           disabled={isDisable}

@@ -285,6 +285,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item
                 name={'provider'}
                 rules={[{ validator: providerValidator }]}
+                statusHelpAsTooltip={true}
                 validateTrigger={['onBlur']}
               >
                 <Input

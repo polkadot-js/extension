@@ -111,7 +111,7 @@ export async function validateWasmToken (chain: string, contractAddress: string,
       } else {
         const symbolObj = symbolResp.output?.toHuman() as Record<string, any>;
         const decimalsObj = decimalsResp.output?.toHuman() as Record<string, any>;
-        const nameObj= nameResp.output?.toHuman() as Record<string, any>;
+        const nameObj = nameResp.output?.toHuman() as Record<string, any>;
 
         name = nameResp.output ? (nameObj.Ok as string || nameObj.ok as string) : '';
         decimals = decimalsResp.output ? (new BN((decimalsObj.Ok || decimalsObj.ok) as string | number)).toNumber() : 0;

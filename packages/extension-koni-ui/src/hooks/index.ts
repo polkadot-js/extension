@@ -6,7 +6,7 @@ export * from './auth';
 export * from './balance';
 export * from './chain';
 export * from './common';
-export * from './confirmation';
+export * from './transaction';
 export * from './dom';
 export * from './form';
 export * from './ledger';

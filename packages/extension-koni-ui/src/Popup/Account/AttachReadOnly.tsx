@@ -188,6 +188,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   validator: accountAddressValidator
                 }
               ]}
+              statusHelpAsTooltip={true}
             >
               <AddressInput
                 id={modalId}

@@ -88,7 +88,7 @@ export default class TransactionService {
       errors: validationInput.errors || [],
       warnings: validationInput.warnings || []
     };
-    const { additionalValidator, address, chain, transaction } = validation;
+    const { additionalValidator, address, chain, edAsWarning, isTransferAll, transaction } = validation;
 
     // Check duplicate transaction
     validation.errors.push(...this.checkDuplicate(validationInput));
@@ -168,11 +168,17 @@ export default class TransactionService {
     const edNum = parseInt(existentialDeposit);
     const transferNativeNum = parseInt(transferNative);
 
-    if (transferNativeNum + feeNum > balanceNum) {
-      validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-    } else {
-      if (balanceNum - (transferNativeNum + feeNum) <= edNum) {
-        validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+    if (!isTransferAll) {
+      if (transferNativeNum + feeNum > balanceNum) {
+        validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+      } else {
+        if (balanceNum - (transferNativeNum + feeNum) <= edNum) {
+          if (edAsWarning) {
+            validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+          } else {
+            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+          }
+        }
       }
     }
 
@@ -241,6 +247,8 @@ export default class TransactionService {
     if (stopByErrors || stopByWarnings) {
       return validatedTransaction;
     }
+
+    validatedTransaction.warnings = [];
 
     const emitter = await this.addTransaction(validatedTransaction);
 
@@ -655,7 +663,7 @@ export default class TransactionService {
             });
         } else {
           this.removeTransaction(id);
-          eventData.errors.push(new TransactionError(BasicTxErrorType.USER_REJECT_REQUEST, 'User Rejected'));
+          eventData.errors.push(new TransactionError(BasicTxErrorType.USER_REJECT_REQUEST));
           emitter.emit('error', eventData);
         }
       })

@@ -390,6 +390,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Form.Item
               name={'contractAddress'}
               rules={[{ validator: contractAddressValidator }]}
+              statusHelpAsTooltip={true}
             >
               <AddressInput
                 disabled={selectedTokenType === ''}

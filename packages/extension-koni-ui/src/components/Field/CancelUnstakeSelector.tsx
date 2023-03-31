@@ -34,7 +34,7 @@ const renderItem = (item: UnstakingInfo, isSelected: boolean) => (
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { chain, className = '', disabled, id = 'cancel-unstake', label, nominators, placeholder, value } = props;
+  const { chain, className = '', disabled, id = 'cancel-unstake', label, nominators, placeholder, statusHelp, value } = props;
 
   const { token } = useTheme() as Theme;
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
@@ -99,6 +99,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         renderSelected={renderSelected}
         renderWhenEmpty={renderEmpty}
         selected={value || ''}
+        statusHelp={statusHelp}
         title={t('Unstake request')}
       />
     </>

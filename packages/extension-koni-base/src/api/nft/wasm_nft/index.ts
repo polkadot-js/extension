@@ -47,7 +47,8 @@ async function isArtZeroFeaturedCollection (networkKey: string, contractAddress:
     collectionInfoPromise
   ]);
 
-  return collectionInfo !== null;
+  // @ts-ignore
+  return collectionInfo !== null && collectionInfo?.status !== 'FAILED';
 }
 
 export class WasmNftApi extends BaseNftApi {
@@ -425,7 +426,7 @@ export class WasmNftApi extends BaseNftApi {
 
       console.log('isCollectionFeatured', this.chain, name, isCollectionFeatured);
 
-      return await this.getItemsByCollection(contractPromise, attributeList, storedOnChain, smartContract, name, params, false);
+      return await this.getItemsByCollection(contractPromise, attributeList, storedOnChain, smartContract, name, params, isCollectionFeatured);
     }));
   }
 }

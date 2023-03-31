@@ -448,24 +448,17 @@ export class ChainService {
   }
 
   // Business logic
-  public init (callback?: () => void) { // TODO: reconsider the flow of initiation
+  public async init () {
+    // TODO: reconsider the flow of initiation
     this.dataMap.assetRefMap = AssetRefMap;
-    this.initChains().then(() => {
-      this.chainInfoMapSubject.next(this.getChainInfoMap());
-      this.chainStateMapSubject.next(this.getChainStateMap());
-      this.assetRegistrySubject.next(this.getAssetRegistry());
+    await this.initChains();
+    this.chainInfoMapSubject.next(this.getChainInfoMap());
+    this.chainStateMapSubject.next(this.getChainStateMap());
+    this.assetRegistrySubject.next(this.getAssetRegistry());
 
-      this.initApis();
-
-      this.logger.log('Initiated chains, assets and APIs');
-
-      if (callback) {
-        callback();
-      }
-
-      // Init asset setting after enable chain
-      this.initAssetSettings().catch(console.error);
-    }).catch((e) => this.logger.error(e));
+    this.initApis();
+    await this.initAssetSettings();
+    this.logger.log('Initiated chains, assets and APIs');
   }
 
   private initApis () { // TODO: this might be async
@@ -511,7 +504,7 @@ export class ChainService {
     }
   }
 
-  public enableChain (chainSlug: string): boolean {
+  private _enableChain (chainSlug: string): boolean {
     const chainInfo = this.getChainInfoByKey(chainSlug);
     const chainStateMap = this.getChainStateMap();
 
@@ -529,11 +522,29 @@ export class ChainService {
       active: true,
       currentProvider: chainStateMap[chainSlug].currentProvider
     }).catch(console.error);
-
-    this.updateChainStateMapSubscription();
     this.lockChainInfoMap = false;
 
     return true;
+  }
+
+  public enableChain (chainSlug: string): boolean {
+    const rs = this._enableChain(chainSlug);
+
+    if (rs) {
+      this.updateChainStateMapSubscription();
+    }
+
+    return rs;
+  }
+
+  public enableChains (chainSlugs: string[]): boolean {
+    const rs = chainSlugs.map(this._enableChain.bind(this));
+
+    if (rs.some((r) => r)) {
+      this.updateChainStateMapSubscription();
+    }
+
+    return rs.every((r) => r);
   }
 
   public disableChain (chainSlug: string): boolean {

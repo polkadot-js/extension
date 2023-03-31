@@ -8,7 +8,7 @@ import { Logger } from '@polkadot/util/types';
 
 import MigrationScripts from './scripts';
 
-export default class Migration {
+export default class MigrationService {
   readonly state: State;
   private logger: Logger;
 

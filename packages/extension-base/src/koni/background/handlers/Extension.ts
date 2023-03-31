@@ -1478,7 +1478,7 @@ export default class KoniExtension {
   }
 
   private async makeTransfer (inputData: RequestTransfer): Promise<SWTransactionResponse> {
-    const { from, networkKey, to, tokenSlug, transferAll, value } = inputData;
+    const { from, ignoreWarnings, networkKey, to, tokenSlug, transferAll, value } = inputData;
     const [errors, , , tokenInfo] = this.validateTransfer(tokenSlug, from, to, value, transferAll);
 
     const warnings: TransactionWarning[] = [];
@@ -1537,7 +1537,8 @@ export default class KoniExtension {
       transferNativeAmount: isTransferNativeToken ? transferAmount.value : '0',
       transaction,
       data: inputData,
-      extrinsicType: isTransferNativeToken ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.TRANSFER_TOKEN
+      extrinsicType: isTransferNativeToken ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.TRANSFER_TOKEN,
+      ignoreWarnings: ignoreWarnings
     });
   }
 

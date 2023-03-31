@@ -49,11 +49,13 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const _onClickMaxBtn = useCallback((e: SyntheticEvent) => {
     e.stopPropagation();
+    inputRef.current?.focus();
     const transformVal = getInputValuesFromString(maxValue, decimals);
 
     setInputValue(transformVal);
     onChange && onChange({ target: { value: maxValue } });
-  }, [decimals, maxValue, onChange]);
+    inputRef.current?.blur();
+  }, [inputRef, decimals, maxValue, onChange]);
 
   const getMaxLengthText = useCallback((value: string) => {
     return value.includes('.') ? decimals + 1 + value.split('.')[0].length : 10;

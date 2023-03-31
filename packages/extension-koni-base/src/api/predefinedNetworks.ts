@@ -2813,6 +2813,21 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['POLKADOT_PARACHAIN'],
     nativeToken: 'AVT',
     decimals: 18
+  },
+  aventus_testnet: {
+    key: 'aventus_testnet',
+    chain: 'Aventus Testnet',
+    genesisHash: '0xa6ffcef7fb8caadf7f6c5ad8ada65e3eaa90d1604f3eabda546ff1d486865a0c',
+    ss58Format: 42,
+    providers: {
+      Aventus: 'wss://public-rpc.public-testnet.aventus.io'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'Aventus',
+    groups: ['TEST_NET'],
+    nativeToken: 'AVT',
+    decimals: 18
   }
 };
 

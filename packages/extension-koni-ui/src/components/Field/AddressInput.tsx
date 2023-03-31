@@ -70,14 +70,17 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   }, []);
 
   const onSuccess = useCallback((result: ScannerResult) => {
+    inputRef?.current?.focus();
     setScanError('');
     inactiveModal(id);
     parseAndChangeValue(result.text);
-  }, [inactiveModal, id, parseAndChangeValue]);
+    inputRef?.current?.blur();
+  }, [inactiveModal, id, parseAndChangeValue, inputRef]);
 
   const onCloseScan = useCallback(() => {
-    inputRef?.current?.blur();
+    inputRef?.current?.focus();
     setScanError('');
+    inputRef?.current?.blur();
   }, [inputRef]);
 
   // todo: Will work with "Manage address book" feature later

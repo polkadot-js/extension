@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
@@ -37,11 +37,9 @@ import styled from 'styled-components';
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 interface TransferFormProps extends TransactionFormBaseProps {
-  to: string
-  chain: string
-  destChain: string
-  token: string
-  value: string
+  to: string;
+  destChain: string;
+  value: string;
 }
 
 type Props = ThemeProps;
@@ -174,21 +172,23 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const preCheckReadOnly = usePreCheckReadOnly(from, 'The account you are using is read-only, you cannot send assets with it');
 
   const [loading, setLoading] = useState(false);
-  const [ignoreWarnings, setIgnoreWarnings] = useState(false);
+  const [isTransferAll, setIsTransferAll] = useState(false);
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone, setIgnoreWarnings);
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDone, setIsTransferAll);
 
   const [form] = Form.useForm<TransferFormProps>();
-  const formDefault = useMemo(() => {
+  const formDefault = useMemo((): TransferFormProps => {
     return {
       from: from,
       chain: chain,
       destChain: '',
-      token: '',
+      asset: '',
       to: '',
       value: ''
     };
   }, [chain, from]);
+
+  const destChain = Form.useWatch('destChain', form);
 
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
@@ -259,7 +259,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
   const onFieldsChange: FormCallbacks<TransferFormProps>['onValuesChange'] = useCallback(
     (part: Partial<TransferFormProps>, values: TransferFormProps) => {
-      if (part.from || part.token || part.destChain) {
+      if (part.from || part.asset || part.destChain) {
         form.resetFields(['to']);
       }
 
@@ -267,9 +267,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         setFrom(part.from);
       }
 
-      if (part.token) {
+      if (part.asset) {
         form.resetFields(['value']);
-        const chain = assetRegistry[part.token].originChain;
+        const chain = assetRegistry[part.asset].originChain;
 
         form.setFieldsValue({
           chain: chain,
@@ -277,10 +277,15 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         });
 
         setChain(chain);
-        setAsset(part.token);
+        setAsset(part.asset);
+        setIsTransferAll(false);
       }
 
-      setIgnoreWarnings(false);
+      if (part.destChain) {
+        if (part.destChain !== values.chain && assetRegistry[values.asset]?.assetType === _AssetType.NATIVE) {
+          setIsTransferAll(false);
+        }
+      }
     },
     [form, setFrom, assetRegistry, setChain, setAsset]
   );
@@ -300,7 +305,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         to: to,
         tokenSlug: asset,
         value: value,
-        ignoreWarnings: ignoreWarnings
+        transferAll: isTransferAll
       });
     } else {
       // Make cross chain transfer
@@ -310,8 +315,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         originNetworkKey: chain,
         tokenSlug: asset,
         to,
-        value,
-        ignoreWarnings: ignoreWarnings
+        value
       });
     }
 
@@ -325,7 +329,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         })
       ;
     }, 300);
-  }, [chain, from, asset, ignoreWarnings, onSuccess, onError]);
+  }, [chain, from, asset, isTransferAll, onSuccess, onError]);
 
   const currentChainAsset = useMemo(() => {
     return asset ? assetRegistry[asset] : undefined;
@@ -337,10 +341,10 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
   // TODO: Need to review
   useEffect(() => {
-    const { from, token } = form.getFieldsValue();
+    const { asset, from } = form.getFieldsValue();
 
     if (tokenItems.length) {
-      if (!token) {
+      if (!asset) {
         const account = findAccountByAddress(accounts, from);
 
         let pass = false;
@@ -353,7 +357,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
             if (token) {
               form.setFieldsValue({
-                token: token.slug,
+                asset: token.slug,
                 chain: assetRegistry[token.slug].originChain,
                 destChain: assetRegistry[token.slug].originChain
               });
@@ -365,18 +369,18 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
         if (!pass) {
           form.setFieldsValue({
-            token: tokenItems[0].slug,
+            asset: tokenItems[0].slug,
             chain: assetRegistry[tokenItems[0].slug].originChain,
             destChain: assetRegistry[tokenItems[0].slug].originChain
           });
           setChain(assetRegistry[tokenItems[0].slug].originChain);
         }
       } else {
-        const isSelectedTokenInList = tokenItems.some((i) => i.slug === token);
+        const isSelectedTokenInList = tokenItems.some((i) => i.slug === asset);
 
         if (!isSelectedTokenInList) {
           form.setFieldsValue({
-            token: tokenItems[0].slug,
+            asset: tokenItems[0].slug,
             chain: assetRegistry[tokenItems[0].slug].originChain,
             destChain: assetRegistry[tokenItems[0].slug].originChain
           });
@@ -432,7 +436,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           </Form.Item>
 
           <div className={'form-row'}>
-            <Form.Item name={'token'}>
+            <Form.Item name={'asset'}>
               <TokenSelector
                 disabled={!tokenItems.length}
                 items={tokenItems}
@@ -453,7 +457,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             >
               <AmountInput
                 decimals={decimals}
+                isDisableMax={destChain !== chain && assetRegistry[asset]?.assetType === _AssetType.NATIVE}
                 maxValue={maxTransfer}
+                setIsMax={setIsTransferAll}
               />
             </Form.Item>
           </div>
@@ -512,8 +518,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           )}
           loading={loading}
           onClick={preCheckReadOnly(form.submit)}
+          schema={isTransferAll ? 'warning' : undefined}
         >
-          {t('Transfer')}
+          {isTransferAll ? t('Transfer all') : t('Transfer')}
         </Button>
       </TransactionFooter>
     </>

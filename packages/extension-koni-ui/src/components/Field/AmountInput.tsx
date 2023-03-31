@@ -6,13 +6,15 @@ import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks/form/useF
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Input, InputRef } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import React, { ChangeEventHandler, ClipboardEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useState } from 'react';
+import React, { ChangeEventHandler, ClipboardEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   decimals: number;
   maxValue: string;
+  setIsMax?: (value: boolean) => void;
+  isDisableMax?: boolean;
 }
 
 const isValidInput = (input: string) => {
@@ -41,7 +43,7 @@ export const getOutputValuesFromString: (input: string, power: number) => string
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className, decimals, disabled, maxValue, onChange, statusHelp, value } = props;
+  const { className, decimals, disabled, isDisableMax, maxValue, onChange, setIsMax, statusHelp, value } = props;
   const [inputValue, setInputValue] = useState(value);
   const inputRef = useForwardInputRef(ref);
 
@@ -54,17 +56,18 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
     setInputValue(transformVal);
     onChange && onChange({ target: { value: maxValue } });
+    setIsMax?.(true);
     inputRef.current?.blur();
-  }, [inputRef, decimals, maxValue, onChange]);
+  }, [setIsMax, inputRef, decimals, maxValue, onChange]);
 
   const getMaxLengthText = useCallback((value: string) => {
     return value.includes('.') ? decimals + 1 + value.split('.')[0].length : 10;
   }, [decimals]);
 
-  const suffix = () => {
+  const suffix = useMemo(() => {
     return (
       <Button
-        // eslint-disable-next-line react/jsx-no-bind
+        disabled={isDisableMax}
         onClick={_onClickMaxBtn}
         size='xs'
         type='ghost'
@@ -72,7 +75,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         <span className='max-btn-text'>{t('Max')}</span>
       </Button>
     );
-  };
+  }, [isDisableMax, _onClickMaxBtn, t]);
 
   const onChangeInput: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     let value = event.target.value;
@@ -87,7 +90,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     const transformVal = getOutputValuesFromString(value, decimals);
 
     onChange && onChange({ target: { value: transformVal } });
-  }, [decimals, getMaxLengthText, onChange]);
+    setIsMax?.(false);
+  }, [decimals, getMaxLengthText, onChange, setIsMax]);
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<Element>): void => {
@@ -121,7 +125,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       readOnly={props.readOnly}
       ref={inputRef}
       statusHelp={statusHelp}
-      suffix={suffix()}
+      suffix={suffix}
       value={inputValue}
     />
   );
@@ -135,6 +139,14 @@ const AmountInput = styled(forwardRef(Component))<Props>(({ theme: { token } }: 
 
     '.max-btn-text': {
       color: token.colorSuccess
+    },
+
+    '.ant-btn': {
+      '&:disabled, &.-disalbed': {
+        '.max-btn-text': {
+          color: token['colorSecondary-4']
+        }
+      }
     }
   };
 });

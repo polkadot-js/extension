@@ -35,6 +35,8 @@ export interface SWTransactionInput extends SwInputBase {
   transaction?: SWTransaction['transaction'] | null;
   warnings?: SWTransaction['warnings'];
   errors?: SWTransaction['errors'];
+  edAsWarning?: boolean;
+  isTransferAll?: boolean;
 }
 
 export type SWTransactionResponse = SwInputBase & Pick<SWTransaction, 'warnings' | 'errors'> & Partial<Pick<SWTransaction, 'id' | 'extrinsicHash' | 'status' | 'estimateFee'>>;

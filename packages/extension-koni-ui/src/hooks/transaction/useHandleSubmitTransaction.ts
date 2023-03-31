@@ -13,11 +13,14 @@ const useHandleSubmitTransaction = (onDone: (extrinsicHash: string) => void, set
     const { errors, extrinsicHash, warnings } = rs;
 
     if (errors.length || warnings.length) {
-      notify({
-        message: errors[0]?.message || warnings[0]?.message,
-        type: errors.length ? 'error' : 'warning'
-      });
-      setIgnoreWarnings?.(true);
+      if (errors[0]?.message !== 'User reject request') {
+        notify({
+          message: errors[0]?.message || warnings[0]?.message,
+          type: errors.length ? 'error' : 'warning'
+        });
+      }
+
+      warnings[0] && setIgnoreWarnings?.(true);
     } else if (extrinsicHash) {
       onDone(extrinsicHash);
     }

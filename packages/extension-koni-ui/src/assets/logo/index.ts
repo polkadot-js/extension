@@ -559,6 +559,10 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   eqdot: require('./199.EQDOT.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  avt: require('./Aventus.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  aventus: require('./Aventus.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./73.Default.png')
 };
 

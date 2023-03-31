@@ -109,13 +109,19 @@ export async function validateWasmToken (chain: string, contractAddress: string,
           contractError: true
         };
       } else {
-        name = symbolResp.output?.toHuman() as string;
-        decimals = parseInt(decimalsResp.output?.toHuman() as string);
-        symbol = symbolResp.output?.toHuman() as string;
+        const symbolObj = symbolResp.output?.toHuman() as Record<string, any>;
+        const decimalsObj = decimalsResp.output?.toHuman() as Record<string, any>;
+        const nameObj = nameResp.output?.toHuman() as Record<string, any>;
+
+        name = nameResp.output ? (nameObj.Ok as string || nameObj.ok as string) : '';
+        decimals = decimalsResp.output ? (new BN((decimalsObj.Ok || decimalsObj.ok) as string | number)).toNumber() : 0;
+        symbol = decimalsResp.output ? (symbolObj.Ok as string || symbolObj.ok as string) : '';
 
         if (name === '' || symbol === '') {
           contractError = true;
         }
+
+        console.log('validate PSP22', name, symbol, decimals);
       }
     } else {
       if (['astar', 'shiden', 'shibuya'].includes(chain)) {

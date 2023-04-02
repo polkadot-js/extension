@@ -1,11 +1,11 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
 
 import { AccountContext } from '../../components/index.js';

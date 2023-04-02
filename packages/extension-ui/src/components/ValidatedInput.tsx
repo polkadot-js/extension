@@ -1,10 +1,12 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { Validator } from '../util/validators.js';
+
 import React, { useEffect, useState } from 'react';
 
 import useIsMounted from '../hooks/useIsMounted.js';
-import { Result, Validator } from '../util/validators.js';
+import { Result } from '../util/validators.js';
 import Warning from './Warning.js';
 
 interface BasicProps {

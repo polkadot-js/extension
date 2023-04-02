@@ -1,8 +1,9 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributor
 // SPDX-License-Identifier: Apache-2.0
 
+import type { WithTranslation } from 'react-i18next';
+
 import React from 'react';
-import { WithTranslation } from 'react-i18next';
 
 import Header from '../partials/Header.js';
 import Button from './Button.js';

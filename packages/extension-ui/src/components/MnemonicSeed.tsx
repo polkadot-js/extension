@@ -1,10 +1,11 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { MouseEventHandler } from 'react';
 import type { ThemeProps } from '../types.js';
 
 import { faCopy } from '@fortawesome/free-regular-svg-icons';
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 
 import useTranslation from '../hooks/useTranslation.js';

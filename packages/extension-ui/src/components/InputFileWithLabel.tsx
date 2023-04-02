@@ -1,10 +1,11 @@
 // Copyright 2017-2023 @polkadot/react-components authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { DropzoneRef } from 'react-dropzone';
 import type { ThemeProps } from '../types.js';
 
 import React, { createRef, useCallback, useState } from 'react';
-import Dropzone, { DropzoneRef } from 'react-dropzone';
+import Dropzone from 'react-dropzone';
 
 import { formatNumber, hexToU8a, isHex, u8aToString } from '@polkadot/util';
 

@@ -1,11 +1,11 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { TFunction } from 'i18next';
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 
-import { TFunction } from 'i18next';
 import React, { useMemo, useRef } from 'react';
 
 import { BN, bnToBn, formatNumber } from '@polkadot/util';

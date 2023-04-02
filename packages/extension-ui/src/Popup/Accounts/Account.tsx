@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountJson } from '@polkadot/extension-base/background/types';
+import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { canDerive } from '@polkadot/extension-base/utils';
-import { ThemeProps } from '@polkadot/extension-ui/types';
 
 import { AccountContext, Address, Checkbox, Dropdown, Link, MenuDivider } from '../../components/index.js';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions.js';

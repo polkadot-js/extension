@@ -11,6 +11,7 @@ import type { KeyringPair } from '@polkadot/keyring/types';
 import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
 import type { SignerPayloadJSON } from '@polkadot/types/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
+import type { AuthUrls } from './State.js';
 
 import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
@@ -18,7 +19,7 @@ import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { AccountsStore } from '../../stores/index.js';
 import Extension from './Extension.js';
-import State, { AuthUrls } from './State.js';
+import State from './State.js';
 import Tabs from './Tabs.js';
 
 describe('Extension', () => {

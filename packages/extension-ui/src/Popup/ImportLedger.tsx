@@ -1,6 +1,8 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { ThemeProps } from '../types.js';
+
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -13,7 +15,6 @@ import useTranslation from '../hooks/useTranslation.js';
 import { createAccountHardware } from '../messaging.js';
 import { Header, Name } from '../partials/index.js';
 import { styled } from '../styled.js';
-import { ThemeProps } from '../types.js';
 import ledgerChains from '../util/legerChains.js';
 
 interface AccOption {

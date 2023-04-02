@@ -6,6 +6,7 @@
 import '@polkadot/extension-mocks/chrome';
 
 import type { ReactWrapper } from 'enzyme';
+import type { Theme } from '../../components/index.js';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import enzyme from 'enzyme';
@@ -14,7 +15,7 @@ import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 import { ThemeProvider } from 'styled-components';
 
-import { Theme, themes } from '../../components/index.js';
+import { themes } from '../../components/index.js';
 import * as messaging from '../../messaging.js';
 import { flushAllPromises } from '../../testHelpers.js';
 import Account from './Account.js';

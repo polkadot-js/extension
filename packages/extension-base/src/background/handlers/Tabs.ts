@@ -8,6 +8,7 @@ import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { MessageTypes, RequestAccountList, RequestAccountUnsubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types.js';
+import type { AuthResponse } from './State.js';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
@@ -19,7 +20,7 @@ import { assert, isNumber } from '@polkadot/util';
 import RequestBytesSign from '../RequestBytesSign.js';
 import RequestExtrinsicSign from '../RequestExtrinsicSign.js';
 import { withErrorLog } from './helpers.js';
-import State, { AuthResponse } from './State.js';
+import State from './State.js';
 import { createSubscription, unsubscribe } from './subscriptions.js';
 
 interface AccountSub {

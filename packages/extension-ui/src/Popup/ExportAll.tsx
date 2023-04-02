@@ -1,11 +1,12 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { RouteComponentProps } from 'react-router';
 import type { ThemeProps } from '../types.js';
 
 import fileSaver from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { withRouter } from 'react-router';
 
 import { AccountContext, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Warning } from '../components/index.js';
 import useTranslation from '../hooks/useTranslation.js';

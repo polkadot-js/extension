@@ -1,11 +1,13 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { Validator } from '../util/validators.js';
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { InputWithLabel, ValidatedInput } from '../components/index.js';
 import useTranslation from '../hooks/useTranslation.js';
-import { allOf, isNotShorterThan, isSameAs, Validator } from '../util/validators.js';
+import { allOf, isNotShorterThan, isSameAs } from '../util/validators.js';
 
 interface Props {
   isFocussed?: boolean;

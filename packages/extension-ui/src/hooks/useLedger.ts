@@ -1,10 +1,11 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { Network } from '@polkadot/networks/types';
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Ledger } from '@polkadot/hw-ledger';
-import { Network } from '@polkadot/networks/types';
 import uiSettings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 

@@ -1,4 +1,4 @@
-     607	Jaco                          	0.45.5 (#1244)
+     608	Jaco                          	Move type-only imports (w/ verbatimModuleSyntax) (#1245)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

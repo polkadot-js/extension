@@ -149,7 +149,7 @@ const Component: React.FC<Props> = ({ account, className, payload: { era, nonce,
       {!tip.isEmpty && (
         <MetaInfo.Number
           label={t<string>('Tip')}
-          value={formatNumber(tip)}
+          value={formatNumber(tip || '0')}
         />
       )}
       {renderMethod(method, decoded, t)}

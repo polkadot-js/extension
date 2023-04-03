@@ -70,14 +70,24 @@ function Component ({ className, request }: Props) {
       <div className='confirmation-footer'>
         <Button
           disabled={loading}
-          icon={<Icon phosphorIcon={XCircle} />}
+          icon={(
+            <Icon
+              phosphorIcon={XCircle}
+              weight='fill'
+            />
+          )}
           onClick={onCancel}
           schema={'secondary'}
         >
           {t('Cancel')}
         </Button>
         <Button
-          icon={<Icon phosphorIcon={CheckCircle} />}
+          icon={(
+            <Icon
+              phosphorIcon={CheckCircle}
+              weight='fill'
+            />
+          )}
           loading={loading}
           onClick={onConfirm}
         >

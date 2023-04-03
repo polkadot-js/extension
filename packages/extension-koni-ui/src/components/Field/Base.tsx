@@ -23,4 +23,5 @@ export interface BasicInputWrapper<T = string> {
   onFocus?: InputProps['onFocus'];
   readOnly?: boolean;
   statusHelp?: string;
+  tooltip?: string;
 }

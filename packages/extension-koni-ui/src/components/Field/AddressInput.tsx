@@ -22,12 +22,13 @@ interface Props extends BasicInputWrapper, ThemeProps {
   showAddressBook?: boolean;
   showScanner?: boolean;
   autoReformatValue?: boolean;
+  addressPrefix?: number;
 }
 
 const modalId = 'input-account-address-modal';
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { autoReformatValue,
+  const { addressPrefix, autoReformatValue,
     className = '', disabled, id = modalId, label, onBlur, onChange, onFocus,
     placeholder, readOnly, showAddressBook, showScanner, statusHelp, value } = props;
   const { t } = useTranslation();
@@ -44,6 +45,20 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
     return account?.name;
   }, [accounts, value]);
+
+  const formattedAddress = useMemo((): string => {
+    const _value = value || '';
+
+    if (addressPrefix === undefined) {
+      return _value;
+    }
+
+    try {
+      return reformatAddress(_value, addressPrefix);
+    } catch (e) {
+      return _value;
+    }
+  }, [addressPrefix, value]);
 
   const parseAndChangeValue = useCallback((value: string) => {
     const val = value.trim();
@@ -105,9 +120,13 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
                   <div className={CN('__name common-text', { 'limit-width': !!accountName })}>
                     {accountName || toShort(value, 9, 9)}
                   </div>
-                  {accountName && <div className={'__address common-text'}>
-                    ({toShort(value, 4, 4)})
-                  </div>}
+                  {(accountName || addressPrefix !== undefined) &&
+                    (
+                      <div className={'__address common-text'}>
+                        ({toShort(formattedAddress, 4, 4)})
+                      </div>
+                    )
+                  }
                 </div>
               )
             }

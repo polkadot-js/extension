@@ -81,18 +81,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }).catch(console.log);
   }, [goBack, handleSimpleConfirmModal, showNotification, t, tokenInfo.slug]);
 
-  const subHeaderButton: ButtonProps[] = [
-    {
-      icon: <Icon
-        customSize={`${token.fontSizeHeading3}px`}
-        phosphorIcon={Trash}
-        type='phosphor'
-        weight={'light'}
-      />,
-      onClick: handleDeleteToken,
-      disabled: !_isSmartContractToken(tokenInfo)
-    }
-  ];
+  const subHeaderButton: ButtonProps[] = useMemo(() => {
+    return [
+      {
+        icon: <Icon
+          customSize={`${token.fontSizeHeading3}px`}
+          phosphorIcon={Trash}
+          type='phosphor'
+          weight={'light'}
+        />,
+        onClick: handleDeleteToken,
+        disabled: !_isCustomAsset(tokenInfo.slug)
+      }
+    ];
+  }, [handleDeleteToken, token.fontSizeHeading3, tokenInfo.slug]);
 
   const contractAddressIcon = useCallback(() => {
     const contractAddress = _getContractAddressOfToken(tokenInfo);

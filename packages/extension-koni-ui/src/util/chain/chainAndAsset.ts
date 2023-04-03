@@ -17,7 +17,7 @@ export function isTokenAvailable (
 
   const isAssetVisible = assetSetting && assetSetting.visible;
   const isAssetFungible = _isAssetFungibleToken(chainAsset);
-  const isOriginChainActive = chainStateMap[chainAsset.originChain].active;
+  const isOriginChainActive = chainStateMap[chainAsset.originChain]?.active;
   const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset.originChain : true; // Check if have ledger network
 
   if (filterActiveChain) {

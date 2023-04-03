@@ -53,7 +53,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const stakingType = _stakingType as StakingType;
 
   const dataContext = useContext(DataContext);
-  const { asset, chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
+  const { asset, chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const { stakingRewardMap } = useSelector((state) => state.staking);
@@ -134,8 +134,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     setChain(stakingChain || '');
-    setTransactionType(ExtrinsicType.STAKING_CLAIM_REWARD);
-  }, [setChain, setTransactionType, stakingChain]);
+  }, [setChain, stakingChain]);
 
   useEffect(() => {
     // Trick to trigger validate when case single account

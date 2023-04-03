@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, NominationPoolInfo, NominatorMetadata, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationPoolInfo, NominatorMetadata, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
@@ -57,8 +57,7 @@ const Component: React.FC<Props> = (props: Props) => {
     setChain,
     setDisabledRightBtn,
     setFrom,
-    setShowRightBtn,
-    setTransactionType } = useContext(TransactionContext);
+    setShowRightBtn } = useContext(TransactionContext);
 
   // TODO: should do better to get validators info
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state) => state.bonding);
@@ -66,8 +65,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const { currentAccount } = useSelector((state) => state.accountState);
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
 
+  const isEthAdr = isEthereumAddress(currentAccount?.address);
+
   const defaultStakingType: StakingType = useMemo(() => {
-    if (isEthereumAddress(currentAccount?.address)) {
+    if (isEthAdr) {
       return StakingType.NOMINATED;
     }
 
@@ -79,7 +80,7 @@ const Component: React.FC<Props> = (props: Props) => {
       default:
         return StakingType.POOLED;
     }
-  }, [_stakingType, currentAccount?.address]);
+  }, [_stakingType, isEthAdr]);
 
   const [form] = Form.useForm<StakeFormProps>();
 
@@ -89,7 +90,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
   const nominatorMetadataList = useGetNominatorInfo(chain, stakingType, from);
+
   const nominatorMetadata: NominatorMetadata | undefined = useMemo(() => nominatorMetadataList[0], [nominatorMetadataList]);
+
   const { nativeTokenBalance } = useGetBalance(chain, from);
   const tokenList = useGetSupportedStakingTokens(stakingType, from, stakingChain);
 
@@ -309,9 +312,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [defaultSlug, setAsset]);
 
   useEffect(() => {
-    setTransactionType(ExtrinsicType.STAKING_JOIN_POOL);
     setShowRightBtn(true);
-  }, [setShowRightBtn, setTransactionType]);
+  }, [setShowRightBtn]);
 
   useEffect(() => {
     setDisabledRightBtn(!chainStakingMetadata);
@@ -355,7 +357,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 options={[
                   {
                     label: 'Pools',
-                    value: StakingType.POOLED
+                    value: StakingType.POOLED,
+                    disabled: isEthAdr
                   },
                   {
                     label: 'Nominate',

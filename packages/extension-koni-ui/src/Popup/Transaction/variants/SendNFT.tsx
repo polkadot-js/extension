@@ -76,7 +76,7 @@ const Component: React.FC = () => {
 
   const chainInfo = useMemo(() => chainInfoMap[nftChain], [chainInfoMap, nftChain]);
 
-  const { chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
+  const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
@@ -93,7 +93,6 @@ const Component: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const recipientValidator = useCallback(({ getFieldValue }: FormInstance<SendNFTFormProps>) => {
-
     return ({
       validator: (rule: FormRule, _recipientAddress: string): Promise<void> => {
         if (!_recipientAddress) {
@@ -173,10 +172,9 @@ const Component: React.FC = () => {
   const preCheckReadOnly = usePreCheckReadOnly(from);
 
   useEffect(() => {
-    setTransactionType(ExtrinsicType.SEND_NFT);
     setChain(nftChain);
     setFrom(owner);
-  }, [nftChain, owner, setChain, setFrom, setTransactionType]);
+  }, [nftChain, owner, setChain, setFrom]);
 
   useEffect(() => {
     if (nftItem === DEFAULT_ITEM || collectionInfo === DEFAULT_COLLECTION) {

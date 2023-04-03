@@ -59,7 +59,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const dataContext = useContext(DataContext);
-  const { chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
+  const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
@@ -222,10 +222,6 @@ const Component: React.FC<Props> = (props: Props) => {
       }
     }
   }, [currentAccount?.address, setFrom]);
-
-  useEffect(() => {
-    setTransactionType(ExtrinsicType.STAKING_LEAVE_POOL);
-  }, [setTransactionType]);
 
   useEffect(() => {
     setChain(stakingChain || '');

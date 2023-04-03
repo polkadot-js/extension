@@ -15,7 +15,7 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "0.45.6-0-x",
+  "version": "0.45.6-1-x",
   "main": "index.js",
   "dependencies": {
     "@polkadot/rpc-provider": "^10.2.2",

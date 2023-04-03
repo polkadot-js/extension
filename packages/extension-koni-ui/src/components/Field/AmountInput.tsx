@@ -6,7 +6,7 @@ import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks/form/useF
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Input, InputRef } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import React, { ChangeEventHandler, ClipboardEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import React, { ChangeEventHandler, ClipboardEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -43,7 +43,7 @@ export const getOutputValuesFromString: (input: string, power: number) => string
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className, decimals, disabled, isDisableMax, maxValue, onChange, setIsMax, statusHelp, value } = props;
+  const { className, decimals, disabled, isDisableMax, maxValue, onChange, setIsMax, statusHelp, tooltip, value } = props;
   const [inputValue, setInputValue] = useState(value);
   const inputRef = useForwardInputRef(ref);
 
@@ -111,6 +111,27 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     event.preventDefault();
   }, []);
 
+  useEffect(() => {
+    let amount = true;
+
+    if (inputValue) {
+      const transformVal = getOutputValuesFromString(inputValue || '0', decimals);
+
+      setTimeout(() => {
+        if (amount) {
+          inputRef.current?.focus();
+          onChange && onChange({ target: { value: transformVal } });
+          inputRef.current?.blur();
+        }
+      }, 300);
+    }
+
+    return () => {
+      amount = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [decimals]);
+
   return (
     <Input
       className={className}
@@ -126,6 +147,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       ref={inputRef}
       statusHelp={statusHelp}
       suffix={suffix}
+      tooltip={tooltip}
       value={inputValue}
     />
   );

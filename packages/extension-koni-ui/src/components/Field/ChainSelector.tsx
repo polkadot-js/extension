@@ -20,7 +20,7 @@ interface Props extends ThemeProps, BasicInputWrapper {
 const renderEmpty = () => <GeneralEmptyList />;
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { className = '', disabled, id = 'address-input', items, label, placeholder, statusHelp, value } = props;
+  const { className = '', disabled, id = 'address-input', items, label, placeholder, statusHelp, tooltip, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { onSelect } = useSelectModalInputHelper(props, ref);
@@ -89,6 +89,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       selected={value || ''}
       statusHelp={statusHelp}
       title={label || placeholder || t('Select chain')}
+      tooltip={tooltip}
     />
   );
 }

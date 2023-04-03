@@ -6,14 +6,13 @@ import { isAccountAll } from '@subwallet/extension-base/utils';
 import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/util';
+import { findNetworkJsonByGenesisHash, reformatAddress, toShort } from '@subwallet/extension-koni-ui/util';
 import { InputRef, SelectModal } from '@subwallet/react-ui';
 import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -21,8 +20,9 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 import GeneralEmptyList from '../GeneralEmptyList';
 
 interface Props extends ThemeProps, BasicInputWrapper {
-  externalAccounts?: AccountJson[],
-  filter?: (account: AccountJson) => boolean
+  externalAccounts?: AccountJson[];
+  filter?: (account: AccountJson) => boolean;
+  addressPrefix?: number;
 }
 
 const renderEmpty = () => <GeneralEmptyList />;
@@ -32,8 +32,9 @@ function defaultFiler (account: AccountJson): boolean {
 }
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
-  const { className = '', disabled, externalAccounts, filter, id = 'account-selector', label, placeholder, readOnly, statusHelp, value } = props;
-  const _items = useSelector((state: RootState) => state.accountState.accounts);
+  const { addressPrefix, className = '', disabled, externalAccounts, filter, id = 'account-selector', label, placeholder, readOnly, statusHelp, value } = props;
+  const _items = useSelector((state) => state.accountState.accounts);
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
 
   const items = useMemo(() => {
     return (externalAccounts || _items).filter(filter || defaultFiler);
@@ -42,7 +43,27 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
   const { t } = useTranslation();
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
+  const formatAddress = useCallback((item: AccountJson): string => {
+    let addPrefix = 42;
+
+    if (addressPrefix !== undefined) {
+      addPrefix = addressPrefix;
+    }
+
+    if (item.originGenesisHash) {
+      const network = findNetworkJsonByGenesisHash(chainInfoMap, item.originGenesisHash);
+
+      if (network) {
+        addPrefix = network.substrateInfo?.addressPrefix ?? addPrefix;
+      }
+    }
+
+    return reformatAddress(item.address, addPrefix);
+  }, [addressPrefix, chainInfoMap]);
+
   const renderSelected = useCallback((item: AccountJson) => {
+    const address = formatAddress(item);
+
     return (
       <div className={'__selected-item'}>
         <div className={'__selected-item-name common-text'}>
@@ -50,11 +71,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
         </div>
 
         <div className={'__selected-item-address common-text'}>
-        ({toShort(item.address, 4, 4)})
+        ({toShort(address, 4, 4)})
         </div>
       </div>
     );
-  }, []);
+  }, [formatAddress]);
 
   const searchFunction = useCallback((item: AccountJson, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -68,14 +89,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
   }, []);
 
   const renderItem = useCallback((item: AccountJson, selected: boolean) => {
+    const address = formatAddress(item);
+
     return (
       <AccountItemWithName
         accountName={item.name}
-        address={item.address}
+        address={address}
         isSelected={selected}
       />
     );
-  }, []);
+  }, [formatAddress]);
 
   return (
     <>

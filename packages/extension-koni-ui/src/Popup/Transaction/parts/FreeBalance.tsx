@@ -28,7 +28,7 @@ const Component = ({ address, chain, className, label, tokenSlug }: Props) => {
 
   return (
     <Typography.Paragraph className={CN(className, 'free-balance')}>
-      {label || t('Sender available balance:')}
+      {label || t('Sender available balance:')}&nbsp;
       {
         !!nativeTokenSlug && (
           <Number
@@ -45,7 +45,7 @@ const Component = ({ address, chain, className, label, tokenSlug }: Props) => {
       {
         !!tokenSlug && (tokenSlug !== nativeTokenSlug) && (
           <>
-            <span className={'__name'}>{t('and')}</span>
+            <span className={'__name'}>&nbsp;{t('and')}&nbsp;</span>
             <Number
               decimal={tokenBalance?.decimals || 18}
               decimalColor={token.colorTextTertiary}
@@ -62,19 +62,16 @@ const Component = ({ address, chain, className, label, tokenSlug }: Props) => {
   );
 };
 
-const FreeBalance = styled(Component)(({ theme: { token } }: Props) => {
-  return ({
+const FreeBalance = styled(Component)<Props>(({ theme: { token } }: Props) => {
+  return {
     display: 'flex',
+    flexWrap: 'wrap',
     color: token.colorTextTertiary,
 
     '&.ant-typography': {
       marginBottom: 0
-    },
-
-    '.ant-number, .__name': {
-      marginLeft: '0.3em'
     }
-  });
+  };
 });
 
 export default FreeBalance;

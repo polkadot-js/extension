@@ -33,7 +33,7 @@ interface Props extends ThemeProps, BasicInputWrapper {
 const renderEmpty = () => <GeneralEmptyList />;
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { className = '', disabled, id = 'token-select', items, label, placeholder, showChainInSelected = false, statusHelp, value, filterFunction = _isAssetFungibleToken } = props;
+  const { className = '', disabled, id = 'token-select', items, label, placeholder, showChainInSelected = false, statusHelp, value, filterFunction = _isAssetFungibleToken, tooltip } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 
@@ -138,6 +138,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       selected={value || ''}
       statusHelp={statusHelp}
       title={label || placeholder || t('Select token')}
+      tooltip={tooltip}
     />
   );
 }

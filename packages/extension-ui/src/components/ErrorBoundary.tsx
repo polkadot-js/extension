@@ -6,9 +6,9 @@ import type { WithTranslation } from 'react-i18next';
 import React from 'react';
 
 import Header from '../partials/Header.js';
+import translate from '../translate.js';
 import Button from './Button.js';
 import ButtonArea from './ButtonArea.js';
-import translate from './translate.js';
 import VerticalSpace from './VerticalSpace.js';
 
 interface Props extends WithTranslation {

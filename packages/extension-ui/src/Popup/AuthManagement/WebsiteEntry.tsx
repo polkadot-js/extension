@@ -1,13 +1,13 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
+import type { AuthUrlInfo } from '@polkadot/extension-base/background/types';
 import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
-import { useTranslation } from '@polkadot/extension-ui/components/translate';
+import { useTranslation } from '@polkadot/extension-ui/translate';
 
 import RemoveAuth from '../../components/RemoveAuth.js';
 import { styled } from '../../styled.js';

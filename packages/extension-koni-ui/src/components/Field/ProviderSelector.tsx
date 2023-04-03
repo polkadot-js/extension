@@ -102,13 +102,15 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
       label={label}
       onSelect={onSelect}
       placeholder={placeholder || t('Select provider')}
-      prefix={<Icon
-        customSize={'24px'}
-        iconColor={token['gray-4']}
-        phosphorIcon={ShareNetwork}
-        type={'phosphor'}
-        weight={'bold'}
-      />}
+      prefix={(
+        <Icon
+          customSize={'24px'}
+          iconColor={token['gray-4']}
+          phosphorIcon={ShareNetwork}
+          type={'phosphor'}
+          weight={'bold'}
+        />
+      )}
       renderItem={renderItem}
       renderSelected={renderSelectedProvider}
       selected={value || ''}
@@ -134,8 +136,7 @@ export const ProviderSelector = styled(forwardRef(Component))<Props>(({ theme: {
 
     '.ant-sw-modal-footer': {
       borderTop: 0,
-      margin: 0,
-      padding: 0
+      paddingTop: 0
     },
 
     '.ant-setting-item .ant-setting-item-name': {

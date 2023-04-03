@@ -11,8 +11,8 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ActionContext, Address, VerticalSpace, Warning } from '../../../components/index.js';
-import { useTranslation } from '../../../components/translate.js';
 import { approveSignSignature } from '../../../messaging.js';
+import { useTranslation } from '../../../translate.js';
 import Bytes from '../Bytes.js';
 import Extrinsic from '../Extrinsic.js';
 import LedgerSign from '../LedgerSign.js';

@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
+// Copyright 2019-2023 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MessageTypes, TransportRequestMessage } from '../types.js';
@@ -9,6 +9,8 @@ import { PORT_EXTENSION } from '../../defaults.js';
 import Extension from './Extension.js';
 import State from './State.js';
 import Tabs from './Tabs.js';
+
+export { withErrorLog } from './helpers.js';
 
 const state = new State();
 const extension = new Extension(state);

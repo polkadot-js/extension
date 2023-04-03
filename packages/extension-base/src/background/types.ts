@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
+// Copyright 2019-2023 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable no-use-before-define */
@@ -10,7 +10,7 @@ import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/ty
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { AuthResponse, AuthUrls } from './handlers/State.js';
+import type { AuthResponse } from './handlers/State.js';
 
 import { ALLOWED_PATH } from '../defaults.js';
 
@@ -25,6 +25,18 @@ type NoUndefinedValues<T> = {
 type IsNull<T, K extends keyof T> = { [K1 in Exclude<keyof T, K>]: T[K1] } & T[K] extends null ? K : never;
 
 type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T];
+
+export type AuthUrls = Record<string, AuthUrlInfo>;
+
+export interface AuthUrlInfo {
+  count: number;
+  id: string;
+  // this is from pre-0.44.1
+  isAllowed?: boolean;
+  origin: string;
+  url: string;
+  authorizedAccounts: string[];
+}
 
 export type SeedLengths = 12 | 24;
 

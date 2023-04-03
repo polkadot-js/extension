@@ -1309,8 +1309,10 @@ export class ChainService {
     return this.assetSettingSubject.value;
   }
 
-  public async updateAssetSetting (assetSlug: string, assetSetting: AssetSetting) {
+  public async updateAssetSetting (assetSlug: string, assetSetting: AssetSetting): Promise<boolean | undefined> {
     const currentAssetSettings = await this.getAssetSettings();
+
+    let needUpdateSubject: boolean | undefined;
 
     // Update settings
     currentAssetSettings[assetSlug] = assetSetting;
@@ -1323,8 +1325,11 @@ export class ChainService {
       // if chain not enabled, then automatically enable
       if (chainState && !chainState.active) {
         this.enableChain(chainState.slug);
+        needUpdateSubject = true;
       }
     }
+
+    return needUpdateSubject;
   }
 
   public async updateAssetSettingByChain (chainSlug: string, visible: boolean) {

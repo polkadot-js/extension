@@ -23,7 +23,7 @@ import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/to
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { SWTransaction, SWTransactionResponse, SWTransactionResult, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
@@ -971,7 +971,11 @@ export default class KoniExtension {
 
   private async updateAssetSetting (params: AssetSettingUpdateReq) {
     try {
-      await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
+      const needUpdateSubject = await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
+
+      if (needUpdateSubject) {
+        this.#koniState.updateServiceInfo();
+      }
 
       return true;
     } catch (e) {
@@ -1472,7 +1476,7 @@ export default class KoniExtension {
       errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Not found token from registry'));
     }
 
-    if (isEthereumAddress(from) && isEthereumAddress(to) && !_isNativeToken(tokenInfo) && !_isTokenEvmSmartContract(tokenInfo)) {
+    if (isEthereumAddress(from) && isEthereumAddress(to) && _isTokenEvmSmartContract(tokenInfo) && _getContractAddressOfToken(tokenInfo).length === 0) {
       errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Not found ERC20 address for this token'));
     }
 
@@ -1506,7 +1510,7 @@ export default class KoniExtension {
       const txVal: string = transferAll ? freeBalance.value : (value || '0');
 
       // Estimate with EVM API
-      if (_isTokenEvmSmartContract(tokenInfo)) {
+      if (_isTokenEvmSmartContract(tokenInfo) || _isLocalToken(tokenInfo)) {
         [
           transaction,
           transferAmount.value

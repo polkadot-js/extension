@@ -134,6 +134,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
               type='ghost'
             />}
             {showScanner && <Button
+              disabled={disabled}
               icon={(
                 <Icon
                   phosphorIcon={Scan}

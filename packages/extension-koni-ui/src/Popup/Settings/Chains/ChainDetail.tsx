@@ -14,7 +14,7 @@ import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/
 import useFetchChainState from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainState';
 import { removeChain, upsertChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Col, Field, Form, Icon, Input, Row, Tooltip } from '@subwallet/react-ui';
+import { Button, ButtonProps, Col, Field, Form, Icon, Input, Row } from '@subwallet/react-ui';
 import { FloppyDiskBack, Globe, Plus, ShareNetwork, Trash } from 'phosphor-react';
 import { FieldData, RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -326,79 +326,58 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
               <Row gutter={token.paddingSM}>
                 <Col span={16}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('Chain name')}
-                  >
-                    <div>
-                      <Field
-                        content={chainInfo.name}
-                        placeholder={t('Chain name')}
-                        prefix={<Icon
-                          customSize={'24px'}
-                          iconColor={token['gray-4']}
-                          phosphorIcon={Globe}
-                          type={'phosphor'}
-                          weight={'bold'}
-                        />}
-                      />
-                    </div>
-                  </Tooltip>
+                  <Field
+                    content={chainInfo.name}
+                    placeholder={t('Chain name')}
+                    prefix={<Icon
+                      customSize={'24px'}
+                      iconColor={token['gray-4']}
+                      phosphorIcon={Globe}
+                      type={'phosphor'}
+                      weight={'bold'}
+                    />}
+                    tooltip={t('Chain name')}
+                    tooltipPlacement={'topLeft'}
+                  />
                 </Col>
                 <Col span={8}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('Symbol')}
-                  >
-                    <div>
-                      <Field
-                        content={symbol}
-                        placeholder={t('Symbol')}
-                      />
-                    </div>
-                  </Tooltip>
+                  <Field
+                    content={symbol}
+                    placeholder={t('Symbol')}
+                    tooltip={t('Symbol')}
+                    tooltipPlacement={'topLeft'}
+                  />
                 </Col>
               </Row>
 
               <Row gutter={token.paddingSM}>
                 <Col span={12}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('Decimals')}
-                  >
-                    <div>
-                      <Field
-                        content={decimals}
-                        placeholder={t('Decimals')}
-                      />
-                    </div>
-                  </Tooltip>
+                  <Field
+                    content={decimals}
+                    placeholder={t('Decimals')}
+                    tooltip={t('Decimals')}
+                    tooltipPlacement={'topLeft'}
+                  />
                 </Col>
                 <Col span={12}>
                   {
                     !isPureEvmChain
-                      ? <Tooltip
-                        placement={'topLeft'}
-                        title={t('ParaId')}
-                      >
-                        <div>
-                          <Field
-                            content={paraId > -1 ? paraId : undefined}
-                            placeholder={t('ParaId')}
-                          />
-                        </div>
-                      </Tooltip>
-                      : <Tooltip
-                        placement={'topLeft'}
-                        title={t('Chain ID')}
-                      >
-                        <div>
-                          <Field
-                            content={chainId > -1 ? chainId : 'None'}
-                            placeholder={t('Chain ID')}
-                          />
-                        </div>
-                      </Tooltip>
+                      ? (
+                        <Field
+                          content={paraId > -1 ? paraId : undefined}
+                          placeholder={t('ParaId')}
+                          tooltip={t('ParaId')}
+                          tooltipPlacement={'topLeft'}
+                        />
+                      )
+                      : (
+                        <Field
+                          content={chainId > -1 ? chainId : 'None'}
+                          placeholder={t('Chain ID')}
+                          tooltip={t('Chain ID')}
+                          tooltipPlacement={'topLeft'}
+                        />
+                      )
                   }
                 </Col>
               </Row>
@@ -407,64 +386,47 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 {
                   !isPureEvmChain &&
                   <Col span={12}>
-                    <Tooltip
-                      placement={'topLeft'}
-                      title={t('Address prefix')}
-                    >
-                      <div>
-                        <Field
-                          content={addressPrefix.toString()}
-                          placeholder={t('Address prefix')}
-                        />
-                      </div>
-                    </Tooltip>
+                    <Field
+                      content={addressPrefix.toString()}
+                      placeholder={t('Address prefix')}
+                      tooltip={t('Address prefix')}
+                      tooltipPlacement={'topLeft'}
+                    />
                   </Col>
                 }
 
                 <Col span={!isPureEvmChain ? 12 : 24}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('Chain type')}
-                  >
-                    <div>
-                      <Field
-                        content={chainTypeString()}
-                        placeholder={t('Chain type')}
-                      />
-                    </div>
-                  </Tooltip>
+                  <Field
+                    content={chainTypeString()}
+                    placeholder={t('Chain type')}
+                    tooltip={t('Chain type')}
+                    tooltipPlacement={'topLeft'}
+                  />
                 </Col>
               </Row>
 
-              <Tooltip
-                placement={'topLeft'}
-                title={t('Block explorer')}
+              <Form.Item
+                name={'blockExplorer'}
+                rules={[{ validator: blockExplorerValidator }]}
+                statusHelpAsTooltip={true}
               >
-                <div>
-                  <Form.Item
-                    name={'blockExplorer'}
-                    rules={[{ validator: blockExplorerValidator }]}
-                    statusHelpAsTooltip={true}
-                  >
-                    <Input placeholder={t('Block explorer')} />
-                  </Form.Item>
-                </div>
-              </Tooltip>
-
-              <Tooltip
-                placement={'topLeft'}
-                title={t('Crowdloan URL')}
+                <Input
+                  placeholder={t('Block explorer')}
+                  tooltip={t('Block explorer')}
+                  tooltipPlacement={'topLeft'}
+                />
+              </Form.Item>
+              <Form.Item
+                name={'crowdloanUrl'}
+                rules={[{ validator: crowdloanUrlValidator }]}
+                statusHelpAsTooltip={true}
               >
-                <div>
-                  <Form.Item
-                    name={'crowdloanUrl'}
-                    rules={[{ validator: crowdloanUrlValidator }]}
-                    statusHelpAsTooltip={true}
-                  >
-                    <Input placeholder={t('Crowdloan URL')} />
-                  </Form.Item>
-                </div>
-              </Tooltip>
+                <Input
+                  placeholder={t('Crowdloan URL')}
+                  tooltip={t('Crowdloan URL')}
+                  tooltipPlacement={'topLeft'}
+                />
+              </Form.Item>
             </div>
           </Form>
         </div>

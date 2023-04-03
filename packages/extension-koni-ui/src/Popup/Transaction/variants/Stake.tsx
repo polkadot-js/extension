@@ -8,7 +8,7 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
@@ -94,11 +94,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const tokenList = useGetSupportedStakingTokens(stakingType, from, stakingChain);
 
   const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
+
   const [loading, setLoading] = useState(false);
   const [poolLoading, setPoolLoading] = useState(false);
   const [validatorLoading, setValidatorLoading] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-  const [warnings, setWarnings] = useState<string[]>([]);
 
   const existentialDeposit = useMemo(() => {
     const assetInfo = assetRegistry[asset];
@@ -138,6 +137,8 @@ const Component: React.FC<Props> = (props: Props) => {
       [FormFieldName.TYPE]: defaultStakingType
     };
   }, [defaultSlug, from, defaultStakingType, chain]);
+
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
   const onFieldsChange: FormCallbacks<StakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);
@@ -238,24 +239,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
     setTimeout(() => {
       bondingPromise
-        .then((response) => {
-          const { errors, extrinsicHash, warnings } = response;
-
-          if (errors.length || warnings.length) {
-            setErrors(errors.map((e) => e.message));
-            setWarnings(warnings.map((w) => w.message));
-          } else if (extrinsicHash) {
-            onDone(extrinsicHash);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        })
+        .then(onSuccess)
+        .catch(onError)
         .finally(() => {
           setLoading(false);
         });
     }, 300);
-  }, [nominatorMetadata, chain, getSelectedPool, getSelectedValidators, onDone]);
+  }, [getSelectedPool, chain, nominatorMetadata, getSelectedValidators, onSuccess, onError]);
 
   const getMetaInfo = useCallback(() => {
     if (chainStakingMetadata) {
@@ -484,8 +474,8 @@ const Component: React.FC<Props> = (props: Props) => {
       </TransactionContent>
 
       <TransactionFooter
-        errors={errors}
-        warnings={warnings}
+        errors={[]}
+        warnings={[]}
       >
         <Button
           disabled={isDisable}

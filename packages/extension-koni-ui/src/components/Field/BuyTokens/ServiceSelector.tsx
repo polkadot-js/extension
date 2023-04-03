@@ -5,30 +5,34 @@ import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, InputRef, Logo, SelectModal, Web3Block } from '@subwallet/react-ui';
+import { Icon, InputRef, Logo, SelectModal, SelectModalItem, Web3Block } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps, BasicInputWrapper {}
 
-type ServiceItem = {
+interface ServiceItem extends SelectModalItem {
   key: string,
   name: string
-};
+}
 
 const serviceItems: ServiceItem[] = [
   {
     key: 'transak',
-    name: 'Transak'
+    name: 'Transak',
+    disabled: false
   },
   {
     key: 'moonpay',
-    name: 'MoonPay (Coming soon)'
+    name: 'MoonPay (Coming soon)',
+    disabled: true
   },
   {
     key: 'onramper',
-    name: 'Onramper (Coming soon)'
+    name: 'Onramper (Coming soon)',
+    disabled: true
   }
 ];
 
@@ -56,7 +60,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
   const renderItem = useCallback((item: ServiceItem, selected: boolean) => {
     return (
       <Web3Block
-        className={'__option-item'}
+        className={CN('__option-item', { disabled: item.disabled })}
         leftItem={(
           <Logo
             className={'__option-logo'}
@@ -112,6 +116,15 @@ export const ServiceSelector = styled(forwardRef(Component))<Props>(({ theme: { 
 
         '&:not(:hover)': {
           backgroundColor: token.colorBgSecondary
+        }
+      },
+
+      '.disabled': {
+        cursor: 'not-allowed',
+        opacity: token.opacityDisable,
+
+        '&:hover': {
+          background: token.colorBgSecondary
         }
       },
 

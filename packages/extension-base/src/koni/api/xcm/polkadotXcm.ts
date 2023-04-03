@@ -49,7 +49,7 @@ export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originC
   let method = 'limitedReserveTransferAssets';
 
   if (['astar', 'shiden'].includes(originChainInfo.slug)) {
-    method = 'reserveWithdrawAssets';
+    method = 'limitedReserveWithdrawAssets';
   } else if (_isSubstrateRelayChain(destinationChainInfo)) {
     method = 'limitedTeleportAssets';
   }

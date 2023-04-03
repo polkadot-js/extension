@@ -4,7 +4,7 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { FOUR_INSTRUCTIONS_WEIGHT, getReceiverLocation, NETWORK_USE_UNLIMITED_WEIGHT, POLKADOT_UNLIMITED_WEIGHT } from '@subwallet/extension-base/koni/api/xcm/utils';
 import { _XCM_TYPE } from '@subwallet/extension-base/services/chain-service/constants';
-import { _getSubstrateParaId, _getXcmAssetId, _getXcmAssetMultilocation, _getXcmAssetType, _getXcmTransferType, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getSubstrateParaId, _getTokenOnChainInfo, _getXcmAssetId, _getXcmAssetMultilocation, _getXcmAssetType, _getXcmTransferType, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { ApiPromise } from '@polkadot/api';
 
@@ -17,10 +17,10 @@ function getCurrencyId (tokenInfo: _ChainAsset): Record<string, string> {
 
     return { [tokenType]: assetId };
   } else if (['pioneer'].includes(tokenInfo.originChain)) {
-    return tokenInfo.metadata?.multilocation as Record<string, string>;
+    return _getXcmAssetMultilocation(tokenInfo) as Record<string, string>;
   }
 
-  return tokenInfo.metadata?.onChainInfo as Record<string, string>;
+  return _getTokenOnChainInfo(tokenInfo) as Record<string, string>;
 }
 
 function getMultiLocationForXtokensPallet (originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, toAddress: string) {

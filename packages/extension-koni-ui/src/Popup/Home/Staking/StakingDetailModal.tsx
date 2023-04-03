@@ -1,26 +1,24 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingItem, StakingRewardItem, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
 import { StakingStatus } from '@subwallet/extension-koni-ui/constants/stakingStatus';
 import { useGetAccountByAddress, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
-import useGetStakingList from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetStakingList';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import { Button, Icon, Number, SwModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import CN from 'classnames';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -28,6 +26,8 @@ import styled, { useTheme } from 'styled-components';
 interface Props extends ThemeProps {
   nominatorMetadata: NominatorMetadata;
   chainStakingMetadata: ChainStakingMetadata;
+  staking: StakingItem;
+  rewardItem?: StakingRewardItem;
 }
 
 export const STAKING_DETAIL_MODAL_ID = 'staking-detail-modal-id';
@@ -36,7 +36,7 @@ export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) =
   return unstakings.find((item) => item.validatorAddress === address);
 };
 
-const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominatorMetadata }: Props) => {
+const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominatorMetadata, rewardItem, staking }: Props) => {
   const { expectedReturn, minStake, unstakingPeriod } = chainStakingMetadata;
   const { activeStake, address, chain, nominations, type, unstakings } = nominatorMetadata;
   const showingOption = isShowNominationByValidator(chain);
@@ -46,25 +46,14 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
   const { t } = useTranslation();
-
+  const [seeMore, setSeeMore] = useState<boolean>(false);
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { currentAccount } = useSelector((state) => state.accountState);
-
-  const { data: stakingData } = useGetStakingList();
-
   const onClickFooterButton = usePreCheckReadOnly(currentAccount?.address);
 
-  const [seeMore, setSeeMore] = useState<boolean>(false);
-
-  const data = useMemo((): StakingDataType => {
-    return stakingData.find(
-      (item) => item.staking.chain === chain && item.staking.type === type
-    ) as StakingDataType;
-  }, [stakingData, chain, type]);
-  const { decimals, reward, staking } = data || { staking: {}, reward: {} };
-
   const chainInfo = useFetchChainInfo(staking.chain);
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);
   const account = useGetAccountByAddress(staking.address);
 
@@ -211,12 +200,21 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           valueColorSchema={StakingStatus.active.schema}
         />
 
-        {!!reward?.totalReward && (
+        {!!rewardItem?.totalReward && !isNaN(parseFloat(rewardItem?.totalReward)) && (
           <MetaInfo.Number
             decimals={decimals}
             label={t('Total reward')}
             suffix={staking.nativeToken}
-            value={reward?.totalReward || '0'}
+            value={rewardItem?.totalReward || '0'}
+          />
+        )}
+
+        {!!rewardItem?.unclaimedReward && !isNaN(parseFloat(rewardItem?.unclaimedReward)) && (
+          <MetaInfo.Number
+            decimals={decimals}
+            label={t('Unclaimed reward')}
+            suffix={staking.nativeToken}
+            value={rewardItem?.unclaimedReward || '0'}
           />
         )}
 
@@ -293,7 +291,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </MetaInfo.Default>}
         </MetaInfo>
 
-        {showingOption === 'showByValue' && !!(nominations && nominations.length) && (
+        {showingOption === 'showByValue' && (nominations && nominations.length > 0) && (
           <>
             <MetaInfo valueColorScheme={'light'}>
               <MetaInfo.Number
@@ -349,7 +347,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </>
         )}
 
-        {(showingOption === 'showByValue' || showingOption === 'mixed') && !!(unstakings && unstakings.length) && (
+        {(showingOption === 'showByValue' || showingOption === 'mixed') && (unstakings && unstakings.length > 0) && (
           <>
             <MetaInfo valueColorScheme={'light'}>
               <MetaInfo.Number
@@ -380,7 +378,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </>
         )}
 
-        {(showingOption === 'showByValidator' || showingOption === 'mixed') &&
+        {(showingOption === 'showByValidator' || showingOption === 'mixed') && (nominations && nominations.length > 0) && (unstakings && unstakings.length > 0) &&
           <>
             {nominations && nominations.length && nominations.map((item) => (
               renderUnstakingInfo(item)

@@ -7,7 +7,6 @@ import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useGetStakingList, usePreCheckReadOnly, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -82,13 +81,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   const onClickItem = useCallback((item: StakingDataType) => {
-    if (!isAccountAll(item.staking.address)) {
-      setSelectedItem(item);
+    setSelectedItem(item);
 
-      setTimeout(() => {
-        activeModal(STAKING_DETAIL_MODAL_ID);
-      }, 100);
-    }
+    setTimeout(() => {
+      activeModal(STAKING_DETAIL_MODAL_ID);
+    }, 100);
   }, [activeModal]);
 
   const preCheckReadOnly = usePreCheckReadOnly(currentAccount?.address);
@@ -177,6 +174,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <StakingDetailModal
               chainStakingMetadata={selectedItem.chainStakingMetadata}
               nominatorMetadata={selectedItem.nominatorMetadata}
+              rewardItem={selectedItem.reward}
+              staking={selectedItem.staking}
             />
           )
         }

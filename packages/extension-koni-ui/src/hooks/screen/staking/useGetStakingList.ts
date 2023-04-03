@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -9,6 +9,8 @@ import { StakingData, StakingDataType } from '@subwallet/extension-koni-ui/types
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
+
+import { BN, BN_ZERO } from '@polkadot/util';
 
 const groupStakingItems = (stakingItems: StakingItem[]): StakingItem[] => {
   const itemGroups: string[] = [];
@@ -108,6 +110,47 @@ const groupStakingRewardItems = (stakingRewardItems: StakingRewardItem[]): Staki
   return groupedStakingRewardItems;
 };
 
+const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): NominatorMetadata[] => {
+  const itemGroups: string[] = [];
+
+  for (const nominatorMetadata of nominatorMetadataList) {
+    const group = `${nominatorMetadata.chain}-${nominatorMetadata.type}`;
+
+    if (!itemGroups.includes(group)) {
+      itemGroups.push(group);
+    }
+  }
+
+  const groupedNominatorMetadataList: NominatorMetadata[] = [];
+
+  for (const group of itemGroups) {
+    const [chain, type] = group.split('-');
+
+    const groupedNominatorMetadata: NominatorMetadata = {
+      chain,
+      type: type as StakingType,
+      address: '',
+      activeStake: '',
+      nominations: [],
+      unstakings: []
+    };
+
+    let groupedActiveStake = BN_ZERO;
+
+    for (const nominatorMetadata of nominatorMetadataList) {
+      if (nominatorMetadata.chain === chain && nominatorMetadata.type === type) {
+        groupedActiveStake = groupedActiveStake.add(new BN(nominatorMetadata.activeStake));
+      }
+    }
+
+    groupedNominatorMetadata.address = ALL_ACCOUNT_KEY;
+    groupedNominatorMetadata.activeStake = groupedActiveStake.toString();
+    groupedNominatorMetadataList.push(groupedNominatorMetadata);
+  }
+
+  return groupedNominatorMetadataList;
+};
+
 export default function useGetStakingList () {
   const { chainStakingMetadataList, nominatorMetadataList, stakingMap, stakingRewardMap } = useSelector((state: RootState) => state.staking);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
@@ -122,6 +165,7 @@ export default function useGetStakingList () {
     const parsedPriceMap: Record<string, number> = {};
     let readyStakingItems: StakingItem[] = [];
     let stakingRewardList = stakingRewardMap;
+    let nominatorMetadatas = nominatorMetadataList;
     const stakingData: StakingDataType[] = [];
 
     stakingMap.forEach((stakingItem) => {
@@ -142,6 +186,7 @@ export default function useGetStakingList () {
     if (isAll) {
       readyStakingItems = groupStakingItems(readyStakingItems);
       stakingRewardList = groupStakingRewardItems(stakingRewardList);
+      nominatorMetadatas = groupNominatorMetadatas(nominatorMetadataList);
     }
 
     for (const stakingItem of readyStakingItems) {
@@ -174,17 +219,15 @@ export default function useGetStakingList () {
         }
       }
 
-      if (!isAll) {
-        for (const nominatorMetadata of nominatorMetadataList) {
-          if (
-            stakingItem.chain === nominatorMetadata.chain &&
-            stakingItem.type === nominatorMetadata.type &&
-            stakingItem.address === nominatorMetadata.address
-          ) {
-            stakingDataType.nominatorMetadata = nominatorMetadata;
+      for (const nominatorMetadata of nominatorMetadatas) {
+        if (
+          stakingItem.chain === nominatorMetadata.chain &&
+          stakingItem.type === nominatorMetadata.type &&
+          stakingItem.address === nominatorMetadata.address
+        ) {
+          stakingDataType.nominatorMetadata = nominatorMetadata;
 
-            break;
-          }
+          break;
         }
       }
 

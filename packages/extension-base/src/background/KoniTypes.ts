@@ -146,8 +146,7 @@ export interface StakingItem {
   nativeToken: string,
   unit?: string,
 
-  state: APIItemState,
-  rewardInfo?: StakingRewardItem
+  state: APIItemState
 }
 
 export interface StakingJson {

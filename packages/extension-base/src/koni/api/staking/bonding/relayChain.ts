@@ -91,8 +91,8 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
     chainApi.api.query.staking.bonded(address)
   ]);
 
-  const ledger = _ledger.toJSON() as unknown as PalletStakingStakingLedger;
-  const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
+  const ledger = _ledger.toPrimitive() as unknown as PalletStakingStakingLedger;
+  const nominations = _nominations.toPrimitive() as unknown as PalletStakingNominations;
   const currentEra = _currentEra.toString();
   const bonded = _bonded.toHuman();
 

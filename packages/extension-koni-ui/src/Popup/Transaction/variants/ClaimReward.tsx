@@ -5,7 +5,7 @@ import { ExtrinsicType, StakingRewardItem, StakingType } from '@subwallet/extens
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountSelector, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useDefaultNavigate, useGetNativeTokenBasicInfo, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useDefaultNavigate, useGetNativeTokenBasicInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
@@ -71,8 +71,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-  const [warnings, setWarnings] = useState<string[]>([]);
 
   const [form] = Form.useForm<ClaimRewardFormProps>();
   const formDefault = useMemo((): ClaimRewardFormProps => ({
@@ -81,6 +79,8 @@ const Component: React.FC<Props> = (props: Props) => {
     asset: asset,
     [FormFieldName.BOND_REWARD]: true
   }), [asset, chain, from]);
+
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
   const onFieldsChange: FormCallbacks<ClaimRewardFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
@@ -112,23 +112,13 @@ const Component: React.FC<Props> = (props: Props) => {
         stakingType: stakingType,
         unclaimedReward: reward?.unclaimedReward
       })
-        .then((result) => {
-          const { errors, extrinsicHash, warnings } = result;
-
-          if (errors.length || warnings.length) {
-            setLoading(false);
-            setErrors(errors.map((e) => e.message));
-            setWarnings(warnings.map((w) => w.message));
-          } else if (extrinsicHash) {
-            onDone(extrinsicHash);
-          }
-        })
-        .catch((error: Error) => {
+        .then(onSuccess)
+        .catch(onError)
+        .finally(() => {
           setLoading(false);
-          setErrors([error.message]);
         });
     }, 300);
-  }, [chain, from, onDone, reward?.unclaimedReward, stakingType]);
+  }, [chain, from, onError, onSuccess, reward?.unclaimedReward, stakingType]);
 
   const onPreCheckReadOnly = usePreCheckReadOnly(from);
 
@@ -213,8 +203,8 @@ const Component: React.FC<Props> = (props: Props) => {
         </PageWrapper>
       </TransactionContent>
       <TransactionFooter
-        errors={errors}
-        warnings={warnings}
+        errors={[]}
+        warnings={[]}
       >
         <Button
           disabled={loading}

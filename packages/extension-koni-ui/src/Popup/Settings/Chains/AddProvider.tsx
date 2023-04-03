@@ -14,7 +14,7 @@ import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
-import { ActivityIndicator, Col, Form, Icon, Input, Row, Tooltip } from '@subwallet/react-ui';
+import { ActivityIndicator, Col, Form, Icon, Input, Row } from '@subwallet/react-ui';
 import { Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -304,63 +304,50 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
               <Row gutter={token.paddingSM}>
                 <Col span={16}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('Chain name')}
-                  >
-                    <div>
-                      <Form.Item name={'name'}>
-                        <Input
-                          disabled={true}
-                          placeholder={t('Chain name')}
-                          prefix={<Icon
-                            customSize={'24px'}
-                            iconColor={token['gray-4']}
-                            phosphorIcon={Globe}
-                            type={'phosphor'}
-                            weight={'bold'}
-                          />}
-                          value={chainInfo.name}
+                  <Form.Item name={'name'}>
+                    <Input
+                      disabled={true}
+                      placeholder={t('Chain name')}
+                      prefix={(
+                        <Icon
+                          customSize={'24px'}
+                          iconColor={token['gray-4']}
+                          phosphorIcon={Globe}
+                          type={'phosphor'}
+                          weight={'bold'}
                         />
-                      </Form.Item>
-                    </div>
-                  </Tooltip>
+                      )}
+                      tooltip={t('Chain name')}
+                      tooltipPlacement='topLeft'
+                      value={chainInfo.name}
+                    />
+                  </Form.Item>
                 </Col>
 
                 <Col span={8}>
-                  <Tooltip
-                    placement={'topLeft'}
-                    title={t('Symbol')}
+                  <Form.Item
+                    name={'symbol'}
                   >
-                    <div>
-                      <Form.Item
-                        name={'symbol'}
-                      >
-                        <Input
-                          disabled={true}
-                          placeholder={t('Symbol')}
-                          value={chainInfo.slug}
-                        />
-                      </Form.Item>
-                    </div>
-                  </Tooltip>
-                </Col>
-              </Row>
-
-              <Tooltip
-                placement={'topLeft'}
-                title={t('Chain type')}
-              >
-                <div>
-                  <Form.Item name={'chainType'}>
                     <Input
                       disabled={true}
-                      placeholder={t('Chain type')}
+                      placeholder={t('Symbol')}
+                      tooltip={t('Symbol')}
+                      tooltipPlacement='topLeft'
                       value={chainInfo.slug}
                     />
                   </Form.Item>
-                </div>
-              </Tooltip>
+                </Col>
+              </Row>
+
+              <Form.Item name={'chainType'}>
+                <Input
+                  disabled={true}
+                  placeholder={t('Chain type')}
+                  tooltip={t('Chain type')}
+                  tooltipPlacement='topLeft'
+                  value={chainInfo.slug}
+                />
+              </Form.Item>
             </div>
           </Form>
         </div>

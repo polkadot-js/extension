@@ -405,12 +405,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   content={symbol}
                   placeholder={t<string>('Symbol')}
                   prefix={tokenDecimalsPrefix()}
+                  tooltip={t('Symbol')}
+                  tooltipPlacement={'topLeft'}
                 />
               </Col>
               <Col span={12}>
                 <Field
                   content={decimals === -1 ? '' : decimals}
                   placeholder={t<string>('Decimals')}
+                  tooltip={t('Decimals')}
+                  tooltipPlacement={'topLeft'}
                 />
               </Col>
             </Row>

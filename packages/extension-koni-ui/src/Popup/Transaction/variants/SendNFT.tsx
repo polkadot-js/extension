@@ -6,7 +6,7 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFocusFormItem, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFocusFormItem, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
@@ -78,6 +78,8 @@ const Component: React.FC = () => {
 
   const { chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
 
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+
   const [form] = Form.useForm<SendNFTFormProps>();
   const formDefault = useMemo(() => {
     return {
@@ -89,8 +91,6 @@ const Component: React.FC = () => {
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-  const [warnings, setWarnings] = useState<string[]>([]);
 
   const recipientValidator = useCallback(({ getFieldValue }: FormInstance<SendNFTFormProps>) => {
     const from = getFieldValue('from') as string;
@@ -161,25 +161,14 @@ const Component: React.FC = () => {
       setTimeout(() => {
         // Handle transfer action
         sendPromise
-          .then((rs) => {
-            const { errors, extrinsicHash, warnings } = rs;
-
-            if (errors.length || warnings.length) {
-              setErrors(errors.map((e) => e.message));
-              setWarnings(warnings.map((w) => w.message));
-            } else if (extrinsicHash) {
-              onDone(extrinsicHash);
-            }
-          })
-          .catch((e: Error) => {
-            setErrors([e.message]);
-          })
+          .then(onSuccess)
+          .catch(onError)
           .finally(() => {
             setLoading(false);
           });
       }, 300);
     },
-    [chain, from, nftItem, onDone]
+    [chain, from, nftItem, onError, onSuccess]
   );
 
   const preCheckReadOnly = usePreCheckReadOnly(from);
@@ -251,8 +240,8 @@ const Component: React.FC = () => {
       </TransactionContent>
       <TransactionFooter
         className={'send-nft-transaction-footer'}
-        errors={errors}
-        warnings={warnings}
+        errors={[]}
+        warnings={[]}
       >
         <Button
           disabled={isDisable}

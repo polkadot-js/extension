@@ -80,7 +80,7 @@ function getTokenItems (
     }
 
     const chainAsset = assetRegistry[tokenGroupSlug];
-    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset.originChain : true;
+    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;
 
     if (isSetTokenSlug) {
       if (isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger) {
@@ -230,12 +230,16 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
     const { chain, destChain, from, to } = form.getFieldsValue();
 
+    if (!from || !chain || !destChain) {
+      return Promise.resolve();
+    }
+
     const isOnChain = chain === destChain;
 
     if (isOnChain) {
       if (from === _recipientAddress) {
         // todo: change message later
-        return Promise.reject(t('On Chain: The recipient address can not be the same as the sender address'));
+        return Promise.reject(t('The recipient address can not be the same as the sender address'));
       }
 
       const isNotSameAddressType = (isEthereumAddress(from) && !!_recipientAddress && !isEthereumAddress(_recipientAddress)) ||
@@ -243,14 +247,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
       if (isNotSameAddressType) {
         // todo: change message later
-        return Promise.reject(t('On Chain: The recipient address must be same type as the current account address.'));
+        return Promise.reject(t('The recipient address must be same type as the current account address.'));
       }
     } else {
       const isDestChainEvmCompatible = _isChainEvmCompatible(chainInfoMap[destChain]);
 
       if (isDestChainEvmCompatible !== isEthereumAddress(to)) {
         // todo: change message later
-        return Promise.reject(t(`Cross chain: The recipient address must be ${isDestChainEvmCompatible ? 'EVM' : 'substrate'} type`));
+        return Promise.reject(t(`The recipient address must be ${isDestChainEvmCompatible ? 'EVM' : 'substrate'} type`));
       }
     }
 
@@ -295,6 +299,10 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           chain: chain,
           destChain: chain
         });
+
+        if (values.to) {
+          validateField.push('to');
+        }
 
         setChain(chain);
         setAsset(part.asset);

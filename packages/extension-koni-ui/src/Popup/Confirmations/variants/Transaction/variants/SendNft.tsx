@@ -3,11 +3,10 @@
 
 import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { useGetChainPrefixBySlug, useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import CN from 'classnames';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { BaseTransactionConfirmationProps } from './Base';
@@ -20,11 +19,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
 
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
-
-  const chainInfo = useMemo(() => {
-    return chainInfoMap[transaction.chain];
-  }, [chainInfoMap, transaction.chain]);
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(transaction.chain);
+  const networkPrefix = useGetChainPrefixBySlug(transaction.chain);
 
   return (
     <div className={CN(className)}>
@@ -32,6 +28,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <MetaInfo.Account
           address={data.senderAddress}
           label={t('Sender')}
+          networkPrefix={networkPrefix}
         />
 
         <MetaInfo.Account
@@ -40,18 +37,18 @@ const Component: React.FC<Props> = (props: Props) => {
         />
 
         <MetaInfo.Chain
-          chain={chainInfo.slug}
+          chain={transaction.chain}
           label={t('Network')}
         />
       </MetaInfo>
       <MetaInfo hasBackgroundWrapper={true}>
-        {data.nftItemName && <MetaInfo.Default label={t('NFT')}>
-          {data.nftItemName}
-        </MetaInfo.Default>}
+        <MetaInfo.Default label={t('NFT')}>
+          {data.nftItem.name || `${data.nftItem.collectionId}_${data.nftItem.id}`}
+        </MetaInfo.Default>
         <MetaInfo.Number
-          decimals={chainInfo?.substrateInfo?.decimals || 0}
+          decimals={decimals}
           label={t('Estimated fee')}
-          suffix={chainInfo?.substrateInfo?.symbol}
+          suffix={symbol}
           value={transaction.estimateFee?.value || 0}
         />
       </MetaInfo>

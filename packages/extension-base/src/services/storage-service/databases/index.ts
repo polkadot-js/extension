@@ -52,7 +52,7 @@ export default class KoniDatabase extends Dexie {
 
   private schemaVersion: number;
 
-  public constructor (name = DEFAULT_DATABASE, schemaVersion = 8) {
+  public constructor (name = DEFAULT_DATABASE, schemaVersion = 9) {
     super(name);
     this.schemaVersion = schemaVersion;
 
@@ -69,6 +69,7 @@ export default class KoniDatabase extends Dexie {
       crowdloans: '[chain+address], chain, address',
       stakings: '[chain+address+type], [chain+address], chain, address, type',
       transactions: '[chain+address+extrinsicHash], &[chain+address+extrinsicHash], chain, address, extrinsicHash, action',
+      migrations: '[key+name]',
 
       chainStakingMetadata: '[chain+type], chain, type',
       nominatorMetadata: '[chain+address+type], [chain+address], chain, address, type'

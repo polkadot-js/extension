@@ -991,5 +991,6 @@
   "The recipient address is required": "",
   "Invalid recipient address": "",
   "Receive address must be of evm account.": "",
-  "Receive address must be of substrate account.": ""
+  "Receive address must be of substrate account.": "",
+  "Transfer all": ""
 }

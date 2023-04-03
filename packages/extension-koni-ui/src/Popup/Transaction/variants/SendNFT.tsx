@@ -93,7 +93,6 @@ const Component: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const recipientValidator = useCallback(({ getFieldValue }: FormInstance<SendNFTFormProps>) => {
-    const from = getFieldValue('from') as string;
 
     return ({
       validator: (rule: FormRule, _recipientAddress: string): Promise<void> => {
@@ -120,7 +119,7 @@ const Component: React.FC = () => {
         return Promise.resolve();
       }
     });
-  }, [t]);
+  }, [t, from]);
 
   const onFieldsChange: FormCallbacks<SendNFTFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);

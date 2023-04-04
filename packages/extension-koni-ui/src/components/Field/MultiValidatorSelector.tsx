@@ -275,7 +275,10 @@ const MultiValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { 
     },
 
     '.ant-sw-modal-footer': {
-      margin: 0
+      margin: 0,
+      marginTop: token.marginXS,
+      borderTop: 0,
+      marginBottom: token.margin
     },
 
     '.pool-item:not(:last-child)': {

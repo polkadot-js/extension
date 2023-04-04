@@ -5,6 +5,7 @@ import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useNavigateOnChangeAccount } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/modal/useConfirmModal';
@@ -31,12 +32,19 @@ const subHeaderRightButton = <Icon
 />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
-  const dataContext = useContext(DataContext);
   const location = useLocation();
+  const { collectionInfo, nftList } = location.state as INftCollectionDetail;
+
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const goBack = useDefaultNavigate().goBack;
+  const { goBack } = useDefaultNavigate();
   const showNotification = useNotification();
+
+  const dataContext = useContext(DataContext);
+
+  useNavigateOnChangeAccount('/home/nfts/collections');
+
+  const originAssetInfo = useGetChainAssetInfo(collectionInfo.originAsset);
 
   const { handleSimpleConfirmModal } = useConfirmModal({
     title: t<string>('Delete NFT'),
@@ -47,9 +55,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     content: t<string>('Confirm delete this NFT collection'),
     okText: t<string>('Remove')
   });
-
-  const { collectionInfo, nftList } = location.state as INftCollectionDetail;
-  const originAssetInfo = useGetChainAssetInfo(collectionInfo.originAsset);
 
   const searchNft = useCallback((nftItem: NftItem, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();

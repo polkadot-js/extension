@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountSelector, CancelUnstakeSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useDefaultNavigate, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
@@ -13,6 +13,7 @@ import { ArrowCircleRight, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
@@ -35,7 +36,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const stakingType = _stakingType as StakingType;
 
   const { t } = useTranslation();
-  const { goHome } = useDefaultNavigate();
+  const navigate = useNavigate();
 
   const dataContext = useContext(DataContext);
   const { asset, chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
@@ -55,6 +56,10 @@ const Component: React.FC<Props> = (props: Props) => {
     asset: asset,
     [FormFieldName.UNSTAKE]: ''
   }), [asset, chain, from]);
+
+  const goHome = useCallback(() => {
+    navigate('/home/staking');
+  }, [navigate]);
 
   const onFieldsChange: FormCallbacks<CancelUnstakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change

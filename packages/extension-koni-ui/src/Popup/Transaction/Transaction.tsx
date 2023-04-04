@@ -2,15 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import { TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useNavigateOnChangeAccount } from '@subwallet/extension-koni-ui/hooks';
-import useAssetChecker from '@subwallet/extension-koni-ui/hooks/chain/useAssetChecker';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { useAssetChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
@@ -71,7 +67,6 @@ function Component ({ className }: Props) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { goBack } = useDefaultNavigate();
 
   const { activeModal } = useContext(ModalContext);
   const dataContext = useContext(DataContext);
@@ -140,12 +135,16 @@ function Component ({ className }: Props) {
 
   const checkAsset = useAssetChecker();
 
+  const goBack = useCallback(() => {
+    navigate(homePath);
+  }, [homePath, navigate]);
+
   // Navigate to finish page
   const onDone = useCallback(
     (extrinsicHash: string) => {
       const chainType = isEthereumAddress(from) ? 'ethereum' : 'substrate';
 
-      navigate(`/transaction/done/${chainType}/${chain}/${extrinsicHash}`, { replace: true });
+      navigate(`/transaction-done/${chainType}/${chain}/${extrinsicHash}`, { replace: true });
     },
     [from, chain, navigate]
   );

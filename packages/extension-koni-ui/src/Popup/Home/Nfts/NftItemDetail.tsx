@@ -3,6 +3,7 @@
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useNavigateOnChangeAccount } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -39,20 +40,26 @@ const modalCloseButton = <Icon
 />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
-  const dataContext = useContext(DataContext);
   const location = useLocation();
+  const { collectionInfo, nftItem } = location.state as INftItemDetail;
+
+  const { t } = useTranslation();
+  const notify = useNotification();
+
   const navigate = useNavigate();
-  const goBack = useDefaultNavigate().goBack;
+  const { goBack } = useDefaultNavigate();
   const { token } = useTheme() as Theme;
+
+  const dataContext = useContext(DataContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const { collectionInfo, nftItem } = location.state as INftItemDetail;
+  const accounts = useSelector((root: RootState) => root.accountState.accounts);
+
   const originChainInfo = useGetChainInfo(nftItem.chain);
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem.owner || '');
   const accountExternalUrl = useScanExplorerAddressUrl(nftItem.chain, nftItem.owner);
-  const accounts = useSelector((root: RootState) => root.accountState.accounts);
-  const notify = useNotification();
+
+  useNavigateOnChangeAccount('/home/nfts/collections');
 
   const onClickSend = useCallback(() => {
     if (nftItem && nftItem.owner) {

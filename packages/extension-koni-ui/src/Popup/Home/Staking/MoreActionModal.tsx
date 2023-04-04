@@ -3,16 +3,15 @@
 
 import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActions, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
-import { usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
+import { useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
+import { ActivityIndicator, BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowArcLeft, ArrowCircleDown, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -48,11 +47,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
-  const notify = useNotification();
 
   const { inactiveModal } = useContext(ModalContext);
 
   const { currentAccount } = useSelector((state) => state.accountState);
+
+  const [selected, setSelected] = useState<StakingAction | undefined>();
 
   const onCancel = useCallback(
     () => {
@@ -61,14 +61,25 @@ const Component: React.FC<Props> = (props: Props) => {
     [inactiveModal]
   );
 
+  const onDoneTransaction = useCallback((extrinsicHash: string) => {
+    // TODO: need handle onDone
+    console.log('all good');
+  }, []);
+
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDoneTransaction);
+
   const handleWithdrawalAction = useCallback(() => {
     if (!nominatorMetadata) {
+      setSelected(undefined);
+
       return;
     }
 
     const unstakingInfo = getWithdrawalInfo(nominatorMetadata);
 
     if (!unstakingInfo) {
+      setSelected(undefined);
+
       return;
     }
 
@@ -83,32 +94,22 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     submitStakeWithdrawal(params)
-      .then((result) => {
-        const { errors, extrinsicHash, warnings } = result;
-
-        if (errors.length || warnings.length) {
-          notify({
-            message: t('Error')
-          });
-          // setErrors(errors.map((e) => e.message));
-          // setWarnings(warnings.map((w) => w.message));
-        } else if (extrinsicHash) {
-          console.log('all good');
-        }
-      })
-      .catch((e: Error) => {
-        notify({
-          message: t('Error')
-        });
+      .then(onSuccess)
+      .catch(onError)
+      .finally(() => {
+        setSelected(undefined);
       });
-  }, [nominatorMetadata, notify, t]);
+  }, [nominatorMetadata, onError, onSuccess]);
 
   const handleClaimRewardAction = useCallback(() => {
     if (!nominatorMetadata) {
+      setSelected(undefined);
+
       return;
     }
 
     if (nominatorMetadata.type === StakingType.POOLED) {
+      setSelected(undefined);
       navigate(`/transaction/claim-reward/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
 
       return;
@@ -120,25 +121,12 @@ const Component: React.FC<Props> = (props: Props) => {
       stakingType: nominatorMetadata.type,
       unclaimedReward: reward?.unclaimedReward
     })
-      .then((result) => {
-        const { errors, extrinsicHash, warnings } = result;
-
-        if (errors.length || warnings.length) {
-          notify({
-            message: t('Error')
-          });
-          // setErrors(errors.map((e) => e.message));
-          // setWarnings(warnings.map((w) => w.message));
-        } else if (extrinsicHash) {
-          console.log('all good');
-        }
-      })
-      .catch((e: Error) => {
-        notify({
-          message: t('Error')
-        });
+      .then(onSuccess)
+      .catch(onError)
+      .finally(() => {
+        setSelected(undefined);
       });
-  }, [navigate, nominatorMetadata, notify, reward?.unclaimedReward, t]);
+  }, [navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward]);
 
   const availableActions = useMemo(() => {
     if (!nominatorMetadata) {
@@ -150,6 +138,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onNavigate = useCallback((url: string) => {
     return () => {
+      setSelected(undefined);
       navigate(url);
     };
   }, [navigate]);
@@ -207,7 +196,13 @@ const Component: React.FC<Props> = (props: Props) => {
     return result;
   }, [chainStakingMetadata?.chain, chainStakingMetadata?.type, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);
 
-  const onClickItem = usePreCheckReadOnly(currentAccount?.address);
+  const onPreCheck = usePreCheckReadOnly(currentAccount?.address);
+  const onClickItem = useCallback((action: StakingAction, onClick: () => void) => {
+    return () => {
+      setSelected(action);
+      onPreCheck(onClick)();
+    };
+  }, [onPreCheck]);
 
   return (
     <SwModal
@@ -215,28 +210,45 @@ const Component: React.FC<Props> = (props: Props) => {
       closable={true}
       id={MORE_ACTION_MODAL}
       maskClosable={true}
-      onCancel={onCancel}
+      onCancel={!selected ? onCancel : undefined}
       title={t('Actions')}
     >
-      {actionList.map((item) => (
-        <SettingItem
-          className={CN(
-            'action-more-item',
-            {
-              disabled: !availableActions.includes(item.action)
+      {actionList.map((item) => {
+        const actionDisable = !availableActions.includes(item.action);
+        const hasAnAction = !!selected;
+        const isSelected = item.action === selected;
+        const anotherDisable = hasAnAction && !isSelected;
+        const disabled = actionDisable || anotherDisable;
+
+        return (
+          <SettingItem
+            className={CN(
+              'action-more-item',
+              {
+                disabled: disabled
+              }
+            )}
+            key={item.label}
+            leftItemIcon={(
+              <BackgroundIcon
+                backgroundColor={token[item.backgroundIconColor] as string}
+                phosphorIcon={item.icon}
+                size='sm'
+                weight='fill'
+              />
+            )}
+            name={item.label}
+            onPressItem={disabled ? undefined : onClickItem(item.action, item.onClick)}
+            rightItem={
+              isSelected && (
+                <div className='loading-icon'>
+                  <ActivityIndicator />
+                </div>
+              )
             }
-          )}
-          key={item.label}
-          leftItemIcon={<BackgroundIcon
-            backgroundColor={token[item.backgroundIconColor] as string}
-            phosphorIcon={item.icon}
-            size='sm'
-            weight='fill'
-          />}
-          name={item.label}
-          onPressItem={!availableActions.includes(item.action) ? undefined : onClickItem(item.onClick)}
-        />
-      ))}
+          />
+        );
+      })}
     </SwModal>
   );
 };
@@ -245,6 +257,10 @@ const MoreActionModal = styled(Component)<Props>(({ theme: { token } }: Props) =
   return {
     '.action-more-item:not(:last-child)': {
       marginBottom: token.marginXS
+    },
+
+    '.ant-web3-block-right-item': {
+      marginRight: 0
     },
 
     '.disabled': {

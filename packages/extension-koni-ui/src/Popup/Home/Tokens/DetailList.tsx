@@ -8,9 +8,7 @@ import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Mod
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
-import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import useReceiveQR from '@subwallet/extension-koni-ui/hooks/screen/home/useReceiveQR';
+import { useDefaultNavigate, useNavigateOnChangeAccount, useNotification, useReceiveQR, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { DetailModal } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailUpperBlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -21,7 +19,6 @@ import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import classNames from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -72,6 +69,8 @@ function Component (): React.ReactElement {
     selectedAccount,
     selectedNetwork,
     tokenSelectorItems } = useReceiveQR(tokenGroupSlug);
+
+  useNavigateOnChangeAccount('/home/tokens');
 
   const symbol = useMemo<string>(() => {
     if (tokenGroupSlug) {

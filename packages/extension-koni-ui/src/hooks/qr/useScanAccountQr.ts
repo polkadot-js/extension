@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import useOpenQrScanner from '@subwallet/extension-koni-ui/hooks/qr/useOpenQrScanner';
+import { ValidateState } from '@subwallet/extension-koni-ui/types';
 import { QrAccount, ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
-import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
 import { useCallback, useMemo } from 'react';
 
 const useScanAccountQr = (

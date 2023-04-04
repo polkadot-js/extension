@@ -100,15 +100,15 @@ export class HistoryService {
     return this.historySubject;
   }
 
-  async insertHistory (historyItem: TransactionHistoryItem) {
-    await this.dbService.upsertHistory([historyItem]);
+  async insertHistories (historyItems: TransactionHistoryItem[]) {
+    await this.dbService.upsertHistory(historyItems);
     this.historySubject.next(await this.dbService.getHistories());
   }
 
-  async updateHistory (chain: string, extrinsicHash: string, historyItem: Partial<TransactionHistoryItem>) {
+  async updateHistories (chain: string, extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
     const existedRecords = await this.dbService.getHistories({ chain, extrinsicHash });
     const updatedRecords = existedRecords.map((r) => {
-      return { ...r, ...historyItem };
+      return { ...r, ...updateData };
     });
 
     await this.addHistoryItems(updatedRecords);
@@ -124,7 +124,7 @@ export class HistoryService {
     const updateRecords = historyItems.filter((item) => {
       const key = `${item.chain}-${quickFormatAddressToCompare(item.address) || ''}-${item.extrinsicHash}`;
 
-      return !excludeKeys.includes(key);
+      return item.origin === 'app' || !excludeKeys.includes(key);
     });
 
     await this.dbService.upsertHistory(updateRecords);

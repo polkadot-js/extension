@@ -5,18 +5,8 @@ import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, Unstakin
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
-import {
-  BN,
-  BN_BILLION,
-  BN_HUNDRED,
-  BN_MILLION,
-  BN_THOUSAND,
-  BN_ZERO,
-  bnToU8a,
-  stringToU8a,
-  u8aConcat
-} from '@polkadot/util';
-import {ApiPromise} from "@polkadot/api";
+import { ApiPromise } from '@polkadot/api';
+import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, stringToU8a, u8aConcat } from '@polkadot/util';
 
 export interface PalletNominationPoolsPoolMember {
   poolId: number,

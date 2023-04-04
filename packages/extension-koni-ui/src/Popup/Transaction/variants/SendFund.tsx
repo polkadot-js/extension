@@ -160,6 +160,49 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
   return result;
 }
 
+const filterAccountFunc = (
+  chainInfoMap: Record<string, _ChainInfo>,
+  assetRegistry: Record<string, _ChainAsset>,
+  multiChainAssetMap: Record<string, _MultiChainAsset>,
+  tokenGroupSlug?: string // is ether a token slug or a multiChainAsset slug
+): (account: AccountJson) => boolean => {
+  const isSetTokenSlug = !!tokenGroupSlug && !!assetRegistry[tokenGroupSlug];
+  const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
+
+  if (!tokenGroupSlug) {
+    return () => true;
+  }
+
+  const chainAssets = Object.values(assetRegistry).filter((chainAsset) => {
+    const isTokenFungible = _isAssetFungibleToken(chainAsset);
+
+    if (isTokenFungible) {
+      if (isSetTokenSlug) {
+        return chainAsset.slug === tokenGroupSlug;
+      }
+
+      if (isSetMultiChainAssetSlug) {
+        return chainAsset.multiChainAsset === tokenGroupSlug;
+      }
+    } else {
+      return false;
+    }
+
+    return false;
+  });
+
+  return (account: AccountJson): boolean => {
+    const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
+    const isAccountEthereum = isEthereumAddress(account.address);
+
+    return chainAssets.some((chainAsset) => {
+      const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;
+
+      return isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger;
+    });
+  };
+};
+
 const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { t } = useTranslation();
   const locationState = useLocation().state as SendFundParam;
@@ -368,6 +411,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }, 300);
   }, [chain, from, asset, isTransferAll, onSuccess, onError]);
 
+  const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
+
   // TODO: Need to review
   useEffect(() => {
     const { asset, from } = form.getFieldsValue();
@@ -461,6 +506,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <AccountSelector
               addressPrefix={fromChainNetworkPrefix}
               disabled={!isAllAccount}
+              filter={onFilterAccountFunc}
               label={t('Send from account')}
             />
           </Form.Item>
@@ -527,7 +573,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <ChainSelector
               disabled={!destChainItems.length}
               items={destChainItems}
-              tooltip={t('Destination chain')}
+              title={t('Destination chain')}
+              tooltip={t('Select destination chain')}
             />
           </Form.Item>
         </Form>

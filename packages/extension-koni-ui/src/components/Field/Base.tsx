@@ -24,4 +24,5 @@ export interface BasicInputWrapper<T = string> {
   readOnly?: boolean;
   statusHelp?: string;
   tooltip?: string;
+  title?: string;
 }

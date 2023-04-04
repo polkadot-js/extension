@@ -573,8 +573,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <ChainSelector
               disabled={!destChainItems.length}
               items={destChainItems}
-              title={t('Destination chain')}
-              tooltip={t('Select destination chain')}
+              title={t('Select destination chain')}
+              tooltip={t('Destination chain')}
             />
           </Form.Item>
         </Form>

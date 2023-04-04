@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -110,6 +110,18 @@ const groupStakingRewardItems = (stakingRewardItems: StakingRewardItem[]): Staki
   return groupedStakingRewardItems;
 };
 
+const getGroupStatus = (earnMapping: Record<string, boolean> = {}): StakingStatus => {
+  const list = Object.values(earnMapping);
+
+  if (list.every((value) => !value)) {
+    return StakingStatus.NOT_EARNING;
+  } else if (list.every((value) => value)) {
+    return StakingStatus.EARNING_REWARD;
+  } else {
+    return StakingStatus.PARTIALLY_EARNING;
+  }
+};
+
 const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): NominatorMetadata[] => {
   const itemGroups: string[] = [];
 
@@ -132,19 +144,23 @@ const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): No
       address: '',
       activeStake: '',
       nominations: [],
-      unstakings: []
+      unstakings: [],
+      status: StakingStatus.NOT_EARNING
     };
 
     let groupedActiveStake = BN_ZERO;
+    const earnMapping: Record<string, boolean> = {};
 
     for (const nominatorMetadata of nominatorMetadataList) {
       if (nominatorMetadata.chain === chain && nominatorMetadata.type === type) {
         groupedActiveStake = groupedActiveStake.add(new BN(nominatorMetadata.activeStake));
+        earnMapping[nominatorMetadata.address] = nominatorMetadata.status === StakingStatus.EARNING_REWARD;
       }
     }
 
     groupedNominatorMetadata.address = ALL_ACCOUNT_KEY;
     groupedNominatorMetadata.activeStake = groupedActiveStake.toString();
+    groupedNominatorMetadata.status = getGroupStatus(earnMapping);
     groupedNominatorMetadataList.push(groupedNominatorMetadata);
   }
 

@@ -5,7 +5,7 @@ import { StakingRewardItem, StakingType } from '@subwallet/extension-base/backgr
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountSelector, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useDefaultNavigate, useGetNativeTokenBasicInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNativeTokenBasicInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
@@ -15,6 +15,7 @@ import { ArrowCircleRight, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
@@ -52,6 +53,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chain: stakingChain, type: _stakingType } = useParams();
   const stakingType = _stakingType as StakingType;
 
+  const navigate = useNavigate();
+
   const dataContext = useContext(DataContext);
   const { asset, chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
@@ -59,7 +62,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { stakingRewardMap } = useSelector((state) => state.staking);
 
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
-  const { goHome } = useDefaultNavigate();
 
   const rewardList = useMemo((): StakingRewardItem[] => {
     return stakingRewardMap.filter((item) => item.chain === chain && item.type === stakingType);
@@ -81,6 +83,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }), [asset, chain, from]);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+
+  const goHome = useCallback(() => {
+    navigate('/home/staking');
+  }, [navigate]);
 
   const onFieldsChange: FormCallbacks<ClaimRewardFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change

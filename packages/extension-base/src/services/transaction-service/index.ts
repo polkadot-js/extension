@@ -317,9 +317,10 @@ export default class TransactionService {
     return getTransactionLink(chainInfo, transaction.extrinsicHash);
   }
 
-  private transactionToHistory (id: string, eventLogs?: EventRecord[]): TransactionHistoryItem {
+  private transactionToHistories (id: string, eventLogs?: EventRecord[]): TransactionHistoryItem[] {
     const transaction = this.getTransaction(id);
     const historyItem: TransactionHistoryItem = {
+      origin: 'app',
       chain: transaction.chain,
       direction: TransactionDirection.SEND,
       type: transaction.extrinsicType,
@@ -331,8 +332,8 @@ export default class TransactionService {
       extrinsicHash: transaction.extrinsicHash,
       time: transaction.createdAt.getTime(),
       fee: transaction.estimateFee,
-      blockNumber: 0, // TODO: to be added later
-      blockHash: '' // TODO: to be added later
+      blockNumber: 0, // Will be added in next step
+      blockHash: '' // Will be added in next step
     };
 
     const chainInfo = this.chainService.getChainInfoByKey(transaction.chain);
@@ -440,13 +441,22 @@ export default class TransactionService {
         break;
     }
 
-    return historyItem;
+    // Return one more history record if transaction send to account in the wallets
+    const toAccount = historyItem && keyring.getAccount(historyItem.to);
+
+    if (toAccount) {
+      return [historyItem, { ...historyItem, address: historyItem.to, direction: TransactionDirection.RECEIVED }];
+    }
+
+    return [historyItem];
   }
 
   private onHasTransactionHash ({ eventLogs, extrinsicHash, id }: TransactionEventResponse) {
     // Write processing transaction history
     this.updateTransaction(id, { extrinsicHash, status: ExtrinsicStatus.PROCESSING });
-    this.historyService.insertHistory(this.transactionToHistory(id, eventLogs)).catch(console.error);
+
+    this.historyService.insertHistories(this.transactionToHistories(id, eventLogs)).catch(console.error);
+
     console.log(`Transaction "${id}" is submitted with hash ${extrinsicHash || ''}`);
   }
 
@@ -474,7 +484,7 @@ export default class TransactionService {
     console.log('Transaction completed', id, transaction.extrinsicHash);
 
     // Write success transaction history
-    this.historyService.updateHistory(transaction.chain, transaction.extrinsicHash, {
+    this.historyService.updateHistories(transaction.chain, transaction.extrinsicHash, {
       status: ExtrinsicStatus.SUCCESS,
       blockNumber: blockNumber || 0,
       blockHash: blockHash || ''
@@ -497,7 +507,7 @@ export default class TransactionService {
       console.log('Transaction failed', id, transaction.extrinsicHash);
 
       // Write failed transaction history
-      this.historyService.updateHistory(transaction.chain, transaction.extrinsicHash, {
+      this.historyService.updateHistories(transaction.chain, transaction.extrinsicHash, {
         status: ExtrinsicStatus.FAIL,
         blockNumber: blockNumber || 0,
         blockHash: blockHash || ''

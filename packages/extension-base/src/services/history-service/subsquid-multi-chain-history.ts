@@ -286,7 +286,7 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
 
   return {
     address,
-    origin: MULTI_CHAIN_URL,
+    origin: 'subsquid',
     time: toTimestamp(historyItem.timestamp),
     chainType,
     from,

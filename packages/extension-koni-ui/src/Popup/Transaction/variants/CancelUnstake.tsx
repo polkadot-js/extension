@@ -38,7 +38,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { goHome } = useDefaultNavigate();
 
   const dataContext = useContext(DataContext);
-  const { asset, chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
+  const { asset, chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
 
@@ -106,8 +106,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     setChain(stakingChain || '');
-    setTransactionType(ExtrinsicType.STAKING_CANCEL_UNSTAKE);
-  }, [setChain, setTransactionType, stakingChain]);
+  }, [setChain, stakingChain]);
 
   return (
     <>

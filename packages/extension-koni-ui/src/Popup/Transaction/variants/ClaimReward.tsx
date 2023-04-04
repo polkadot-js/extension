@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountSelector, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -53,7 +53,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const stakingType = _stakingType as StakingType;
 
   const dataContext = useContext(DataContext);
-  const { asset, chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
+  const { asset, chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const { stakingRewardMap } = useSelector((state) => state.staking);
@@ -134,8 +134,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     setChain(stakingChain || '');
-    setTransactionType(ExtrinsicType.STAKING_CLAIM_REWARD);
-  }, [setChain, setTransactionType, stakingChain]);
+  }, [setChain, stakingChain]);
 
   useEffect(() => {
     // Trick to trigger validate when case single account

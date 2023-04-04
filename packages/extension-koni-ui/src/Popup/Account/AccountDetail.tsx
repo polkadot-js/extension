@@ -396,7 +396,8 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
         },
 
         '.ant-input-suffix': {
-          marginRight: 0
+          marginRight: 0,
+          marginLeft: token.marginXS
         },
 
         '.ant-btn': {

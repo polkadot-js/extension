@@ -44,10 +44,13 @@ export const getOutputValuesFromString: (input: string, power: number) => string
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { className, decimals, disabled, isDisableMax, maxValue, onChange, setIsMax, statusHelp, tooltip, value } = props;
-  const [inputValue, setInputValue] = useState(value);
-  const inputRef = useForwardInputRef(ref);
 
   const { t } = useTranslation();
+
+  const inputRef = useForwardInputRef(ref);
+
+  const [inputValue, setInputValue] = useState(value);
+  const [firstTime, setFirstTime] = useState(true);
 
   const _onClickMaxBtn = useCallback((e: SyntheticEvent) => {
     e.stopPropagation();
@@ -114,7 +117,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   useEffect(() => {
     let amount = true;
 
-    if (inputValue) {
+    if (inputValue && !firstTime) {
       const transformVal = getOutputValuesFromString(inputValue || '0', decimals);
 
       setTimeout(() => {
@@ -128,6 +131,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
     return () => {
       amount = false;
+
+      if (decimals >= 0) {
+        setFirstTime(false);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decimals]);

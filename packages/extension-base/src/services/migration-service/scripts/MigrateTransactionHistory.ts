@@ -1,18 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  ChainType,
-  ExtrinsicStatus,
-  ExtrinsicType,
-  TransactionDirection,
-  TransactionHistoryItem
-} from '@subwallet/extension-base/background/KoniTypes';
-import {_getChainNativeTokenBasicInfo} from '@subwallet/extension-base/services/chain-service/utils';
+import { ChainType, ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import BaseMigrationJob from '@subwallet/extension-base/services/migration-service/Base';
 import Dexie from 'dexie';
 
-import {isEthereumAddress} from '@polkadot/util-crypto';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface OldTransactionItem {
   chainHash: string;
@@ -32,7 +26,7 @@ interface OldTransactionItem {
 }
 
 export default class MigrateTransactionHistory extends BaseMigrationJob {
-  public override async run(): Promise<void> {
+  public override async run (): Promise<void> {
     const state = this.state;
     const chainInfoMap = state.getChainInfoMap();
     const assetList = Object.values(state.getAssetRegistry());

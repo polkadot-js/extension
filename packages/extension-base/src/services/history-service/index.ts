@@ -5,11 +5,11 @@ import { TransactionHistoryItem } from '@subwallet/extension-base/background/Kon
 import { CRON_REFRESH_HISTORY_INTERVAL } from '@subwallet/extension-base/constants';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
+import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject } from 'rxjs';
 
 import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
-import {quickFormatAddressToCompare} from "@subwallet/extension-base/utils/address";
 
 export class HistoryService {
   private dbService: DatabaseService;

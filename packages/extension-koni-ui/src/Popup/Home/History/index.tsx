@@ -274,6 +274,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return finalHistoryList.sort((a, b) => (b.time - a.time));
   }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap, currentAccount?.address]);
 
+  const [curAdr] = useState(currentAccount?.address);
+
   // Handle detail modal
   const { chain, extrinsicHash } = useParams();
   const [selectedItem, setSelectedItem] = useState<TransactionHistoryDisplayItem | null>(null);
@@ -318,6 +320,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       });
     }
   }, [checkActive, historyList]);
+
+  useEffect(() => {
+    if (currentAccount?.address !== curAdr) {
+      inactiveModal(HistoryDetailModalId);
+      setSelectedItem(null);
+    }
+  }, [curAdr, currentAccount?.address, inactiveModal]);
 
   const emptyList = useCallback(() => {
     return <EmptyList

@@ -4,8 +4,7 @@
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useGetNftByAccount from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetNftByAccount';
+import { useGetNftByAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ExtrinsicType, NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
@@ -59,7 +59,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const dataContext = useContext(DataContext);
-  const { chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
+  const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
@@ -222,10 +222,6 @@ const Component: React.FC<Props> = (props: Props) => {
       }
     }
   }, [currentAccount?.address, setFrom]);
-
-  useEffect(() => {
-    setTransactionType(ExtrinsicType.STAKING_LEAVE_POOL);
-  }, [setTransactionType]);
 
   useEffect(() => {
     setChain(stakingChain || '');

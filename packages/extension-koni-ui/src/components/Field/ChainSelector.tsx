@@ -14,13 +14,13 @@ import styled, { useTheme } from 'styled-components';
 import GeneralEmptyList from '../GeneralEmptyList';
 
 interface Props extends ThemeProps, BasicInputWrapper {
-  items: ChainItemType[]
+  items: ChainItemType[];
 }
 
 const renderEmpty = () => <GeneralEmptyList />;
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { className = '', disabled, id = 'address-input', items, label, placeholder, statusHelp, value } = props;
+  const { className = '', disabled, id = 'address-input', items, label, placeholder, statusHelp, title, tooltip, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { onSelect } = useSelectModalInputHelper(props, ref);
@@ -43,6 +43,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     return (
       <Logo
         network={value}
+        shape='squircle'
         size={token.controlHeightSM}
       />
     );
@@ -53,7 +54,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       <NetworkItem
         name={item.name}
         networkKey={item.slug}
-        networkMainLogoShape={'circle'}
+        networkMainLogoShape='squircle'
         networkMainLogoSize={28}
         rightItem={selected && (<div className={'__check-icon'}>
           <Icon
@@ -61,7 +62,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
             iconColor={token.colorSuccess}
             phosphorIcon={CheckCircle}
             type='phosphor'
-            weight={'fill'}
+            weight='fill'
           />
         </div>)}
       />
@@ -88,7 +89,8 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       searchableMinCharactersCount={2}
       selected={value || ''}
       statusHelp={statusHelp}
-      title={label || placeholder || t('Select chain')}
+      title={title || label || placeholder || t('Select chain')}
+      tooltip={tooltip}
     />
   );
 }

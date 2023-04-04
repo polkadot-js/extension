@@ -2277,9 +2277,9 @@ export default class KoniExtension {
   }
 
   private async submitBonding (inputData: RequestBondingSubmit): Promise<SWTransactionResponse> {
-    const { amount, chain, nominatorMetadata, selectedValidators } = inputData;
+    const { address, amount, chain, nominatorMetadata, selectedValidators } = inputData;
 
-    if (!amount || !nominatorMetadata || !selectedValidators) {
+    if (!amount || !selectedValidators) {
       // Todo: Check and return error here
 
       return this.#koniState.transactionService
@@ -2288,10 +2288,12 @@ export default class KoniExtension {
 
     const chainInfo = this.#koniState.getChainInfo(chain);
     const substrateApi = this.#koniState.getSubstrateApi(chain);
-    const extrinsic = await getBondingExtrinsic(chainInfo, amount, nominatorMetadata, selectedValidators, substrateApi);
+    const extrinsic = await getBondingExtrinsic(chainInfo, amount, selectedValidators, substrateApi, address, nominatorMetadata);
+
+    console.log('Bonding extrinsic: ', chain, extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
-      address: nominatorMetadata.address,
+      address,
       chain: chain,
       chainType: ChainType.SUBSTRATE,
       data: inputData,
@@ -2386,6 +2388,8 @@ export default class KoniExtension {
 
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getPoolingBondingExtrinsic(substrateApi, amount, selectedPool.id, nominatorMetadata);
+
+    console.log('Join nomination pool extrinsic', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address,

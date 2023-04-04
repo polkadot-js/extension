@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { BlockHeader, getBondedValidators, isUnstakeAll, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -94,6 +94,7 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
     activeStake = delegatorState.amount.toString();
 
     nominationList.push({
+      status: StakingStatus.NOT_EARNING,
       chain,
       validatorAddress: delegatorState.owner,
       activeStake: delegatorState.amount.toString(),
@@ -183,9 +184,13 @@ export async function getAmplitudeCollatorsInfo (chain: string, substrateApi: _S
   return allCollators;
 }
 
-export async function getAmplitudeBondingExtrinsic (nominatorMetadata: NominatorMetadata, substrateApi: _SubstrateApi, amount: string, selectedValidatorInfo: ValidatorInfo) {
+export async function getAmplitudeBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, selectedValidatorInfo: ValidatorInfo, nominatorMetadata?: NominatorMetadata) {
   const chainApi = await substrateApi.isReady;
   const binaryAmount = new BN(amount);
+
+  if (!nominatorMetadata) {
+    return chainApi.api.tx.parachainStaking.joinDelegators(selectedValidatorInfo.address, binaryAmount);
+  }
 
   const { bondedValidators } = getBondedValidators(nominatorMetadata.nominations);
 

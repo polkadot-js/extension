@@ -16,10 +16,9 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account/account';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/util/common/dom';
-import { Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
+import { ActivityIndicator, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
-import { SpinnerGap } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -36,11 +35,9 @@ const renderLoaderIcon = (x: React.ReactNode): React.ReactNode => {
   return (
     <>
       {x}
-      <Icon
-        className='loader-icon'
-        phosphorIcon={SpinnerGap}
-        size='sm'
-      />
+      <div className='loading-icon'>
+        <ActivityIndicator />
+      </div>
     </>
   );
 };

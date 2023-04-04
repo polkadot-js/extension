@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, PalletNominationPoolsPoolMember, parseIdentity, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { reformatAddress } from '@subwallet/extension-base/utils';
 
 import { Bytes } from '@polkadot/types';
 import { BN, BN_ZERO } from '@polkadot/util';
@@ -91,8 +93,10 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
     chainApi.api.query.staking.bonded(address)
   ]);
 
-  const ledger = _ledger.toJSON() as unknown as PalletStakingStakingLedger;
-  const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
+  const _maxNominatorRewardedPerValidator = chainApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+  const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
+  const ledger = _ledger.toPrimitive() as unknown as PalletStakingStakingLedger;
+  const nominations = _nominations.toPrimitive() as unknown as PalletStakingNominations;
   const currentEra = _currentEra.toString();
   const bonded = _bonded.toHuman();
 
@@ -100,6 +104,7 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
     return;
   }
 
+  let stakingStatus = StakingStatus.NOT_EARNING;
   const activeStake = ledger.active.toString();
   const nominationList: NominationInfo[] = [];
   const unstakingList: UnstakingInfo[] = [];
@@ -108,16 +113,37 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
     const validatorList = nominations.targets;
 
     await Promise.all(validatorList.map(async (validatorAddress) => {
-      const identityInfo = (await chainApi.api.query.identity.identityOf(validatorAddress)).toHuman() as unknown as PalletIdentityRegistration;
+      let nominationStatus = StakingStatus.NOT_EARNING;
+      const [_identityInfo, _eraStaker] = await Promise.all([
+        chainApi.api.query.identity.identityOf(validatorAddress),
+        chainApi.api.query.staking.erasStakers(currentEra, validatorAddress)
+      ]);
+      const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
+      const identityInfo = _identityInfo.toHuman() as unknown as PalletIdentityRegistration;
       const identity = parseIdentity(identityInfo);
+      const topNominators = eraStaker.others.map((nominator) => {
+        return nominator.who;
+      });
+
+      if (topNominators.slice(0, maxNominatorRewardedPerValidator).includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
+        nominationStatus = StakingStatus.EARNING_REWARD;
+      }
 
       nominationList.push({
         chain,
         validatorAddress,
+        status: nominationStatus,
         validatorIdentity: identity,
         activeStake: '0' // relaychain allocates stake accordingly
       } as NominationInfo);
     }));
+  }
+
+  for (const nomination of nominationList) {
+    if (nomination.status === StakingStatus.EARNING_REWARD) { // only need 1 earning nomination to count
+      stakingStatus = StakingStatus.EARNING_REWARD;
+      break;
+    }
   }
 
   ledger.unlocking.forEach((unlockingChunk) => {
@@ -136,6 +162,7 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
   return {
     chain,
     type: StakingType.NOMINATED,
+    status: stakingStatus,
     address: address,
     activeStake,
 
@@ -153,6 +180,9 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
     chainApi.api.query.staking.currentEra()
   ]);
 
+  const _maxNominatorRewardedPerValidator = chainApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+  const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
+  const poolsPalletId = chainApi.api.consts.nominationPools.palletId.toString();
   const poolMemberInfo = _poolMemberInfo.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
   const currentEra = _currentEra.toString();
 
@@ -160,14 +190,37 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
     return;
   }
 
+  let stakingStatus = StakingStatus.NOT_EARNING;
+
   const _poolMetadata = (await chainApi.api.query.nominationPools.metadata(poolMemberInfo.poolId));
   const poolMetadata = _poolMetadata.toPrimitive() as unknown as Bytes;
 
   const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
+  const poolStashAccount = parsePoolStashAddress(chainApi.api, 0, poolMemberInfo.poolId, poolsPalletId);
+
+  const _nominations = await chainApi.api.query.staking.nominators(poolStashAccount);
+  const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
+
+  if (nominations) {
+    const validatorList = nominations.targets;
+
+    await Promise.all(validatorList.map(async (validatorAddress) => {
+      const _eraStaker = await chainApi.api.query.staking.erasStakers(currentEra, validatorAddress);
+      const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
+      const topNominators = eraStaker.others.map((nominator) => {
+        return nominator.who;
+      }).slice(0, maxNominatorRewardedPerValidator);
+
+      if (topNominators.includes(reformatAddress(poolStashAccount, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
+        stakingStatus = StakingStatus.EARNING_REWARD;
+      }
+    }));
+  }
 
   const joinedPoolInfo: NominationInfo = {
     activeStake: poolMemberInfo.points.toString(),
     chain: chainInfo.slug,
+    status: stakingStatus,
     validatorIdentity: poolName,
     validatorAddress: poolMemberInfo.poolId.toString(), // use poolId
     hasUnstaking: poolMemberInfo.unbondingEras && Object.keys(poolMemberInfo.unbondingEras).length > 0
@@ -192,6 +245,7 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
     chain: chainInfo.slug,
     type: StakingType.POOLED,
     address,
+    status: stakingStatus,
     activeStake: poolMemberInfo.points.toString(),
     nominations: [joinedPoolInfo], // can only join 1 pool at a time
     unstakings
@@ -345,16 +399,27 @@ export async function getRelayPoolsInfo (chain: string, substrateApi: _Substrate
   return nominationPools;
 }
 
-export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, targetValidators: ValidatorInfo[], nominatorMetadata: NominatorMetadata, chainInfo: _ChainInfo, bondDest = 'Staked') {
+export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, targetValidators: ValidatorInfo[], chainInfo: _ChainInfo, address: string, nominatorMetadata?: NominatorMetadata, bondDest = 'Staked') {
   const chainApi = await substrateApi.isReady;
   const binaryAmount = new BN(amount);
 
   let bondTx;
   let nominateTx;
 
+  const validatorParamList = targetValidators.map((validator) => {
+    return validator.address;
+  });
+
+  if (!nominatorMetadata) {
+    bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
+    nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
+
+    return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
+  }
+
   if (!nominatorMetadata.isBondedBefore) { // first time
     bondTx = chainApi.api.tx.staking.bond(nominatorMetadata.address, binaryAmount, bondDest);
-    nominateTx = chainApi.api.tx.staking.nominate(targetValidators);
+    nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
 
     return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
   } else {
@@ -363,7 +428,7 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
     }
 
     if (nominatorMetadata.isBondedBefore && targetValidators.length > 0) {
-      nominateTx = chainApi.api.tx.staking.nominate(targetValidators);
+      nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
     }
   }
 

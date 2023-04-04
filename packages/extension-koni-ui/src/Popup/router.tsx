@@ -78,7 +78,7 @@ const AccountDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/
 const AccountExport = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/AccountExport'));
 
 const Transaction = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/Transaction'));
-const TransactionDone = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/TransactionDone'));
+const TransactionDone = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/TransactionDone'));
 const SendFund = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund'));
 const SendNFT = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendNFT'));
 const Stake = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake'));
@@ -139,9 +139,11 @@ export const router = createHashRouter([
           {
             path: 'compound',
             element: <Example />
-          },
-          TransactionDone.generateRouterObject('done/:chainType/:chain/:extrinsicHash')
+          }
         ]
+      },
+      {
+        ...TransactionDone.generateRouterObject('transaction-done/:chainType/:chain/:extrinsicHash')
       },
       {
         path: '/keyring',

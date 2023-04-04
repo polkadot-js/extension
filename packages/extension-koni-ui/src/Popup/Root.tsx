@@ -33,6 +33,11 @@ const loginUrl = '/keyring/login';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
 
+const baseAccountPath = '/account';
+const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-parity-signer', 'connect-keystone', 'connect-ledger'];
+
+const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
+
 function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
   const location = useLocation();
   const navigate = useNavigate();
@@ -91,30 +96,26 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   useEffect(() => {
     const pathName = location.pathname;
 
-    if (needMigrate && hasMasterPassword) {
+    if (needMigrate && hasMasterPassword && !isLocked) {
       navigate(migratePasswordUrl);
-    } else if (pathName === DEFAULT_ROUTER_PATH) {
-      if (hasConfirmations) {
-        if (hasMasterPassword && isLocked) {
-          navigate(loginUrl);
-        } else {
-          openPModal('confirmations');
-        }
-      } else if (isNoAccount(accounts)) {
-        if (hasMasterPassword && isLocked) {
-          navigate(loginUrl);
-        } else {
+    } else if (hasMasterPassword && isLocked) {
+      navigate(loginUrl);
+    } else if (!hasMasterPassword) {
+      if (isNoAccount(accounts)) {
+        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl].includes(pathName)) {
           navigate(welcomeUrl);
         }
-      } else if (!hasMasterPassword) {
+      } else {
         navigate(createPasswordUrl);
-      } else if (isLocked) {
-        navigate(loginUrl);
-      } else if (needMigrate) {
-        navigate(migratePasswordUrl);
+      }
+    } else if (pathName === DEFAULT_ROUTER_PATH) {
+      if (hasConfirmations) {
+        openPModal('confirmations');
       } else {
         navigate(tokenUrl);
       }
+    } else if (pathName === migratePasswordUrl && !needMigrate) {
+      goHome();
     } else if (pathName === loginUrl && !isLocked) {
       goHome();
     } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {

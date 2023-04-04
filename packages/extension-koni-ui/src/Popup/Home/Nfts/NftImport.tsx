@@ -12,8 +12,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetContractSupportedChains';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
+import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Form, Icon, Image, Input, NetworkItem, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';

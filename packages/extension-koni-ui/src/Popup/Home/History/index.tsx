@@ -234,6 +234,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.STAKING_BOND]: t('Bond'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward'),
+    [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw'),
+    [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake'),
     [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction')
   }), [t]);
 
@@ -248,6 +250,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.STAKING_BOND]: t('Bond transaction'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond transaction'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward transaction'),
+    [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw transaction'),
+    [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake transaction'),
     [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction')
   }), [t]);
 
@@ -273,6 +277,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     return finalHistoryList.sort((a, b) => (b.time - a.time));
   }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap, currentAccount?.address]);
+
+  const [curAdr] = useState(currentAccount?.address);
 
   // Handle detail modal
   const { chain, extrinsicHash } = useParams();
@@ -318,6 +324,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       });
     }
   }, [checkActive, historyList]);
+
+  useEffect(() => {
+    if (currentAccount?.address !== curAdr) {
+      inactiveModal(HistoryDetailModalId);
+      setSelectedItem(null);
+    }
+  }, [curAdr, currentAccount?.address, inactiveModal]);
 
   const emptyList = useCallback(() => {
     return <EmptyList

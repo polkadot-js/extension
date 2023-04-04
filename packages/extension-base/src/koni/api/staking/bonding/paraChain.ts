@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getBondedValidators, getParaCurrentInflation, InflationConfig, isUnstakeAll, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -140,6 +140,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
 
     nominationList.push({
       chain,
+      status: StakingStatus.NOT_EARNING,
       validatorAddress: delegation.owner,
       validatorIdentity: identity,
       activeStake: bnActiveStake.toString(),
@@ -250,9 +251,13 @@ export async function getParachainCollatorsInfo (chain: string, substrateApi: _S
   return allValidators;
 }
 
-export async function getParaBondingExtrinsic (nominatorMetadata: NominatorMetadata, chainInfo: _ChainInfo, substrateApi: _SubstrateApi, amount: string, selectedCollatorInfo: ValidatorInfo) {
+export async function getParaBondingExtrinsic (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, amount: string, selectedCollatorInfo: ValidatorInfo, nominatorMetadata?: NominatorMetadata) {
   const apiPromise = await substrateApi.isReady;
   const binaryAmount = new BN(amount);
+
+  if (!nominatorMetadata) {
+    return apiPromise.api.tx.parachainStaking.delegate(selectedCollatorInfo.address, binaryAmount, new BN(selectedCollatorInfo.nominatorCount), 0);
+  }
 
   const { bondedValidators, nominationCount } = getBondedValidators(nominatorMetadata.nominations);
 

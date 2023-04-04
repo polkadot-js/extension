@@ -567,3 +567,11 @@ div#popup-container {
 .d-none {
   display: none;
 }
+
+.ant-notification {
+  position: absolute;
+}
+
+.ant-notification-notice {
+  max-width: calc(390px - 48px);
+}

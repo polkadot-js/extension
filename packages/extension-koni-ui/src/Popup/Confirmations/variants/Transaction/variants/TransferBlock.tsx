@@ -4,6 +4,7 @@
 import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
+import { useGetChainPrefixBySlug, useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,9 +28,8 @@ const Component: React.FC<Props> = ({ transaction }: Props) => {
     [chainInfoMap, transaction.chain]
   );
 
-  const { decimals: chainDecimals, symbol: chainSymbol } = useMemo(() => {
-    return _getChainNativeTokenBasicInfo(chainInfo);
-  }, [chainInfo]);
+  const { decimals: chainDecimals, symbol: chainSymbol } = useGetNativeTokenBasicInfo(transaction.chain);
+  const senderPrefix = useGetChainPrefixBySlug(transaction.chain);
 
   return (
     <>
@@ -37,6 +37,7 @@ const Component: React.FC<Props> = ({ transaction }: Props) => {
         <MetaInfo.Account
           address={data.from}
           label={t('Sender')}
+          networkPrefix={senderPrefix}
         />
 
         {transaction.extrinsicType === ExtrinsicType.TRANSFER_XCM && chainInfo && <MetaInfo.Chain

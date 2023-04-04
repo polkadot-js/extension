@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
@@ -76,7 +76,7 @@ const Component: React.FC = () => {
 
   const chainInfo = useMemo(() => chainInfoMap[nftChain], [chainInfoMap, nftChain]);
 
-  const { chain, from, onDone, setChain, setFrom, setTransactionType } = useContext(TransactionContext);
+  const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
@@ -93,8 +93,6 @@ const Component: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const recipientValidator = useCallback(({ getFieldValue }: FormInstance<SendNFTFormProps>) => {
-    const from = getFieldValue('from') as string;
-
     return ({
       validator: (rule: FormRule, _recipientAddress: string): Promise<void> => {
         if (!_recipientAddress) {
@@ -120,7 +118,7 @@ const Component: React.FC = () => {
         return Promise.resolve();
       }
     });
-  }, [t]);
+  }, [t, from]);
 
   const onFieldsChange: FormCallbacks<SendNFTFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);
@@ -174,10 +172,9 @@ const Component: React.FC = () => {
   const preCheckReadOnly = usePreCheckReadOnly(from);
 
   useEffect(() => {
-    setTransactionType(ExtrinsicType.SEND_NFT);
     setChain(nftChain);
     setFrom(owner);
-  }, [nftChain, owner, setChain, setFrom, setTransactionType]);
+  }, [nftChain, owner, setChain, setFrom]);
 
   useEffect(() => {
     if (nftItem === DEFAULT_ITEM || collectionInfo === DEFAULT_COLLECTION) {

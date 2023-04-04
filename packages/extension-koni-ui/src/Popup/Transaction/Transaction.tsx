@@ -2,21 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import { TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import useAssetChecker from '@subwallet/extension-koni-ui/hooks/chain/useAssetChecker';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { useAssetChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -35,7 +32,6 @@ export interface TransactionFormBaseProps {
 
 export interface TransactionContextProps extends TransactionFormBaseProps {
   transactionType: ExtrinsicType,
-  setTransactionType: Dispatch<SetStateAction<ExtrinsicType>>,
   setFrom: Dispatch<SetStateAction<string>>,
   setChain: Dispatch<SetStateAction<string>>,
   setAsset: Dispatch<SetStateAction<string>>,
@@ -48,7 +44,6 @@ export interface TransactionContextProps extends TransactionFormBaseProps {
 export const TransactionContext = React.createContext<TransactionContextProps>({
   transactionType: ExtrinsicType.TRANSFER_BALANCE,
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setTransactionType: (value) => {},
   from: '',
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   setFrom: (value) => {},
@@ -70,16 +65,56 @@ export const TransactionContext = React.createContext<TransactionContextProps>({
 
 function Component ({ className }: Props) {
   const { t } = useTranslation();
+  const location = useLocation();
   const navigate = useNavigate();
+
   const { activeModal } = useContext(ModalContext);
   const dataContext = useContext(DataContext);
+
   const { currentAccount, isAllAccount } = useSelector((root: RootState) => root.accountState);
-  const [from, setFrom] = useState(!isAllAccount ? currentAccount?.address || '' : '');
-  const [chain, setChain] = useState('');
-  const [asset, setAsset] = useState('');
-  const [transactionType, setTransactionType] = useState<ExtrinsicType>(ExtrinsicType.TRANSFER_BALANCE);
-  const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
-  const [disabledRightBtn, setDisabledRightBtn] = useState<boolean>(false);
+
+  const transactionType = useMemo((): ExtrinsicType => {
+    const pathName = location.pathname;
+    const action = pathName.split('/')[2] || '';
+
+    switch (action) {
+      case 'stake':
+        return ExtrinsicType.STAKING_JOIN_POOL;
+      case 'unstake':
+        return ExtrinsicType.STAKING_LEAVE_POOL;
+      case 'cancel-unstake':
+        return ExtrinsicType.STAKING_CANCEL_UNSTAKE;
+      case 'claim-reward':
+        return ExtrinsicType.STAKING_CLAIM_REWARD;
+      case 'compound':
+        return ExtrinsicType.STAKING_COMPOUNDING;
+      case 'send-nft':
+        return ExtrinsicType.SEND_NFT;
+      case 'send-fund':
+      default:
+        return ExtrinsicType.TRANSFER_BALANCE;
+    }
+  }, [location.pathname]);
+
+  const homePath = useMemo((): string => {
+    const pathName = location.pathname;
+    const action = pathName.split('/')[2] || '';
+
+    switch (action) {
+      case 'stake':
+      case 'unstake':
+      case 'cancel-unstake':
+      case 'claim-reward':
+      case 'compound':
+        return '/home/staking';
+      case 'send-nft':
+        return '/home/nfts/collections';
+      case 'send-fund':
+      default:
+        return '/home/tokens';
+    }
+  }, [location.pathname]);
+
   const titleMap = useMemo<Record<string, string>>(() => {
     const result: Record<string, string> = {};
 
@@ -89,20 +124,27 @@ function Component ({ className }: Props) {
 
     return result;
   }, [t]);
-  const { goBack } = useDefaultNavigate();
+
+  useNavigateOnChangeAccount(homePath);
+
+  const [from, setFrom] = useState(!isAllAccount ? currentAccount?.address || '' : '');
+  const [chain, setChain] = useState('');
+  const [asset, setAsset] = useState('');
+  const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
+  const [disabledRightBtn, setDisabledRightBtn] = useState<boolean>(false);
 
   const checkAsset = useAssetChecker();
 
-  useEffect(() => {
-    asset !== '' && checkAsset(asset);
-  }, [asset, checkAsset]);
+  const goBack = useCallback(() => {
+    navigate(homePath);
+  }, [homePath, navigate]);
 
   // Navigate to finish page
   const onDone = useCallback(
     (extrinsicHash: string) => {
       const chainType = isEthereumAddress(from) ? 'ethereum' : 'substrate';
 
-      navigate(`/transaction/done/${chainType}/${chain}/${extrinsicHash}`, { replace: true });
+      navigate(`/transaction-done/${chainType}/${chain}/${extrinsicHash}`, { replace: true });
     },
     [from, chain, navigate]
   );
@@ -125,12 +167,16 @@ function Component ({ className }: Props) {
       : [];
   }, [disabledRightBtn, onClickRightBtn, showRightBtn]);
 
+  useEffect(() => {
+    asset !== '' && checkAsset(asset);
+  }, [asset, checkAsset]);
+
   return (
     <Layout.Home
       showFilterIcon
       showTabBar={false}
     >
-      <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, setTransactionType, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn, asset, setAsset }}>
+      <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn, asset, setAsset }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
             <SwSubHeader

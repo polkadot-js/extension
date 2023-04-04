@@ -7,3 +7,4 @@ export { default as useChainInfo } from './useChainInfo';
 export { default as useChainInfoWithState } from './useChainInfoWithState';
 export { default as useGetChainInfoByChainId } from './useGetChainInfoByChainId';
 export { default as useGetChainInfoByGenesisHash } from './useGetChainInfoByGenesisHash';
+export { default as useGetChainPrefixBySlug } from './useGetChainPrefixBySlug';

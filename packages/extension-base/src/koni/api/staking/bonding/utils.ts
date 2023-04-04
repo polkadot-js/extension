@@ -5,7 +5,8 @@ import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, Unstakin
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
-import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO } from '@polkadot/util';
+import { ApiPromise } from '@polkadot/api';
+import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, stringToU8a, u8aConcat } from '@polkadot/util';
 
 export interface PalletNominationPoolsPoolMember {
   poolId: number,
@@ -75,6 +76,17 @@ export interface PalletParachainStakingDelegator {
   status: number
 }
 
+export interface PalletStakingExposureItem {
+  who: string,
+  value: number
+}
+
+export interface PalletStakingExposure {
+  total: number,
+  own: number,
+  others: PalletStakingExposureItem[]
+}
+
 export interface PalletIdentityRegistration {
   judgements: any[],
   deposit: number,
@@ -104,6 +116,25 @@ export interface ValidatorExtraInfo {
 export interface Unlocking {
   remainingEras: BN;
   value: BN;
+}
+
+export function parsePoolStashAddress (api: ApiPromise, index: number, poolId: number, poolsPalletId: string) {
+  const ModPrefix = stringToU8a('modl');
+  const U32Opts = { bitLength: 32, isLe: true };
+  const EmptyH256 = new Uint8Array(32);
+
+  return api.registry
+    .createType(
+      'AccountId32',
+      u8aConcat(
+        ModPrefix,
+        poolsPalletId,
+        new Uint8Array([index]),
+        bnToU8a(new BN(poolId.toString()), U32Opts),
+        EmptyH256
+      )
+    )
+    .toString();
 }
 
 export function transformPoolName (input: string): string {

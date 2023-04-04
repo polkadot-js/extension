@@ -3,3 +3,4 @@
 
 export { default as useAutoNavigateToCreatePassword } from './useAutoNavigateToCreatePassword';
 export { default as useDefaultNavigate } from './useDefaultNavigate';
+export { default as useNavigateOnChangeAccount } from './useNavigateOnChangeAccount';

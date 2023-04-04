@@ -3,7 +3,7 @@
 
 import { reformatAddress } from '@subwallet/extension-base/utils/index';
 
-import { decodeAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
+import { decodeAddress, encodeAddress, isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 export const simpleAddress = (address: string): string => {
   if (isEthereumAddress(address)) {
@@ -14,15 +14,9 @@ export const simpleAddress = (address: string): string => {
 };
 
 export function quickFormatAddressToCompare (address?: string) {
-  if (!address) {
+  if (!isAddress(address)) {
     return address;
   }
 
-  if (address.startsWith('5')) {
-    return address.toLowerCase();
-  } else if (address.startsWith('0x')) {
-    return address.toLowerCase();
-  } else {
-    return reformatAddress(address, 42).toLowerCase();
-  }
+  return reformatAddress(address, 42).toLowerCase();
 }

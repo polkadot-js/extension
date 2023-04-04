@@ -146,8 +146,7 @@ export interface StakingItem {
   nativeToken: string,
   unit?: string,
 
-  state: APIItemState,
-  rewardInfo?: StakingRewardItem
+  state: APIItemState
 }
 
 export interface StakingJson {
@@ -1390,6 +1389,7 @@ export interface NominationInfo {
 
   hasUnstaking?: boolean;
   validatorMinStake?: string;
+  status: StakingStatus;
 }
 
 export interface PalletNominationPoolsBondedPoolInner {
@@ -1424,9 +1424,17 @@ export interface UnstakingInfo {
   validatorAddress?: string; // might unstake from a validator or not
 }
 
+export enum StakingStatus {
+  EARNING_REWARD = 'EARNING_REWARD',
+  PARTIALLY_EARNING = 'PARTIALLY_EARNING',
+  NOT_EARNING = 'NOT_EARNING'
+}
+
 export interface NominatorMetadata {
   chain: string,
   type: StakingType,
+
+  status: StakingStatus,
   address: string,
   activeStake: string,
   nominations: NominationInfo[],
@@ -1484,8 +1492,9 @@ export interface ChainBondingInfo {
 export interface BondingSubmitParams extends BaseRequestSign {
   chain: string,
   type: StakingType,
-  nominatorMetadata?: NominatorMetadata,
+  nominatorMetadata?: NominatorMetadata, // undefined if user has no stake
   amount: string,
+  address: string,
   selectedValidators: ValidatorInfo[],
   lockPeriod?: number // in month
 }

@@ -12,7 +12,8 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
+import { useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { getFreeBalance, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
 import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
@@ -22,7 +23,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SendFundParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
-import { findAccountByAddress } from '@subwallet/extension-koni-ui/util';
+import { findAccountByAddress, noop } from '@subwallet/extension-koni-ui/util';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
@@ -79,7 +80,7 @@ function getTokenItems (
     }
 
     const chainAsset = assetRegistry[tokenGroupSlug];
-    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset.originChain : true;
+    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;
 
     if (isSetTokenSlug) {
       if (isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger) {
@@ -159,6 +160,49 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
   return result;
 }
 
+const filterAccountFunc = (
+  chainInfoMap: Record<string, _ChainInfo>,
+  assetRegistry: Record<string, _ChainAsset>,
+  multiChainAssetMap: Record<string, _MultiChainAsset>,
+  tokenGroupSlug?: string // is ether a token slug or a multiChainAsset slug
+): (account: AccountJson) => boolean => {
+  const isSetTokenSlug = !!tokenGroupSlug && !!assetRegistry[tokenGroupSlug];
+  const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
+
+  if (!tokenGroupSlug) {
+    return () => true;
+  }
+
+  const chainAssets = Object.values(assetRegistry).filter((chainAsset) => {
+    const isTokenFungible = _isAssetFungibleToken(chainAsset);
+
+    if (isTokenFungible) {
+      if (isSetTokenSlug) {
+        return chainAsset.slug === tokenGroupSlug;
+      }
+
+      if (isSetMultiChainAssetSlug) {
+        return chainAsset.multiChainAsset === tokenGroupSlug;
+      }
+    } else {
+      return false;
+    }
+
+    return false;
+  });
+
+  return (account: AccountJson): boolean => {
+    const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
+    const isAccountEthereum = isEthereumAddress(account.address);
+
+    return chainAssets.some((chainAsset) => {
+      const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;
+
+      return isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger;
+    });
+  };
+};
+
 const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { t } = useTranslation();
   const locationState = useLocation().state as SendFundParam;
@@ -195,6 +239,17 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
   }, [chainInfoMap, asset, xcmRefMap]);
 
+  const currentChainAsset = useMemo(() => {
+    return asset ? assetRegistry[asset] : undefined;
+  }, [assetRegistry, asset]);
+
+  const decimals = useMemo(() => {
+    return currentChainAsset ? _getAssetDecimals(currentChainAsset) : 0;
+  }, [currentChainAsset]);
+
+  const fromChainNetworkPrefix = useGetChainPrefixBySlug(chain);
+  const destChainNetworkPrefix = useGetChainPrefixBySlug(destChain);
+
   const tokenItems = useMemo<TokenItemType[]>(() => {
     return getTokenItems(
       from,
@@ -219,12 +274,16 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
     const { chain, destChain, from, to } = form.getFieldsValue();
 
+    if (!from || !chain || !destChain) {
+      return Promise.resolve();
+    }
+
     const isOnChain = chain === destChain;
 
     if (isOnChain) {
       if (from === _recipientAddress) {
         // todo: change message later
-        return Promise.reject(t('On Chain: The recipient address can not be the same as the sender address'));
+        return Promise.reject(t('The recipient address can not be the same as the sender address'));
       }
 
       const isNotSameAddressType = (isEthereumAddress(from) && !!_recipientAddress && !isEthereumAddress(_recipientAddress)) ||
@@ -232,14 +291,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
       if (isNotSameAddressType) {
         // todo: change message later
-        return Promise.reject(t('On Chain: The recipient address must be same type as the current account address.'));
+        return Promise.reject(t('The recipient address must be same type as the current account address.'));
       }
     } else {
       const isDestChainEvmCompatible = _isChainEvmCompatible(chainInfoMap[destChain]);
 
       if (isDestChainEvmCompatible !== isEthereumAddress(to)) {
         // todo: change message later
-        return Promise.reject(t(`Cross chain: The recipient address must be ${isDestChainEvmCompatible ? 'EVM' : 'substrate'} type`));
+        return Promise.reject(t(`The recipient address must be ${isDestChainEvmCompatible ? 'EVM' : 'substrate'} type`));
       }
     }
 
@@ -255,27 +314,39 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       return Promise.reject(t('Amount must be greater than 0'));
     }
 
-    return Promise.resolve();
-  }, [t]);
+    if ((new BigN(amount)).gt(new BigN(maxTransfer))) {
+      const maxString = new BigN(maxTransfer).div(BN_TEN.pow(decimals)).toFixed(6);
 
-  const onFieldsChange: FormCallbacks<TransferFormProps>['onValuesChange'] = useCallback(
+      return Promise.reject(t('Amount must be equal or less than {{number}}', { replace: { number: maxString } }));
+    }
+
+    return Promise.resolve();
+  }, [decimals, maxTransfer, t]);
+
+  const onValuesChange: FormCallbacks<TransferFormProps>['onValuesChange'] = useCallback(
     (part: Partial<TransferFormProps>, values: TransferFormProps) => {
-      if (part.from || part.asset || part.destChain) {
-        form.resetFields(['to']);
-      }
+      const validateField: string[] = [];
 
       if (part.from) {
         setFrom(part.from);
+        form.resetFields(['asset']);
       }
 
       if (part.asset) {
-        form.resetFields(['value']);
         const chain = assetRegistry[part.asset].originChain;
+
+        if (values.value) {
+          validateField.push('value');
+        }
 
         form.setFieldsValue({
           chain: chain,
           destChain: chain
         });
+
+        if (values.to) {
+          validateField.push('to');
+        }
 
         setChain(chain);
         setAsset(part.asset);
@@ -286,6 +357,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         if (part.destChain !== values.chain && assetRegistry[values.asset]?.assetType === _AssetType.NATIVE) {
           setIsTransferAll(false);
         }
+
+        if (values.to) {
+          validateField.push('to');
+        }
+      }
+
+      if (validateField.length) {
+        form.validateFields(validateField).catch(noop);
       }
     },
     [form, setFrom, assetRegistry, setChain, setAsset]
@@ -332,13 +411,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }, 300);
   }, [chain, from, asset, isTransferAll, onSuccess, onError]);
 
-  const currentChainAsset = useMemo(() => {
-    return asset ? assetRegistry[asset] : undefined;
-  }, [assetRegistry, asset]);
-
-  const decimals = useMemo(() => {
-    return currentChainAsset ? _getAssetDecimals(currentChainAsset) : 0;
-  }, [currentChainAsset]);
+  const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
   // TODO: Need to review
   useEffect(() => {
@@ -424,14 +497,16 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           form={form}
           initialValues={formDefault}
           onFinish={onSubmit}
-          onValuesChange={onFieldsChange}
+          onValuesChange={onValuesChange}
         >
           <Form.Item
             className={CN({ hidden: !isAllAccount })}
             name={'from'}
           >
             <AccountSelector
+              addressPrefix={fromChainNetworkPrefix}
               disabled={!isAllAccount}
+              filter={onFilterAccountFunc}
               label={t('Send from account')}
             />
           </Form.Item>
@@ -443,6 +518,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
                 items={tokenItems}
                 placeholder={t('Select token')}
                 showChainInSelected
+                tooltip={t('Token')}
               />
             </Form.Item>
 
@@ -461,6 +537,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
                 isDisableMax={destChain !== chain && assetRegistry[asset]?.assetType === _AssetType.NATIVE}
                 maxValue={maxTransfer}
                 setIsMax={setIsTransferAll}
+                tooltip={t('Amount')}
               />
             </Form.Item>
           </div>
@@ -485,6 +562,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             validateTrigger='onBlur'
           >
             <AddressInput
+              addressPrefix={destChainNetworkPrefix}
               autoReformatValue
               label={t('Send to account')}
               showScanner={true}
@@ -495,6 +573,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <ChainSelector
               disabled={!destChainItems.length}
               items={destChainItems}
+              title={t('Select destination chain')}
+              tooltip={t('Destination chain')}
             />
           </Form.Item>
         </Form>

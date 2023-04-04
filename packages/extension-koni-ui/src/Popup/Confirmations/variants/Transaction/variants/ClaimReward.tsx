@@ -21,8 +21,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const { decimals, symbol } = useGetNativeTokenBasicInfo(data.chain);
 
-  // TODO: missing check box to bond reward, only show when stakingType = POOLED
-
   return (
     <div className={CN(className)}>
       <CommonTransactionInfo
@@ -50,7 +48,13 @@ const Component: React.FC<Props> = (props: Props) => {
         />
       </MetaInfo>
 
-      <span className={'text-light-4'}>{t('Your rewards will be bonded back into the pool')}</span>
+      <span className={'text-light-4'}>
+        {
+          data.bondReward
+            ? t('Your rewards will be bonded back into the pool')
+            : t('Withdrawing rewards will immediately transfer them to your account as free balance')
+        }
+      </span>
     </div>
   );
 };

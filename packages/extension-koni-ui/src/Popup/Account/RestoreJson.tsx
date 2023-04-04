@@ -12,8 +12,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '@subwallet/extension-koni-ui/messaging';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
+import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { isKeyringPairs$Json } from '@subwallet/extension-koni-ui/util/account/typeGuards';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
 import { Form, Icon, Input, ModalContext, SettingItem, SwList, SwModal, Upload } from '@subwallet/react-ui';

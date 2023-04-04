@@ -7,10 +7,9 @@ import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useGetStakingList, usePreCheckReadOnly, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { FadersHorizontal, Plus, Trophy } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -42,14 +41,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const dataContext = useContext(DataContext);
-  const { activeModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { data: stakingItems, priceMap } = useGetStakingList();
 
   const { currentAccount } = useSelector((state) => state.accountState);
 
-  const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const [address] = useState(currentAccount?.address);
+  const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);
+
   const filterFunction = useMemo<(item: StakingDataType) => boolean>(() => {
     return (item) => {
       if (!selectedFilters.length) {
@@ -82,13 +84,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   const onClickItem = useCallback((item: StakingDataType) => {
-    if (!isAccountAll(item.staking.address)) {
-      setSelectedItem(item);
+    setSelectedItem(item);
 
-      setTimeout(() => {
-        activeModal(STAKING_DETAIL_MODAL_ID);
-      }, 100);
-    }
+    setTimeout(() => {
+      activeModal(STAKING_DETAIL_MODAL_ID);
+    }, 100);
   }, [activeModal]);
 
   const preCheckReadOnly = usePreCheckReadOnly(currentAccount?.address);
@@ -131,6 +131,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       />
     );
   }, [t]);
+
+  useEffect(() => {
+    if (currentAccount?.address !== address) {
+      inactiveModal(MORE_ACTION_MODAL);
+      inactiveModal(STAKING_DETAIL_MODAL_ID);
+      setSelectedItem(undefined);
+    }
+  }, [address, currentAccount?.address, inactiveModal, navigate]);
 
   return (
     <PageWrapper
@@ -177,6 +185,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <StakingDetailModal
               chainStakingMetadata={selectedItem.chainStakingMetadata}
               nominatorMetadata={selectedItem.nominatorMetadata}
+              rewardItem={selectedItem.reward}
+              staking={selectedItem.staking}
             />
           )
         }

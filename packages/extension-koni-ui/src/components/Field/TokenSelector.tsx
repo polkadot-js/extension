@@ -38,6 +38,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const { token } = useTheme() as Theme;
 
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
 
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
@@ -56,7 +57,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       (
         <Logo
           isShowSubLogo={true}
-          shape={'square'}
+          shape='squircle'
           size={token.controlHeightSM}
           subNetwork={tokenInfo.originChain}
           token={tokenInfo.symbol.toLowerCase()}
@@ -86,24 +87,40 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       <TokenItem
         className={'token-item'}
         isShowSubLogo={true}
+        middleItem={(
+          <div className='token-info-container'>
+            <div className='token-symbol'>
+              {item.symbol}
+            </div>
+            <div className='token-original-chain'>
+              {chainInfoMap[item.originChain]?.name || item.originChain}
+            </div>
+          </div>
+        )}
         name={item.symbol}
-        networkMainLogoShape={'circle'}
+        networkMainLogoShape='squircle'
         networkMainLogoSize={28}
-        rightItem={selected && (<div className={'__check-icon'}>
-          <Icon
-            customSize={'20px'}
-            iconColor={token.colorSuccess}
-            phosphorIcon={CheckCircle}
-            type='phosphor'
-            weight={'fill'}
-          />
-        </div>)}
-        subName={''}
+        networkSubLogoShape='circle'
+        rightItem={
+          selected &&
+          (
+            <div className={'__check-icon'}>
+              <Icon
+                customSize={'20px'}
+                iconColor={token.colorSuccess}
+                phosphorIcon={CheckCircle}
+                type='phosphor'
+                weight='fill'
+              />
+            </div>
+          )
+        }
+        subName=''
         subNetworkKey={item.originChain}
         symbol={item.symbol.toLowerCase()}
       />
     );
-  }, [token]);
+  }, [chainInfoMap, token.colorSuccess]);
 
   useEffect(() => {
     if (!value) {
@@ -154,10 +171,27 @@ export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { to
       display: 'none'
     },
 
+    '.ant-network-item-content': {
+      padding: token.paddingSM
+    },
+
     '.token-item .__check-icon': {
       display: 'flex',
       width: 40,
       justifyContent: 'center'
+    },
+
+    '.token-symbol': {
+      fontWeight: token.fontWeightStrong,
+      fontSize: token.fontSizeHeading5,
+      lineHeight: token.lineHeightHeading5,
+      color: token.colorTextBase
+    },
+
+    '.token-original-chain': {
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      color: token.colorTextDescription
     }
   });
 });

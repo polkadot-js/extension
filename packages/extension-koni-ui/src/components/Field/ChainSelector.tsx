@@ -43,6 +43,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     return (
       <Logo
         network={value}
+        shape='squircle'
         size={token.controlHeightSM}
       />
     );
@@ -53,7 +54,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       <NetworkItem
         name={item.name}
         networkKey={item.slug}
-        networkMainLogoShape={'circle'}
+        networkMainLogoShape='squircle'
         networkMainLogoSize={28}
         rightItem={selected && (<div className={'__check-icon'}>
           <Icon
@@ -61,7 +62,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
             iconColor={token.colorSuccess}
             phosphorIcon={CheckCircle}
             type='phosphor'
-            weight={'fill'}
+            weight='fill'
           />
         </div>)}
       />

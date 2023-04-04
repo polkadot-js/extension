@@ -6,7 +6,7 @@ import State from '@subwallet/extension-base/koni/background/handlers/State';
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
-import MigrationScripts from './scripts';
+import MigrationScripts, { EVERYTIME } from './scripts';
 
 export default class MigrationService {
   readonly state: State;
@@ -24,26 +24,28 @@ export default class MigrationService {
     try {
       for (let i = 0; i < keys.length; i++) {
         const JobClass = MigrationScripts[keys[i]];
+        const key = keys[i];
+        const name = JobClass.name;
 
         const check = await this.state.dbService.stores.migration.table.where({
-          name: JobClass.name,
-          key: keys[i]
+          name,
+          key
         }).first();
 
-        if (!check) {
+        if (!check || key.startsWith(EVERYTIME)) {
+          this.logger.log('Running script: ', JobClass.name);
           const job = new JobClass(this.state);
 
-          this.logger.log('Running script: ', JobClass.name);
           await job.run();
           await this.state.dbService.stores.migration.table.put({
-            key: keys[i],
-            name: JobClass.name,
-            timestamp: +new Date()
+            key,
+            name,
+            timestamp: new Date().getTime()
           });
         }
       }
     } catch (error) {
-      this.logger.warn('Migration error: ', error);
+      this.logger.error('Migration error: ', error);
     }
 
     this.logger.log('Migration done.');

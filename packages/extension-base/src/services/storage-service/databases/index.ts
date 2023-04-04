@@ -52,7 +52,7 @@ export default class KoniDatabase extends Dexie {
 
   private schemaVersion: number;
 
-  public constructor (name = DEFAULT_DATABASE, schemaVersion = 9) {
+  public constructor (name = DEFAULT_DATABASE, schemaVersion = 10) {
     super(name);
     this.schemaVersion = schemaVersion;
 

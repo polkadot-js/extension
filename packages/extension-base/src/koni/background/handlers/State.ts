@@ -43,6 +43,7 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { KoniCron } from '../cron';
 import { KoniSubscription } from '../subscription';
+import {SubscanService} from "@subwallet/extension-base/services/subscan-service";
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -129,11 +130,14 @@ export default class KoniState {
   readonly balanceService: BalanceService;
   readonly migrationService: MigrationService;
 
+  readonly subscanService: SubscanService;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor (providers: Providers = {}) {
     this.providers = providers;
 
     this.dbService = new DatabaseService();
+    this.subscanService = new SubscanService();
 
     this.notificationService = new NotificationService();
     this.chainService = new ChainService(this.dbService);

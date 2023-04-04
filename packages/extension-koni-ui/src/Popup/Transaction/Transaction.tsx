@@ -144,7 +144,7 @@ function Component ({ className }: Props) {
     (extrinsicHash: string) => {
       const chainType = isEthereumAddress(from) ? 'ethereum' : 'substrate';
 
-      navigate(`/transaction/done/${chainType}/${chain}/${extrinsicHash}`, { replace: true });
+      navigate(`/transaction-done/${chainType}/${chain}/${extrinsicHash}`, { replace: true });
     },
     [from, chain, navigate]
   );

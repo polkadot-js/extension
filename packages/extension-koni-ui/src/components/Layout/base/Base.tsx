@@ -76,7 +76,7 @@ const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
 
 const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBaseProps) => {
   const navigate = useNavigate();
-  const goHome = useDefaultNavigate().goHome;
+  const { goHome } = useDefaultNavigate();
   const { pathname } = useLocation();
 
   const selectedTab = useMemo((): string => {

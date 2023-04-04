@@ -1389,6 +1389,7 @@ export interface NominationInfo {
 
   hasUnstaking?: boolean;
   validatorMinStake?: string;
+  status: StakingStatus;
 }
 
 export interface PalletNominationPoolsBondedPoolInner {
@@ -1423,9 +1424,17 @@ export interface UnstakingInfo {
   validatorAddress?: string; // might unstake from a validator or not
 }
 
+export enum StakingStatus {
+  EARNING_REWARD = 'EARNING_REWARD',
+  PARTIALLY_EARNING = 'PARTIALLY_EARNING',
+  NOT_EARNING = 'NOT_EARNING'
+}
+
 export interface NominatorMetadata {
   chain: string,
   type: StakingType,
+
+  status: StakingStatus,
   address: string,
   activeStake: string,
   nominations: NominationInfo[],

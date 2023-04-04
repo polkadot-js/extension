@@ -6,13 +6,13 @@ import { CheckCircle, ListChecks, XCircle } from 'phosphor-react';
 
 export type StakingStatusType = 'active' | 'inactive' | 'pending'
 
-export const StakingStatus = {
+export const StakingStatusUi = {
   active: {
     schema: 'success' as InfoItemBase['valueColorSchema'],
     icon: CheckCircle,
     name: 'Earning reward'
   },
-  pending: {
+  partialEarning: {
     schema: 'warning' as InfoItemBase['valueColorSchema'],
     icon: ListChecks,
     name: 'Earning reward'

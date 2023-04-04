@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingItem, StakingRewardItem, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
-import { StakingStatus } from '@subwallet/extension-koni-ui/constants/stakingStatus';
+import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
 import { useGetAccountByAddress, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
@@ -109,6 +109,18 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
     inactiveModal(STAKING_DETAIL_MODAL_ID);
   }, [inactiveModal]);
 
+  const getStakingStatus = useCallback((status: StakingStatus) => {
+    if (status === StakingStatus.EARNING_REWARD) {
+      return StakingStatusUi.active;
+    }
+
+    if (status === StakingStatus.PARTIALLY_EARNING) {
+      return StakingStatusUi.partialEarning;
+    }
+
+    return StakingStatusUi.inactive;
+  }, []);
+
   const renderUnstakingInfo = useCallback((item: NominationInfo) => {
     const unstakingData = getUnstakingInfo(unstakings, item.validatorAddress);
 
@@ -137,9 +149,9 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
         <MetaInfo.Status
           label={t('Staking status')}
-          statusIcon={StakingStatus.active.icon}
-          statusName={StakingStatus.active.name}
-          valueColorSchema={StakingStatus.active.schema}
+          statusIcon={getStakingStatus(item.status).icon}
+          statusName={getStakingStatus(item.status).name}
+          valueColorSchema={getStakingStatus(item.status).schema}
         />
 
         {!!unstakingData && showingOption === 'showByValidator' && <MetaInfo.Default
@@ -167,7 +179,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         </MetaInfo.Default>}
       </MetaInfo>
     );
-  }, [decimals, networkPrefix, showingOption, staking.nativeToken, t, unstakings]);
+  }, [decimals, getStakingStatus, networkPrefix, showingOption, staking.nativeToken, t, unstakings]);
 
   return (
     <SwModal
@@ -195,9 +207,9 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         />
         <MetaInfo.Status
           label={t('Nomination')}
-          statusIcon={StakingStatus.active.icon}
-          statusName={StakingStatus.active.name}
-          valueColorSchema={StakingStatus.active.schema}
+          statusIcon={getStakingStatus(nominatorMetadata.status).icon}
+          statusName={getStakingStatus(nominatorMetadata.status).name}
+          valueColorSchema={getStakingStatus(nominatorMetadata.status).schema}
         />
 
         {!!rewardItem?.totalReward && !isNaN(parseFloat(rewardItem?.totalReward)) && (
@@ -321,7 +333,6 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
                           />
                         )}
                       >
-
                       </MetaInfo.Default>
                     );
                   }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import { StakingStatus, StakingStatusType } from '@subwallet/extension-koni-ui/constants/stakingStatus';
+import { StakingStatusUi, StakingStatusType } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -59,9 +59,9 @@ function Component (props: Props): React.ReactElement<Props> {
 
         <MetaInfo.Status
           label={t('Status')}
-          statusIcon={StakingStatus[status].icon}
-          statusName={StakingStatus[status].name}
-          valueColorSchema={StakingStatus[status].schema}
+          statusIcon={StakingStatusUi[status].icon}
+          statusName={StakingStatusUi[status].name}
+          valueColorSchema={StakingStatusUi[status].schema}
         />
 
         <MetaInfo.Number

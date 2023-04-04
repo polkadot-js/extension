@@ -2389,6 +2389,8 @@ export default class KoniExtension {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getPoolingBondingExtrinsic(substrateApi, amount, selectedPool.id, nominatorMetadata);
 
+    console.log('Join nomination pool extrinsic', extrinsic.toHex());
+
     return await this.#koniState.transactionService.handleTransaction({
       address,
       chain,

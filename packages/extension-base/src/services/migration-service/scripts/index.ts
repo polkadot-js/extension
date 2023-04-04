@@ -7,7 +7,7 @@ import MigrateNetworkSettings from '@subwallet/extension-base/services/migration
 import BaseMigrationJob from '../Base';
 
 export default <Record<string, typeof BaseMigrationJob>> {
-  '1.0.1-1': MigrateNetworkSettings,
-  '1.0.1-2': MigrateImportedToken
+  '1.0.1-11': MigrateNetworkSettings,
+  '1.0.1-20': MigrateImportedToken
   // '1.0.1-0': ClearOldStorage
 };

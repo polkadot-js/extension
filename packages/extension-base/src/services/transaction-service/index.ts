@@ -320,6 +320,7 @@ export default class TransactionService {
   private transactionToHistory (id: string, eventLogs?: EventRecord[]): TransactionHistoryItem {
     const transaction = this.getTransaction(id);
     const historyItem: TransactionHistoryItem = {
+      origin: 'app',
       chain: transaction.chain,
       direction: TransactionDirection.SEND,
       type: transaction.extrinsicType,

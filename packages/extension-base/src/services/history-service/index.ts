@@ -9,6 +9,7 @@ import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject } from 'rxjs';
 
 import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
+import {quickFormatAddressToCompare} from "@subwallet/extension-base/utils/address";
 
 export class HistoryService {
   private dbService: DatabaseService;
@@ -114,7 +115,19 @@ export class HistoryService {
   }
 
   async addHistoryItems (historyItems: TransactionHistoryItem[]) {
-    await this.dbService.upsertHistory(historyItems);
+    // Prevent override record with original is 'app'
+    const appRecords = this.historySubject.value.filter((item) => item.origin === 'app');
+    const excludeKeys = appRecords.map((item) => {
+      return `${item.chain}-${quickFormatAddressToCompare(item.address) || ''}-${item.extrinsicHash}`;
+    });
+
+    const updateRecords = historyItems.filter((item) => {
+      const key = `${item.chain}-${quickFormatAddressToCompare(item.address) || ''}-${item.extrinsicHash}`;
+
+      return !excludeKeys.includes(key);
+    });
+
+    await this.dbService.upsertHistory(updateRecords);
     this.historySubject.next(await this.dbService.getHistories());
   }
 

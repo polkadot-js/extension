@@ -516,7 +516,7 @@ export type TransactionAdditionalInfo<T extends ExtrinsicType> = T extends Extri
     ? NFTTransactionAdditionalInfo
     : undefined;
 export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType.TRANSFER_BALANCE> {
-  origin?: string, // 'app' or history source
+  origin?: 'app' | 'migration' | 'subsquid', // 'app' or history source
   callhash?: string,
   signature?: string,
   chain: string,

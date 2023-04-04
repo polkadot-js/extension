@@ -3,6 +3,7 @@
 
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { isAccountAll } from '@subwallet/extension-base/utils';
+import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
 import { FilterModal, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { HistoryItem } from '@subwallet/extension-koni-ui/components/History/HistoryItem';
@@ -11,7 +12,6 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import { HistoryDetailModal, HistoryDetailModalId } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { quickFormatToCompare } from '@subwallet/extension-koni-ui/util/account/reformatAddress';
 import { customFormatDate } from '@subwallet/extension-koni-ui/util/common/customFormatDate';
 import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
@@ -260,13 +260,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     rawHistoryList.forEach((item: TransactionHistoryItem) => {
       // Filter account by current account
-      if (isFilterByAddress && currentAddressLowerCase !== quickFormatToCompare(item.address)) {
+      if (isFilterByAddress && currentAddressLowerCase !== quickFormatAddressToCompare(item.address)) {
         return;
       }
 
       // Format display name for account by address
-      const fromName = accountMap[quickFormatToCompare(item.from) || ''];
-      const toName = accountMap[quickFormatToCompare(item.to) || ''];
+      const fromName = accountMap[quickFormatAddressToCompare(item.from) || ''];
+      const toName = accountMap[quickFormatAddressToCompare(item.to) || ''];
 
       finalHistoryList.push({ ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) });
     });

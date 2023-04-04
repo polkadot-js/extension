@@ -13,7 +13,12 @@ import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-base/ko
 import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainEnabled, _isChainSupportSubstrateStaking, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import {
+  _isChainEnabled,
+  _isChainEvmCompatible,
+  _isChainSupportSubstrateStaking,
+  _isSubstrateRelayChain
+} from '@subwallet/extension-base/services/chain-service/utils';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { Subscription } from 'rxjs';
 
@@ -21,6 +26,7 @@ import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 
 import KoniState from './handlers/State';
+import {isEthereumAddress} from "@polkadot/util-crypto";
 
 type SubscriptionName = 'balance' | 'crowdloan' | 'stakingOnChain';
 
@@ -347,8 +353,16 @@ export class KoniSubscription {
       addresses = await this.state.getStakingOwnersByChains(Object.keys(filteredChainInfoMap));
     }
 
-    await Promise.all(addresses.map(async (address) => {
+    const validAddresses = addresses.filter((address) => !isEthereumAddress(address));
+
+    await Promise.all(validAddresses.map(async (address) => {
+      const isEvmAddress = isEthereumAddress(address);
+
       await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
+        if (isEvmAddress && !_isChainEvmCompatible(chainInfo)) {
+          return;
+        }
+
         if (_isSubstrateRelayChain(chainInfo) && _STAKING_CHAIN_GROUP.nominationPool.includes(chainInfo.slug)) {
           const poolMemberMetadata = await getRelayChainPoolMemberMetadata(chainInfo, address, substrateApiMap[chainInfo.slug]);
 

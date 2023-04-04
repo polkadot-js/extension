@@ -442,7 +442,7 @@ export default class TransactionService {
     }
 
     // Return one more history record if transaction send to account in the wallets
-    const toAccount = historyItem && keyring.getAccount(historyItem.to);
+    const toAccount = historyItem?.to && keyring.getAccount(historyItem.to);
 
     if (toAccount) {
       return [historyItem, { ...historyItem, address: historyItem.to, direction: TransactionDirection.RECEIVED }];

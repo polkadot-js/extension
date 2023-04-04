@@ -399,16 +399,27 @@ export async function getRelayPoolsInfo (chain: string, substrateApi: _Substrate
   return nominationPools;
 }
 
-export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, targetValidators: ValidatorInfo[], nominatorMetadata: NominatorMetadata, chainInfo: _ChainInfo, bondDest = 'Staked') {
+export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, targetValidators: ValidatorInfo[], chainInfo: _ChainInfo, address: string, nominatorMetadata?: NominatorMetadata, bondDest = 'Staked') {
   const chainApi = await substrateApi.isReady;
   const binaryAmount = new BN(amount);
 
   let bondTx;
   let nominateTx;
 
+  const validatorParamList = targetValidators.map((validator) => {
+    return validator.address;
+  })
+
+  if (!nominatorMetadata) {
+    bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
+    nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
+
+    return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
+  }
+
   if (!nominatorMetadata.isBondedBefore) { // first time
     bondTx = chainApi.api.tx.staking.bond(nominatorMetadata.address, binaryAmount, bondDest);
-    nominateTx = chainApi.api.tx.staking.nominate(targetValidators);
+    nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
 
     return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
   } else {
@@ -417,7 +428,7 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
     }
 
     if (nominatorMetadata.isBondedBefore && targetValidators.length > 0) {
-      nominateTx = chainApi.api.tx.staking.nominate(targetValidators);
+      nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
     }
   }
 

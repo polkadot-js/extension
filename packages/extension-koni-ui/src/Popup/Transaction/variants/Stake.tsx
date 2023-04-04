@@ -236,6 +236,7 @@ const Component: React.FC<Props> = (props: Props) => {
         chain: chain,
         nominatorMetadata: nominatorMetadata,
         selectedValidators,
+        address: from,
         type: StakingType.NOMINATED
       });
     }

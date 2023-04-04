@@ -1492,8 +1492,9 @@ export interface ChainBondingInfo {
 export interface BondingSubmitParams extends BaseRequestSign {
   chain: string,
   type: StakingType,
-  nominatorMetadata?: NominatorMetadata,
+  nominatorMetadata?: NominatorMetadata, // undefined if user has no stake
   amount: string,
+  address: string,
   selectedValidators: ValidatorInfo[],
   lockPeriod?: number // in month
 }

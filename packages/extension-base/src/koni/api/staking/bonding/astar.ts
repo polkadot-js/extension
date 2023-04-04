@@ -262,7 +262,9 @@ export async function getAstarBondingExtrinsic (substrateApi: _SubstrateApi, amo
   const chainApi = await substrateApi.isReady;
   const binaryAmount = new BN(amount);
 
-  return chainApi.api.tx.dappsStaking.bondAndStake({ Evm: dappInfo.address }, binaryAmount);
+  const dappParam = isEthereumAddress(dappInfo.address) ? { Evm: dappInfo.address } : { Wasm: dappInfo.address };
+
+  return chainApi.api.tx.dappsStaking.bondAndStake(dappParam, binaryAmount);
 }
 
 export async function getAstarUnbondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, stakerAddress: string, amount: number, dappAddress: string) {

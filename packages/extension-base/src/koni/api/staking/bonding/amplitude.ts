@@ -184,9 +184,13 @@ export async function getAmplitudeCollatorsInfo (chain: string, substrateApi: _S
   return allCollators;
 }
 
-export async function getAmplitudeBondingExtrinsic (nominatorMetadata: NominatorMetadata, substrateApi: _SubstrateApi, amount: string, selectedValidatorInfo: ValidatorInfo) {
+export async function getAmplitudeBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, selectedValidatorInfo: ValidatorInfo, nominatorMetadata?: NominatorMetadata) {
   const chainApi = await substrateApi.isReady;
   const binaryAmount = new BN(amount);
+
+  if (!nominatorMetadata) {
+    return chainApi.api.tx.parachainStaking.joinDelegators(selectedValidatorInfo.address, binaryAmount);
+  }
 
   const { bondedValidators } = getBondedValidators(nominatorMetadata.nominations);
 

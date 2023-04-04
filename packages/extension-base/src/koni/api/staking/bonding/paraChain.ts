@@ -251,9 +251,13 @@ export async function getParachainCollatorsInfo (chain: string, substrateApi: _S
   return allValidators;
 }
 
-export async function getParaBondingExtrinsic (nominatorMetadata: NominatorMetadata, chainInfo: _ChainInfo, substrateApi: _SubstrateApi, amount: string, selectedCollatorInfo: ValidatorInfo) {
+export async function getParaBondingExtrinsic (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, amount: string, selectedCollatorInfo: ValidatorInfo, nominatorMetadata?: NominatorMetadata) {
   const apiPromise = await substrateApi.isReady;
   const binaryAmount = new BN(amount);
+
+  if (!nominatorMetadata) {
+    return apiPromise.api.tx.parachainStaking.delegate(selectedCollatorInfo.address, binaryAmount, new BN(selectedCollatorInfo.nominatorCount), 0);
+  }
 
   const { bondedValidators, nominationCount } = getBondedValidators(nominatorMetadata.nominations);
 

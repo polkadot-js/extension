@@ -4,7 +4,7 @@
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import SUBSCAN_CHAIN_MAP from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import { IMultiChainBalance, SubscanRequest, SubscanResponse } from '@subwallet/extension-base/services/subscan-service/types';
-import fetch from 'node-fetch';
+import fetch from 'cross-fetch';
 
 export class SubscanService {
   private limitRate = 2; // limit per interval check

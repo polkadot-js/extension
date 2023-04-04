@@ -992,5 +992,11 @@
   "Invalid recipient address": "",
   "Receive address must be of evm account.": "",
   "Receive address must be of substrate account.": "",
-  "Transfer all": ""
+  "Transfer all": "",
+  "Withdrawing rewards will immediately transfer them to your account as free balance": "",
+  "Cancel unstake transaction": "",
+  "The recipient address must be same type as the current account address.": "",
+  "Amount must be equal or less than {{number}}": "",
+  "Select destination chain": "",
+  "Destination chain": ""
 }

@@ -408,7 +408,7 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
 
   const validatorParamList = targetValidators.map((validator) => {
     return validator.address;
-  })
+  });
 
   if (!nominatorMetadata) {
     bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);

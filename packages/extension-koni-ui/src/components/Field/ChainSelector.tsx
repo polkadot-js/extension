@@ -14,13 +14,13 @@ import styled, { useTheme } from 'styled-components';
 import GeneralEmptyList from '../GeneralEmptyList';
 
 interface Props extends ThemeProps, BasicInputWrapper {
-  items: ChainItemType[]
+  items: ChainItemType[];
 }
 
 const renderEmpty = () => <GeneralEmptyList />;
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { className = '', disabled, id = 'address-input', items, label, placeholder, statusHelp, tooltip, value } = props;
+  const { className = '', disabled, id = 'address-input', items, label, placeholder, statusHelp, title, tooltip, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { onSelect } = useSelectModalInputHelper(props, ref);
@@ -89,7 +89,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       searchableMinCharactersCount={2}
       selected={value || ''}
       statusHelp={statusHelp}
-      title={label || placeholder || t('Select chain')}
+      title={title || label || placeholder || t('Select chain')}
       tooltip={tooltip}
     />
   );

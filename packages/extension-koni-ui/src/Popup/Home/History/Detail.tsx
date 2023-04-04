@@ -53,6 +53,8 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const { t } = useTranslation();
 
+  console.log(data);
+
   const txTypeNameMap: Record<string, string> = useMemo(() => ({
     [ExtrinsicType.TRANSFER_BALANCE]: t('Transfer'),
     [ExtrinsicType.TRANSFER_TOKEN]: t('Transfer'),
@@ -65,6 +67,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
     [ExtrinsicType.STAKING_UNBOND]: t('Unbond'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim reward'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw'),
+    [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake'),
     [ExtrinsicType.STAKING_COMPOUNDING]: t('Compounding'),
     [ExtrinsicType.EVM_EXECUTE]: t('EVM Execute')
   }), [t]);
@@ -214,7 +217,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
         <MetaInfo.Default
           label={t('Transaction time')}
         >
-          {customFormatDate(data.time, '#hh#:#mm# #AMPM# - #MMM# #DD#, #YYYY#')}
+          {customFormatDate(data.time, '#hhhh#:#mm# - #MMM# #DD#, #YYYY#')}
         </MetaInfo.Default>
 
         {data.additionalInfo && transactionType === ExtrinsicType.SEND_NFT && (

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnlockingStakeInfo, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxInfo, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnlockingStakeInfo, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getFreeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
@@ -114,6 +114,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
         const dappInfo = dAppInfoMap[dappAddress];
 
         nominationList.push({
+          status: StakingStatus.NOT_EARNING, // TODO
           chain,
           validatorAddress: dappAddress,
           activeStake: currentStake,
@@ -152,7 +153,8 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
     address: address,
     activeStake: bnTotalActiveStake.toString(),
     nominations: nominationList,
-    unstakings: unstakingList
+    unstakings: unstakingList,
+    status: StakingStatus.NOT_EARNING // TODO
   } as NominatorMetadata;
 }
 
@@ -183,21 +185,23 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
     const dappName = dapp.name as string;
     const dappAddress = dapp.address as string;
     const dappIcon = isUrl(dapp.iconUrl as string) ? dapp.iconUrl as string : undefined;
-    const _contractInfo = await chainApi.api.query.dappsStaking.contractEraStake({ Evm: dappAddress }, era);
-    const contractInfo = _contractInfo.toHuman() as Record<string, any>;
-    let totalStake = 0;
+    const contractParam = isEthereumAddress(dappAddress) ? { Evm: dappAddress } : { Wasm: dappAddress };
+    const _contractInfo = await chainApi.api.query.dappsStaking.contractEraStake(contractParam, era);
+    const contractInfo = _contractInfo.toPrimitive() as Record<string, any>;
+    let totalStake = '0';
     let stakerCount = 0;
 
     if (contractInfo !== null) {
-      totalStake = parseRawNumber(contractInfo.total as string);
-      stakerCount = parseRawNumber(contractInfo.numberOfStakers as string);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      totalStake = contractInfo?.total?.toString();
+      stakerCount = contractInfo.numberOfStakers as number;
     }
 
     allDappsInfo.push({
       commission: 0,
       expectedReturn: 0,
       address: dappAddress,
-      totalStake: totalStake.toString(),
+      totalStake: totalStake,
       ownStake: '0',
       otherStake: totalStake.toString(),
       nominatorCount: stakerCount,

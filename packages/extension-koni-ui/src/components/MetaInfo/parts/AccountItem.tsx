@@ -8,8 +8,6 @@ import CN from 'classnames';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-
 import { InfoItemBase } from './types';
 
 export interface AccountInfoItem extends InfoItemBase {
@@ -59,7 +57,6 @@ const Component: React.FC<AccountInfoItem> = (props: AccountInfoItem) => {
           <Avatar
             className={'__account-avatar'}
             size={24}
-            theme={address ? isEthereumAddress(address) ? 'ethereum' : 'polkadot' : undefined}
             value={address}
           />
           <div className={'__account-name ml-xs'}>

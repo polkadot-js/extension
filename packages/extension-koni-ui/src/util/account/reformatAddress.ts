@@ -14,15 +14,19 @@ export default function reformatAddress (address: string, networkPrefix = 42, is
     return address;
   }
 
-  const publicKey = decodeAddress(address);
+  try {
+    const publicKey = decodeAddress(address);
 
-  if (isEthereum) {
-    return ethereumEncode(publicKey);
-  }
+    if (isEthereum) {
+      return ethereumEncode(publicKey);
+    }
 
-  if (networkPrefix < 0) {
+    if (networkPrefix < 0) {
+      return address;
+    }
+
+    return encodeAddress(publicKey, networkPrefix);
+  } catch {
     return address;
   }
-
-  return encodeAddress(publicKey, networkPrefix);
 }

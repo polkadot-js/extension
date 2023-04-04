@@ -6,5 +6,5 @@ import React from 'react';
 
 export interface InfoItemBase extends ThemeProps {
   label?: React.ReactNode,
-  valueColorSchema?: 'default' | 'light' | 'gray' | 'success' | 'gold' | 'danger'
+  valueColorSchema?: 'default' | 'light' | 'gray' | 'success' | 'gold' | 'danger' | 'warning'
 }

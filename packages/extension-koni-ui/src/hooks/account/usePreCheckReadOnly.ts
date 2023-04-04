@@ -20,7 +20,7 @@ const usePreCheckReadOnly = (address?: string, message?: string): ((onClick: Voi
         notify({
           message: t(message ?? 'The account you are using is read-only, you cannot use this feature with it'),
           type: 'info',
-          duration: 3
+          duration: 1.5
         });
       } else {
         onClick();

@@ -4,28 +4,21 @@
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
+import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
+import { AddressInput, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetContractSupportedChains';
+import { useChainChecker, useDefaultNavigate, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ValidateStatus } from '@subwallet/extension-koni-ui/types/validator';
+import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Col, Field, Form, Icon, Image, NetworkItem, Row, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
-
-import ChainLogoMap from '../../../assets/logo';
-import GeneralEmptyList from '../../../components/GeneralEmptyList';
 
 type Props = ThemeProps
 
@@ -79,6 +72,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [contractValidation, setContractValidation] = useState<ValidationInfo>({ status: '' });
   const [loading, setLoading] = useState(false);
 
+  const chainChecker = useChainChecker();
   const [name, setName] = useState('');
   const [symbol, setSymbol] = useState('');
   const [decimals, setDecimals] = useState(-1);
@@ -312,6 +306,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       />
     );
   }, [token.fontSizeXL]);
+
+  useEffect(() => {
+    chainChecker(selectedChain);
+  }, [chainChecker, selectedChain]);
 
   return (
     <PageWrapper

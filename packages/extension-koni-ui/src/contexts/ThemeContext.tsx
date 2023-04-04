@@ -36,6 +36,10 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       whiteSpace: 'pre-wrap'
     },
 
+    '.loading-icon': {
+      fontSize: token.size
+    },
+
     '.main-page-container': {
       border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`,
       borderBottomWidth: token.lineWidth * 2

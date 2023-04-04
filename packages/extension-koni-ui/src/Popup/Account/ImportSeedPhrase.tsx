@@ -14,8 +14,7 @@ import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFo
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ValidateState } from '@subwallet/extension-koni-ui/types/validator';
+import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { Form, Icon, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown } from 'phosphor-react';

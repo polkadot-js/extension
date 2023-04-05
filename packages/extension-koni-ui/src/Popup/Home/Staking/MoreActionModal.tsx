@@ -33,14 +33,6 @@ type ActionListType = {
   onClick: () => void;
 }
 
-export type StakingDataOption = {
-  staking?: StakingItem;
-  reward?: StakingRewardItem;
-  chainStakingMetadata?: ChainStakingMetadata,
-  nominatorMetadata?: NominatorMetadata,
-  hideTabList?: boolean
-}
-
 const Component: React.FC<Props> = (props: Props) => {
   const { chainStakingMetadata, className, nominatorMetadata, reward } = props;
 
@@ -62,9 +54,10 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 
   const onDoneTransaction = useCallback((extrinsicHash: string) => {
-    // TODO: need handle onDone
-    console.log('all good');
-  }, []);
+    if (chainStakingMetadata) {
+      navigate(`/transaction-done/substrate/${chainStakingMetadata?.chain}/${extrinsicHash}`);
+    }
+  }, [chainStakingMetadata, navigate]);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDoneTransaction);
 

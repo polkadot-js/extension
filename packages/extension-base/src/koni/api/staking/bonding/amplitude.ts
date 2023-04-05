@@ -6,7 +6,7 @@ import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus,
 import { BlockHeader, getBondedValidators, isUnstakeAll, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { parseRawNumber } from '@subwallet/extension-base/utils';
+import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { BN } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -194,7 +194,7 @@ export async function getAmplitudeBondingExtrinsic (substrateApi: _SubstrateApi,
 
   const { bondedValidators } = getBondedValidators(nominatorMetadata.nominations);
 
-  if (!bondedValidators.includes(selectedValidatorInfo.address)) {
+  if (!bondedValidators.includes(reformatAddress(selectedValidatorInfo.address, 0))) {
     return chainApi.api.tx.parachainStaking.joinDelegators(selectedValidatorInfo.address, binaryAmount);
   } else {
     const _params = chainApi.api.tx.parachainStaking.delegatorStakeMore.toJSON() as Record<string, any>;

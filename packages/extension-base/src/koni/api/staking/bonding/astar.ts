@@ -2,13 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { BasicTxInfo, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnlockingStakeInfo, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getFreeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import { isUrl, parseNumberToDisplay, parseRawNumber } from '@subwallet/extension-base/utils';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { isUrl, parseRawNumber } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
@@ -218,46 +216,6 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
   return allDappsInfo;
 }
 
-export async function getAstarBondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, stakerAddress: string, amount: number, dappInfo: ValidatorInfo) {
-  const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-  const parsedAmount = amount * (10 ** decimals);
-  const binaryAmount = new BN(parsedAmount.toString());
-
-  const extrinsic = apiPromise.api.tx.dappsStaking.bondAndStake({ Evm: dappInfo.address }, binaryAmount);
-
-  return extrinsic.paymentInfo(stakerAddress);
-}
-
-export async function handleAstarBondingTxInfo (chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappInfo: ValidatorInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-
-  try {
-    const [txInfo, balance] = await Promise.all([
-      getAstarBondingTxInfo(chainInfo, substrateApiMap[networkKey], stakerAddress, amount, dappInfo),
-      getFreeBalance(networkKey, stakerAddress, substrateApiMap, evmApiMap)
-    ]);
-
-    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
-    const rawFee = parseRawNumber(txInfo.partialFee.toString());
-    const binaryBalance = new BN(balance);
-
-    const sumAmount = txInfo.partialFee.addn(amount);
-    const balanceError = sumAmount.gt(binaryBalance);
-
-    return {
-      rawFee,
-      fee: feeString,
-      balanceError
-    } as BasicTxInfo;
-  } catch (e) {
-    return {
-      fee: `0.0000 ${symbol}`,
-      balanceError: false
-    } as BasicTxInfo;
-  }
-}
-
 export async function getAstarBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, dappInfo: ValidatorInfo) {
   const chainApi = await substrateApi.isReady;
   const binaryAmount = new BN(amount);
@@ -267,224 +225,19 @@ export async function getAstarBondingExtrinsic (substrateApi: _SubstrateApi, amo
   return chainApi.api.tx.dappsStaking.bondAndStake(dappParam, binaryAmount);
 }
 
-export async function getAstarUnbondingTxInfo (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, stakerAddress: string, amount: number, dappAddress: string) {
-  const apiPromise = await substrateApi.isReady;
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-  const parsedAmount = amount * (10 ** decimals);
-  const binaryAmount = new BN(parsedAmount.toString());
-
-  const extrinsic = apiPromise.api.tx.dappsStaking.unbondAndUnstake({ Evm: dappAddress }, binaryAmount);
-
-  return extrinsic.paymentInfo(stakerAddress);
-}
-
-export async function handleAstarUnbondingTxInfo (chainInfo: _ChainInfo, amount: number, networkKey: string, stakerAddress: string, dappAddress: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-
-  try {
-    const [txInfo, balance] = await Promise.all([
-      getAstarUnbondingTxInfo(chainInfo, substrateApiMap[networkKey], stakerAddress, amount, dappAddress),
-      getFreeBalance(networkKey, stakerAddress, substrateApiMap, evmApiMap)
-    ]);
-
-    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
-    const rawFee = parseRawNumber(txInfo.partialFee.toString());
-    const binaryBalance = new BN(balance);
-    const balanceError = txInfo.partialFee.gt(binaryBalance);
-
-    return {
-      rawFee,
-      fee: feeString,
-      balanceError
-    } as BasicTxInfo;
-  } catch (e) {
-    return {
-      fee: `0.0000 ${symbol}`,
-      balanceError: false
-    } as BasicTxInfo;
-  }
-}
-
 export async function getAstarUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: string, dappAddress: string) {
   const apiPromise = await substrateApi.isReady;
   const binaryAmount = new BN(amount);
 
-  return apiPromise.api.tx.dappsStaking.unbondAndUnstake({ Evm: dappAddress }, binaryAmount);
-}
+  const dappParam = isEthereumAddress(dappAddress) ? { Evm: dappAddress } : { Wasm: dappAddress };
 
-async function getAstarUnlockingInfo (substrateApi: _SubstrateApi, address: string, networkKey: string) {
-  const chainApi = await substrateApi.isReady;
-
-  const [_stakingInfo, _era] = await Promise.all([
-    chainApi.api.query.dappsStaking.ledger(address),
-    chainApi.api.query.dappsStaking.currentEra()
-  ]);
-
-  const currentEra = parseRawNumber(_era.toHuman() as string);
-  const stakingInfo = _stakingInfo.toHuman() as Record<string, any>;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const unlockingChunks = stakingInfo.unbondingInfo.unlockingChunks as Record<string, string>[];
-
-  let nextWithdrawalEra = -1;
-  let nextWithdrawalAmount = 0;
-  let redeemable = 0;
-
-  for (const chunk of unlockingChunks) {
-    const unlockEra = parseRawNumber(chunk.unlockEra);
-    const amount = parseRawNumber(chunk.amount);
-
-    // Find next withdrawal
-    if (nextWithdrawalEra === -1) {
-      nextWithdrawalEra = unlockEra;
-      nextWithdrawalAmount = amount;
-    } else if (unlockEra <= nextWithdrawalEra) {
-      nextWithdrawalEra = unlockEra;
-      nextWithdrawalAmount += amount;
-    }
-
-    // Find redeemable
-    if (unlockEra - currentEra <= 0) {
-      redeemable += amount;
-    }
-  }
-
-  const nextWithdrawal = (nextWithdrawalEra - currentEra) * _STAKING_ERA_LENGTH_MAP[networkKey];
-
-  return {
-    nextWithdrawal,
-    nextWithdrawalAmount,
-    redeemable
-  };
-}
-
-export async function handleAstarUnlockingInfo (substrateApi: _SubstrateApi, chainInfo: _ChainInfo, networkKey: string, address: string, type: StakingType) {
-  const { nextWithdrawal, nextWithdrawalAmount, redeemable } = await getAstarUnlockingInfo(substrateApi, address, networkKey);
-
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
-
-  const parsedRedeemable = redeemable / (10 ** decimals);
-  const parsedNextWithdrawalAmount = nextWithdrawalAmount / (10 ** decimals);
-
-  return {
-    address,
-    type,
-    chain: networkKey,
-    nextWithdrawal: nextWithdrawal,
-    redeemable: parsedRedeemable,
-    nextWithdrawalAmount: parsedNextWithdrawalAmount
-  } as UnlockingStakeInfo;
-}
-
-export async function getAstarWithdrawalTxInfo (substrateApi: _SubstrateApi, address: string) {
-  const apiPromise = await substrateApi.isReady;
-
-  const extrinsic = apiPromise.api.tx.dappsStaking.withdrawUnbonded();
-
-  return extrinsic.paymentInfo(address);
-}
-
-export async function handleAstarWithdrawalTxInfo (networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, address: string) {
-  const [txInfo, balance] = await Promise.all([
-    getAstarWithdrawalTxInfo(substrateApiMap[networkKey], address),
-    getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
-  ]);
-
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-
-  const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
-  const rawFee = parseRawNumber(txInfo.partialFee.toString());
-  const binaryBalance = new BN(balance);
-  const balanceError = txInfo.partialFee.gt(binaryBalance);
-
-  return {
-    rawFee,
-    fee: feeString,
-    balanceError
-  } as BasicTxInfo;
+  return apiPromise.api.tx.dappsStaking.unbondAndUnstake(dappParam, binaryAmount);
 }
 
 export async function getAstarWithdrawalExtrinsic (substrateApi: _SubstrateApi) {
   const chainApi = await substrateApi.isReady;
 
   return chainApi.api.tx.dappsStaking.withdrawUnbonded();
-}
-
-export async function getAstarClaimRewardTxInfo (substrateApi: _SubstrateApi, address: string) {
-  const apiPromise = await substrateApi.isReady;
-
-  const [_stakedDapps, _currentEra] = await Promise.all([
-    apiPromise.api.query.dappsStaking.generalStakerInfo.entries(address),
-    apiPromise.api.query.dappsStaking.currentEra()
-  ]);
-
-  const currentEra = parseRawNumber(_currentEra.toHuman() as string);
-  const transactions: SubmittableExtrinsic[] = [];
-
-  for (const item of _stakedDapps) {
-    const data = item[0].toHuman() as any[];
-    const stakedDapp = data[1] as Record<string, string>;
-    const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
-    const stakes = stakeData.stakes;
-    const dappAddress = stakedDapp.Evm.toLowerCase();
-
-    let numberOfUnclaimedEra = 0;
-
-    for (let i = 0; i < stakes.length; i++) {
-      const { era, staked } = stakes[i];
-      const bnStaked = new BN(staked.replaceAll(',', ''));
-      const parsedEra = parseRawNumber(era);
-
-      if (bnStaked.eq(new BN(0))) {
-        continue;
-      }
-
-      const nextEraData = stakes[i + 1] ?? null;
-      const nextEra = nextEraData && parseRawNumber(nextEraData.era);
-      const isLastEra = i === stakes.length - 1;
-      const eraToClaim = isLastEra ? currentEra - parsedEra : nextEra - parsedEra;
-
-      numberOfUnclaimedEra += eraToClaim;
-    }
-
-    for (let i = 0; i < numberOfUnclaimedEra; i++) {
-      const tx = apiPromise.api.tx.dappsStaking.claimStaker({ Evm: dappAddress });
-
-      transactions.push(tx);
-    }
-  }
-
-  console.log('no of tx: ', transactions.length);
-
-  const extrinsic = apiPromise.api.tx.utility.batch(transactions);
-
-  return extrinsic.paymentInfo(address);
-}
-
-export async function handleAstarClaimRewardTxInfo (address: string, networkKey: string, chainInfo: _ChainInfo, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>) {
-  const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-
-  try {
-    const [txInfo, balance] = await Promise.all([
-      getAstarClaimRewardTxInfo(substrateApiMap[networkKey], address),
-      getFreeBalance(networkKey, address, substrateApiMap, evmApiMap)
-    ]);
-
-    const feeString = parseNumberToDisplay(txInfo.partialFee, decimals) + ` ${symbol}`;
-    const rawFee = parseRawNumber(txInfo.partialFee.toString());
-    const binaryBalance = new BN(balance);
-    const balanceError = txInfo.partialFee.gt(binaryBalance);
-
-    return {
-      rawFee,
-      fee: feeString,
-      balanceError
-    } as BasicTxInfo;
-  } catch (e) {
-    return {
-      fee: `0.0000 ${symbol}`,
-      balanceError: false
-    } as BasicTxInfo;
-  }
 }
 
 export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi, address: string) {
@@ -525,8 +278,10 @@ export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi,
       numberOfUnclaimedEra += eraToClaim;
     }
 
+    const dappParam = isEthereumAddress(dappAddress) ? { Evm: dappAddress } : { Wasm: dappAddress };
+
     for (let i = 0; i < Math.min(numberOfUnclaimedEra, maxTx); i++) {
-      const tx = apiPromise.api.tx.dappsStaking.claimStaker({ Evm: dappAddress });
+      const tx = apiPromise.api.tx.dappsStaking.claimStaker(dappParam);
 
       transactions.push(tx);
     }

@@ -308,7 +308,10 @@ export function isUnstakeAll (selectedValidator: string, nominations: Nomination
   let isUnstakeAll = false;
 
   for (const nomination of nominations) {
-    if (nomination.validatorAddress === selectedValidator) {
+    const parsedValidatorAddress = reformatAddress(nomination.validatorAddress, 0);
+    const parsedSelectedValidator = reformatAddress(selectedValidator, 0);
+
+    if (parsedValidatorAddress === parsedSelectedValidator) {
       if (unstakeAmount === nomination.activeStake) {
         isUnstakeAll = true;
       }

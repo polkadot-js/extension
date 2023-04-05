@@ -22,18 +22,29 @@ export function useSelectValidators (modalId: string, maxCount: number, onChange
       let result: string[];
 
       if (!changeValidators.includes(changeVal)) {
-        if ((isSingleSelect ? defaultSelected : changeValidators).length >= maxCount) {
-          notify({
-            message: `You can only choose ${maxCount} validators`,
-            type: 'info'
-          });
-
-          return changeValidators;
-        }
-
         if (isSingleSelect) {
+          if (defaultSelected.length >= maxCount) {
+            if (!defaultSelected.includes(changeVal)) {
+              notify({
+                message: `You can only choose ${maxCount} validators`,
+                type: 'info'
+              });
+
+              return changeValidators;
+            }
+          }
+
           result = [changeVal];
         } else {
+          if (changeValidators.length >= maxCount) {
+            notify({
+              message: `You can only choose ${maxCount} validators`,
+              type: 'info'
+            });
+
+            return changeValidators;
+          }
+
           result = [...changeValidators, changeVal];
         }
       } else {

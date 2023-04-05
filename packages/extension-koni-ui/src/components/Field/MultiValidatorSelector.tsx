@@ -169,7 +169,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   useEffect(() => {
     const defaultValue = nominations?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || '';
-    const selected = (isSingleSelect ? nominations?.slice(0, 1) : nominations)?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || '';
+    const selected = isSingleSelect ? '' : defaultValue;
 
     onInitValidators(defaultValue, selected);
     onChange && onChange({ target: { value: selected } });

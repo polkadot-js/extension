@@ -61,15 +61,12 @@ export function useSelectValidators (modalId: string, maxCount: number, onChange
   }, [selected, inactiveModal, modalId]);
 
   const onInitValidators = useCallback((defaultValue: string, selected: string) => {
-    if (!selected || !defaultValue) {
-      setChangeValidators([]);
-      setDefaultSelected([]);
-      setSelected([]);
-    } else {
-      setChangeValidators(selected.split(','));
-      setDefaultSelected(defaultValue.split(','));
-      setSelected(selected.split(','));
-    }
+    const _selected = !selected ? [] : selected.split(',');
+    const _default = !defaultValue ? [] : defaultValue.split(',');
+
+    setChangeValidators(_selected);
+    setDefaultSelected(_default);
+    setSelected(_selected);
   }, []);
 
   return {

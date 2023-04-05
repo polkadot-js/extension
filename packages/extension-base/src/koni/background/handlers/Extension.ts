@@ -2629,6 +2629,8 @@ export default class KoniExtension {
 
     const registry = new TypeRegistry();
 
+    let isEvm = false;
+
     if (isJsonPayload(payload)) {
       // Get the metadata for the genesisHash
       const currentMetadata = this.#koniState.knownMetadata.find((meta: MetadataDef) =>
@@ -2640,13 +2642,20 @@ export default class KoniExtension {
       if (currentMetadata) {
         registry.register(currentMetadata?.types);
       }
+
+      const [, chainInfo] = this.#koniState.findNetworkKeyByGenesisHash(payload.genesisHash);
+
+      if (chainInfo) {
+        isEvm = _isChainEvmCompatible(chainInfo);
+      }
     }
 
     const result = request.sign(registry, pair);
 
     resolve({
       id,
-      ...result
+      // In case evm chain, must be cut 2 character after 0x
+      signature: isEvm ? `0x${result.signature.slice(4)}` : result.signature
     });
 
     return true;

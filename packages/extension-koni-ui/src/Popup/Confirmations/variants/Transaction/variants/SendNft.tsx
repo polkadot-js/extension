@@ -42,9 +42,13 @@ const Component: React.FC<Props> = (props: Props) => {
         />
       </MetaInfo>
       <MetaInfo hasBackgroundWrapper={true}>
-        <MetaInfo.Default label={t('NFT')}>
-          {data.nftItem.name || `${data.nftItem.collectionId}_${data.nftItem.id}`}
-        </MetaInfo.Default>
+        {
+          (data.nftItemName || data.nftItem) && (
+            <MetaInfo.Default label={t('NFT')}>
+              {data.nftItemName || data.nftItem.name || `${data.nftItem.collectionId}_${data.nftItem.id}`}
+            </MetaInfo.Default>
+          )
+        }
         <MetaInfo.Number
           decimals={decimals}
           label={t('Estimated fee')}

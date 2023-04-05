@@ -377,7 +377,7 @@ export default class KoniState {
   }
 
   public async getStaking (): Promise<StakingJson> {
-    const addresses = await this.getDecodedAddresses();
+    const addresses = this.getDecodedAddresses();
 
     const stakings = await this.dbService.getStakings(addresses, this.activeChainSlugs);
 
@@ -449,13 +449,13 @@ export default class KoniState {
     return this.dbService.stores.nftCollection.subscribeNftCollection(this.activeChainSlugs);
   }
 
-  public async resetNft (newAddress: string): Promise<void> {
+  resetNft (newAddress: string): void {
     this.getNft().then((data) => this.nftSubject.next(data || {
       nftList: [],
       total: 0
     })).catch((e) => this.logger.warn(e));
 
-    const addresses = await this.getDecodedAddresses(newAddress);
+    const addresses = this.getDecodedAddresses(newAddress);
 
     this.dbService.subscribeNft(addresses, this.activeChainSlugs, (nfts) => {
       this.nftSubject.next({
@@ -480,7 +480,7 @@ export default class KoniState {
   }
 
   public async getNft (): Promise<NftJson | undefined> {
-    const addresses = await this.getDecodedAddresses();
+    const addresses = this.getDecodedAddresses();
 
     if (!addresses.length) {
       return;
@@ -576,10 +576,6 @@ export default class KoniState {
     return this.stakingRewardSubject;
   }
 
-  public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
-    update(this.keyringService.currentAccount);
-  }
-
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     const { address, currentGenesisHash } = data;
 
@@ -613,13 +609,13 @@ export default class KoniState {
       keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash });
     }
 
-    this.getCurrentAccount((accountInfo) => {
-      if (address === accountInfo.address) {
-        accountInfo.currentGenesisHash = genesisHash as string || ALL_GENESIS_HASH;
+    const accountInfo = this.keyringService.currentAccount;
 
-        this.setCurrentAccount(accountInfo);
-      }
-    });
+    if (address === accountInfo.address) {
+      accountInfo.currentGenesisHash = genesisHash as string || ALL_GENESIS_HASH;
+
+      this.setCurrentAccount(accountInfo);
+    }
 
     return true;
   }
@@ -644,10 +640,7 @@ export default class KoniState {
   public async switchNetworkAccount (id: string, url: string, networkKey: string, changeAddress?: string): Promise<boolean> {
     const chainInfo = this.chainService.getChainInfoByKey(networkKey);
     const chainState = this.chainService.getChainStateByKey(networkKey);
-
-    const { address, currentGenesisHash } = await new Promise<CurrentAccountInfo>((resolve) => {
-      this.getCurrentAccount(resolve);
-    });
+    const { address, currentGenesisHash } = this.keyringService.currentAccount;
 
     return this.requestService.addConfirmation(id, url, 'switchNetworkRequest', {
       networkKey,
@@ -778,23 +771,21 @@ export default class KoniState {
     return this.settingService.getSubject();
   }
 
-  public getAccountAddress (): Promise<string | null | undefined> {
-    return new Promise((resolve, reject) => {
-      this.getCurrentAccount((account) => {
-        if (account) {
-          resolve(account.address);
-        } else {
-          resolve(null);
-        }
-      });
-    });
+  public getAccountAddress (): string | null {
+    const address = this.keyringService.currentAccount.address;
+
+    if (address === '') {
+      return null;
+    }
+
+    return address;
   }
 
-  public async getDecodedAddresses (address?: string): Promise<string[]> {
+  public getDecodedAddresses (address?: string): string[] {
     let checkingAddress: string | null | undefined = address;
 
     if (!address) {
-      checkingAddress = await this.getAccountAddress();
+      checkingAddress = this.getAccountAddress();
     }
 
     if (!checkingAddress) {
@@ -867,14 +858,14 @@ export default class KoniState {
     this.publishCrowdloan(true);
   }
 
-  public async resetStaking (newAddress: string) {
+  public resetStaking (newAddress: string) {
     this.getStaking()
       .then((data) => {
         this.stakingSubject.next(data);
       })
       .catch((e) => this.logger.warn(e));
 
-    const addresses = await this.getDecodedAddresses(newAddress);
+    const addresses = this.getDecodedAddresses(newAddress);
 
     this.dbService.subscribeStaking(addresses, this.activeChainSlugs, (stakings) => {
       this.stakingSubject.next({
@@ -894,9 +885,9 @@ export default class KoniState {
   }
 
   private updateBalanceStore (item: BalanceItem) {
-    this.getCurrentAccount((currentAccountInfo) => {
-      this.dbService.updateBalanceStore(currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
-    });
+    const currentAccountInfo = this.keyringService.currentAccount;
+
+    this.dbService.updateBalanceStore(currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
   }
 
   public subscribeBalance () {
@@ -926,9 +917,9 @@ export default class KoniState {
   }
 
   private updateCrowdloanStore (networkKey: string, item: CrowdloanItem) {
-    this.getCurrentAccount((currentAccountInfo) => {
-      this.dbService.updateCrowdloanStore(networkKey, currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
-    });
+    const currentAccountInfo = this.keyringService.currentAccount;
+
+    this.dbService.updateCrowdloanStore(networkKey, currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
   }
 
   public subscribeCrowdloan () {
@@ -1166,14 +1157,12 @@ export default class KoniState {
   public updateServiceInfo () {
     // Todo: Should handle this in event service
     this.logger.log('<---Update serviceInfo--->');
-    this.getCurrentAccount((value) => {
-      this.serviceInfoSubject.next({
-        chainInfoMap: this.chainService.getChainInfoMap(),
-        chainApiMap: this.getApiMap(),
-        currentAccountInfo: value,
-        assetRegistry: this.chainService.getAssetRegistry(),
-        chainStateMap: this.chainService.getChainStateMap()
-      });
+    this.serviceInfoSubject.next({
+      chainInfoMap: this.chainService.getChainInfoMap(),
+      chainApiMap: this.getApiMap(),
+      currentAccountInfo: this.keyringService.currentAccount,
+      assetRegistry: this.chainService.getAssetRegistry(),
+      chainStateMap: this.chainService.getChainStateMap()
     });
   }
 

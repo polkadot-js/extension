@@ -14,8 +14,8 @@ import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainEvmCompatible, _isChainSupportSubstrateStaking, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import { Subscription } from 'rxjs';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
@@ -26,7 +26,7 @@ import KoniState from './handlers/State';
 type SubscriptionName = 'balance' | 'crowdloan' | 'stakingOnChain';
 
 export class KoniSubscription {
-  private serviceSubscription: Subscription | undefined;
+  private eventHandler?: (events: EventItem<EventType>[], eventTypes: EventType[]) => void;
   private subscriptionMap: Record<SubscriptionName, (() => void) | undefined> = {
     crowdloan: undefined,
     balance: undefined,
@@ -85,28 +85,37 @@ export class KoniSubscription {
       this.subscribeStakingOnChain(currentAddress, this.state.getSubstrateApiMap());
     }
 
-    !this.serviceSubscription &&
-      (this.serviceSubscription = this.state.subscribeServiceInfo().subscribe({
-        next: (serviceInfo) => {
-          this.logger.log('ServiceInfo updated, restarting...');
-          const address = serviceInfo.currentAccountInfo?.address;
+    if (!this.eventHandler) {
+      const reloadEvents: EventType[] = ['account.add', 'account.remove', 'account.updateCurrent', 'chain.add', 'chain.update', 'chain.enable', 'asset.add', 'asset.enable', 'transaction.done', 'transaction.failed'];
 
-          if (!address) {
-            return;
-          }
+      this.eventHandler = (events, eventTypes) => {
+        const serviceInfo = this.state.getServiceInfo();
+        const needReload = eventTypes.some((eT) => reloadEvents.includes(eT));
 
-          this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
-          this.subscribeStakingOnChain(address, serviceInfo.chainApiMap.substrate);
+        if (!needReload) {
+          return;
         }
-      }));
+
+        this.logger.log('ServiceInfo updated, restarting...');
+        const address = serviceInfo.currentAccountInfo?.address;
+
+        if (!address) {
+          return;
+        }
+
+        this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
+        this.subscribeStakingOnChain(address, serviceInfo.chainApiMap.substrate);
+      };
+
+      this.state.eventService.onLazy(this.eventHandler);
+    }
   }
 
   stop () {
     this.logger.log('Stopping subscription');
 
-    if (this.serviceSubscription) {
-      this.serviceSubscription.unsubscribe();
-      this.serviceSubscription = undefined;
+    if (this.eventHandler) {
+      this.state.eventService.offLazy(this.eventHandler);
     }
 
     this.stopAllSubscription();

@@ -16,7 +16,7 @@ import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCus
 import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParachain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
-import { KeyringService } from '@subwallet/extension-base/services/kerying-service';
+import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import MigrationService from '@subwallet/extension-base/services/migration-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import { PriceService } from '@subwallet/extension-base/services/price-service';
@@ -134,13 +134,13 @@ export default class KoniState {
     this.keyringService = new KeyringService(this.eventService);
 
     this.notificationService = new NotificationService();
-    this.chainService = new ChainService(this.dbService);
+    this.chainService = new ChainService(this.dbService, this.eventService);
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService, this.settingService);
-    this.priceService = new PriceService(this.serviceInfoSubject, this.dbService, this.chainService);
+    this.priceService = new PriceService(this.dbService, this.eventService, this.chainService);
     this.balanceService = new BalanceService(this.chainService);
     this.historyService = new HistoryService(this.dbService, this.chainService, this.eventService);
-    this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
+    this.transactionService = new TransactionService(this.chainService, this.eventService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
     this.migrationService = new MigrationService(this);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
@@ -273,7 +273,7 @@ export default class KoniState {
     await this.chainService.init();
     await this.migrationService.run();
     this.startSubscription();
-    this.updateServiceInfo();
+    this.eventService.emit('chain.ready', true);
 
     this.onReady();
     this.autoEnableChainOnAccountAdded();
@@ -596,7 +596,6 @@ export default class KoniState {
     }
 
     this.keyringService.setCurrentAccount(result);
-    this.updateServiceInfo();
     callback && callback();
   }
 
@@ -1002,13 +1001,10 @@ export default class KoniState {
     if (_isAssetFungibleToken(data)) {
       await this.chainService.updateAssetSetting(tokenSlug, { visible: true });
     }
-
-    this.updateServiceInfo();
   }
 
   public deleteCustomAssets (targetTokens: string[]) {
     this.chainService.deleteCustomAssets(targetTokens);
-    this.updateServiceInfo();
   }
 
   public async validateCustomChain (provider: string, existedChainSlug?: string) {
@@ -1036,17 +1032,11 @@ export default class KoniState {
       await this.chainService.updateAssetSetting(newNativeTokenSlug, { visible: true });
     }
 
-    this.updateServiceInfo();
-
     return true;
   }
 
   public removeCustomChain (networkKey: string): boolean {
-    const result = this.chainService.removeCustomChain(networkKey);
-
-    this.updateServiceInfo();
-
-    return result;
+    return this.chainService.removeCustomChain(networkKey);
   }
 
   // TODO: avoids turning off chains related to ledger account
@@ -1082,11 +1072,7 @@ export default class KoniState {
     // const defaultChains = this.getDefaultNetworkKeys();
     await this.chainService.updateAssetSettingByChain(chainSlug, false);
 
-    const result = this.chainService.disableChain(chainSlug);
-
-    this.updateServiceInfo();
-
-    return result;
+    return this.chainService.disableChain(chainSlug);
   }
 
   public async enableChain (chainSlug: string, enableTokens = true): Promise<boolean> {
@@ -1094,11 +1080,7 @@ export default class KoniState {
       await this.chainService.updateAssetSettingByChain(chainSlug, true);
     }
 
-    const result = this.chainService.enableChain(chainSlug);
-
-    this.updateServiceInfo();
-
-    return result;
+    return this.chainService.enableChain(chainSlug);
   }
 
   public resetDefaultChains () {
@@ -1154,16 +1136,14 @@ export default class KoniState {
     return this.serviceInfoSubject;
   }
 
-  public updateServiceInfo () {
-    // Todo: Should handle this in event service
-    this.logger.log('<---Update serviceInfo--->');
-    this.serviceInfoSubject.next({
+  public getServiceInfo (): ServiceInfo {
+    return {
       chainInfoMap: this.chainService.getChainInfoMap(),
       chainApiMap: this.getApiMap(),
       currentAccountInfo: this.keyringService.currentAccount,
       assetRegistry: this.chainService.getAssetRegistry(),
       chainStateMap: this.chainService.getChainStateMap()
-    });
+    };
   }
 
   public getExternalRequestMap (): Record<string, ExternalRequestPromise> {
@@ -1689,7 +1669,6 @@ export default class KoniState {
     if (needActiveTokens.length) {
       this.chainService.enableChains(needEnableChains);
       this.chainService.setAssetSettings({ ...currentAssetSettings });
-      this.updateServiceInfo();
     }
   }
 

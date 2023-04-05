@@ -971,11 +971,7 @@ export default class KoniExtension {
 
   private async updateAssetSetting (params: AssetSettingUpdateReq) {
     try {
-      const needUpdateSubject = await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
-
-      if (needUpdateSubject) {
-        this.#koniState.updateServiceInfo();
-      }
+      await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
 
       return true;
     } catch (e) {

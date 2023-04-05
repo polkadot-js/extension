@@ -1,43 +1,45 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PriceJson, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
 import { CRON_REFRESH_PRICE_INTERVAL } from '@subwallet/extension-base/constants';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { EventService } from '@subwallet/extension-base/services/event-service';
 import { getTokenPrice } from '@subwallet/extension-base/services/price-service/coingecko';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 const DEFAULT_PRICE_SUBJECT: PriceJson = { ready: false, currency: 'usd', priceMap: {}, price24hMap: {} };
 
 export class PriceService {
   private dbService: DatabaseService;
+  private eventService: EventService;
   private chainService: ChainService;
   private priceSubject: BehaviorSubject<PriceJson> = new BehaviorSubject(DEFAULT_PRICE_SUBJECT);
   private refreshTimeout: NodeJS.Timeout | undefined;
   private priceIds = new Set<string>();
 
-  constructor (serviceInfoSubject: Subject<ServiceInfo>, dbService: DatabaseService, chainService: ChainService) {
+  constructor (dbService: DatabaseService, eventService: EventService, chainService: ChainService) {
     this.dbService = dbService;
+    this.eventService = eventService;
     this.chainService = chainService;
 
     // Fetch data from storage
     this.getPrice().catch(console.error);
+    this.refreshPriceData();
 
-    // Add some delay to avoid fetching many times when start extension background
-    // Subscribe service info to update price list
-    setTimeout(() => {
-      this.refreshPriceData();
-      serviceInfoSubject.subscribe((serviceInfo) => {
-        const newPriceIds = this.getPriceIds();
+    const eventHandler = () => {
+      const newPriceIds = this.getPriceIds();
 
-        // Compare two set newPriceIds and this.priceIds
-        if (newPriceIds.size !== this.priceIds.size || !Array.from(newPriceIds).every((v) => this.priceIds.has(v))) {
-          this.priceIds = newPriceIds;
-          this.refreshPriceData(this.priceIds);
-        }
-      });
-    }, 3000);
+      // Compare two set newPriceIds and this.priceIds
+      if (newPriceIds.size !== this.priceIds.size || !Array.from(newPriceIds).every((v) => this.priceIds.has(v))) {
+        this.priceIds = newPriceIds;
+        this.refreshPriceData(this.priceIds);
+      }
+    };
+
+    this.eventService.on('asset.enable', eventHandler);
+    this.eventService.on('asset.add', eventHandler);
   }
 
   async getPrice () {

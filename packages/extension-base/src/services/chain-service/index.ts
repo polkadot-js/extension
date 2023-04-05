@@ -11,6 +11,7 @@ import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
@@ -29,6 +30,7 @@ export class ChainService {
   };
 
   private dbService: DatabaseService; // to save chain, token settings from user
+  private eventService: EventService;
 
   private lockChainInfoMap = false; // prevent unwanted changes (edit, enable, disable) to chainInfoMap
 
@@ -50,8 +52,9 @@ export class ChainService {
 
   private refreshChainStateTimeout: NodeJS.Timeout | undefined;
 
-  constructor (dbService: DatabaseService) {
+  constructor (dbService: DatabaseService, eventService: EventService) {
     this.dbService = dbService;
+    this.eventService = eventService;
 
     this.substrateChainHandler = new SubstrateChainHandler();
     this.evmChainHandler = new EvmChainHandler();
@@ -362,6 +365,8 @@ export class ChainService {
 
     this.lockChainInfoMap = false;
 
+    this.eventService.emit('chain.remove', slug);
+
     return true;
   }
 
@@ -445,6 +450,9 @@ export class ChainService {
     this.dbService.removeFromAssetStore(targetAssets).catch((e) => this.logger.error(e));
 
     this.assetRegistrySubject.next(assetRegistry);
+    targetAssets.forEach((assetSlug) => {
+      this.eventService.emit('asset.remove', assetSlug);
+    });
   }
 
   // Business logic
@@ -524,6 +532,8 @@ export class ChainService {
     }).catch(console.error);
     this.lockChainInfoMap = false;
 
+    this.eventService.emit('chain.enable', chainSlug);
+
     return true;
   }
 
@@ -569,6 +579,8 @@ export class ChainService {
 
     this.updateChainStateMapSubscription();
     this.lockChainInfoMap = false;
+
+    this.eventService.emit('chain.disable', chainSlug);
 
     return true;
   }
@@ -815,6 +827,8 @@ export class ChainService {
       ...targetChainInfo,
       active: targetChainState.active,
       currentProvider: targetChainState.currentProvider
+    }).then(() => {
+      this.eventService.emit('chain.update', chainSlug);
     }).catch((e) => this.logger.error(e));
   }
 
@@ -905,7 +919,11 @@ export class ChainService {
       active: true,
       currentProvider: params.chainEditInfo.currentProvider,
       ...chainInfo
-    }).catch((e) => this.logger.error(e));
+    })
+      .then(() => {
+        this.eventService.emit('chain.add', newChainSlug);
+      })
+      .catch((e) => this.logger.error(e));
 
     return nativeTokenSlug;
   }
@@ -1282,14 +1300,30 @@ export class ChainService {
         }
       });
 
-      this.setAssetSettings(assetSettings);
+      this.setAssetSettings(assetSettings, false);
+      this.eventService.emit('asset.ready', true);
     }
 
     console.log('Done init asset settings');
   }
 
-  public setAssetSettings (assetSettings: Record<string, AssetSetting>): void {
+  public setAssetSettings (assetSettings: Record<string, AssetSetting>, emitEvent = true): void {
+    const updateAssets: string[] = [];
+
+    if (emitEvent) {
+      Object.keys(assetSettings).forEach((slug) => {
+        if (this.assetSettingSubject.value[slug]?.visible !== assetSettings[slug].visible) {
+          updateAssets.push(slug);
+        }
+      });
+    }
+
     this.assetSettingSubject.next(assetSettings);
+
+    updateAssets.forEach((slug) => {
+      this.eventService.emit(assetSettings[slug].visible ? 'asset.enable' : 'asset.disable', slug);
+    });
+
     this.store.set('AssetSetting', assetSettings);
   }
 

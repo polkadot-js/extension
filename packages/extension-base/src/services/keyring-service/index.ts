@@ -94,7 +94,8 @@ export class KeyringService {
   }
 
   setCurrentAccount (currentAccountData: CurrentAccountInfo) {
-    this.currentAccountStore.set('CurrentAccountInfo', currentAccountData);
     this.currentAccountSubject.next(currentAccountData);
+    this.eventService.emit('account.updateCurrent', currentAccountData);
+    this.currentAccountStore.set('CurrentAccountInfo', currentAccountData);
   }
 }

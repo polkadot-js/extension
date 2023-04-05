@@ -8,14 +8,13 @@ import EventEmitter from 'eventemitter3';
 export class EventService extends EventEmitter<EventRegistry> {
   private lazyTime: number;
   private timeoutId: NodeJS.Timeout | null;
-  private pendingEvents: Set<EventItem<EventType>>;
-  private lazyEmitter = new EventEmitter<{lazy: [EventItem<EventType>[]]}>();
+  private pendingEvents: EventItem<EventType>[] = [];
+  private lazyEmitter = new EventEmitter<{lazy: [EventItem<EventType>[], EventType[]]}>();
 
   constructor (options: { lazyTime: number } = { lazyTime: 300 }) {
     super();
     this.lazyTime = options.lazyTime;
     this.timeoutId = null;
-    this.pendingEvents = new Set<EventItem<EventType>>();
   }
 
   private setLazyTimeout (): void {
@@ -29,21 +28,26 @@ export class EventService extends EventEmitter<EventRegistry> {
   }
 
   private emitLazy (): void {
-    this.lazyEmitter.emit('lazy', Array.from(this.pendingEvents));
-    this.pendingEvents.clear();
+    this.lazyEmitter.emit('lazy', this.pendingEvents, this.pendingEvents.map((e) => e.type));
+    this.pendingEvents = [];
     this.timeoutId = null;
   }
 
-  public onLazy (callback: (events: EventItem<keyof EventRegistry>[]) => void): void {
+  public onLazy (callback: (events: EventItem<EventType>[], eventTypes: EventType[]) => void): void {
     this.lazyEmitter.on('lazy', callback);
   }
 
-  public onceLazy (callback: (events: EventItem<keyof EventRegistry>[]) => void): void {
+  public offLazy (callback: (events: EventItem<EventType>[], eventTypes: EventType[]) => void): void {
+    this.lazyEmitter.off('lazy', callback);
+  }
+
+  public onceLazy (callback: (events: EventItem<EventType>[], eventTypes: EventType[]) => void): void {
     this.lazyEmitter.once('lazy', callback);
   }
 
-  public override emit<T extends keyof EventRegistry> (eventType: T, ...args: EventEmitter.EventArgs<EventRegistry, T>): boolean {
-    this.pendingEvents.add({ type: eventType, data: args as EventRegistry[T] });
+  public override emit<T extends EventType> (eventType: T, ...args: EventEmitter.EventArgs<EventRegistry, T>): boolean {
+    console.debug('Emit event: ', eventType, ...args);
+    this.pendingEvents.push({ type: eventType, data: args as EventRegistry[T] });
     this.setLazyTimeout();
 
     return super.emit(eventType, ...args);

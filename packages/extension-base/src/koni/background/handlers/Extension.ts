@@ -2301,6 +2301,8 @@ export default class KoniExtension {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getUnbondingExtrinsic(nominatorMetadata, amount, chain, substrateApi, validatorAddress);
 
+    console.log('unbonding extrinsic: ', extrinsic.toHex());
+
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
       chain: chain,
@@ -2320,6 +2322,8 @@ export default class KoniExtension {
 
     const dotSamaApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, chain, nominatorMetadata, validatorAddress);
+
+    console.log('Stake withdrawal extrinsic: ', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
@@ -2341,6 +2345,8 @@ export default class KoniExtension {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getClaimRewardExtrinsic(substrateApi, chain, address, stakingType, bondReward);
 
+    console.log('Staking claim reward extrinsic: ', extrinsic.toHex());
+
     return await this.#koniState.transactionService.handleTransaction({
       address,
       chain: chain,
@@ -2361,6 +2367,8 @@ export default class KoniExtension {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getCancelWithdrawalExtrinsic(substrateApi, chain, selectedUnstaking);
 
+    console.log('Cancel stake withdrawal extrinsic', extrinsic.toHex());
+
     return await this.#koniState.transactionService.handleTransaction({
       address,
       chain,
@@ -2374,6 +2382,7 @@ export default class KoniExtension {
   private async submitPoolingBonding (inputData: RequestStakePoolingBonding): Promise<SWTransactionResponse> {
     const { address, amount, chain, nominatorMetadata, selectedPool } = inputData;
 
+    // TODO: can't stake when unstake all
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getPoolingBondingExtrinsic(substrateApi, amount, selectedPool.id, nominatorMetadata);
 
@@ -2394,6 +2403,8 @@ export default class KoniExtension {
 
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getPoolingUnbondingExtrinsic(substrateApi, amount, nominatorMetadata);
+
+    console.log('Nomination pool unbond extrinsic', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
@@ -2607,6 +2618,8 @@ export default class KoniExtension {
 
     const registry = new TypeRegistry();
 
+    let isEvm = false;
+
     if (isJsonPayload(payload)) {
       // Get the metadata for the genesisHash
       const currentMetadata = this.#koniState.knownMetadata.find((meta: MetadataDef) =>
@@ -2618,13 +2631,20 @@ export default class KoniExtension {
       if (currentMetadata) {
         registry.register(currentMetadata?.types);
       }
+
+      const [, chainInfo] = this.#koniState.findNetworkKeyByGenesisHash(payload.genesisHash);
+
+      if (chainInfo) {
+        isEvm = _isChainEvmCompatible(chainInfo);
+      }
     }
 
     const result = request.sign(registry, pair);
 
     resolve({
       id,
-      ...result
+      // In case evm chain, must be cut 2 character after 0x
+      signature: isEvm ? `0x${result.signature.slice(4)}` : result.signature
     });
 
     return true;

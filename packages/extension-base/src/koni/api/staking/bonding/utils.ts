@@ -308,7 +308,10 @@ export function isUnstakeAll (selectedValidator: string, nominations: Nomination
   let isUnstakeAll = false;
 
   for (const nomination of nominations) {
-    if (nomination.validatorAddress === selectedValidator) {
+    const parsedValidatorAddress = reformatAddress(nomination.validatorAddress, 0);
+    const parsedSelectedValidator = reformatAddress(selectedValidator, 0);
+
+    if (parsedValidatorAddress === parsedSelectedValidator) {
       if (unstakeAmount === nomination.activeStake) {
         isUnstakeAll = true;
       }
@@ -328,7 +331,23 @@ export enum StakingAction {
   CANCEL_UNSTAKE = 'CANCEL_UNSTAKE'
 }
 
-export function getStakingAvailableActions (nominatorMetadata: NominatorMetadata): StakingAction[] {
+export function getStakingAvailableActionsByChain (chain: string, type: StakingType): StakingAction[] {
+  if (type === StakingType.POOLED) {
+    return [StakingAction.STAKE, StakingAction.UNSTAKE, StakingAction.WITHDRAW, StakingAction.CLAIM_REWARD];
+  }
+
+  if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
+    return [StakingAction.STAKE, StakingAction.UNSTAKE, StakingAction.WITHDRAW, StakingAction.CANCEL_UNSTAKE];
+  } else if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+    return [StakingAction.STAKE, StakingAction.UNSTAKE, StakingAction.WITHDRAW, StakingAction.CLAIM_REWARD];
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
+    return [StakingAction.STAKE, StakingAction.UNSTAKE, StakingAction.WITHDRAW];
+  }
+
+  return [StakingAction.STAKE, StakingAction.UNSTAKE, StakingAction.WITHDRAW, StakingAction.CANCEL_UNSTAKE];
+}
+
+export function getStakingAvailableActionsByNominator (nominatorMetadata: NominatorMetadata): StakingAction[] {
   const result: StakingAction[] = [StakingAction.STAKE];
 
   const bnActiveStake = new BN(nominatorMetadata.activeStake);

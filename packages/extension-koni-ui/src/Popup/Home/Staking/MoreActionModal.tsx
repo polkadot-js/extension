@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { getStakingAvailableActions, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
@@ -33,14 +33,6 @@ type ActionListType = {
   onClick: () => void;
 }
 
-export type StakingDataOption = {
-  staking?: StakingItem;
-  reward?: StakingRewardItem;
-  chainStakingMetadata?: ChainStakingMetadata,
-  nominatorMetadata?: NominatorMetadata,
-  hideTabList?: boolean
-}
-
 const Component: React.FC<Props> = (props: Props) => {
   const { chainStakingMetadata, className, nominatorMetadata, reward } = props;
 
@@ -62,9 +54,10 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 
   const onDoneTransaction = useCallback((extrinsicHash: string) => {
-    // TODO: need handle onDone
-    console.log('all good');
-  }, []);
+    if (chainStakingMetadata) {
+      navigate(`/transaction-done/substrate/${chainStakingMetadata?.chain}/${extrinsicHash}`);
+    }
+  }, [chainStakingMetadata, navigate]);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDoneTransaction);
 
@@ -133,7 +126,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return [];
     }
 
-    return getStakingAvailableActions(nominatorMetadata);
+    return getStakingAvailableActionsByNominator(nominatorMetadata);
   }, [nominatorMetadata]);
 
   const onNavigate = useCallback((url: string) => {
@@ -144,63 +137,66 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [navigate]);
 
   const actionList: ActionListType[] = useMemo((): ActionListType[] => {
-    const isPool = chainStakingMetadata?.type === StakingType.POOLED;
+    if (!chainStakingMetadata) {
+      return [];
+    }
 
-    const result: ActionListType[] = [
-      {
+    const actionListByChain = getStakingAvailableActionsByChain(chainStakingMetadata.chain, chainStakingMetadata.type);
+
+    return actionListByChain.map((action) => {
+      if (action === StakingAction.UNSTAKE) {
+        return {
+          action: StakingAction.UNSTAKE,
+          backgroundIconColor: 'magenta-6',
+          icon: MinusCircle,
+          label: 'Unstake funds',
+          onClick: onNavigate(`/transaction/unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
+        };
+      } else if (action === StakingAction.WITHDRAW) {
+        return {
+          action: StakingAction.WITHDRAW,
+          backgroundIconColor: 'geekblue-6',
+          icon: ArrowCircleDown,
+          label: 'Withdraw',
+          onClick: handleWithdrawalAction
+        };
+      } else if (action === StakingAction.CLAIM_REWARD) {
+        return {
+          action: StakingAction.CLAIM_REWARD,
+          backgroundIconColor: 'green-7',
+          icon: Wallet,
+          label: 'Claim rewards',
+          onClick: handleClaimRewardAction
+        };
+      } else if (action === StakingAction.CANCEL_UNSTAKE) {
+        return {
+          action: StakingAction.CANCEL_UNSTAKE,
+          backgroundIconColor: 'purple-8',
+          icon: ArrowArcLeft,
+          label: 'Cancel unstake',
+          onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
+        };
+      }
+
+      return {
         action: StakingAction.STAKE,
         backgroundIconColor: 'green-6',
         icon: PlusCircle,
         label: 'Stake more',
         onClick: onNavigate(`/transaction/stake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
-      },
-      {
-        action: StakingAction.UNSTAKE,
-        backgroundIconColor: 'magenta-6',
-        icon: MinusCircle,
-        label: 'Unstake funds',
-        onClick: onNavigate(`/transaction/unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
-      },
-      {
-        action: StakingAction.WITHDRAW,
-        backgroundIconColor: 'geekblue-6',
-        icon: ArrowCircleDown,
-        label: 'Withdraw',
-        onClick: handleWithdrawalAction
-      },
-      {
-        action: StakingAction.CLAIM_REWARD,
-        backgroundIconColor: 'green-7',
-        icon: Wallet,
-        label: 'Claim rewards',
-        onClick: handleClaimRewardAction
-      }
-      // {
-      //   backgroundIconColor: 'blue-7',
-      //   icon: Alarm,
-      //   label: 'Compound',
-      //   value: '/transaction/compound'
-      // }
-    ];
-
-    if (!isPool) {
-      result.push({
-        action: StakingAction.CANCEL_UNSTAKE,
-        backgroundIconColor: 'purple-8',
-        icon: ArrowArcLeft,
-        label: 'Cancel unstake',
-        onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
-      });
-    }
-
-    return result;
-  }, [chainStakingMetadata?.chain, chainStakingMetadata?.type, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);
+      };
+    });
+  }, [chainStakingMetadata, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);
 
   const onPreCheck = usePreCheckReadOnly(currentAccount?.address);
   const onClickItem = useCallback((action: StakingAction, onClick: () => void) => {
-    return () => {
+    const _onClick = () => {
       setSelected(action);
-      onPreCheck(onClick)();
+      onClick();
+    };
+
+    return () => {
+      onPreCheck(_onClick)();
     };
   }, [onPreCheck]);
 

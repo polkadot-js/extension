@@ -99,7 +99,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         )}
         name={item.symbol}
         networkMainLogoShape='squircle'
-        networkMainLogoSize={28}
+        networkMainLogoSize={40}
         networkSubLogoShape='circle'
         rightItem={
           selected &&

@@ -452,7 +452,7 @@ export default class TransactionService {
         return [historyItem, { ...historyItem, address: historyItem.to, direction: TransactionDirection.RECEIVED }];
       }
     } catch (e) {
-      console.error(e);
+      console.warn(e);
     }
 
     return [historyItem];

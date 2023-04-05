@@ -138,7 +138,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       <StakingValidatorItem
         apy={'15'}
         className={'pool-item'}
-        disabled={!isRelayChain && nominated}
         isNominated={nominated}
         isSelected={selected}
         key={item.address}
@@ -147,7 +146,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         validatorInfo={item}
       />
     );
-  }, [changeValidators, isRelayChain, nominatorValueList, onClickItem, onClickMore]);
+  }, [changeValidators, nominatorValueList, onClickItem, onClickMore]);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -169,13 +168,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [activeModal, id]);
 
   useEffect(() => {
-    const selected = nominations?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || '';
+    const defaultValue = nominations?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || '';
+    const selected = isSingleSelect ? '' : defaultValue;
 
-    onInitValidators(selected);
+    onInitValidators(defaultValue, selected);
     onChange && onChange({ target: { value: selected } });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nominations, onInitValidators]);
+  }, [nominations, onInitValidators, isSingleSelect]);
 
   return (
     <>

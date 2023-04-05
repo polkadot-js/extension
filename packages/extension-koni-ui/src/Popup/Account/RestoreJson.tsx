@@ -403,6 +403,10 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.account-list-item': {
       marginTop: -token.marginXS,
 
+      '.account-item': {
+        cursor: 'default'
+      },
+
       '.ant-web3-block-right-item': {
         marginRight: 0
       }

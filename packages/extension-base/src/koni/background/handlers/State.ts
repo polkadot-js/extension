@@ -14,7 +14,9 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParachain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
+import { KeyringService } from '@subwallet/extension-base/services/kerying-service';
 import MigrationService from '@subwallet/extension-base/services/migration-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import { PriceService } from '@subwallet/extension-base/services/price-service';
@@ -23,9 +25,9 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
+import SUBSCAN_CHAIN_MAP from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { CurrentAccountStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
@@ -81,19 +83,9 @@ export default class KoniState {
   private injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
   private readonly providers: Providers;
   private readonly unsubscriptionMap: Record<string, () => void> = {};
-  private readonly currentAccountStore = new CurrentAccountStore();
   private readonly accountRefStore = new AccountRefStore();
-  private readonly keyringStateSubject = new Subject<KeyringState>();
   private externalRequest: Record<string, ExternalRequestPromise> = {};
-
-  private keyringState: KeyringState = {
-    isReady: false,
-    isLocked: true,
-    hasMasterPassword: false
-  };
-
   private serviceInfoSubject = new Subject<ServiceInfo>();
-
   private balanceMap: Record<string, BalanceItem> = {};
   private balanceSubject = new Subject<BalanceJson>();
 
@@ -116,6 +108,8 @@ export default class KoniState {
 
   readonly notificationService: NotificationService;
   // TODO: consider making chainService public (or getter) and call function directly
+  readonly eventService: EventService;
+  readonly keyringService: KeyringService;
   readonly chainService: ChainService;
   readonly dbService: DatabaseService;
   private cron: KoniCron;
@@ -129,15 +123,15 @@ export default class KoniState {
   readonly priceService: PriceService;
   readonly balanceService: BalanceService;
   readonly migrationService: MigrationService;
-
   readonly subscanService: SubscanService;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor (providers: Providers = {}) {
     this.providers = providers;
 
     this.dbService = new DatabaseService();
+    this.eventService = new EventService();
     this.subscanService = new SubscanService();
+    this.keyringService = new KeyringService(this.eventService);
 
     this.notificationService = new NotificationService();
     this.chainService = new ChainService(this.dbService);
@@ -145,7 +139,7 @@ export default class KoniState {
     this.requestService = new RequestService(this.chainService, this.settingService);
     this.priceService = new PriceService(this.serviceInfoSubject, this.dbService, this.chainService);
     this.balanceService = new BalanceService(this.chainService);
-    this.historyService = new HistoryService(this.dbService, this.chainService);
+    this.historyService = new HistoryService(this.dbService, this.chainService, this.eventService);
     this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
     this.migrationService = new MigrationService(this);
     this.subscription = new KoniSubscription(this, this.dbService);
@@ -282,6 +276,7 @@ export default class KoniState {
     this.updateServiceInfo();
 
     this.onReady();
+    this.autoEnableChainOnAccountAdded();
     this.logger.log('Done init state');
   }
 
@@ -308,17 +303,8 @@ export default class KoniState {
     return this.ready;
   }
 
-  public getKeyringState (): KeyringState {
-    return this.keyringState;
-  }
-
-  public subscribeKeyringState (): Subject<KeyringState> {
-    return this.keyringStateSubject;
-  }
-
   public setKeyringState (data: KeyringState, callback?: () => void): void {
-    this.keyringStateSubject.next(data);
-    this.keyringState = data;
+    this.keyringService.setKeyringState(data);
     callback && callback();
   }
 
@@ -591,7 +577,7 @@ export default class KoniState {
   }
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
-    this.currentAccountStore.get('CurrentAccountInfo', update);
+    update(this.keyringService.currentAccount);
   }
 
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
@@ -600,7 +586,7 @@ export default class KoniState {
     const result: CurrentAccountInfo = { ...data };
 
     if (address === ALL_ACCOUNT_KEY) {
-      const pairs = keyring.getPairs();
+      const pairs = keyring.getAccounts();
       const pair = pairs[0];
       const pairGenesisHash = pair.meta.genesisHash as string;
 
@@ -613,10 +599,9 @@ export default class KoniState {
       }
     }
 
-    this.currentAccountStore.set('CurrentAccountInfo', result, () => {
-      this.updateServiceInfo();
-      callback && callback();
-    });
+    this.keyringService.setCurrentAccount(result);
+    this.updateServiceInfo();
+    callback && callback();
   }
 
   public setAccountTie (address: string, genesisHash: string | null): boolean {
@@ -791,10 +776,6 @@ export default class KoniState {
 
   public subscribeSettingsSubject (): Subject<RequestSettingsType> {
     return this.settingService.getSubject();
-  }
-
-  public subscribeCurrentAccount (): Subject<CurrentAccountInfo> {
-    return this.currentAccountStore.getSubject();
   }
 
   public getAccountAddress (): Promise<string | null | undefined> {
@@ -1183,6 +1164,7 @@ export default class KoniState {
   }
 
   public updateServiceInfo () {
+    // Todo: Should handle this in event service
     this.logger.log('<---Update serviceInfo--->');
     this.getCurrentAccount((value) => {
       this.serviceInfoSubject.next({
@@ -1679,5 +1661,52 @@ export default class KoniState {
 
   public createUnsubscriptionHandle (id: string, unsubscribe: () => void): void {
     this.unsubscriptionMap[id] = unsubscribe;
+  }
+
+  public async autoEnableChains (addresses: string[]) {
+    const assetMap = this.chainService.getAssetRegistry();
+    const promiseList = addresses.map((address) => {
+      return this.subscanService.getMultiChainBalance(address)
+        .catch((e) => {
+          console.error(e);
+
+          return null;
+        });
+    });
+
+    const needEnableChains: string[] = [];
+    const needActiveTokens: string[] = [];
+    const currentAssetSettings = await this.chainService.getAssetSettings();
+    const balanceDataList = await Promise.all(promiseList);
+
+    balanceDataList.forEach((balanceData) => {
+      balanceData && balanceData.forEach(({ category, network, symbol }) => {
+        const chain = SUBSCAN_CHAIN_MAP[network];
+
+        if (!chain) {
+          return;
+        }
+
+        const tokenKey = `${chain}-${category === 'native' ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
+
+        if (assetMap[tokenKey] && !currentAssetSettings[tokenKey]?.visible) {
+          needEnableChains.push(chain);
+          needActiveTokens.push(tokenKey);
+          currentAssetSettings[tokenKey] = { visible: true };
+        }
+      });
+    });
+
+    if (needActiveTokens.length) {
+      this.chainService.enableChains(needEnableChains);
+      this.chainService.setAssetSettings({ ...currentAssetSettings });
+      this.updateServiceInfo();
+    }
+  }
+
+  public autoEnableChainOnAccountAdded () {
+    this.eventService.on('account.add', (address) => {
+      this.autoEnableChains([address]).catch(this.logger.error);
+    });
   }
 }

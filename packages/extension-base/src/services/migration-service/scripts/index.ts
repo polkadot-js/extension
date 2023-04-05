@@ -14,6 +14,7 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.0.1-11': MigrateNetworkSettings,
   '1.0.1-20': MigrateImportedToken,
   '1.0.1-30': MigrateTransactionHistory,
+  '1.0.1-40': AutoEnableChainsTokens
   // '1.0.1-0': ClearOldStorage,
-  [`${EVERYTIME}-1`]: AutoEnableChainsTokens
+  // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

@@ -1199,9 +1199,6 @@ export default class KoniExtension {
       });
     });
 
-    // Remove history
-    await this.#koniState.historyService.removeHistoryByAddress(address);
-
     // Set current account to all account
     await new Promise<void>((resolve) => {
       this.#koniState.getCurrentAccount(({ allGenesisHash }) => {
@@ -2474,7 +2471,8 @@ export default class KoniExtension {
 
   private keyringStateSubscribe (id: string, port: chrome.runtime.Port): KeyringState {
     const cb = createSubscription<'pri(keyring.subscribe)'>(id, port);
-    const subscription = this.#koniState.subscribeKeyringState().subscribe((value): void =>
+    const keyringStateSubject = this.#koniState.keyringService.keyringStateSubject;
+    const subscription = keyringStateSubject.subscribe((value): void =>
       cb(value)
     );
 
@@ -2484,7 +2482,7 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return this.#koniState.getKeyringState();
+    return this.#koniState.keyringService.keyringState;
   }
 
   private keyringChangeMasterPassword ({ createNew,

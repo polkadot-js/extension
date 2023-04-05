@@ -9,14 +9,8 @@ export default class BaseStoreWithAddressAndChain<T extends DefaultDocWithAddres
     return items.reduce((a, v) => ({ ...a, [v.chain]: v }), {});
   }
 
-  public removeAllByAddress (address: string, chain?: string) {
-    const conditions = { address } as T;
-
-    if (chain) {
-      conditions.chain = chain;
-    }
-
-    return this.table.where(conditions).delete();
+  public removeAllByAddress (address: string) {
+    return this.table.where('address').equalsIgnoreCase(address).delete();
   }
 
   async getDataByAddressAsObject (address: string) {

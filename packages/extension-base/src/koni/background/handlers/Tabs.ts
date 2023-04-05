@@ -488,7 +488,7 @@ export default class KoniTabs {
       }
     };
 
-    const accountListSubscription = this.#koniState.subscribeCurrentAccount()
+    const accountListSubscription = this.#koniState.keyringService.currentAccountSubject
       .subscribe(() => {
         onCurrentAccountChanged().catch(console.error);
       });

@@ -2313,6 +2313,8 @@ export default class KoniExtension {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getUnbondingExtrinsic(nominatorMetadata, amount, chain, substrateApi, validatorAddress);
 
+    console.log('unbonding extrinsic: ', extrinsic.toHex());
+
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
       chain: chain,
@@ -2353,6 +2355,8 @@ export default class KoniExtension {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getClaimRewardExtrinsic(substrateApi, chain, address, stakingType, bondReward);
 
+    console.log('Staking claim reward extrinsic: ', extrinsic.toHex());
+
     return await this.#koniState.transactionService.handleTransaction({
       address,
       chain: chain,
@@ -2372,6 +2376,8 @@ export default class KoniExtension {
 
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getCancelWithdrawalExtrinsic(substrateApi, chain, selectedUnstaking);
+
+    console.log('Cancel stake withdrawal extrinsic', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address,
@@ -2406,6 +2412,8 @@ export default class KoniExtension {
 
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getPoolingUnbondingExtrinsic(substrateApi, amount, nominatorMetadata);
+
+    console.log('Nomination pool unbond extrinsic', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,

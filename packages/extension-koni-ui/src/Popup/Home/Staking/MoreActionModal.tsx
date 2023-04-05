@@ -190,9 +190,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onPreCheck = usePreCheckReadOnly(currentAccount?.address);
   const onClickItem = useCallback((action: StakingAction, onClick: () => void) => {
-    return () => {
+    const _onClick = () => {
       setSelected(action);
-      onPreCheck(onClick)();
+      onClick();
+    };
+
+    return () => {
+      onPreCheck(_onClick)();
     };
   }, [onPreCheck]);
 

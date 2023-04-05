@@ -23,7 +23,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SendFundParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
-import { findAccountByAddress, noop } from '@subwallet/extension-koni-ui/util';
+import { findAccountByAddress, isAccountAll, noop } from '@subwallet/extension-koni-ui/util';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
@@ -170,7 +170,7 @@ const filterAccountFunc = (
   const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
 
   if (!tokenGroupSlug) {
-    return () => true;
+    return (account: AccountJson) => !isAccountAll(account.address);
   }
 
   const chainAssets = Object.values(assetRegistry).filter((chainAsset) => {
@@ -194,6 +194,10 @@ const filterAccountFunc = (
   return (account: AccountJson): boolean => {
     const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
     const isAccountEthereum = isEthereumAddress(account.address);
+
+    if (isAccountAll(account.address)) {
+      return false;
+    }
 
     return chainAssets.some((chainAsset) => {
       const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;

@@ -222,7 +222,7 @@ const Component: React.FC<Props> = (props: Props) => {
       const selectedPool = getSelectedPool(pool);
 
       bondingPromise = submitPoolBonding({
-        amount: value, // TODO: value is wrong
+        amount: value,
         chain: chain,
         nominatorMetadata: nominatorMetadata,
         selectedPool: selectedPool as NominationPoolInfo,

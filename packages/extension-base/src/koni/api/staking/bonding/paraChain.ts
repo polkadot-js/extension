@@ -169,7 +169,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
 export async function getParachainCollatorsInfo (chain: string, substrateApi: _SubstrateApi): Promise<ValidatorInfo[]> {
   const apiProps = await substrateApi.isReady;
 
-  const allValidators: ValidatorInfo[] = [];
+  const allCollators: ValidatorInfo[] = [];
 
   const [_allCollators, _collatorCommission] = await Promise.all([
     apiProps.api.query.parachainStaking.candidateInfo.entries(),
@@ -181,10 +181,11 @@ export async function getParachainCollatorsInfo (chain: string, substrateApi: _S
   const collatorCommission = parseFloat(rawCollatorCommission.split('%')[0]);
 
   for (const collator of _allCollators) {
-    const collatorAddress = collator[0].toPrimitive() as string;
+    const _collatorAddress = collator[0].toHuman() as string[];
+    const collatorAddress = _collatorAddress[0];
     const collatorInfo = collator[1].toPrimitive() as unknown as ParachainStakingCandidateMetadata;
 
-    allValidators.push({
+    allCollators.push({
       commission: 0,
       expectedReturn: 0,
       address: collatorAddress,
@@ -202,10 +203,10 @@ export async function getParachainCollatorsInfo (chain: string, substrateApi: _S
 
   const extraInfoMap: Record<string, CollatorExtraInfo> = {};
 
-  await Promise.all(allValidators.map(async (validator) => {
+  await Promise.all(allCollators.map(async (collator) => {
     const [_info, _identity] = await Promise.all([
-      apiProps.api.query.parachainStaking.candidateInfo(validator.address),
-      apiProps.api.query?.identity?.identityOf(validator.address) // some chains might not have identity pallet
+      apiProps.api.query.parachainStaking.candidateInfo(collator.address),
+      apiProps.api.query?.identity?.identityOf(collator.address) // some chains might not have identity pallet
     ]);
 
     const rawInfo = _info.toHuman() as Record<string, any>;
@@ -226,7 +227,7 @@ export async function getParachainCollatorsInfo (chain: string, substrateApi: _S
       identity = parseIdentity(rawIdentity);
     }
 
-    extraInfoMap[validator.address] = {
+    extraInfoMap[collator.address] = {
       identity,
       isVerified: isReasonable,
       bond: bond.toString(),
@@ -236,7 +237,7 @@ export async function getParachainCollatorsInfo (chain: string, substrateApi: _S
     } as CollatorExtraInfo;
   }));
 
-  for (const validator of allValidators) {
+  for (const validator of allCollators) {
     validator.minBond = extraInfoMap[validator.address].minDelegation.toString();
     validator.ownStake = extraInfoMap[validator.address].bond.toString();
     validator.blocked = !extraInfoMap[validator.address].active;
@@ -248,7 +249,7 @@ export async function getParachainCollatorsInfo (chain: string, substrateApi: _S
     validator.commission = collatorCommission;
   }
 
-  return allValidators;
+  return allCollators;
 }
 
 export async function getParaBondingExtrinsic (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, amount: string, selectedCollatorInfo: ValidatorInfo, nominatorMetadata?: NominatorMetadata) {
@@ -260,8 +261,9 @@ export async function getParaBondingExtrinsic (chainInfo: _ChainInfo, substrateA
   }
 
   const { bondedValidators, nominationCount } = getBondedValidators(nominatorMetadata.nominations);
+  const parsedSelectedCollatorAddress = reformatAddress(selectedCollatorInfo.address, 0);
 
-  if (!bondedValidators.includes(reformatAddress(selectedCollatorInfo.address, 0))) {
+  if (!bondedValidators.includes(parsedSelectedCollatorAddress)) {
     return apiPromise.api.tx.parachainStaking.delegate(selectedCollatorInfo.address, binaryAmount, new BN(selectedCollatorInfo.nominatorCount), nominationCount);
   } else {
     return apiPromise.api.tx.parachainStaking.delegatorBondMore(selectedCollatorInfo.address, binaryAmount);

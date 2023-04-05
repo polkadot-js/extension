@@ -2335,6 +2335,8 @@ export default class KoniExtension {
     const dotSamaApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, chain, nominatorMetadata, validatorAddress);
 
+    console.log('Stake withdrawal extrinsic: ', extrinsic.toHex());
+
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
       chain: chain,
@@ -2392,6 +2394,7 @@ export default class KoniExtension {
   private async submitPoolingBonding (inputData: RequestStakePoolingBonding): Promise<SWTransactionResponse> {
     const { address, amount, chain, nominatorMetadata, selectedPool } = inputData;
 
+    // TODO: can't stake when unstake all
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getPoolingBondingExtrinsic(substrateApi, amount, selectedPool.id, nominatorMetadata);
 

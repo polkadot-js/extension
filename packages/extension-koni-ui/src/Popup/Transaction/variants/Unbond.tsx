@@ -161,7 +161,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [mustChooseValidator, setFrom]);
 
   const onSubmit: FormCallbacks<UnstakeFormProps>['onFinish'] = useCallback((values: UnstakeFormProps) => {
-    const { [FormFieldName.VALUE]: value } = values;
+    const { [FormFieldName.VALUE]: value, [FormFieldName.VALIDATOR]: selectedValidator } = values;
     // const selectedValidator = nominatorMetadata.nominations[0].validatorAddress;
 
     let unbondingPromise: Promise<SWTransactionResponse>;
@@ -182,7 +182,7 @@ const Component: React.FC<Props> = (props: Props) => {
       };
 
       if (mustChooseValidator) {
-        params.validatorAddress = ''; // TODO
+        params.validatorAddress = selectedValidator || '';
       }
 
       unbondingPromise = submitUnbonding(params);

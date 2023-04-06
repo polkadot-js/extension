@@ -414,6 +414,10 @@ export class ChainService {
       }
     }
 
+    if (token.originChain && _isAssetFungibleToken(token)) {
+      token.hasValue = !(this.getChainInfoByKey(token.originChain)?.isTestnet);
+    }
+
     const assetRegistry = this.getAssetRegistry();
 
     assetRegistry[token.slug] = token;

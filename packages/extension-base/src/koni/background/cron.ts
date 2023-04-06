@@ -116,7 +116,7 @@ export class KoniCron {
       this.setStakingRewardReady();
     }
 
-    const reloadEvents: EventType[] = ['account.add', 'account.remove', 'account.updateCurrent', 'chain.add', 'chain.update', 'chain.enable', 'asset.add', 'asset.enable', 'transaction.done', 'transaction.failed'];
+    const reloadEvents: EventType[] = ['account.add', 'account.remove', 'account.updateCurrent', 'chain.add', 'chain.update', 'chain.enable', 'asset.update', 'asset.enable', 'transaction.done', 'transaction.failed'];
 
     this.state.eventService.onLazy((events, eventTypes) => {
       const serviceInfo = this.state.getServiceInfo();

@@ -42,7 +42,7 @@ export class PriceService {
         this.refreshPriceData();
 
         this.eventService.on('asset.enable', eventHandler);
-        this.eventService.on('asset.add', eventHandler);
+        this.eventService.on('asset.update', eventHandler);
       }).catch(console.error);
   }
 

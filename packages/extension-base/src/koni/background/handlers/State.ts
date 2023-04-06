@@ -1001,6 +1001,7 @@ export default class KoniState {
 
     if (_isAssetFungibleToken(data)) {
       await this.chainService.updateAssetSetting(tokenSlug, { visible: true });
+      this.eventService.emit('asset.update', tokenSlug);
     }
   }
 

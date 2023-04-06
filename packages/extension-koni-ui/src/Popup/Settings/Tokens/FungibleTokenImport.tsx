@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
-import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getTokenTypesSupportedByChain, _isChainTestNet, _isCustomAsset, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
 import { AddressInput, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
@@ -10,7 +10,19 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainChecker, useDefaultNavigate, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Col, Field, Form, Icon, Image, NetworkItem, Row, SelectModal, SettingItem } from '@subwallet/react-ui';
+import {
+  BackgroundIcon,
+  Col,
+  Field,
+  Form,
+  Icon,
+  Image,
+  Input,
+  NetworkItem,
+  Row,
+  SelectModal,
+  SettingItem
+} from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
@@ -25,7 +37,8 @@ type Props = ThemeProps
 interface TokenImportFormType {
   contractAddress: string,
   chain: string,
-  type: _AssetType
+  type: _AssetType,
+  priceId: string,
 }
 
 interface ValidationInfo {
@@ -92,7 +105,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       name,
       symbol,
       decimals,
-      priceId: null,
+      priceId: formValues.priceId || null,
       minAmount: null,
       assetType: formValues.type,
       metadata: _parseMetadataForSmartContractAsset(formValues.contractAddress),
@@ -397,7 +410,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               />
             </Form.Item>
 
-            <Row gutter={token.margin}>
+            <Row className={'token-symbol-decimals'} gutter={token.margin}>
               <Col span={12}>
                 <Field
                   content={symbol}
@@ -417,6 +430,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               </Col>
             </Row>
 
+            <Form.Item
+              name={'priceId'}
+              statusHelpAsTooltip={true}
+            >
+              <Input
+                disabled={selectedTokenType === ''}
+                tooltip={t('Price Id')}
+                placeholder={t('Price Id')}
+              />
+            </Form.Item>
             <Form.Item
               help={contractValidation.message}
               validateStatus={contractValidation.status}
@@ -442,6 +465,10 @@ const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Prop
 
     '.ant-field-container.ant-field-size-medium .ant-field-wrapper': {
       padding: token.paddingSM
+    },
+
+    '.token-symbol-decimals': {
+      marginBottom: token.margin
     },
 
     '.token-type-item': {

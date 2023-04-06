@@ -86,7 +86,7 @@ export class KoniSubscription {
     }
 
     if (!this.eventHandler) {
-      const reloadEvents: EventType[] = ['account.add', 'account.remove', 'account.updateCurrent', 'chain.add', 'chain.update', 'chain.enable', 'asset.add', 'asset.enable', 'transaction.done', 'transaction.failed'];
+      const reloadEvents: EventType[] = ['account.add', 'account.remove', 'account.updateCurrent', 'chain.add', 'chain.update', 'chain.enable', 'asset.update', 'asset.enable', 'transaction.done', 'transaction.failed'];
 
       this.eventHandler = (events, eventTypes) => {
         const serviceInfo = this.state.getServiceInfo();

@@ -14,7 +14,9 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParachain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
+import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import MigrationService from '@subwallet/extension-base/services/migration-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import { PriceService } from '@subwallet/extension-base/services/price-service';
@@ -23,9 +25,9 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
+import SUBSCAN_CHAIN_MAP from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { CurrentAccountStore } from '@subwallet/extension-base/stores';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
@@ -81,19 +83,9 @@ export default class KoniState {
   private injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
   private readonly providers: Providers;
   private readonly unsubscriptionMap: Record<string, () => void> = {};
-  private readonly currentAccountStore = new CurrentAccountStore();
   private readonly accountRefStore = new AccountRefStore();
-  private readonly keyringStateSubject = new Subject<KeyringState>();
   private externalRequest: Record<string, ExternalRequestPromise> = {};
-
-  private keyringState: KeyringState = {
-    isReady: false,
-    isLocked: true,
-    hasMasterPassword: false
-  };
-
   private serviceInfoSubject = new Subject<ServiceInfo>();
-
   private balanceMap: Record<string, BalanceItem> = {};
   private balanceSubject = new Subject<BalanceJson>();
 
@@ -116,6 +108,8 @@ export default class KoniState {
 
   readonly notificationService: NotificationService;
   // TODO: consider making chainService public (or getter) and call function directly
+  readonly eventService: EventService;
+  readonly keyringService: KeyringService;
   readonly chainService: ChainService;
   readonly dbService: DatabaseService;
   private cron: KoniCron;
@@ -129,24 +123,24 @@ export default class KoniState {
   readonly priceService: PriceService;
   readonly balanceService: BalanceService;
   readonly migrationService: MigrationService;
-
   readonly subscanService: SubscanService;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor (providers: Providers = {}) {
     this.providers = providers;
 
     this.dbService = new DatabaseService();
+    this.eventService = new EventService();
     this.subscanService = new SubscanService();
+    this.keyringService = new KeyringService(this.eventService);
 
     this.notificationService = new NotificationService();
-    this.chainService = new ChainService(this.dbService);
+    this.chainService = new ChainService(this.dbService, this.eventService);
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService, this.settingService);
-    this.priceService = new PriceService(this.serviceInfoSubject, this.dbService, this.chainService);
+    this.priceService = new PriceService(this.dbService, this.eventService, this.chainService);
     this.balanceService = new BalanceService(this.chainService);
-    this.historyService = new HistoryService(this.dbService, this.chainService);
-    this.transactionService = new TransactionService(this.chainService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
+    this.historyService = new HistoryService(this.dbService, this.chainService, this.eventService);
+    this.transactionService = new TransactionService(this.chainService, this.eventService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
     this.migrationService = new MigrationService(this);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
@@ -279,9 +273,10 @@ export default class KoniState {
     await this.chainService.init();
     await this.migrationService.run();
     this.startSubscription();
-    this.updateServiceInfo();
+    this.eventService.emit('chain.ready', true);
 
     this.onReady();
+    this.autoEnableChainOnAccountAdded();
     this.logger.log('Done init state');
   }
 
@@ -308,17 +303,8 @@ export default class KoniState {
     return this.ready;
   }
 
-  public getKeyringState (): KeyringState {
-    return this.keyringState;
-  }
-
-  public subscribeKeyringState (): Subject<KeyringState> {
-    return this.keyringStateSubject;
-  }
-
   public setKeyringState (data: KeyringState, callback?: () => void): void {
-    this.keyringStateSubject.next(data);
-    this.keyringState = data;
+    this.keyringService.setKeyringState(data);
     callback && callback();
   }
 
@@ -391,7 +377,7 @@ export default class KoniState {
   }
 
   public async getStaking (): Promise<StakingJson> {
-    const addresses = await this.getDecodedAddresses();
+    const addresses = this.getDecodedAddresses();
 
     const stakings = await this.dbService.getStakings(addresses, this.activeChainSlugs);
 
@@ -463,13 +449,13 @@ export default class KoniState {
     return this.dbService.stores.nftCollection.subscribeNftCollection(this.activeChainSlugs);
   }
 
-  public async resetNft (newAddress: string): Promise<void> {
+  resetNft (newAddress: string): void {
     this.getNft().then((data) => this.nftSubject.next(data || {
       nftList: [],
       total: 0
     })).catch((e) => this.logger.warn(e));
 
-    const addresses = await this.getDecodedAddresses(newAddress);
+    const addresses = this.getDecodedAddresses(newAddress);
 
     this.dbService.subscribeNft(addresses, this.activeChainSlugs, (nfts) => {
       this.nftSubject.next({
@@ -494,7 +480,7 @@ export default class KoniState {
   }
 
   public async getNft (): Promise<NftJson | undefined> {
-    const addresses = await this.getDecodedAddresses();
+    const addresses = this.getDecodedAddresses();
 
     if (!addresses.length) {
       return;
@@ -590,17 +576,13 @@ export default class KoniState {
     return this.stakingRewardSubject;
   }
 
-  public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
-    this.currentAccountStore.get('CurrentAccountInfo', update);
-  }
-
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     const { address, currentGenesisHash } = data;
 
     const result: CurrentAccountInfo = { ...data };
 
     if (address === ALL_ACCOUNT_KEY) {
-      const pairs = keyring.getPairs();
+      const pairs = keyring.getAccounts();
       const pair = pairs[0];
       const pairGenesisHash = pair.meta.genesisHash as string;
 
@@ -613,10 +595,8 @@ export default class KoniState {
       }
     }
 
-    this.currentAccountStore.set('CurrentAccountInfo', result, () => {
-      this.updateServiceInfo();
-      callback && callback();
-    });
+    this.keyringService.setCurrentAccount(result);
+    callback && callback();
   }
 
   public setAccountTie (address: string, genesisHash: string | null): boolean {
@@ -628,13 +608,13 @@ export default class KoniState {
       keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash });
     }
 
-    this.getCurrentAccount((accountInfo) => {
-      if (address === accountInfo.address) {
-        accountInfo.currentGenesisHash = genesisHash as string || ALL_GENESIS_HASH;
+    const accountInfo = this.keyringService.currentAccount;
 
-        this.setCurrentAccount(accountInfo);
-      }
-    });
+    if (address === accountInfo.address) {
+      accountInfo.currentGenesisHash = genesisHash as string || ALL_GENESIS_HASH;
+
+      this.setCurrentAccount(accountInfo);
+    }
 
     return true;
   }
@@ -659,10 +639,7 @@ export default class KoniState {
   public async switchNetworkAccount (id: string, url: string, networkKey: string, changeAddress?: string): Promise<boolean> {
     const chainInfo = this.chainService.getChainInfoByKey(networkKey);
     const chainState = this.chainService.getChainStateByKey(networkKey);
-
-    const { address, currentGenesisHash } = await new Promise<CurrentAccountInfo>((resolve) => {
-      this.getCurrentAccount(resolve);
-    });
+    const { address, currentGenesisHash } = this.keyringService.currentAccount;
 
     return this.requestService.addConfirmation(id, url, 'switchNetworkRequest', {
       networkKey,
@@ -793,27 +770,21 @@ export default class KoniState {
     return this.settingService.getSubject();
   }
 
-  public subscribeCurrentAccount (): Subject<CurrentAccountInfo> {
-    return this.currentAccountStore.getSubject();
+  public getAccountAddress (): string | null {
+    const address = this.keyringService.currentAccount.address;
+
+    if (address === '') {
+      return null;
+    }
+
+    return address;
   }
 
-  public getAccountAddress (): Promise<string | null | undefined> {
-    return new Promise((resolve, reject) => {
-      this.getCurrentAccount((account) => {
-        if (account) {
-          resolve(account.address);
-        } else {
-          resolve(null);
-        }
-      });
-    });
-  }
-
-  public async getDecodedAddresses (address?: string): Promise<string[]> {
+  public getDecodedAddresses (address?: string): string[] {
     let checkingAddress: string | null | undefined = address;
 
     if (!address) {
-      checkingAddress = await this.getAccountAddress();
+      checkingAddress = this.getAccountAddress();
     }
 
     if (!checkingAddress) {
@@ -886,14 +857,14 @@ export default class KoniState {
     this.publishCrowdloan(true);
   }
 
-  public async resetStaking (newAddress: string) {
+  public resetStaking (newAddress: string) {
     this.getStaking()
       .then((data) => {
         this.stakingSubject.next(data);
       })
       .catch((e) => this.logger.warn(e));
 
-    const addresses = await this.getDecodedAddresses(newAddress);
+    const addresses = this.getDecodedAddresses(newAddress);
 
     this.dbService.subscribeStaking(addresses, this.activeChainSlugs, (stakings) => {
       this.stakingSubject.next({
@@ -913,9 +884,9 @@ export default class KoniState {
   }
 
   private updateBalanceStore (item: BalanceItem) {
-    this.getCurrentAccount((currentAccountInfo) => {
-      this.dbService.updateBalanceStore(currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
-    });
+    const currentAccountInfo = this.keyringService.currentAccount;
+
+    this.dbService.updateBalanceStore(currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
   }
 
   public subscribeBalance () {
@@ -945,9 +916,9 @@ export default class KoniState {
   }
 
   private updateCrowdloanStore (networkKey: string, item: CrowdloanItem) {
-    this.getCurrentAccount((currentAccountInfo) => {
-      this.dbService.updateCrowdloanStore(networkKey, currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
-    });
+    const currentAccountInfo = this.keyringService.currentAccount;
+
+    this.dbService.updateCrowdloanStore(networkKey, currentAccountInfo.address, item).catch((e) => this.logger.warn(e));
   }
 
   public subscribeCrowdloan () {
@@ -1030,13 +1001,10 @@ export default class KoniState {
     if (_isAssetFungibleToken(data)) {
       await this.chainService.updateAssetSetting(tokenSlug, { visible: true });
     }
-
-    this.updateServiceInfo();
   }
 
   public deleteCustomAssets (targetTokens: string[]) {
     this.chainService.deleteCustomAssets(targetTokens);
-    this.updateServiceInfo();
   }
 
   public async validateCustomChain (provider: string, existedChainSlug?: string) {
@@ -1064,17 +1032,11 @@ export default class KoniState {
       await this.chainService.updateAssetSetting(newNativeTokenSlug, { visible: true });
     }
 
-    this.updateServiceInfo();
-
     return true;
   }
 
   public removeCustomChain (networkKey: string): boolean {
-    const result = this.chainService.removeCustomChain(networkKey);
-
-    this.updateServiceInfo();
-
-    return result;
+    return this.chainService.removeCustomChain(networkKey);
   }
 
   // TODO: avoids turning off chains related to ledger account
@@ -1110,11 +1072,7 @@ export default class KoniState {
     // const defaultChains = this.getDefaultNetworkKeys();
     await this.chainService.updateAssetSettingByChain(chainSlug, false);
 
-    const result = this.chainService.disableChain(chainSlug);
-
-    this.updateServiceInfo();
-
-    return result;
+    return this.chainService.disableChain(chainSlug);
   }
 
   public async enableChain (chainSlug: string, enableTokens = true): Promise<boolean> {
@@ -1122,11 +1080,7 @@ export default class KoniState {
       await this.chainService.updateAssetSettingByChain(chainSlug, true);
     }
 
-    const result = this.chainService.enableChain(chainSlug);
-
-    this.updateServiceInfo();
-
-    return result;
+    return this.chainService.enableChain(chainSlug);
   }
 
   public resetDefaultChains () {
@@ -1182,17 +1136,14 @@ export default class KoniState {
     return this.serviceInfoSubject;
   }
 
-  public updateServiceInfo () {
-    this.logger.log('<---Update serviceInfo--->');
-    this.getCurrentAccount((value) => {
-      this.serviceInfoSubject.next({
-        chainInfoMap: this.chainService.getChainInfoMap(),
-        chainApiMap: this.getApiMap(),
-        currentAccountInfo: value,
-        assetRegistry: this.chainService.getAssetRegistry(),
-        chainStateMap: this.chainService.getChainStateMap()
-      });
-    });
+  public getServiceInfo (): ServiceInfo {
+    return {
+      chainInfoMap: this.chainService.getChainInfoMap(),
+      chainApiMap: this.getApiMap(),
+      currentAccountInfo: this.keyringService.currentAccount,
+      assetRegistry: this.chainService.getAssetRegistry(),
+      chainStateMap: this.chainService.getChainStateMap()
+    };
   }
 
   public getExternalRequestMap (): Record<string, ExternalRequestPromise> {
@@ -1679,5 +1630,51 @@ export default class KoniState {
 
   public createUnsubscriptionHandle (id: string, unsubscribe: () => void): void {
     this.unsubscriptionMap[id] = unsubscribe;
+  }
+
+  public async autoEnableChains (addresses: string[]) {
+    const assetMap = this.chainService.getAssetRegistry();
+    const promiseList = addresses.map((address) => {
+      return this.subscanService.getMultiChainBalance(address)
+        .catch((e) => {
+          console.error(e);
+
+          return null;
+        });
+    });
+
+    const needEnableChains: string[] = [];
+    const needActiveTokens: string[] = [];
+    const currentAssetSettings = await this.chainService.getAssetSettings();
+    const balanceDataList = await Promise.all(promiseList);
+
+    balanceDataList.forEach((balanceData) => {
+      balanceData && balanceData.forEach(({ category, network, symbol }) => {
+        const chain = SUBSCAN_CHAIN_MAP[network];
+
+        if (!chain) {
+          return;
+        }
+
+        const tokenKey = `${chain}-${category === 'native' ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
+
+        if (assetMap[tokenKey] && !currentAssetSettings[tokenKey]?.visible) {
+          needEnableChains.push(chain);
+          needActiveTokens.push(tokenKey);
+          currentAssetSettings[tokenKey] = { visible: true };
+        }
+      });
+    });
+
+    if (needActiveTokens.length) {
+      this.chainService.enableChains(needEnableChains);
+      this.chainService.setAssetSettings({ ...currentAssetSettings });
+    }
+  }
+
+  public autoEnableChainOnAccountAdded () {
+    this.eventService.on('account.add', (address) => {
+      this.autoEnableChains([address]).catch(this.logger.error);
+    });
   }
 }

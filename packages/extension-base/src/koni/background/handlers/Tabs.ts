@@ -245,15 +245,15 @@ export default class KoniTabs {
         const accountList = transformAccountsV2(allAccounts, false, authInfo, 'evm').map((a) => a.address);
         let accounts: string[] = [];
 
-        this.#koniState.getCurrentAccount(({ address }) => {
-          if (address === ALL_ACCOUNT_KEY || !accountList.includes(address) || getAll) {
-            accounts = accountList;
-          } else if (address && accountList.includes(address)) {
-            accounts = ([address]);
-          }
+        const address = this.#koniState.keyringService.currentAccount.address;
 
-          resolve(accounts);
-        });
+        if (address === ALL_ACCOUNT_KEY || !accountList.includes(address) || getAll) {
+          accounts = accountList;
+        } else if (address && accountList.includes(address)) {
+          accounts = ([address]);
+        }
+
+        resolve(accounts);
       }).catch(console.error);
     });
   }
@@ -488,7 +488,7 @@ export default class KoniTabs {
       }
     };
 
-    const accountListSubscription = this.#koniState.subscribeCurrentAccount()
+    const accountListSubscription = this.#koniState.keyringService.currentAccountSubject
       .subscribe(() => {
         onCurrentAccountChanged().catch(console.error);
       });

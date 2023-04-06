@@ -413,22 +413,22 @@ export default class KoniExtension {
         };
 
         setTimeout(() => {
-          this.#koniState.getCurrentAccount((accountInfo) => {
-            if (accountInfo) {
-              accountsWithCurrentAddress.currentAddress = accountInfo.address;
+          const accountInfo = this.#koniState.keyringService.currentAccount;
 
-              if (accountInfo.address === ALL_ACCOUNT_KEY) {
-                accountsWithCurrentAddress.currentGenesisHash = accountInfo.currentGenesisHash;
-              } else {
-                const acc = accounts.find((a) => (a.address === accountInfo.address));
+          if (accountInfo) {
+            accountsWithCurrentAddress.currentAddress = accountInfo.address;
 
-                accountsWithCurrentAddress.currentGenesisHash = acc?.genesisHash || ALL_GENESIS_HASH;
-              }
+            if (accountInfo.address === ALL_ACCOUNT_KEY) {
+              accountsWithCurrentAddress.currentGenesisHash = accountInfo.currentGenesisHash;
+            } else {
+              const acc = accounts.find((a) => (a.address === accountInfo.address));
+
+              accountsWithCurrentAddress.currentGenesisHash = acc?.genesisHash || ALL_GENESIS_HASH;
             }
+          }
 
-            resolve(accountsWithCurrentAddress);
-            cb(accountsWithCurrentAddress);
-          });
+          resolve(accountsWithCurrentAddress);
+          cb(accountsWithCurrentAddress);
         }, 300);
       });
 
@@ -906,28 +906,28 @@ export default class KoniExtension {
   }
 
   private _saveCurrentAccountAddress (address: string, callback?: (data: CurrentAccountInfo) => void) {
-    this.#koniState.getCurrentAccount((accountInfo) => {
-      if (!accountInfo) {
-        accountInfo = {
-          address,
-          currentGenesisHash: ALL_GENESIS_HASH,
-          allGenesisHash: ALL_GENESIS_HASH || undefined
-        };
+    let accountInfo = this.#koniState.keyringService.currentAccount;
+
+    if (!accountInfo) {
+      accountInfo = {
+        address,
+        currentGenesisHash: ALL_GENESIS_HASH,
+        allGenesisHash: ALL_GENESIS_HASH || undefined
+      };
+    } else {
+      accountInfo.address = address;
+
+      if (address !== ALL_ACCOUNT_KEY) {
+        const currentKeyPair = keyring.getAccount(address);
+
+        accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
       } else {
-        accountInfo.address = address;
-
-        if (address !== ALL_ACCOUNT_KEY) {
-          const currentKeyPair = keyring.getAccount(address);
-
-          accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
-        } else {
-          accountInfo.currentGenesisHash = accountInfo.allGenesisHash || ALL_GENESIS_HASH;
-        }
+        accountInfo.currentGenesisHash = accountInfo.allGenesisHash || ALL_GENESIS_HASH;
       }
+    }
 
-      this.#koniState.setCurrentAccount(accountInfo, () => {
-        callback && callback(accountInfo);
-      });
+    this.#koniState.setCurrentAccount(accountInfo, () => {
+      callback && callback(accountInfo);
     });
   }
 
@@ -971,11 +971,7 @@ export default class KoniExtension {
 
   private async updateAssetSetting (params: AssetSettingUpdateReq) {
     try {
-      const needUpdateSubject = await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
-
-      if (needUpdateSubject) {
-        this.#koniState.updateServiceInfo();
-      }
+      await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
 
       return true;
     } catch (e) {
@@ -1137,9 +1133,7 @@ export default class KoniExtension {
       }
     }
 
-    const currentAccount = await new Promise<CurrentAccountInfo>((resolve) => {
-      this.#koniState.getCurrentAccount(resolve);
-    });
+    const currentAccount = this.#koniState.keyringService.currentAccount;
     const allGenesisHash = currentAccount?.allGenesisHash || undefined;
 
     types?.forEach((type) => {
@@ -1199,17 +1193,14 @@ export default class KoniExtension {
       });
     });
 
-    // Remove history
-    await this.#koniState.historyService.removeHistoryByAddress(address);
-
     // Set current account to all account
     await new Promise<void>((resolve) => {
-      this.#koniState.getCurrentAccount(({ allGenesisHash }) => {
-        this.#koniState.setCurrentAccount({
-          currentGenesisHash: allGenesisHash || null,
-          address: ALL_ACCOUNT_KEY
-        }, resolve);
-      });
+      const currentAccountInfo = this.#koniState.keyringService.currentAccount;
+
+      this.#koniState.setCurrentAccount({
+        currentGenesisHash: currentAccountInfo?.allGenesisHash || null,
+        address: ALL_ACCOUNT_KEY
+      }, resolve);
     });
 
     return true;
@@ -1937,10 +1928,7 @@ export default class KoniExtension {
       });
     }
 
-    const currentAccount = await new Promise<CurrentAccountInfo>((resolve) => {
-      this.#koniState.getCurrentAccount(resolve);
-    });
-
+    const currentAccount = this.#koniState.keyringService.currentAccount;
     const allGenesisHash = currentAccount?.allGenesisHash || undefined;
 
     if (addresses.length <= 1) {
@@ -2485,7 +2473,8 @@ export default class KoniExtension {
 
   private keyringStateSubscribe (id: string, port: chrome.runtime.Port): KeyringState {
     const cb = createSubscription<'pri(keyring.subscribe)'>(id, port);
-    const subscription = this.#koniState.subscribeKeyringState().subscribe((value): void =>
+    const keyringStateSubject = this.#koniState.keyringService.keyringStateSubject;
+    const subscription = keyringStateSubject.subscribe((value): void =>
       cb(value)
     );
 
@@ -2495,7 +2484,7 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return this.#koniState.getKeyringState();
+    return this.#koniState.keyringService.keyringState;
   }
 
   private keyringChangeMasterPassword ({ createNew,

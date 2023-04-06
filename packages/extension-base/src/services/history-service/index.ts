@@ -11,6 +11,7 @@ import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject } from 'rxjs';
 
 import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
+import {keyring} from "@subwallet/ui-keyring";
 
 export class HistoryService {
   private dbService: DatabaseService;
@@ -28,8 +29,9 @@ export class HistoryService {
       this.historySubject.next(histories);
     }).catch(console.error);
 
-    // Trigger fetch histories on init
-    this.getHistories().catch(console.error);
+    this.eventService.once('chain.ready', () => {
+      this.getHistories().catch(console.log);
+    });
 
     this.eventService.on('account.add', (address) => {
       this.refreshHistoryInterval.bind(this);
@@ -90,13 +92,16 @@ export class HistoryService {
   }
 
   public async getHistories () {
-    const addressList = Object.keys(accounts.subject.value);
+    const addressList = keyring.getAccounts().map((a) => a.address);
+    const currentHistories = this.historySubject.value;
 
-    if (!this.fetchPromise) {
-      this.fetchHistories(addressList).then(this.historySubject.next).catch(console.error);
+    if (!this.fetchPromise || currentHistories.length === 0) {
+      const historyRecords = await this.fetchHistories(addressList);
+
+      this.historySubject.next(historyRecords);
     }
 
-    return Promise.resolve(this.historySubject.getValue());
+    return this.historySubject.getValue();
   }
 
   public async getHistorySubject () {

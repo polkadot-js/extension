@@ -26,7 +26,10 @@ export class PriceService {
 
     // Fetch data from storage
     this.getPrice().catch(console.error);
-    this.refreshPriceData();
+
+    this.eventService.once('chain.ready', () => {
+      this.refreshPriceData();
+    });
 
     const eventHandler = () => {
       const newPriceIds = this.getPriceIds();

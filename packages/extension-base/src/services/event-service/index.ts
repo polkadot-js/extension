@@ -11,10 +11,27 @@ export class EventService extends EventEmitter<EventRegistry> {
   private pendingEvents: EventItem<EventType>[] = [];
   private lazyEmitter = new EventEmitter<{lazy: [EventItem<EventType>[], EventType[]]}>();
 
+  public readonly waitKeyringReady: Promise<boolean>;
+  public readonly waitAccountReady: Promise<boolean>;
+  public readonly waitChainReady: Promise<boolean>;
+  public readonly waitAssetReady: Promise<boolean>;
+
   constructor (options: { lazyTime: number } = { lazyTime: 300 }) {
     super();
     this.lazyTime = options.lazyTime;
     this.timeoutId = null;
+    this.waitKeyringReady = this.generateWaitPromise('keyring.ready');
+    this.waitAccountReady = this.generateWaitPromise('account.ready');
+    this.waitChainReady = this.generateWaitPromise('chain.ready');
+    this.waitAssetReady = this.generateWaitPromise('asset.ready');
+  }
+
+  private generateWaitPromise<T extends EventType> (eventType: T): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.once(eventType, (isReady) => {
+        resolve(isReady);
+      });
+    });
   }
 
   private setLazyTimeout (): void {

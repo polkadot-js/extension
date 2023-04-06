@@ -1301,9 +1301,9 @@ export class ChainService {
       });
 
       this.setAssetSettings(assetSettings, false);
-      this.eventService.emit('asset.ready', true);
     }
 
+    this.eventService.emit('asset.ready', true);
     console.log('Done init asset settings');
   }
 

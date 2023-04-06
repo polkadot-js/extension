@@ -7,11 +7,11 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
+import { keyring } from '@subwallet/ui-keyring';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject } from 'rxjs';
 
 import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
-import {keyring} from "@subwallet/ui-keyring";
 
 export class HistoryService {
   private dbService: DatabaseService;
@@ -29,16 +29,17 @@ export class HistoryService {
       this.historySubject.next(histories);
     }).catch(console.error);
 
-    this.eventService.once('chain.ready', () => {
+    // Wait for keyring and chain ready and start
+    Promise.all([this.eventService.waitKeyringReady, this.eventService.waitChainReady]).then(() => {
       this.getHistories().catch(console.log);
-    });
 
-    this.eventService.on('account.add', (address) => {
-      this.refreshHistoryInterval.bind(this);
-    });
-    this.eventService.on('account.remove', (address) => {
-      this.removeHistoryByAddress(address).catch(console.error);
-    });
+      this.eventService.on('account.add', (address) => {
+        this.refreshHistoryInterval.bind(this);
+      });
+      this.eventService.on('account.remove', (address) => {
+        this.removeHistoryByAddress(address).catch(console.error);
+      });
+    }).catch(console.error);
   }
 
   private fetchPromise: Promise<TransactionHistoryItem[]> | null = null;

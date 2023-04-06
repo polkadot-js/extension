@@ -2,7 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthRequestV2, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestSign, ResponseSigning, SigningRequest } from '@subwallet/extension-base/background/types';
+import {
+  AccountAuthType,
+  AccountJson,
+  AuthorizeRequest,
+  MetadataRequest,
+  RequestAuthorizeTab,
+  RequestSign,
+  ResponseSigning,
+  SigningRequest
+} from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import AuthRequestHandler from '@subwallet/extension-base/services/request-service/handler/AuthRequestHandler';
 import EvmRequestHandler from '@subwallet/extension-base/services/request-service/handler/EvmRequestHandler';
@@ -120,6 +129,10 @@ export default class RequestService {
 
   public getAuthRequestV2 (id: string): AuthRequestV2 {
     return this.#authRequestHandler.getAuthRequestV2(id);
+  }
+
+  public getDAppChainInfo (options: {accessType: AccountAuthType, autoActive?: boolean, defaultChain?: string, url?: string}) {
+    return this.#authRequestHandler.getDAppChainInfo(options);
   }
 
   public get subscribeEvmChainChange (): Subject<AuthUrls> {

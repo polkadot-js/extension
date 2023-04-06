@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ConfirmationRequestBase } from '@subwallet/extension-base/background/types';
+import { getDomainFromUrl } from '@subwallet/extension-base/utils';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Image, Logo, Typography } from '@subwallet/react-ui';
@@ -16,12 +17,8 @@ interface Props extends ThemeProps {
 }
 
 // Get domain from full url
-function getDomain (url: string): string {
-  return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
-}
-
 function Component ({ className, linkIcon, linkIconBg, request }: Props) {
-  const domain = getDomain(request.url);
+  const domain = getDomainFromUrl(request.url);
   const leftLogoUrl = `https://icons.duckduckgo.com/ip2/${domain}.ico`;
 
   return (

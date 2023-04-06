@@ -1,13 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthRequestV2, ResultResolver } from '@subwallet/extension-base/background/KoniTypes';
-import { AuthorizeRequest, RequestAuthorizeTab, Resolver } from '@subwallet/extension-base/background/types';
+import { AccountAuthType, AuthorizeRequest, RequestAuthorizeTab, Resolver } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _isChainEnabled, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import RequestService from '@subwallet/extension-base/services/request-service';
+import { PREDEFINED_CHAIN_DAPP_CHAIN_MAP } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
+import { getDomainFromUrl } from '@subwallet/extension-base/utils';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -90,7 +93,42 @@ export default class AuthRequestHandler {
     });
   }
 
-  private authCompleteV2 = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<ResultResolver> => {
+  public getDAppChainInfo (options: {accessType: AccountAuthType, autoActive?: boolean, defaultChain?: string, url?: string}): _ChainInfo | undefined {
+    const chainInfoMaps = this.#chainService.getChainInfoMap();
+    const chainStateMap = this.#chainService.getChainStateMap();
+    let defaultChain = options.defaultChain;
+    const needEnableChains: string[] = [];
+
+    if (options.url) {
+      const domain = getDomainFromUrl(options.url);
+      const predefinedSupportChains = PREDEFINED_CHAIN_DAPP_CHAIN_MAP[domain];
+
+      if (predefinedSupportChains) {
+        defaultChain = predefinedSupportChains[0];
+        options.autoActive && needEnableChains.push(...predefinedSupportChains);
+      }
+    }
+
+    let chainInfo: _ChainInfo | undefined;
+
+    if (['both', 'evm'].includes(options.accessType)) {
+      const evmChains = Object.values(chainInfoMaps).filter(_isChainEvmCompatible);
+
+      chainInfo = (defaultChain ? chainInfoMaps[defaultChain] : evmChains.find((chain) => chainStateMap[chain.slug]?.active)) || evmChains[0];
+
+      if (options.autoActive) {
+        if (!needEnableChains.includes(chainInfo.slug)) {
+          needEnableChains.push(chainInfo.slug);
+        }
+      }
+    }
+
+    needEnableChains.length > 0 && this.#chainService.enableChains(needEnableChains);
+
+    return chainInfo;
+  }
+
+  private authCompleteV2 = (id: string, url: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<ResultResolver> => {
     const isAllowedMap = this.getAddressList();
 
     const complete = (result: boolean | Error, cb: () => void, accounts?: string[]) => {
@@ -126,19 +164,7 @@ export default class AuthRequestHandler {
         });
       }
 
-      let defaultEvmNetworkKey: string | undefined;
-
-      if (accountAuthType === 'both' || accountAuthType === 'evm') {
-        const defaultChain = Object.values(this.#chainService.getChainInfoMap()).find((chainInfo) => {
-          const chainState = this.#chainService.getChainStateByKey(chainInfo.slug);
-
-          return _isChainEvmCompatible(chainInfo) && _isChainEnabled(chainState);
-        });
-
-        if (defaultChain) {
-          defaultEvmNetworkKey = defaultChain.slug;
-        }
-      }
+      const defaultEvmNetworkKey = this.getDAppChainInfo({ accessType: accountAuthType, url, autoActive: !isCancelled && isAllowed })?.slug;
 
       this.getAuthorize((value) => {
         let authorizeList = {} as AuthUrls;
@@ -246,7 +272,7 @@ export default class AuthRequestHandler {
       const id = getId();
 
       this.#authRequestsV2[id] = {
-        ...this.authCompleteV2(id, resolve, reject),
+        ...this.authCompleteV2(id, url, resolve, reject),
         id,
         idStr,
         request,

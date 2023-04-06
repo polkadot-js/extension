@@ -25,7 +25,7 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
-import SUBSCAN_CHAIN_MAP from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
+import { SUBSCAN_CHAIN_MAP_REVERSE } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
@@ -1646,13 +1646,17 @@ export default class KoniState {
     const needEnableChains: string[] = [];
     const needActiveTokens: string[] = [];
     const currentAssetSettings = await this.chainService.getAssetSettings();
+    const chainMap = this.chainService.getChainInfoMap();
     const balanceDataList = await Promise.all(promiseList);
 
     balanceDataList.forEach((balanceData) => {
-      balanceData && balanceData.forEach(({ category, network, symbol }) => {
-        const chain = SUBSCAN_CHAIN_MAP[network];
+      balanceData && balanceData.forEach(({ balance, bonded, category, locked, network, symbol }) => {
+        const chain = SUBSCAN_CHAIN_MAP_REVERSE[network];
+        const chainInfo = chain ? chainMap[chain] : null;
+        const balanceIsEmpty = (!balance || balance === '0') && (!locked && locked === '0') && (!bonded || bonded === '0');
 
-        if (!chain) {
+        // Cancel if chain is not supported or is testnet or balance is 0
+        if (!chainInfo || chainInfo.isTestnet || balanceIsEmpty) {
           return;
         }
 

@@ -28,6 +28,9 @@ export class HistoryService {
       this.historySubject.next(histories);
     }).catch(console.error);
 
+    // Trigger fetch histories on init
+    this.getHistories().catch(console.error);
+
     this.eventService.on('account.add', (address) => {
       this.refreshHistoryInterval.bind(this);
     });
@@ -90,12 +93,10 @@ export class HistoryService {
     const addressList = Object.keys(accounts.subject.value);
 
     if (!this.fetchPromise) {
-      const historyRecords = await this.fetchHistories(addressList);
-
-      this.historySubject.next(historyRecords);
+      this.fetchHistories(addressList).then(this.historySubject.next).catch(console.error);
     }
 
-    return this.historySubject.getValue();
+    return Promise.resolve(this.historySubject.getValue());
   }
 
   public async getHistorySubject () {

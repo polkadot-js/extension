@@ -93,6 +93,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const { error } = simpleCheckForm(allFields);
 
     const changesMap = convertFieldToObject<ClaimRewardFormProps>(changedFields);
+    const allMap = convertFieldToObject<ClaimRewardFormProps>(allFields);
 
     const { from } = changesMap;
 
@@ -100,7 +101,7 @@ const Component: React.FC<Props> = (props: Props) => {
       setFrom(from);
     }
 
-    setIsDisable(error);
+    setIsDisable(error || !(allMap.from ?? true));
   }, [setFrom]);
 
   const { t } = useTranslation();
@@ -136,7 +137,7 @@ const Component: React.FC<Props> = (props: Props) => {
         setFrom(address);
       }
     }
-  }, [currentAccount?.address, setFrom]);
+  }, [currentAccount?.address, form, setFrom]);
 
   useEffect(() => {
     setChain(stakingChain || '');

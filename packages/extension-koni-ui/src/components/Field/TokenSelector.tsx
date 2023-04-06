@@ -56,6 +56,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     return tokenInfo &&
       (
         <Logo
+          className='token-logo'
           isShowSubLogo={true}
           shape='squircle'
           size={token.controlHeightSM}
@@ -169,6 +170,17 @@ export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { to
     // TODO: delete this when fix component in ui-base
     '.token-item .ant-network-item-sub-name': {
       display: 'none'
+    },
+
+    '.token-logo': {
+      bottom: 0,
+      right: 0,
+
+      '.-sub-logo': {
+        '.ant-image': {
+          display: 'flex'
+        }
+      }
     },
 
     '.ant-network-item-content': {

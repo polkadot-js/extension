@@ -160,6 +160,8 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
   return result;
 }
 
+const defaultFilterAccount = (account: AccountJson): boolean => !(isAccountAll(account.address) || account.isReadOnly);
+
 const filterAccountFunc = (
   chainInfoMap: Record<string, _ChainInfo>,
   assetRegistry: Record<string, _ChainAsset>,
@@ -170,7 +172,7 @@ const filterAccountFunc = (
   const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
 
   if (!tokenGroupSlug) {
-    return (account: AccountJson) => !isAccountAll(account.address);
+    return defaultFilterAccount;
   }
 
   const chainAssets = Object.values(assetRegistry).filter((chainAsset) => {
@@ -195,7 +197,7 @@ const filterAccountFunc = (
     const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
     const isAccountEthereum = isEthereumAddress(account.address);
 
-    if (isAccountAll(account.address)) {
+    if (!defaultFilterAccount(account)) {
       return false;
     }
 

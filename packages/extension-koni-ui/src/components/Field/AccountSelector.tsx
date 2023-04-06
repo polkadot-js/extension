@@ -95,6 +95,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
       <AccountItemWithName
         accountName={item.name}
         address={address}
+        avatarSize={24}
         isSelected={selected}
       />
     );

@@ -1,19 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { useDefaultNavigate, useFocusFormItem, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/form/form';
-import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/util/form/validators/password';
+import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { renderBaseConfirmPasswordRules, renderBasePasswordRules, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
 import { Form, Icon, Input, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FloppyDiskBack, ShieldCheck } from 'phosphor-react';
-import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -51,7 +46,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     navigate('/settings/security');
   }, [navigate]);
 
-  const onSubmit: Callbacks<ChangePasswordFormState>['onFinish'] = useCallback((values: ChangePasswordFormState) => {
+  const onSubmit: FormCallbacks<ChangePasswordFormState>['onFinish'] = useCallback((values: ChangePasswordFormState) => {
     const password = values[FormFieldName.PASSWORD];
     const oldPassword = values[FormFieldName.OLD_PASSWORD];
 
@@ -77,7 +72,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, [form, goHome]);
 
-  const onUpdate: Callbacks<ChangePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
+  const onUpdate: FormCallbacks<ChangePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { empty, error } = simpleCheckForm(allFields);
 
     setSubmitError('');
@@ -108,7 +103,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: <InfoIcon />
+            icon: <CloseIcon />,
+            onClick: goHome
           }
         ]}
         title={t('Change password')}

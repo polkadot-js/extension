@@ -108,6 +108,10 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       } else {
         navigate(createPasswordUrl);
       }
+    } else if (isNoAccount(accounts)) {
+      if (![...allowImportAccountUrls, welcomeUrl].includes(pathName)) {
+        navigate(welcomeUrl);
+      }
     } else if (pathName === DEFAULT_ROUTER_PATH) {
       if (hasConfirmations) {
         openPModal('confirmations');

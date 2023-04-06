@@ -1,59 +1,37 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {InjectedAccount} from '@subwallet/extension-inject/types';
+import type { InjectedAccount } from '@subwallet/extension-inject/types';
 
-import {_AssetType} from '@subwallet/chain-list/types';
-import {EvmProviderError} from '@subwallet/extension-base/background/errors/EvmProviderError';
-import {withErrorLog} from '@subwallet/extension-base/background/handlers/helpers';
-import {AuthUrlInfo} from '@subwallet/extension-base/background/handlers/State';
-import {createSubscription, unsubscribe} from '@subwallet/extension-base/background/handlers/subscriptions';
-import {
-  AddNetworkRequestExternal,
-  AddTokenRequestExternal,
-  EvmAppState,
-  EvmEventType,
-  EvmProviderErrorType,
-  EvmSendTransactionParams,
-  RequestEvmProviderSend
-} from '@subwallet/extension-base/background/KoniTypes';
+import { _AssetType } from '@subwallet/chain-list/types';
+import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
+import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
+import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
+import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
+import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
 import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesSign';
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
-import {
-  AccountAuthType,
-  MessageTypes,
-  RequestAccountList,
-  RequestAccountSubscribe,
-  RequestAuthorizeTab,
-  RequestRpcSend,
-  RequestRpcSubscribe,
-  RequestRpcUnsubscribe,
-  RequestTypes,
-  ResponseRpcListProviders,
-  ResponseSigning,
-  ResponseTypes,
-  SubscriptionMessageTypes
-} from '@subwallet/extension-base/background/types';
-import {ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS} from '@subwallet/extension-base/constants';
-import {PHISHING_PAGE_REDIRECT} from '@subwallet/extension-base/defaults';
+import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
+import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
+import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import {_generateCustomProviderKey} from '@subwallet/extension-base/services/chain-service/utils';
-import {canDerive} from '@subwallet/extension-base/utils';
-import {InjectedMetadataKnown, MetadataDef, ProviderMeta} from '@subwallet/extension-inject/types';
-import {KeyringPair} from '@subwallet/keyring/types';
+import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { canDerive } from '@subwallet/extension-base/utils';
+import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
+import { KeyringPair } from '@subwallet/keyring/types';
 import keyring from '@subwallet/ui-keyring';
-import {accounts as accountsObservable} from '@subwallet/ui-keyring/observable/accounts';
-import {SingleAddress, SubjectInfo} from '@subwallet/ui-keyring/observable/types';
+import { accounts as accountsObservable } from '@subwallet/ui-keyring/observable/accounts';
+import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import Web3 from 'web3';
-import {HttpProvider, RequestArguments, WebsocketProvider} from 'web3-core';
-import {JsonRpcPayload} from 'web3-core-helpers';
+import { HttpProvider, RequestArguments, WebsocketProvider } from 'web3-core';
+import { JsonRpcPayload } from 'web3-core-helpers';
 
-import {checkIfDenied} from '@polkadot/phishing';
-import {JsonRpcResponse} from '@polkadot/rpc-provider/types';
-import {SignerPayloadJSON, SignerPayloadRaw} from '@polkadot/types/types';
-import {assert, isNumber} from '@polkadot/util';
+import { checkIfDenied } from '@polkadot/phishing';
+import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
+import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import { assert, isNumber } from '@polkadot/util';
 
-function stripUrl(url: string): string {
+function stripUrl (url: string): string {
   assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
 
   const parts = url.split('/');
@@ -61,7 +39,7 @@ function stripUrl(url: string): string {
   return parts[2];
 }
 
-function transformAccountsV2(accounts: SubjectInfo, anyType = false, authInfo?: AuthUrlInfo, accountAuthType?: AccountAuthType): InjectedAccount[] {
+function transformAccountsV2 (accounts: SubjectInfo, anyType = false, authInfo?: AuthUrlInfo, accountAuthType?: AccountAuthType): InjectedAccount[] {
   const accountSelected = authInfo
     ? (
       authInfo.isAllowed
@@ -73,22 +51,22 @@ function transformAccountsV2(accounts: SubjectInfo, anyType = false, authInfo?: 
     )
     : [];
 
-  let authTypeFilter = ({type}: SingleAddress) => true;
+  let authTypeFilter = ({ type }: SingleAddress) => true;
 
   if (accountAuthType === 'substrate') {
-    authTypeFilter = ({type}: SingleAddress) => (type !== 'ethereum');
+    authTypeFilter = ({ type }: SingleAddress) => (type !== 'ethereum');
   } else if (accountAuthType === 'evm') {
-    authTypeFilter = ({type}: SingleAddress) => (type === 'ethereum');
+    authTypeFilter = ({ type }: SingleAddress) => (type === 'ethereum');
   }
 
   return Object
     .values(accounts)
-    .filter(({json: {meta: {isHidden}}}) => !isHidden)
-    .filter(({type}) => anyType ? true : canDerive(type))
+    .filter(({ json: { meta: { isHidden } } }) => !isHidden)
+    .filter(({ type }) => anyType ? true : canDerive(type))
     .filter(authTypeFilter)
-    .filter(({json: {address}}) => accountSelected.includes(address))
+    .filter(({ json: { address } }) => accountSelected.includes(address))
     .sort((a, b) => (a.json.meta.whenCreated || 0) - (b.json.meta.whenCreated || 0))
-    .map(({json: {address, meta: {genesisHash, name}}, type}): InjectedAccount => ({
+    .map(({ json: { address, meta: { genesisHash, name } }, type }): InjectedAccount => ({
       address,
       genesisHash,
       name,
@@ -100,12 +78,12 @@ export default class KoniTabs {
   readonly #koniState: KoniState;
   private evmEventEmitterMap: Record<string, Record<string, (eventName: EvmEventType, payload: any) => void>> = {};
 
-  constructor(koniState: KoniState) {
+  constructor (koniState: KoniState) {
     this.#koniState = koniState;
   }
 
   /// Clone from Polkadot.js
-  private getSigningPair(address: string): KeyringPair {
+  private getSigningPair (address: string): KeyringPair {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find keypair');
@@ -113,58 +91,58 @@ export default class KoniTabs {
     return pair;
   }
 
-  private bytesSign(url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
+  private bytesSign (url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
     const address = request.address;
     const pair = this.getSigningPair(address);
 
-    return this.#koniState.sign(url, new RequestBytesSign(request), {address, ...pair.meta});
+    return this.#koniState.sign(url, new RequestBytesSign(request), { address, ...pair.meta });
   }
 
-  private extrinsicSign(url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
+  private extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
     const address = request.address;
     const pair = this.getSigningPair(address);
 
-    return this.#koniState.sign(url, new RequestExtrinsicSign(request), {address, ...pair.meta});
+    return this.#koniState.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
   }
 
-  private metadataProvide(url: string, request: MetadataDef): Promise<boolean> {
+  private metadataProvide (url: string, request: MetadataDef): Promise<boolean> {
     return this.#koniState.injectMetadata(url, request);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private metadataList(url: string): InjectedMetadataKnown[] {
-    return this.#koniState.knownMetadata.map(({genesisHash, specVersion}) => ({
+  private metadataList (url: string): InjectedMetadataKnown[] {
+    return this.#koniState.knownMetadata.map(({ genesisHash, specVersion }) => ({
       genesisHash,
       specVersion
     }));
   }
 
-  private rpcListProviders(): Promise<ResponseRpcListProviders> {
+  private rpcListProviders (): Promise<ResponseRpcListProviders> {
     return this.#koniState.rpcListProviders();
   }
 
-  private rpcSend(request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
+  private rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
     return this.#koniState.rpcSend(request, port);
   }
 
-  private rpcStartProvider(key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
+  private rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
     return this.#koniState.rpcStartProvider(key, port);
   }
 
-  private async rpcSubscribe(request: RequestRpcSubscribe, id: string, port: chrome.runtime.Port): Promise<boolean> {
+  private async rpcSubscribe (request: RequestRpcSubscribe, id: string, port: chrome.runtime.Port): Promise<boolean> {
     const innerCb = createSubscription<'pub(rpc.subscribe)'>(id, port);
     const cb = (_error: Error | null, data: SubscriptionMessageTypes['pub(rpc.subscribe)']): void => innerCb(data);
     const subscriptionId = await this.#koniState.rpcSubscribe(request, cb, port);
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
-      withErrorLog(() => this.rpcUnsubscribe({...request, subscriptionId}, port));
+      withErrorLog(() => this.rpcUnsubscribe({ ...request, subscriptionId }, port));
     });
 
     return true;
   }
 
-  private rpcSubscribeConnected(request: null, id: string, port: chrome.runtime.Port): Promise<boolean> {
+  private rpcSubscribeConnected (request: null, id: string, port: chrome.runtime.Port): Promise<boolean> {
     const innerCb = createSubscription<'pub(rpc.subscribeConnected)'>(id, port);
     const cb = (_error: Error | null, data: SubscriptionMessageTypes['pub(rpc.subscribeConnected)']): void => innerCb(data);
 
@@ -177,26 +155,26 @@ export default class KoniTabs {
     return Promise.resolve(true);
   }
 
-  private async rpcUnsubscribe(request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
+  private async rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
     return this.#koniState.rpcUnsubscribe(request, port);
   }
 
-  private redirectPhishingLanding(phishingWebsite: string): void {
+  private redirectPhishingLanding (phishingWebsite: string): void {
     const nonFragment = phishingWebsite.split('#')[0];
     const encodedWebsite = encodeURIComponent(nonFragment);
     const url = `${chrome.extension.getURL('index.html')}#${PHISHING_PAGE_REDIRECT}/${encodedWebsite}`;
 
-    chrome.tabs.query({url: nonFragment}, (tabs) => {
+    chrome.tabs.query({ url: nonFragment }, (tabs) => {
       tabs
-        .map(({id}) => id)
+        .map(({ id }) => id)
         .filter((id): id is number => isNumber(id))
         .forEach((id) =>
-          withErrorLog(() => chrome.tabs.update(id, {url}))
+          withErrorLog(() => chrome.tabs.update(id, { url }))
         );
     });
   }
 
-  protected async redirectIfPhishing(url: string): Promise<boolean> {
+  protected async redirectIfPhishing (url: string): Promise<boolean> {
     const isInDenyList = await checkIfDenied(url);
 
     if (isInDenyList) {
@@ -210,31 +188,29 @@ export default class KoniTabs {
 
   ///
 
-  private cancelSubscription(id: string): boolean {
+  private cancelSubscription (id: string): boolean {
     return this.#koniState.cancelSubscription(id);
   }
 
-  private createUnsubscriptionHandle(id: string, unsubscribe: () => void): void {
+  private createUnsubscriptionHandle (id: string, unsubscribe: () => void): void {
     this.#koniState.createUnsubscriptionHandle(id, unsubscribe);
   }
 
-  async getAuthInfo(url: string): Promise<AuthUrlInfo | undefined> {
+  async getAuthInfo (url: string): Promise<AuthUrlInfo | undefined> {
     const authList = await this.#koniState.getAuthList();
     const shortenUrl = stripUrl(url);
 
     return authList[shortenUrl];
   }
 
-  private async accountsListV2(url: string, {
-    accountAuthType,
-    anyType
-  }: RequestAccountList): Promise<InjectedAccount[]> {
+  private async accountsListV2 (url: string, { accountAuthType,
+    anyType }: RequestAccountList): Promise<InjectedAccount[]> {
     const authInfo = await this.getAuthInfo(url);
 
     return transformAccountsV2(accountsObservable.subject.getValue(), anyType, authInfo, accountAuthType);
   }
 
-  private accountsSubscribeV2(url: string, {accountAuthType}: RequestAccountSubscribe, id: string, port: chrome.runtime.Port): boolean {
+  private accountsSubscribeV2 (url: string, { accountAuthType }: RequestAccountSubscribe, id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pub(accounts.subscribeV2)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
       this.getAuthInfo(url).then((authInfo) => {
@@ -251,7 +227,7 @@ export default class KoniTabs {
     return true;
   }
 
-  private authorizeV2(url: string, request: RequestAuthorizeTab): Promise<boolean> {
+  private authorizeV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     if (request.accountAuthType === 'evm') {
       return new Promise((resolve, reject) => {
         this.#koniState.authorizeUrlV2(url, request).then(resolve).catch((e: Error) => {
@@ -263,7 +239,7 @@ export default class KoniTabs {
     }
   }
 
-  private async getEvmCurrentAccount(url: string, getAll = false): Promise<string[]> {
+  private async getEvmCurrentAccount (url: string, getAll = false): Promise<string[]> {
     return await new Promise((resolve) => {
       this.getAuthInfo(url).then((authInfo) => {
         const allAccounts = accountsObservable.subject.getValue();
@@ -283,7 +259,7 @@ export default class KoniTabs {
     });
   }
 
-  private async getEvmState(url?: string): Promise<EvmAppState> {
+  private async getEvmState (url?: string): Promise<EvmAppState> {
     let currentChain: string | undefined;
     let autoActiveChain = false;
 
@@ -307,7 +283,7 @@ export default class KoniTabs {
     });
 
     if (currentEvmNetwork) {
-      const {evmInfo, slug} = currentEvmNetwork;
+      const { evmInfo, slug } = currentEvmNetwork;
       const evmApi = this.#koniState.getEvmApi(slug);
       const web3 = evmApi.api;
 
@@ -340,19 +316,19 @@ export default class KoniTabs {
     }
   }
 
-  private async getEvmPermission(url: string, id: string) {
+  private async getEvmPermission (url: string, id: string) {
     const accounts = await this.getEvmCurrentAccount(url, true);
 
     return [{
       id: id,
       invoker: url,
       parentCapability: 'eth_accounts',
-      caveats: [{type: 'restrictReturnedAccounts', value: accounts}],
+      caveats: [{ type: 'restrictReturnedAccounts', value: accounts }],
       date: new Date().getTime()
     }];
   }
 
-  private async switchEvmChain(id: string, url: string, {params}: RequestArguments) {
+  private async switchEvmChain (id: string, url: string, { params }: RequestArguments) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const chainId = params[0].chainId as string;
 
@@ -373,7 +349,7 @@ export default class KoniTabs {
     return null;
   }
 
-  private async addEvmToken(id: string, url: string, {params}: RequestArguments) {
+  private async addEvmToken (id: string, url: string, { params }: RequestArguments) {
     const input = params as {
       type: string
       options: {
@@ -427,18 +403,18 @@ export default class KoniTabs {
     return await this.#koniState.addTokenConfirm(id, url, tokenInfo);
   }
 
-  private async addEvmChain(id: string, url: string, {params}: RequestArguments) {
+  private async addEvmChain (id: string, url: string, { params }: RequestArguments) {
     const input = params as AddNetworkRequestExternal[];
 
     if (input && input.length > 0) {
-      const {blockExplorerUrls, chainId, chainName, rpcUrls} = input[0];
+      const { blockExplorerUrls, chainId, chainName, rpcUrls } = input[0];
 
       if (chainId) {
         const chainIdNum = parseInt(chainId, 16);
         const [networkKey] = this.#koniState.findNetworkKeyByChainId(chainIdNum);
 
         if (networkKey) {
-          return await this.switchEvmChain(id, url, {method: 'wallet_switchEthereumChain', params: [{chainId}]});
+          return await this.switchEvmChain(id, url, { method: 'wallet_switchEthereumChain', params: [{ chainId }] });
         }
 
         if (rpcUrls && chainName) {
@@ -482,7 +458,7 @@ export default class KoniTabs {
               blockExplorer: blockExplorerUrls?.[0],
               slug: '',
               currentProvider: newProviderKey,
-              providers: {[newProviderKey]: provider},
+              providers: { [newProviderKey]: provider },
               symbol: chainInfo.symbol,
               chainType: 'EVM',
               name: chainInfo.name
@@ -495,20 +471,20 @@ export default class KoniTabs {
     return null;
   }
 
-  private async getEvmCurrentChainId(url: string): Promise<string> {
+  private async getEvmCurrentChainId (url: string): Promise<string> {
     const evmState = await this.getEvmState(url);
 
     return evmState.chainId || '0x0';
   }
 
-  private async evmSubscribeEvents(url: string, id: string, port: chrome.runtime.Port) {
+  private async evmSubscribeEvents (url: string, id: string, port: chrome.runtime.Port) {
     // This method will be called after DApp request connect to extension
     const cb = createSubscription<'evm(events.subscribe)'>(id, port);
     let isConnected = false;
 
     const emitEvent = (eventName: EvmEventType, payload: any) => {
       // eslint-disable-next-line node/no-callback-literal
-      cb({type: eventName, payload: payload});
+      cb({ type: eventName, payload: payload });
     };
 
     // Detect accounts changed
@@ -536,7 +512,7 @@ export default class KoniTabs {
 
     const _onAuthChanged = async () => {
       // Detect network
-      const {chainId} = await this.getEvmState(url);
+      const { chainId } = await this.getEvmState(url);
 
       if (chainId !== currentChainId) {
         emitEvent('chainChanged', chainId);
@@ -565,7 +541,7 @@ export default class KoniTabs {
         evmState.web3?.eth.net.isListening()
           .then((connecting) => {
             if (connecting && !isConnected) {
-              emitEvent('connect', {chainId: evmState.chainId});
+              emitEvent('connect', { chainId: evmState.chainId });
             } else if (!connecting && isConnected) {
               emitEvent('disconnect', new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED));
             }
@@ -582,7 +558,7 @@ export default class KoniTabs {
 
     const eventMap: Record<string, any> = {};
 
-    eventMap.data = ({method, params}: JsonRpcPayload) => {
+    eventMap.data = ({ method, params }: JsonRpcPayload) => {
       emitEvent('message', {
         type: method,
         data: params
@@ -626,7 +602,7 @@ export default class KoniTabs {
     return true;
   }
 
-  private checkAndHandleProviderStatus(provider: WebsocketProvider | HttpProvider | undefined) {
+  private checkAndHandleProviderStatus (provider: WebsocketProvider | HttpProvider | undefined) {
     if ((!provider || !provider?.connected) && provider?.supportsSubscriptions()) { // excludes HttpProvider
       Object.values(this.evmEventEmitterMap).forEach((m) => {
         Object.values(m).forEach((emitter) => {
@@ -637,7 +613,7 @@ export default class KoniTabs {
     }
   }
 
-  private async getEvmProvider(url: string): Promise<WebsocketProvider | undefined> {
+  private async getEvmProvider (url: string): Promise<WebsocketProvider | undefined> {
     const evmState = await this.getEvmState(url);
     let provider = evmState.web3?.currentProvider as WebsocketProvider;
 
@@ -649,10 +625,8 @@ export default class KoniTabs {
     return provider;
   }
 
-  private async performWeb3Method(id: string, url: string, {
-    method,
-    params
-  }: RequestArguments, callback?: (result?: any) => void) {
+  private async performWeb3Method (id: string, url: string, { method,
+    params }: RequestArguments, callback?: (result?: any) => void) {
     const provider = await this.getEvmProvider(url);
 
     this.checkAndHandleProviderStatus(provider);
@@ -678,13 +652,13 @@ export default class KoniTabs {
     });
   }
 
-  public async canUseAccount(address: string, url: string) {
+  public async canUseAccount (address: string, url: string) {
     const allowedAccounts = await this.getEvmCurrentAccount(url, true);
 
     return !!allowedAccounts.find((acc) => (acc.toLowerCase() === address.toLowerCase()));
   }
 
-  private async evmSign(id: string, url: string, {method, params}: RequestArguments) {
+  private async evmSign (id: string, url: string, { method, params }: RequestArguments) {
     const allowedAccounts = (await this.getEvmCurrentAccount(url, true));
     const signResult = await this.#koniState.evmSign(id, url, method, params, allowedAccounts);
 
@@ -695,7 +669,7 @@ export default class KoniTabs {
     }
   }
 
-  public async evmSendTransaction(id: string, url: string, {params}: RequestArguments) {
+  public async evmSendTransaction (id: string, url: string, { params }: RequestArguments) {
     const transactionParams = (params as EvmSendTransactionParams[])[0];
     const canUseAccount = transactionParams.from && this.canUseAccount(transactionParams.from, url);
     const evmState = await this.getEvmState(url);
@@ -719,8 +693,8 @@ export default class KoniTabs {
     return transactionHash;
   }
 
-  private async handleEvmRequest(id: string, url: string, request: RequestArguments): Promise<unknown> {
-    const {method} = request;
+  private async handleEvmRequest (id: string, url: string, request: RequestArguments): Promise<unknown> {
+    const { method } = request;
 
     console.log('method: ' + method);
 
@@ -747,7 +721,7 @@ export default class KoniTabs {
         case 'eth_signTypedData_v4':
           return await this.evmSign(id, url, request);
         case 'wallet_requestPermissions':
-          await this.authorizeV2(url, {origin: '', accountAuthType: 'evm', reConfirm: true});
+          await this.authorizeV2(url, { origin: '', accountAuthType: 'evm', reConfirm: true });
 
           return await this.getEvmPermission(url, id);
         case 'wallet_getPermissions':
@@ -774,7 +748,7 @@ export default class KoniTabs {
     }
   }
 
-  private async handleEvmSend(id: string, url: string, port: chrome.runtime.Port, request: RequestEvmProviderSend) {
+  private async handleEvmSend (id: string, url: string, port: chrome.runtime.Port, request: RequestEvmProviderSend) {
     const cb = createSubscription<'evm(provider.send)'>(id, port);
     const evmState = await this.getEvmState(url);
     const provider = evmState.web3?.currentProvider as WebsocketProvider;
@@ -783,7 +757,7 @@ export default class KoniTabs {
 
     provider.send(request, (error, result?) => {
       // eslint-disable-next-line node/no-callback-literal
-      cb({error, result});
+      cb({ error, result });
 
       this.cancelSubscription(id);
     });
@@ -795,7 +769,7 @@ export default class KoniTabs {
     return true;
   }
 
-  public isEvmPublicRequest(type: string, request: RequestArguments) {
+  public isEvmPublicRequest (type: string, request: RequestArguments) {
     if (type === 'evm(request)' && ['eth_chainId', 'net_version'].includes(request?.method)) {
       return true;
     } else {
@@ -803,7 +777,7 @@ export default class KoniTabs {
     }
   }
 
-  public async handle<TMessageType extends MessageTypes>(id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type === 'pub(phishing.redirectIfDenied)') {
       return this.redirectIfPhishing(url);
     }

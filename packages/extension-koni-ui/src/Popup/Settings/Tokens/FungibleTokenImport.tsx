@@ -10,19 +10,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainChecker, useDefaultNavigate, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
-import {
-  BackgroundIcon,
-  Col,
-  Field,
-  Form,
-  Icon,
-  Image,
-  Input,
-  NetworkItem,
-  Row,
-  SelectModal,
-  SettingItem
-} from '@subwallet/react-ui';
+import { BackgroundIcon, Col, Field, Form, Icon, Image, Input, NetworkItem, Row, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
@@ -410,7 +398,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               />
             </Form.Item>
 
-            <Row className={'token-symbol-decimals'} gutter={token.margin}>
+            <Row
+              className={'token-symbol-decimals'}
+              gutter={token.margin}
+            >
               <Col span={12}>
                 <Field
                   content={symbol}
@@ -436,8 +427,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             >
               <Input
                 disabled={selectedTokenType === ''}
-                tooltip={t('Price Id')}
                 placeholder={t('Price Id')}
+                tooltip={t('Price Id')}
               />
             </Form.Item>
             <Form.Item

@@ -5,12 +5,12 @@ import type { MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNul
 
 import { ProviderError } from '@subwallet/extension-base/background/errors/ProviderError';
 import { ProviderErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { SubWalletEvmProvider } from '@subwallet/extension-base/page/SubWalleEvmProvider';
 import { EvmProvider } from '@subwallet/extension-inject/types';
 
 import { MESSAGE_ORIGIN_PAGE } from '../defaults';
 import { getId } from '../utils/getId';
 import Injected from './Injected';
-import {SubWalletEvmProvider} from "@subwallet/extension-base/page/SubWalleEvmProvider";
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader
 //  - the loader takes this event and uses port.postMessage to background

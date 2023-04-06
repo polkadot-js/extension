@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -30,6 +31,44 @@ export interface PalletStakingStakingLedger {
   active: number,
   unlocking: UnlockingChunk[],
   claimedRewards: number[]
+}
+
+export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: string, selectedValidators: ValidatorInfo[], address: string, chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata): TransactionError[] {
+  // cannot stake when unstake all
+  // amount >= min stake
+
+}
+
+export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: string, selectedValidators: ValidatorInfo[], address: string, chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata) {
+  const errors: TransactionError[] = [];
+  let bnTotalStake = new BN(amount);
+  const bnMinStake = new BN(chainStakingMetadata.minStake);
+
+  if (!nominatorMetadata) {
+    if (!bnTotalStake.gte(bnMinStake)) {
+      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+    }
+
+    if (selectedValidators.length > chainStakingMetadata.maxValidatorPerNominator) {
+      errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS));
+    }
+
+    return errors;
+  }
+
+  const bnCurrentActiveStake = new BN(nominatorMetadata.activeStake);
+
+  bnTotalStake = bnTotalStake.add(bnCurrentActiveStake);
+
+  if (!bnTotalStake.gte(bnMinStake)) {
+    errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+  }
+
+  if (selectedValidators.length > chainStakingMetadata.maxValidatorPerNominator) {
+    errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS));
+  }
+
+  return errors;
 }
 
 export async function getRelayChainStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {

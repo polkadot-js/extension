@@ -570,6 +570,9 @@ export enum BasicTxErrorType {
 }
 
 export enum StakingTxErrorType {
+  NOT_ENOUGH_MIN_STAKE = 'NOT_ENOUGH_MIN_STAKE',
+  EXCEED_MAX_NOMINATIONS = 'EXCEED_MAX_NOMINATIONS',
+  EXIST_UNSTAKING_REQUEST = 'EXIST_UNSTAKING_REQUEST',
   STAKING_ERROR = 'stakingError',
   UN_STAKING_ERROR = 'unStakingError',
   WITHDRAW_STAKING_ERROR = 'withdrawStakingError',

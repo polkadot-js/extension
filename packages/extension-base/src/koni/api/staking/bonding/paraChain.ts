@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getBondedValidators, getParaCurrentInflation, InflationConfig, isUnstakeAll, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -19,6 +20,60 @@ interface CollatorExtraInfo {
   delegationCount: number,
   bond: string,
   minDelegation: string
+}
+
+export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount: string, selectedCollators: ValidatorInfo[], address: string, chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata): TransactionError[] {
+  const errors: TransactionError[] = [];
+  const selectedCollator = selectedCollators[0];
+  let bnTotalStake = new BN(amount);
+  const bnChainMinStake = new BN(chainStakingMetadata.minStake || '0');
+  const bnCollatorMinStake = new BN(selectedCollator.minBond || '0');
+  const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
+
+  if (!nominatorMetadata) {
+    if (!bnTotalStake.gte(bnMinStake)) {
+      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+    }
+
+    return errors;
+  }
+
+  const { bondedValidators } = getBondedValidators(nominatorMetadata.nominations);
+  const parsedSelectedCollatorAddress = reformatAddress(selectedCollator.address, 0);
+
+  if (!bondedValidators.includes(parsedSelectedCollatorAddress)) { // new delegation
+    if (!bnTotalStake.gte(bnMinStake)) {
+      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+    }
+
+    const delegationCount = nominatorMetadata.nominations.length + 1;
+
+    if (delegationCount > chainStakingMetadata.maxValidatorPerNominator) {
+      errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_NOMINATIONS));
+    }
+  } else {
+    let currentDelegationAmount = '0';
+    let hasUnstaking = false;
+
+    for (const delegation of nominatorMetadata.nominations) {
+      if (reformatAddress(delegation.validatorAddress, 0) === parsedSelectedCollatorAddress) {
+        currentDelegationAmount = delegation.activeStake;
+        hasUnstaking = !!delegation.hasUnstaking && delegation.hasUnstaking;
+      }
+    }
+
+    bnTotalStake = bnTotalStake.add(new BN(currentDelegationAmount));
+
+    if (!bnTotalStake.gte(bnMinStake)) {
+      errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+    }
+
+    if (hasUnstaking) {
+      errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));
+    }
+  }
+
+  return errors;
 }
 
 export async function getParaChainStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {

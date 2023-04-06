@@ -186,9 +186,9 @@ export class KoniSubscription {
   initBalanceSubscription (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
     const filteredChainInfoMap: Record<string, _ChainInfo> = {};
 
-    Object.values(chainInfoMap).forEach((chainInfo) => {
-      if (chainStateMap[chainInfo.slug].active) {
-        filteredChainInfoMap[chainInfo.slug] = chainInfo;
+    Object.values(chainStateMap).forEach((chainState) => {
+      if (chainState.active) {
+        filteredChainInfoMap[chainState.slug] = chainInfoMap[chainState.slug];
       }
     });
 

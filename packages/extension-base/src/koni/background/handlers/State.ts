@@ -276,7 +276,8 @@ export default class KoniState {
     this.eventService.emit('chain.ready', true);
 
     this.onReady();
-    this.autoEnableChainOnAccountAdded();
+    this.onAccountAdd();
+    this.onAccountRemove();
     this.logger.log('Done init state');
   }
 
@@ -792,14 +793,14 @@ export default class KoniState {
     }
 
     if (checkingAddress === ALL_ACCOUNT_KEY) {
-      return Object.keys(accounts.subject.value);
+      return this.getAllAddresses();
     }
 
     return [checkingAddress];
   }
 
   public getAllAddresses (): string[] {
-    return Object.keys(accounts.subject.value);
+    return keyring.getAccounts().map((account) => account.address);
   }
 
   private removeInactiveChainBalances (balanceMap: Record<string, BalanceItem>) {
@@ -1676,9 +1677,27 @@ export default class KoniState {
     }
   }
 
-  public autoEnableChainOnAccountAdded () {
+  public onAccountAdd () {
     this.eventService.on('account.add', (address) => {
       this.autoEnableChains([address]).catch(this.logger.error);
+    });
+  }
+
+  public onAccountRemove () {
+    this.eventService.on('account.remove', (address) => {
+      // Some separate service like historyService will listen to this event and remove inside that service
+
+      const stores = this.dbService.stores;
+
+      // Remove Balance
+      stores.balance.removeAllByAddress(address).catch(console.error);
+      stores.balance.removeAllByAddress(ALL_ACCOUNT_KEY).catch(console.error);
+
+      // Remove NFT
+      stores.nft.deleteNftByAddress([address]).catch(console.error);
+
+      // Remove Staking Data
+      stores.staking.removeAllByAddress(address).catch(console.error);
     });
   }
 }

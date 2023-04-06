@@ -279,11 +279,14 @@ export class ChainService {
     return this.getAssetRegistry()[slug];
   }
 
-  public getFungibleTokensByChain (chainSlug: string): Record<string, _ChainAsset> {
+  public getFungibleTokensByChain (chainSlug: string, checkActive = false): Record<string, _ChainAsset> {
     const result: Record<string, _ChainAsset> = {};
+    const assetSettings = this.assetSettingSubject.value;
 
     Object.values(this.getAssetRegistry()).forEach((chainAsset) => {
-      if (chainAsset.originChain === chainSlug && _isAssetFungibleToken(chainAsset)) {
+      const _filterActive = !checkActive || assetSettings[chainAsset.slug]?.visible;
+
+      if (chainAsset.originChain === chainSlug && _isAssetFungibleToken(chainAsset) && _filterActive) {
         result[chainAsset.slug] = chainAsset;
       }
     });
@@ -1301,9 +1304,9 @@ export class ChainService {
       });
 
       this.setAssetSettings(assetSettings, false);
-      this.eventService.emit('asset.ready', true);
     }
 
+    this.eventService.emit('asset.ready', true);
     console.log('Done init asset settings');
   }
 

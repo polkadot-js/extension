@@ -23,7 +23,6 @@ export interface EventRegistry {
   'asset.enable': [string] // token slug
   'asset.disable': [string] // token slug
   'asset.remove': [string] // token slug,
-  'service.update': [string],
   'transaction.done': [SWTransaction]
   'transaction.failed': [SWTransaction | undefined]
 }

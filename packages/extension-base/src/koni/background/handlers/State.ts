@@ -25,7 +25,7 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
-import SUBSCAN_CHAIN_MAP from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
+import { SUBSCAN_CHAIN_MAP_REVERSE } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
@@ -276,7 +276,8 @@ export default class KoniState {
     this.eventService.emit('chain.ready', true);
 
     this.onReady();
-    this.autoEnableChainOnAccountAdded();
+    this.onAccountAdd();
+    this.onAccountRemove();
     this.logger.log('Done init state');
   }
 
@@ -792,14 +793,14 @@ export default class KoniState {
     }
 
     if (checkingAddress === ALL_ACCOUNT_KEY) {
-      return Object.keys(accounts.subject.value);
+      return this.getAllAddresses();
     }
 
     return [checkingAddress];
   }
 
   public getAllAddresses (): string[] {
-    return Object.keys(accounts.subject.value);
+    return keyring.getAccounts().map((account) => account.address);
   }
 
   private removeInactiveChainBalances (balanceMap: Record<string, BalanceItem>) {
@@ -1646,13 +1647,17 @@ export default class KoniState {
     const needEnableChains: string[] = [];
     const needActiveTokens: string[] = [];
     const currentAssetSettings = await this.chainService.getAssetSettings();
+    const chainMap = this.chainService.getChainInfoMap();
     const balanceDataList = await Promise.all(promiseList);
 
     balanceDataList.forEach((balanceData) => {
-      balanceData && balanceData.forEach(({ category, network, symbol }) => {
-        const chain = SUBSCAN_CHAIN_MAP[network];
+      balanceData && balanceData.forEach(({ balance, bonded, category, locked, network, symbol }) => {
+        const chain = SUBSCAN_CHAIN_MAP_REVERSE[network];
+        const chainInfo = chain ? chainMap[chain] : null;
+        const balanceIsEmpty = (!balance || balance === '0') && (!locked && locked === '0') && (!bonded || bonded === '0');
 
-        if (!chain) {
+        // Cancel if chain is not supported or is testnet or balance is 0
+        if (!chainInfo || chainInfo.isTestnet || balanceIsEmpty) {
           return;
         }
 
@@ -1672,9 +1677,27 @@ export default class KoniState {
     }
   }
 
-  public autoEnableChainOnAccountAdded () {
+  public onAccountAdd () {
     this.eventService.on('account.add', (address) => {
       this.autoEnableChains([address]).catch(this.logger.error);
+    });
+  }
+
+  public onAccountRemove () {
+    this.eventService.on('account.remove', (address) => {
+      // Some separate service like historyService will listen to this event and remove inside that service
+
+      const stores = this.dbService.stores;
+
+      // Remove Balance
+      stores.balance.removeAllByAddress(address).catch(console.error);
+      stores.balance.removeAllByAddress(ALL_ACCOUNT_KEY).catch(console.error);
+
+      // Remove NFT
+      stores.nft.deleteNftByAddress([address]).catch(console.error);
+
+      // Remove Staking Data
+      stores.staking.removeAllByAddress(address).catch(console.error);
     });
   }
 }

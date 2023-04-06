@@ -26,7 +26,6 @@ export class PriceService {
 
     // Fetch data from storage
     this.getPrice().catch(console.error);
-    this.refreshPriceData();
 
     const eventHandler = () => {
       const newPriceIds = this.getPriceIds();
@@ -38,8 +37,13 @@ export class PriceService {
       }
     };
 
-    this.eventService.on('asset.enable', eventHandler);
-    this.eventService.on('asset.add', eventHandler);
+    this.eventService.waitAssetReady
+      .then(() => {
+        this.refreshPriceData();
+
+        this.eventService.on('asset.enable', eventHandler);
+        this.eventService.on('asset.add', eventHandler);
+      }).catch(console.error);
   }
 
   async getPrice () {
@@ -80,9 +84,7 @@ export class PriceService {
 
         console.log('Get Token Price From CoinGecko');
       })
-      .catch((e) => {
-        // Pass
-      });
+      .catch(console.error);
 
     this.refreshTimeout = setTimeout(this.refreshPriceData.bind(this), CRON_REFRESH_PRICE_INTERVAL);
   }

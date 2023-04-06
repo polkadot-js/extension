@@ -44,7 +44,11 @@ export default class NftStore extends BaseStoreWithAddressAndChain<INft> {
     }).and((nft) => !collectionIds.some((item) => item === nft.collectionId));
   }
 
-  deleteNftByAddresses (chain: string, addresses: string[], nftItem: NftItem) {
+  deleteNftByAddress (addresses: string[]) {
+    return this.table.where('address').anyOfIgnoreCase(addresses).delete();
+  }
+
+  deleteNftItem (chain: string, addresses: string[], nftItem: NftItem) {
     return this.table.where('address').anyOfIgnoreCase(addresses).filter((storedItem) => storedItem.chain === chain &&
       storedItem.collectionId === nftItem.collectionId &&
       storedItem.id === nftItem.id).delete();

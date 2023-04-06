@@ -3,7 +3,7 @@
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { isAccountAll } from '@subwallet/extension-base/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import reformatAddress from '@subwallet/extension-koni-ui/util/account/reformatAddress';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
@@ -16,11 +16,8 @@ interface NftData {
 }
 
 function filterNftByAccount (currentAccount: AccountJson | null, nftCollections: NftCollection[], nftItems: NftItem[], accountNetwork?: string): NftData {
-  if (!currentAccount || currentAccount.address === ALL_ACCOUNT_KEY) {
-    return { nftCollections: [...nftCollections].reverse(), nftItems };
-  }
-
-  const currentAddress = reformatAddress(currentAccount.address, 0);
+  const isAll = !currentAccount || isAccountAll(currentAccount.address);
+  const currentAddress = !isAll && reformatAddress(currentAccount.address, 0);
   const filteredNftItems: NftItem[] = [];
   const filteredNftCollections: NftCollection[] = [];
 
@@ -29,7 +26,7 @@ function filterNftByAccount (currentAccount: AccountJson | null, nftCollections:
   nftItems.forEach((nftItem) => {
     const formattedOwnerAddress = reformatAddress(nftItem.owner, 0);
 
-    if (currentAddress === formattedOwnerAddress) {
+    if (isAll || currentAddress === formattedOwnerAddress) {
       let pass = true;
 
       if (accountNetwork) {

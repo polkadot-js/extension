@@ -233,7 +233,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
 
     const bnActiveStake = bnStake.sub(bnUnstakeBalance);
 
-    if (bnStake.lt(BN_ZERO) && bnStake.gte(new BN(minDelegation))) {
+    if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegation))) {
       delegationStatus = StakingStatus.EARNING_REWARD;
     }
 

@@ -147,6 +147,15 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           valueColorSchema={'gray'}
         />
 
+        <MetaInfo.Number
+          decimals={decimals}
+          key={item.validatorAddress}
+          label={t('Min stake')}
+          suffix={staking.nativeToken}
+          value={item.validatorMinStake || '0'}
+          valueColorSchema={'gray'}
+        />
+
         <MetaInfo.Status
           label={t('Staking status')}
           statusIcon={getStakingStatus(item.status).icon}
@@ -237,14 +246,14 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           value={String(parseFloat(activeStake) + parseFloat(staking.unlockingBalance || '0'))}
         />
 
-        {!seeMore && <MetaInfo.Number
+        {<MetaInfo.Number
           decimals={decimals}
           label={t('Active staked')}
           suffix={staking.nativeToken}
           value={activeStake}
         />}
 
-        {!seeMore && <MetaInfo.Number
+        {<MetaInfo.Number
           decimals={decimals}
           label={t('Unstaked')}
           suffix={staking.nativeToken}

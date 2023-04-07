@@ -290,12 +290,8 @@ export function getBondedValidators (nominations: NominationInfo[]) {
   let nominationCount = 0;
 
   for (const nomination of nominations) {
-    const bnActiveStake = new BN(nomination.activeStake);
-
-    if (bnActiveStake.gt(BN_ZERO)) {
-      nominationCount += 1;
-      bondedValidators.push(reformatAddress(nomination.validatorAddress, 0));
-    }
+    nominationCount += 1;
+    bondedValidators.push(reformatAddress(nomination.validatorAddress, 0));
   }
 
   return {

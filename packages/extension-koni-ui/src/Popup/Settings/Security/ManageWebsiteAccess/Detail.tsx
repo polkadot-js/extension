@@ -264,15 +264,12 @@ const ManageWebsiteAccessDetail = styled(WrapperComponent)<Props>(({ theme: { to
   return ({
     paddingBottom: token.paddingMD,
 
-    '&.manage-website-access-detail': {
-      height: '100%',
-      backgroundColor: token.colorBgDefault,
-      display: 'flex',
-      flexDirection: 'column',
+    '.ant-sw-list-section': {
+      height: '100%'
+    },
 
-      '.ant-sw-list-section': {
-        flex: 1
-      }
+    '&.manage-website-access-detail': {
+      backgroundColor: token.colorBgDefault
     },
 
     '.ant-sw-screen-layout-body': {

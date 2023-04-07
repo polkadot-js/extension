@@ -15,7 +15,7 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
-import { qrSignerScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
+import { qrSignerScan } from '@subwallet/extension-koni-ui/utils/scanner/attach';
 import { Form, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { QrCode } from 'phosphor-react';

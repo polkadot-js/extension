@@ -4,7 +4,7 @@
 import { ExtrinsicType, TransactionAdditionalInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { isTypeTransfer } from '@subwallet/extension-koni-ui/util';
+import { isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

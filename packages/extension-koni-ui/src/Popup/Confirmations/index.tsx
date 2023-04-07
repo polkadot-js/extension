@@ -7,7 +7,7 @@ import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants/s
 import { useConfirmationsInfo } from '@subwallet/extension-koni-ui/hooks';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isRawPayload } from '@subwallet/extension-koni-ui/util';
+import { isRawPayload } from '@subwallet/extension-koni-ui/utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

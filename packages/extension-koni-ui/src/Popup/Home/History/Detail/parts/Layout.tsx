@@ -4,7 +4,7 @@
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { HistoryStatusMap, TxTypeNameMap } from '@subwallet/extension-koni-ui/constants';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate, toShort } from '@subwallet/extension-koni-ui/util';
+import { customFormatDate, toShort } from '@subwallet/extension-koni-ui/utils';
 import CN from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

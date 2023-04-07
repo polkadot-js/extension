@@ -5,7 +5,7 @@ import { SigningRequest } from '@subwallet/extension-base/background/types';
 import { AccountItemWithName, ConfirmationGeneralInfo, ViewDetailIcon } from '@subwallet/extension-koni-ui/components';
 import { useOpenDetailModal, useParseSubstrateRequestPayload } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isSubstrateMessage } from '@subwallet/extension-koni-ui/util';
+import { isSubstrateMessage } from '@subwallet/extension-koni-ui/utils';
 import { Button } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React from 'react';

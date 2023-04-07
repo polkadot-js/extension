@@ -8,7 +8,7 @@ import { useCopy } from '@subwallet/extension-koni-ui/hooks';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { detectThemeAvatar, toShort } from '@subwallet/extension-koni-ui/util';
+import { detectThemeAvatar, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Col, Field, Icon, Image, Row, Tooltip } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';

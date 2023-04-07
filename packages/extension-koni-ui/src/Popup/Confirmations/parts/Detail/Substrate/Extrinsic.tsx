@@ -10,7 +10,7 @@ import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo'
 import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByGenesisHash';
 import useMetadata from '@subwallet/extension-koni-ui/hooks/transaction/confirmation/useMetadata';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/util';
+import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { TFunction } from 'i18next';
 import React, { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';

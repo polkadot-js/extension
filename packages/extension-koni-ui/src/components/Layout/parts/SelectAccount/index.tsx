@@ -15,8 +15,8 @@ import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@subwall
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { searchAccountFunction } from '@subwallet/extension-koni-ui/util/account/account';
+import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { searchAccountFunction } from '@subwallet/extension-koni-ui/utils/account/account';
 import { BackgroundIcon, Logo, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Plug, Plugs, PlugsConnected } from 'phosphor-react';

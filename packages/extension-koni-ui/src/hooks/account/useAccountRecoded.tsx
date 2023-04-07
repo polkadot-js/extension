@@ -4,7 +4,7 @@
 import useChainInfo from '@subwallet/extension-koni-ui/hooks/chain/useChainInfo';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Recoded } from '@subwallet/extension-koni-ui/types';
-import { recodeAddress } from '@subwallet/extension-koni-ui/util';
+import { recodeAddress } from '@subwallet/extension-koni-ui/utils';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 

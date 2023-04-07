@@ -4,7 +4,7 @@
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import ChainItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/ChainItem';
 import { ChainInfo } from '@subwallet/extension-koni-ui/types/chain';
-import { toShort } from '@subwallet/extension-koni-ui/util';
+import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { Logo } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React from 'react';

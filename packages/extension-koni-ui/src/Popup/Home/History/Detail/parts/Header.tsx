@@ -6,7 +6,7 @@ import { _getChainName } from '@subwallet/extension-base/services/chain-service/
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/util';
+import { isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';

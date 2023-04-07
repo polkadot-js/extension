@@ -8,8 +8,8 @@ import ConfirmationGeneralInfo from '@subwallet/extension-koni-ui/components/Con
 import { changeAuthorizationBlock, changeAuthorizationPerSite } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress } from '@subwallet/extension-koni-ui/util';
-import { accountCanSign, getSignMode } from '@subwallet/extension-koni-ui/util/account/account';
+import { findAccountByAddress } from '@subwallet/extension-koni-ui/utils';
+import { accountCanSign, getSignMode } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Button, Icon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, GlobeHemisphereWest, ShieldCheck, ShieldSlash, XCircle } from 'phosphor-react';

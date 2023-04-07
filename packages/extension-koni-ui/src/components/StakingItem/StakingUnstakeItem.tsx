@@ -5,7 +5,7 @@ import { UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/backgr
 import { Avatar } from '@subwallet/extension-koni-ui/components';
 import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/util';
+import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { Icon, Number, Web3Block } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, Spinner } from 'phosphor-react';

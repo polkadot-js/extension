@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getBondedValidators, getParaCurrentInflation, InflationConfig, isUnstakeAll, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getBondedValidators, getParaCurrentInflation, getStakingStatusByNominations, InflationConfig, isUnstakeAll, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -187,12 +187,15 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
   let bnTotalActiveStake = BN_ZERO;
 
   await Promise.all(delegatorState.delegations.map(async (delegation) => {
-    const [_delegationScheduledRequests, _identity, _roundInfo] = await Promise.all([
+    const [_delegationScheduledRequests, _identity, _roundInfo, _collatorInfo] = await Promise.all([
       chainApi.api.query.parachainStaking.delegationScheduledRequests(delegation.owner),
       chainApi.api.query.identity.identityOf(delegation.owner),
-      chainApi.api.query.parachainStaking.round()
+      chainApi.api.query.parachainStaking.round(),
+      chainApi.api.query.parachainStaking.candidateInfo(delegation.owner)
     ]);
 
+    const rawCollatorInfo = _collatorInfo.toHuman() as Record<string, any>;
+    const minDelegation = (rawCollatorInfo?.lowestTopDelegationAmount as string).replaceAll(',', '');
     const identityInfo = _identity.toHuman() as unknown as PalletIdentityRegistration;
     const roundInfo = _roundInfo.toPrimitive() as Record<string, number>;
     const delegationScheduledRequests = _delegationScheduledRequests.toPrimitive() as unknown as PalletParachainStakingDelegationRequestsScheduledRequest[];
@@ -200,6 +203,7 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
     const currentRound = roundInfo.current;
     const identity = parseIdentity(identityInfo);
     let hasUnstaking = false;
+    let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
 
     // parse unstaking info
     if (delegationScheduledRequests) {
@@ -229,11 +233,15 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
 
     const bnActiveStake = bnStake.sub(bnUnstakeBalance);
 
+    if (bnStake.gte(new BN(minDelegation))) {
+      delegationStatus = StakingStatus.EARNING_REWARD;
+    }
+
     bnTotalActiveStake = bnTotalActiveStake.add(bnActiveStake);
 
     nominationList.push({
       chain,
-      status: StakingStatus.NOT_EARNING,
+      status: delegationStatus,
       validatorAddress: delegation.owner,
       validatorIdentity: identity,
       activeStake: bnActiveStake.toString(),
@@ -248,9 +256,12 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
     nomination.validatorMinStake = collatorInfo.lowestTopDelegationAmount.toString();
   }));
 
+  const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);
+
   return {
     chain,
     type: StakingType.NOMINATED,
+    status: stakingStatus,
     address: address,
     activeStake: bnTotalActiveStake.toString(),
 

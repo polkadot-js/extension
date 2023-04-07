@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
@@ -410,4 +410,28 @@ export function getWithdrawalInfo (nominatorMetadata: NominatorMetadata) {
   }
 
   return result;
+}
+
+export function getStakingStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): StakingStatus {
+  let stakingStatus: StakingStatus = StakingStatus.EARNING_REWARD;
+
+  if (bnTotalActiveStake.isZero()) {
+    stakingStatus = StakingStatus.NOT_EARNING;
+  } else {
+    let invalidDelegationCount = 0;
+
+    for (const nomination of nominationList) {
+      if (nomination.status === StakingStatus.NOT_EARNING) {
+        invalidDelegationCount += 1;
+      }
+    }
+
+    if (invalidDelegationCount > 0 && invalidDelegationCount < nominationList.length) {
+      stakingStatus = StakingStatus.PARTIALLY_EARNING;
+    } else if (invalidDelegationCount === nominationList.length) {
+      stakingStatus = StakingStatus.NOT_EARNING;
+    }
+  }
+
+  return stakingStatus;
 }

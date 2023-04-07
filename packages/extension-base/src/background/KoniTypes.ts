@@ -1426,7 +1426,8 @@ export interface UnstakingInfo {
 export enum StakingStatus {
   EARNING_REWARD = 'EARNING_REWARD',
   PARTIALLY_EARNING = 'PARTIALLY_EARNING',
-  NOT_EARNING = 'NOT_EARNING'
+  NOT_EARNING = 'NOT_EARNING',
+  WAITING = 'WAITING'
 }
 
 export interface NominatorMetadata {

@@ -3,7 +3,7 @@
 
 import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
-import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

@@ -5,7 +5,7 @@ import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingItem, S
 import { isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
 import { useGetAccountByAddress, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';

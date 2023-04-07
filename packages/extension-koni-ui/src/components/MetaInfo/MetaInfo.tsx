@@ -1,13 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import AccountGroupItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountGroupItem';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React from 'react';
 import styled from 'styled-components';
 
-import { AccountItem, ChainItem, DataItem, DefaultItem, DisplayTypeItem, NumberItem, StatusItem, TotalItem, TransferItem } from './parts';
+import { AccountGroupItem, AccountItem, ChainItem, DataItem, DefaultItem, DisplayTypeItem, NumberItem, StatusItem, TotalItem, TransferItem } from './parts';
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;

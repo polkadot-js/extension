@@ -6,7 +6,7 @@ import type { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/inter
 import type { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import useGetChainInfoByGenesisHash from '@subwallet/extension-koni-ui/hooks/chain/useGetChainInfoByGenesisHash';
 import useMetadata from '@subwallet/extension-koni-ui/hooks/transaction/confirmation/useMetadata';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

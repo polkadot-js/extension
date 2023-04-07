@@ -34,7 +34,7 @@ export class HistoryService {
       this.getHistories().catch(console.log);
 
       this.eventService.on('account.add', (address) => {
-        this.refreshHistoryInterval.bind(this);
+        this.refreshHistoryInterval();
       });
       this.eventService.on('account.remove', (address) => {
         this.removeHistoryByAddress(address).catch(console.error);
@@ -66,9 +66,9 @@ export class HistoryService {
       record.toName = accountMap[record.to?.toLowerCase()];
     });
 
-    await this.dbService.upsertHistory(historyRecords);
+    this.dbService.upsertHistory(historyRecords).catch(console.error);
 
-    return await this.dbService.getHistories();
+    return historyRecords;
   }
 
   public async fetchHistories (addresses: string[]) {

@@ -41,14 +41,14 @@ export default class TransactionStore extends BaseStoreWithAddressAndChain<ITran
   public override async bulkUpsert (records: ITransactionHistoryItem[]): Promise<unknown> {
     await this.table.bulkPut(records);
 
-    await Promise.all(records.map((record) => {
-      return this.table.where({
-        chain: record.chain,
-        address: record.address,
-        extrinsicHash: record.extrinsicHash
-      }).filter((item) => (item.origin === 'app' && record.origin !== 'app'))
-        .delete();
-    }));
+    // await Promise.all(records.map((record) => {
+    //   return this.table.where({
+    //     chain: record.chain,
+    //     address: record.address,
+    //     extrinsicHash: record.extrinsicHash
+    //   }).filter((item) => (item.origin === 'app' && record.origin !== 'app'))
+    //     .delete();
+    // }));
 
     return true;
   }

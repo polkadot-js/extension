@@ -53,8 +53,6 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const { t } = useTranslation();
 
-  console.log(data);
-
   const txTypeNameMap: Record<string, string> = useMemo(() => ({
     [ExtrinsicType.TRANSFER_BALANCE]: t('Transfer'),
     [ExtrinsicType.TRANSFER_TOKEN]: t('Transfer'),

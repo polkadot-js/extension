@@ -9,7 +9,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
-import React, { useCallback, useContext, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import GeneralEmptyList from '../../GeneralEmptyList';
@@ -26,7 +26,7 @@ const renderEmpty = () => <GeneralEmptyList />;
 
 function Component ({ address, className = '', items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal, checkActive } = useContext(ModalContext);
   const sectionRef = useRef<SwListSectionRef>(null);
   const checkAsset = useAssetChecker();
 
@@ -40,7 +40,6 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
 
   const onCancel = useCallback(() => {
     inactiveModal(ReceiveTokensSelectorModalId);
-    sectionRef.current?.setSearchValue('');
   }, [inactiveModal]);
 
   const onClickQrBtn = useCallback((item: _ChainAsset) => {
@@ -51,6 +50,14 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
       activeModal(RECEIVE_QR_MODAL);
     };
   }, [activeModal, checkAsset, inactiveModal, onSelectItem]);
+
+  useEffect(() => {
+    if (!checkActive(ReceiveTokensSelectorModalId)) {
+      setTimeout(() => {
+        sectionRef.current?.setSearchValue('');
+      }, 100);
+    }
+  }, [checkActive, ReceiveTokensSelectorModalId]);
 
   const renderItem = useCallback((item: _ChainAsset) => {
     return (

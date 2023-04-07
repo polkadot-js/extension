@@ -1125,11 +1125,7 @@ export default class KoniExtension {
         throw Error('Require password to set up master password');
       } else {
         keyring.changeMasterPassword(password);
-        this.#koniState.setKeyringState({
-          hasMasterPassword: true,
-          isLocked: false,
-          isReady: true
-        });
+        this.#koniState.updateKeyringState();
       }
     }
 
@@ -2520,11 +2516,7 @@ export default class KoniExtension {
       };
     }
 
-    this.#koniState.setKeyringState({
-      hasMasterPassword: true,
-      isLocked: false,
-      isReady: true
-    });
+    this.#koniState.updateKeyringState();
 
     return {
       status: true,
@@ -2560,11 +2552,7 @@ export default class KoniExtension {
       };
     }
 
-    this.#koniState.setKeyringState({
-      isReady: true,
-      hasMasterPassword: true,
-      isLocked: false
-    });
+    this.#koniState.updateKeyringState();
 
     return {
       status: true,
@@ -2575,11 +2563,7 @@ export default class KoniExtension {
   private keyringLock (): void {
     keyring.lockAll();
 
-    this.#koniState.setKeyringState({
-      isReady: true,
-      hasMasterPassword: true,
-      isLocked: true
-    });
+    this.#koniState.updateKeyringState();
   }
 
   private keyringExportMnemonic ({ address, password }: RequestKeyringExportMnemonic): ResponseKeyringExportMnemonic {

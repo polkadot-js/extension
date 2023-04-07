@@ -29,16 +29,16 @@ export function validateBondingCondition (chainInfo: _ChainInfo, amount: string,
   return validateParaChainBondingCondition(chainInfo, amount, selectedValidators, address, chainStakingMetadata, nominatorMetadata);
 }
 
-export async function getChainStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
-  if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
-    return getAstarStakingMetadata(chain, substrateApi);
-  } else if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
-    return getParaChainStakingMetadata(chain, substrateApi);
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
-    return getAmplitudeStakingMetadata(chain, substrateApi);
+export async function getChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
+  if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
+    return getAstarStakingMetadata(chainInfo.slug, substrateApi);
+  } else if (_STAKING_CHAIN_GROUP.para.includes(chainInfo.slug)) {
+    return getParaChainStakingMetadata(chainInfo.slug, substrateApi);
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chainInfo.slug)) {
+    return getAmplitudeStakingMetadata(chainInfo.slug, substrateApi);
   }
 
-  return getRelayChainStakingMetadata(chain, substrateApi);
+  return getRelayChainStakingMetadata(chainInfo, substrateApi);
 }
 
 export async function getNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {

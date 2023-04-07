@@ -4,7 +4,6 @@
 import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import BigNumber from 'bignumber.js';
 
 import { BN, hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
@@ -317,21 +316,6 @@ export const filterAndSortingAccountByAuthType = (accounts: AccountJson[], accou
 
 export function parseRawNumber (value: string) {
   return parseFloat(value.replaceAll(',', ''));
-}
-
-export function parseNumberToDisplay (amount: BN, decimals: number | undefined) {
-  if (!decimals) {
-    return '0';
-  }
-
-  const parsedAmount = parseRawNumber(amount.toString());
-
-  const bigN = new BigNumber(parsedAmount / (10 ** decimals));
-  const roundedString = bigN.toFixed(9);
-
-  const formattedString = parseFloat(roundedString); // remove excess zeros at the end
-
-  return formattedString.toString();
 }
 
 export function isSameAddress (address1: string, address2: string) {

@@ -324,7 +324,7 @@ export class KoniSubscription {
       const chainState = chainStateMap[chainInfo.slug];
 
       if (chainState?.active && _isChainSupportSubstrateStaking(chainInfo)) {
-        const chainStakingMetadata = await getChainStakingMetadata(chainInfo.slug, substrateApiMap[chainInfo.slug]);
+        const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
 
         this.state.updateChainStakingMetadata(chainStakingMetadata);
       }

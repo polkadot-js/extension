@@ -8,7 +8,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
-import { BN } from '@polkadot/util';
+import {BN, BN_ZERO} from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface InflationConfig {
@@ -96,7 +96,7 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
     const bnActiveStake = new BN(activeStake);
     let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
 
-    if (bnActiveStake.gte(new BN(minDelegatorStake))) {
+    if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
       delegationStatus = StakingStatus.EARNING_REWARD;
     }
 

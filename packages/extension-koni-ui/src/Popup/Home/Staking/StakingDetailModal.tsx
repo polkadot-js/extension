@@ -389,7 +389,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </>
         )}
 
-        {(showingOption === 'showByValidator' || showingOption === 'mixed') && (nominations && nominations.length > 0) && (unstakings && unstakings.length > 0) &&
+        {(showingOption === 'showByValidator' || showingOption === 'mixed') && (nominations && nominations.length > 0) &&
           <>
             {nominations && nominations.length && nominations.map((item) => (
               renderUnstakingInfo(item)

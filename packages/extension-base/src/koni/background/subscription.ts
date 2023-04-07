@@ -348,15 +348,19 @@ export class KoniSubscription {
       addresses = await this.state.getStakingOwnersByChains(Object.keys(filteredChainInfoMap));
     }
 
-    const validAddresses = addresses.filter((address) => !isEthereumAddress(address));
+    console.log('filteredChainInfoMap', filteredChainInfoMap);
 
-    await Promise.all(validAddresses.map(async (address) => {
+    await Promise.all(addresses.map(async (address) => {
       const isEvmAddress = isEthereumAddress(address);
 
       await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
         if (isEvmAddress && !_isChainEvmCompatible(chainInfo)) {
+          console.log('got here', chainInfo.slug);
+
           return;
         }
+
+        console.log('ok fuck', chainInfo.slug)
 
         if (_isSubstrateRelayChain(chainInfo) && _STAKING_CHAIN_GROUP.nominationPool.includes(chainInfo.slug)) {
           const poolMemberMetadata = await getRelayChainPoolMemberMetadata(chainInfo, address, substrateApiMap[chainInfo.slug]);

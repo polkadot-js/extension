@@ -109,7 +109,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
       const bnCurrentStake = new BN(currentStake);
 
       if (bnCurrentStake.gt(BN_ZERO)) {
-        const dappStakingStatus = bnCurrentStake.gte(new BN(minDelegatorStake)) ? StakingStatus.EARNING_REWARD : StakingStatus.NOT_EARNING;
+        const dappStakingStatus = bnCurrentStake.gt(BN_ZERO) && bnCurrentStake.gte(new BN(minDelegatorStake)) ? StakingStatus.EARNING_REWARD : StakingStatus.NOT_EARNING;
 
         bnTotalActiveStake = bnTotalActiveStake.add(bnCurrentStake);
         const dappInfo = dAppInfoMap[dappAddress];

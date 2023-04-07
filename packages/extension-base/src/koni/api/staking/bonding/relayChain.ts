@@ -225,6 +225,7 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
   for (const nomination of nominationList) {
     if (nomination.status === StakingStatus.EARNING_REWARD) { // only need 1 earning nomination to count
       stakingStatus = StakingStatus.EARNING_REWARD;
+
       break;
     }
   }

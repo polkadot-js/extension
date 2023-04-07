@@ -114,6 +114,10 @@ enum FilterValue {
   FAILED = 'failed',
 }
 
+function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'address' | 'extrinsicHash'>) {
+  return `${item.chain}-${item.address}-${item.extrinsicHash}`;
+}
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
@@ -224,11 +228,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }), [t]);
 
   // Fill display data to history list
-  const historyList = useMemo(() => {
+  const historyMap = useMemo(() => {
     const currentAddress = currentAccount?.address || '';
     const currentAddressLowerCase = currentAddress.toLowerCase();
     const isFilterByAddress = currentAccount?.address && !isAccountAll(currentAddress);
-    const finalHistoryList: TransactionHistoryDisplayItem[] = [];
+    const finalHistoryMap: Record<string, TransactionHistoryDisplayItem> = {};
 
     rawHistoryList.forEach((item: TransactionHistoryItem) => {
       // Filter account by current account
@@ -239,12 +243,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       // Format display name for account by address
       const fromName = accountMap[quickFormatAddressToCompare(item.from) || ''];
       const toName = accountMap[quickFormatAddressToCompare(item.to) || ''];
+      const key = getHistoryItemKey(item);
 
-      finalHistoryList.push({ ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) });
+      finalHistoryMap[key] = { ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) }
     });
 
-    return finalHistoryList.sort((a, b) => (b.time - a.time));
+    return finalHistoryMap;
   }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap, currentAccount?.address]);
+
+  const historyList = useMemo(() => {
+    return Object.values(historyMap).sort((a, b) => (b.time - a.time));
+  }, [historyMap]);
 
   const [curAdr] = useState(currentAccount?.address);
 
@@ -285,13 +294,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     if (checkActive(HistoryDetailModalId)) {
       setSelectedItem((selected) => {
         if (selected) {
-          return historyList.find((x) => (x.chain === selected.chain && x.address === selected.address && x.extrinsicHash === selected.extrinsicHash)) || selected;
+          const key = getHistoryItemKey(selected);
+
+          return historyMap[key] || null;
         } else {
           return selected;
         }
       });
     }
-  }, [checkActive, historyList]);
+  }, [checkActive, historyMap]);
 
   useEffect(() => {
     if (currentAccount?.address !== curAdr) {

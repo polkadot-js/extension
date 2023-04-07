@@ -114,7 +114,7 @@ function getCrowdloanContributeMap (
     }
 
     const { decimals, symbol } = _getChainNativeTokenBasicInfo(relayChainInfo);
-    const price = priceMap[relayParentKey];
+    const price = priceMap[relayParentKey] || 0;
     const contributeValue = getBalanceValue(crowdloanItem.contribute, decimals);
     const convertedContributeValue = getConvertedBalanceValue(contributeValue, price);
 

@@ -3,7 +3,7 @@
 
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
-import { getSignMode } from '@subwallet/extension-koni-ui/util/account/account';
+import { getSignMode } from '@subwallet/extension-koni-ui/utils/account/account';
 import { useMemo } from 'react';
 
 const useGetAccountSignModeByAddress = (address?: string): AccountSignMode => {

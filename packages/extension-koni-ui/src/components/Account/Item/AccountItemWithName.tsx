@@ -4,7 +4,7 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import AccountItemBase, { AccountItemBaseProps } from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemBase';
-import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
+import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
 import CN from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

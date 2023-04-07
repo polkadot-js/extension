@@ -6,7 +6,7 @@ import { useClickOutSide, useGoBackSelectAccount, useIsPopup, useTranslation } f
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { renderModalSelector } from '@subwallet/extension-koni-ui/util';
+import { renderModalSelector } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileJs, Leaf, QrCode, Wallet } from 'phosphor-react';

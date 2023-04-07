@@ -9,7 +9,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFocusFormItem, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
+import { reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Image, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight } from 'phosphor-react';

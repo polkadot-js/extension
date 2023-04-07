@@ -6,8 +6,8 @@ import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/Av
 import useChainInfo from '@subwallet/extension-koni-ui/hooks/chain/useChainInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
-import { formatAccountAddress } from '@subwallet/extension-koni-ui/util/account/account';
+import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { formatAccountAddress } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Typography } from '@subwallet/react-ui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';

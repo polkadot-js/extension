@@ -8,8 +8,8 @@ import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotifi
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getScanExplorerAddressInfoUrl } from '@subwallet/extension-koni-ui/util';
-import reformatAddress from '@subwallet/extension-koni-ui/util/account/reformatAddress';
+import { getScanExplorerAddressInfoUrl } from '@subwallet/extension-koni-ui/utils';
+import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
 import { Button, Icon, Logo, ModalContext, QRCode, SwModal } from '@subwallet/react-ui';
 import AccountItem from '@subwallet/react-ui/es/web3-block/account-item';
 import CN from 'classnames';

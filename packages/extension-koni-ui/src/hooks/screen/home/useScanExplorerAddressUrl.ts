@@ -3,7 +3,7 @@
 
 import { _getBlockExplorerFromChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { getScanExplorerAddressInfoUrl } from '@subwallet/extension-koni-ui/util';
+import { getScanExplorerAddressInfoUrl } from '@subwallet/extension-koni-ui/utils';
 import { useSelector } from 'react-redux';
 
 export default function useScanExplorerAddressUrl (chain: string, address: string) {

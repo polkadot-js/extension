@@ -10,9 +10,9 @@ import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFo
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isNoAccount } from '@subwallet/extension-koni-ui/util/account/account';
-import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/form/form';
-import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/util/form/validators/password';
+import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
+import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/utils/form/validators/password';
 import { Form, Icon, Input, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CaretLeft, CheckCircle, ShieldPlus } from 'phosphor-react';

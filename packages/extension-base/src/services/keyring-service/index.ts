@@ -76,13 +76,17 @@ export class KeyringService {
     return this.keyringStateSubject.value;
   }
 
-  setKeyringState (state: KeyringState) {
-    if (!this.keyringState.isReady && state.isReady) {
+  updateKeyringState (isReady = true) {
+    if (!this.keyringState.isReady && isReady) {
       this.eventService.emit('keyring.ready', true);
       this.eventService.emit('account.ready', true);
     }
 
-    this.keyringStateSubject.next(state);
+    this.keyringStateSubject.next({
+      hasMasterPassword: !!keyring.keyring?.hasMasterPassword,
+      isLocked: !!keyring.keyring?.isLocked,
+      isReady: isReady
+    });
   }
 
   get accounts (): SubjectInfo {

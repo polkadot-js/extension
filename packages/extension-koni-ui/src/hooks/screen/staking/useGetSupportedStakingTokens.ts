@@ -9,7 +9,7 @@ import { _getChainNativeTokenSlug, _getSubstrateGenesisHash, _isChainEvmCompatib
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountAddressType } from '@subwallet/extension-koni-ui/types/account';
-import { findAccountByAddress, getAccountAddressType } from '@subwallet/extension-koni-ui/util';
+import { findAccountByAddress, getAccountAddressType } from '@subwallet/extension-koni-ui/utils';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 

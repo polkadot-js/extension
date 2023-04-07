@@ -26,7 +26,7 @@ const renderEmpty = () => <GeneralEmptyList />;
 
 function Component ({ address, className = '', items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { activeModal, inactiveModal, checkActive } = useContext(ModalContext);
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const sectionRef = useRef<SwListSectionRef>(null);
   const checkAsset = useAssetChecker();
 
@@ -57,7 +57,7 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
         sectionRef.current?.setSearchValue('');
       }, 100);
     }
-  }, [checkActive, ReceiveTokensSelectorModalId]);
+  }, [checkActive, sectionRef]);
 
   const renderItem = useCallback((item: _ChainAsset) => {
     return (

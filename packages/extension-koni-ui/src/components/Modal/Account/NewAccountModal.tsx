@@ -10,7 +10,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { renderModalSelector } from '@subwallet/extension-koni-ui/util/common/dom';
+import { renderModalSelector } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';

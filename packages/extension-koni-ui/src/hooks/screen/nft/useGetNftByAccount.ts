@@ -5,8 +5,8 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import reformatAddress from '@subwallet/extension-koni-ui/util/account/reformatAddress';
-import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
+import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
+import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 

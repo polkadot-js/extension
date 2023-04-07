@@ -13,8 +13,8 @@ import MigrateDone from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterP
 import IntroductionMigratePassword from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword/Introduction';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/util';
-import { simpleCheckForm } from '@subwallet/extension-koni-ui/util/form/form';
+import { toShort } from '@subwallet/extension-koni-ui/utils';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
 import { Button, ButtonProps, Field, Form, Icon, Input } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';

@@ -430,13 +430,22 @@ export default class TransactionService {
       }
 
         break;
+
       case ExtrinsicType.STAKING_WITHDRAW: {
         const data = parseTransactionData<ExtrinsicType.STAKING_WITHDRAW>(transaction.data);
 
         historyItem.to = data.validatorAddress || '';
+        historyItem.amount = { ...baseNativeAmount, value: data.unstakingInfo.claimable || '0' };
+        break;
       }
 
+      case ExtrinsicType.STAKING_CANCEL_UNSTAKE: {
+        const data = parseTransactionData<ExtrinsicType.STAKING_CANCEL_UNSTAKE>(transaction.data);
+
+        historyItem.amount = { ...baseNativeAmount, value: data.selectedUnstaking.claimable || '0' };
         break;
+      }
+
       case ExtrinsicType.EVM_EXECUTE:
         // Todo: Update historyItem.to
         break;

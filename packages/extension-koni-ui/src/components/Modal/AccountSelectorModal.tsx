@@ -7,7 +7,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
-import React, {useCallback, useContext, useEffect, useRef} from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import GeneralEmptyList from '../GeneralEmptyList';
@@ -24,7 +24,7 @@ const renderEmpty = () => <GeneralEmptyList />;
 
 function Component ({ className = '', id = AccountSelectorModalId, items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { inactiveModal, checkActive } = useContext(ModalContext);
+  const { checkActive, inactiveModal } = useContext(ModalContext);
   const sectionRef = useRef<SwListSectionRef>(null);
 
   const onCancel = useCallback(() => {

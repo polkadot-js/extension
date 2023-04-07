@@ -3,7 +3,7 @@
 
 import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
-import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import { useGetChainPrefixBySlug, useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import React, { useMemo } from 'react';

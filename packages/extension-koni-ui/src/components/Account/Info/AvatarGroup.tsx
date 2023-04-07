@@ -3,7 +3,7 @@
 
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import React, { useMemo } from 'react';

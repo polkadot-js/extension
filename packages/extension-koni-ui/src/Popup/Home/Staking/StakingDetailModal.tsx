@@ -156,13 +156,6 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           valueColorSchema={'gray'}
         />
 
-        <MetaInfo.Status
-          label={t('Staking status')}
-          statusIcon={getStakingStatus(item.status).icon}
-          statusName={getStakingStatus(item.status).name}
-          valueColorSchema={getStakingStatus(item.status).schema}
-        />
-
         {!!unstakingData && showingOption === 'showByValidator' && <MetaInfo.Default
           className={'__para'}
           label={t('Unstaked')}
@@ -170,22 +163,26 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         >
           <div>
             <Number
-              className={'common-text text-light-4'}
+              className={'common-text text-light-4 text-right'}
               decimal={decimals}
               suffix={staking.nativeToken}
               value={unstakingData.claimable}
             />
 
-            {/* chi hien thi waiting time khi UnstakingStatus = unlocking, neu waitingTime = 0 && UnstakingStatus = unlocking => soon */}
             {unstakingData.status === UnstakingStatus.UNLOCKING.valueOf() &&
-              <Number
-                className={'sm-text text-light-4'}
-                decimal={0}
-                value={getWaitingTime(unstakingData.waitingTime)}
-              />
+              <div className={'sm-text text-light-4'}>
+                {getWaitingTime(unstakingData.waitingTime)}
+              </div>
             }
           </div>
         </MetaInfo.Default>}
+
+        <MetaInfo.Status
+          label={t('Staking status')}
+          statusIcon={getStakingStatus(item.status).icon}
+          statusName={getStakingStatus(item.status).name}
+          valueColorSchema={getStakingStatus(item.status).schema}
+        />
       </MetaInfo>
     );
   }, [decimals, getStakingStatus, networkPrefix, showingOption, staking.nativeToken, t, unstakings]);

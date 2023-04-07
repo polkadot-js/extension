@@ -6,12 +6,20 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { ChainStakingMetadata, NominatorMetadata, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAmplitudeBondingExtrinsic, getAmplitudeCancelWithdrawalExtrinsic, getAmplitudeClaimRewardExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeNominatorMetadata, getAmplitudeStakingMetadata, getAmplitudeUnbondingExtrinsic, getAmplitudeWithdrawalExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/amplitude';
 import { getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarNominatorMetadata, getAstarStakingMetadata, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
-import { getParaBondingExtrinsic, getParaCancelWithdrawalExtrinsic, getParachainCollatorsInfo, getParaChainNominatorMetadata, getParaChainStakingMetadata, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, validateParaChainBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
-import { getPoolingClaimRewardExtrinsic, getPoolingWithdrawalExtrinsic, getRelayBondingExtrinsic, getRelayCancelWithdrawalExtrinsic, getRelayChainNominatorMetadata, getRelayChainStakingMetadata, getRelayPoolsInfo, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, validateRelayBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
+import { getParaBondingExtrinsic, getParaCancelWithdrawalExtrinsic, getParachainCollatorsInfo, getParaChainNominatorMetadata, getParaChainStakingMetadata, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, validateParaChainBondingCondition, validateParaChainUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
+import { getPoolingClaimRewardExtrinsic, getPoolingWithdrawalExtrinsic, getRelayBondingExtrinsic, getRelayCancelWithdrawalExtrinsic, getRelayChainNominatorMetadata, getRelayChainStakingMetadata, getRelayPoolsInfo, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, validateRelayBondingCondition, validateRelayUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
 // all addresses must be converted to its chain format
+
+export function validateUnbondingCondition (nominatorMetadata: NominatorMetadata, amount: string, chain: string, chainStakingMetadata: ChainStakingMetadata, selectedValidator?: string): TransactionError[] {
+  if (_STAKING_CHAIN_GROUP.relay.includes(chain)) {
+    return validateRelayUnbondingCondition(amount, chainStakingMetadata, nominatorMetadata);
+  }
+
+  return validateParaChainUnbondingCondition(amount, nominatorMetadata, chainStakingMetadata, selectedValidator as string);
+}
 
 export function validateBondingCondition (chainInfo: _ChainInfo, amount: string, selectedValidators: ValidatorInfo[], address: string, chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata): TransactionError[] {
   if (_STAKING_CHAIN_GROUP.relay.includes(chainInfo.slug)) {

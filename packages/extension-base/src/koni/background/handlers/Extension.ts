@@ -15,9 +15,9 @@ import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
 import { parseSubstrateTransaction } from '@subwallet/extension-base/koni/api/dotsama/parseTransaction';
 import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
 import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-base/koni/api/nft/transfer';
-import { getBondingExtrinsic, getCancelWithdrawalExtrinsic, getClaimRewardExtrinsic, getNominationPoolsInfo, getUnbondingExtrinsic, getValidatorsInfo, getWithdrawalExtrinsic, validateBondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding';
+import { getBondingExtrinsic, getCancelWithdrawalExtrinsic, getClaimRewardExtrinsic, getNominationPoolsInfo, getUnbondingExtrinsic, getValidatorsInfo, getWithdrawalExtrinsic, validateBondingCondition, validateUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding';
 import { getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
-import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
+import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, validatePoolBondingCondition, validateRelayUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
@@ -2305,21 +2305,30 @@ export default class KoniExtension {
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_BOND,
       transaction: extrinsic,
-      url: EXTENSION_REQUEST_URL
+      url: EXTENSION_REQUEST_URL,
+      transferNativeAmount: amount
     });
   }
 
   private async submitUnbonding (inputData: RequestUnbondingSubmit): Promise<SWTransactionResponse> {
     const { amount, chain, nominatorMetadata, validatorAddress } = inputData;
 
-    if (!amount || !nominatorMetadata) {
-      return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INVALID_PARAMS)]);
+    const chainStakingMetadata = await this.#koniState.getStakingMetadataByChain(chain, StakingType.NOMINATED);
+
+    if (!chainStakingMetadata || !nominatorMetadata) {
+      return this.#koniState.transactionService.generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
+    const unbondingValidation = validateUnbondingCondition(nominatorMetadata, amount, chain, chainStakingMetadata, validatorAddress);
+
+    if (!amount || unbondingValidation.length > 0) {
+      return this.#koniState.transactionService.generateBeforeHandleResponseErrors(unbondingValidation);
     }
 
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getUnbondingExtrinsic(nominatorMetadata, amount, chain, substrateApi, validatorAddress);
 
-    console.log('unbonding extrinsic: ', extrinsic.toHex());
+    console.log('Unbonding extrinsic: ', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
@@ -2327,8 +2336,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_UNBOND,
-      chainType: ChainType.SUBSTRATE,
-      transferNativeAmount: amount
+      chainType: ChainType.SUBSTRATE
     });
   }
 
@@ -2398,10 +2406,24 @@ export default class KoniExtension {
     });
   }
 
-  private async submitPoolingBonding (inputData: RequestStakePoolingBonding): Promise<SWTransactionResponse> {
+  private async submitPoolBonding (inputData: RequestStakePoolingBonding): Promise<SWTransactionResponse> {
     const { address, amount, chain, nominatorMetadata, selectedPool } = inputData;
 
-    // TODO: can't stake when unstake all
+    const chainInfo = this.#koniState.getChainInfo(chain);
+    const chainStakingMetadata = await this.#koniState.getStakingMetadataByChain(chain, StakingType.NOMINATED);
+
+    if (!chainStakingMetadata) {
+      return this.#koniState.transactionService
+        .generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
+    const bondingValidation = validatePoolBondingCondition(chainInfo, amount, selectedPool, address, chainStakingMetadata, nominatorMetadata);
+
+    if (!amount || bondingValidation.length > 0) {
+      return this.#koniState.transactionService
+        .generateBeforeHandleResponseErrors(bondingValidation);
+    }
+
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getPoolingBondingExtrinsic(substrateApi, amount, selectedPool.id, nominatorMetadata);
 
@@ -2419,6 +2441,20 @@ export default class KoniExtension {
 
   private async submitPoolingUnbonding (inputData: RequestStakePoolingUnbonding): Promise<SWTransactionResponse> {
     const { amount, chain, nominatorMetadata } = inputData;
+
+    const chainStakingMetadata = await this.#koniState.getStakingMetadataByChain(chain, StakingType.NOMINATED);
+
+    if (!chainStakingMetadata || !nominatorMetadata) {
+      return this.#koniState.transactionService
+        .generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
+    const unbondingValidation = validateRelayUnbondingCondition(amount, chainStakingMetadata, nominatorMetadata);
+
+    if (!amount || unbondingValidation.length > 0) {
+      return this.#koniState.transactionService
+        .generateBeforeHandleResponseErrors(unbondingValidation);
+    }
 
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getPoolingUnbondingExtrinsic(substrateApi, amount, nominatorMetadata);
@@ -3289,7 +3325,7 @@ export default class KoniExtension {
       case 'pri(staking.submitTuringCancelCompound)':
         return await this.submitTuringCancelStakeCompound(request as RequestTuringCancelStakeCompound);
       case 'pri(bonding.nominationPool.submitBonding)':
-        return await this.submitPoolingBonding(request as RequestStakePoolingBonding);
+        return await this.submitPoolBonding(request as RequestStakePoolingBonding);
       case 'pri(bonding.nominationPool.submitUnbonding)':
         return await this.submitPoolingUnbonding(request as RequestStakePoolingUnbonding);
 

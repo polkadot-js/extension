@@ -335,5 +335,9 @@ export function parseNumberToDisplay (amount: BN, decimals: number | undefined) 
 }
 
 export function isSameAddress (address1: string, address2: string) {
+  if (isEthereumAddress(address1)) {
+    return address1.toLowerCase() === address2.toLowerCase();
+  }
+
   return reformatAddress(address1, 0) === reformatAddress(address2, 0); // TODO: maybe there's a better way
 }

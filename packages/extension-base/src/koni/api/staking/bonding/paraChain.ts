@@ -3,12 +3,12 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getBondedValidators, getParaCurrentInflation, InflationConfig, isUnstakeAll, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
+import { isSameAddress, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -20,6 +20,42 @@ interface CollatorExtraInfo {
   delegationCount: number,
   bond: string,
   minDelegation: string
+}
+
+export function validateParaChainUnbondingCondition (amount: string, nominatorMetadata: NominatorMetadata, chainStakingMetadata: ChainStakingMetadata, selectedCollator: string): TransactionError[] {
+  const errors: TransactionError[] = [];
+  let targetNomination: NominationInfo | undefined;
+
+  for (const nomination of nominatorMetadata.nominations) {
+    if (isSameAddress(nomination.validatorAddress, selectedCollator)) {
+      targetNomination = nomination;
+
+      break;
+    }
+  }
+
+  if (!targetNomination) {
+    errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+
+    return errors;
+  }
+
+  const bnActiveStake = new BN(targetNomination.activeStake);
+  const bnRemainingStake = bnActiveStake.sub(new BN(amount));
+
+  const bnChainMinStake = new BN(chainStakingMetadata.minStake || '0');
+  const bnCollatorMinStake = new BN(targetNomination.validatorMinStake || '0');
+  const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
+
+  if (targetNomination.hasUnstaking) {
+    errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));
+  }
+
+  if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(bnMinStake))) {
+    errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE));
+  }
+
+  return errors;
 }
 
 export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount: string, selectedCollators: ValidatorInfo[], address: string, chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata): TransactionError[] {
@@ -59,6 +95,8 @@ export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount
       if (reformatAddress(delegation.validatorAddress, 0) === parsedSelectedCollatorAddress) {
         currentDelegationAmount = delegation.activeStake;
         hasUnstaking = !!delegation.hasUnstaking && delegation.hasUnstaking;
+
+        break;
       }
     }
 

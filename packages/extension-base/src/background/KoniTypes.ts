@@ -555,7 +555,6 @@ export interface SWWarning {
 }
 
 export enum BasicTxErrorType {
-  NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
   NOT_ENOUGH_BALANCE = 'NOT_ENOUGH_BALANCE',
   CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
   INVALID_PARAMS = 'INVALID_PARAMS',
@@ -573,12 +572,8 @@ export enum StakingTxErrorType {
   NOT_ENOUGH_MIN_STAKE = 'NOT_ENOUGH_MIN_STAKE',
   EXCEED_MAX_NOMINATIONS = 'EXCEED_MAX_NOMINATIONS',
   EXIST_UNSTAKING_REQUEST = 'EXIST_UNSTAKING_REQUEST',
-  STAKING_ERROR = 'stakingError',
-  UN_STAKING_ERROR = 'unStakingError',
-  WITHDRAW_STAKING_ERROR = 'withdrawStakingError',
-  CLAIM_REWARD_ERROR = 'claimRewardError',
-  CREATE_COMPOUND_ERROR = 'createCompoundError',
-  CANCEL_COMPOUND_ERROR = 'cancelCompoundError',
+  INVALID_ACTIVE_STAKE = 'INVALID_ACTIVE_STAKE',
+  EXCEED_MAX_UNSTAKING = 'EXCEED_MAX_UNSTAKING'
 }
 
 export enum TransferTxErrorType {
@@ -1378,6 +1373,7 @@ export interface ChainStakingMetadata {
   inflation?: number; // in %, annually
   minJoinNominationPool?: string; // for relaychain supports nomination pool
   minStake: string;
+  minPoolBonding?: string;
   maxValidatorPerNominator: number;
   maxWithdrawalRequestPerValidator: number;
   allowCancelUnstaking: boolean;
@@ -1463,33 +1459,6 @@ export interface ValidatorInfo {
   isVerified: boolean;
   icon?: string;
   isCrowded: boolean;
-}
-
-export interface NominationPoolMetadata {
-  id: string,
-  identity?: string,
-  address: string,
-  memberCount: number,
-  bondedAmount: string
-}
-
-// Bonding
-export interface NominatorInfo {
-  chain: string,
-  address: string,
-
-  isBondedBefore: boolean,
-  bondedValidators: string[],
-  bondedPool: string[]
-}
-
-export interface ChainBondingInfo {
-  chain: string,
-  estimatedReturn: number, // yearly
-  activeNominatorCount: number,
-  totalNominatorCount: number,
-  unbondingPeriod: number, // in hours
-  totalStake: string
 }
 
 export interface BondingSubmitParams extends BaseRequestSign {

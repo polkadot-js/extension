@@ -33,10 +33,44 @@ export interface PalletStakingStakingLedger {
   claimedRewards: number[]
 }
 
-export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: string, selectedValidators: ValidatorInfo[], address: string, chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata): TransactionError[] {
+export function validateRelayUnbondingCondition (amount: string, chainStakingMetadata: ChainStakingMetadata, nominatorMetadata: NominatorMetadata): TransactionError[] {
+  const errors: TransactionError[] = [];
+  const bnActiveStake = new BN(nominatorMetadata.activeStake);
+  const bnRemainingStake = bnActiveStake.sub(new BN(amount));
+
+  if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(new BN(chainStakingMetadata.minStake)))) {
+    errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE));
+  }
+
+  if (nominatorMetadata.unstakings.length > chainStakingMetadata.maxWithdrawalRequestPerValidator) {
+    errors.push(new TransactionError(StakingTxErrorType.EXCEED_MAX_UNSTAKING));
+  }
+
+  return errors;
+}
+
+export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: string, selectedPool: NominationPoolInfo, address: string, chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata): TransactionError[] {
   // cannot stake when unstake all
   // amount >= min stake
+  const errors: TransactionError[] = [];
+  let bnTotalStake = new BN(amount);
+  const bnMinStake = new BN(chainStakingMetadata.minPoolBonding || '0');
 
+  if (nominatorMetadata) {
+    const bnCurrentActiveStake = new BN(nominatorMetadata.activeStake);
+
+    bnTotalStake = bnTotalStake.add(bnCurrentActiveStake);
+
+    if (!bnCurrentActiveStake.gt(BN_ZERO)) {
+      errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));
+    }
+  }
+
+  if (!bnTotalStake.gte(bnMinStake)) {
+    errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
+  }
+
+  return errors;
 }
 
 export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: string, selectedValidators: ValidatorInfo[], address: string, chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata) {

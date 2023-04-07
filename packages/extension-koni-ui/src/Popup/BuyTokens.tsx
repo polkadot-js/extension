@@ -7,7 +7,7 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { ServiceSelector } from '@subwallet/extension-koni-ui/components/Field/BuyTokens/ServiceSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { PREDEFINED_TRANSAK_TOKEN } from '@subwallet/extension-koni-ui/constants/transak';
+import { PREDEFINED_TRANSAK_TOKEN, PREDEFINED_TRANSAK_TOKEN_BY_SLUG } from '@subwallet/extension-koni-ui/constants/transak';
 import useAssetChecker from '@subwallet/extension-koni-ui/hooks/chain/useAssetChecker';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -131,8 +131,13 @@ function Component ({ className }: Props) {
     const { address, service, tokenKey } = form.getFieldsValue();
 
     if (service === 'transak') {
-      console.debug(PREDEFINED_TRANSAK_TOKEN, selectedTokenKey);
-      const { chain, symbol, transakNetwork } = PREDEFINED_TRANSAK_TOKEN[selectedTokenKey];
+      const transakInfo = PREDEFINED_TRANSAK_TOKEN_BY_SLUG[selectedTokenKey];
+
+      if (!transakInfo) {
+        return;
+      }
+
+      const { chain, symbol, transakNetwork } = transakInfo;
       const networkPrefix = chainInfoMap[chain].substrateInfo?.addressPrefix;
 
       const walletAddress = tokenKeyMapIsEthereum[tokenKey]
@@ -155,7 +160,7 @@ function Component ({ className }: Props) {
 
   const isSupportBuyTokens = useMemo(() => {
     if ((selectedService === 'transak') && selectedAddress && selectedTokenKey) {
-      const transakInfo = PREDEFINED_TRANSAK_TOKEN[selectedTokenKey];
+      const transakInfo = PREDEFINED_TRANSAK_TOKEN_BY_SLUG[selectedTokenKey];
       const accountType = getAccountType(selectedAddress);
 
       return transakInfo && transakInfo.support === accountType && tokenItems.find((item) => item.slug === selectedTokenKey);

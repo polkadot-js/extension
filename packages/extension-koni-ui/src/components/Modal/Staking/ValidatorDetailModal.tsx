@@ -28,6 +28,8 @@ function Component (props: Props): React.ReactElement<Props> {
     identity: validatorName = '',
     minBond: minStake,
     ownStake,
+    otherStake,
+    totalStake,
     symbol } = validatorItem;
   const { t } = useTranslation();
 
@@ -73,11 +75,31 @@ function Component (props: Props): React.ReactElement<Props> {
         />
 
         {
+          totalStake !== '0' && <MetaInfo.Number
+            decimals={decimals}
+            label={t('Total stake')}
+            suffix={symbol}
+            value={totalStake}
+            valueColorSchema={'even-odd'}
+          />
+        }
+
+        {
           ownStake !== '0' && <MetaInfo.Number
             decimals={decimals}
             label={t('Own stake')}
             suffix={symbol}
             value={ownStake}
+            valueColorSchema={'even-odd'}
+          />
+        }
+
+        {
+          otherStake !== '0' && <MetaInfo.Number
+            decimals={decimals}
+            label={t('Other stake')}
+            suffix={symbol}
+            value={otherStake}
             valueColorSchema={'even-odd'}
           />
         }

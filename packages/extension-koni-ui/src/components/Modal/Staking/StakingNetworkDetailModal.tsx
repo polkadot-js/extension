@@ -13,7 +13,7 @@ import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  activeNominators?: [SwNumberProps['value'], SwNumberProps['value']],
+  activeNominators?: SwNumberProps['value'],
   estimatedEarning?: SwNumberProps['value'],
   inflation?: SwNumberProps['value'],
   minimumActive: AmountData,
@@ -58,7 +58,7 @@ function Component ({ activeNominators,
           valueColorSchema={'even-odd'}
         />
 
-        {activeNominators && <MetaInfo.Default label={t('Active nominators')}>
+        {activeNominators && <MetaInfo.Default label={t('Total nominators')}>
           <div className={'__active-nominators-value'}>
             <Number
               className={'__current-nominator-count'}
@@ -66,16 +66,7 @@ function Component ({ activeNominators,
               decimalOpacity={1}
               intOpacity={1}
               unitOpacity={1}
-              value={activeNominators[0]}
-            />
-            <span className={'__slash'}>/</span>
-            <Number
-              className={'__total-nominator-count'}
-              decimal={0}
-              decimalOpacity={1}
-              intOpacity={1}
-              unitOpacity={1}
-              value={activeNominators[1]}
+              value={activeNominators}
             />
           </div>
         </MetaInfo.Default>}

@@ -1373,6 +1373,7 @@ export interface ChainStakingMetadata {
   inflation?: number; // in %, annually
   minJoinNominationPool?: string; // for relaychain supports nomination pool
   minStake: string;
+  nominatorCount?: number;
   minPoolBonding?: string;
   maxValidatorPerNominator: number;
   maxWithdrawalRequestPerValidator: number;

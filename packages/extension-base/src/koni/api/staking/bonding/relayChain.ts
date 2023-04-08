@@ -115,14 +115,31 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
   const maxUnlockingChunks = chainApi.api.consts.staking.maxUnlockingChunks.toString();
   const unlockingEras = chainApi.api.consts.staking.bondingDuration.toString();
 
-  const [_totalEraStake, _totalIssuance, _auctionCounter, _minimumActiveStake, _minNominatorBond, _minPoolJoin] = await Promise.all([
+  const [_totalEraStake, _totalIssuance, _auctionCounter, _minimumActiveStake, _minNominatorBond, _minPoolJoin, _eraStakers] = await Promise.all([
     chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
     chainApi.api.query.balances.totalIssuance(),
     chainApi.api.query.auctions?.auctionCounter(),
     chainApi.api.query.staking.minimumActiveStake(),
     chainApi.api.query.staking.minNominatorBond(),
-    chainApi.api.query?.nominationPools?.minJoinBond()
+    chainApi.api.query?.nominationPools?.minJoinBond(),
+    chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra))
   ]);
+
+  const eraStakers = _eraStakers as any[];
+  const nominatorList: string[] = [];
+
+  for (const item of eraStakers) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const rawValidatorStat = item[1].toHuman() as Record<string, any>;
+    const eraNominators = rawValidatorStat.others as Record<string, any>[];
+
+    for (const nominator of eraNominators) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      if (!nominatorList.includes(nominator.who as string)) {
+        nominatorList.push(nominator.who as string);
+      }
+    }
+  }
 
   const minActiveStake = _minimumActiveStake.toString();
   const minNominatorBond = _minNominatorBond.toString();
@@ -157,7 +174,8 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
     maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
     allowCancelUnstaking: true,
     unstakingPeriod: unlockingPeriod,
-    minJoinNominationPool: minPoolJoin
+    minJoinNominationPool: minPoolJoin,
+    nominatorCount: nominatorList.length
   } as ChainStakingMetadata;
 }
 

@@ -11,13 +11,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import {
-  convertFieldToObject,
-  isAccountAll,
-  parseNominations,
-  reformatAddress,
-  simpleCheckForm
-} from '@subwallet/extension-koni-ui/util';
+import { convertFieldToObject, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
@@ -504,10 +498,11 @@ const Component: React.FC<Props> = (props: Props) => {
         </Button>
       </TransactionFooter>
 
-      {
+      { // TODO: check case for pool
         chainStakingMetadata &&
         (
           <StakingNetworkDetailModal
+            activeNominators={chainStakingMetadata.nominatorCount}
             estimatedEarning={chainStakingMetadata.expectedReturn}
             inflation={chainStakingMetadata.inflation}
             maxValidatorPerNominator={chainStakingMetadata.maxValidatorPerNominator}

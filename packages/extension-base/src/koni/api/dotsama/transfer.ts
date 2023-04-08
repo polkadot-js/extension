@@ -11,6 +11,7 @@ import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainIn
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
+import {getWasmContractGasLimit} from "@subwallet/extension-base/koni/api/tokens/wasm/utils";
 
 function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount): accountInfo is AccountInfoWithRefCount {
   return !!(accountInfo as AccountInfoWithRefCount).refcount;
@@ -128,9 +129,10 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
 
   if (_isTokenWasmSmartContract(tokenInfo) && api.query.contracts) {
     const contractPromise = getPSP22ContractPromise(api, _getContractAddressOfToken(tokenInfo));
-    const transferQuery = await contractPromise.query['psp22::transfer'](from, { gasLimit: -1 }, to, value, {});
-    const gasLimit = transferQuery.gasRequired.toString();
+    // @ts-ignore
+    const gasLimit = await getWasmContractGasLimit(api, from, 'psp22::transfer', contractPromise, {}, [from, value, {}]);
 
+    // @ts-ignore
     transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
     transferAmount = value;
   } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {

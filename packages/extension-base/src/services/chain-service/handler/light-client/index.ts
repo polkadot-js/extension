@@ -5,10 +5,10 @@ import { ScProvider } from '@polkadot/rpc-provider';
 import { ProviderInterface, ProviderInterfaceCallback, ProviderInterfaceEmitCb, ProviderInterfaceEmitted } from '@polkadot/rpc-provider/types';
 
 export const relayChainSpecs: Record<string, string> = {
-  kusama: ScProvider.WellKnownChain.ksmcc3,
-  polkadot: ScProvider.WellKnownChain.polkadot,
-  rococo: ScProvider.WellKnownChain.rococo_v2_2,
-  westend: ScProvider.WellKnownChain.westend2
+  kusama: ScProvider?.WellKnownChain?.ksmcc3,
+  polkadot: ScProvider?.WellKnownChain?.polkadot,
+  rococo: ScProvider?.WellKnownChain?.rococo_v2_2,
+  westend: ScProvider?.WellKnownChain?.westend2
 };
 
 // Direct get spec data from @polkadot/react-api repository

@@ -12,6 +12,7 @@
     { "path": "./packages/extension-mocks" },
     { "path": "./packages/extension-koni" },
     { "path": "./packages/extension-koni-ui" },
-    { "path": "./packages/web-runner" }
+    { "path": "./packages/web-runner" },
+    { "path": "./packages/subwallet-webapp-runner" }
   ]
 }

@@ -14,16 +14,9 @@ import { BehaviorSubject } from 'rxjs';
 import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
 
 export class HistoryService {
-  private dbService: DatabaseService;
-  private chainService: ChainService;
-  private eventService: EventService;
   private historySubject: BehaviorSubject<TransactionHistoryItem[]> = new BehaviorSubject([] as TransactionHistoryItem[]);
 
-  constructor (dbService: DatabaseService, chainService: ChainService, eventService: EventService) {
-    this.dbService = dbService;
-    this.chainService = chainService;
-    this.eventService = eventService;
-
+  constructor (private dbService: DatabaseService, private chainService: ChainService, private eventService: EventService) {
     // Load history from database
     this.dbService.getHistories().then((histories) => {
       this.historySubject.next(histories);
@@ -33,7 +26,7 @@ export class HistoryService {
     Promise.all([this.eventService.waitKeyringReady, this.eventService.waitChainReady]).then(() => {
       this.getHistories().catch(console.log);
 
-      this.eventService.on('account.add', (address) => {
+      this.eventService.on('account.add', () => {
         this.refreshHistoryInterval();
       });
       this.eventService.on('account.remove', (address) => {
@@ -89,7 +82,9 @@ export class HistoryService {
     this.invalidCache();
     this.getHistories().catch(console.error);
 
-    this.nextFetch = setTimeout(this.refreshHistoryInterval.bind(this), CRON_REFRESH_HISTORY_INTERVAL);
+    this.nextFetch = setTimeout(() => {
+      this.refreshHistoryInterval();
+    }, CRON_REFRESH_HISTORY_INTERVAL);
   }
 
   public async getHistories () {

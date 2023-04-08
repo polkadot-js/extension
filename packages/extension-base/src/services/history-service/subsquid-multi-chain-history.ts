@@ -232,10 +232,15 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
       to = autoFormatAddress(parsedArgs.to);
       from = autoFormatAddress(parsedArgs.from);
       extrinsicHash = parsedArgs.transactionHash;
-      amount = transaction.value;
+      amount = transaction.value || '0';
       fee = (parseInt(transaction.gasPrice) * parseInt(transaction.gasLimit)).toString();
       signature = generateSignature(transaction.signature);
       success = extrinsic.success;
+
+      // Special fix for moonbeam
+      if ((historyItem.chainId === 'moonbeam' || historyItem.chainId === 'moonriver') && typeof amount === 'object') {
+        amount = amount[0];
+      }
 
       break;
     }

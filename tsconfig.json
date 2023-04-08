@@ -13,6 +13,6 @@
     { "path": "./packages/extension-koni" },
     { "path": "./packages/extension-koni-ui" },
     { "path": "./packages/web-runner" },
-    { "path": "./packages/subwallet-webapp-runner" }
+    { "path": "./packages/webapp-runner" }
   ]
 }

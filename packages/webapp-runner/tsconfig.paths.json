@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@subwallet-webapp/assets/*": ["./assets/*"],
+      "@subwallet-webapp/components/*": ["./components/*"],
+      "@subwallet-webapp/constants/*": ["./constants/*"],
+      "@subwallet-webapp/contexts/*": ["./contexts/*"],
+      "@subwallet-webapp/hooks/*": ["./hooks/*"],
+      "@subwallet-webapp/i18n/*": ["./i18n/*"],
+      "@subwallet-webapp/pages/*": ["./pages/*"],
+      "@subwallet-webapp/Popup/*": ["./Popup/*"],
+      "@subwallet-webapp/reducer/*": ["./reducer/*"],
+      "@subwallet-webapp/stores/*": ["./stores/*"],
+      "@subwallet-webapp/types/*": ["./types/*"],
+      "@subwallet-webapp/util/*": ["./util/*"],
+      "@subwallet-webapp/*": ["./*"]
+    }
+  }
+}

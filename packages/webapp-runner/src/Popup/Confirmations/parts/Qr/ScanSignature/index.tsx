@@ -1,0 +1,73 @@
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import QrScannerErrorNotice from "@subwallet-webapp/components/Qr/Scanner/ErrorNotice";
+import { CONFIRMATION_SCAN_MODAL } from "@subwallet-webapp/constants/modal";
+import { SigData, ThemeProps } from "@subwallet-webapp/types";
+import { ScannerResult } from "@subwallet-webapp/types/scanner";
+import { ModalContext, SwQrScanner } from "@subwallet/react-ui";
+import React, { useCallback, useContext, useState } from "react";
+import { useTranslation } from "react-i18next";
+import styled from "styled-components";
+
+import { isHex } from "@polkadot/util";
+
+interface Props extends ThemeProps {
+  onSignature: (signature: SigData) => void;
+}
+
+const modalId = CONFIRMATION_SCAN_MODAL;
+
+const Component: React.FC<Props> = (props: Props) => {
+  const { onSignature } = props;
+
+  const { t } = useTranslation();
+
+  const { inactiveModal } = useContext(ModalContext);
+
+  const [error, setError] = useState("");
+
+  const onSuccess = useCallback(
+    (result: ScannerResult) => {
+      const signature = `0x${result.text}`;
+
+      if (isHex(signature)) {
+        inactiveModal(modalId);
+        onSignature({
+          signature: signature,
+        });
+      } else {
+        setError("Invalid signature!");
+      }
+    },
+    [onSignature, inactiveModal]
+  );
+
+  const onError = useCallback((error: string) => {
+    setError(error);
+  }, []);
+
+  const onClose = useCallback(() => {
+    setError("");
+  }, []);
+
+  return (
+    <SwQrScanner
+      id={modalId}
+      isError={!!error}
+      onClose={onClose}
+      onError={onError}
+      onSuccess={onSuccess}
+      overlay={error && <QrScannerErrorNotice message={error} />}
+      title={t("Scan signature")}
+    />
+  );
+};
+
+const ScanSignature = styled(Component)<Props>(
+  ({ theme: { token } }: Props) => {
+    return {};
+  }
+);
+
+export default ScanSignature;

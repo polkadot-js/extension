@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo';
-import { StakingStatusType, StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
+import { StakingStatusType } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -20,7 +20,7 @@ type Props = ThemeProps & {
 export const ValidatorDetailModalId = 'validatorDetailModalId';
 
 function Component (props: Props): React.ReactElement<Props> {
-  const { className, onCancel, status, validatorItem } = props;
+  const { className, onCancel, validatorItem } = props;
   const { address: validatorAddress,
     commission,
     decimals,
@@ -57,12 +57,12 @@ function Component (props: Props): React.ReactElement<Props> {
           name={validatorName}
         />
 
-        <MetaInfo.Status
-          label={t('Status')}
-          statusIcon={StakingStatusUi[status].icon}
-          statusName={StakingStatusUi[status].name}
-          valueColorSchema={StakingStatusUi[status].schema}
-        />
+        {/* <MetaInfo.Status */}
+        {/*  label={t('Status')} */}
+        {/*  statusIcon={StakingStatusUi[status].icon} */}
+        {/*  statusName={StakingStatusUi[status].name} */}
+        {/*  valueColorSchema={StakingStatusUi[status].schema} */}
+        {/* /> */}
 
         <MetaInfo.Number
           decimals={decimals}
@@ -72,20 +72,24 @@ function Component (props: Props): React.ReactElement<Props> {
           valueColorSchema={'even-odd'}
         />
 
-        <MetaInfo.Number
-          decimals={decimals}
-          label={t('Own stake')}
-          suffix={symbol}
-          value={ownStake}
-          valueColorSchema={'even-odd'}
-        />
+        {
+          ownStake !== '0' && <MetaInfo.Number
+            decimals={decimals}
+            label={t('Own stake')}
+            suffix={symbol}
+            value={ownStake}
+            valueColorSchema={'even-odd'}
+          />
+        }
 
-        <MetaInfo.Number
-          label={t('Earning estimated')}
-          suffix={'%'}
-          value={earningEstimated}
-          valueColorSchema={'even-odd'}
-        />
+        {
+          earningEstimated > 0 && earningEstimated !== '' && <MetaInfo.Number
+            label={t('Earning estimated')}
+            suffix={'%'}
+            value={earningEstimated}
+            valueColorSchema={'even-odd'}
+          />
+        }
 
         <MetaInfo.Number
           label={t('Commission')}

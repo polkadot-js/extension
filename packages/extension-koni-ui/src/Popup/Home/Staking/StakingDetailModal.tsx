@@ -118,6 +118,10 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
       return StakingStatusUi.partialEarning;
     }
 
+    if (status === StakingStatus.WAITING) {
+      return StakingStatusUi.waiting;
+    }
+
     return StakingStatusUi.inactive;
   }, []);
 

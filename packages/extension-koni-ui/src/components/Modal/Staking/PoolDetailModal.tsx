@@ -21,7 +21,7 @@ export const PoolDetailModalId = 'poolDetailModalId';
 
 function Component ({ className, decimals, onCancel, selectedNominationPool, status }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { address = '', memberCounter = 0, name, symbol } = selectedNominationPool || {};
+  const { address = '', bondedAmount, memberCounter = 0, name, state, symbol } = selectedNominationPool || {};
 
   return (
     <SwModal
@@ -43,36 +43,36 @@ function Component ({ className, decimals, onCancel, selectedNominationPool, sta
 
         <MetaInfo.Status
           label={t('Status')}
-          statusIcon={StakingStatusUi[status].icon}
-          statusName={StakingStatusUi[status].name}
+          statusIcon={StakingStatusUi[status].icon} // TODO: update icon
+          statusName={state || ''}
           valueColorSchema={StakingStatusUi[status].schema}
         />
 
-        <MetaInfo.Number
-          label={t('Commission')}
-          suffix={'%'}
-          value={'10'}
-          valueColorSchema={'even-odd'}
-        />
+        {/* <MetaInfo.Number */}
+        {/*  label={t('Commission')} */}
+        {/*  suffix={'%'} */}
+        {/*  value={'10'} */}
+        {/*  valueColorSchema={'even-odd'} */}
+        {/* /> */}
+
+        {/* <MetaInfo.Number */}
+        {/*  decimals={decimals} */}
+        {/*  label={t('Owner pooled')} */}
+        {/*  suffix={symbol} */}
+        {/*  value={memberCounter} */}
+        {/*  valueColorSchema={'even-odd'} */}
+        {/* /> */}
 
         <MetaInfo.Number
           decimals={decimals}
-          label={t('Owner pooled')}
-          suffix={symbol}
-          value={memberCounter}
-          valueColorSchema={'even-odd'}
-        />
-
-        <MetaInfo.Number
           label={t('Total pooled')}
-          suffix={'%'}
-          value={memberCounter}
+          suffix={symbol}
+          value={bondedAmount || '0'}
           valueColorSchema={'even-odd'}
         />
 
         <MetaInfo.Number
-          label={t('Member of pool')}
-          suffix={'%'}
+          label={t('Total members')}
           value={memberCounter}
           valueColorSchema={'even-odd'}
         />

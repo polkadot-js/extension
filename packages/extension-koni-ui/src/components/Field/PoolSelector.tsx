@@ -278,7 +278,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       />
 
       <PoolDetailModal
-        decimals={0}
+        decimals={viewDetailItem?.decimals || 0}
         onCancel={onCloseDetail}
         selectedNominationPool={viewDetailItem}
         status={'active'}

@@ -343,7 +343,7 @@ export function getStakingAvailableActionsByChain (chain: string, type: StakingT
   return [StakingAction.STAKE, StakingAction.UNSTAKE, StakingAction.WITHDRAW, StakingAction.CANCEL_UNSTAKE];
 }
 
-export function getStakingAvailableActionsByNominator (nominatorMetadata: NominatorMetadata): StakingAction[] {
+export function getStakingAvailableActionsByNominator (nominatorMetadata: NominatorMetadata, unclaimedReward?: string): StakingAction[] {
   const result: StakingAction[] = [StakingAction.STAKE];
 
   const bnActiveStake = new BN(nominatorMetadata.activeStake);
@@ -352,8 +352,9 @@ export function getStakingAvailableActionsByNominator (nominatorMetadata: Nomina
     result.push(StakingAction.UNSTAKE);
 
     const isChainAllowClaimReward = _STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain) || _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
+    const bnUnclaimedReward = new BN(unclaimedReward || '0');
 
-    if (nominatorMetadata.type === StakingType.POOLED || isChainAllowClaimReward) {
+    if ((nominatorMetadata.type === StakingType.POOLED || isChainAllowClaimReward) && bnUnclaimedReward.gt(BN_ZERO)) {
       result.push(StakingAction.CLAIM_REWARD);
     }
   }

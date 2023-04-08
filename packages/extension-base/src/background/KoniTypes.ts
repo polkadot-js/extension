@@ -1393,7 +1393,7 @@ export interface NominationInfo {
 
 export interface PalletNominationPoolsBondedPoolInner {
   points: number,
-  state: 'Open' | 'Destroying',
+  state: 'Open' | 'Destroying' | 'Locked',
   memberCounter: number,
   roles: {
     depositor: string,

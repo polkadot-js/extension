@@ -126,8 +126,8 @@ const Component: React.FC<Props> = (props: Props) => {
       return [];
     }
 
-    return getStakingAvailableActionsByNominator(nominatorMetadata);
-  }, [nominatorMetadata]);
+    return getStakingAvailableActionsByNominator(nominatorMetadata, reward?.unclaimedReward);
+  }, [nominatorMetadata, reward?.unclaimedReward]);
 
   const onNavigate = useCallback((url: string) => {
     return () => {

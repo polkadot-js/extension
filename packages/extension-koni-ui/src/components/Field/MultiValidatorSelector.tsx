@@ -136,7 +136,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
     return (
       <StakingValidatorItem
-        apy={'15'}
+        apy={item?.expectedReturn?.toString() || '0'}
         className={'pool-item'}
         isNominated={nominated}
         isSelected={selected}

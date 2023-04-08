@@ -1,8 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { reformatAddress } from '@subwallet/extension-koni-ui/util';
+
 export const getValidatorKey = (address?: string, identity?: string) => {
-  return `${address || ''}___${identity || ''}`;
+  return `${address ? reformatAddress(address, 42) : ''}___${identity || ''}`;
 };
 
 export const parseNominations = (nomination: string) => {

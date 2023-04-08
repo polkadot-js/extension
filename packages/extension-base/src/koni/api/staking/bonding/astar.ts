@@ -117,7 +117,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
         nominationList.push({
           status: dappStakingStatus,
           chain,
-          validatorAddress: dappAddress,
+          validatorAddress: dappAddress.toLowerCase(),
           activeStake: currentStake,
           validatorMinStake: '0',
           validatorIdentity: dappInfo?.name,
@@ -203,7 +203,7 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
     allDappsInfo.push({
       commission: 0,
       expectedReturn: 0,
-      address: dappAddress,
+      address: dappAddress.toLowerCase(),
       totalStake: totalStake,
       ownStake: '0',
       otherStake: totalStake.toString(),

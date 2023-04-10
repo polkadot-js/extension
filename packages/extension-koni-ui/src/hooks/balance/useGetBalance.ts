@@ -11,6 +11,7 @@ import { useSelector } from '../common';
 
 const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
   const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const { assetSettingMap } = useSelector((state) => state.assetRegistry);
 
   const chainInfo = useMemo((): _ChainInfo | undefined => (chainInfoMap[chain]), [chainInfoMap, chain]);
   const nativeTokenSlug = useMemo(() => chainInfo ? _getChainNativeTokenSlug(chainInfo) : undefined, [chainInfo]);
@@ -26,14 +27,14 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
   useEffect(() => {
     let cancel = false;
 
-    if (address && chain && nativeTokenSlug) {
+    if (address && chain && nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible) {
       getFreeBalance({ address, networkKey: chain })
         .then((balance) => {
           !cancel && setNativeTokenBalance(balance);
         })
         .catch(console.error);
 
-      if (tokenSlug && tokenSlug !== nativeTokenSlug) {
+      if (tokenSlug && tokenSlug !== nativeTokenSlug && assetSettingMap[tokenSlug]?.visible) {
         getFreeBalance({ address, networkKey: chain, token: tokenSlug })
           .then((balance) => {
             !cancel && setTokenBalance(balance);
@@ -45,7 +46,7 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
     return () => {
       cancel = true;
     };
-  }, [address, chain, nativeTokenSlug, tokenSlug, isRefresh]);
+  }, [address, chain, nativeTokenSlug, tokenSlug, isRefresh, assetSettingMap]);
 
   return { refreshBalance, tokenBalance, nativeTokenBalance, nativeTokenSlug };
 };

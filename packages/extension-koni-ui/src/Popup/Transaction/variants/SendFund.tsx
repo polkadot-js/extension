@@ -482,6 +482,18 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       })
         .then((balance) => {
           !cancel && setMaxTransfer(balance.value);
+
+          if (!cancel) {
+            const value = form.getFieldValue('value') as string;
+
+            console.log(value);
+
+            if (value) {
+              setTimeout(() => {
+                form.validateFields(['value']).finally(noop);
+              }, 100);
+            }
+          }
         })
         .catch(console.error);
     }
@@ -489,7 +501,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return () => {
       cancel = true;
     };
-  }, [asset, assetRegistry, from]);
+  }, [asset, assetRegistry, form, from]);
 
   return (
     <>

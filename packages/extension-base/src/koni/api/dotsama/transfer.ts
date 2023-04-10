@@ -1,0 +1,176 @@
+// Copyright 2019-2022 @subwallet/extension-base
+// SPDX-License-Identifier: Apache-2.0
+
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { SupportTransferResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
+import { _BALANCE_TOKEN_GROUP, _TRANSFER_CHAIN_GROUP, _TRANSFER_NOT_SUPPORTED_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
+
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { AccountInfoWithProviders, AccountInfoWithRefCount } from '@polkadot/types/interfaces';
+import { BN } from '@polkadot/util';
+
+function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount): accountInfo is AccountInfoWithRefCount {
+  return !!(accountInfo as AccountInfoWithRefCount).refcount;
+}
+
+export async function checkReferenceCount (networkKey: string, address: string, substrateApiMap: Record<string, _SubstrateApi>, chainInfo: _ChainInfo): Promise<boolean> {
+  const apiProps = await substrateApiMap[networkKey].isReady;
+  const api = apiProps.api;
+
+  if (_isChainEvmCompatible(chainInfo)) {
+    return false;
+  }
+
+  // @ts-ignore
+  const accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount = await api.query.system.account(address);
+
+  return accountInfo
+    ? isRefCount(accountInfo)
+      ? !accountInfo.refcount.isZero()
+      : !accountInfo.consumers.isZero()
+    : false;
+}
+
+export async function checkSupportTransfer (networkKey: string, tokenInfo: _ChainAsset, substrateApiMap: Record<string, _SubstrateApi>, chainInfo: _ChainInfo): Promise<SupportTransferResponse> {
+  const substrateApi = await substrateApiMap[networkKey].isReady;
+
+  if (!tokenInfo) {
+    return {
+      supportTransfer: false,
+      supportTransferAll: false
+    };
+  }
+
+  if (_isChainEvmCompatible(chainInfo)) {
+    return {
+      supportTransfer: true,
+      supportTransferAll: true
+    };
+  }
+
+  if (_TRANSFER_NOT_SUPPORTED_CHAINS.includes(networkKey)) {
+    return {
+      supportTransfer: false,
+      supportTransferAll: false
+    };
+  }
+
+  const api = substrateApi.api;
+  const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
+  const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
+  const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
+  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
+  const result: SupportTransferResponse = {
+    supportTransfer: false,
+    supportTransferAll: false
+  };
+
+  if (!(isTxCurrenciesSupported || isTxBalancesSupported || isTxTokensSupported || isTxEqBalancesSupported)) {
+    return result;
+  }
+
+  if (_isTokenWasmSmartContract(tokenInfo) && api.query.contracts) { // for PSP tokens
+    return {
+      supportTransfer: true,
+      supportTransferAll: true
+    };
+  }
+
+  if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
+    result.supportTransfer = true;
+    result.supportTransferAll = false;
+  } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxTokensSupported) {
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
+  } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported) {
+    result.supportTransfer = true;
+    result.supportTransferAll = false;
+  } else if (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) && _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)) {
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
+  } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
+  } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && !_isNativeToken(tokenInfo) && _BALANCE_TOKEN_GROUP.bitcountry.includes(tokenInfo.symbol)) {
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
+  } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
+  }
+
+  return result;
+}
+
+interface CreateTransferExtrinsicProps {
+  substrateApi: _SubstrateApi;
+  networkKey: string,
+  to: string,
+  from: string,
+  value: string,
+  transferAll: boolean,
+  tokenInfo: _ChainAsset,
+}
+
+export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, to, tokenInfo, transferAll, value }: CreateTransferExtrinsicProps): Promise<[SubmittableExtrinsic | null, string]> => {
+  const api = substrateApi.api;
+
+  // @ts-ignore
+  let transfer: SubmittableExtrinsic<'promise'> | null = null;
+  const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
+  const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
+  const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
+  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
+  let transferAmount; // for PSP-22 tokens, might be deprecated in the future
+
+  if (_isTokenWasmSmartContract(tokenInfo) && api.query.contracts) {
+    const contractPromise = getPSP22ContractPromise(api, _getContractAddressOfToken(tokenInfo));
+    const transferQuery = await contractPromise.query['psp22::transfer'](from, { gasLimit: -1 }, to, value, {});
+    const gasLimit = transferQuery.gasRequired.toString();
+
+    transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
+    transferAmount = value;
+  } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
+    if (transferAll) {
+      // currently Acala, Karura, Acala testnet do not have transfer all method for sub token
+    } else if (value) {
+      transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
+    }
+  } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxTokensSupported) {
+    if (transferAll) {
+      transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo), false);
+    } else if (value) {
+      transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo), new BN(value));
+    }
+  } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported) {
+    if (transferAll) {
+      // currently genshiro_testnet, genshiro, equilibrium_parachain do not have transfer all method for tokens
+    } else if (value) {
+      transfer = api.tx.eqBalances.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
+    }
+  } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
+    if (transferAll) {
+      transfer = api.tx.kton.transferAll(to, false);
+    } else if (value) {
+      transfer = api.tx.kton.transfer(to, new BN(value));
+    }
+  } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && !_isNativeToken(tokenInfo)) {
+    transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
+  } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
+    transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
+  } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
+    if (transferAll) {
+      transfer = api.tx.balances.transferAll(to, false);
+    } else if (value) {
+      transfer = api.tx.balances.transfer(to, new BN(value));
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+  console.log('transfer extrinsic: ', transfer?.toHex());
+
+  return [transfer, transferAmount || value];
+};

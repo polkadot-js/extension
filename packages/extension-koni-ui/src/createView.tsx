@@ -3,27 +3,25 @@
 
 import './i18n/i18n';
 
+import applyPreloadStyle from '@subwallet/extension-koni-ui/preloadStyle';
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
-import { HashRouter } from 'react-router-dom';
-
-import { View } from './components';
+import ReactDOM from 'react-dom/client';
 
 export default function createView (Entry: React.ComponentType, rootId = 'root'): void {
+  applyPreloadStyle();
   const rootElement = document.getElementById(rootId);
 
   if (!rootElement) {
     throw new Error(`Unable to find element with id '${rootId}'`);
   }
 
-  ReactDOM.render(
-    <Suspense fallback='...'>
-      <View>
-        <HashRouter>
-          <Entry />
-        </HashRouter>
-      </View>
-    </Suspense>,
-    rootElement
+  const root = ReactDOM.createRoot(rootElement);
+
+  root.render(
+    <React.StrictMode>
+      <Suspense>
+        <Entry />
+      </Suspense>
+    </React.StrictMode>
   );
 }

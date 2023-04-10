@@ -1,262 +1,382 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faCog } from '@fortawesome/free-solid-svg-icons/faCog';
-import { faCoins } from '@fortawesome/free-solid-svg-icons/faCoins';
-import { faExpand } from '@fortawesome/free-solid-svg-icons/faExpand';
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle';
-import { faList } from '@fortawesome/free-solid-svg-icons/faList';
-import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
-import { faPlug } from '@fortawesome/free-solid-svg-icons/faPlug';
-import { faQrcode } from '@fortawesome/free-solid-svg-icons/faQrcode';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconMaps } from '@subwallet/extension-koni-ui/assets/icon';
-import { Link } from '@subwallet/extension-koni-ui/components';
-import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
-import Header from '@subwallet/extension-koni-ui/partials/Header';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
+import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
+import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
+import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import styled, { useTheme } from 'styled-components';
 
-import settings from '@polkadot/ui-settings';
+type Props = ThemeProps
 
-interface Props extends ThemeProps {
-  className?: string;
+type SettingItemType = {
+  key: string,
+  leftIcon: SwIconProps['phosphorIcon'],
+  leftIconBgColor: string,
+  rightIcon: SwIconProps['phosphorIcon'],
+  title: string,
+  onClick?: () => void,
+  isHidden?: boolean,
+};
+
+type SettingGroupItemType = {
+  key: string,
+  label?: string,
+  items: SettingItemType[],
+};
+
+function generateLeftIcon (backgroundColor: string, icon: SwIconProps['phosphorIcon']): React.ReactNode {
+  return (
+    <BackgroundIcon
+      backgroundColor={backgroundColor}
+      phosphorIcon={icon}
+      size='sm'
+      type='phosphor'
+      weight='fill'
+    />
+  );
 }
 
-const SettingPath = '/account/settings';
-
-function Settings ({ className }: Props): React.ReactElement {
-  const { t } = useTranslation();
-  const [camera, setCamera] = useState(settings.camera === 'on');
-  const isPopup = useIsPopup();
-  const _onWindowOpen = useCallback(
-    () => windowOpen('/').catch(console.error),
-    []
+function generateRightIcon (icon: SwIconProps['phosphorIcon']): React.ReactNode {
+  return (
+    <Icon
+      className='__right-icon'
+      customSize={'20px'}
+      phosphorIcon={icon}
+      type='phosphor'
+    />
   );
+}
 
-  useEffect(() => {
-    settings.set({ camera: camera ? 'on' : 'off' });
-  }, [camera]);
+function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  const navigate = useNavigate();
+  const { token } = useTheme() as Theme;
+  const isPopup = useIsPopup();
+  const notify = useNotification();
+  const { goHome } = useDefaultNavigate();
 
-  const onChangeCameraAccess = useCallback(() => {
-    setCamera(!camera);
+  const [locking, setLocking] = useState(false);
 
-    if (!camera && isPopup) {
-      window.localStorage.setItem('popupNavigation', SettingPath);
-      windowOpen(SettingPath).catch(console.error);
+  const onLock = useCallback(() => {
+    setLocking(true);
+
+    setTimeout(() => {
+      keyringLock()
+        .then(() => {
+          goHome();
+        })
+        .catch((e: Error) => {
+          notify({
+            message: e.message,
+            type: 'error'
+          });
+        })
+        .finally(() => {
+          setLocking(false);
+        });
+    }, 100);
+  }, [goHome, notify]);
+
+  // todo: i18n all titles, labels below
+  const SettingGroupItemType: SettingGroupItemType[] = [
+    {
+      key: 'general',
+      items: [
+        {
+          key: 'expand-view',
+          leftIcon: FrameCorners,
+          leftIconBgColor: token.colorPrimary,
+          rightIcon: ArrowsOut,
+          title: 'Expand view',
+          onClick: () => {
+            windowOpen('/').catch(console.error);
+          },
+          isHidden: !isPopup
+        },
+        {
+          key: 'general-settings',
+          leftIcon: GlobeHemisphereEast,
+          leftIconBgColor: token['magenta-6'],
+          rightIcon: CaretRight,
+          title: 'General settings',
+          onClick: () => {
+            navigate('/settings/general');
+          }
+        },
+        {
+          key: 'security-settings',
+          leftIcon: ShieldCheck,
+          leftIconBgColor: token['green-6'],
+          rightIcon: CaretRight,
+          title: 'Security settings',
+          onClick: () => {
+            navigate('/settings/security', { state: true });
+          }
+        }
+        // {
+        //   key: 'manage-address-book',
+        //   leftIcon: BookBookmark,
+        //   leftIconBgColor: token['blue-6'],
+        //   rightIcon: CaretRight,
+        //   title: 'Manage address book'
+        // }
+      ]
+    },
+    {
+      key: 'networks-&-tokens',
+      label: 'Chains & tokens',
+      items: [
+        {
+          key: 'manage-networks',
+          leftIcon: ShareNetwork,
+          leftIconBgColor: token['purple-7'],
+          rightIcon: CaretRight,
+          title: 'Manage Chains',
+          onClick: () => {
+            navigate('/settings/chains/manage');
+          }
+        },
+        {
+          key: 'manage-tokens',
+          leftIcon: Coin,
+          leftIconBgColor: token['gold-6'],
+          rightIcon: CaretRight,
+          title: 'Manage tokens',
+          onClick: () => {
+            navigate('/settings/tokens/manage');
+          }
+        }
+      ]
+    },
+    {
+      key: 'community-&-support',
+      label: 'Community & support',
+      items: [
+        {
+          key: 'twitter',
+          leftIcon: TwitterLogo,
+          leftIconBgColor: token['blue-6'],
+          rightIcon: ArrowSquareOut,
+          title: 'Twitter',
+          onClick: openInNewTab(TWITTER_URL)
+        },
+        {
+          key: 'discord',
+          leftIcon: DiscordLogo,
+          leftIconBgColor: token['geekblue-8'],
+          rightIcon: ArrowSquareOut,
+          title: 'Discord',
+          onClick: openInNewTab(DISCORD_URL)
+        },
+        {
+          key: 'telegram',
+          leftIcon: TelegramLogo,
+          leftIconBgColor: token['blue-5'],
+          rightIcon: ArrowSquareOut,
+          title: 'Telegram',
+          onClick: openInNewTab(TELEGRAM_URL)
+        }
+      ]
+    },
+    {
+      key: 'about',
+      label: 'About SubWallet',
+      items: [
+        {
+          key: 'website',
+          leftIcon: ShieldCheck,
+          leftIconBgColor: token['red-6'],
+          rightIcon: ArrowSquareOut,
+          title: 'Website',
+          onClick: openInNewTab(WEBSITE_URL)
+        },
+        {
+          key: 'user-manual',
+          leftIcon: Book,
+          leftIconBgColor: token['green-6'],
+          rightIcon: ArrowSquareOut,
+          title: 'User manual',
+          onClick: openInNewTab(WIKI_URL)
+        },
+        {
+          key: 'term-of-service',
+          leftIcon: BookOpen,
+          leftIconBgColor: token['volcano-7'],
+          rightIcon: ArrowSquareOut,
+          title: 'Term of service',
+          onClick: openInNewTab(TERMS_OF_SERVICE_URL)
+        },
+        {
+          key: 'privacy-policy',
+          leftIcon: BookBookmark,
+          leftIconBgColor: token['geekblue-6'],
+          rightIcon: ArrowSquareOut,
+          title: 'Privacy policy',
+          onClick: openInNewTab(PRIVACY_AND_POLICY_URL)
+        }
+      ]
     }
-  }, [camera, isPopup]);
+  ];
+
+  const headerIcons = useMemo<ButtonProps[]>(() => {
+    return [
+      {
+        icon: (
+          <Icon
+            customSize={'24px'}
+            phosphorIcon={X}
+            type='phosphor'
+            weight={'bold'}
+          />
+        ),
+        onClick: goHome
+      }
+    ];
+  }, [goHome]);
 
   return (
-    <div className={className}>
-      <Header
-        showBackArrow
-        showSubHeader
-        subHeaderName={t<string>('Settings')}
-      />
-      <div className='menu-setting-item-list'>
-        <a
-          className='menu-setting-item'
-          href='https://linktr.ee/subwallet.app'
-          rel='noreferrer'
-          target='_blank'
+    <PageWrapper className={`settings ${className}`}>
+      <>
+        <SwHeader
+          left='logo'
+          onClickLeft={goHome}
+          rightButtons={headerIcons}
+          showLeftButton={true}
         >
-          {/* @ts-ignore */}
-          <FontAwesomeIcon icon={faInfoCircle} />
-          <div className='menu-setting-item__text'>{t<string>('About')}</div>
-          {/* @ts-ignore */}
-          <div className='menu-setting-item__toggle' />
-        </a>
+          {/*  // todo: i18n Settings */}
+        Settings
+        </SwHeader>
 
-        <Link
-          className='menu-setting-item'
-          to='/account/general-setting'
-        >
-          {/* @ts-ignore */}
-          <FontAwesomeIcon icon={faCog} />
-          <div className='menu-setting-item__text'>{t<string>('General')}</div>
-          {/* @ts-ignore */}
-          <div className='menu-setting-item__toggle' />
-        </Link>
+        <div className={'__scroll-container'}>
+          {
+            SettingGroupItemType.map((group) => {
+              return (
+                <div
+                  className={'__group-container'}
+                  key={group.key}
+                >
+                  {!!group.label && (<div className='__group-label'>{group.label}</div>)}
 
-        <Link
-          className='menu-setting-item'
-          to='/account/networks'
-        >
-          {/* @ts-ignore */}
-          <FontAwesomeIcon icon={faPlug} />
-          <div className='menu-setting-item__text'>{t<string>('Networks')}</div>
-          <div className='menu-setting-item__toggle' />
-        </Link>
-
-        <Link
-          className='menu-setting-item'
-          to='/auth-list'
-        >
-          {/* @ts-ignore */}
-          <FontAwesomeIcon icon={faList} />
-          <div className='menu-setting-item__text'>{t<string>('Manage Website Access')}</div>
-          {/* @ts-ignore */}
-          <div className='menu-setting-item__toggle' />
-        </Link>
-
-        <Link
-          className='menu-setting-item'
-          to='/account/token-setting'
-        >
-          {/* @ts-ignore */}
-          <FontAwesomeIcon icon={faCoins} />
-          <div className='menu-setting-item__text'>{t<string>('Manage Tokens')}</div>
-          {/* @ts-ignore */}
-          <div className='menu-setting-item__toggle' />
-        </Link>
-
-        {isPopup && <div
-          className='menu-setting-item'
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          onClick={_onWindowOpen}
-        >
-          {/* @ts-ignore */}
-          <FontAwesomeIcon icon={faExpand} />
-          <div className='menu-setting-item__text'>{t<string>('Open extension in new window')}</div>
-          {/* @ts-ignore */}
-          <div className='menu-setting-item__toggle' />
-        </div>
-        }
-
-        <div
-          className='menu-setting-item'
-          onClick={onChangeCameraAccess}
-        >
-          {/* @ts-ignore */}
-          <FontAwesomeIcon icon={faQrcode} />
-          <div className='menu-setting-item__text'>{t<string>('Allow QR Camera Access')}</div>
-          {camera
-            ? (
-              <div className='account-checked'>
-                {IconMaps.check}
-              </div>
-            )
-            : (
-              <div className='account-checked account-unchecked-item' />
-            )
+                  <div className={'__group-content'}>
+                    {group.items.map((item) => item.isHidden
+                      ? null
+                      : (
+                        <SettingItem
+                          className={'__setting-item'}
+                          key={item.key}
+                          leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
+                          name={item.title}
+                          onPressItem={item.onClick}
+                          rightItem={generateRightIcon(item.rightIcon)}
+                        />
+                      ))}
+                  </div>
+                </div>
+              );
+            })
           }
+
+          <Button
+            block
+            icon={
+              <Icon
+                phosphorIcon={Lock}
+                type='phosphor'
+                weight={'fill'}
+              />
+            }
+            loading={locking}
+            onClick={onLock}
+            schema={'secondary'}
+          >
+            Lock
+          </Button>
+
+          <div className={'__version'}>
+          SubWallet v {EXTENSION_VERSION}
+          </div>
         </div>
 
-        {/* <Link */}
-        {/*  className='menu-setting-item' */}
-        {/*  isDisabled */}
-        {/*  to='' */}
-        {/* > */}
-        {/*  /!* @ts-ignore *!/ */}
-        {/*  <FontAwesomeIcon icon={faSlidersH} /> */}
-        {/*  <div className='menu-setting-item__text'>{t<string>('Advanced')}</div> */}
-        {/*  <div className='menu-setting-item__toggle' /> */}
-        {/* </Link> */}
-
-        {/* <Link */}
-        {/*  className='menu-setting-item' */}
-        {/*  isDisabled */}
-        {/*  to='' */}
-        {/* > */}
-        {/*  /!* @ts-ignore *!/ */}
-        {/*  <FontAwesomeIcon icon={faIdBadge} /> */}
-        {/*  <div className='menu-setting-item__text'>{t<string>('Contacts')}</div> */}
-        {/*  <div className='menu-setting-item__toggle' /> */}
-        {/* </Link> */}
-
-        <a
-          className='menu-setting-item'
-          href='https://docs.subwallet.app/privacy-and-security/privacy-policy'
-          rel='noreferrer'
-          target='_blank'
-        >
-          {/* @ts-ignore */}
-          <FontAwesomeIcon icon={faLock} />
-          <div className='menu-setting-item__text'>{t<string>('Security & Privacy')}</div>
-          <div className='menu-setting-item__toggle' />
-        </a>
-
-        {/* <Link */}
-        {/*  className='menu-setting-item' */}
-        {/*  isDisabled */}
-        {/*  to='' */}
-        {/* > */}
-        {/*  /!* @ts-ignore *!/ */}
-        {/*  <FontAwesomeIcon icon={faBell} /> */}
-        {/*  <div className='menu-setting-item__text'>{t<string>('Alerts')}</div> */}
-        {/*  <div className='menu-setting-item__toggle' /> */}
-        {/* </Link> */}
-      </div>
-
-    </div>
+        <Outlet />
+      </>
+    </PageWrapper>
   );
 }
 
-export default styled(Settings)(({ theme }: Props) => `
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) => {
+  return ({
+    height: '100%',
+    backgroundColor: token.colorBgDefault,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
 
-  .menu-setting-item-list {
-    padding: 25px 22px;
-    flex: 1;
-    overflow: auto;
-  }
+    '.ant-sw-header-container': {
+      paddingTop: token.padding,
+      paddingBottom: token.padding,
+      backgroundColor: token.colorBgDefault
+    },
 
-  .menu-setting-item {
-    position: relative;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    padding: 11px;
-    opacity: 1;
+    '.ant-sw-header-center-part': {
+      color: token.colorTextLight1,
+      fontSize: token.fontSizeHeading4,
+      lineHeight: token.lineHeightHeading4,
+      fontWeight: token.headingFontWeight
+    },
 
-    .svg-inline--fa {
-      color: ${theme.iconNeutralColor};
-      margin-right: 11px;
-      width: 15px;
+    '.__scroll-container': {
+      overflow: 'auto',
+      paddingTop: token.padding,
+      paddingRight: token.padding,
+      paddingLeft: token.padding,
+      paddingBottom: token.paddingLG
+    },
+
+    '.__group-label': {
+      color: token.colorTextLight3,
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      marginBottom: token.margin,
+      textTransform: 'uppercase'
+    },
+
+    '.__group-container': {
+      paddingBottom: token.paddingLG
+    },
+
+    '.__setting-item + .__setting-item': {
+      marginTop: token.marginXS
+    },
+
+    '.ant-web3-block-right-item': {
+      minWidth: 40,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: -token.marginXS,
+      color: token['gray-4']
+    },
+
+    '.__setting-item:hover .ant-web3-block-right-item': {
+      color: token['gray-6']
+    },
+
+    '.__version': {
+      paddingTop: token.padding,
+      textAlign: 'center',
+      color: token.colorTextLight3,
+      fontSize: token.size,
+      lineHeight: token.lineHeight
     }
-  }
+  });
+});
 
-  .menu-setting-item:hover {
-    background-color: ${theme.backgroundAccountAddress};
-    cursor: pointer;
-
-    .menu-setting-item__toggle {
-      color:  ${theme.textColor};
-    }
-
-    .svg-inline--fa,
-    .menu-setting-item__text {
-      color: ${theme.buttonTextColor2};
-    }
-  }
-
-  .menu-setting-item__text {
-    font-size: 18px;
-    line-height: 30px;
-    font-weight: 500;
-    color: ${theme.textColor2};
-  }
-
-  .menu-setting-item__toggle {
-    position: absolute;
-    border-style: solid;
-    border-width: 0 2px 2px 0;
-    display: inline-block;
-    padding: 3px;
-    transform: rotate(-45deg);
-    right: 25px;
-    color: ${theme.background};
-  }
-
-  .account-checked {
-    position: absolute;
-    right: 25px;
-    color: ${theme.primaryColor}
-  }
-`);
+export default Settings;

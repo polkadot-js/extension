@@ -1,38 +1,7 @@
 # CHANGELOG
 
-## 0.8.4 (Koni)
-Build date: Mar 31, 2023.
-
-Update:
-- Integrate Aventus Network (#646)
-- Add ArtZero API & fix bug show NFT (#1112)
-- Update Azero block explorer (#1117)
-
-Bug fixes:
-- Fix bug importing PSP22 tokens (#1118)
-
-## 0.8.3 (Koni)
-Build date: Mar 29, 2023.
-
-Update:
-- Update explorer for Gemini 3c, 2a (#1089)
-- Equilibrium logo update (#1098)
-- Add XCM for Kusama --> Statemint (#1094)
-- Update logic for ink 4.0 and delete old PSP token (#1095)
-
-## 0.8.2 (Koni)
-Build date: Mar 15, 2023.
-
-Update:
-- Update Token's logo of the Equilibrium (#1032)
-- Add support Subspace Gemini 3c (#1077)
-- Temporarily hide Kintsugi in the Origin Chain list (#1086)
-
-Bug fixes:
-- Fix bug XCM for Moonbeam, Bifrost Kusama (#1000)
-
 ## 0.8.1 (Koni)
-Build date: Feb 03, 2023.
+Build date: Feb 03, 2022.
 
 Update:
 - Update RMRK NFT endpoints (#963)
@@ -44,7 +13,7 @@ Bug fixes:
 - Fix bug can not connect to AstarEVM (#1001)
 
 ## 0.7.9 (Koni)
-Build date: Jan 30, 2023.
+Build date: Jan 30, 2022.
 
 Update:
 - Add the coingecko key for Nodle (#983)

@@ -3,7 +3,10 @@
 
 import type { MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, RequestTypes, ResponseTypes, SubscriptionMessageTypes, TransportRequestMessage, TransportResponseMessage } from '../background/types';
 
-import { SubWalletProviderError } from '@subwallet/extension-base/errors/SubWalletProviderError';
+import { ProviderError } from '@subwallet/extension-base/background/errors/ProviderError';
+import { ProviderErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { SubWalletEvmProvider } from '@subwallet/extension-base/page/SubWalleEvmProvider';
+import { EvmProvider } from '@subwallet/extension-inject/types';
 
 import { MESSAGE_ORIGIN_PAGE } from '../defaults';
 import { getId } from '../utils/getId';
@@ -74,8 +77,12 @@ export function handleResponse<TMessageType extends MessageTypes> (data: Transpo
     // eslint-disable-next-line @typescript-eslint/ban-types
     (handler.subscriber as Function)(data.subscription);
   } else if (data.error) {
-    handler.reject(new SubWalletProviderError(data.error, data.errorCode, data.errorData));
+    handler.reject(new ProviderError(ProviderErrorType.INTERNAL_ERROR, data.error, data.errorCode));
   } else {
     handler.resolve(data.response);
   }
+}
+
+export function initEvmProvider (version: string): EvmProvider {
+  return new SubWalletEvmProvider(sendMessage, version);
 }

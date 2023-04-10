@@ -9,11 +9,12 @@ import type { RequestSignatures, TransportRequestMessage } from '@subwallet/exte
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
+import { onExtensionInstall } from '@subwallet/extension-base/koni/background/events';
+import handlers, { state as koniState } from '@subwallet/extension-base/koni/background/handlers';
 import { AccountsStore } from '@subwallet/extension-base/stores';
-import { onExtensionInstall } from '@subwallet/extension-koni-base/background/events';
-import handlers, { state as koniState } from '@subwallet/extension-koni-base/background/handlers';
+import KeyringStore from '@subwallet/extension-base/stores/Keyring';
+import keyring from '@subwallet/ui-keyring';
 
-import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
@@ -48,6 +49,7 @@ chrome.runtime.onConnect.addListener((port): void => {
     openCount += 1;
     koniState.wakeup().catch((err) => console.warn(err));
 
+    // TODO: wakeup happens every time popup opens, no matter if the background is asleep or not
     console.log('Wake up due to popup open ---------------------------------');
 
     if (waitingToStop) {
@@ -97,7 +99,11 @@ cryptoWaitReady()
     console.log('crypto initialized');
 
     // load all the keyring data
-    keyring.loadAll({ store: new AccountsStore(), type: 'sr25519' });
+    keyring.loadAll({ store: new AccountsStore(), type: 'sr25519', password_store: new KeyringStore() });
+
+    keyring.restoreKeyringPassword().finally(() => {
+      koniState.updateKeyringState();
+    });
 
     console.log('initialization completed');
   })

@@ -1,4 +1,4 @@
-{
+ {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": "..",
@@ -8,7 +8,6 @@
   "references": [
     { "path": "../extension-base" },
     { "path": "../extension-inject" },
-    { "path": "../extension-koni-base" },
     { "path": "../extension-koni-ui" }
   ]
 }

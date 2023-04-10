@@ -1,62 +1,107 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
-
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { Theme } from '@subwallet/extension-koni-ui/themes';
+import { ButtonProps, Icon, PageIcon, Typography } from '@subwallet/react-ui';
+import CN from 'classnames';
+import { ShieldSlash, XCircle } from 'phosphor-react';
 import React from 'react';
-import { Trans } from 'react-i18next';
 import { useParams } from 'react-router';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
-import useTranslation from '../hooks/useTranslation';
-import { Header } from '../partials';
+import { Layout } from '../components';
+import useTranslation from '../hooks/common/useTranslation';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
 }
 
-interface WebsiteState {
-  website: string;
-}
-
-function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
+function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { website } = useParams<WebsiteState>();
+  const { goHome } = useDefaultNavigate();
+  const { token } = useTheme() as Theme;
+  const website = useParams<{ website: string }>().website || '';
   const decodedWebsite = decodeURIComponent(website);
 
+  const footerBtn: ButtonProps = {
+    children: t('Get me out of here'),
+    icon: <Icon
+      phosphorIcon={XCircle}
+      weight='fill'
+    />,
+    onClick: goHome
+  };
+
   return (
-    <>
-      <Header text={t<string>('Phishing detected')} />
-      <div className={className}>
-        <p>
-          {t<string>('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.')}
-        </p>
-        <p className='website-address'>
-          {decodedWebsite}
-        </p>
-        <p>
-          <Trans i18nKey='phishing.incorrect'>
-            Note that this  website was reported on a community-driven, curated list. It might be incomplete or inaccurate. If you think that this website was flagged incorrectly, <a href='https://github.com/polkadot-js/phishing/issues/new'>please open an issue by clicking here</a>.
-          </Trans>
-        </p>
+    <Layout.WithSubHeaderOnly
+      className={CN(className)}
+      rightFooterButton={footerBtn}
+      showBackButton={false}
+      subHeaderPaddingVertical={true}
+      title={t('Phishing detection')}
+    >
+      <div className={CN('__upper-block-wrapper')} />
+      <PageIcon
+        color={token.colorError}
+        iconProps={{ phosphorIcon: ShieldSlash, weight: 'fill' }}
+      />
+      <div className='title h3-text text-danger'>{t('Phishing detection')}</div>
+      <div className='h4-text text-danger'>{decodedWebsite}</div>
+      <div className='phishing-detection-message'>
+        <span>{t('This domain has been reported as a known phishing site on a community maintained list: ')}</span>
+        <Typography.Link size='lg'>
+          <a href='https://polkadot.js.org/phishing/#'>{t('view full list')}</a>
+        </Typography.Link>
       </div>
-    </>
+    </Layout.WithSubHeaderOnly>
   );
 }
 
-export default styled(PhishingDetected)(({ theme }: Props) => `
-  p {
-    color: ${theme.subTextColor};
-    margin-bottom: 1rem;
-    margin-top: 0;
+const PhishingDetected = styled(_PhishingDetected)<Props>(({ theme }) => {
+  const { extendToken, token } = theme as Theme;
 
-    a {
-      color: ${theme.subTextColor};
-    }
+  return ({
+    position: 'relative',
 
-    &.website-address {
-      font-size: 1.3rem;
-      text-align: center;
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      paddingTop: 48
+    },
+
+    '.ant-sw-sub-header-title-content': {
+      zIndex: 1
+    },
+
+    '.title': {
+      paddingTop: 16,
+      paddingBottom: 16
+    },
+
+    '.phishing-detection-message': {
+      paddingLeft: 40,
+      paddingRight: 40,
+      paddingTop: 16,
+      textAlign: 'center',
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      color: token.colorTextLight3
+    },
+
+    '.__upper-block-wrapper': {
+      position: 'absolute',
+      height: 180,
+      top: 0,
+      left: 0,
+      right: 0,
+      display: 'flex',
+      alignItems: 'center',
+      transaction: '0.1s height',
+      backgroundImage: extendToken.tokensScreenDangerBackgroundColor
     }
-  }
-`);
+  });
+});
+
+export default PhishingDetected;

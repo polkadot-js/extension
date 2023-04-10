@@ -1,99 +1,210 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
-
-import Button from '@subwallet/extension-koni-ui/components/Button';
-import ButtonArea from '@subwallet/extension-koni-ui/components/ButtonArea';
-import Header from '@subwallet/extension-koni-ui/partials/Header';
+import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
+import { Layout } from '@subwallet/extension-koni-ui/components';
+import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
+import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Button, ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
+import CN from 'classnames';
+import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
-import styled, { ThemeContext } from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
-import { ActionContext } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import { Theme } from '../types';
+type Props = ThemeProps;
 
-interface Props extends ThemeProps {
-  className?: string;
+interface WelcomeButtonItem {
+  id: string;
+  icon: PhosphorIcon;
+  schema: ButtonProps['schema'];
+  title: string;
+  description: string;
 }
 
-function Welcome ({ className }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
-  const onAction = useContext(ActionContext);
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
+const items: WelcomeButtonItem[] = [
+  {
+    description: 'Create a new account with SubWallet',
+    icon: PlusCircle,
+    id: CREATE_ACCOUNT_MODAL,
+    schema: 'primary',
+    title: 'Create a new account'
+  },
+  {
+    description: 'Import an existing account',
+    icon: FileArrowDown,
+    id: IMPORT_ACCOUNT_MODAL,
+    schema: 'secondary',
+    title: 'Import an account'
+  },
+  {
+    description: 'Attach an account from external wallet',
+    icon: Swatches,
+    id: ATTACH_ACCOUNT_MODAL,
+    schema: 'secondary',
+    title: 'Attach an account'
+  }
+];
 
-  const _onClick = useCallback(
-    (): void => {
-      window.localStorage.setItem('welcome_read', 'ok');
-      onAction();
-    },
-    [onAction]
-  );
+function Component ({ className }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const navigate = useNavigate();
+
+  const openModal = useCallback((id: string) => {
+    return () => {
+      if (id === CREATE_ACCOUNT_MODAL) {
+        navigate('/accounts/new-seed-phrase', { state: { accountTypes: [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE] } });
+      } else {
+        inactiveModal(SELECT_ACCOUNT_MODAL);
+        activeModal(id);
+      }
+    };
+  }, [activeModal, inactiveModal, navigate]);
 
   return (
-    <>
-      <Header
-        isNotHaveAccount
-        isWelcomeScreen
-      />
-      <div className={className}>
-        <div className='welcome-container'>
-          <img
-            alt='logo'
-            className='welcome-logo'
-            src={themeContext.logo}
+    <Layout.Base
+      className={CN(className)}
+    >
+      <div className='bg-gradient' />
+      <div className='bg-image' />
+      <div className='body-container'>
+        <div className='logo-container'>
+          <Logo3D
+            height={100}
+            width={69}
           />
-          <span className='welcome-title'>
-            Welcome Back
-          </span>
-          <span className='welcome-subtitle'>
-            The decentralized web awaits
-          </span>
-          <ButtonArea className='welcome-button-wrapper'>
-            <Button onClick={_onClick}>{t<string>('Get started')}</Button>
-          </ButtonArea>
+        </div>
+        <div className='title'>
+          {t('SubWallet')}
+        </div>
+        <div className='sub-title'>
+          {t('Polkadot, Substrate & Ethereum wallet')}
+        </div>
+        <div className='buttons-container'>
+          {
+            items.map((item) => (
+              <Button
+                block={true}
+                className='welcome-import-button'
+                contentAlign='left'
+                icon={(
+                  <Icon
+                    className='welcome-import-icon'
+                    phosphorIcon={item.icon}
+                    size='md'
+                    weight='fill'
+                  />
+                )}
+                key={item.id}
+                onClick={openModal(item.id)}
+                schema={item.schema}
+              >
+                <div className='welcome-import-button-content'>
+                  <div className='welcome-import-button-title'>{t(item.title)}</div>
+                  <div className='welcome-import-button-description'>{t(item.description)}</div>
+                </div>
+              </Button>
+            ))
+          }
         </div>
       </div>
-    </>
+    </Layout.Base>
   );
 }
 
-export default styled(Welcome)(({ theme }: Props) => `
-  .welcome-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 30px 47px;
-  }
+const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
+  return {
+    position: 'relative',
 
-  .welcome-logo {
-    margin: 15px 0 30px 0;
-    width: 118px;
-    height: 118px;
-  }
+    '.bg-gradient': {
+      backgroundImage: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+      height: 290,
+      width: '100%',
+      position: 'absolute',
+      left: 0,
+      top: 0
+    },
 
-  .welcome-title {
-    font-size: 32px;
-    line-height: 44px;
-    color: ${theme.textColor};
-    font-weight: 500;
-  }
+    '.bg-image': {
+      backgroundImage: `url(${LoginBg})`,
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'top',
+      backgroundSize: 'contain',
+      height: '100%',
+      position: 'absolute',
+      width: '100%',
+      left: 0,
+      top: 0,
+      opacity: 0.1
+    },
 
-  .welcome-subtitle {
-    margin-top: 3px;
-    font-size: 18px;
-    line-height: 30px;
-    color: ${theme.textColor2};
-  }
+    '.body-container': {
+      padding: `0 ${token.padding}px`,
+      textAlign: 'center',
 
-  .welcome-button-wrapper {
-    width: 100%;
-    margin-top: 30px;
-  }
+      '.logo-container': {
+        marginTop: token.sizeLG * 3,
+        color: token.colorTextBase
+      },
 
-  p {
-    color: ${theme.subTextColor};
-    margin-bottom: 6px;
-    margin-top: 0;
-  }
-`);
+      '.title': {
+        marginTop: token.marginXS,
+        fontWeight: token.fontWeightStrong,
+        fontSize: token.fontSizeHeading1,
+        lineHeight: token.lineHeightHeading1,
+        color: token.colorTextBase
+      },
+
+      '.sub-title': {
+        marginTop: token.marginXS,
+        marginBottom: token.sizeLG * 3,
+        fontSize: token.fontSizeHeading5,
+        lineHeight: token.lineHeightHeading5,
+        color: token.colorTextLight3
+      },
+
+      '.buttons-container': {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: token.sizeXS,
+
+        '.welcome-import-button': {
+          height: 'auto',
+
+          '.welcome-import-icon': {
+            height: token.sizeLG,
+            width: token.sizeLG,
+            marginLeft: token.sizeMD - token.size
+          },
+
+          '.welcome-import-button-content': {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: token.sizeXXS,
+            fontWeight: token.fontWeightStrong,
+            padding: `${token.paddingSM - 1}px ${token.paddingLG}px`,
+            textAlign: 'start',
+
+            '.welcome-import-button-title': {
+              fontSize: token.fontSizeHeading5,
+              lineHeight: token.lineHeightHeading5,
+              color: token.colorTextBase
+            },
+
+            '.welcome-import-button-description': {
+              fontSize: token.fontSizeHeading6,
+              lineHeight: token.lineHeightHeading6,
+              color: token.colorTextLabel
+            }
+          }
+        }
+      }
+    }
+  };
+});
+
+export default Welcome;

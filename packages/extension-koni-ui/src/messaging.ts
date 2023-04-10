@@ -4,22 +4,24 @@
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
 import type { Message } from '@subwallet/extension-base/types';
 import type { Chain } from '@subwallet/extension-chains/types';
-import type { KeyringPair$Json } from '@polkadot/keyring/types';
-import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
+import type { KeyringPair$Json } from '@subwallet/keyring/types';
+import type { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountExternalError, AccountsWithCurrentAddress, BalanceJson, BasicTxInfo, BasicTxResponse, BondingOptionInfo, BondingSubmitParams, ChainBondingBasics, ChainRegistry, CheckExistingTuringCompoundParams, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, CustomToken, CustomTokenJson, DelegationItem, DeleteCustomTokenParams, DisableNetworkResponse, EvmNftTransaction, ExistingTuringCompoundTask, NetworkJson, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestCancelCompoundStakeExternal, RequestCheckCrossChainTransfer, RequestCheckTransfer, RequestClaimRewardExternal, RequestCreateCompoundStakeExternal, RequestCrossChainTransfer, RequestCrossChainTransferExternal, RequestEvmNftSubmitTransaction, RequestFreeBalance, RequestNftForceUpdate, RequestNftTransferExternalEVM, RequestNftTransferExternalSubstrate, RequestParseEVMContractInput, RequestParseTransactionSubstrate, RequestQrSignEVM, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSettingsType, RequestStakeClaimReward, RequestStakeExternal, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTransferExternal, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnStakeExternal, RequestWithdrawStakeExternal, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseCheckCrossChainTransfer, ResponseCheckPublicAndSecretKey, ResponseCheckTransfer, ResponseParseEVMContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEVM, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, StakeClaimRewardParams, StakeDelegationRequest, StakeUnlockingJson, StakeWithdrawalParams, StakingJson, StakingRewardJson, SubstrateNftTransaction, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TuringCancelStakeCompoundParams, TuringStakeCompoundParams, TuringStakeCompoundResp, UnbondingSubmitParams, ValidateCustomTokenRequest, ValidateCustomTokenResponse, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountsWithCurrentAddress, AmountData, AssetSettingUpdateReq, BalanceJson, BrowserConfirmationType, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanJson, CurrentAccountInfo, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, NominatorMetadata, Notification, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountMeta, RequestAuthorizationBlock, RequestAuthorizationPerSite, RequestBondingSubmit, RequestChangeMasterPassword, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrSignEvm, RequestQrSignSubstrate, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountIsLocked, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, UiSettings, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
+import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
+import { SingleAddress } from '@subwallet/ui-keyring/observable/types';
 
-import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
-
-import { _getKnownHashes, _getKnownNetworks } from './util/defaultChains';
+import { _getKnownHashes, _getKnownNetworks } from './utils/chain/defaultChains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
 interface Handler {
@@ -72,6 +74,62 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
   });
 }
 
+export function lazySendMessage<TMessageType extends MessageTypesWithSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType]): {promise: Promise<ResponseTypes[TMessageType]>, start: () => void} {
+  const id = getId();
+  const handlePromise = new Promise((resolve, reject): void => {
+    handlers[id] = { reject, resolve };
+  });
+
+  return {
+    promise: handlePromise as Promise<ResponseTypes[TMessageType]>,
+    start: () => {
+      port.postMessage({ id, message, request: request || {} });
+    }
+  };
+}
+
+export function lazySubscribeMessage<TMessageType extends MessageTypesWithSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType], callback: (data: ResponseTypes[TMessageType]) => void, subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): {promise: Promise<ResponseTypes[TMessageType]>, start: () => void, unsub: () => void} {
+  const id = getId();
+  let cancel = false;
+  const handlePromise = new Promise((resolve, reject): void => {
+    handlers[id] = { reject, resolve, subscriber };
+  });
+
+  const rs = {
+    promise: handlePromise as Promise<ResponseTypes[TMessageType]>,
+    start: () => {
+      port.postMessage({ id, message, request: request || {} });
+    },
+    unsub: () => {
+      const handler = handlers[id];
+
+      cancel = true;
+
+      if (handler) {
+        delete handler.subscriber;
+        handler.resolve(null);
+      }
+    }
+  };
+
+  rs.promise.then((data) => {
+    !cancel && callback(data);
+  }).catch(console.error);
+
+  return rs;
+}
+
+export function subscribeMessage<TMessageType extends MessageTypesWithSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType], callback: (data: ResponseTypes[TMessageType]) => void, subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): {promise: Promise<ResponseTypes[TMessageType]>, unsub: () => void} {
+  const lazyItem = lazySubscribeMessage(message, request, callback, subscriber);
+
+  lazyItem.start();
+
+  return {
+    promise: lazyItem.promise,
+    unsub: lazyItem.unsub
+  };
+}
+
 export async function editAccount (address: string, name: string): Promise<boolean> {
   return sendMessage('pri(accounts.edit)', { address, name });
 }
@@ -92,11 +150,19 @@ export async function saveAccountAllLogo (accountAllLogo: string, callback: (dat
   return sendMessage('pri(settings.saveAccountAllLogo)', accountAllLogo, callback);
 }
 
-export async function saveTheme (theme: ThemeTypes, callback: (data: RequestSettingsType) => void): Promise<boolean> {
+export async function saveBrowserConfirmationType (type: BrowserConfirmationType, callback: (data: RequestSettingsType) => void): Promise<boolean> {
+  return sendMessage('pri(settings.saveBrowserConfirmationType)', type, callback);
+}
+
+export async function saveCameraSetting (value: boolean): Promise<boolean> {
+  return sendMessage('pri(settings.saveCamera)', { camera: value });
+}
+
+export async function saveTheme (theme: ThemeNames, callback: (data: RequestSettingsType) => void): Promise<boolean> {
   return sendMessage('pri(settings.saveTheme)', theme, callback);
 }
 
-export async function subscribeSettings (data: RequestSubscribeBalancesVisibility, callback: (data: ResponseSettingsType) => void): Promise<ResponseSettingsType> {
+export async function subscribeSettings (data: RequestSubscribeBalancesVisibility, callback: (data: UiSettings) => void): Promise<UiSettings> {
   return sendMessage('pri(settings.subscribe)', data, callback);
 }
 
@@ -152,6 +218,10 @@ export async function approveSignPassword (id: string, savePass: boolean, passwo
   return sendMessage('pri(signing.approve.password)', { id, password, savePass });
 }
 
+export async function approveSignPasswordV2 (request: RequestSigningApprovePasswordV2): Promise<boolean> {
+  return sendMessage('pri(signing.approve.passwordV2)', request);
+}
+
 export async function approveSignSignature (id: string, signature: HexString): Promise<boolean> {
   return sendMessage('pri(signing.approve.signature)', { id, signature });
 }
@@ -172,12 +242,16 @@ export async function createAccountHardwareV2 (request: RequestAccountCreateHard
   return sendMessage('pri(accounts.create.hardwareV2)', request);
 }
 
+export async function createAccountHardwareMultiple (request: RequestAccountCreateHardwareMultiple): Promise<boolean> {
+  return sendMessage('pri(accounts.create.hardwareMultiple)', request);
+}
+
 export async function createAccountSuri (name: string, password: string, suri: string, type?: KeypairType, genesisHash?: string): Promise<boolean> {
   return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
-export async function createAccountSuriV2 (name: string, password: string, suri: string, isAllowed: boolean, types?: Array<KeypairType>, genesisHash?: string): Promise<ResponseAccountCreateSuriV2> {
-  return sendMessage('pri(accounts.create.suriV2)', { genesisHash, name, password, suri, types, isAllowed });
+export async function createAccountSuriV2 (request: RequestAccountCreateSuriV2): Promise<ResponseAccountCreateSuriV2> {
+  return sendMessage('pri(accounts.create.suriV2)', request);
 }
 
 export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
@@ -192,7 +266,7 @@ export async function createAccountWithSecret (request: RequestAccountCreateWith
   return sendMessage('pri(accounts.create.withSecret)', request);
 }
 
-export async function getAllMetatdata (): Promise<MetadataDef[]> {
+export async function getAllMetadata (): Promise<MetadataDef[]> {
   return sendMessage('pri(metadata.list)');
 }
 
@@ -201,8 +275,8 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
     return null;
   }
 
-  const chains = await getNetworkMap();
-  const parsedChains = _getKnownHashes(chains);
+  // const chains = await getNetworkMap();
+  const parsedChains = _getKnownHashes({});
 
   let request = getSavedMeta(genesisHash);
 
@@ -237,8 +311,8 @@ export async function getChainMetadata (genesisHash?: string | null): Promise<Ch
     return null;
   }
 
-  const chains = await getNetworkMap();
-  const parsedChains = _getKnownNetworks(chains);
+  // const chains = await getNetworkMap();
+  const parsedChains = _getKnownNetworks({});
 
   let request = getSavedMeta(genesisHash);
 
@@ -284,11 +358,11 @@ export async function rejectMetaRequest (id: string): Promise<boolean> {
   return sendMessage('pri(metadata.reject)', { id });
 }
 
-export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<boolean> {
+export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<AccountJson[]> {
   return sendMessage('pri(accounts.subscribe)', {}, cb);
 }
 
-export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<boolean> {
+export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<AccountsWithCurrentAddress> {
   return sendMessage('pri(accounts.subscribeWithCurrentAddress)', {}, cb);
 }
 
@@ -332,7 +406,7 @@ export async function changeAuthorization (connectValue: boolean, url: string, c
   return sendMessage('pri(authorize.changeSite)', { url, connectValue }, callback);
 }
 
-export async function changeAuthorizationPerAcc (address: string, connectValue: boolean, url: string, callback: (data: AuthUrls) => void): Promise<boolean> {
+export async function changeAuthorizationPerAccount (address: string, connectValue: boolean, url: string, callback: (data: AuthUrls) => void): Promise<boolean> {
   return sendMessage('pri(authorize.changeSitePerAccount)', { address, url, connectValue }, callback);
 }
 
@@ -381,7 +455,7 @@ export async function deriveAccount (parentAddress: string, suri: string, parent
 }
 
 export async function deriveAccountV2 (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: string | null, isAllowed: boolean): Promise<boolean> {
-  return sendMessage('pri(derivation.createV2)', { genesisHash, name, parentAddress, parentPassword, password, suri, isAllowed });
+  return sendMessage('pri(derivation.createV2)', { genesisHash, name, parentAddress, suri, isAllowed });
 }
 
 export async function windowOpen (path: AllowedPath): Promise<boolean> {
@@ -400,8 +474,8 @@ export async function batchRestore (file: KeyringPairs$Json, password: string, a
   return sendMessage('pri(json.batchRestore)', { file, password, address });
 }
 
-export async function jsonRestoreV2 (file: KeyringPair$Json, password: string, address: string, isAllowed: boolean): Promise<void> {
-  return sendMessage('pri(json.restoreV2)', { file, password, address, isAllowed });
+export async function jsonRestoreV2 (request: RequestJsonRestoreV2): Promise<void> {
+  return sendMessage('pri(json.restoreV2)', request);
 }
 
 export async function batchRestoreV2 (file: KeyringPairs$Json, password: string, accountsInfo: ResponseJsonGetAccountInfo[], isAllowed: boolean): Promise<void> {
@@ -436,16 +510,13 @@ export async function subscribeCrowdloan (request: RequestSubscribeCrowdloan, ca
   return sendMessage('pri(crowdloan.getSubscription)', request, callback);
 }
 
-export async function subscribeChainRegistry (callback: (map: Record<string, ChainRegistry>) => void): Promise<Record<string, ChainRegistry>> {
-  return sendMessage('pri(chainRegistry.getSubscription)', null, callback);
+// TODO: remove, deprecated
+export async function subscribeAssetRegistry (callback: (map: Record<string, _ChainAsset>) => void): Promise<Record<string, _ChainAsset>> {
+  return sendMessage('pri(chainService.subscribeAssetRegistry)', null, callback);
 }
 
-export async function subscribeHistory (callback: (historyMap: Record<string, TransactionHistoryItemType[]>) => void): Promise<Record<string, TransactionHistoryItemType[]>> {
+export async function subscribeHistory (callback: (historyMap: TransactionHistoryItem[]) => void): Promise<TransactionHistoryItem[]> {
   return sendMessage('pri(transaction.history.getSubscription)', null, callback);
-}
-
-export async function updateTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {
-  return sendMessage('pri(transaction.history.add)', { address, networkKey, item }, callback);
 }
 
 export async function getNft (account: string): Promise<NftJson> {
@@ -478,112 +549,92 @@ export async function subscribeStakingReward (request: RequestSubscribeStakingRe
   return sendMessage('pri(stakingReward.getSubscription)', request, callback);
 }
 
-export async function nftForceUpdate (request: RequestNftForceUpdate): Promise<boolean> {
-  return sendMessage('pri(nft.forceUpdate)', request);
+export async function makeTransfer (request: RequestTransfer): Promise<SWTransactionResponse> {
+  return sendMessage('pri(accounts.transfer)', request);
 }
 
-export async function getNftTransfer (): Promise<NftTransferExtra> {
-  return sendMessage('pri(nftTransfer.getNftTransfer)', null);
+export async function makeCrossChainTransfer (request: RequestCrossChainTransfer): Promise<SWTransactionResponse> {
+  return sendMessage('pri(accounts.crossChainTransfer)', request);
 }
 
-export async function subscribeNftTransfer (callback: (data: NftTransferExtra) => void): Promise<NftTransferExtra> {
-  return sendMessage('pri(nftTransfer.getSubscription)', null, callback);
+export async function evmNftSubmitTransaction (request: NftTransactionRequest): Promise<SWTransactionResponse> {
+  return sendMessage('pri(evmNft.submitTransaction)', request);
 }
 
-export async function setNftTransfer (request: NftTransferExtra): Promise<boolean> {
-  return sendMessage('pri(nftTransfer.setNftTransfer)', request);
+// ChainService -------------------------------------------------------------------------------------
+
+export async function subscribeChainInfoMap (callback: (data: Record<string, _ChainInfo>) => void): Promise<Record<string, _ChainInfo>> {
+  return sendMessage('pri(chainService.subscribeChainInfoMap)', null, callback);
 }
 
-export async function checkTransfer (request: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
-  return sendMessage('pri(accounts.checkTransfer)', request);
+export async function subscribeChainStateMap (callback: (data: Record<string, _ChainState>) => void): Promise<Record<string, _ChainState>> {
+  return sendMessage('pri(chainService.subscribeChainStateMap)', null, callback);
 }
 
-export async function checkCrossChainTransfer (request: RequestCheckCrossChainTransfer): Promise<ResponseCheckCrossChainTransfer> {
-  return sendMessage('pri(accounts.checkCrossChainTransfer)', request);
+export async function removeChain (networkKey: string): Promise<boolean> {
+  return sendMessage('pri(chainService.removeChain)', networkKey);
 }
 
-export async function makeTransfer (request: RequestTransfer, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(accounts.transfer)', request, callback);
+export async function updateChainActiveState (chain: string, active: boolean): Promise<boolean> {
+  if (active) {
+    return await enableChain(chain);
+  } else {
+    return await disableChain(chain);
+  }
 }
 
-export async function makeCrossChainTransfer (request: RequestCrossChainTransfer, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(accounts.crossChainTransfer)', request, callback);
+export async function disableChain (networkKey: string): Promise<boolean> {
+  return sendMessage('pri(chainService.disableChain)', networkKey);
 }
 
-export async function evmNftGetTransaction (request: NftTransactionRequest): Promise<EvmNftTransaction> {
-  return sendMessage('pri(evmNft.getTransaction)', request);
+export async function enableChain (networkKey: string): Promise<boolean> {
+  return sendMessage('pri(chainService.enableChain)', networkKey);
 }
 
-export async function evmNftSubmitTransaction (request: RequestEvmNftSubmitTransaction, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
-  return sendMessage('pri(evmNft.submitTransaction)', request, callback);
+export async function enableChains (targetKeys: string[]): Promise<boolean> {
+  return sendMessage('pri(chainService.enableChains)', targetKeys);
 }
 
-export async function subscribeNetworkMap (callback: (data: Record<string, NetworkJson>) => void): Promise<Record<string, NetworkJson>> {
-  return sendMessage('pri(networkMap.getSubscription)', null, callback);
+export async function disableChains (targetKeys: string[]): Promise<boolean> {
+  return sendMessage('pri(chainService.disableChains)', targetKeys);
 }
 
-export async function upsertNetworkMap (data: NetworkJson): Promise<boolean> {
-  return sendMessage('pri(networkMap.upsert)', data);
+export async function upsertChain (data: _NetworkUpsertParams): Promise<boolean> {
+  return sendMessage('pri(chainService.upsertChain)', data);
 }
 
-export async function getNetworkMap (): Promise<Record<string, NetworkJson>> {
-  return sendMessage('pri(networkMap.getNetworkMap)');
+export async function getSupportedContractTypes (): Promise<string[]> {
+  return sendMessage('pri(chainService.getSupportedContractTypes)', null);
 }
 
-export async function removeNetworkMap (networkKey: string): Promise<boolean> {
-  return sendMessage('pri(networkMap.removeOne)', networkKey);
+export async function upsertCustomToken (data: _ChainAsset): Promise<boolean> {
+  return sendMessage('pri(chainService.upsertCustomAsset)', data);
 }
 
-export async function disableNetworkMap (networkKey: string): Promise<DisableNetworkResponse> {
-  return sendMessage('pri(networkMap.disableOne)', networkKey);
+export async function deleteCustomAssets (assetSlug: string): Promise<boolean> {
+  return sendMessage('pri(chainService.deleteCustomAsset)', assetSlug);
 }
 
-export async function enableNetworkMap (networkKey: string): Promise<boolean> {
-  return sendMessage('pri(networkMap.enableOne)', networkKey);
-}
-
-export async function enableNetworks (targetKeys: string[]): Promise<boolean> {
-  return sendMessage('pri(networkMap.enableMany)', targetKeys);
-}
-
-export async function disableNetworks (targetKeys: string[]): Promise<boolean> {
-  return sendMessage('pri(networkMap.disableMany)', targetKeys);
-}
-
-export async function validateNetwork (provider: string, isEthereum: boolean, existedNetwork?: NetworkJson): Promise<ValidateNetworkResponse> {
-  return sendMessage('pri(apiMap.validate)', { provider, isEthereum, existedNetwork });
-}
-
-export async function disableAllNetwork (): Promise<boolean> {
-  return sendMessage('pri(networkMap.disableAll)', null);
-}
-
-export async function enableAllNetwork (): Promise<boolean> {
-  return sendMessage('pri(networkMap.enableAll)', null);
+export async function validateCustomToken (data: _ValidateCustomAssetRequest): Promise<_ValidateCustomAssetResponse> {
+  return sendMessage('pri(chainService.validateCustomAsset)', data);
 }
 
 export async function resetDefaultNetwork (): Promise<boolean> {
-  return sendMessage('pri(networkMap.resetDefault)', null);
+  return sendMessage('pri(chainService.resetDefaultChains)', null);
 }
 
-export async function subscribeCustomToken (callback: (data: CustomTokenJson) => void): Promise<CustomTokenJson> {
-  return sendMessage('pri(customTokenState.getSubscription)', null, callback);
+export async function updateAssetSetting (data: AssetSettingUpdateReq): Promise<boolean> {
+  return sendMessage('pri(assetSetting.update)', data);
 }
 
-export async function getCustomTokenState (): Promise<CustomTokenJson> {
-  return sendMessage('pri(customTokenState.getCustomTokenState)', null);
+// -------------------------------------------------------------------------------------
+
+export async function validateCustomChain (provider: string, existedChainSlug?: string): Promise<ValidateNetworkResponse> {
+  return sendMessage('pri(chainService.validateCustomChain)', { provider, existedChainSlug });
 }
 
-export async function upsertCustomToken (data: CustomToken): Promise<boolean> {
-  return sendMessage('pri(customTokenState.upsertCustomTokenState)', data);
-}
-
-export async function deleteCustomTokens (data: DeleteCustomTokenParams[]) {
-  return sendMessage('pri(customTokenState.deleteMany)', data);
-}
-
-export async function validateCustomToken (data: ValidateCustomTokenRequest): Promise<ValidateCustomTokenResponse> {
-  return sendMessage('pri(customTokenState.validateCustomToken)', data);
+export async function disableAllNetwork (): Promise<boolean> {
+  return sendMessage('pri(chainService.disableAllChains)', null);
 }
 
 export async function transferCheckReferenceCount (request: RequestTransferCheckReferenceCount): Promise<boolean> {
@@ -602,20 +653,20 @@ export async function cancelSubscription (request: string): Promise<boolean> {
   return sendMessage('pri(subscription.cancel)', request);
 }
 
-export async function subscribeFreeBalance (request: RequestFreeBalance, callback: (balance: string) => void): Promise<string> {
+export async function getFreeBalance (request: RequestFreeBalance): Promise<AmountData> {
+  return sendMessage('pri(freeBalance.get)', request);
+}
+
+export async function subscribeFreeBalance (request: RequestFreeBalance, callback: (balance: AmountData) => void): Promise<AmountData> {
   return sendMessage('pri(freeBalance.subscribe)', request, callback);
 }
 
-export async function substrateNftGetTransaction (request: NftTransactionRequest): Promise<SubstrateNftTransaction> {
-  return sendMessage('pri(substrateNft.getTransaction)', request);
-}
-
-export async function substrateNftSubmitTransaction (request: RequestSubstrateNftSubmitTransaction, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
-  return sendMessage('pri(substrateNft.submitTransaction)', request, callback);
+export async function substrateNftSubmitTransaction (request: RequestSubstrateNftSubmitTransaction): Promise<NftTransactionResponse> {
+  return sendMessage('pri(substrateNft.submitTransaction)', request);
 }
 
 export async function recoverDotSamaApi (request: string): Promise<boolean> {
-  return sendMessage('pri(networkMap.recoverDotSama)', request);
+  return sendMessage('pri(chainService.recoverSubstrateApi)', request);
 }
 
 // Sign Qr
@@ -628,7 +679,7 @@ export async function qrSignSubstrate (request: RequestQrSignSubstrate): Promise
   return sendMessage('pri(qr.sign.substrate)', request);
 }
 
-export async function qrSignEvm (request: RequestQrSignEVM): Promise<ResponseQrSignEVM> {
+export async function qrSignEvm (request: RequestQrSignEvm): Promise<ResponseQrSignEvm> {
   return sendMessage('pri(qr.sign.evm)', request);
 }
 
@@ -638,96 +689,6 @@ export async function parseSubstrateTransaction (request: RequestParseTransactio
 
 export async function parseEVMTransaction (data: string): Promise<ResponseQrParseRLP> {
   return sendMessage('pri(qr.transaction.parse.evm)', { data });
-}
-
-// External with Qr
-
-export async function makeTransferQr (request: RequestTransferExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(accounts.transfer.qr.create)', request, callback);
-}
-
-export async function makeCrossChainTransferQr (request: RequestCrossChainTransferExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(accounts.cross.transfer.qr.create)', request, callback);
-}
-
-export async function makeTransferNftQrSubstrate (request: RequestNftTransferExternalSubstrate, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
-  return sendMessage('pri(nft.transfer.qr.create.substrate)', request, callback);
-}
-
-export async function makeTransferNftQrEvm (request: RequestNftTransferExternalEVM, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
-  return sendMessage('pri(nft.transfer.qr.create.evm)', request, callback);
-}
-
-export async function makeBondingQr (request: RequestStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(stake.qr.create)', request, callback);
-}
-
-export async function makeUnBondingQr (request: RequestUnStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(unStake.qr.create)', request, callback);
-}
-
-export async function stakeWithdrawQr (request: RequestWithdrawStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(withdrawStake.qr.create)', request, callback);
-}
-
-export async function claimRewardQr (request: RequestClaimRewardExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(claimReward.qr.create)', request, callback);
-}
-
-export async function createCompoundQr (request: RequestCreateCompoundStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(createCompound.qr.create)', request, callback);
-}
-
-export async function cancelCompoundQr (request: RequestCancelCompoundStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(cancelCompound.qr.create)', request, callback);
-}
-
-// External with Ledger
-
-export async function makeTransferLedger (request: RequestTransferExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(accounts.transfer.ledger.create)', request, callback);
-}
-
-export async function makeCrossChainTransferLedger (request: RequestCrossChainTransferExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(accounts.cross.transfer.ledger.create)', request, callback);
-}
-
-export async function makeTransferNftLedgerSubstrate (request: RequestNftTransferExternalSubstrate, callback: (data: NftTransactionResponse) => void): Promise<NftTransactionResponse> {
-  return sendMessage('pri(nft.transfer.ledger.create.substrate)', request, callback);
-}
-
-export async function makeBondingLedger (request: RequestStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(stake.ledger.create)', request, callback);
-}
-
-export async function makeUnBondingLedger (request: RequestUnStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(unStake.ledger.create)', request, callback);
-}
-
-export async function stakeWithdrawLedger (request: RequestWithdrawStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(withdrawStake.ledger.create)', request, callback);
-}
-
-export async function claimRewardLedger (request: RequestClaimRewardExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(claimReward.ledger.create)', request, callback);
-}
-
-export async function createCompoundLedger (request: RequestCreateCompoundStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(createCompound.ledger.create)', request, callback);
-}
-
-export async function cancelCompoundLedger (request: RequestCancelCompoundStakeExternal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(cancelCompound.ledger.create)', request, callback);
-}
-
-// External request
-
-export async function rejectExternalRequest (request: RequestRejectExternalRequest): Promise<ResponseRejectExternalRequest> {
-  return sendMessage('pri(account.external.reject)', request);
-}
-
-export async function resolveExternalRequest (request: RequestResolveExternalRequest): Promise<ResponseResolveExternalRequest> {
-  return sendMessage('pri(account.external.resolve)', request);
 }
 
 export async function getAccountMeta (request: RequestAccountMeta): Promise<ResponseAccountMeta> {
@@ -742,55 +703,51 @@ export async function completeConfirmation<CT extends ConfirmationType> (type: C
   return sendMessage('pri(confirmations.complete)', { [type]: payload });
 }
 
-export async function getBondingOptions (networkKey: string, address: string): Promise<BondingOptionInfo> {
-  return sendMessage('pri(bonding.getBondingOptions)', { networkKey, address });
+export async function getBondingOptions (networkKey: string, type: StakingType): Promise<ValidatorInfo[]> {
+  return sendMessage('pri(bonding.getBondingOptions)', { chain: networkKey, type });
 }
 
-export async function getChainBondingBasics (networkJsons: NetworkJson[], callback: (data: Record<string, ChainBondingBasics>) => void): Promise<Record<string, ChainBondingBasics>> {
-  return sendMessage('pri(bonding.getChainBondingBasics)', networkJsons, callback);
+export async function getNominationPoolOptions (chain: string): Promise<NominationPoolInfo[]> {
+  return sendMessage('pri(bonding.getNominationPoolOptions)', chain);
 }
 
-export async function submitBonding (request: RequestBondingSubmit, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(bonding.submitTransaction)', request, callback);
+export async function subscribeChainStakingMetadata (callback: (data: ChainStakingMetadata[]) => void): Promise<ChainStakingMetadata[]> {
+  return sendMessage('pri(bonding.subscribeChainStakingMetadata)', null, callback);
 }
 
-export async function getBondingTxInfo (bondingSubmitParams: BondingSubmitParams): Promise<BasicTxInfo> {
-  return sendMessage('pri(bonding.txInfo)', bondingSubmitParams);
+export async function subscribeStakingNominatorMetadata (callback: (data: NominatorMetadata[]) => void): Promise<NominatorMetadata[]> {
+  return sendMessage('pri(bonding.subscribeNominatorMetadata)', null, callback);
 }
 
-export async function getUnbondingTxInfo (unbondingSubmitParams: UnbondingSubmitParams): Promise<BasicTxInfo> {
-  return sendMessage('pri(unbonding.txInfo)', unbondingSubmitParams);
+export async function submitPoolBonding (request: RequestStakePoolingBonding): Promise<SWTransactionResponse> {
+  return sendMessage('pri(bonding.nominationPool.submitBonding)', request);
 }
 
-export async function submitUnbonding (request: RequestUnbondingSubmit, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(unbonding.submitTransaction)', request, callback);
+export async function submitPoolUnbonding (request: RequestStakePoolingUnbonding): Promise<SWTransactionResponse> {
+  return sendMessage('pri(bonding.nominationPool.submitUnbonding)', request);
 }
 
-export async function subscribeStakeUnlockingInfo (callback: (data: StakeUnlockingJson) => void): Promise<StakeUnlockingJson> {
-  return sendMessage('pri(unbonding.subscribeUnlockingInfo)', null, callback);
+export async function submitBonding (request: RequestBondingSubmit): Promise<SWTransactionResponse> {
+  return sendMessage('pri(bonding.submitBondingTransaction)', request);
 }
 
-export async function getStakeWithdrawalTxInfo (params: StakeWithdrawalParams): Promise<BasicTxInfo> {
-  return sendMessage('pri(unbonding.withdrawalTxInfo)', params);
+export async function submitUnbonding (request: RequestUnbondingSubmit): Promise<SWTransactionResponse> {
+  return sendMessage('pri(unbonding.submitTransaction)', request);
 }
 
-export async function submitStakeWithdrawal (params: RequestStakeWithdrawal, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(unbonding.submitWithdrawal)', params, callback);
+export async function submitStakeWithdrawal (params: RequestStakeWithdrawal): Promise<SWTransactionResponse> {
+  return sendMessage('pri(unbonding.submitWithdrawal)', params);
 }
 
-export async function getStakeClaimRewardTxInfo (params: StakeClaimRewardParams): Promise<BasicTxInfo> {
-  return sendMessage('pri(staking.claimRewardTxInfo)', params);
+export async function submitStakeClaimReward (request: RequestStakeClaimReward): Promise<SWTransactionResponse> {
+  return sendMessage('pri(staking.submitClaimReward)', request);
 }
 
-export async function submitStakeClaimReward (request: RequestStakeClaimReward, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(staking.submitClaimReward)', request, callback);
+export async function submitStakeCancelWithdrawal (request: RequestStakeCancelWithdrawal): Promise<SWTransactionResponse> {
+  return sendMessage('pri(staking.submitCancelWithdrawal)', request);
 }
 
-export async function getStakeDelegationInfo (params: StakeDelegationRequest): Promise<DelegationItem[]> {
-  return sendMessage('pri(staking.delegationInfo)', params);
-}
-
-export async function parseEVMTransactionInput (request: RequestParseEVMContractInput): Promise<ResponseParseEVMContractInput> {
+export async function parseEVMTransactionInput (request: RequestParseEvmContractInput): Promise<ResponseParseEvmContractInput> {
   return sendMessage('pri(evm.transaction.parse.input)', request);
 }
 
@@ -798,26 +755,64 @@ export async function subscribeAuthUrl (callback: (data: AuthUrls) => void): Pro
   return sendMessage('pri(authorize.subscribe)', null, callback);
 }
 
-export async function getTuringStakeCompoundTxInfo (request: TuringStakeCompoundParams): Promise<TuringStakeCompoundResp> {
-  return sendMessage('pri(staking.turingCompound)', request);
+export async function submitTuringStakeCompounding (request: RequestTuringStakeCompound): Promise<SWTransactionResponse> {
+  return sendMessage('pri(staking.submitTuringCompound)', request);
 }
 
-export async function submitTuringStakeCompounding (request: RequestTuringStakeCompound, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(staking.submitTuringCompound)', request, callback);
+export async function submitTuringCancelStakeCompounding (request: RequestTuringCancelStakeCompound): Promise<SWTransactionResponse> {
+  return sendMessage('pri(staking.submitTuringCancelCompound)', request);
 }
 
-export async function checkTuringStakeCompounding (request: CheckExistingTuringCompoundParams): Promise<ExistingTuringCompoundTask> {
-  return sendMessage('pri(staking.checkTuringCompoundTask)', request);
+// Keyring state
+export async function keyringStateSubscribe (cb: (value: KeyringState) => void): Promise<KeyringState> {
+  return sendMessage('pri(keyring.subscribe)', null, cb);
 }
 
-export async function getTuringCancelStakeCompoundTxInfo (params: TuringCancelStakeCompoundParams): Promise<BasicTxInfo> {
-  return sendMessage('pri(staking.turingCancelCompound)', params);
+export async function keyringChangeMasterPassword (request: RequestChangeMasterPassword): Promise<ResponseChangeMasterPassword> {
+  return sendMessage('pri(keyring.change)', request);
 }
 
-export async function submitTuringCancelStakeCompounding (request: RequestTuringCancelStakeCompound, callback: (data: BasicTxResponse) => void): Promise<BasicTxResponse> {
-  return sendMessage('pri(staking.submitTuringCancelCompound)', request, callback);
+export async function keyringMigrateMasterPassword (request: RequestMigratePassword): Promise<ResponseMigratePassword> {
+  return sendMessage('pri(keyring.migrate)', request);
 }
 
-export async function wasmNftGetTransaction (request: NftTransactionRequest): Promise<SubstrateNftTransaction> {
-  return sendMessage('pri(wasmNft.getTransaction)', request);
+export async function keyringUnlock (request: RequestUnlockKeyring): Promise<ResponseUnlockKeyring> {
+  return sendMessage('pri(keyring.unlock)', request);
+}
+
+export async function keyringLock (): Promise<void> {
+  return sendMessage('pri(keyring.lock)', null);
+}
+
+export async function keyringExportMnemonic (request: RequestKeyringExportMnemonic): Promise<ResponseKeyringExportMnemonic> {
+  return sendMessage('pri(keyring.export.mnemonic)', request);
+}
+
+/// Derive
+export async function validateDerivePathV2 (request: RequestDeriveValidateV2): Promise<ResponseDeriveValidateV2> {
+  return sendMessage('pri(derivation.validateV2)', request);
+}
+
+export async function getListDeriveAccounts (request: RequestGetDeriveAccounts): Promise<ResponseGetDeriveAccounts> {
+  return sendMessage('pri(derivation.getList)', request);
+}
+
+export async function deriveMultiple (request: RequestDeriveCreateMultiple): Promise<boolean> {
+  return sendMessage('pri(derivation.create.multiple)', request);
+}
+
+export async function deriveAccountV3 (request: RequestDeriveCreateV3): Promise<boolean> {
+  return sendMessage('pri(derivation.createV3)', request);
+}
+
+export async function getTransaction (request: RequestGetTransaction): Promise<SWTransactionResult> {
+  return sendMessage('pri(transactions.getOne)', request);
+}
+
+export async function subscribeTransactions (callback: (rs: Record<string, SWTransactionResult>) => void): Promise<Record<string, SWTransactionResult>> {
+  return sendMessage('pri(transactions.subscribe)', null, callback);
+}
+
+export async function subscribeNotifications (callback: (rs: Notification[]) => void): Promise<Notification[]> {
+  return sendMessage('pri(notifications.subscribe)', null, callback);
 }

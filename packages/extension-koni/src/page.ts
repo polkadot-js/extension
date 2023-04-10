@@ -5,9 +5,8 @@ import type { RequestSignatures, TransportRequestMessage } from '@subwallet/exte
 import type { Message } from '@subwallet/extension-base/types';
 
 import { MESSAGE_ORIGIN_CONTENT } from '@subwallet/extension-base/defaults';
-import { enable, handleResponse } from '@subwallet/extension-base/page';
+import { enable, handleResponse, initEvmProvider } from '@subwallet/extension-base/page';
 import { injectEvmExtension, injectExtension } from '@subwallet/extension-inject';
-import { initEvmProvider } from '@subwallet/extension-koni-base/page';
 
 const version = process.env.PKG_VERSION as string;
 

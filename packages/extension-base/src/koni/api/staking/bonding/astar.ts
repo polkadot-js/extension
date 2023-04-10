@@ -1,0 +1,293 @@
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { isUrl, parseRawNumber } from '@subwallet/extension-base/utils';
+import fetch from 'cross-fetch';
+
+import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { BN, BN_ZERO } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
+export async function getAstarStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
+  const aprPromise = new Promise(function (resolve) {
+    fetch(`https://api.astar.network/api/v1/${chain}/dapps-staking/apr`, {
+      method: 'GET'
+    }).then((resp) => {
+      resolve(resp.json());
+    }).catch(console.error);
+  });
+
+  const timeout = new Promise((resolve) => {
+    const id = setTimeout(() => {
+      clearTimeout(id);
+      resolve(null);
+    }, 8000);
+  });
+
+  const aprRacePromise = Promise.race([
+    timeout,
+    aprPromise
+  ]); // need race because API often timeout
+
+  const [aprInfo, chainApi] = await Promise.all([
+    aprRacePromise,
+    substrateApi.isReady
+  ]);
+
+  const era = (await chainApi.api.query.dappsStaking.currentEra()).toString();
+  const minDelegatorStake = chainApi.api.consts.dappsStaking.minimumStakingAmount.toString();
+  const unstakingDelay = chainApi.api.consts.dappsStaking.unbondingPeriod.toString();
+
+  const unstakingPeriod = parseInt(unstakingDelay) * _STAKING_ERA_LENGTH_MAP[chain];
+
+  return {
+    chain,
+    type: StakingType.NOMINATED,
+    expectedReturn: aprInfo !== null ? aprInfo as number : undefined,
+    era: parseInt(era),
+    minStake: minDelegatorStake,
+    maxValidatorPerNominator: 100, // temporary fix for Astar, there's no limit for now
+    maxWithdrawalRequestPerValidator: 1, // by default
+    allowCancelUnstaking: true,
+    unstakingPeriod
+  } as ChainStakingMetadata;
+}
+
+export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
+  if (isEthereumAddress(address)) {
+    return;
+  }
+
+  const chain = chainInfo.slug;
+  const chainApi = await substrateApi.isReady;
+
+  const nominationList: NominationInfo[] = [];
+  const unstakingList: UnstakingInfo[] = [];
+
+  const allDappsReq = new Promise(function (resolve) {
+    fetch(`https://api.astar.network/api/v1/${chain}/dapps-staking/dapps`, {
+      method: 'GET'
+    }).then((resp) => {
+      resolve(resp.json());
+    }).catch(console.error);
+  });
+
+  const [_ledger, _era, _stakerInfo] = await Promise.all([
+    chainApi.api.query.dappsStaking.ledger(address),
+    chainApi.api.query.dappsStaking.currentEra(),
+    chainApi.api.query.dappsStaking.generalStakerInfo.entries(address)
+  ]);
+
+  const ledger = _ledger.toPrimitive() as unknown as PalletDappsStakingAccountLedger;
+  const currentEra = _era.toString();
+
+  let bnTotalActiveStake = BN_ZERO;
+
+  if (_stakerInfo.length > 0) {
+    const dAppInfoMap: Record<string, PalletDappsStakingDappInfo> = {};
+    const allDapps = await allDappsReq as PalletDappsStakingDappInfo[];
+
+    allDapps.forEach((dappInfo) => {
+      dAppInfoMap[dappInfo.address.toLowerCase()] = dappInfo;
+    });
+
+    for (const item of _stakerInfo) {
+      const data = item[0].toHuman() as unknown as any[];
+      const stakedDapp = data[1] as Record<string, string>;
+      const stakeData = item[1].toPrimitive() as Record<string, Record<string, string>[]>;
+      const stakeList = stakeData.stakes;
+
+      const dappAddress = stakedDapp.Evm.toLowerCase();
+      const currentStake = stakeList.slice(-1)[0].staked.toString() || '0';
+
+      const bnCurrentStake = new BN(currentStake);
+
+      if (bnCurrentStake.gt(BN_ZERO)) {
+        bnTotalActiveStake = bnTotalActiveStake.add(bnCurrentStake);
+        const dappInfo = dAppInfoMap[dappAddress];
+
+        nominationList.push({
+          status: StakingStatus.NOT_EARNING, // TODO
+          chain,
+          validatorAddress: dappAddress,
+          activeStake: currentStake,
+          validatorMinStake: '0',
+          validatorIdentity: dappInfo?.name,
+          hasUnstaking: false // cannot get unstaking info by dapp
+        });
+      }
+    }
+  }
+
+  const unlockingChunks = ledger.unbondingInfo.unlockingChunks;
+
+  if (unlockingChunks.length > 0) {
+    const nearestUnstaking = unlockingChunks[0]; // only handle 1 unstaking request at a time, might need to change
+
+    const isClaimable = nearestUnstaking.unlockEra - parseInt(currentEra) <= 0;
+    const remainingEra = nearestUnstaking.unlockEra - (parseInt(currentEra) + 1);
+    const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+
+    unstakingList.push({
+      chain,
+      status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+      claimable: nearestUnstaking.amount.toString(),
+      waitingTime: waitingTime > 0 ? waitingTime : 0
+    });
+  }
+
+  if (nominationList.length === 0 && unstakingList.length === 0) {
+    return;
+  }
+
+  return {
+    chain,
+    type: StakingType.NOMINATED,
+    address: address,
+    activeStake: bnTotalActiveStake.toString(),
+    nominations: nominationList,
+    unstakings: unstakingList,
+    status: StakingStatus.NOT_EARNING // TODO
+  } as NominatorMetadata;
+}
+
+export async function getAstarDappsInfo (networkKey: string, substrateApi: _SubstrateApi) {
+  const chainApi = await substrateApi.isReady;
+  const rawMaxStakerPerContract = (chainApi.api.consts.dappsStaking.maxNumberOfStakersPerContract).toHuman() as string;
+
+  const allDappsInfo: ValidatorInfo[] = [];
+  const maxStakerPerContract = parseRawNumber(rawMaxStakerPerContract);
+
+  const allDappsReq = new Promise(function (resolve) {
+    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/dapps`, {
+      method: 'GET'
+    }).then((resp) => {
+      resolve(resp.json());
+    }).catch(console.error);
+  });
+
+  const [_era, _allDapps] = await Promise.all([
+    chainApi.api.query.dappsStaking.currentEra(),
+    allDappsReq
+  ]);
+
+  const era = parseRawNumber(_era.toHuman() as string);
+  const allDapps = _allDapps as Record<string, any>[];
+
+  await Promise.all(allDapps.map(async (dapp) => {
+    const dappName = dapp.name as string;
+    const dappAddress = dapp.address as string;
+    const dappIcon = isUrl(dapp.iconUrl as string) ? dapp.iconUrl as string : undefined;
+    const contractParam = isEthereumAddress(dappAddress) ? { Evm: dappAddress } : { Wasm: dappAddress };
+    const _contractInfo = await chainApi.api.query.dappsStaking.contractEraStake(contractParam, era);
+    const contractInfo = _contractInfo.toPrimitive() as Record<string, any>;
+    let totalStake = '0';
+    let stakerCount = 0;
+
+    if (contractInfo !== null) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      totalStake = contractInfo?.total?.toString();
+      stakerCount = contractInfo.numberOfStakers as number;
+    }
+
+    allDappsInfo.push({
+      commission: 0,
+      expectedReturn: 0,
+      address: dappAddress,
+      totalStake: totalStake,
+      ownStake: '0',
+      otherStake: totalStake.toString(),
+      nominatorCount: stakerCount,
+      blocked: false,
+      isVerified: false,
+      minBond: '0',
+      icon: dappIcon,
+      identity: dappName,
+      chain: networkKey,
+      isCrowded: stakerCount >= maxStakerPerContract
+    });
+  }));
+
+  return allDappsInfo;
+}
+
+export async function getAstarBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, dappInfo: ValidatorInfo) {
+  const chainApi = await substrateApi.isReady;
+  const binaryAmount = new BN(amount);
+
+  const dappParam = isEthereumAddress(dappInfo.address) ? { Evm: dappInfo.address } : { Wasm: dappInfo.address };
+
+  return chainApi.api.tx.dappsStaking.bondAndStake(dappParam, binaryAmount);
+}
+
+export async function getAstarUnbondingExtrinsic (substrateApi: _SubstrateApi, amount: string, dappAddress: string) {
+  const apiPromise = await substrateApi.isReady;
+  const binaryAmount = new BN(amount);
+
+  const dappParam = isEthereumAddress(dappAddress) ? { Evm: dappAddress } : { Wasm: dappAddress };
+
+  return apiPromise.api.tx.dappsStaking.unbondAndUnstake(dappParam, binaryAmount);
+}
+
+export async function getAstarWithdrawalExtrinsic (substrateApi: _SubstrateApi) {
+  const chainApi = await substrateApi.isReady;
+
+  return chainApi.api.tx.dappsStaking.withdrawUnbonded();
+}
+
+export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi, address: string) {
+  const apiPromise = await substrateApi.isReady;
+
+  const [_stakedDapps, _currentEra] = await Promise.all([
+    apiPromise.api.query.dappsStaking.generalStakerInfo.entries(address),
+    apiPromise.api.query.dappsStaking.currentEra()
+  ]);
+
+  const currentEra = parseRawNumber(_currentEra.toHuman() as string);
+  const transactions: SubmittableExtrinsic[] = [];
+
+  for (const item of _stakedDapps) {
+    const data = item[0].toHuman() as any[];
+    const stakedDapp = data[1] as Record<string, string>;
+    const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
+    const stakes = stakeData.stakes;
+    const dappAddress = stakedDapp.Evm.toLowerCase();
+
+    let numberOfUnclaimedEra = 0;
+    const maxTx = 50;
+
+    for (let i = 0; i < stakes.length; i++) {
+      const { era, staked } = stakes[i];
+      const bnStaked = new BN(staked.replaceAll(',', ''));
+      const parsedEra = parseRawNumber(era);
+
+      if (bnStaked.eq(new BN(0))) {
+        continue;
+      }
+
+      const nextEraData = stakes[i + 1] ?? null;
+      const nextEra = nextEraData && parseRawNumber(nextEraData.era);
+      const isLastEra = i === stakes.length - 1;
+      const eraToClaim = isLastEra ? currentEra - parsedEra : nextEra - parsedEra;
+
+      numberOfUnclaimedEra += eraToClaim;
+    }
+
+    const dappParam = isEthereumAddress(dappAddress) ? { Evm: dappAddress } : { Wasm: dappAddress };
+
+    for (let i = 0; i < Math.min(numberOfUnclaimedEra, maxTx); i++) {
+      const tx = apiPromise.api.tx.dappsStaking.claimStaker(dappParam);
+
+      transactions.push(tx);
+    }
+  }
+
+  console.log('no of astar claim reward tx: ', transactions.length);
+
+  return apiPromise.api.tx.utility.batch(transactions);
+}

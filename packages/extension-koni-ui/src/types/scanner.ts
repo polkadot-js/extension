@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Transaction } from '@subwallet/extension-koni-base/utils/eth';
+import { Transaction } from '@subwallet/extension-base/utils/eth';
 
 import { GenericExtrinsicPayload } from '@polkadot/types';
 
+export { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 export interface Frames {
   completedFramesCount: number;
   isMultipart: boolean;

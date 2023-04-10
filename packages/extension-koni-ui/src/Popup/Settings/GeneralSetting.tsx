@@ -1,149 +1,344 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import { BrowserConfirmationType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import { languageOptions } from '@subwallet/extension-base/constants/i18n';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { saveBrowserConfirmationType } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { updateBrowserConfirmationType, updateLanguage, updateTheme } from '@subwallet/extension-koni-ui/stores/utils';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
+import CN from 'classnames';
+import i18next from 'i18next';
+import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import styled, { useTheme } from 'styled-components';
 
-import { ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
-import { saveTheme, setNotification } from '@subwallet/extension-koni-ui/messaging';
-import Header from '@subwallet/extension-koni-ui/partials/Header';
-import getLanguageOptions from '@subwallet/extension-koni-ui/util/getLanguageOptions';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
-import styled, { ThemeContext } from 'styled-components';
+type Props = ThemeProps;
 
-import settings from '@polkadot/ui-settings';
+type SelectionItemType = {
+  key: string,
+  leftIcon: SwIconProps['phosphorIcon'],
+  leftIconBgColor: string,
+  title: string,
+  disabled?: boolean,
+};
 
-import { Dropdown, getThemeOptions, MenuItem, ThemeSwitchContext } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { Theme } from '../../types';
-
-interface Props extends ThemeProps {
-  className?: string;
+function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
+  return (
+    <SettingItem
+      className={CN('__selection-item', { 'item-disabled': item.disabled })}
+      key={item.key}
+      leftItemIcon={
+        <BackgroundIcon
+          backgroundColor={item.leftIconBgColor}
+          phosphorIcon={item.leftIcon}
+          size='sm'
+          type='phosphor'
+          weight='fill'
+        />
+      }
+      name={item.title}
+      rightItem={
+        _selected
+          ? <Icon
+            className='__right-icon'
+            customSize={'20px'}
+            phosphorIcon={CheckCircle}
+            type='phosphor'
+            weight='fill'
+          />
+          : null
+      }
+    />
+  );
 }
 
-const notificationOptions = ['Extension', 'PopUp', 'Window']
-  .map((item) => ({ text: item, value: item.toLowerCase() }));
+function renderModalTrigger (item: SelectionItemType) {
+  return (
+    <SettingItem
+      className={'__trigger-item'}
+      key={item.key}
+      leftItemIcon={
+        <BackgroundIcon
+          backgroundColor={item.leftIconBgColor}
+          phosphorIcon={item.leftIcon}
+          size='sm'
+          type='phosphor'
+          weight='fill'
+        />
+      }
+      name={item.title}
+      rightItem={
+        <Icon
+          className='__right-icon'
+          customSize={'20px'}
+          phosphorIcon={CaretRight}
+          type='phosphor'
+        />
+      }
+    />
+  );
+}
 
-function GeneralSetting ({ className }: Props): React.ReactElement {
+// todo: may update loading for theme
+type LoadingMap = {
+  language: boolean;
+  browserConfirmationType: boolean;
+};
+
+function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [notification, updateNotification] = useState(settings.notification);
-  const [language, updateLanguage] = useState(settings.i18nLang === 'default' ? 'en' : settings.i18nLang);
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const setTheme = useContext(ThemeSwitchContext);
-  const languageOptions = useMemo(() => getLanguageOptions(), []);
-  const themeOptions = useMemo(() => getThemeOptions(), []);
 
-  const _onChangeNotification = useCallback(
-    (value: string): void => {
-      setNotification(value).catch(console.error);
+  const theme = useSelector((state: RootState) => state.settings.theme);
+  const _language = useSelector((state: RootState) => state.settings.language);
+  const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
+  const [language, setLanguage] = useState<LanguageType>(_language);
+  const [browserConfirmationType, setBrowserConfirmationType] = useState<BrowserConfirmationType>(_browserConfirmationType);
+  const [loadingMap, setLoadingMap] = useState<LoadingMap>({
+    browserConfirmationType: false,
+    language: false
+  });
 
-      updateNotification(value);
-      settings.set({ notification: value });
-    },
-    []
-  );
+  const goBack = useDefaultNavigate().goBack;
+  const { token } = useTheme() as Theme;
 
-  const _onChangeTheme = useCallback(
-    (theme: string): void => {
-      saveTheme(theme as ThemeTypes, () => {
-        setTheme(theme);
-      }).catch((e) => console.log('There is problem when saveTheme', e));
-    },
-    [setTheme]
-  );
+  const themeItems = useMemo<SelectionItemType[]>(() => {
+    return [
+      {
+        key: ThemeNames.DARK,
+        leftIcon: MoonStars,
+        leftIconBgColor: token.colorPrimary,
+        title: t('Dark theme')
+      },
+      {
+        key: ThemeNames.LIGHT,
+        leftIcon: Sun,
+        leftIconBgColor: token.colorPrimary,
+        title: t('Light theme (coming soon)'),
+        disabled: true
+      }
+    ];
+  }, [t, token]);
 
-  const _onChangeLang = useCallback(
-    (value: string): void => {
-      updateLanguage(value);
-      settings.set({ i18nLang: value });
-    },
-    []
-  );
+  const languageItems = useMemo<SelectionItemType[]>(() => {
+    return languageOptions.map((item) => ({
+      key: item.value,
+      leftIcon: GlobeHemisphereEast,
+      leftIconBgColor: token['green-6'],
+      title: item.text,
+      disabled: item.value !== 'en'
+    }));
+  }, [token]);
+
+  const browserConfirmationItems = useMemo<SelectionItemType[]>(() => {
+    return [
+      {
+        key: 'extension',
+        leftIcon: LayoutIcon,
+        leftIconBgColor: token['volcano-6'],
+        title: t('Extension')
+      },
+      {
+        key: 'popup',
+        leftIcon: ArrowSquareUpRight,
+        leftIconBgColor: token['volcano-6'],
+        title: t('Popup')
+      },
+      {
+        key: 'window',
+        leftIcon: CornersOut,
+        leftIconBgColor: token['volcano-6'],
+        title: t('Window')
+      }
+    ];
+  }, [t, token]);
+
+  const onSelectLanguage = useCallback((value: string) => {
+    setLanguage(value as LanguageType);
+    setLoadingMap((prev) => ({
+      ...prev,
+      language: true
+    }));
+    i18next.changeLanguage(value).then(() => {
+      updateLanguage(value as LanguageType);
+
+      setLoadingMap((prev) => ({
+        ...prev,
+        language: false
+      }));
+      setLanguage(value as LanguageType);
+    }).catch((e) => {
+      setLoadingMap((prev) => ({
+        ...prev,
+        language: false
+      }));
+      console.log('i18next.changeLanguage error', e);
+    });
+  }, []);
+
+  const onSelectBrowserConfirmationType = useCallback((value: string) => {
+    setBrowserConfirmationType(value as BrowserConfirmationType);
+    setLoadingMap((prev) => ({
+      ...prev,
+      browserConfirmationType: true
+    }));
+    saveBrowserConfirmationType(value as BrowserConfirmationType, (data) => {
+      updateBrowserConfirmationType(data.browserConfirmationType);
+
+      setLoadingMap((prev) => ({
+        ...prev,
+        browserConfirmationType: false
+      }));
+      setBrowserConfirmationType(data.browserConfirmationType);
+    }).catch((e) => {
+      setLoadingMap((prev) => ({
+        ...prev,
+        browserConfirmationType: false
+      }));
+      console.log('saveBrowserConfirmationType error', e);
+    });
+  }, []);
 
   return (
-    <>
-      <div className={className}>
-        <Header
-          showBackArrow
-          showSubHeader
-          subHeaderName={t<string>('General Setting')}
-          to='/account/settings'
-        />
-        <MenuItem
-          className='setting'
-          title='Theme'
-        >
-          <Dropdown
-            className='dropdown'
-            label=''
-            onChange={_onChangeTheme}
-            options={themeOptions}
-            value={themeContext.id}
+    <PageWrapper className={`general-setting ${className}`}>
+      <Layout.WithSubHeaderOnly
+        onBack={goBack}
+        title={t('General settings')}
+      >
+        <div className={'__scroll-container'}>
+          <SelectModal
+            background={'default'}
+            className={`__modal ${className}`}
+            customInput={renderModalTrigger({
+              key: 'wallet-theme-trigger',
+              leftIcon: Image,
+              leftIconBgColor: token.colorPrimary,
+              title: t('Wallet theme')
+            })}
+            id='wallet-theme-select-modal'
+            inputWidth={'100%'}
+            itemKey='key'
+            items={themeItems}
+            onSelect={updateTheme as unknown as (value: string) => void}
+            renderItem={renderSelectionItem}
+            selected={theme}
+            shape='round'
+            title={t('Wallet theme')}
           />
-        </MenuItem>
-        <MenuItem
-          className='setting'
-          title={t<string>('Language')}
-        >
-          <Dropdown
-            className='dropdown'
-            label=''
-            onChange={_onChangeLang}
-            options={languageOptions}
-            value={language}
+
+          <SelectModal
+            background={'default'}
+            className={`__modal ${className}`}
+            customInput={renderModalTrigger({
+              key: 'languages-trigger',
+              leftIcon: GlobeHemisphereEast,
+              leftIconBgColor: token['green-6'],
+              title: t('Languages')
+            })}
+            disabled={loadingMap.language}
+            id='languages-select-modal'
+            inputWidth={'100%'}
+            itemKey='key'
+            items={languageItems}
+            onSelect={onSelectLanguage}
+            renderItem={renderSelectionItem}
+            selected={language}
+            shape='round'
+            size='small'
+            title={t('Languages')}
           />
-        </MenuItem>
-        <MenuItem
-          className='setting'
-          title={t<string>('Notifications')}
-        >
-          <Dropdown
-            className='dropdown'
-            label=''
-            onChange={_onChangeNotification}
-            options={notificationOptions}
-            value={notification}
+
+          <SelectModal
+            background={'default'}
+            className={`__modal ${className}`}
+            customInput={renderModalTrigger({
+              key: 'browser-confirmation-type-trigger',
+              leftIcon: BellSimpleRinging,
+              leftIconBgColor: token['volcano-6'],
+              title: t('Browser confirmation type')
+            })}
+            disabled={loadingMap.browserConfirmationType}
+            id='browser-confirmation-type-select-modal'
+            inputWidth={'100%'}
+            itemKey='key'
+            items={browserConfirmationItems}
+            onSelect={onSelectBrowserConfirmationType}
+            renderItem={renderSelectionItem}
+            selected={browserConfirmationType}
+            shape='round'
+            size='small'
+            title={t('Browser confirmation type')}
           />
-        </MenuItem>
-      </div>
-    </>
+        </div>
+      </Layout.WithSubHeaderOnly>
+    </PageWrapper>
   );
 }
 
-export default styled(GeneralSetting)(({ theme }: Props) => `
-  margin-top: -25px;
-  padding-top: 25px;
+export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Props) => {
+  return ({
+    '.ant-web3-block-right-item': {
+      minWidth: 40,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: -token.marginXS
+    },
 
-  .settings__theme-setting {
-    padding-top: 14px;
-    .horizontal-label {
-      font-size: 18px;
-      line-height: 30px;
+    '.item-disabled': {
+      '.ant-setting-item-content': {
+        cursor: 'not-allowed',
+        backgroundColor: `${token.colorBgSecondary} !important`
+      }
+    },
+
+    '&.general-setting': {
+      height: '100%',
+      backgroundColor: token.colorBgDefault,
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+
+      '.ant-sw-header-bg-default': {
+        // backgroundColor: 'transparent'
+      },
+
+      '.ant-select-modal-input-custom + .ant-select-modal-input-custom': {
+        marginTop: token.marginXS
+      },
+
+      '.ant-select-modal-input-custom': {
+        width: 'unset'
+      },
+
+      '.__trigger-item .ant-web3-block-right-item': {
+        color: token.colorTextLight4
+      },
+
+      '.__trigger-item:hover .ant-web3-block-right-item': {
+        color: token.colorTextLight2
+      },
+
+      '.__scroll-container': {
+        overflow: 'auto',
+        paddingTop: token.padding,
+        paddingRight: token.padding,
+        paddingLeft: token.padding,
+        paddingBottom: token.paddingLG
+      }
+    },
+
+    '&.__modal': {
+      '.__selection-item .ant-web3-block-right-item': {
+        color: token.colorSuccess
+      }
     }
-  }
+  });
+});
 
-  .menu-items-wrapper {
-    display: flex;
-    align-items: center;
-  }
-
-  .settings-menu-divider {
-    padding-top: 0;
-  }
-
-  .manage-website-access, .setting__action-text {
-    > span {
-      font-size: 16px;
-      line-height: 26px;
-      color: ${theme.textColor2};
-      font-weight: 400;
-    }
-  }
-
-  .checkbox {
-    margin: 6px 0 14px 0;
-  }
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-`);
+export default GeneralSetting;

@@ -4,10 +4,10 @@
 /* eslint-disable no-use-before-define */
 
 import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@subwallet/extension-inject/types';
-import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
+import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
+import type { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
-import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -34,17 +34,21 @@ export type SeedLengths = 12 | 24;
 
 export interface AccountJson extends KeyringPair$Meta {
   address: string;
+  accountIndex?: number;
+  addressOffset?: number;
   genesisHash?: string | null;
-  originGenesisHash?: string | null;
   isExternal?: boolean;
   isHardware?: boolean;
   isHidden?: boolean;
+  isMasterAccount?: boolean;
+  isMasterPassword?: boolean;
+  isReadOnly?: boolean;
   name?: string;
+  originGenesisHash?: string | null;
   parentAddress?: string;
   suri?: string;
   type?: KeypairType;
   whenCreated?: number;
-  isReadOnly?: boolean;
 }
 
 // all Accounts and the address of the current Account
@@ -81,23 +85,23 @@ export type AccNetworkContext = {
   setNetwork: (network: CurrentNetworkInfo) => void;
 }
 
-export interface AuthorizeRequest {
+export interface ConfirmationRequestBase {
   id: string;
+  url: string;
+  isInternal?: boolean;
+}
+
+export interface AuthorizeRequest extends ConfirmationRequestBase {
   request: RequestAuthorizeTab;
-  url: string;
 }
 
-export interface MetadataRequest {
-  id: string;
+export interface MetadataRequest extends ConfirmationRequestBase {
   request: MetadataDef;
-  url: string;
 }
 
-export interface SigningRequest {
+export interface SigningRequest extends ConfirmationRequestBase {
   account: AccountJson;
-  id: string;
   request: RequestSign;
-  url: string;
 }
 
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
@@ -112,7 +116,7 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(accounts.forget)': [RequestAccountForget, boolean];
   'pri(accounts.show)': [RequestAccountShow, boolean];
   'pri(accounts.tie)': [RequestAccountTie, boolean];
-  'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
+  'pri(accounts.subscribe)': [RequestAccountSubscribe, AccountJson[], AccountJson[]];
   'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(accounts.changePassword)': [RequestAccountChangePassword, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
@@ -456,4 +460,9 @@ export interface ResponseJsonGetAccountInfo {
 
 export interface ResponseAuthorizeList {
   list: AuthUrls;
+}
+
+export interface Resolver<T> {
+  reject: (error: Error) => void;
+  resolve: (result: T) => void;
 }

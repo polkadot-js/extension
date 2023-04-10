@@ -3,7 +3,6 @@
 
 import type { AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
-import type { AvailableThemes } from '../components/themes';
 
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
 import React from 'react';
@@ -15,22 +14,24 @@ const noop = (): void => undefined;
 
 const AccountContext = React.createContext<AccountsContext>({ accounts: [], hierarchy: [], master: undefined });
 const ActionContext = React.createContext<(to?: string) => void>(noop);
-const AuthorizeReqContext = React.createContext<AuthorizeRequest[]>([]);
 const MediaContext = React.createContext<boolean>(false);
+
+const AuthorizeReqContext = React.createContext<AuthorizeRequest[]>([]);
 const MetadataReqContext = React.createContext<MetadataRequest[]>([]);
-const SettingsContext = React.createContext<SettingsStruct>(settings.get());
 const SigningReqContext = React.createContext<SigningRequest[]>([]);
 const ConfirmationsQueueContext = React.createContext<ConfirmationsQueue>({
   addNetworkRequest: {},
   addTokenRequest: {},
   switchNetworkRequest: {},
   evmSignatureRequest: {},
-  evmSignatureRequestExternal: {},
-  evmSendTransactionRequest: {},
-  evmSendTransactionRequestExternal: {}
+  evmSendTransactionRequest: {}
 });
-const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
+
+const SettingsContext = React.createContext<SettingsStruct>(settings.get());
+
 const ToastContext = React.createContext<({show: (message: string, isError?: boolean) => void})>({ show: noop });
+// eslint-disable-next-line func-call-spacing
+const WaitAtHomeContext = React.createContext<{ wait: boolean, setWait: (val: boolean) => void }>({ setWait: noop, wait: false });
 
 export {
   AccountContext,
@@ -41,6 +42,6 @@ export {
   SettingsContext,
   SigningReqContext,
   ConfirmationsQueueContext,
-  ThemeSwitchContext,
-  ToastContext
+  ToastContext,
+  WaitAtHomeContext
 };

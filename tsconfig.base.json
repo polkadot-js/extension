@@ -15,8 +15,6 @@
         "@subwallet/extension-mocks/*": ["extension-mocks/src/*"],
         "@subwallet/extension-koni": ["extension-koni/src"],
         "@subwallet/extension-koni/*": ["extension-koni/src/*"],
-        "@subwallet/extension-koni-base": ["extension-koni-base/src"],
-        "@subwallet/extension-koni-base/*": ["extension-koni-base/src/*"],
         "@subwallet/extension-koni-ui": ["extension-koni-ui/src"],
         "@subwallet/extension-koni-ui/*": ["extension-koni-ui/src/*"],
         "@subwallet/web-runner": ["web-runner/src"],

@@ -1,21 +1,24 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ChainInfoMap } from '@subwallet/chain-list';
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 
 export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   {
-    displayName: 'Polkadot Relay Chain',
-    genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
+    displayName: 'Polkadot network',
+    genesisHash: ChainInfoMap.polkadot.substrateInfo?.genesisHash || '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
     icon: 'substrate',
     network: 'polkadot',
+    slug: ChainInfoMap.polkadot.slug,
     isDevMode: false
   },
   {
-    displayName: 'Kusama Relay Chain',
-    genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
+    displayName: 'Kusama network',
+    genesisHash: ChainInfoMap.kusama.substrateInfo?.genesisHash || '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
     icon: 'substrate',
     network: 'kusama',
+    slug: ChainInfoMap.kusama.slug,
     isDevMode: false
   },
   // {
@@ -26,10 +29,11 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   //   isDevMode: false
   // },
   {
-    displayName: 'Acala',
-    genesisHash: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
+    displayName: 'Acala network',
+    genesisHash: ChainInfoMap.acala.substrateInfo?.genesisHash || '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
     icon: 'substrate',
     network: 'acala',
+    slug: ChainInfoMap.acala.slug,
     isDevMode: true
   }
   // {

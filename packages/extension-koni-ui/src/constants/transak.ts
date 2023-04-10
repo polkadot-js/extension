@@ -1,39 +1,64 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransakNetwork } from '@subwallet/extension-base/background/KoniTypes';
+export type TransakTokenInfo = {
+  transakNetwork: string,
+  chain: string,
+  symbol: string,
+  slug: string,
+  support: 'ETHEREUM' | 'SUBSTRATE'
+}
 
-export const PREDEFINED_TRANSAK_NETWORK: Record<string, TransakNetwork> = {
-  polkadot: {
-    networks: ['mainnet'],
-    tokens: ['DOT']
+export const PREDEFINED_TRANSAK_TOKEN: Record<string, TransakTokenInfo> = {
+  DOT: {
+    transakNetwork: 'mainnet',
+    chain: 'polkadot',
+    slug: 'polkadot-NATIVE-DOT',
+    symbol: 'DOT',
+    support: 'SUBSTRATE'
   },
-  kusama: {
-    networks: ['mainnet'],
-    tokens: ['KSM']
+  KSM: {
+    transakNetwork: 'mainnet',
+    chain: 'kusama',
+    slug: 'kusama-NATIVE-KSM',
+    symbol: 'KSM',
+    support: 'SUBSTRATE'
   },
-  astar: {
-    networks: ['astar'],
-    tokens: ['ASTR']
+  ASTR: {
+    transakNetwork: 'mainnet',
+    chain: 'astar',
+    slug: 'astar-NATIVE-ASTR',
+    symbol: 'ASTR',
+    support: 'SUBSTRATE'
   },
-  shiden: {
-    networks: ['Shiden'],
-    tokens: ['SDN']
+  GLMR: {
+    transakNetwork: 'mainnet',
+    chain: 'moonbeam',
+    slug: 'moonbeam-NATIVE-GLMR',
+    symbol: 'GLMR',
+    support: 'ETHEREUM'
   },
-  moonbeam: {
-    networks: ['mainnet'],
-    tokens: ['GLMR']
+  MOVR: {
+    transakNetwork: 'moonriver',
+    chain: 'moonriver',
+    slug: 'moonriver-NATIVE-MOVR',
+    symbol: 'MOVR',
+    support: 'ETHEREUM'
   },
-  moonriver: {
-    networks: ['moonriver'],
-    tokens: ['MOVR']
+  ETH: {
+    transakNetwork: 'ethereum',
+    chain: 'ethereum',
+    slug: 'ethereum-NATIVE-ETH',
+    symbol: 'ETH',
+    support: 'ETHEREUM'
   },
-  ethereum: {
-    networks: ['ethereum'],
-    tokens: ['ETH']
-  },
-  binance: {
-    networks: ['bsc'],
-    tokens: ['BNB']
+  BNB: {
+    transakNetwork: 'bsc',
+    chain: 'binance',
+    slug: 'binance-NATIVE-BNB',
+    symbol: 'BNB',
+    support: 'ETHEREUM'
   }
 };
+
+export const PREDEFINED_TRANSAK_TOKEN_BY_SLUG: Record<string, TransakTokenInfo> = Object.fromEntries(Object.values(PREDEFINED_TRANSAK_TOKEN).map((info) => [info.slug, info]));

@@ -39,3 +39,5 @@ packages/extension-koni-base/src/api/dotsama/ignore-staking.spec.ts
 packages/extension-koni-base/src/api/nft/evm_nft/ignore-moonbeam.api.spec.ts
 test.ts
 /packages/extension-koni-base/src/test-api/
+/packages/extension-base/src/koni/test-api/
+/packages/extension-base/src/services/chain-service/chain.spec.ts

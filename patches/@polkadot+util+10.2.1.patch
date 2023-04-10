@@ -1,0 +1,26 @@
+diff --git a/node_modules/@polkadot/util/cjs/versionDetect.js b/node_modules/@polkadot/util/cjs/versionDetect.js
+index 0b06b47..63d9516 100644
+--- a/node_modules/@polkadot/util/cjs/versionDetect.js
++++ b/node_modules/@polkadot/util/cjs/versionDetect.js
+@@ -88,7 +88,7 @@ function detectPackage(_ref3, pathOrFn) {
+     version
+   } = _ref3;
+   let deps = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+-  if (!name.startsWith('@polkadot')) {
++  if (!name.startsWith('@polkadot') && !name.startsWith('@subwallet')) {
+     throw new Error(`Invalid package descriptor ${name}`);
+   }
+   const entry = getEntry(name);
+diff --git a/node_modules/@polkadot/util/versionDetect.js b/node_modules/@polkadot/util/versionDetect.js
+index 7d5aa62..f846667 100644
+--- a/node_modules/@polkadot/util/versionDetect.js
++++ b/node_modules/@polkadot/util/versionDetect.js
+@@ -78,7 +78,7 @@ export function detectPackage({
+   type,
+   version
+ }, pathOrFn, deps = []) {
+-  if (!name.startsWith('@polkadot')) {
++  if (!name.startsWith('@polkadot') && !name.startsWith('@subwallet')) {
+     throw new Error(`Invalid package descriptor ${name}`);
+   }
+   const entry = getEntry(name);

@@ -247,7 +247,7 @@ function subscribePSP22Balance (addresses: string[], chain: string, api: ApiProm
           state: APIItemState.READY
         } as BalanceItem);
       } catch (err) {
-        console.log('There is a problem fetching ' + tokenInfo.slug + ' PSP-22 token balance', err);
+        console.warn('Problem fetching ' + tokenInfo.slug + ' PSP-22 token balance', err); // TODO: error createType
       }
     });
   };

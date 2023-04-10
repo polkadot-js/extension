@@ -14,7 +14,7 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "1.0.2-0",
+  "version": "1.0.2-1",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
     "@ethereumjs/common": "^2.6.5",
@@ -38,10 +38,10 @@
     "@ramonak/react-progress-bar": "^5.0.3",
     "@reduxjs/toolkit": "^1.9.1",
     "@subwallet/chain-list": "^0.0.27",
-    "@subwallet/extension-base": "^1.0.2-0",
-    "@subwallet/extension-chains": "^1.0.2-0",
-    "@subwallet/extension-dapp": "^1.0.2-0",
-    "@subwallet/extension-inject": "^1.0.2-0",
+    "@subwallet/extension-base": "^1.0.2-1",
+    "@subwallet/extension-chains": "^1.0.2-1",
+    "@subwallet/extension-dapp": "^1.0.2-1",
+    "@subwallet/extension-inject": "^1.0.2-1",
     "@subwallet/keyring": "^0.0.4",
     "@subwallet/react-ui": "5.1.2-b41",
     "@subwallet/ui-keyring": "^0.0.3",
@@ -85,7 +85,7 @@
     "web3": "^1.8.1"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^1.0.2-0",
+    "@subwallet/extension-mocks": "^1.0.2-1",
     "@types/bn.js": "^5.1.1",
     "@types/enzyme": "^3.10.12",
     "@types/enzyme-adapter-react-16": "^1.0.6",

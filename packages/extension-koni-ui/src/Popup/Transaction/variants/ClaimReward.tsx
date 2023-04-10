@@ -1,11 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNativeTokenBasicInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -17,6 +21,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
@@ -31,22 +37,6 @@ interface ClaimRewardFormProps extends TransactionFormBaseProps {
   [FormFieldName.BOND_REWARD]: boolean;
 }
 
-const filterAccountFunc = (rewardList: StakingRewardItem[]): ((account: AccountJson) => boolean) => {
-  return (account: AccountJson) => {
-    if (isAccountAll(account.address)) {
-      return false;
-    }
-
-    if (account.isReadOnly) {
-      return false;
-    }
-
-    const exists = rewardList.find((item) => item.address === account.address);
-
-    return !!exists;
-  };
-};
-
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
@@ -60,12 +50,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const { stakingRewardMap } = useSelector((state) => state.staking);
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
 
+  const allNominatorInfo = useGetNominatorInfo(stakingChain, stakingType);
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
-
-  const rewardList = useMemo((): StakingRewardItem[] => {
-    return stakingRewardMap.filter((item) => item.chain === chain && item.type === stakingType);
-  }, [chain, stakingRewardMap, stakingType]);
 
   const reward = useMemo((): StakingRewardItem | undefined => {
     return stakingRewardMap.find((item) => item.chain === chain && item.address === from && item.type === stakingType);
@@ -129,6 +117,38 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onPreCheckReadOnly = usePreCheckReadOnly(from);
 
+  const filterAccount = useCallback((account: AccountJson): boolean => {
+    const _stakingChain = stakingChain || '';
+    const chain = chainInfoMap[_stakingChain];
+
+    if (!chain) {
+      return false;
+    }
+
+    if (account.originGenesisHash && _getSubstrateGenesisHash(chain) !== account.originGenesisHash) {
+      return false;
+    }
+
+    if (isAccountAll(account.address)) {
+      return false;
+    }
+
+    if (account.isReadOnly) {
+      return false;
+    }
+
+    const exists = allNominatorInfo.find((value) => isSameAddress(value.address, account.address));
+
+    if (!exists) {
+      return false;
+    }
+
+    const isEvmChain = _isChainEvmCompatible(chain);
+    const isChainAllowClaimReward = _STAKING_CHAIN_GROUP.amplitude.includes(_stakingChain) || _STAKING_CHAIN_GROUP.astar.includes(_stakingChain);
+
+    return (stakingType === StakingType.POOLED || isChainAllowClaimReward) && isEvmChain === isEthereumAddress(account.address);
+  }, [allNominatorInfo, chainInfoMap, stakingChain, stakingType]);
+
   useEffect(() => {
     const address = currentAccount?.address || '';
 
@@ -161,11 +181,12 @@ const Component: React.FC<Props> = (props: Props) => {
             onFieldsChange={onFieldsChange}
             onFinish={onSubmit}
           >
-            {isAllAccount &&
-              <Form.Item name={'from'}>
-                <AccountSelector filter={filterAccountFunc(rewardList)} />
-              </Form.Item>
-            }
+            <Form.Item
+              hidden={!isAllAccount}
+              name={'from'}
+            >
+              <AccountSelector filter={filterAccount} />
+            </Form.Item>
             <FreeBalance
               address={from}
               chain={chain}

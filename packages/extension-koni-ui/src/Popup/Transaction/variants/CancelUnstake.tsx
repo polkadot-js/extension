@@ -124,11 +124,12 @@ const Component: React.FC<Props> = (props: Props) => {
             onFieldsChange={onFieldsChange}
             onFinish={onSubmit}
           >
-            {isAllAccount &&
-              <Form.Item name={'from'}>
-                <AccountSelector />
-              </Form.Item>
-            }
+            <Form.Item
+              hidden={!isAllAccount}
+              name={'from'}
+            >
+              <AccountSelector />
+            </Form.Item>
             <FreeBalance
               address={from}
               chain={chain}

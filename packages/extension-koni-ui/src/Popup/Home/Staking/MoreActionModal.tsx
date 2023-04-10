@@ -42,7 +42,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { inactiveModal } = useContext(ModalContext);
 
-  const { currentAccount } = useSelector((state) => state.accountState);
+  const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
 
   const [selected, setSelected] = useState<StakingAction | undefined>();
 
@@ -101,7 +101,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
-    if (nominatorMetadata.type === StakingType.POOLED) {
+    if (nominatorMetadata.type === StakingType.POOLED || isAllAccount) {
       setSelected(undefined);
       navigate(`/transaction/claim-reward/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
 
@@ -119,7 +119,7 @@ const Component: React.FC<Props> = (props: Props) => {
       .finally(() => {
         setSelected(undefined);
       });
-  }, [navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward]);
+  }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward]);
 
   const availableActions = useMemo(() => {
     if (!nominatorMetadata) {

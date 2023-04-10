@@ -21,7 +21,7 @@ function Component ({ className, index, numberOfConfirmations, onClickNext, onCl
     <SwSubHeader
       background='transparent'
       center={true}
-      className={CN(className)}
+      className={CN(className, 'confirmation-header')}
       onBack={onClickPrev}
       paddingVertical={true}
       rightButtons={(index === (numberOfConfirmations - 1) || numberOfConfirmations === 1)

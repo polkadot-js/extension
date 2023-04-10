@@ -59,7 +59,7 @@ export class HistoryService {
       record.toName = accountMap[record.to?.toLowerCase()];
     });
 
-    this.dbService.upsertHistory(historyRecords).catch(console.error);
+    await this.dbService.upsertHistory(historyRecords);
 
     return historyRecords;
   }
@@ -92,9 +92,9 @@ export class HistoryService {
     const currentHistories = this.historySubject.value;
 
     if (!this.fetchPromise || currentHistories.length === 0) {
-      const historyRecords = await this.fetchHistories(addressList);
+      await this.fetchHistories(addressList);
 
-      this.historySubject.next(historyRecords);
+      this.historySubject.next(await this.dbService.getHistories());
     }
 
     return this.historySubject.getValue();

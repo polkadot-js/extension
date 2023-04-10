@@ -8,7 +8,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
-import {BN, BN_ZERO} from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface InflationConfig {
@@ -82,6 +82,8 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
   const delegatorState = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
   const unstakingInfo = _unstakingInfo.toPrimitive() as unknown as Record<string, number>;
 
+  console.log('unstakingInfo ampe', unstakingInfo, !!unstakingInfo);
+
   if (!delegatorState && !unstakingInfo) {
     return;
   }
@@ -89,8 +91,8 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
   let activeStake = '0';
 
   if (delegatorState) { // delegatorState can be null while unstaking all
-    const identityInfo = (await chainApi.api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration;
-    const identity = parseIdentity(identityInfo);
+    const identityInfo = chainApi.api.query.identity ? (await chainApi.api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration : undefined;
+    const identity = identityInfo ? parseIdentity(identityInfo) : undefined;
 
     activeStake = delegatorState.amount.toString();
     const bnActiveStake = new BN(activeStake);
@@ -106,7 +108,7 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
       validatorAddress: delegatorState.owner,
       activeStake: delegatorState.amount.toString(),
       validatorMinStake: '0',
-      hasUnstaking: !!unstakingInfo,
+      hasUnstaking: !!unstakingInfo && Object.values(unstakingInfo).length > 0,
       validatorIdentity: identity
     });
   }
@@ -251,10 +253,4 @@ export async function getAmplitudeClaimRewardExtrinsic (substrateApi: _Substrate
     chainApi.api.tx.parachainStaking.incrementDelegatorRewards(),
     chainApi.api.tx.parachainStaking.claimRewards()
   ]);
-}
-
-export async function getAmplitudeCancelWithdrawalExtrinsic (substrateApi: _SubstrateApi) {
-  const chainApi = await substrateApi.isReady;
-
-  return chainApi.api.tx.parachainStaking.cancelLeaveCandidates();
 }

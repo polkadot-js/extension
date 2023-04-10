@@ -155,6 +155,7 @@ const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): No
       if (nominatorMetadata.chain === chain && nominatorMetadata.type === type) {
         groupedActiveStake = groupedActiveStake.add(new BN(nominatorMetadata.activeStake));
         earnMapping[nominatorMetadata.address] = nominatorMetadata.status === StakingStatus.EARNING_REWARD;
+        groupedNominatorMetadata.unstakings = [...groupedNominatorMetadata.unstakings, ...nominatorMetadata.unstakings];
       }
     }
 

@@ -231,8 +231,6 @@ const Component: React.FC<Props> = (props: Props) => {
     } else {
       const selectedValidators = getSelectedValidators(parseNominations(nominate));
 
-      console.log('selectedValidators', selectedValidators);
-
       bondingPromise = submitBonding({
         amount: value,
         chain: chain,

@@ -462,7 +462,7 @@ export default class TransactionService {
       const toAccount = historyItem?.to && keyring.getAccount(historyItem.to);
 
       if (toAccount) {
-        return [historyItem, { ...historyItem, address: historyItem.to, direction: TransactionDirection.RECEIVED }];
+        return [historyItem, { ...historyItem, address: toAccount.address, direction: TransactionDirection.RECEIVED }];
       }
     } catch (e) {
       console.warn(e);

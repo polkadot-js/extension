@@ -14,6 +14,7 @@ export interface PalletNominationPoolsPoolMember {
   lasRecordedRewardCounter: number,
   unbondingEras: Record<string, number>
 }
+
 export interface PalletDappsStakingDappInfo {
   address: string,
   name: string,
@@ -22,22 +23,26 @@ export interface PalletDappsStakingDappInfo {
   url: string,
   imagesUrl: string[]
 }
+
 export interface PalletDappsStakingUnlockingChunk {
   amount: number,
   unlockEra: number
 }
+
 export interface PalletDappsStakingAccountLedger {
   locked: number,
   unbondingInfo: {
     unlockingChunks: PalletDappsStakingUnlockingChunk[]
   }
 }
+
 export interface BlockHeader {
   parentHash: string,
   number: number,
   stateRoot: string,
   extrinsicsRoot: string
 }
+
 export interface ParachainStakingStakeOption {
   owner: string,
   amount: number

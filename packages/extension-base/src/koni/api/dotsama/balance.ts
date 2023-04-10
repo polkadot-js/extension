@@ -45,6 +45,19 @@ export function subscribeBalance (addresses: string[], chainInfoMap: Record<stri
     }
 
     if (!useAddresses || useAddresses.length === 0 || _PURE_EVM_CHAINS.indexOf(chainSlug) > -1) {
+      const fungibleTokensByChain = state.chainService.getFungibleTokensByChain(chainSlug, true);
+      const now = new Date().getTime();
+
+      Object.values(fungibleTokensByChain).map((token) => {
+        return {
+          tokenSlug: token.slug,
+          free: '0',
+          locked: '0',
+          state: APIItemState.READY,
+          timestamp: now
+        } as BalanceItem;
+      }).forEach(callback);
+
       return undefined;
     }
 

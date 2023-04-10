@@ -21,7 +21,7 @@ import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { SingleAddress } from '@subwallet/ui-keyring/observable/types';
 
-import { _getKnownHashes, _getKnownNetworks } from './util/chain/defaultChains';
+import { _getKnownHashes, _getKnownNetworks } from './utils/chain/defaultChains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
 interface Handler {

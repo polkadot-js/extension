@@ -4,35 +4,21 @@
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
-import { FilterModal, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
-import { HistoryItem } from '@subwallet/extension-koni-ui/components/History/HistoryItem';
+import { EmptyList, FilterModal, HistoryItem, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
-import { HistoryDetailModal, HistoryDetailModalId } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate } from '@subwallet/extension-koni-ui/util/common/customFormatDate';
+import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
+import { customFormatDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-type Props = ThemeProps
+import { HistoryDetailModal, HistoryDetailModalId } from './Detail';
 
-export interface TransactionHistoryDisplayData {
-  className: string,
-  typeName: string,
-  name: string,
-  title: string,
-  icon: SwIconProps['phosphorIcon'],
-}
-export interface TransactionHistoryDisplayItem extends TransactionHistoryItem {
-  displayData: TransactionHistoryDisplayData
-}
+type Props = ThemeProps
 
 const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
   send: ArrowUpRight,
@@ -67,24 +53,6 @@ function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
   }
 
   return IconMap.default;
-}
-
-function isTypeTransfer (txType: ExtrinsicType) {
-  return [
-    ExtrinsicType.TRANSFER_BALANCE,
-    ExtrinsicType.TRANSFER_TOKEN,
-    ExtrinsicType.TRANSFER_XCM
-  ].includes(txType);
-}
-
-function isTypeStaking (txType: ExtrinsicType) {
-  return [
-    ExtrinsicType.STAKING_JOIN_POOL,
-    ExtrinsicType.STAKING_LEAVE_POOL,
-    ExtrinsicType.STAKING_BOND,
-    ExtrinsicType.STAKING_UNBOND,
-    ExtrinsicType.STAKING_WITHDRAW,
-    ExtrinsicType.STAKING_COMPOUNDING].includes(txType);
 }
 
 function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, string>, titleMap: Record<string, string>): TransactionHistoryDisplayData {
@@ -146,12 +114,16 @@ enum FilterValue {
   FAILED = 'failed',
 }
 
+function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'address' | 'extrinsicHash'>) {
+  return `${item.chain}-${item.address}-${item.extrinsicHash}`;
+}
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
-  const { accounts, currentAccount } = useSelector((root: RootState) => root.accountState);
-  const { historyList: rawHistoryList } = useSelector((root: RootState) => root.transactionHistory);
+  const { accounts, currentAccount } = useSelector((root) => root.accountState);
+  const { historyList: rawHistoryList } = useSelector((root) => root.transactionHistory);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
@@ -256,11 +228,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }), [t]);
 
   // Fill display data to history list
-  const historyList = useMemo(() => {
+  const historyMap = useMemo(() => {
     const currentAddress = currentAccount?.address || '';
     const currentAddressLowerCase = currentAddress.toLowerCase();
     const isFilterByAddress = currentAccount?.address && !isAccountAll(currentAddress);
-    const finalHistoryList: TransactionHistoryDisplayItem[] = [];
+    const finalHistoryMap: Record<string, TransactionHistoryDisplayItem> = {};
 
     rawHistoryList.forEach((item: TransactionHistoryItem) => {
       // Filter account by current account
@@ -271,12 +243,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       // Format display name for account by address
       const fromName = accountMap[quickFormatAddressToCompare(item.from) || ''];
       const toName = accountMap[quickFormatAddressToCompare(item.to) || ''];
+      const key = getHistoryItemKey(item);
 
-      finalHistoryList.push({ ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) });
+      finalHistoryMap[key] = { ...item, fromName, toName, displayData: getDisplayData(item, typeNameMap, typeTitleMap) };
     });
 
-    return finalHistoryList.sort((a, b) => (b.time - a.time));
+    return finalHistoryMap;
   }, [accountMap, rawHistoryList, typeNameMap, typeTitleMap, currentAccount?.address]);
+
+  const historyList = useMemo(() => {
+    return Object.values(historyMap).sort((a, b) => (b.time - a.time));
+  }, [historyMap]);
 
   const [curAdr] = useState(currentAccount?.address);
 
@@ -317,13 +294,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     if (checkActive(HistoryDetailModalId)) {
       setSelectedItem((selected) => {
         if (selected) {
-          return historyList.find((x) => (x.chain === selected.chain && x.address === selected.address && x.extrinsicHash === selected.extrinsicHash)) || selected;
+          const key = getHistoryItemKey(selected);
+
+          return historyMap[key] || null;
         } else {
           return selected;
         }
       });
     }
-  }, [checkActive, historyList]);
+  }, [checkActive, historyMap]);
 
   useEffect(() => {
     if (currentAccount?.address !== curAdr) {
@@ -333,11 +312,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [curAdr, currentAccount?.address, inactiveModal]);
 
   const emptyList = useCallback(() => {
-    return <EmptyList
-      emptyMessage={t('Your transactions history will appear here!')}
-      emptyTitle={t('No transactions yet')}
-      phosphorIcon={Clock}
-    />;
+    return (
+      <EmptyList
+        emptyMessage={t('Your transactions history will appear here!')}
+        emptyTitle={t('No transactions yet')}
+        phosphorIcon={Clock}
+      />
+    );
   }, [t]);
 
   const renderItem = useCallback(

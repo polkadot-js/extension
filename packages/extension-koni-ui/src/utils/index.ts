@@ -8,8 +8,8 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
 import { Recoded } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util/account/accountAll';
-import reformatAddress from '@subwallet/extension-koni-ui/util/account/reformatAddress';
+import { isAccountAll } from '@subwallet/extension-koni-ui/utils/account/accountAll';
+import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
 
 import { decodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -210,7 +210,7 @@ export function getScanExplorerAddressInfoUrl (networkKey: string, address: stri
 export const detectThemeAvatar = (address?: string) => isEthereumAddress(address) ? 'ethereum' : 'polkadot';
 
 export { toAddress } from './account/toAddress';
-export { openInNewTab } from '@subwallet/extension-koni-ui/util/common/browser';
+export { openInNewTab } from '@subwallet/extension-koni-ui/utils/common/browser';
 
 export * from './account';
 export * from './chain';

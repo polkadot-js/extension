@@ -13,7 +13,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateAuthUrls } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ManageWebsiteAccessDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { filterNotReadOnlyAccount } from '@subwallet/extension-koni-ui/util/account/account';
+import { filterNotReadOnlyAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Icon, ModalContext, Switch, SwList } from '@subwallet/react-ui';
 import { GearSix, MagnifyingGlass, Plugs, PlugsConnected, ShieldCheck, ShieldSlash, X } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -264,15 +264,12 @@ const ManageWebsiteAccessDetail = styled(WrapperComponent)<Props>(({ theme: { to
   return ({
     paddingBottom: token.paddingMD,
 
-    '&.manage-website-access-detail': {
-      height: '100%',
-      backgroundColor: token.colorBgDefault,
-      display: 'flex',
-      flexDirection: 'column',
+    '.ant-sw-list-section': {
+      height: '100%'
+    },
 
-      '.ant-sw-list-section': {
-        flex: 1
-      }
+    '&.manage-website-access-detail': {
+      backgroundColor: token.colorBgDefault
     },
 
     '.ant-sw-screen-layout-body': {

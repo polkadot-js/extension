@@ -3,7 +3,7 @@
 
 import type { InjectedAccount } from '@subwallet/extension-inject/types';
 
-import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
+import { _AssetType } from '@subwallet/chain-list/types';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
@@ -203,7 +203,8 @@ export default class KoniTabs {
     return authList[shortenUrl];
   }
 
-  private async accountsListV2 (url: string, { accountAuthType, anyType }: RequestAccountList): Promise<InjectedAccount[]> {
+  private async accountsListV2 (url: string, { accountAuthType,
+    anyType }: RequestAccountList): Promise<InjectedAccount[]> {
     const authInfo = await this.getAuthInfo(url);
 
     return transformAccountsV2(accountsObservable.subject.getValue(), anyType, authInfo, accountAuthType);
@@ -245,35 +246,41 @@ export default class KoniTabs {
         const accountList = transformAccountsV2(allAccounts, false, authInfo, 'evm').map((a) => a.address);
         let accounts: string[] = [];
 
-        this.#koniState.getCurrentAccount(({ address }) => {
-          if (address === ALL_ACCOUNT_KEY || !accountList.includes(address) || getAll) {
-            accounts = accountList;
-          } else if (address && accountList.includes(address)) {
-            accounts = ([address]);
-          }
+        const address = this.#koniState.keyringService.currentAccount.address;
 
-          resolve(accounts);
-        });
+        if (address === ALL_ACCOUNT_KEY || !accountList.includes(address) || getAll) {
+          accounts = accountList;
+        } else if (address && accountList.includes(address)) {
+          accounts = ([address]);
+        }
+
+        resolve(accounts);
       }).catch(console.error);
     });
   }
 
   private async getEvmState (url?: string): Promise<EvmAppState> {
-    let currentEvmNetworkKey: string | undefined;
+    let currentChain: string | undefined;
+    let autoActiveChain = false;
 
     if (url) {
       const authInfo = await this.getAuthInfo(url);
 
-      currentEvmNetworkKey = authInfo?.currentEvmNetworkKey;
+      if (authInfo?.currentEvmNetworkKey) {
+        currentChain = authInfo?.currentEvmNetworkKey;
+      }
+
+      if (authInfo?.isAllowed) {
+        autoActiveChain = true;
+      }
     }
 
-    let currentEvmNetwork: _ChainInfo | undefined = currentEvmNetworkKey ? this.#koniState.getChainInfo(currentEvmNetworkKey) : undefined;
-
-    if (currentEvmNetworkKey && !this.#koniState.getChainStateByKey(currentEvmNetworkKey).active) {
-      currentEvmNetwork = Object.values(this.#koniState.getChainInfoMap()).find((network) => {
-        return network.evmInfo !== null && this.#koniState.getChainStateByKey(network.slug).active;
-      });
-    }
+    const currentEvmNetwork = this.#koniState.requestService.getDAppChainInfo({
+      autoActive: autoActiveChain,
+      accessType: 'evm',
+      defaultChain: currentChain,
+      url
+    });
 
     if (currentEvmNetwork) {
       const { evmInfo, slug } = currentEvmNetwork;
@@ -312,7 +319,13 @@ export default class KoniTabs {
   private async getEvmPermission (url: string, id: string) {
     const accounts = await this.getEvmCurrentAccount(url, true);
 
-    return [{ id: id, invoker: url, parentCapability: 'eth_accounts', caveats: [{ type: 'restrictReturnedAccounts', value: accounts }], date: new Date().getTime() }];
+    return [{
+      id: id,
+      invoker: url,
+      parentCapability: 'eth_accounts',
+      caveats: [{ type: 'restrictReturnedAccounts', value: accounts }],
+      date: new Date().getTime()
+    }];
   }
 
   private async switchEvmChain (id: string, url: string, { params }: RequestArguments) {
@@ -488,7 +501,7 @@ export default class KoniTabs {
       }
     };
 
-    const accountListSubscription = this.#koniState.subscribeCurrentAccount()
+    const accountListSubscription = this.#koniState.keyringService.currentAccountSubject
       .subscribe(() => {
         onCurrentAccountChanged().catch(console.error);
       });
@@ -612,7 +625,8 @@ export default class KoniTabs {
     return provider;
   }
 
-  private async performWeb3Method (id: string, url: string, { method, params }: RequestArguments, callback?: (result?: any) => void) {
+  private async performWeb3Method (id: string, url: string, { method,
+    params }: RequestArguments, callback?: (result?: any) => void) {
     const provider = await this.getEvmProvider(url);
 
     this.checkAndHandleProviderStatus(provider);

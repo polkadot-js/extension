@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { getSupportedLedger } from '@subwallet/extension-koni-ui/util/account/ledger';
+import { getSupportedLedger } from '@subwallet/extension-koni-ui/utils/account/ledger';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 

@@ -14,8 +14,8 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/util/form/form';
-import { readOnlyScan } from '@subwallet/extension-koni-ui/util/scanner/attach';
+import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
+import { readOnlyScan } from '@subwallet/extension-koni-ui/utils/scanner/attach';
 import { Form, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Eye } from 'phosphor-react';

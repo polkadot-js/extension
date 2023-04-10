@@ -3,7 +3,7 @@
 
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { useGetAccountByAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { findNetworkJsonByGenesisHash, reformatAddress, toShort } from '@subwallet/extension-koni-ui/util';
+import { findNetworkJsonByGenesisHash, reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';

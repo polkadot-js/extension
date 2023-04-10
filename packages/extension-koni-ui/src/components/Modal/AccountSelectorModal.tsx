@@ -7,7 +7,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
-import React, { useCallback, useContext, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import GeneralEmptyList from '../GeneralEmptyList';
@@ -24,12 +24,11 @@ const renderEmpty = () => <GeneralEmptyList />;
 
 function Component ({ className = '', id = AccountSelectorModalId, items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { inactiveModal } = useContext(ModalContext);
+  const { checkActive, inactiveModal } = useContext(ModalContext);
   const sectionRef = useRef<SwListSectionRef>(null);
 
   const onCancel = useCallback(() => {
     inactiveModal(id);
-    sectionRef.current?.setSearchValue('');
   }, [id, inactiveModal]);
 
   const searchFunction = useCallback((item: AccountJson, searchText: string) => {
@@ -46,8 +45,17 @@ function Component ({ className = '', id = AccountSelectorModalId, items, onSele
   const _onSelectItem = useCallback((item: AccountJson) => {
     return () => {
       onSelectItem && onSelectItem(item);
+      sectionRef.current?.setSearchValue('');
     };
   }, [onSelectItem]);
+
+  useEffect(() => {
+    if (!checkActive(id)) {
+      setTimeout(() => {
+        sectionRef.current?.setSearchValue('');
+      }, 100);
+    }
+  }, [checkActive, id]);
 
   const renderItem = useCallback((item: AccountJson) => {
     return (

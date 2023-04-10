@@ -13,7 +13,7 @@ import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
-import { isKeyringPairs$Json } from '@subwallet/extension-koni-ui/util/account/typeGuards';
+import { isKeyringPairs$Json } from '@subwallet/extension-koni-ui/utils/account/typeGuards';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
 import { Form, Icon, Input, ModalContext, SettingItem, SwList, SwModal, Upload } from '@subwallet/react-ui';
 import { UploadChangeParam, UploadFile } from '@subwallet/react-ui/es/upload/interface';
@@ -287,7 +287,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onFinish={onSubmit}
           >
             <Form.Item
-              help={fileValidateState.message}
               validateStatus={fileValidateState.status}
             >
               <Upload.SingleFileDragger
@@ -296,6 +295,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 disabled={validating}
                 hint={t('Please drag an drop the .json file you exported from Polkadot.js')}
                 onChange={onChange}
+                statusHelp={fileValidateState.message}
                 title={t('Import from Polkadot.js')}
               />
             </Form.Item>

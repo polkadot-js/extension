@@ -197,7 +197,7 @@ export default class DatabaseService {
   }
 
   handleNftTransfer (chain: string, addresses: string[], nftItem: NftItem) {
-    return this.stores.nft.deleteNftByAddresses(chain, addresses, nftItem);
+    return this.stores.nft.deleteNftItem(chain, addresses, nftItem);
   }
 
   removeNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {

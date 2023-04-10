@@ -60,4 +60,5 @@ const SUBSCAN_CHAIN_MAP: Record<string, string> = {
   polymesh: 'polymesh'
 };
 
+export const SUBSCAN_CHAIN_MAP_REVERSE = Object.fromEntries(Object.entries(SUBSCAN_CHAIN_MAP).map(([k, v]) => [v, k]));
 export default SUBSCAN_CHAIN_MAP;

@@ -4,8 +4,10 @@
 import { TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { CRON_REFRESH_HISTORY_INTERVAL } from '@subwallet/extension-base/constants';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { EventService } from '@subwallet/extension-base/services/event-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
+import { keyring } from '@subwallet/ui-keyring';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject } from 'rxjs';
 
@@ -14,22 +16,30 @@ import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
 export class HistoryService {
   private dbService: DatabaseService;
   private chainService: ChainService;
+  private eventService: EventService;
   private historySubject: BehaviorSubject<TransactionHistoryItem[]> = new BehaviorSubject([] as TransactionHistoryItem[]);
 
-  constructor (dbService: DatabaseService, chainService: ChainService) {
+  constructor (dbService: DatabaseService, chainService: ChainService, eventService: EventService) {
     this.dbService = dbService;
     this.chainService = chainService;
+    this.eventService = eventService;
 
     // Load history from database
     this.dbService.getHistories().then((histories) => {
       this.historySubject.next(histories);
     }).catch(console.error);
 
-    // Add some delay to avoid fetching many times when start extension background
-    setTimeout(() => {
-      // Create history interval and refresh it if changes accounts list
-      accounts.subject.subscribe(this.refreshHistoryInterval.bind(this));
-    }, 3333);
+    // Wait for keyring and chain ready and start
+    Promise.all([this.eventService.waitKeyringReady, this.eventService.waitChainReady]).then(() => {
+      this.getHistories().catch(console.log);
+
+      this.eventService.on('account.add', (address) => {
+        this.refreshHistoryInterval();
+      });
+      this.eventService.on('account.remove', (address) => {
+        this.removeHistoryByAddress(address).catch(console.error);
+      });
+    }).catch(console.error);
   }
 
   private fetchPromise: Promise<TransactionHistoryItem[]> | null = null;
@@ -56,9 +66,9 @@ export class HistoryService {
       record.toName = accountMap[record.to?.toLowerCase()];
     });
 
-    await this.dbService.upsertHistory(historyRecords);
+    this.dbService.upsertHistory(historyRecords).catch(console.error);
 
-    return await this.dbService.getHistories();
+    return historyRecords;
   }
 
   public async fetchHistories (addresses: string[]) {
@@ -83,9 +93,10 @@ export class HistoryService {
   }
 
   public async getHistories () {
-    const addressList = Object.keys(accounts.subject.value);
+    const addressList = keyring.getAccounts().map((a) => a.address);
+    const currentHistories = this.historySubject.value;
 
-    if (!this.fetchPromise) {
+    if (!this.fetchPromise || currentHistories.length === 0) {
       const historyRecords = await this.fetchHistories(addressList);
 
       this.historySubject.next(historyRecords);

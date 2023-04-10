@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { findChainInfoByChainId } from '@subwallet/extension-koni-ui/util/chain/chain';
+import { findChainInfoByChainId } from '@subwallet/extension-koni-ui/utils/chain/chain';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 

@@ -8,7 +8,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetNativeTokenBasicInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/util';
+import { convertFieldToObject, isAccountAll, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Checkbox, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
@@ -93,6 +93,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const { error } = simpleCheckForm(allFields);
 
     const changesMap = convertFieldToObject<ClaimRewardFormProps>(changedFields);
+    const allMap = convertFieldToObject<ClaimRewardFormProps>(allFields);
 
     const { from } = changesMap;
 
@@ -100,7 +101,7 @@ const Component: React.FC<Props> = (props: Props) => {
       setFrom(from);
     }
 
-    setIsDisable(error);
+    setIsDisable(error || !(allMap.from ?? true));
   }, [setFrom]);
 
   const { t } = useTranslation();
@@ -136,7 +137,7 @@ const Component: React.FC<Props> = (props: Props) => {
         setFrom(address);
       }
     }
-  }, [currentAccount?.address, setFrom]);
+  }, [currentAccount?.address, form, setFrom]);
 
   useEffect(() => {
     setChain(stakingChain || '');

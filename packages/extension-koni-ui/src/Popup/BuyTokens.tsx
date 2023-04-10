@@ -14,10 +14,10 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BuyTokensParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { findAccountByAddress, openInNewTab } from '@subwallet/extension-koni-ui/util';
-import { getAccountType } from '@subwallet/extension-koni-ui/util/account/account';
-import reformatAddress from '@subwallet/extension-koni-ui/util/account/reformatAddress';
-import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
+import { findAccountByAddress, openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { getAccountType } from '@subwallet/extension-koni-ui/utils/account/account';
+import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
+import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ShoppingCartSimple } from 'phosphor-react';

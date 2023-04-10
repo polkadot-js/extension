@@ -102,11 +102,7 @@ cryptoWaitReady()
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519', password_store: new KeyringStore() });
 
     keyring.restoreKeyringPassword().finally(() => {
-      koniState.setKeyringState({
-        hasMasterPassword: !!keyring.keyring?.hasMasterPassword,
-        isLocked: !!keyring.keyring?.isLocked,
-        isReady: true
-      });
+      koniState.updateKeyringState();
     });
 
     console.log('initialization completed');

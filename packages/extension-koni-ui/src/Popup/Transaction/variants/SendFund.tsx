@@ -23,8 +23,8 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SendFundParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
-import { findAccountByAddress, noop } from '@subwallet/extension-koni-ui/util';
-import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/util/chain/getNetworkJsonByGenesisHash';
+import { findAccountByAddress, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
+import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
@@ -160,6 +160,8 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
   return result;
 }
 
+const defaultFilterAccount = (account: AccountJson): boolean => !(isAccountAll(account.address) || account.isReadOnly);
+
 const filterAccountFunc = (
   chainInfoMap: Record<string, _ChainInfo>,
   assetRegistry: Record<string, _ChainAsset>,
@@ -170,7 +172,7 @@ const filterAccountFunc = (
   const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
 
   if (!tokenGroupSlug) {
-    return () => true;
+    return defaultFilterAccount;
   }
 
   const chainAssets = Object.values(assetRegistry).filter((chainAsset) => {
@@ -194,6 +196,10 @@ const filterAccountFunc = (
   return (account: AccountJson): boolean => {
     const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
     const isAccountEthereum = isEthereumAddress(account.address);
+
+    if (!defaultFilterAccount(account)) {
+      return false;
+    }
 
     return chainAssets.some((chainAsset) => {
       const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;

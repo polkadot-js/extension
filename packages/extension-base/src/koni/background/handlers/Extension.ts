@@ -10,7 +10,7 @@ import { createSubscription } from '@subwallet/extension-base/background/handler
 import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AmountData, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BondingOptionParams, BrowserConfirmationType, ChainType, CreateDeriveAccountInfo, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestChangeMasterPassword, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeCancel, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApproveSignature, RequestSigningCancel, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseType, SigningRequest } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
-import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, DEFAULT_TIME_AUTO_LOCK } from '@subwallet/extension-base/constants';
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
 import { parseSubstrateTransaction } from '@subwallet/extension-base/koni/api/dotsama/parseTransaction';
 import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
@@ -67,6 +67,7 @@ const ACCOUNT_ALL_JSON: AccountJson = {
 };
 
 export default class KoniExtension {
+  #lockTimeOut: NodeJS.Timer | undefined = undefined;
   readonly #koniState: KoniState;
 
   constructor (state: KoniState) {
@@ -413,22 +414,22 @@ export default class KoniExtension {
         };
 
         setTimeout(() => {
-          this.#koniState.getCurrentAccount((accountInfo) => {
-            if (accountInfo) {
-              accountsWithCurrentAddress.currentAddress = accountInfo.address;
+          const accountInfo = this.#koniState.keyringService.currentAccount;
 
-              if (accountInfo.address === ALL_ACCOUNT_KEY) {
-                accountsWithCurrentAddress.currentGenesisHash = accountInfo.currentGenesisHash;
-              } else {
-                const acc = accounts.find((a) => (a.address === accountInfo.address));
+          if (accountInfo) {
+            accountsWithCurrentAddress.currentAddress = accountInfo.address;
 
-                accountsWithCurrentAddress.currentGenesisHash = acc?.genesisHash || ALL_GENESIS_HASH;
-              }
+            if (accountInfo.address === ALL_ACCOUNT_KEY) {
+              accountsWithCurrentAddress.currentGenesisHash = accountInfo.currentGenesisHash;
+            } else {
+              const acc = accounts.find((a) => (a.address === accountInfo.address));
+
+              accountsWithCurrentAddress.currentGenesisHash = acc?.genesisHash || ALL_GENESIS_HASH;
             }
+          }
 
-            resolve(accountsWithCurrentAddress);
-            cb(accountsWithCurrentAddress);
-          });
+          resolve(accountsWithCurrentAddress);
+          cb(accountsWithCurrentAddress);
         }, 300);
       });
 
@@ -906,28 +907,28 @@ export default class KoniExtension {
   }
 
   private _saveCurrentAccountAddress (address: string, callback?: (data: CurrentAccountInfo) => void) {
-    this.#koniState.getCurrentAccount((accountInfo) => {
-      if (!accountInfo) {
-        accountInfo = {
-          address,
-          currentGenesisHash: ALL_GENESIS_HASH,
-          allGenesisHash: ALL_GENESIS_HASH || undefined
-        };
+    let accountInfo = this.#koniState.keyringService.currentAccount;
+
+    if (!accountInfo) {
+      accountInfo = {
+        address,
+        currentGenesisHash: ALL_GENESIS_HASH,
+        allGenesisHash: ALL_GENESIS_HASH || undefined
+      };
+    } else {
+      accountInfo.address = address;
+
+      if (address !== ALL_ACCOUNT_KEY) {
+        const currentKeyPair = keyring.getAccount(address);
+
+        accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
       } else {
-        accountInfo.address = address;
-
-        if (address !== ALL_ACCOUNT_KEY) {
-          const currentKeyPair = keyring.getAccount(address);
-
-          accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
-        } else {
-          accountInfo.currentGenesisHash = accountInfo.allGenesisHash || ALL_GENESIS_HASH;
-        }
+        accountInfo.currentGenesisHash = accountInfo.allGenesisHash || ALL_GENESIS_HASH;
       }
+    }
 
-      this.#koniState.setCurrentAccount(accountInfo, () => {
-        callback && callback(accountInfo);
-      });
+    this.#koniState.setCurrentAccount(accountInfo, () => {
+      callback && callback(accountInfo);
     });
   }
 
@@ -971,11 +972,7 @@ export default class KoniExtension {
 
   private async updateAssetSetting (params: AssetSettingUpdateReq) {
     try {
-      const needUpdateSubject = await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
-
-      if (needUpdateSubject) {
-        this.#koniState.updateServiceInfo();
-      }
+      await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
 
       return true;
     } catch (e) {
@@ -1129,17 +1126,11 @@ export default class KoniExtension {
         throw Error('Require password to set up master password');
       } else {
         keyring.changeMasterPassword(password);
-        this.#koniState.setKeyringState({
-          hasMasterPassword: true,
-          isLocked: false,
-          isReady: true
-        });
+        this.#koniState.updateKeyringState();
       }
     }
 
-    const currentAccount = await new Promise<CurrentAccountInfo>((resolve) => {
-      this.#koniState.getCurrentAccount(resolve);
-    });
+    const currentAccount = this.#koniState.keyringService.currentAccount;
     const allGenesisHash = currentAccount?.allGenesisHash || undefined;
 
     types?.forEach((type) => {
@@ -1199,17 +1190,14 @@ export default class KoniExtension {
       });
     });
 
-    // Remove history
-    await this.#koniState.historyService.removeHistoryByAddress(address);
-
     // Set current account to all account
     await new Promise<void>((resolve) => {
-      this.#koniState.getCurrentAccount(({ allGenesisHash }) => {
-        this.#koniState.setCurrentAccount({
-          currentGenesisHash: allGenesisHash || null,
-          address: ALL_ACCOUNT_KEY
-        }, resolve);
-      });
+      const currentAccountInfo = this.#koniState.keyringService.currentAccount;
+
+      this.#koniState.setCurrentAccount({
+        currentGenesisHash: currentAccountInfo?.allGenesisHash || null,
+        address: ALL_ACCOUNT_KEY
+      }, resolve);
     });
 
     return true;
@@ -1937,10 +1925,7 @@ export default class KoniExtension {
       });
     }
 
-    const currentAccount = await new Promise<CurrentAccountInfo>((resolve) => {
-      this.#koniState.getCurrentAccount(resolve);
-    });
-
+    const currentAccount = this.#koniState.keyringService.currentAccount;
     const allGenesisHash = currentAccount?.allGenesisHash || undefined;
 
     if (addresses.length <= 1) {
@@ -2528,7 +2513,8 @@ export default class KoniExtension {
 
   private keyringStateSubscribe (id: string, port: chrome.runtime.Port): KeyringState {
     const cb = createSubscription<'pri(keyring.subscribe)'>(id, port);
-    const subscription = this.#koniState.subscribeKeyringState().subscribe((value): void =>
+    const keyringStateSubject = this.#koniState.keyringService.keyringStateSubject;
+    const subscription = keyringStateSubject.subscribe((value): void =>
       cb(value)
     );
 
@@ -2538,7 +2524,7 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return this.#koniState.getKeyringState();
+    return this.#koniState.keyringService.keyringState;
   }
 
   private keyringChangeMasterPassword ({ createNew,
@@ -2574,11 +2560,7 @@ export default class KoniExtension {
       };
     }
 
-    this.#koniState.setKeyringState({
-      hasMasterPassword: true,
-      isLocked: false,
-      isReady: true
-    });
+    this.#koniState.updateKeyringState();
 
     return {
       status: true,
@@ -2614,11 +2596,7 @@ export default class KoniExtension {
       };
     }
 
-    this.#koniState.setKeyringState({
-      isReady: true,
-      hasMasterPassword: true,
-      isLocked: false
-    });
+    this.#koniState.updateKeyringState();
 
     return {
       status: true,
@@ -2629,11 +2607,8 @@ export default class KoniExtension {
   private keyringLock (): void {
     keyring.lockAll();
 
-    this.#koniState.setKeyringState({
-      isReady: true,
-      hasMasterPassword: true,
-      isLocked: true
-    });
+    this.#koniState.updateKeyringState();
+    clearTimeout(this.#lockTimeOut);
   }
 
   private keyringExportMnemonic ({ address, password }: RequestKeyringExportMnemonic): ResponseKeyringExportMnemonic {
@@ -3023,6 +2998,12 @@ export default class KoniExtension {
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
+    clearTimeout(this.#lockTimeOut);
+
+    this.#lockTimeOut = setTimeout(() => {
+      this.keyringLock();
+    }, DEFAULT_TIME_AUTO_LOCK);
+
     switch (type) {
       /// Clone from PolkadotJs
       case 'pri(accounts.create.external)':

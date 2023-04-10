@@ -172,7 +172,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             name={formName}
           >
             <Form.Item
-              help={validateState.message}
               name={fieldName}
               validateStatus={validateState.status}
             >
@@ -180,6 +179,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 className='seed-phrase-input'
                 onChange={onChange}
                 placeholder={t('Secret phrase')}
+                statusHelp={validateState.message}
               />
             </Form.Item>
             <Form.Item>

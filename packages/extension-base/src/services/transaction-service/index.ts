@@ -10,6 +10,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
+import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import RequestService from '@subwallet/extension-base/services/request-service';
@@ -38,6 +39,7 @@ import { HexString } from '@polkadot/util/types';
 
 export default class TransactionService {
   private readonly chainService: ChainService;
+  private readonly eventService: EventService;
   private readonly databaseService: DatabaseService;
   private readonly requestService: RequestService;
   private readonly balanceService: BalanceService;
@@ -49,8 +51,9 @@ export default class TransactionService {
     return this.transactionSubject.getValue();
   }
 
-  constructor (chainService: ChainService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService, notificationService: NotificationService, databaseService: DatabaseService) {
+  constructor (chainService: ChainService, eventService: EventService, requestService: RequestService, balanceService: BalanceService, historyService: HistoryService, notificationService: NotificationService, databaseService: DatabaseService) {
     this.chainService = chainService;
+    this.eventService = eventService;
     this.requestService = requestService;
     this.balanceService = balanceService;
     this.historyService = historyService;
@@ -427,13 +430,22 @@ export default class TransactionService {
       }
 
         break;
+
       case ExtrinsicType.STAKING_WITHDRAW: {
         const data = parseTransactionData<ExtrinsicType.STAKING_WITHDRAW>(transaction.data);
 
         historyItem.to = data.validatorAddress || '';
+        historyItem.amount = { ...baseNativeAmount, value: data.unstakingInfo.claimable || '0' };
+        break;
       }
 
+      case ExtrinsicType.STAKING_CANCEL_UNSTAKE: {
+        const data = parseTransactionData<ExtrinsicType.STAKING_CANCEL_UNSTAKE>(transaction.data);
+
+        historyItem.amount = { ...baseNativeAmount, value: data.selectedUnstaking.claimable || '0' };
         break;
+      }
+
       case ExtrinsicType.EVM_EXECUTE:
         // Todo: Update historyItem.to
         break;
@@ -501,6 +513,8 @@ export default class TransactionService {
       action: { url: this.getTransactionLink(id) },
       notifyViaBrowser: true
     });
+
+    this.eventService.emit('transaction.done', transaction);
   }
 
   private onFailed ({ blockHash, blockNumber, errors, id }: TransactionEventResponse) {
@@ -526,6 +540,7 @@ export default class TransactionService {
       });
     }
 
+    this.eventService.emit('transaction.failed', transaction);
     // Log transaction errors
     console.error(errors);
   }

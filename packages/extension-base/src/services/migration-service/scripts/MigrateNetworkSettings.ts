@@ -13,11 +13,15 @@ export default class MigrateNetworkSettings extends BaseMigrationJob {
         resolve(items as {NetworkMap: unknown});
       });
     });
-    const networkMap = items.NetworkMap as Record<string, { active: boolean, currentProvider: string }>;
+    const oldNetworkMap = items.NetworkMap as Record<string, { active: boolean, currentProvider: string }>;
     const enableList: string[] = [];
     const stateMap = state.getChainStateMap();
 
-    Object.entries(networkMap).forEach(([slug, chain]) => {
+    if (!oldNetworkMap) {
+      return;
+    }
+
+    Object.entries(oldNetworkMap).forEach(([slug, chain]) => {
       if (chain.active) {
         const currentState = stateMap[slug];
 

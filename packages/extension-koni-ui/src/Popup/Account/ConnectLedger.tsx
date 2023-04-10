@@ -379,7 +379,12 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
     '.logo': {
       margin: `${token.controlHeightLG}px 0`,
-      '--logo-size': token.controlHeightLG + token.controlHeightXS
+      '--logo-size': token.controlHeightLG + token.controlHeightXS,
+
+      '.dual-logo-container': {
+        marginBottom: 0,
+        padding: 0
+      }
     },
 
     '.ledger-button-content': {

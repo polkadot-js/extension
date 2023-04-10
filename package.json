@@ -40,20 +40,20 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.72.32",
+    "@polkadot/dev": "^0.72.39",
     "@types/node": "^18.15.11",
     "i18next-scanner": "^4.2.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^10.2.2",
+    "@polkadot/api": "^10.3.2",
     "@polkadot/keyring": "^11.1.3",
     "@polkadot/networks": "^11.1.3",
-    "@polkadot/types": "^10.2.2",
+    "@polkadot/types": "^10.3.2",
     "@polkadot/util": "^11.1.3",
     "@polkadot/util-crypto": "^11.1.3",
     "@polkadot/x-fetch": "^11.1.3",
     "safe-buffer": "^5.2.1",
-    "typescript": "^5.0.3"
+    "typescript": "^5.0.4"
   }
 }

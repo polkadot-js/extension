@@ -146,6 +146,8 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
     slug: originChain.slug
   });
 
+  console.log('xcmRefMap', xcmRefMap);
+
   Object.values(xcmRefMap).forEach((xcmRef) => {
     if (xcmRef.srcAsset === tokenSlug) {
       const destinationChain = chainInfoMap[xcmRef.destChain];
@@ -244,6 +246,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
   }, [chainInfoMap, asset, xcmRefMap]);
+
+  console.log('destChainItems', destChainItems);
 
   const currentChainAsset = useMemo(() => {
     return asset ? assetRegistry[asset] : undefined;

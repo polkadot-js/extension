@@ -14,9 +14,8 @@ export const POLKADOT_UNLIMITED_WEIGHT = 'Unlimited';
 // get multilocation for destination chain from a parachain
 
 export function getReceiverLocation (originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, toAddress: string): Record<string, any> {
-  // @ts-ignore
-  if (destinationChainInfo.slug === COMMON_CHAIN_SLUGS.ASTAR_EVM || destinationChainInfo.slug === 'astarEvm') {
-    const ss58Address = evmToAddress(toAddress, _getChainSubstrateAddressPrefix(destinationChainInfo));
+  if (destinationChainInfo.slug === COMMON_CHAIN_SLUGS.ASTAR_EVM) {
+    const ss58Address = evmToAddress(toAddress, 2006); // TODO: shouldn't pass addressPrefix directly
 
     return { AccountId32: { network: 'Any', id: decodeAddress(ss58Address) } };
   }

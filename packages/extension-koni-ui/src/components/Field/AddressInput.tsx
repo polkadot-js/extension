@@ -5,7 +5,7 @@ import { reformatAddress } from '@subwallet/extension-base/utils';
 import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
-import { toShort } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
@@ -41,7 +41,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const [scanError, setScanError] = useState('');
 
   const accountName = useMemo(() => {
-    const account = accounts.find((acc) => acc.address.toLowerCase() === value?.toLowerCase());
+    const account = findAccountByAddress(accounts, value);
 
     return account?.name;
   }, [accounts, value]);
@@ -65,7 +65,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
     if (autoReformatValue) {
       if (isAddress(val)) {
-        onChange && onChange({ target: { value: reformatAddress(val, 42) } });
+        onChange && onChange({ target: { value: val } });
 
         return;
       }

@@ -21,14 +21,13 @@ import { BasicInputWrapper } from './Base';
 interface Props extends BasicInputWrapper, ThemeProps {
   showAddressBook?: boolean;
   showScanner?: boolean;
-  autoReformatValue?: boolean;
   addressPrefix?: number;
 }
 
 const modalId = 'input-account-address-modal';
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { addressPrefix, autoReformatValue,
+  const { addressPrefix,
     className = '', disabled, id = modalId, label, onBlur, onChange, onFocus,
     placeholder, readOnly, showAddressBook, showScanner, statusHelp, value } = props;
   const { t } = useTranslation();
@@ -63,16 +62,8 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const parseAndChangeValue = useCallback((value: string) => {
     const val = value.trim();
 
-    if (autoReformatValue) {
-      if (isAddress(val)) {
-        onChange && onChange({ target: { value: val } });
-
-        return;
-      }
-    }
-
     onChange && onChange({ target: { value: val } });
-  }, [onChange, autoReformatValue]);
+  }, [onChange]);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     parseAndChangeValue(event.target.value);

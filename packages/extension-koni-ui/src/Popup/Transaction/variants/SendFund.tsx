@@ -570,7 +570,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           >
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
-              autoReformatValue
               label={t('Send to account')}
               showScanner={true}
             />

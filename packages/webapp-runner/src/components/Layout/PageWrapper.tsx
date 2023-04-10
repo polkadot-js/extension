@@ -17,6 +17,10 @@ export interface PageWrapperProps extends ThemeProps {
 
 const defaultResolver = Promise.resolve(true);
 
+function ComponentError() {
+  return <h1>ERRRRRRRRRr</h1>
+}
+
 function Component({
   animateOnce,
   children,
@@ -40,7 +44,7 @@ function Component({
 
   return (
     <React.Suspense fallback={<LoadingScreen className={loadingClass} />}>
-      <Await resolve={resolve || defaultResolver}>
+      <Await resolve={resolve || defaultResolver} errorElement={<ComponentError />}>
         <CSSTransition
           classNames={"page"}
           in={!!(animateOnce && pathName) || pathName === location.pathname}

@@ -8,6 +8,10 @@
   "references": [
     { "path": "../extension-base/tsconfig.build.json"
     },
+    { "path": "../extension-chains/tsconfig.build.json"
+    },
+    { "path": "../extension-dapp/tsconfig.build.json"
+    },
     { "path": "../extension-inject/tsconfig.build.json"
     }
   ]

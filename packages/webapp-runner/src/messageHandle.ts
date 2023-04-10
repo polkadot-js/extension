@@ -47,8 +47,8 @@ export function setupHandlers() {
   window.addEventListener("message", (ev) => {
     const data = ev.data as TransportRequestMessage<keyof RequestSignatures>
     const port = {
-      // name: PORT_EXTENSION,
-      name: PORT_MOBILE,
+      name: PORT_EXTENSION,
+      // name: PORT_MOBILE,
       sender: { url: data.origin || ev.origin },
       postMessage: responseMessage,
       onDisconnect: {

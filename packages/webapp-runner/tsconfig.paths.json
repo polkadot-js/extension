@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": "./src",
     "paths": {
@@ -16,5 +17,12 @@
       "@subwallet-webapp/util/*": ["./util/*"],
       "@subwallet-webapp/*": ["./*"]
     }
-  }
+  },
+  "references": [
+    { "path": "../extension-base" },
+    { "path": "../extension-chains" },
+    { "path": "../extension-dapp" },
+    { "path": "../extension-inject" },
+    { "path": "../extension-mocks" }
+  ]
 }

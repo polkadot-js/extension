@@ -159,36 +159,64 @@ interface Handler {
 
 type Handlers = Record<string, Handler>
 
-console.log("chrome?.runtime?.connect", chrome?.runtime?.connect)
-const port = chrome?.runtime?.connect
-  ? chrome.runtime.connect({ name: PORT_EXTENSION })
-  : undefined
+// const port = chrome?.runtime?.connect
+//   ? chrome.runtime.connect({ name: PORT_EXTENSION })
+  // : undefined
+const port = window;
 const handlers: Handlers = {}
+console.log('========port', port);
+
+
 
 // setup a listener for messages, any incoming resolves the promise
-port &&
-  port.onMessage.addListener((data: Message["data"]): void => {
-    const handler = handlers[data.id]
+// port &&
+//   port.onMessage.addListener((data: Message["data"]): void => {
+//     const handler = handlers[data.id]
 
-    if (!handler) {
-      console.error(`Unknown response: ${JSON.stringify(data)}`)
+//     if (!handler) {
+//       console.error(`Unknown response: ${JSON.stringify(data)}`)
 
-      return
-    }
+//       return
+//     }
 
-    if (!handler.subscriber) {
-      delete handlers[data.id]
-    }
+//     if (!handler.subscriber) {
+//       delete handlers[data.id]
+//     }
 
-    if (data.subscription) {
-      // eslint-disable-next-line @typescript-eslint/ban-types
-      ;(handler.subscriber as Function)(data.subscription)
-    } else if (data.error) {
-      handler.reject(new Error(data.error))
-    } else {
-      handler.resolve(data.response)
-    }
-  })
+//     if (data.subscription) {
+//       // eslint-disable-next-line @typescript-eslint/ban-types
+//       ;(handler.subscriber as Function)(data.subscription)
+//     } else if (data.error) {
+//       handler.reject(new Error(data.error))
+//     } else {
+//       handler.resolve(data.response)
+//     }
+//   })
+
+port.addEventListener('message', (event: MessageEvent) => {
+  const data = event.data;
+  console.log('port.addEventListener data', data);
+  const handler = handlers[data.id];
+  console.log('port.addEventListener handler', handler);
+  if (!handler) {
+    console.error(`Unknown response: ${JSON.stringify(data)}`)
+
+    return
+  }
+
+  if (!handler.subscriber) {
+    delete handlers[data.id]
+  }
+
+  if (data.subscription) {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    ;(handler.subscriber as Function)(data.subscription)
+  } else if (data.error) {
+    handler.reject(new Error(data.error))
+  } else {
+    handler.resolve(data.response)
+  }
+}, false);
 
 function sendMessage<TMessageType extends MessageTypesWithNullRequest>(
   message: TMessageType
@@ -210,6 +238,9 @@ function sendMessage<TMessageType extends MessageTypes>(
   return new Promise((resolve, reject): void => {
     const id = getId()
 
+    if (subscriber) {
+      console.log('=====subscriber', {subscriber, message, request});
+    }
     handlers[id] = { reject, resolve, subscriber }
 
     port?.postMessage({ id, message, request: request || {} })
@@ -256,6 +287,7 @@ export function lazySubscribeMessage<
   const rs = {
     promise: handlePromise as Promise<ResponseTypes[TMessageType]>,
     start: () => {
+      console.log('====start port', port);
       port?.postMessage({ id, message, request: request || {} })
     },
     unsub: () => {

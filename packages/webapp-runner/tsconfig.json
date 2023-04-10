@@ -1,23 +1,15 @@
 {
-  "extends": "./tsconfig.paths.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2021",
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": false,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "downlevelIteration": true,
-    "skipDefaultLibCheck": true
+    "baseUrl": "..",
+    "outDir": "./build",
+    "rootDir": "./src"
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "references": [
+    { "path": "../extension-base" },
+    { "path": "../extension-chains" },
+    { "path": "../extension-dapp" },
+    { "path": "../extension-inject" },
+    { "path": "../extension-mocks" }
+  ]
 }

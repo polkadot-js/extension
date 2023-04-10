@@ -72,6 +72,7 @@ const _DataContext: DataContextType = {
     return map;
   }, {} as DataMap), // Convert the result to DataMap type
   addHandler: function (item: DataHandler) {
+    console.log('====item', item);
     // Add a new data handler
     const { name } = item;
 
@@ -143,8 +144,10 @@ const _DataContext: DataContextType = {
       }, [] as string[]);
 
       // Create an array of promises from the handlers
+      console.log('====handlers', handlers);
       const promiseList = handlers.map((siName) => {
         const handler = this.handlerMap[siName];
+        console.log('====handler', handler);
 
         // Start the handler if it's not started or it's not a subscription and we want to renew
         if (!handler.isStarted || (!handler.isSubscription && renew)) {
@@ -160,15 +163,23 @@ const _DataContext: DataContextType = {
         this.readyStoreMap[n] = true;
       });
 
-      this.awaitRequestsCache[key] = Promise.all(promiseList).then(() => true);
+      this.awaitRequestsCache[key] = Promise.all(promiseList).then((data) => {
+        console.log('====handler data', data);
+        return true;
+      }).catch(error => {
+        console.log('====handle rerror', error);
+        return true;
+      });
     }
 
     // Wait for all handlers to finish
+    // console.log('this.awaitRequestsCache[key]', {a: this.awaitRequestsCache[key]});
     return this.awaitRequestsCache[key];
   },
 };
 
 export function initBasicData() {
+  console.log('initBasicData', initBasicData);
   // Init Application with some default data if not existed
   const VARIANTS = ["beam", "marble", "pixel", "sunset", "bauhaus", "ring"];
 

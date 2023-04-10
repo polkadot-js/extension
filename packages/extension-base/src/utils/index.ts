@@ -20,25 +20,31 @@ export function isAccountAll (address?: string): boolean {
 }
 
 export function reformatAddress (address: string, networkPrefix: number, isEthereum = false): string {
-  if (isEthereumAddress(address)) {
+  try {
+    if (isEthereumAddress(address)) {
+      return address;
+    }
+
+    if (isAccountAll(address)) {
+      return address;
+    }
+
+    const publicKey = decodeAddress(address);
+
+    if (isEthereum) {
+      return ethereumEncode(publicKey);
+    }
+
+    if (networkPrefix < 0) {
+      return address;
+    }
+
+    return encodeAddress(publicKey, networkPrefix);
+  } catch (e) {
+    console.warn('Get error while reformat address', address, e);
+
     return address;
   }
-
-  if (isAccountAll(address)) {
-    return address;
-  }
-
-  const publicKey = decodeAddress(address);
-
-  if (isEthereum) {
-    return ethereumEncode(publicKey);
-  }
-
-  if (networkPrefix < 0) {
-    return address;
-  }
-
-  return encodeAddress(publicKey, networkPrefix);
 }
 
 export function filterAddressByNetworkKey (addresses: string[], networkKey: string, isEthereum?: boolean) {

@@ -540,9 +540,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             >
               <AmountInput
                 decimals={decimals}
-                isDisableMax={destChain !== chain && assetRegistry[asset]?.assetType === _AssetType.NATIVE}
                 maxValue={maxTransfer}
-                setIsMax={setIsTransferAll}
+                onSetMax={setIsTransferAll}
+                showMaxButton={chain === destChain && assetRegistry[asset]?.assetType === _AssetType.NATIVE}
                 tooltip={t('Amount')}
               />
             </Form.Item>

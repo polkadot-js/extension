@@ -374,6 +374,10 @@ export default class TransactionService {
         const sendingTokenInfo = this.chainService.getAssetBySlug(inputData.tokenSlug);
 
         historyItem.amount = { value: inputData.value || '0', decimals: sendingTokenInfo.decimals || 0, symbol: sendingTokenInfo.symbol };
+
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        historyItem.additionalInfo = { destinationChain: inputData?.destinationNetworkKey || '' };
         eventLogs && parseXcmEventLogs(historyItem, eventLogs, transaction.chain, sendingTokenInfo, chainInfo);
       }
 

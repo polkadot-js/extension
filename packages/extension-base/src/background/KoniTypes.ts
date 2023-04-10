@@ -502,7 +502,7 @@ export interface AmountData extends BasicTokenInfo {
 
 export interface XCMTransactionAdditionalInfo {
   destinationChain: string,
-  fee: AmountData
+  fee?: AmountData
 }
 
 export interface NFTTransactionAdditionalInfo {

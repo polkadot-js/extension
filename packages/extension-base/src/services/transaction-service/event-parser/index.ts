@@ -7,7 +7,7 @@ import { _getAssetDecimals, _getChainNativeTokenBasicInfo, _isNativeToken } from
 
 import { EventRecord } from '@polkadot/types/interfaces';
 
-export function parseXcmEventLogs (historyItem: TransactionHistoryItem, eventLogs: EventRecord[], chain: string, sendingTokenInfo: _ChainAsset, chainInfo: _ChainInfo) {
+export function parseXcmEventLogs (historyItem: Partial<TransactionHistoryItem>, eventLogs: EventRecord[], chain: string, sendingTokenInfo: _ChainAsset, chainInfo: _ChainInfo) {
   let isFeeUseMainTokenSymbol = true;
 
   for (let index = 0; index < eventLogs.length; index++) {
@@ -51,7 +51,7 @@ export function parseXcmEventLogs (historyItem: TransactionHistoryItem, eventLog
   }
 }
 
-export function parseTransferEventLogs (historyItem: TransactionHistoryItem, eventLogs: EventRecord[], chain: string, sendingTokenInfo: _ChainAsset, chainInfo: _ChainInfo) {
+export function parseTransferEventLogs (historyItem: Partial<TransactionHistoryItem>, eventLogs: EventRecord[], chain: string, sendingTokenInfo: _ChainAsset, chainInfo: _ChainInfo) {
   let isFeeUseMainTokenSymbol = true;
 
   for (let index = 0; index < eventLogs.length; index++) {

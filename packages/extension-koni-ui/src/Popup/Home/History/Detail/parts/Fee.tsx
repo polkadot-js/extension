@@ -37,12 +37,12 @@ const Component: React.FC<Props> = (props: Props) => {
           value={fee?.value || '0'}
         />
 
-        <MetaInfo.Number
+        {xcmInfo.fee && <MetaInfo.Number
           decimals={xcmInfo.fee?.decimals || undefined}
           label={t('Destination fee')}
           suffix={xcmInfo.fee?.symbol || undefined}
           value={xcmInfo.fee?.value || '0'}
-        />
+        />}
       </>
     );
   }

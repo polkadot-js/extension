@@ -998,5 +998,8 @@
   "The recipient address must be same type as the current account address.": "",
   "Amount must be equal or less than {{number}}": "",
   "Select destination chain": "",
-  "Destination chain": ""
+  "Destination chain": "",
+  "Withdraw value": "",
+  "Unstake value": "",
+  "Cancel unstake value": ""
 }

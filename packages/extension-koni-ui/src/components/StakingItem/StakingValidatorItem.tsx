@@ -77,12 +77,12 @@ const Component: React.FC<Props> = (props: Props) => {
               </span>
               {
                 apy !== '0' && (
-                  <div>
-                    -
+                  <>
+                    <span>-</span>
                     <span className={'middle-item__apy'}>
                       {t('APY')}: {formatBalance(apy, 0)}%
                     </span>
-                  </div>
+                  </>
                 )
               }
             </div>
@@ -153,17 +153,19 @@ const StakingValidatorItem = styled(Component)<Props>(({ theme: { token } }: Pro
     '.middle-item__info': {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
-      color: token.colorTextLight4
+      color: token.colorTextLight4,
+      display: 'flex',
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: token.sizeXXS
     },
 
     '.middle-item__commission': {
-      color: token.colorTextLight4,
-      paddingRight: token.paddingXXS
+      color: token.colorTextLight4
     },
 
     '.middle-item__apy': {
-      color: token.colorSuccess,
-      paddingLeft: token.paddingXXS
+      color: token.colorSuccess
     },
 
     '.right-item__select-icon': {

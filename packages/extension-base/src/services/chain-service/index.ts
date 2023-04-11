@@ -368,7 +368,7 @@ export class ChainService {
 
     this.lockChainInfoMap = false;
 
-    this.eventService.emit('chain.remove', slug);
+    this.eventService.emit('chain.updateState', slug);
 
     return true;
   }
@@ -458,7 +458,7 @@ export class ChainService {
 
     this.assetRegistrySubject.next(assetRegistry);
     targetAssets.forEach((assetSlug) => {
-      this.eventService.emit('asset.remove', assetSlug);
+      this.eventService.emit('asset.updateState', assetSlug);
     });
   }
 
@@ -539,7 +539,7 @@ export class ChainService {
     }).catch(console.error);
     this.lockChainInfoMap = false;
 
-    this.eventService.emit('chain.enable', chainSlug);
+    this.eventService.emit('chain.updateState', chainSlug);
 
     return true;
   }
@@ -587,7 +587,7 @@ export class ChainService {
     this.updateChainStateMapSubscription();
     this.lockChainInfoMap = false;
 
-    this.eventService.emit('chain.disable', chainSlug);
+    this.eventService.emit('chain.updateState', chainSlug);
 
     return true;
   }
@@ -835,7 +835,7 @@ export class ChainService {
       active: targetChainState.active,
       currentProvider: targetChainState.currentProvider
     }).then(() => {
-      this.eventService.emit('chain.update', chainSlug);
+      this.eventService.emit('chain.updateState', chainSlug);
     }).catch((e) => this.logger.error(e));
   }
 
@@ -1328,7 +1328,7 @@ export class ChainService {
     this.assetSettingSubject.next(assetSettings);
 
     updateAssets.forEach((slug) => {
-      this.eventService.emit(assetSettings[slug].visible ? 'asset.enable' : 'asset.disable', slug);
+      this.eventService.emit('asset.updateState', slug);
     });
 
     this.store.set('AssetSetting', assetSettings);

@@ -978,6 +978,8 @@ export default class KoniExtension {
     try {
       await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
 
+      this.#koniState.eventService.emit('asset.updateState', params.tokenSlug);
+
       return true;
     } catch (e) {
       console.error('Error updating asset setting', e);

@@ -1,16 +1,16 @@
-    1216	Nam Phạm                      	[Issue-963] update parsing RMRK NFTs
-     805	AnhMTV                        	Release version 0.8.1
+    1537	Nam Phạm                      	[Issue 1060] updated transactions for staking
+    1097	AnhMTV                        	Fix build error in master branch
+     656	S2kael                        	[RestoreJson] [ImportSeed] [ImportPrivateKey] Update form UI
      465	Jaco                          	0.42.5 (#969)
-     363	S2kael                        	[Issue-945] [XCM] Add GMLR xcm from Acala to Moonbeam
+     285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	
-     154	lw-cdm                        	Fix tslint issues
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       98	lw-cdm                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	Hieu Dao                      	[CI Skip] Update subspace block explorer
+      69	dominhquang                   	Fix bug UI for Staking feature
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
-      14	dominhquang                   	Update explorer url for Nodle network
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

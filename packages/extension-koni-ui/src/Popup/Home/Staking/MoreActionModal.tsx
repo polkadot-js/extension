@@ -68,6 +68,13 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
+    if (isAllAccount) {
+      setSelected(undefined);
+      navigate(`/transaction/withdraw/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
+
+      return;
+    }
+
     const unstakingInfo = getWithdrawalInfo(nominatorMetadata);
 
     if (!unstakingInfo) {
@@ -92,7 +99,7 @@ const Component: React.FC<Props> = (props: Props) => {
       .finally(() => {
         setSelected(undefined);
       });
-  }, [nominatorMetadata, onError, onSuccess]);
+  }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess]);
 
   const handleClaimRewardAction = useCallback(() => {
     if (!nominatorMetadata) {
@@ -126,8 +133,8 @@ const Component: React.FC<Props> = (props: Props) => {
       return [];
     }
 
-    return getStakingAvailableActionsByNominator(nominatorMetadata);
-  }, [nominatorMetadata]);
+    return getStakingAvailableActionsByNominator(nominatorMetadata, reward?.unclaimedReward);
+  }, [nominatorMetadata, reward?.unclaimedReward]);
 
   const onNavigate = useCallback((url: string) => {
     return () => {

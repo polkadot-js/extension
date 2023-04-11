@@ -2,26 +2,43 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainStakingMetadata, NominatorMetadata, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getAmplitudeBondingExtrinsic, getAmplitudeCancelWithdrawalExtrinsic, getAmplitudeClaimRewardExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeNominatorMetadata, getAmplitudeStakingMetadata, getAmplitudeUnbondingExtrinsic, getAmplitudeWithdrawalExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/amplitude';
+import { getAmplitudeBondingExtrinsic, getAmplitudeClaimRewardExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeNominatorMetadata, getAmplitudeStakingMetadata, getAmplitudeUnbondingExtrinsic, getAmplitudeWithdrawalExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/amplitude';
 import { getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarNominatorMetadata, getAstarStakingMetadata, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
-import { getParaBondingExtrinsic, getParaCancelWithdrawalExtrinsic, getParachainCollatorsInfo, getParaChainNominatorMetadata, getParaChainStakingMetadata, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
-import { getPoolingClaimRewardExtrinsic, getPoolingWithdrawalExtrinsic, getRelayBondingExtrinsic, getRelayCancelWithdrawalExtrinsic, getRelayChainNominatorMetadata, getRelayChainStakingMetadata, getRelayPoolsInfo, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
+import { getParaBondingExtrinsic, getParaCancelWithdrawalExtrinsic, getParachainCollatorsInfo, getParaChainNominatorMetadata, getParaChainStakingMetadata, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, validateParaChainBondingCondition, validateParaChainUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
+import { getPoolingClaimRewardExtrinsic, getPoolingWithdrawalExtrinsic, getRelayBondingExtrinsic, getRelayCancelWithdrawalExtrinsic, getRelayChainNominatorMetadata, getRelayChainStakingMetadata, getRelayPoolsInfo, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, validateRelayBondingCondition, validateRelayUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
 // all addresses must be converted to its chain format
 
-export async function getChainStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
-  if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
-    return getAstarStakingMetadata(chain, substrateApi);
-  } else if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
-    return getParaChainStakingMetadata(chain, substrateApi);
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
-    return getAmplitudeStakingMetadata(chain, substrateApi);
+export function validateUnbondingCondition (nominatorMetadata: NominatorMetadata, amount: string, chain: string, chainStakingMetadata: ChainStakingMetadata, selectedValidator?: string): TransactionError[] {
+  if (_STAKING_CHAIN_GROUP.relay.includes(chain)) {
+    return validateRelayUnbondingCondition(amount, chainStakingMetadata, nominatorMetadata);
   }
 
-  return getRelayChainStakingMetadata(chain, substrateApi);
+  return validateParaChainUnbondingCondition(amount, nominatorMetadata, chainStakingMetadata, selectedValidator as string);
+}
+
+export function validateBondingCondition (chainInfo: _ChainInfo, amount: string, selectedValidators: ValidatorInfo[], address: string, chainStakingMetadata: ChainStakingMetadata, nominatorMetadata?: NominatorMetadata): TransactionError[] {
+  if (_STAKING_CHAIN_GROUP.relay.includes(chainInfo.slug)) {
+    return validateRelayBondingCondition(chainInfo, amount, selectedValidators, address, chainStakingMetadata, nominatorMetadata);
+  }
+
+  return validateParaChainBondingCondition(chainInfo, amount, selectedValidators, address, chainStakingMetadata, nominatorMetadata);
+}
+
+export async function getChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
+  if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
+    return getAstarStakingMetadata(chainInfo.slug, substrateApi);
+  } else if (_STAKING_CHAIN_GROUP.para.includes(chainInfo.slug)) {
+    return getParaChainStakingMetadata(chainInfo.slug, substrateApi);
+  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chainInfo.slug)) {
+    return getAmplitudeStakingMetadata(chainInfo.slug, substrateApi);
+  }
+
+  return getRelayChainStakingMetadata(chainInfo, substrateApi);
 }
 
 export async function getNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
@@ -105,8 +122,6 @@ export async function getClaimRewardExtrinsic (substrateApi: _SubstrateApi, chai
 export async function getCancelWithdrawalExtrinsic (substrateApi: _SubstrateApi, chain: string, selectedUnstaking: UnstakingInfo) {
   if (_STAKING_CHAIN_GROUP.para.includes(chain)) {
     return getParaCancelWithdrawalExtrinsic(substrateApi, selectedUnstaking);
-  } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chain)) {
-    return getAmplitudeCancelWithdrawalExtrinsic(substrateApi);
   }
 
   return getRelayCancelWithdrawalExtrinsic(substrateApi, selectedUnstaking);

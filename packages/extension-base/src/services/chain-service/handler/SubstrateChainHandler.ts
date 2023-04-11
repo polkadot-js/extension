@@ -4,6 +4,7 @@
 import { options as acalaOptions } from '@acala-network/api';
 import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { _AssetType } from '@subwallet/chain-list/types';
+import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { getSubstrateConnectProvider } from '@subwallet/extension-base/services/chain-service/handler/light-client';
 import { _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi, _SubstrateChainMetadata } from '@subwallet/extension-base/services/chain-service/types';
@@ -12,7 +13,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
 import { TypeRegistry } from '@polkadot/types/create';
 import { Registry } from '@polkadot/types/types';
-import { formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';
+import { BN, formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
@@ -106,9 +107,9 @@ export class SubstrateChainHandler {
         tokenContract = new ContractPromise(substrateApi.api, _PSP22_ABI, contractAddress);
 
         const [nameResp, symbolResp, decimalsResp] = await Promise.all([
-          tokenContract.query['psp22Metadata::tokenName'](contractCaller || contractAddress, { gasLimit: -1 }), // read-only operation so no gas limit
-          tokenContract.query['psp22Metadata::tokenSymbol'](contractCaller || contractAddress, { gasLimit: -1 }),
-          tokenContract.query['psp22Metadata::tokenDecimals'](contractCaller || contractAddress, { gasLimit: -1 })
+          tokenContract.query['psp22Metadata::tokenName'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(substrateApi.api) }), // read-only operation so no gas limit
+          tokenContract.query['psp22Metadata::tokenSymbol'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(substrateApi.api) }),
+          tokenContract.query['psp22Metadata::tokenDecimals'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(substrateApi.api) })
         ]);
 
         if (!(nameResp.result.isOk && symbolResp.result.isOk && decimalsResp.result.isOk) || !nameResp.output || !decimalsResp.output || !symbolResp.output) {
@@ -121,18 +122,24 @@ export class SubstrateChainHandler {
             contractError: true
           };
         } else {
-          name = symbolResp.output?.toHuman() as string;
-          decimals = parseInt(decimalsResp.output?.toHuman() as string);
-          symbol = symbolResp.output?.toHuman() as string;
+          const symbolObj = symbolResp.output?.toHuman() as Record<string, any>;
+          const decimalsObj = decimalsResp.output?.toHuman() as Record<string, any>;
+          const nameObj = nameResp.output?.toHuman() as Record<string, any>;
+
+          name = nameResp.output ? (nameObj.Ok as string || nameObj.ok as string) : '';
+          decimals = decimalsResp.output ? (new BN((decimalsObj.Ok || decimalsObj.ok) as string | number)).toNumber() : 0;
+          symbol = decimalsResp.output ? (symbolObj.Ok as string || symbolObj.ok as string) : '';
 
           if (name === '' || symbol === '') {
             contractError = true;
           }
+
+          console.log('validate PSP22', name, symbol, decimals);
         }
       } else {
         tokenContract = new ContractPromise(substrateApi.api, _PSP34_ABI, contractAddress);
 
-        const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller || contractAddress, { gasLimit: -1 }); // read-only operation so no gas limit
+        const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(substrateApi.api) }); // read-only operation so no gas limit
 
         if (!collectionIdResp.result.isOk || !collectionIdResp.output) {
           this.logger.error('Error response while validating WASM contract');

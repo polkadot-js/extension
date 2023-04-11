@@ -6,7 +6,6 @@ import { CRON_REFRESH_HISTORY_INTERVAL } from '@subwallet/extension-base/constan
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
-import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
 import { keyring } from '@subwallet/ui-keyring';
 import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject } from 'rxjs';
@@ -59,7 +58,7 @@ export class HistoryService {
       record.toName = accountMap[record.to?.toLowerCase()];
     });
 
-    await this.dbService.upsertHistory(historyRecords);
+    await this.addHistoryItems(historyRecords);
 
     return historyRecords;
   }
@@ -106,11 +105,6 @@ export class HistoryService {
     return this.historySubject;
   }
 
-  async insertHistories (historyItems: TransactionHistoryItem[]) {
-    await this.dbService.upsertHistory(historyItems);
-    this.historySubject.next(await this.dbService.getHistories());
-  }
-
   async updateHistories (chain: string, extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
     const existedRecords = await this.dbService.getHistories({ chain, extrinsicHash });
     const updatedRecords = existedRecords.map((r) => {
@@ -120,15 +114,24 @@ export class HistoryService {
     await this.addHistoryItems(updatedRecords);
   }
 
+  // Insert history without check override origin 'app'
+  async insertHistories (historyItems: TransactionHistoryItem[]) {
+    await this.dbService.upsertHistory(historyItems);
+    this.historySubject.next(await this.dbService.getHistories());
+  }
+
+  // Insert history with check override origin 'app'
   async addHistoryItems (historyItems: TransactionHistoryItem[]) {
     // Prevent override record with original is 'app'
     const appRecords = this.historySubject.value.filter((item) => item.origin === 'app');
     const excludeKeys = appRecords.map((item) => {
-      return `${item.chain}-${quickFormatAddressToCompare(item.address) || ''}-${item.extrinsicHash}`;
+      return `${item.chain}-${item.extrinsicHash}`;
     });
 
     const updateRecords = historyItems.filter((item) => {
-      const key = `${item.chain}-${quickFormatAddressToCompare(item.address) || ''}-${item.extrinsicHash}`;
+      const key = `${item.chain}-${item.extrinsicHash}`;
+
+      !excludeKeys.includes(key) && console.log('Cancel update', key);
 
       return item.origin === 'app' || !excludeKeys.includes(key);
     });

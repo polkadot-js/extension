@@ -17,7 +17,7 @@ type Props = NominationPoolDataType & ThemeProps & {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { address, bondedAmount, className, id, name, onClickMoreBtn, symbol } = props;
+  const { address, bondedAmount, className, decimals, id, name, onClickMoreBtn, symbol } = props;
 
   const { t } = useTranslation();
 
@@ -39,7 +39,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <span className={'middle-item__bond-amount-label'}>{t('Bonded: ')}</span>
             <Number
               className={'middle-item__bond-amount-number'}
-              decimal={0}
+              decimal={decimals}
               decimalOpacity={0.45}
               intOpacity={0.45}
               size={12}

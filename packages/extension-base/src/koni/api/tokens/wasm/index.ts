@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
+import { getWasmContractGasLimit } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { _PSP22_ABI, _PSP34_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
@@ -21,10 +22,10 @@ export async function getPSP34TransferExtrinsic (networkKey: string, substrateAp
 
   try {
     const contractPromise = getPSP34ContractPromise(substrateApi.api, contractAddress);
-    const transferQuery = await contractPromise.query['psp34::transfer'](senderAddress, { gasLimit: -1 }, recipientAddress, onChainOption, {});
+    // @ts-ignore
+    const gasLimit = await getWasmContractGasLimit(substrateApi.api, senderAddress, 'psp34::transfer', contractPromise, {}, [recipientAddress, onChainOption, {}]);
 
-    const gasLimit = transferQuery.gasRequired.toString();
-
+    // @ts-ignore
     return contractPromise.tx['psp34::transfer']({ gasLimit }, recipientAddress, onChainOption, {});
   } catch (e) {
     console.error('Error getting WASM NFT transfer extrinsic', e);

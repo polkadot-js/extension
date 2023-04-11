@@ -17,7 +17,7 @@ import { BackgroundIcon, Form, Icon, Image, Input, NetworkItem, SelectModal, Set
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -66,10 +66,11 @@ const renderEmpty = () => <GeneralEmptyList />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const goBack = useDefaultNavigate().goBack;
-  const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
+  const { goBack } = useDefaultNavigate();
   const showNotification = useNotification();
+
+  const dataContext = useContext(DataContext);
 
   const formRef = useRef<FormInstance<NftImportFormType>>(null);
   const chainInfoMap = useGetContractSupportedChains();
@@ -306,6 +307,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
+  useEffect(() => {
+    if (contractValidation.status === 'error' && contractValidation.message) {
+      showNotification({
+        message: contractValidation.message,
+        type: 'error'
+      });
+    }
+  }, [contractValidation.message, contractValidation.status, showNotification]);
+
   return (
     <PageWrapper
       className={className}
@@ -402,11 +412,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 label={t<string>('NFT collection name')}
               />
             </Form.Item>
-
-            <Form.Item
-              help={contractValidation.message}
-              validateStatus={contractValidation.status}
-            />
           </Form>
         </div>
       </Layout.WithSubHeaderOnly>

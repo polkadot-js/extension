@@ -1,13 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestStakeWithdrawal, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, CancelUnstakeSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
+import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { accountFilterFunc } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -24,13 +25,7 @@ import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
 type Props = ThemeProps;
 
-enum FormFieldName {
-  UNSTAKE = 'unstake'
-}
-
-interface CancelUnstakeFormProps extends TransactionFormBaseProps {
-  [FormFieldName.UNSTAKE]: string;
-}
+type WithdrawFormProps = TransactionFormBaseProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className = '' } = props;
@@ -50,26 +45,35 @@ const Component: React.FC<Props> = (props: Props) => {
   const nominatorInfo = useGetNominatorInfo(stakingChain, stakingType, from);
   const nominatorMetadata = nominatorInfo[0];
 
+  const unstakingInfo = useMemo((): UnstakingInfo | undefined => {
+    if (from && !isAccountAll(from)) {
+      return nominatorMetadata.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE)[0];
+    }
+
+    return undefined;
+  }, [from, nominatorMetadata]);
+
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const [form] = Form.useForm<CancelUnstakeFormProps>();
-  const formDefault = useMemo((): CancelUnstakeFormProps => ({
+  const [form] = Form.useForm<WithdrawFormProps>();
+  const formDefault = useMemo((): WithdrawFormProps => ({
     from: from,
     chain: chain,
-    asset: asset,
-    [FormFieldName.UNSTAKE]: ''
+    asset: asset
   }), [asset, chain, from]);
+
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
 
   const goHome = useCallback(() => {
     navigate('/home/staking');
   }, [navigate]);
 
-  const onFieldsChange: FormCallbacks<CancelUnstakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<WithdrawFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
     const { empty, error } = simpleCheckForm(allFields);
 
-    const changesMap = convertFieldToObject<CancelUnstakeFormProps>(changedFields);
+    const changesMap = convertFieldToObject<WithdrawFormProps>(changedFields);
 
     const { from } = changesMap;
 
@@ -82,32 +86,42 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
-  const onSubmit: FormCallbacks<CancelUnstakeFormProps>['onFinish'] = useCallback((values: CancelUnstakeFormProps) => {
+  const onSubmit: FormCallbacks<WithdrawFormProps>['onFinish'] = useCallback((values: WithdrawFormProps) => {
     setLoading(true);
 
-    const { [FormFieldName.UNSTAKE]: unstakeIndex } = values;
+    if (!unstakingInfo) {
+      setLoading(false);
+
+      return;
+    }
+
+    const params: RequestStakeWithdrawal = {
+      unstakingInfo: unstakingInfo,
+      chain: nominatorMetadata.chain,
+      nominatorMetadata
+    };
+
+    if (isActionFromValidator(stakingType, chain)) {
+      params.validatorAddress = unstakingInfo.validatorAddress;
+    }
 
     setTimeout(() => {
-      submitStakeCancelWithdrawal({
-        address: from,
-        chain: chain,
-        selectedUnstaking: nominatorMetadata.unstakings[parseInt(unstakeIndex)]
-      })
+      submitStakeWithdrawal(params)
         .then(onSuccess)
         .catch(onError)
         .finally(() => {
           setLoading(false);
         });
     }, 300);
-  }, [chain, from, nominatorMetadata.unstakings, onError, onSuccess]);
+  }, [chain, nominatorMetadata, onError, onSuccess, stakingType, unstakingInfo]);
+
+  const onPreCheckReadOnly = usePreCheckReadOnly(from);
 
   const filterAccount = useCallback((account: AccountJson): boolean => {
     const nomination = nominatorInfo.find((data) => isSameAddress(data.address, account.address));
 
-    return (nomination ? nomination.unstakings.length > 0 : false) && accountFilterFunc(chainInfoMap, stakingType, stakingChain)(account);
+    return (nomination ? nomination.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE).length > 0 : false) && accountFilterFunc(chainInfoMap, stakingType, stakingChain)(account);
   }, [chainInfoMap, nominatorInfo, stakingChain, stakingType]);
-
-  const onPreCheckReadOnly = usePreCheckReadOnly(from);
 
   useEffect(() => {
     const address = currentAccount?.address || '';
@@ -134,25 +148,37 @@ const Component: React.FC<Props> = (props: Props) => {
             onFieldsChange={onFieldsChange}
             onFinish={onSubmit}
           >
-            <Form.Item
-              hidden={!isAllAccount}
-              name={'from'}
-            >
-              <AccountSelector filter={filterAccount} />
-            </Form.Item>
+            {isAllAccount &&
+              <Form.Item name={'from'}>
+                <AccountSelector filter={filterAccount} />
+              </Form.Item>
+            }
             <FreeBalance
               address={from}
               chain={chain}
               className={'free-balance'}
               label={t('Available balance:')}
             />
-            <Form.Item name={FormFieldName.UNSTAKE}>
-              <CancelUnstakeSelector
-                chain={chain}
-                disabled={!from}
-                label={t('Select unstake request')}
-                nominators={from ? nominatorMetadata?.unstakings || [] : []}
-              />
+            <Form.Item>
+              <MetaInfo
+                className='withdraw-meta-info'
+                hasBackgroundWrapper={true}
+              >
+                <MetaInfo.Chain
+                  chain={chain}
+                  label={t('Network')}
+                />
+                {
+                  unstakingInfo && (
+                    <MetaInfo.Number
+                      decimals={decimals}
+                      label={t('Withdraw amount')}
+                      suffix={symbol}
+                      value={unstakingInfo.claimable}
+                    />
+                  )
+                }
+              </MetaInfo>
             </Form.Item>
           </Form>
         </PageWrapper>
@@ -193,21 +219,16 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const CancelUnstake = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const Withdraw = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.unstaked-field, .free-balance': {
+    '.free-balance': {
       marginBottom: token.marginXS
     },
 
     '.meta-info': {
       marginTop: token.paddingSM
-    },
-
-    '.cancel-unstake-info-item > .__col': {
-      flex: 'initial',
-      paddingRight: token.paddingXXS
     }
   };
 });
 
-export default CancelUnstake;
+export default Withdraw;

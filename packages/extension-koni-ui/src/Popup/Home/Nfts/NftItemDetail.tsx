@@ -167,6 +167,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     inactiveModal('nftItemDescription');
   }, [inactiveModal]);
 
+  const onImageClick = useCallback(() => {
+    if (nftItem.externalUrl) {
+      chrome.tabs.create({ url: nftItem.externalUrl, active: true })
+        .then(() => console.log('redirecting'))
+        .catch(console.error);
+    }
+  }, [collectionInfo.image, nftItem.externalUrl, nftItem.image]);
+
   return (
     <PageWrapper
       className={`${className}`}
@@ -185,7 +193,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <div className={'nft_item_detail__container'}>
           <div className={'nft_item_detail__nft_image'}>
             <Image
+              className={CN({ clickable: nftItem.externalUrl })}
               height={358}
+              onClick={onImageClick}
               src={nftItem.image}
             />
           </div>
@@ -311,6 +321,10 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       paddingRight: token.margin,
       paddingLeft: token.margin,
       paddingBottom: token.margin
+    },
+
+    '.clickable': {
+      cursor: 'pointer'
     },
 
     '.nft_item_detail__info_container': {

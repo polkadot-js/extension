@@ -4,39 +4,29 @@
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getNftTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
-import { GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
+import { AddressInput, ChainSelector, Layout, PageWrapper, TokenTypeSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import useGetContractSupportedChains from '@subwallet/extension-koni-ui/hooks/screen/nft/useGetContractSupportedChains';
+import { useChainChecker, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
-import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Form, Icon, Image, Input, NetworkItem, SelectModal, SettingItem } from '@subwallet/react-ui';
-import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
-import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
+import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertFieldToError, convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { Form, Icon, Input } from '@subwallet/react-ui';
+import { PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import styled, { useTheme } from 'styled-components';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
+import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
-import ChainLogoMap from '../../../assets/logo';
-
-type Props = ThemeProps
+type Props = ThemeProps;
 
 interface NftImportFormType {
-  contractAddress: string,
-  chain: string,
-  collectionName: string,
-  type: _AssetType,
-  symbol: string
-}
-
-interface ValidationInfo {
-  status: ValidateStatus,
-  message?: string
+  contractAddress: string;
+  chain: string;
+  collectionName: string;
+  type: _AssetType;
+  symbol: string;
 }
 
 interface NftTypeOption {
@@ -62,167 +52,112 @@ function getNftTypeSupported (chainInfo: _ChainInfo) {
   return result;
 }
 
-const renderEmpty = () => <GeneralEmptyList />;
-
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { token } = useTheme() as Theme;
-  const { goBack } = useDefaultNavigate();
   const showNotification = useNotification();
+  const navigate = useNavigate();
 
   const dataContext = useContext(DataContext);
 
-  const formRef = useRef<FormInstance<NftImportFormType>>(null);
   const chainInfoMap = useGetContractSupportedChains();
-  const [selectedChain, setSelectedChain] = useState<string>('');
-  const [selectedNftType, setSelectedNftType] = useState<string>('');
-  const [contractValidation, setContractValidation] = useState<ValidationInfo>({ status: '' });
-  const [symbol, setSymbol] = useState<string>('');
+
+  const [form] = Form.useForm<NftImportFormType>();
+  const selectedChain = Form.useWatch('chain', form);
+  const selectedNftType = Form.useWatch('type', form);
+
+  const chains = useMemo(() => Object.values(chainInfoMap), [chainInfoMap]);
+
   const [loading, setLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
+  const [nameDisabled, setNameDisabled] = useState(true);
 
   const nftTypeOptions = useMemo(() => {
     return getNftTypeSupported(chainInfoMap[selectedChain]);
   }, [chainInfoMap, selectedChain]);
 
-  const onSubmit = useCallback(() => {
-    const formValues = formRef.current?.getFieldsValue() as NftImportFormType;
-    const formattedCollectionName = formValues.collectionName.replaceAll(' ', '').toUpperCase();
+  const checkChain = useChainChecker();
+
+  const goBack = useCallback(() => {
+    navigate('/home/nfts/collections');
+  }, [navigate]);
+
+  const onFieldsChange: FormCallbacks<NftImportFormType>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+    const { error } = simpleCheckForm(allFields);
+
+    const changes = convertFieldToObject<NftImportFormType>(changedFields);
+    const all = convertFieldToObject<NftImportFormType>(allFields);
+    const allError = convertFieldToError<NftImportFormType>(allFields);
+
+    const empty = Object.entries(all).some(([key, value]) => key !== 'symbol' ? !value : false);
+
+    const { chain, type } = changes;
+
+    if (chain) {
+      const nftTypes = getNftTypeSupported(chainInfoMap[chain]);
+
+      if (nftTypes.length === 1) {
+        form.setFieldValue('type', nftTypes[0].value);
+      } else {
+        form.resetFields(['type']);
+      }
+
+      form.resetFields(['contractAddress', 'collectionName']);
+    }
+
+    if (type) {
+      form.resetFields(['contractAddress', 'collectionName']);
+    }
+
+    if (allError.contractAddress.length > 0) {
+      form.resetFields(['collectionName']);
+    }
+
+    setNameDisabled(!all.chain || !all.type || allError.contractAddress.length > 0);
+    setIsDisabled(empty || error);
+  }, [chainInfoMap, form]);
+
+  const onSubmit: FormCallbacks<NftImportFormType>['onFinish'] = useCallback((formValues: NftImportFormType) => {
+    const { chain, collectionName, contractAddress, symbol, type } = formValues;
+    const formattedCollectionName = collectionName.replaceAll(' ', '').toUpperCase();
 
     setLoading(true);
 
-    upsertCustomToken({
-      originChain: formValues.chain,
-      slug: '',
-      name: formValues.collectionName,
-      symbol: symbol !== '' ? symbol : formattedCollectionName,
-      decimals: null,
-      priceId: null,
-      minAmount: null,
-      assetType: formValues.type,
-      metadata: _parseMetadataForSmartContractAsset(formValues.contractAddress),
-      multiChainAsset: null,
-      hasValue: _isChainTestNet(chainInfoMap[formValues.chain])
-    })
-      .then((result) => {
-        setLoading(false);
-
-        if (result) {
-          showNotification({
-            message: t('Imported NFT successfully')
-          });
-          goBack();
-        } else {
+    setTimeout(() => {
+      upsertCustomToken({
+        originChain: chain,
+        slug: '',
+        name: collectionName,
+        symbol: symbol !== '' ? symbol : formattedCollectionName,
+        decimals: null,
+        priceId: null,
+        minAmount: null,
+        assetType: type,
+        metadata: _parseMetadataForSmartContractAsset(contractAddress),
+        multiChainAsset: null,
+        hasValue: _isChainTestNet(chainInfoMap[chain])
+      })
+        .then((result) => {
+          if (result) {
+            showNotification({
+              message: t('Imported NFT successfully')
+            });
+            goBack();
+          } else {
+            showNotification({
+              message: t('An error occurred, please try again')
+            });
+          }
+        })
+        .catch(() => {
           showNotification({
             message: t('An error occurred, please try again')
           });
-        }
-      }).catch(() => {
-        setLoading(false);
-        showNotification({
-          message: t('An error occurred, please try again')
+        })
+        .finally(() => {
+          setLoading(false);
         });
-      });
-  }, [symbol, chainInfoMap, showNotification, t, goBack]);
-
-  const isSubmitDisabled = useCallback(() => {
-    return contractValidation.status === '' || contractValidation.status === 'error';
-  }, [contractValidation.status]);
-
-  const onChangeChain = useCallback((value: string) => {
-    formRef.current?.setFieldValue('chain', value);
-    const nftTypes = getNftTypeSupported(chainInfoMap[value]);
-
-    if (nftTypes.length === 1) {
-      formRef.current?.setFieldValue('type', nftTypes[0].value);
-      setSelectedNftType(nftTypes[0].value);
-    } else {
-      formRef.current?.resetFields(['type']);
-      setSelectedNftType('');
-    }
-
-    formRef.current?.resetFields(['contractAddress', 'collectionName']);
-    setSelectedChain(value);
-    setContractValidation({ status: '' });
-  }, [chainInfoMap]);
-
-  const onChangeNftType = useCallback((value: string) => {
-    if (selectedNftType !== value) {
-      formRef.current?.resetFields(['contractAddress', 'collectionName']);
-    }
-
-    formRef.current?.setFieldValue('type', value as _AssetType);
-    setSelectedNftType(value);
-  }, [selectedNftType]);
-
-  const renderChainOption = useCallback((chainInfo: _ChainInfo, selected: boolean) => {
-    return (
-      <NetworkItem
-        name={chainInfo.name}
-        networkKey={chainInfo.slug}
-        networkMainLogoShape={'circle'}
-        networkMainLogoSize={28}
-        rightItem={selected && <Icon
-          customSize={'20px'}
-          iconColor={token.colorSuccess}
-          phosphorIcon={CheckCircle}
-          type='phosphor'
-          weight={'fill'}
-        />}
-      />
-    );
-  }, [token]);
-
-  const renderNftTypeOption = useCallback((nftType: NftTypeOption, selected: boolean) => {
-    return (
-      <SettingItem
-        className='nft-type-item'
-        leftItemIcon={(
-          <BackgroundIcon
-            backgroundColor='var(--nft-type-icon-bg-color)'
-            iconColor='var(--nft-type-icon-color)'
-            phosphorIcon={Coin}
-            size='sm'
-            weight='fill'
-          />
-        )}
-        name={nftType.label}
-        rightItem={
-          selected &&
-          (
-            <Icon
-              iconColor='var(--nft-selected-icon-color)'
-              phosphorIcon={CheckCircle}
-              size='sm'
-              weight='fill'
-            />
-          )
-        }
-      />
-    );
-  }, []);
-
-  const renderNftTypeSelected = useCallback((nftType: NftTypeOption) => {
-    return (
-      <div className={'nft_import__selected_option'}>{nftType.label}</div>
-    );
-  }, []);
-
-  const renderChainSelected = useCallback((chainInfo: _ChainInfo) => {
-    return (
-      <div className={'nft_import__selected_option'}>{chainInfo.name}</div>
-    );
-  }, []);
-
-  const originChainLogo = useCallback(() => {
-    return (
-      <Image
-        height={token.fontSizeXL}
-        shape={'circle'}
-        src={ChainLogoMap[selectedChain]}
-        width={token.fontSizeXL}
-      />
-    );
-  }, [selectedChain, token.fontSizeXL]);
+    }, 300);
+  }, [chainInfoMap, showNotification, t, goBack]);
 
   const collectionNameValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -236,85 +171,50 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const contractAddressValidator = useCallback((rule: RuleObject, contractAddress: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      const isValidEvmContract = [_AssetType.ERC721].includes(selectedNftType as _AssetType) && isEthereumAddress(contractAddress);
-      const isValidWasmContract = [_AssetType.PSP34].includes(selectedNftType as _AssetType) && isValidSubstrateAddress(contractAddress);
-
-      if (isValidEvmContract || isValidWasmContract) {
-        setLoading(true);
-        validateCustomToken({
-          contractAddress,
-          originChain: selectedChain,
-          type: selectedNftType as _AssetType
-        })
-          .then((validationResult) => {
-            setLoading(false);
-
-            if (validationResult.isExist) {
-              setContractValidation({
-                status: 'error',
-                message: t('Existed NFT')
-              });
-              resolve();
-            }
-
-            if (validationResult.contractError) {
-              setContractValidation({
-                status: 'error',
-                message: t('Error validating this NFT')
-              });
-              resolve();
-            }
-
-            if (!validationResult.isExist && !validationResult.contractError) {
-              setContractValidation({
-                status: 'success'
-              });
-              formRef.current?.setFieldValue('collectionName', validationResult.name);
-              setSymbol(validationResult.symbol);
-              resolve();
-            }
-          })
-          .catch(() => {
-            setLoading(false);
-            setContractValidation({
-              status: 'error',
-              message: t('Error validating this NFT')
-            });
-            resolve();
-          });
-      } else {
-        setContractValidation({
-          status: 'error'
-        });
+      if (!isAddress(contractAddress)) {
         reject(t('Invalid contract address'));
+      } else {
+        const isValidEvmContract = [_AssetType.ERC721].includes(selectedNftType) && isEthereumAddress(contractAddress);
+        const isValidWasmContract = [_AssetType.PSP34].includes(selectedNftType) && isValidSubstrateAddress(contractAddress);
+
+        if (isValidEvmContract || isValidWasmContract) {
+          setLoading(true);
+          validateCustomToken({
+            contractAddress: contractAddress,
+            originChain: selectedChain,
+            type: selectedNftType
+          })
+            .then((validationResult) => {
+              setLoading(false);
+
+              if (validationResult.isExist) {
+                reject(t('Existed NFT'));
+              }
+
+              if (validationResult.contractError) {
+                reject(t('Invalid contract for the selected chain'));
+              }
+
+              if (!validationResult.isExist && !validationResult.contractError) {
+                form.setFieldValue('collectionName', validationResult.name);
+                form.setFieldValue('symbol', validationResult.symbol);
+                resolve();
+              }
+            })
+            .catch(() => {
+              setLoading(false);
+              reject(t('Invalid contract for the selected chain'));
+            });
+        } else {
+          reject(t('Invalid contract address'));
+        }
       }
     });
-  }, [selectedChain, selectedNftType, t]);
-
-  const isCollectionNameDisabled = useCallback(() => {
-    if (contractValidation.status === '' || contractValidation.status === 'error') {
-      return true;
-    }
-
-    return selectedNftType === '' || selectedChain === '';
-  }, [contractValidation, selectedChain, selectedNftType]);
-
-  const searchChain = useCallback((chainInfo: _ChainInfo, searchText: string) => {
-    const searchTextLowerCase = searchText.toLowerCase();
-
-    return (
-      chainInfo.name.toLowerCase().includes(searchTextLowerCase)
-    );
-  }, []);
+  }, [form, selectedChain, selectedNftType, t]);
 
   useEffect(() => {
-    if (contractValidation.status === 'error' && contractValidation.message) {
-      showNotification({
-        message: contractValidation.message,
-        type: 'error'
-      });
-    }
-  }, [contractValidation.message, contractValidation.status, showNotification]);
+    selectedChain && checkChain(selectedChain);
+  }, [selectedChain, checkChain]);
 
   return (
     <PageWrapper
@@ -324,7 +224,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Layout.WithSubHeaderOnly
         onBack={goBack}
         rightFooterButton={{
-          disabled: isSubmitDisabled(),
+          disabled: isDisabled,
           icon: (
             <Icon
               phosphorIcon={PlusCircle}
@@ -332,41 +232,32 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             />
           ),
           loading: loading,
-          onClick: onSubmit,
+          onClick: form.submit,
           children: t('Import')
         }}
         title={t<string>('Import NFT')}
       >
         <div className={'nft_import__container'}>
           <Form
+            className='form-space-xs'
+            form={form}
             initialValues={{
               contractAddress: '',
               chain: '',
               collectionName: '',
               type: ''
             }}
-            name={'nft-import'}
-            ref={formRef}
+            name='nft-import'
+            onFieldsChange={onFieldsChange}
+            onFinish={onSubmit}
           >
             <Form.Item
               name='chain'
             >
-              <SelectModal
-                className={className}
-                id='import-nft-select-chain'
-                itemKey={'slug'}
-                items={Object.values(chainInfoMap)}
+              <ChainSelector
+                items={chains}
                 label={t<string>('Network')}
-                onSelect={onChangeChain}
                 placeholder={t('Select network')}
-                prefix={selectedChain !== '' && originChainLogo()}
-                renderItem={renderChainOption}
-                renderSelected={renderChainSelected}
-                renderWhenEmpty={renderEmpty}
-                searchFunction={searchChain}
-                searchPlaceholder={'Search network'}
-                searchableMinCharactersCount={2}
-                selected={selectedChain}
                 title={t('Select network')}
               />
             </Form.Item>
@@ -374,18 +265,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Form.Item
               name='type'
             >
-              <SelectModal
+              <TokenTypeSelector
                 className={className}
-                disabled={selectedChain === ''}
-                id='import-nft-select-type'
-                itemKey={'value'}
+                disabled={!selectedChain}
                 items={nftTypeOptions}
                 label={t<string>('NFT type')}
-                onSelect={onChangeNftType}
                 placeholder={t('Select NFT type')}
-                renderItem={renderNftTypeOption}
-                renderSelected={renderNftTypeSelected}
-                selected={selectedNftType}
                 title={t('Select NFT type')}
               />
             </Form.Item>
@@ -396,7 +281,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               statusHelpAsTooltip={true}
             >
               <AddressInput
-                disabled={selectedNftType === ''}
+                disabled={!selectedNftType}
                 label={t<string>('NFT contract address')}
                 showScanner={true}
               />
@@ -408,7 +293,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               statusHelpAsTooltip={true}
             >
               <Input
-                disabled={isCollectionNameDisabled()}
+                disabled={nameDisabled}
                 label={t<string>('NFT collection name')}
               />
             </Form.Item>

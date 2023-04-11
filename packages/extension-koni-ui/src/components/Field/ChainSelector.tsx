@@ -4,8 +4,7 @@
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
+import { ChainItemType, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, InputRef, Logo, NetworkItem, SelectModal } from '@subwallet/react-ui';
 import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';

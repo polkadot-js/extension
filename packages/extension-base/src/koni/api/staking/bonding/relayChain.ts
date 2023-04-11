@@ -38,7 +38,9 @@ export function validateRelayUnbondingCondition (amount: string, chainStakingMet
   const bnActiveStake = new BN(nominatorMetadata.activeStake);
   const bnRemainingStake = bnActiveStake.sub(new BN(amount));
 
-  if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(new BN(chainStakingMetadata.minStake)))) {
+  const minStake = new BN(chainStakingMetadata.minPoolBonding || '0');
+
+  if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {
     errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE));
   }
 

@@ -82,7 +82,6 @@ const Base = ({
   showFooter,
   ...props
 }: LayoutBaseProps) => {
-  console.log("props", props)
   const navigate = useNavigate()
   const goHome = useDefaultNavigate().goHome
   const { pathname } = useLocation()

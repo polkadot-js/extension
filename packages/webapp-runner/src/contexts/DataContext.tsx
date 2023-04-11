@@ -72,7 +72,7 @@ const _DataContext: DataContextType = {
     return map;
   }, {} as DataMap), // Convert the result to DataMap type
   addHandler: function (item: DataHandler) {
-    console.log('====item', item);
+    // console.log('====item', item);
     // Add a new data handler
     const { name } = item;
 
@@ -93,8 +93,12 @@ const _DataContext: DataContextType = {
 
       // If the handler is set to start immediately
       if (item.isStartImmediately) {
-        item.start(); // Start the handler
-        item.isStarted = true; // Mark the handler as started
+        console.log('====handler item.isStartImmediately', item.isStartImmediately);
+        setTimeout(() => {
+          console.log('====handler item.isStartImmediately Action');
+          item.start(); // Start the handler
+          item.isStarted = true; // Mark the handler as started
+        }, 3000);
       }
     }
 
@@ -147,7 +151,7 @@ const _DataContext: DataContextType = {
       console.log('====handlers', handlers);
       const promiseList = handlers.map((siName) => {
         const handler = this.handlerMap[siName];
-        console.log('====handler', handler);
+        // console.log('====handler', handler);
 
         // Start the handler if it's not started or it's not a subscription and we want to renew
         if (!handler.isStarted || (!handler.isSubscription && renew)) {
@@ -163,13 +167,15 @@ const _DataContext: DataContextType = {
         this.readyStoreMap[n] = true;
       });
 
-      this.awaitRequestsCache[key] = Promise.all(promiseList).then((data) => {
-        console.log('====handler data', data);
-        return true;
-      }).catch(error => {
-        console.log('====handle rerror', error);
-        return true;
-      });
+      setTimeout(() => {
+        this.awaitRequestsCache[key] = Promise.all(promiseList).then((data) => {
+          console.log('====handler data', data);
+          return true;
+        }).catch(error => {
+          console.log('====handle rerror', error);
+          return true;
+        });
+      }, 2000)
     }
 
     // Wait for all handlers to finish

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PHISHING_PAGE_REDIRECT } from "@subwallet/extension-base/defaults"
+// import { PHISHING_PAGE_REDIRECT } from "@subwallet/extension-base/defaults"
 import { PageWrapper } from "@subwallet-webapp/components"
 import { i18nPromise } from "@subwallet-webapp/util/common/i18n"
 import React, { ComponentType, ReactNode } from "react"
@@ -316,5 +316,5 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`),
+  // PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`),
 ])

@@ -54,20 +54,6 @@ const useCreatePassword = () => {
 
   const [loading, setLoading] = useState(false)
 
-  const [isDesktop, setIsDesktop] = useState<boolean>(true)
-
-  const handleWindowResize = useCallback(() => {
-    if (window.innerWidth < 1200 && isDesktop) setIsDesktop(false)
-    if (window.innerWidth >= 1200 && !isDesktop) setIsDesktop(true)
-  }, [isDesktop])
-
-  useEffect(() => {
-    window.addEventListener("resize", handleWindowResize)
-    ;() => {
-      window.removeEventListener("resize", handleWindowResize)
-    }
-  }, [handleWindowResize])
-
   const onComplete = useCallback(() => {
     if (previousInfo?.prevPathname) {
       navigate(previousInfo.prevPathname, {
@@ -153,7 +139,6 @@ const useCreatePassword = () => {
     openModal,
     closeModal,
     form,
-    isDesktop,
   }
 }
 

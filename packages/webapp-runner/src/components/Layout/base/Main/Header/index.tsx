@@ -3,7 +3,7 @@ import Component, { Props } from "./Header"
 
 const Header = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   ".common-header": {
-    padding: "24px 36px 40px 44px",
+    paddingBottom: 40,
     display: "flex",
     justifyContent: "space-between",
 

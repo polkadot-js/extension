@@ -4,10 +4,17 @@
 import { AlertBox, Layout, PageWrapper } from "@subwallet-webapp/components"
 import InfoIcon from "@subwallet-webapp/components/Icon/InfoIcon"
 
-import { Form, Icon, Input, PageIcon, SwModal } from "@subwallet/react-ui"
+import {
+  Button,
+  Form,
+  Icon,
+  Input,
+  PageIcon,
+  SwModal,
+} from "@subwallet/react-ui"
 import CN from "classnames"
 import { CaretLeft, ShieldPlus, CheckCircle } from "phosphor-react"
-import React from "react"
+import React, { useContext, useMemo } from "react"
 import useCreatePassword, {
   PropsType,
   FormFieldName,
@@ -16,6 +23,11 @@ import useCreatePassword, {
   confirmPasswordRules,
   modalId,
 } from "./hook"
+import {
+  ScreenContext,
+  Screens,
+} from "@subwallet-webapp/contexts/ScreenContext"
+import InstructionContainer from "./InstructionContainer"
 
 const FooterIcon = <Icon phosphorIcon={CheckCircle} weight="fill" />
 
@@ -32,19 +44,24 @@ const ComponentLayout: React.FC<PropsType> = (props) => {
     closeModal,
     form,
     className,
-    isDesktop,
   } = props
+
+  const { screenType } = useContext(ScreenContext)
+
+  const isDesktop = useMemo(() => screenType === Screens.DESKTOP, [screenType])
 
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
-        rightFooterButton={{
-          children: t("Continue"),
-          onClick: form.submit,
-          loading: loading,
-          disabled: isDisabled,
-          icon: FooterIcon,
-        }}
+        {...(!isDesktop && {
+          rightFooterButton: {
+            children: t("Continue"),
+            onClick: form.submit,
+            loading: loading,
+            disabled: isDisabled,
+            icon: FooterIcon,
+          },
+        })}
         subHeaderIcons={[
           {
             icon: <InfoIcon />,
@@ -53,7 +70,11 @@ const ComponentLayout: React.FC<PropsType> = (props) => {
         ]}
         title={t("Create a password")}
       >
-        <div className="body-container">
+        <div
+          className={CN("body-container", {
+            "desktop-container": isDesktop,
+          })}
+        >
           {!isDesktop && (
             <>
               <div className="page-icon">
@@ -68,72 +89,77 @@ const ComponentLayout: React.FC<PropsType> = (props) => {
               <div className="title">{t("Create a password")}</div>
             </>
           )}
-          <Form
-            form={form}
-            initialValues={{
-              [FormFieldName.PASSWORD]: "",
-              [FormFieldName.CONFIRM_PASSWORD]: "",
-            }}
-            name={formName}
-            onFieldsChange={onUpdate}
-            onFinish={onSubmit}
-          >
-            <Form.Item
-              name={FormFieldName.PASSWORD}
-              rules={passwordRules}
-              statusHelpAsTooltip={true}
-            >
-              <Input
-                onChange={onChangePassword}
-                placeholder={t("Enter password")}
-                type="password"
-              />
-            </Form.Item>
-            <Form.Item
-              name={FormFieldName.CONFIRM_PASSWORD}
-              rules={confirmPasswordRules}
-              statusHelpAsTooltip={true}
-            >
-              <Input placeholder={t("Confirm password")} type="password" />
-            </Form.Item>
-            <Form.Item>
-              <AlertBox
-                description={t("Recommended security practice")}
-                title={t("Always choose a strong password!")}
-                type="warning"
-              />
-            </Form.Item>
-            {submitError && (
-              <Form.Item help={submitError} validateStatus="error" />
-            )}
-          </Form>
-          {!isDesktop && (
-            <SwModal
-              closeIcon={<Icon phosphorIcon={CaretLeft} size="sm" />}
-              id={modalId}
-              onCancel={closeModal}
-              rightIconProps={{
-                icon: <InfoIcon />,
+
+          <div className="form-container">
+            <Form
+              form={form}
+              initialValues={{
+                [FormFieldName.PASSWORD]: "",
+                [FormFieldName.CONFIRM_PASSWORD]: "",
               }}
-              title={t("Instructions")}
-              wrapClassName={className}
+              name={formName}
+              onFieldsChange={onUpdate}
+              onFinish={onSubmit}
             >
-              <div className="instruction-container">
-                <AlertBox
-                  description={t(
-                    "For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it."
-                  )}
-                  title={t("Why do I need to enter a password?")}
+              <Form.Item
+                name={FormFieldName.PASSWORD}
+                rules={passwordRules}
+                statusHelpAsTooltip={true}
+              >
+                <Input
+                  onChange={onChangePassword}
+                  placeholder={t("Enter password")}
+                  type="password"
                 />
+              </Form.Item>
+              <Form.Item
+                name={FormFieldName.CONFIRM_PASSWORD}
+                rules={confirmPasswordRules}
+                statusHelpAsTooltip={true}
+              >
+                <Input placeholder={t("Confirm password")} type="password" />
+              </Form.Item>
+              <Form.Item>
                 <AlertBox
-                  description={t(
-                    "The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!"
-                  )}
-                  title={t("Can I recover a password?")}
+                  description={t("Recommended security practice")}
+                  title={t("Always choose a strong password!")}
+                  type="warning"
                 />
-              </div>
-            </SwModal>
-          )}
+              </Form.Item>
+              {submitError && (
+                <Form.Item help={submitError} validateStatus="error" />
+              )}
+              {isDesktop && (
+                <Button
+                  onClick={form.submit}
+                  loading={loading}
+                  disabled={isDisabled}
+                  icon={FooterIcon}
+                >
+                  {t("Import Account")}
+                </Button>
+              )}
+            </Form>
+          </div>
+
+          <div className="instruction-container">
+            {isDesktop ? (
+              <InstructionContainer type="warning" />
+            ) : (
+              <SwModal
+                closeIcon={<Icon phosphorIcon={CaretLeft} size="sm" />}
+                id={modalId}
+                onCancel={closeModal}
+                rightIconProps={{
+                  icon: <InfoIcon />,
+                }}
+                title={t("Instructions")}
+                wrapClassName={className}
+              >
+                <InstructionContainer />
+              </SwModal>
+            )}
+          </div>
         </div>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>

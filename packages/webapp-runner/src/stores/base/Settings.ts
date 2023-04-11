@@ -44,14 +44,15 @@ const settingsSlice = createSlice({
   reducers: {
     updateUiSettings(state, action: PayloadAction<UiSettings>) {
       const payload = action.payload;
+      console.log('===updateUiSettings payload', payload);
 
       return {
         ...state,
         // todo: will save language, theme, isShowZeroBalance, camera in background
-        browserConfirmationType: payload.browserConfirmationType,
-        isShowBalance: payload.isShowBalance,
-        accountAllLogo: payload.accountAllLogo,
-        camera: payload.camera,
+        browserConfirmationType: payload?.browserConfirmationType,
+        isShowBalance: payload?.isShowBalance,
+        accountAllLogo: payload?.accountAllLogo,
+        camera: payload?.camera,
         reduxStatus: ReduxStatus.READY,
       };
     },

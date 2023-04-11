@@ -12,6 +12,7 @@ export { default as RadioGroup } from './Field/RadioGroup';
 export { default as ScreenTab } from './ScreenTab';
 export { default as SelectValidatorInput } from './SelectValidatorInput';
 export { default as WordPhrase } from './WordPhrase';
+export { default as TokenTable } from './TokenTable';
 
 export * from '../contexts';
 export * from './Account';

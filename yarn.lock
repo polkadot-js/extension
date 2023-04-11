@@ -6054,6 +6054,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rottitime/react-hook-message-event@npm:^1.0.10":
+  version: 1.0.10
+  resolution: "@rottitime/react-hook-message-event@npm:1.0.10"
+  peerDependencies:
+    react: ">=17.0.0"
+  checksum: 33b77332eacc0ed6eaa5685e9798a263195cdf58a9dd3e64f82fe1436a593e6005cd9632fd8b9509ddfff244833f5166fee868a1fbe13d3e55043c962c265d93
+  languageName: node
+  linkType: hard
+
 "@rushstack/eslint-patch@npm:^1.1.0, @rushstack/eslint-patch@npm:^1.1.2, @rushstack/eslint-patch@npm:^1.2.0":
   version: 1.2.0
   resolution: "@rushstack/eslint-patch@npm:1.2.0"
@@ -6807,9 +6816,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/webapp-runner@workspace:packages/subwallet-webapp-runner":
+"@subwallet/webapp-runner@workspace:packages/webapp-runner":
   version: 0.0.0-use.local
-  resolution: "@subwallet/webapp-runner@workspace:packages/subwallet-webapp-runner"
+  resolution: "@subwallet/webapp-runner@workspace:packages/webapp-runner"
   dependencies:
     "@babel/runtime": ^7.20.6
     "@craco/craco": ^7.1.0
@@ -6834,6 +6843,7 @@ __metadata:
     "@polkadot/util-crypto": ^10.2.1
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
+    "@rottitime/react-hook-message-event": ^1.0.10
     "@subwallet/chain-list": ^0.0.21
     "@subwallet/extension-base": ^1.0.1
     "@subwallet/extension-chains": ^1.0.1

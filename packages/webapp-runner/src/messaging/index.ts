@@ -195,9 +195,7 @@ console.log('========port', port);
 
 port.addEventListener('message', (event: MessageEvent) => {
   const data = event.data;
-  console.log('port.addEventListener data', data);
   const handler = handlers[data.id];
-  console.log('port.addEventListener handler', handler);
   if (!handler) {
     console.error(`Unknown response: ${JSON.stringify(data)}`)
 
@@ -1340,6 +1338,7 @@ export async function keyringStateSubscribe(
 export async function keyringChangeMasterPassword(
   request: RequestChangeMasterPassword
 ): Promise<ResponseChangeMasterPassword> {
+  console.log("request", request)
   return sendMessage("pri(keyring.change)", request)
 }
 

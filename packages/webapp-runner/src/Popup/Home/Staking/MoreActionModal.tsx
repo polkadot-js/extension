@@ -1,56 +1,29 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-  ChainStakingMetadata,
-  NominatorMetadata,
-  RequestStakeWithdrawal,
-  StakingItem,
-  StakingRewardItem,
-  StakingType,
-} from "@subwallet/extension-base/background/KoniTypes";
-import {
-  getStakingAvailableActions,
-  getWithdrawalInfo,
-  isActionFromValidator,
-  StakingAction,
-} from "@subwallet/extension-base/koni/api/staking/bonding/utils";
-import { ALL_KEY } from "@subwallet-webapp/constants/common";
-import { usePreCheckReadOnly, useSelector } from "@subwallet-webapp/hooks";
-import useNotification from "@subwallet-webapp/hooks/common/useNotification";
-import {
-  submitStakeClaimReward,
-  submitStakeWithdrawal,
-} from "@subwallet-webapp/messaging";
-import { GlobalToken } from "@subwallet-webapp/themes";
-import { PhosphorIcon, Theme, ThemeProps } from "@subwallet-webapp/types";
-import {
-  BackgroundIcon,
-  ModalContext,
-  SettingItem,
-  SwModal,
-} from "@subwallet/react-ui";
-import CN from "classnames";
-import {
-  ArrowArcLeft,
-  ArrowCircleDown,
-  MinusCircle,
-  PlusCircle,
-  Wallet,
-} from "phosphor-react";
-import React, { useCallback, useContext, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import styled, { useTheme } from "styled-components";
+import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { ALL_KEY } from '@subwallet-webapp/constants';
+import { useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
+import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
+import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ActivityIndicator, BackgroundIcon, ModalContext, SettingItem, SwModal } from '@subwallet/react-ui';
+import CN from 'classnames';
+import { ArrowArcLeft, ArrowCircleDown, MinusCircle, PlusCircle, Wallet } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps & {
   staking?: StakingItem;
   reward?: StakingRewardItem;
   chainStakingMetadata?: ChainStakingMetadata;
   nominatorMetadata?: NominatorMetadata;
-};
+}
 
-export const MORE_ACTION_MODAL = "more-action-modal";
+export const MORE_ACTION_MODAL = 'more-action-modal';
 
 type ActionListType = {
   backgroundIconColor: keyof GlobalToken;
@@ -58,15 +31,7 @@ type ActionListType = {
   label: string;
   action: StakingAction;
   onClick: () => void;
-};
-
-export type StakingDataOption = {
-  staking?: StakingItem;
-  reward?: StakingRewardItem;
-  chainStakingMetadata?: ChainStakingMetadata;
-  nominatorMetadata?: NominatorMetadata;
-  hideTabList?: boolean;
-};
+}
 
 const Component: React.FC<Props> = (props: Props) => {
   const { chainStakingMetadata, className, nominatorMetadata, reward } = props;
@@ -74,69 +39,71 @@ const Component: React.FC<Props> = (props: Props) => {
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const { t } = useTranslation();
-  const notify = useNotification();
 
   const { inactiveModal } = useContext(ModalContext);
 
   const { currentAccount } = useSelector((state) => state.accountState);
 
-  const onCancel = useCallback(() => {
-    inactiveModal(MORE_ACTION_MODAL);
-  }, [inactiveModal]);
+  const [selected, setSelected] = useState<StakingAction | undefined>();
+
+  const onCancel = useCallback(
+    () => {
+      inactiveModal(MORE_ACTION_MODAL);
+    },
+    [inactiveModal]
+  );
+
+  const onDoneTransaction = useCallback((extrinsicHash: string) => {
+    if (chainStakingMetadata) {
+      navigate(`/transaction-done/substrate/${chainStakingMetadata?.chain}/${extrinsicHash}`);
+    }
+  }, [chainStakingMetadata, navigate]);
+
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDoneTransaction);
 
   const handleWithdrawalAction = useCallback(() => {
     if (!nominatorMetadata) {
+      setSelected(undefined);
+
       return;
     }
 
     const unstakingInfo = getWithdrawalInfo(nominatorMetadata);
 
     if (!unstakingInfo) {
+      setSelected(undefined);
+
       return;
     }
 
     const params: RequestStakeWithdrawal = {
       unstakingInfo,
       chain: nominatorMetadata.chain,
-      nominatorMetadata,
+      nominatorMetadata
     };
 
-    if (
-      isActionFromValidator(nominatorMetadata.type, nominatorMetadata.chain)
-    ) {
+    if (isActionFromValidator(nominatorMetadata.type, nominatorMetadata.chain)) {
       params.validatorAddress = unstakingInfo.validatorAddress;
     }
 
     submitStakeWithdrawal(params)
-      .then((result) => {
-        const { errors, extrinsicHash, warnings } = result;
-
-        if (errors.length || warnings.length) {
-          notify({
-            message: t("Error"),
-          });
-          // setErrors(errors.map((e) => e.message));
-          // setWarnings(warnings.map((w) => w.message));
-        } else if (extrinsicHash) {
-          console.log("all good");
-        }
-      })
-      .catch((e: Error) => {
-        notify({
-          message: t("Error"),
-        });
+      .then(onSuccess)
+      .catch(onError)
+      .finally(() => {
+        setSelected(undefined);
       });
-  }, [nominatorMetadata, notify, t]);
+  }, [nominatorMetadata, onError, onSuccess]);
 
   const handleClaimRewardAction = useCallback(() => {
     if (!nominatorMetadata) {
+      setSelected(undefined);
+
       return;
     }
 
     if (nominatorMetadata.type === StakingType.POOLED) {
-      navigate(
-        `/transaction/claim-reward/${nominatorMetadata.type}/${nominatorMetadata.chain}`
-      );
+      setSelected(undefined);
+      navigate(`/transaction/claim-reward/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
 
       return;
     }
@@ -145,117 +112,93 @@ const Component: React.FC<Props> = (props: Props) => {
       address: nominatorMetadata.address,
       chain: nominatorMetadata.chain,
       stakingType: nominatorMetadata.type,
-      unclaimedReward: reward?.unclaimedReward,
+      unclaimedReward: reward?.unclaimedReward
     })
-      .then((result) => {
-        const { errors, extrinsicHash, warnings } = result;
-
-        if (errors.length || warnings.length) {
-          notify({
-            message: t("Error"),
-          });
-          // setErrors(errors.map((e) => e.message));
-          // setWarnings(warnings.map((w) => w.message));
-        } else if (extrinsicHash) {
-          console.log("all good");
-        }
-      })
-      .catch((e: Error) => {
-        notify({
-          message: t("Error"),
-        });
+      .then(onSuccess)
+      .catch(onError)
+      .finally(() => {
+        setSelected(undefined);
       });
-  }, [navigate, nominatorMetadata, notify, reward?.unclaimedReward, t]);
+  }, [navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward]);
 
   const availableActions = useMemo(() => {
     if (!nominatorMetadata) {
       return [];
     }
 
-    return getStakingAvailableActions(nominatorMetadata);
+    return getStakingAvailableActionsByNominator(nominatorMetadata);
   }, [nominatorMetadata]);
 
-  const onNavigate = useCallback(
-    (url: string) => {
-      return () => {
-        navigate(url);
-      };
-    },
-    [navigate]
-  );
+  const onNavigate = useCallback((url: string) => {
+    return () => {
+      setSelected(undefined);
+      navigate(url);
+    };
+  }, [navigate]);
 
   const actionList: ActionListType[] = useMemo((): ActionListType[] => {
-    const isPool = chainStakingMetadata?.type === StakingType.POOLED;
-
-    const result: ActionListType[] = [
-      {
-        action: StakingAction.STAKE,
-        backgroundIconColor: "green-6",
-        icon: PlusCircle,
-        label: "Stake more",
-        onClick: onNavigate(
-          `/transaction/stake/${chainStakingMetadata?.type || ALL_KEY}/${
-            chainStakingMetadata?.chain || ALL_KEY
-          }`
-        ),
-      },
-      {
-        action: StakingAction.UNSTAKE,
-        backgroundIconColor: "magenta-6",
-        icon: MinusCircle,
-        label: "Unstake funds",
-        onClick: onNavigate(
-          `/transaction/unstake/${chainStakingMetadata?.type || ALL_KEY}/${
-            chainStakingMetadata?.chain || ALL_KEY
-          }`
-        ),
-      },
-      {
-        action: StakingAction.WITHDRAW,
-        backgroundIconColor: "geekblue-6",
-        icon: ArrowCircleDown,
-        label: "Withdraw",
-        onClick: handleWithdrawalAction,
-      },
-      {
-        action: StakingAction.CLAIM_REWARD,
-        backgroundIconColor: "green-7",
-        icon: Wallet,
-        label: "Claim rewards",
-        onClick: handleClaimRewardAction,
-      },
-      // {
-      //   backgroundIconColor: 'blue-7',
-      //   icon: Alarm,
-      //   label: 'Compound',
-      //   value: '/transaction/compound'
-      // }
-    ];
-
-    if (!isPool) {
-      result.push({
-        action: StakingAction.CANCEL_UNSTAKE,
-        backgroundIconColor: "purple-8",
-        icon: ArrowArcLeft,
-        label: "Cancel unstake",
-        onClick: onNavigate(
-          `/transaction/cancel-unstake/${
-            chainStakingMetadata?.type || ALL_KEY
-          }/${chainStakingMetadata?.chain || ALL_KEY}`
-        ),
-      });
+    if (!chainStakingMetadata) {
+      return [];
     }
 
-    return result;
-  }, [
-    chainStakingMetadata?.chain,
-    chainStakingMetadata?.type,
-    handleClaimRewardAction,
-    handleWithdrawalAction,
-    onNavigate,
-  ]);
+    const actionListByChain = getStakingAvailableActionsByChain(chainStakingMetadata.chain, chainStakingMetadata.type);
 
-  const onClickItem = usePreCheckReadOnly(currentAccount?.address);
+    return actionListByChain.map((action) => {
+      if (action === StakingAction.UNSTAKE) {
+        return {
+          action: StakingAction.UNSTAKE,
+          backgroundIconColor: 'magenta-6',
+          icon: MinusCircle,
+          label: 'Unstake funds',
+          onClick: onNavigate(`/transaction/unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
+        };
+      } else if (action === StakingAction.WITHDRAW) {
+        return {
+          action: StakingAction.WITHDRAW,
+          backgroundIconColor: 'geekblue-6',
+          icon: ArrowCircleDown,
+          label: 'Withdraw',
+          onClick: handleWithdrawalAction
+        };
+      } else if (action === StakingAction.CLAIM_REWARD) {
+        return {
+          action: StakingAction.CLAIM_REWARD,
+          backgroundIconColor: 'green-7',
+          icon: Wallet,
+          label: 'Claim rewards',
+          onClick: handleClaimRewardAction
+        };
+      } else if (action === StakingAction.CANCEL_UNSTAKE) {
+        return {
+          action: StakingAction.CANCEL_UNSTAKE,
+          backgroundIconColor: 'purple-8',
+          icon: ArrowArcLeft,
+          label: 'Cancel unstake',
+          onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
+        };
+      }
+
+      return {
+        action: StakingAction.STAKE,
+        backgroundIconColor: 'green-6',
+        icon: PlusCircle,
+        label: 'Stake more',
+        onClick: onNavigate(`/transaction/stake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
+      };
+    });
+  }, [chainStakingMetadata, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);
+
+  const onPreCheck = usePreCheckReadOnly(currentAccount?.address);
+  const onClickItem = useCallback((action: StakingAction, onClick: () => void) => {
+    const _onClick = () => {
+      setSelected(action);
+      onClick();
+    };
+
+    return () => {
+      onPreCheck(_onClick)();
+    };
+  }, [onPreCheck]);
 
   return (
     <SwModal
@@ -263,57 +206,73 @@ const Component: React.FC<Props> = (props: Props) => {
       closable={true}
       id={MORE_ACTION_MODAL}
       maskClosable={true}
-      onCancel={onCancel}
-      title={t("Actions")}
+      onCancel={!selected ? onCancel : undefined}
+      title={t('Actions')}
     >
-      {actionList.map((item) => (
-        <SettingItem
-          className={CN("action-more-item", {
-            disabled: !availableActions.includes(item.action),
-          })}
-          key={item.label}
-          leftItemIcon={
-            <BackgroundIcon
-              backgroundColor={token[item.backgroundIconColor] as string}
-              phosphorIcon={item.icon}
-              size="sm"
-              weight="fill"
-            />
-          }
-          name={item.label}
-          onPressItem={
-            !availableActions.includes(item.action)
-              ? undefined
-              : onClickItem(item.onClick)
-          }
-        />
-      ))}
+      {actionList.map((item) => {
+        const actionDisable = !availableActions.includes(item.action);
+        const hasAnAction = !!selected;
+        const isSelected = item.action === selected;
+        const anotherDisable = hasAnAction && !isSelected;
+        const disabled = actionDisable || anotherDisable;
+
+        return (
+          <SettingItem
+            className={CN(
+              'action-more-item',
+              {
+                disabled: disabled
+              }
+            )}
+            key={item.label}
+            leftItemIcon={(
+              <BackgroundIcon
+                backgroundColor={token[item.backgroundIconColor] as string}
+                phosphorIcon={item.icon}
+                size='sm'
+                weight='fill'
+              />
+            )}
+            name={item.label}
+            onPressItem={disabled ? undefined : onClickItem(item.action, item.onClick)}
+            rightItem={
+              isSelected && (
+                <div className='loading-icon'>
+                  <ActivityIndicator />
+                </div>
+              )
+            }
+          />
+        );
+      })}
     </SwModal>
   );
 };
 
-const MoreActionModal = styled(Component)<Props>(
-  ({ theme: { token } }: Props) => {
-    return {
-      ".action-more-item:not(:last-child)": {
-        marginBottom: token.marginXS,
+const MoreActionModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+  return {
+    '.action-more-item:not(:last-child)': {
+      marginBottom: token.marginXS
+    },
+
+    '.ant-web3-block-right-item': {
+      marginRight: 0
+    },
+
+    '.disabled': {
+      cursor: 'not-allowed',
+      opacity: token.opacityDisable,
+
+      '.ant-web3-block': {
+        cursor: 'not-allowed'
       },
 
-      ".disabled": {
-        cursor: "not-allowed",
-        opacity: token.opacityDisable,
-
-        ".ant-web3-block": {
-          cursor: "not-allowed",
-        },
-
-        ".ant-web3-block:hover": {
-          cursor: "not-allowed",
-          background: token.colorBgSecondary,
-        },
-      },
-    };
-  }
-);
+      '.ant-web3-block:hover': {
+        cursor: 'not-allowed',
+        background: token.colorBgSecondary
+      }
+    }
+  };
+});
 
 export default MoreActionModal;

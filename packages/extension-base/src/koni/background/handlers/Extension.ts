@@ -154,6 +154,7 @@ export default class KoniExtension {
 
   // FIXME This looks very much like what we have in Tabs
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
+    console.log('------accountsSubscribe', accountsSubscribe);
     const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
       cb(transformAccounts(accounts))

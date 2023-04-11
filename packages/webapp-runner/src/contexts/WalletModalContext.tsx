@@ -9,94 +9,124 @@ import {
   NewAccountModal,
   RequestCameraAccessModal,
   RequestCreatePasswordModal,
-} from "@subwallet-webapp/components";
-import { CustomizeModal } from "@subwallet-webapp/components/Modal/Customize/CustomizeModal";
-import Confirmations from "@subwallet-webapp/Popup/Confirmations";
-import { RootState } from "@subwallet-webapp/stores";
-import { ModalContext, SwModal, useExcludeModal } from "@subwallet/react-ui";
-import CN from "classnames";
-import React, { useCallback, useContext, useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+} from "@subwallet-webapp/components"
+import { CustomizeModal } from "@subwallet-webapp/components/Modal/Customize/CustomizeModal"
+import Confirmations from "@subwallet-webapp/Popup/Confirmations"
+import { RootState } from "@subwallet-webapp/stores"
+import { ModalContext, SwModal, useExcludeModal } from "@subwallet/react-ui"
+import CN from "classnames"
+import React, { useCallback, useContext, useEffect } from "react"
+import { useSelector } from "react-redux"
+import { useSearchParams } from "react-router-dom"
+import styled from "styled-components"
+import { ScreenContext, Screens } from "./ScreenContext"
+import { ThemeProps } from "../types"
 
 interface Props {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export const PREDEFINED_MODAL_NAMES = [
   "debugger",
   "transaction",
   "confirmations",
-];
-type PredefinedModalName = (typeof PREDEFINED_MODAL_NAMES)[number];
+]
+type PredefinedModalName = (typeof PREDEFINED_MODAL_NAMES)[number]
 
 export const usePredefinedModal = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams()
   const openPModal = useCallback(
     (name: PredefinedModalName | null) => {
       setSearchParams((prev) => {
         if (name) {
-          prev.set("popup", name);
+          prev.set("popup", name)
         } else {
-          prev.delete("popup");
+          prev.delete("popup")
         }
 
-        return prev;
-      });
+        return prev
+      })
     },
     [setSearchParams]
-  );
+  )
 
   const isOpenPModal = useCallback(
     (popupName?: string) => {
-      const currentPopup = searchParams.get("popup");
+      const currentPopup = searchParams.get("popup")
 
       if (popupName) {
-        return currentPopup === popupName;
+        return currentPopup === popupName
       } else {
-        return !!currentPopup;
+        return !!currentPopup
       }
     },
     [searchParams]
-  );
+  )
 
-  return { openPModal, isOpenPModal };
-};
+  return { openPModal, isOpenPModal }
+}
+
+const ModalWrapper = styled.div<ThemeProps>(
+  ({ theme: { token } }: ThemeProps) => {
+    return {
+      height: "100%",
+
+      ".ant-sw-modal-wrap": {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+
+        ".ant-sw-modal": {
+          position: "relative",
+
+          ".ant-sw-modal-content": {
+            borderRadius: 8,
+            paddingBottom: 0,
+          },
+        },
+      },
+    }
+  }
+)
 
 export const WalletModalContext = ({ children }: Props) => {
   const { activeModal, hasActiveModal, inactiveModals } =
-    useContext(ModalContext);
-  const [searchParams, setSearchParams] = useSearchParams();
+    useContext(ModalContext)
+  const { screenType } = useContext(ScreenContext)
+  const [searchParams, setSearchParams] = useSearchParams()
   const { hasConfirmations } = useSelector(
     (state: RootState) => state.requestState
-  );
+  )
 
-  useExcludeModal("confirmations");
+  useExcludeModal("confirmations")
 
   useEffect(() => {
-    const confirmID = searchParams.get("popup");
+    const confirmID = searchParams.get("popup")
 
     // Auto open confirm modal with method modalContext.activeModal else auto close all modal
     if (confirmID) {
-      PREDEFINED_MODAL_NAMES.includes(confirmID) && activeModal(confirmID);
+      PREDEFINED_MODAL_NAMES.includes(confirmID) && activeModal(confirmID)
     } else {
-      inactiveModals(PREDEFINED_MODAL_NAMES);
+      inactiveModals(PREDEFINED_MODAL_NAMES)
     }
-  }, [activeModal, inactiveModals, searchParams]);
+  }, [activeModal, inactiveModals, searchParams])
 
   const onCloseModal = useCallback(() => {
     setSearchParams((prev) => {
-      prev.delete("popup");
+      prev.delete("popup")
 
-      return prev;
-    });
-  }, [setSearchParams]);
+      return prev
+    })
+  }, [setSearchParams])
 
   return (
-    <>
+    <ModalWrapper>
       <div
         id="popup-container"
         style={{ zIndex: hasActiveModal ? undefined : -1 }}
+        className={CN({
+          "desktop-modal": screenType === Screens.DESKTOP,
+        })}
       />
       {children}
       <SwModal
@@ -117,6 +147,6 @@ export const WalletModalContext = ({ children }: Props) => {
       <RequestCreatePasswordModal />
       <RequestCameraAccessModal />
       <CustomizeModal />
-    </>
-  );
-};
+    </ModalWrapper>
+  )
+}

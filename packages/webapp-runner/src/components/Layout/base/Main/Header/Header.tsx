@@ -4,6 +4,7 @@ import { ThemeProps } from "@subwallet-webapp/types/index"
 import { BalanceItem, Button, Icon, Typography } from "@subwallet/react-ui"
 import CN from "classnames"
 import { FadersHorizontal } from "phosphor-react"
+import Balance from "./Balance"
 
 export type Props = ThemeProps
 
@@ -52,15 +53,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
         </div>
       </div>
 
-      <BalanceItem
-        name="Name props"
-        price={1000}
-        convertedBalanceValue={100}
-        balanceValue={100.222}
-        decimal={2}
-      />
-
-      <NumberItem value={1000.200546} suffix="$" decimals={3} />
+      <Balance />
     </div>
   )
 }

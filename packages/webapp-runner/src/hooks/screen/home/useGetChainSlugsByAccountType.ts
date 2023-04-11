@@ -20,7 +20,7 @@ function getChainsAccountType(
 ): string[] {
   const result: string[] = [];
 
-  Object.keys(chainInfoMap).forEach((chain) => {
+  Object.keys(chainInfoMap || {}).forEach((chain) => {
     if (accountNetwork) {
       if (chain === accountNetwork) {
         result.push(chain);

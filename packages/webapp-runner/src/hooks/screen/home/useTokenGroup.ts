@@ -108,7 +108,7 @@ export default function useTokenGroup(
   const filteredAssetRegistryMap = useMemo(() => {
     const filteredAssetRegistryMap: Record<string, _ChainAsset> = {};
 
-    Object.values(assetRegistryMap).forEach((chainAsset) => {
+    Object.values(assetRegistryMap || {}).forEach((chainAsset) => {
       if (isTokenAvailable(chainAsset, assetSettingMap, chainStateMap, true)) {
         filteredAssetRegistryMap[chainAsset.slug] = chainAsset;
       }

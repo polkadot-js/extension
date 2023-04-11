@@ -1,21 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AlertBox, Layout, PageWrapper } from "@subwallet-webapp/components";
-import InfoIcon from "@subwallet-webapp/components/Icon/InfoIcon";
-import { REQUEST_CREATE_PASSWORD_MODAL } from "@subwallet-webapp/constants/modal";
-import { DEFAULT_ROUTER_PATH } from "@subwallet-webapp/constants/router";
-import useTranslation from "@subwallet-webapp/hooks/common/useTranslation";
-import useFocusFormItem from "@subwallet-webapp/hooks/form/useFocusFormItem";
-import { keyringChangeMasterPassword } from "@subwallet-webapp/messaging";
-import { RootState } from "@subwallet-webapp/stores";
-import { ThemeProps } from "@subwallet-webapp/types";
-import { isNoAccount } from "@subwallet-webapp/util/account/account";
-import { simpleCheckForm } from "@subwallet-webapp/util/form/form";
+import { AlertBox, Layout, PageWrapper } from "@subwallet-webapp/components"
+import InfoIcon from "@subwallet-webapp/components/Icon/InfoIcon"
+import { REQUEST_CREATE_PASSWORD_MODAL } from "@subwallet-webapp/constants/modal"
+import { DEFAULT_ROUTER_PATH } from "@subwallet-webapp/constants/router"
+import useTranslation from "@subwallet-webapp/hooks/common/useTranslation"
+import useFocusFormItem from "@subwallet-webapp/hooks/form/useFocusFormItem"
+import { keyringChangeMasterPassword } from "@subwallet-webapp/messaging"
+import { RootState } from "@subwallet-webapp/stores"
+import { ThemeProps } from "@subwallet-webapp/types"
+import { isNoAccount } from "@subwallet-webapp/util/account/account"
+import { simpleCheckForm } from "@subwallet-webapp/util/form/form"
 import {
   renderBaseConfirmPasswordRules,
   renderBasePasswordRules,
-} from "@subwallet-webapp/util/form/validators/password";
+} from "@subwallet-webapp/util/form/validators/password"
 import {
   Form,
   Icon,
@@ -23,16 +23,16 @@ import {
   ModalContext,
   PageIcon,
   SwModal,
-} from "@subwallet/react-ui";
-import CN from "classnames";
-import { CaretLeft, CheckCircle, ShieldPlus } from "phosphor-react";
-import { Callbacks, FieldData } from "rc-field-form/lib/interface";
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
-import styled from "styled-components";
+} from "@subwallet/react-ui"
+import CN from "classnames"
+import { CaretLeft, CheckCircle, ShieldPlus } from "phosphor-react"
+import { Callbacks, FieldData } from "rc-field-form/lib/interface"
+import React, { useCallback, useContext, useEffect, useState } from "react"
+import { useSelector } from "react-redux"
+import { useLocation, useNavigate } from "react-router-dom"
+import styled from "styled-components"
 
-type Props = ThemeProps;
+type Props = ThemeProps
 
 enum FormFieldName {
   PASSWORD = "password",
@@ -40,110 +40,110 @@ enum FormFieldName {
 }
 
 interface CreatePasswordFormState {
-  [FormFieldName.PASSWORD]: string;
-  [FormFieldName.CONFIRM_PASSWORD]: string;
+  [FormFieldName.PASSWORD]: string
+  [FormFieldName.CONFIRM_PASSWORD]: string
 }
 
-const FooterIcon = <Icon phosphorIcon={CheckCircle} weight="fill" />;
+const FooterIcon = <Icon phosphorIcon={CheckCircle} weight="fill" />
 
-const passwordRules = renderBasePasswordRules("Password");
+const passwordRules = renderBasePasswordRules("Password")
 const confirmPasswordRules = renderBaseConfirmPasswordRules(
   FormFieldName.PASSWORD
-);
+)
 
-const modalId = "create-password-instruction-modal";
-const formName = "create-password-form";
+const modalId = "create-password-instruction-modal"
+const formName = "create-password-form"
 
 const Component: React.FC<Props> = ({ className }: Props) => {
-  const { t } = useTranslation();
-  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
-  const navigate = useNavigate();
+  const { t } = useTranslation()
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext)
+  const navigate = useNavigate()
   const previousInfo = useLocation().state as {
-    prevPathname: string;
-    prevState: any;
-  };
+    prevPathname: string
+    prevState: any
+  }
 
-  const { accounts } = useSelector((state: RootState) => state.accountState);
+  const { accounts } = useSelector((state: RootState) => state.accountState)
 
-  const [noAccount] = useState(isNoAccount(accounts));
+  const [noAccount] = useState(isNoAccount(accounts))
 
-  const [form] = Form.useForm<CreatePasswordFormState>();
-  const [isDisabled, setIsDisable] = useState(true);
-  const [submitError, setSubmitError] = useState("");
+  const [form] = Form.useForm<CreatePasswordFormState>()
+  const [isDisabled, setIsDisable] = useState(true)
+  const [submitError, setSubmitError] = useState("")
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
 
   const onComplete = useCallback(() => {
     if (previousInfo?.prevPathname) {
       navigate(previousInfo.prevPathname, {
         state: previousInfo.prevState as unknown,
-      });
+      })
     } else {
-      navigate(DEFAULT_ROUTER_PATH);
+      navigate(DEFAULT_ROUTER_PATH)
     }
-  }, [navigate, previousInfo?.prevPathname, previousInfo?.prevState]);
+  }, [navigate, previousInfo?.prevPathname, previousInfo?.prevState])
 
   const onSubmit: Callbacks<CreatePasswordFormState>["onFinish"] = useCallback(
     (values: CreatePasswordFormState) => {
-      const password = values[FormFieldName.PASSWORD];
+      const password = values[FormFieldName.PASSWORD]
 
       if (password) {
-        setLoading(true);
+        setLoading(true)
         keyringChangeMasterPassword({
           createNew: true,
           newPassword: password,
         })
           .then((res) => {
             if (!res.status) {
-              setSubmitError(res.errors[0]);
+              setSubmitError(res.errors[0])
             } else {
-              onComplete();
+              onComplete()
             }
           })
           .catch((e: Error) => {
-            setSubmitError(e.message);
+            setSubmitError(e.message)
           })
           .finally(() => {
-            setLoading(false);
-          });
+            setLoading(false)
+          })
       }
     },
     [onComplete]
-  );
+  )
 
   const onUpdate: Callbacks<CreatePasswordFormState>["onFieldsChange"] =
     useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
-      const { empty, error } = simpleCheckForm(allFields);
+      const { empty, error } = simpleCheckForm(allFields)
 
-      setSubmitError("");
-      setIsDisable(error || empty);
-    }, []);
+      setSubmitError("")
+      setIsDisable(error || empty)
+    }, [])
 
   const onChangePassword = useCallback(() => {
     form.setFields([
       { name: FormFieldName.CONFIRM_PASSWORD, value: "", errors: [] },
-    ]);
-  }, [form]);
+    ])
+  }, [form])
 
   const openModal = useCallback(() => {
-    activeModal(modalId);
-  }, [activeModal]);
+    activeModal(modalId)
+  }, [activeModal])
 
   const closeModal = useCallback(() => {
-    inactiveModal(modalId);
-  }, [inactiveModal]);
+    inactiveModal(modalId)
+  }, [inactiveModal])
 
   useEffect(() => {
     if (!noAccount) {
-      activeModal(REQUEST_CREATE_PASSWORD_MODAL);
+      activeModal(REQUEST_CREATE_PASSWORD_MODAL)
     }
-  }, [activeModal, noAccount]);
+  }, [activeModal, noAccount])
 
   useFocusFormItem(
     form,
     FormFieldName.PASSWORD,
     !checkActive(REQUEST_CREATE_PASSWORD_MODAL)
-  );
+  )
 
   return (
     <PageWrapper className={CN(className)}>
@@ -241,8 +241,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         </div>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
-  );
-};
+  )
+}
 
 const CreatePassword = styled(Component)<Props>(
   ({ theme: { token } }: Props) => {
@@ -273,8 +273,8 @@ const CreatePassword = styled(Component)<Props>(
         flexDirection: "column",
         gap: token.sizeXS,
       },
-    };
+    }
   }
-);
+)
 
-export default CreatePassword;
+export default CreatePassword

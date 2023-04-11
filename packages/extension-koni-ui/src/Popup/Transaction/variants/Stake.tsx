@@ -437,7 +437,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 statusHelpAsTooltip={true}
               >
                 <AmountInput
-                  decimals={decimals}
+                  decimals={(chain && from) ? decimals : -1}
                   maxValue={maxValue}
                 />
               </Form.Item>

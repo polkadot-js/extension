@@ -4,14 +4,15 @@
 import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, SwModal } from '@subwallet/react-ui';
-import { SortAscending } from 'phosphor-react';
+import { SortAscending, SortDescending } from 'phosphor-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 export type OptionType = {
-  label: string,
-  value: string,
+  label: string;
+  value: string;
+  desc?: boolean;
 };
 
 type Props = ThemeProps & {
@@ -44,7 +45,7 @@ function Component (props: Props): React.ReactElement<Props> {
               label={option.label}
               leftItemIcon={
                 <BackgroundIcon
-                  phosphorIcon={SortAscending}
+                  phosphorIcon={ option.desc ? SortDescending : SortAscending}
                   size={'sm'}
                 />
               }

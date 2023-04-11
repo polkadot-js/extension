@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -13,12 +13,13 @@ import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  activeNominators?: SwNumberProps['value'],
-  estimatedEarning?: SwNumberProps['value'],
-  inflation?: SwNumberProps['value'],
-  minimumActive: AmountData,
-  unstakingPeriod?: number,
-  maxValidatorPerNominator: SwNumberProps['value']
+  activeNominators?: SwNumberProps['value'];
+  estimatedEarning?: SwNumberProps['value'];
+  inflation?: SwNumberProps['value'];
+  minimumActive: AmountData;
+  unstakingPeriod?: number;
+  maxValidatorPerNominator: SwNumberProps['value'];
+  stakingType: StakingType;
 };
 
 export const StakingNetworkDetailModalId = 'stakingNetworkDetailModalId';
@@ -29,6 +30,7 @@ function Component ({ activeNominators,
   inflation,
   maxValidatorPerNominator,
   minimumActive,
+  stakingType,
   unstakingPeriod }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
@@ -52,24 +54,35 @@ function Component ({ activeNominators,
         spaceSize={'xs'}
         valueColorScheme={'light'}
       >
-        <MetaInfo.Number
-          label={t('Max nomination')}
-          value={maxValidatorPerNominator}
-          valueColorSchema={'even-odd'}
-        />
+        {
+          stakingType === StakingType.NOMINATED && (
+            <>
+              <MetaInfo.Number
+                label={t('Max nomination')}
+                value={maxValidatorPerNominator}
+                valueColorSchema={'even-odd'}
+              />
 
-        {activeNominators && <MetaInfo.Default label={t('Total nominators')}>
-          <div className={'__active-nominators-value'}>
-            <Number
-              className={'__current-nominator-count'}
-              decimal={0}
-              decimalOpacity={1}
-              intOpacity={1}
-              unitOpacity={1}
-              value={activeNominators}
-            />
-          </div>
-        </MetaInfo.Default>}
+              {
+                activeNominators &&
+                (
+                  <MetaInfo.Default label={t('Total nominators')}>
+                    <div className={'__active-nominators-value'}>
+                      <Number
+                        className={'__current-nominator-count'}
+                        decimal={0}
+                        decimalOpacity={1}
+                        intOpacity={1}
+                        unitOpacity={1}
+                        value={activeNominators}
+                      />
+                    </div>
+                  </MetaInfo.Default>
+                )
+              }
+            </>
+          )
+        }
 
         {!!estimatedEarning && !!inflation &&
           <MetaInfo.Default
@@ -138,6 +151,10 @@ export const StakingNetworkDetailModal = styled(Component)<Props>(({ theme: { to
 
     '.__total-nominator-count': {
       color: token.colorTextLight4
+    },
+
+    '.-to-right': {
+      textAlign: 'right'
     }
   });
 });

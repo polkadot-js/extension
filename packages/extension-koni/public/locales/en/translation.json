@@ -1015,5 +1015,7 @@
   "Claim reward confirm": "",
   "Cancel unstake confirm": "",
   "Transaction confirm": "",
-  "Withdraw amount": ""
+  "Withdraw amount": "",
+  "Reloading": "",
+  "Invalid contract for the selected chain": ""
 }

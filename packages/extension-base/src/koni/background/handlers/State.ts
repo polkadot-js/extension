@@ -85,7 +85,6 @@ export default class KoniState {
   private readonly unsubscriptionMap: Record<string, () => void> = {};
   private readonly accountRefStore = new AccountRefStore();
   private externalRequest: Record<string, ExternalRequestPromise> = {};
-  private serviceInfoSubject = new Subject<ServiceInfo>();
   private balanceMap: Record<string, BalanceItem> = {};
   private balanceSubject = new Subject<BalanceJson>();
 
@@ -585,7 +584,7 @@ export default class KoniState {
     if (address === ALL_ACCOUNT_KEY) {
       const pairs = keyring.getAccounts();
       const pair = pairs[0];
-      const pairGenesisHash = pair.meta.genesisHash as string;
+      const pairGenesisHash = pair?.meta.genesisHash as string;
 
       if (pairs.length > 1 || !pair) {
         result.allGenesisHash = currentGenesisHash || undefined;
@@ -926,10 +925,6 @@ export default class KoniState {
     return this.crowdloanSubject;
   }
 
-  public getAllPriceIds () {
-    return this.chainService.getAllPriceIds();
-  }
-
   public getSmartContractNfts () {
     return this.chainService.getSmartContractNfts();
   }
@@ -1001,7 +996,9 @@ export default class KoniState {
 
     if (_isAssetFungibleToken(data)) {
       await this.chainService.updateAssetSetting(tokenSlug, { visible: true });
-      this.eventService.emit('asset.update', tokenSlug);
+      this.eventService.emit('asset.updateState', tokenSlug);
+    } else {
+      this.eventService.emit('asset.updateState', tokenSlug);
     }
   }
 
@@ -1032,6 +1029,7 @@ export default class KoniState {
 
     if (newNativeTokenSlug) {
       await this.chainService.updateAssetSetting(newNativeTokenSlug, { visible: true });
+      this.eventService.emit('asset.updateState', newNativeTokenSlug);
     }
 
     return true;
@@ -1091,16 +1089,6 @@ export default class KoniState {
     return this.chainService.resetChainInfoMap(defaultChains);
   }
 
-  public updateNetworkStatus (networkKey: string, status: _ChainConnectionStatus) {
-    const chainState = this.chainService.getChainStateByKey(networkKey);
-
-    if (chainState.connectionStatus === status) {
-      return;
-    }
-
-    this.chainService.setChainConnectionStatus(networkKey, status);
-  }
-
   public getSubstrateApiMap () {
     return this.chainService.getSubstrateApiMap();
   }
@@ -1132,10 +1120,6 @@ export default class KoniState {
 
   public refreshWeb3Api (key: string) {
     this.chainService.refreshEvmApi(key);
-  }
-
-  public subscribeServiceInfo () {
-    return this.serviceInfoSubject;
   }
 
   public getServiceInfo (): ServiceInfo {
@@ -1700,5 +1684,13 @@ export default class KoniState {
       // Remove Staking Data
       stores.staking.removeAllByAddress(address).catch(console.error);
     });
+  }
+
+  public async reloadNft () {
+    return await this.cron.reloadNft();
+  }
+
+  public async reloadStaking () {
+    return await this.cron.reloadStaking();
   }
 }

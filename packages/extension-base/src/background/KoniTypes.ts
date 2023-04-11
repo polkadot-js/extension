@@ -364,8 +364,8 @@ export interface AccountsWithCurrentAddress {
   accounts: AccountJson[];
   currentAddress?: string;
   currentGenesisHash?: string | null;
-  isShowBalance?: boolean;
-  allAccountLogo?: string;
+  isShowBalance?: boolean; // Deprecated and move to setting
+  allAccountLogo?: string; // Deprecated and move to setting
 }
 
 export interface OptionInputAddress {
@@ -1770,6 +1770,10 @@ export interface Notification {
 
 export type NotificationParams = Omit<Notification, 'id'>;
 
+export interface CronReloadRequest {
+  data: 'nft' | 'staking'
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1865,10 +1869,9 @@ export interface KoniRequestSignatures {
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, AccountsWithCurrentAddress, AccountsWithCurrentAddress];
   'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
   'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
-  'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(accounts.get.meta)': [RequestAccountMeta, ResponseAccountMeta];
   'pri(accounts.updateCurrentAddress)': [string, boolean];
-  'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
+  'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, CurrentAccountInfo];
 
   // Settings
   'pri(settings.changeBalancesVisibility)': [null, boolean, UiSettings];
@@ -1949,6 +1952,9 @@ export interface KoniRequestSignatures {
 
   // Notification
   'pri(notifications.subscribe)': [null, Notification[], Notification[]];
+
+  // Private
+  'pri(cron.reload)': [CronReloadRequest, boolean];
 
   // Mobile
   'mobile(ping)': [null, string];

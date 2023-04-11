@@ -356,10 +356,14 @@ export function getStakingAvailableActionsByNominator (nominatorMetadata: Nomina
   if (nominatorMetadata.activeStake && bnActiveStake.gt(BN_ZERO)) {
     result.push(StakingAction.UNSTAKE);
 
-    const isChainAllowClaimReward = _STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain) || _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
+    const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
+    const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain);
     const bnUnclaimedReward = new BN(unclaimedReward || '0');
 
-    if ((nominatorMetadata.type === StakingType.POOLED || isChainAllowClaimReward) && bnUnclaimedReward.gt(BN_ZERO)) {
+    if (
+      ((nominatorMetadata.type === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) ||
+      isAstarNetwork
+    ) {
       result.push(StakingAction.CLAIM_REWARD);
     }
   }

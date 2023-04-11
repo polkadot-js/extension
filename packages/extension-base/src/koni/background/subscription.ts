@@ -85,30 +85,28 @@ export class KoniSubscription {
       this.subscribeStakingOnChain(currentAddress, this.state.getSubstrateApiMap());
     }
 
-    if (!this.eventHandler) {
-      const reloadEvents: EventType[] = ['account.add', 'account.remove', 'account.updateCurrent', 'chain.add', 'chain.update', 'chain.enable', 'asset.update', 'asset.enable', 'transaction.done', 'transaction.failed'];
+    const reloadEvents: EventType[] = ['account.add', 'account.remove', 'account.updateCurrent', 'chain.add', 'chain.updateState', 'asset.updateState', 'transaction.done', 'transaction.failed'];
 
-      this.eventHandler = (events, eventTypes) => {
-        const serviceInfo = this.state.getServiceInfo();
-        const needReload = eventTypes.some((eT) => reloadEvents.includes(eT));
+    this.eventHandler = (events, eventTypes) => {
+      const serviceInfo = this.state.getServiceInfo();
+      const needReload = eventTypes.some((eT) => reloadEvents.includes(eT));
 
-        if (!needReload) {
-          return;
-        }
+      if (!needReload) {
+        return;
+      }
 
-        this.logger.log('ServiceInfo updated, restarting...');
-        const address = serviceInfo.currentAccountInfo?.address;
+      this.logger.log('ServiceInfo updated, restarting...');
+      const address = serviceInfo.currentAccountInfo?.address;
 
-        if (!address) {
-          return;
-        }
+      if (!address) {
+        return;
+      }
 
-        this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
-        this.subscribeStakingOnChain(address, serviceInfo.chainApiMap.substrate);
-      };
+      this.subscribeBalancesAndCrowdloans(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
+      this.subscribeStakingOnChain(address, serviceInfo.chainApiMap.substrate);
+    };
 
-      this.state.eventService.onLazy(this.eventHandler);
-    }
+    this.state.eventService.onLazy(this.eventHandler);
   }
 
   stop () {
@@ -116,6 +114,7 @@ export class KoniSubscription {
 
     if (this.eventHandler) {
       this.state.eventService.offLazy(this.eventHandler);
+      this.eventHandler = undefined;
     }
 
     this.stopAllSubscription();
@@ -320,14 +319,24 @@ export class KoniSubscription {
   }
 
   async fetchChainStakingMetadata (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
-    await Promise.all(Object.values(chainInfoMap).map(async (chainInfo) => {
+    const filteredChainInfoMap: Record<string, _ChainInfo> = {};
+
+    Object.values(chainInfoMap).forEach((chainInfo) => {
       const chainState = chainStateMap[chainInfo.slug];
 
       if (chainState?.active && _isChainSupportSubstrateStaking(chainInfo)) {
-        const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
-
-        this.state.updateChainStakingMetadata(chainStakingMetadata);
+        filteredChainInfoMap[chainInfo.slug] = chainInfo;
       }
+    });
+
+    if (Object.values(filteredChainInfoMap).length === 0) {
+      return;
+    }
+
+    await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
+      const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
+
+      this.state.updateChainStakingMetadata(chainStakingMetadata);
     }));
   }
 
@@ -353,8 +362,6 @@ export class KoniSubscription {
 
       await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
         if (isEvmAddress && !_isChainEvmCompatible(chainInfo)) {
-          console.log('got here', chainInfo.slug);
-
           return;
         }
 

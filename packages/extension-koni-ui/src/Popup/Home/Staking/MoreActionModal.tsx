@@ -108,7 +108,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
-    if (nominatorMetadata.type === StakingType.POOLED) {
+    if (nominatorMetadata.type === StakingType.POOLED || isAllAccount) {
       setSelected(undefined);
       navigate(`/transaction/claim-reward/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
 
@@ -126,7 +126,7 @@ const Component: React.FC<Props> = (props: Props) => {
       .finally(() => {
         setSelected(undefined);
       });
-  }, [navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward]);
+  }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward]);
 
   const availableActions = useMemo(() => {
     if (!nominatorMetadata) {

@@ -7,7 +7,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AmountData, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BondingOptionParams, BrowserConfirmationType, ChainType, CreateDeriveAccountInfo, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestChangeMasterPassword, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AmountData, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BondingOptionParams, BrowserConfirmationType, ChainType, CreateDeriveAccountInfo, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestChangeMasterPassword, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeCancel, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApproveSignature, RequestSigningCancel, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseType, SigningRequest } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, DEFAULT_TIME_AUTO_LOCK } from '@subwallet/extension-base/constants';
@@ -396,50 +396,44 @@ export default class KoniExtension {
 
   private async accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): Promise<AccountsWithCurrentAddress> {
     const cb = createSubscription<'pri(accounts.subscribeWithCurrentAddress)'>(id, port);
+    const keyringService = this.#koniState.keyringService;
 
-    return await new Promise<AccountsWithCurrentAddress>((resolve): void => {
-      const subscription = accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {
-        const transformedAccounts = transformAccounts(storedAccounts);
+    await this.#koniState.eventService.waitAccountReady;
 
-        const accounts: AccountJson[] = transformedAccounts && transformedAccounts.length
-          ? [
-            {
-              ...ACCOUNT_ALL_JSON
-            },
-            ...transformedAccounts
-          ]
-          : [];
+    const currentAccount = keyringService.currentAccount;
+    const accountsSubject = keyring.accounts.subject;
+    const transformedAccounts = transformAccounts(accountsSubject.value);
+    const responseData: AccountsWithCurrentAddress = {
+      accounts: transformedAccounts?.length ? [{ ...ACCOUNT_ALL_JSON }, ...transformedAccounts] : [],
+      currentAddress: currentAccount?.address,
+      currentGenesisHash: currentAccount?.currentGenesisHash
+    };
 
-        const accountsWithCurrentAddress: AccountsWithCurrentAddress = {
-          accounts
-        };
+    const subscriptionAccounts = accountsSubject.subscribe((storedAccounts: SubjectInfo): void => {
+      const transformedAccounts = transformAccounts(storedAccounts);
 
-        setTimeout(() => {
-          const accountInfo = this.#koniState.keyringService.currentAccount;
+      responseData.accounts = transformedAccounts?.length ? [{ ...ACCOUNT_ALL_JSON }, ...transformedAccounts] : [];
 
-          if (accountInfo) {
-            accountsWithCurrentAddress.currentAddress = accountInfo.address;
-
-            if (accountInfo.address === ALL_ACCOUNT_KEY) {
-              accountsWithCurrentAddress.currentGenesisHash = accountInfo.currentGenesisHash;
-            } else {
-              const acc = accounts.find((a) => (a.address === accountInfo.address));
-
-              accountsWithCurrentAddress.currentGenesisHash = acc?.genesisHash || ALL_GENESIS_HASH;
-            }
-          }
-
-          resolve(accountsWithCurrentAddress);
-          cb(accountsWithCurrentAddress);
-        }, 300);
-      });
-
-      this.createUnsubscriptionHandle(id, subscription.unsubscribe);
-
-      port.onDisconnect.addListener((): void => {
-        this.cancelSubscription(id);
-      });
+      cb(responseData);
     });
+
+    const subscriptionCurrentAccount = keyringService.currentAccountSubject.subscribe((currentAccountData) => {
+      responseData.currentAddress = currentAccountData.address;
+      responseData.currentGenesisHash = currentAccountData.currentGenesisHash;
+
+      cb(responseData);
+    });
+
+    this.createUnsubscriptionHandle(id, () => {
+      subscriptionAccounts.unsubscribe();
+      subscriptionCurrentAccount.unsubscribe();
+    });
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return responseData;
   }
 
   private accountsGetAll (id: string, port: chrome.runtime.Port): string {
@@ -465,13 +459,13 @@ export default class KoniExtension {
     return keyring.saveRecent(accountId);
   }
 
-  private triggerAccountsSubscription (): boolean {
-    const accountsSubject = accountsObservable.subject;
-
-    accountsSubject.next(accountsSubject.getValue());
-
-    return true;
-  }
+  // private triggerAccountsSubscription (): boolean {
+  //   const accountsSubject = accountsObservable.subject;
+  //
+  //   accountsSubject.next(accountsSubject.getValue());
+  //
+  //   return true;
+  // }
 
   private _getAuthListV2 (): Promise<AuthUrls> {
     return new Promise<AuthUrls>((resolve, reject) => {
@@ -938,23 +932,17 @@ export default class KoniExtension {
   }
 
   private updateCurrentAccountAddress (address: string): boolean {
-    this._saveCurrentAccountAddress(address, () => {
-      this.triggerAccountsSubscription();
-    });
+    this._saveCurrentAccountAddress(address);
 
     return true;
   }
 
-  private saveCurrentAccountAddress (data: RequestCurrentAccountAddress, id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'pri(currentAccount.saveAddress)'>(id, port);
-
-    this._saveCurrentAccountAddress(data.address, cb);
-
-    port.onDisconnect.addListener((): void => {
-      this.cancelSubscription(id);
+  private async saveCurrentAccountAddress (data: RequestCurrentAccountAddress): Promise<CurrentAccountInfo> {
+    return new Promise<CurrentAccountInfo>((resolve) => {
+      this._saveCurrentAccountAddress(data.address, (currentInfo) => {
+        resolve(currentInfo);
+      });
     });
-
-    return true;
   }
 
   private async getAssetSetting (): Promise<Record<string, AssetSetting>> {
@@ -978,6 +966,8 @@ export default class KoniExtension {
   private async updateAssetSetting (params: AssetSettingUpdateReq) {
     try {
       await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
+
+      this.#koniState.eventService.emit('asset.updateState', params.tokenSlug);
 
       return true;
     } catch (e) {
@@ -3000,6 +2990,16 @@ export default class KoniExtension {
     return notificationSubject.value;
   }
 
+  private async reloadCron ({ data }: CronReloadRequest) {
+    if (data === 'nft') {
+      return await this.#koniState.reloadNft();
+    } else if (data === 'staking') {
+      return await this.#koniState.reloadStaking();
+    }
+
+    return Promise.resolve(false);
+  }
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -3141,10 +3141,8 @@ export default class KoniExtension {
         return this.accountsGetAll(id, port);
       case 'pri(accounts.saveRecent)':
         return this.saveRecentAccountId(request as RequestSaveRecentAccount);
-      case 'pri(accounts.triggerSubscription)':
-        return this.triggerAccountsSubscription();
       case 'pri(currentAccount.saveAddress)':
-        return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress, id, port);
+        return await this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress);
       case 'pri(accounts.updateCurrentAddress)':
         return this.updateCurrentAccountAddress(request as string);
       case 'pri(settings.changeBalancesVisibility)':
@@ -3360,6 +3358,9 @@ export default class KoniExtension {
       // Notification
       case 'pri(notifications.subscribe)':
         return this.subscribeNotifications(id, port);
+
+      case 'pri(cron.reload)':
+        return await this.reloadCron(request as CronReloadRequest);
 
       // Default
       default:

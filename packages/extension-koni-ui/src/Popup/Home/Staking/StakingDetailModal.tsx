@@ -22,6 +22,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import {ALL_ACCOUNT_KEY} from "@subwallet/extension-base/constants";
 
 interface Props extends ThemeProps {
   nominatorMetadata: NominatorMetadata;
@@ -222,7 +223,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           valueColorSchema={getStakingStatus(nominatorMetadata.status).schema}
         />
 
-        {!!rewardItem?.totalReward && !isNaN(parseFloat(rewardItem?.totalReward)) && (
+        {!!rewardItem?.totalReward && parseFloat(rewardItem?.totalReward) > 0 && (
           <MetaInfo.Number
             decimals={decimals}
             label={t('Total reward')}
@@ -231,7 +232,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           />
         )}
 
-        {!!rewardItem?.unclaimedReward && !isNaN(parseFloat(rewardItem?.unclaimedReward)) && (
+        {!!rewardItem?.unclaimedReward && parseFloat(rewardItem?.unclaimedReward) > 0 && (
           <MetaInfo.Number
             decimals={decimals}
             label={t('Unclaimed reward')}
@@ -313,7 +314,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </MetaInfo.Default>}
         </MetaInfo>
 
-        {showingOption === 'showByValue' && (nominations && nominations.length > 0) && (
+        {showingOption === 'showByValue' && (nominations && nominations.length > 0) && currentAccount?.address !== ALL_ACCOUNT_KEY && (
           <>
             <MetaInfo valueColorScheme={'light'}>
               <MetaInfo.Number
@@ -368,7 +369,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </>
         )}
 
-        {(showingOption === 'showByValue' || showingOption === 'mixed') && (unstakings && unstakings.length > 0) && (
+        {(showingOption === 'showByValue' || showingOption === 'mixed') && (unstakings && unstakings.length > 0) && currentAccount?.address !== ALL_ACCOUNT_KEY && (
           <>
             <MetaInfo valueColorScheme={'light'}>
               <MetaInfo.Number
@@ -399,7 +400,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </>
         )}
 
-        {(showingOption === 'showByValidator' || showingOption === 'mixed') && (nominations && nominations.length > 0) &&
+        {(showingOption === 'showByValidator' || showingOption === 'mixed') && (nominations && nominations.length > 0) && currentAccount?.address !== ALL_ACCOUNT_KEY &&
           <>
             {nominations && nominations.length && nominations.map((item) => (
               renderUnstakingInfo(item)

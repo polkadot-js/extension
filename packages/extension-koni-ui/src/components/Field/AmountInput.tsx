@@ -13,8 +13,8 @@ import styled from 'styled-components';
 interface Props extends ThemeProps, BasicInputWrapper {
   decimals: number;
   maxValue: string;
-  setIsMax?: (value: boolean) => void;
-  isDisableMax?: boolean;
+  onSetMax?: (value: boolean) => void;
+  showMaxButton?: boolean;
 }
 
 const isValidInput = (input: string) => {
@@ -43,7 +43,7 @@ export const getOutputValuesFromString: (input: string, power: number) => string
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className, decimals, disabled, isDisableMax, maxValue, onChange, setIsMax, statusHelp, tooltip, value } = props;
+  const { className, decimals, disabled, maxValue, onChange, onSetMax, showMaxButton, statusHelp, tooltip, value } = props;
 
   const { t } = useTranslation();
 
@@ -59,26 +59,29 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
     setInputValue(transformVal);
     onChange && onChange({ target: { value: maxValue } });
-    setIsMax?.(true);
+    onSetMax?.(true);
     inputRef.current?.blur();
-  }, [setIsMax, inputRef, decimals, maxValue, onChange]);
+  }, [onSetMax, inputRef, decimals, maxValue, onChange]);
 
   const getMaxLengthText = useCallback((value: string) => {
     return value.includes('.') ? decimals + 1 + value.split('.')[0].length : 10;
   }, [decimals]);
 
-  const suffix = useMemo(() => {
-    return (
-      <Button
-        disabled={isDisableMax}
-        onClick={_onClickMaxBtn}
-        size='xs'
-        type='ghost'
-      >
-        <span className='max-btn-text'>{t('Max')}</span>
-      </Button>
-    );
-  }, [isDisableMax, _onClickMaxBtn, t]);
+  const suffix = useMemo((): React.ReactNode => (
+    showMaxButton
+      ? (
+        <Button
+          onClick={_onClickMaxBtn}
+          size='xs'
+          type='ghost'
+        >
+          <span className='max-btn-text'>{t('Max')}</span>
+        </Button>
+      )
+      : (
+        <span />
+      )
+  ), [showMaxButton, _onClickMaxBtn, t]);
 
   const onChangeInput: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     let value = event.target.value;
@@ -93,8 +96,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     const transformVal = getOutputValuesFromString(value, decimals);
 
     onChange && onChange({ target: { value: transformVal } });
-    setIsMax?.(false);
-  }, [decimals, getMaxLengthText, onChange, setIsMax]);
+    onSetMax?.(false);
+  }, [decimals, getMaxLengthText, onChange, onSetMax]);
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<Element>): void => {

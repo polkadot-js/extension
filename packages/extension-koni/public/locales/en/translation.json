@@ -998,5 +998,22 @@
   "The recipient address must be same type as the current account address.": "",
   "Amount must be equal or less than {{number}}": "",
   "Select destination chain": "",
-  "Destination chain": ""
+  "Destination chain": "",
+  "Withdraw value": "",
+  "Unstake value": "",
+  "Cancel unstake value": "",
+  "Total members": "",
+  "Total nominators": "",
+  "Total stake": "",
+  "Other stake": "",
+  "APY": "",
+  "Transfer confirmation": "",
+  "NFT Transfer confirmation": "",
+  "Add to bond confirm": "",
+  "Unbond confirmation": "",
+  "Withdraw confirm": "",
+  "Claim reward confirm": "",
+  "Cancel unstake confirm": "",
+  "Transaction confirm": "",
+  "Withdraw amount": ""
 }

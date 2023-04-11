@@ -262,8 +262,6 @@ function WrapperComponent (props: WrapperProps) {
 
 const ManageWebsiteAccessDetail = styled(WrapperComponent)<Props>(({ theme: { token } }: Props) => {
   return ({
-    paddingBottom: token.paddingMD,
-
     '.ant-sw-list-section': {
       height: '100%'
     },

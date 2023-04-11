@@ -287,7 +287,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onFinish={onSubmit}
           >
             <Form.Item
-              help={fileValidateState.message}
               validateStatus={fileValidateState.status}
             >
               <Upload.SingleFileDragger
@@ -296,6 +295,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 disabled={validating}
                 hint={t('Please drag an drop the .json file you exported from Polkadot.js')}
                 onChange={onChange}
+                statusHelp={fileValidateState.message}
                 title={t('Import from Polkadot.js')}
               />
             </Form.Item>

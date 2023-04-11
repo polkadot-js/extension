@@ -11,7 +11,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
@@ -189,7 +189,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const result: ValidatorInfo[] = [];
 
     validatorList.forEach((validator) => {
-      if (nominations.includes(validator.address)) {
+      if (nominations.includes(reformatAddress(validator.address, 42))) { // remember the format of the address
         result.push(validator);
       }
     });
@@ -278,7 +278,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 decimals={decimals}
                 label={t('Minimum active:')}
                 suffix={symbol}
-                value={chainStakingMetadata.minStake}
+                value={stakingType === StakingType.POOLED ? chainStakingMetadata.minPoolBonding || '0' : chainStakingMetadata.minStake}
                 valueColorSchema={'success'}
               />
             )
@@ -288,7 +288,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return null;
-  }, [chainStakingMetadata, decimals, symbol, t]);
+  }, [chainStakingMetadata, decimals, stakingType, symbol, t]);
 
   const onPreCheckReadOnly = usePreCheckReadOnly(from);
 
@@ -437,7 +437,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 statusHelpAsTooltip={true}
               >
                 <AmountInput
-                  decimals={decimals}
+                  decimals={(chain && from) ? decimals : -1}
                   maxValue={maxValue}
                 />
               </Form.Item>
@@ -496,10 +496,11 @@ const Component: React.FC<Props> = (props: Props) => {
         </Button>
       </TransactionFooter>
 
-      {
+      { // TODO: check case for pool
         chainStakingMetadata &&
         (
           <StakingNetworkDetailModal
+            activeNominators={chainStakingMetadata.nominatorCount}
             estimatedEarning={chainStakingMetadata.expectedReturn}
             inflation={chainStakingMetadata.inflation}
             maxValidatorPerNominator={chainStakingMetadata.maxValidatorPerNominator}

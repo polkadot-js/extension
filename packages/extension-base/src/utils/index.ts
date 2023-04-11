@@ -4,7 +4,6 @@
 import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import BigNumber from 'bignumber.js';
 
 import { BN, hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
@@ -21,25 +20,31 @@ export function isAccountAll (address?: string): boolean {
 }
 
 export function reformatAddress (address: string, networkPrefix: number, isEthereum = false): string {
-  if (isEthereumAddress(address)) {
+  try {
+    if (isEthereumAddress(address)) {
+      return address;
+    }
+
+    if (isAccountAll(address)) {
+      return address;
+    }
+
+    const publicKey = decodeAddress(address);
+
+    if (isEthereum) {
+      return ethereumEncode(publicKey);
+    }
+
+    if (networkPrefix < 0) {
+      return address;
+    }
+
+    return encodeAddress(publicKey, networkPrefix);
+  } catch (e) {
+    console.warn('Get error while reformat address', address, e);
+
     return address;
   }
-
-  if (isAccountAll(address)) {
-    return address;
-  }
-
-  const publicKey = decodeAddress(address);
-
-  if (isEthereum) {
-    return ethereumEncode(publicKey);
-  }
-
-  if (networkPrefix < 0) {
-    return address;
-  }
-
-  return encodeAddress(publicKey, networkPrefix);
 }
 
 export function filterAddressByNetworkKey (addresses: string[], networkKey: string, isEthereum?: boolean) {
@@ -319,22 +324,11 @@ export function parseRawNumber (value: string) {
   return parseFloat(value.replaceAll(',', ''));
 }
 
-export function parseNumberToDisplay (amount: BN, decimals: number | undefined) {
-  if (!decimals) {
-    return '0';
+export function isSameAddress (address1: string, address2: string) {
+  if (isEthereumAddress(address1)) {
+    return address1.toLowerCase() === address2.toLowerCase();
   }
 
-  const parsedAmount = parseRawNumber(amount.toString());
-
-  const bigN = new BigNumber(parsedAmount / (10 ** decimals));
-  const roundedString = bigN.toFixed(9);
-
-  const formattedString = parseFloat(roundedString); // remove excess zeros at the end
-
-  return formattedString.toString();
-}
-
-export function isSameAddress (address1: string, address2: string) {
   return reformatAddress(address1, 0) === reformatAddress(address2, 0); // TODO: maybe there's a better way
 }
 

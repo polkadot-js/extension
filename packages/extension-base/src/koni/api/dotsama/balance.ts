@@ -9,8 +9,9 @@ import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/koni/
 import { getEVMBalance } from '@subwallet/extension-base/koni/api/tokens/evm/balance';
 import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
+import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { state } from '@subwallet/extension-base/koni/background/handlers';
-import { _BALANCE_CHAIN_GROUP, _BALANCE_TOKEN_GROUP, _PURE_EVM_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
+import { _BALANCE_CHAIN_GROUP, _PURE_EVM_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isPureEvmChain, _isSmartContractToken, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses, sumBN } from '@subwallet/extension-base/utils';
@@ -18,9 +19,8 @@ import { Contract } from 'web3-eth-contract';
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
-import { AccountInfo, Balance } from '@polkadot/types/interfaces';
+import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN, BN_ZERO } from '@polkadot/util';
-import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type EqBalanceItem = [number, { positive: number }];
 type EqBalanceV0 = {
@@ -130,13 +130,19 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
     if (_isSubstrateRelayChain(chainInfo) && networkAPI.query.nominationPools) {
       const poolMemberDatas = await networkAPI.query.nominationPools.poolMembers.multi(addresses);
 
-      for (const _poolMemberData of poolMemberDatas) {
-        const poolMemberData = _poolMemberData.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
+      if (poolMemberDatas) {
+        for (const _poolMemberData of poolMemberDatas) {
+          const poolMemberData = _poolMemberData.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
 
-        if (poolMemberData) {
-          const pooledBalance = new BN(poolMemberData.points.toString());
+          if (poolMemberData) {
+            const pooledBalance = new BN(poolMemberData.points.toString());
 
-          pooledStakingBalance = pooledStakingBalance.add(pooledBalance);
+            pooledStakingBalance = pooledStakingBalance.add(pooledBalance);
+
+            Object.entries(poolMemberData.unbondingEras).forEach(([, amount]) => {
+              pooledStakingBalance = pooledStakingBalance.add(new BN(amount));
+            });
+          }
         }
       }
     }
@@ -176,78 +182,6 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
     unsub();
   };
 }
-
-// deprecated
-// function subscribeDarwiniaBalance (addresses: string[], chainInfo: _ChainInfo, chain: string, networkAPI: ApiPromise, callBack: (rs: BalanceItem) => void) {
-//   const tokenMap = state.getAssetByChainAndAsset(chain, [_AssetType.LOCAL]);
-//   const nativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
-//
-//   let totalBalance: BN = new BN(0);
-//   let freeBalance: BN = new BN(0);
-//   let miscFrozen: BN = new BN(0);
-//   let reservedKtonBalance: BN = new BN(0);
-//   let totalKtonBalance: BN = new BN(0);
-//
-//   const unsubProms = addresses.map((address) => {
-//     return networkAPI.derive.balances?.all(address, async (balance: DeriveBalancesAll) => {
-//       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-//       freeBalance = freeBalance.add(balance.availableBalance?.toBn() || new BN(0));
-//       miscFrozen = miscFrozen.add(balance.lockedBalance?.toBn() || new BN(0));
-//       totalBalance = totalBalance.add(balance.freeBalance?.toBn() || new BN(0));
-//
-//       const _systemBalance = await networkAPI.query.system.account(address);
-//       const systemBalance = _systemBalance.toHuman() as unknown as AccountInfo;
-//
-//       // @ts-ignore
-//       const rawTotalKton = (systemBalance.data?.freeKton as string).replaceAll(',', '');
-//       // @ts-ignore
-//       const rawReservedKton = (systemBalance.data?.reservedKton as string).replaceAll(',', '');
-//
-//       // @ts-ignore
-//       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-//       totalKtonBalance = totalKtonBalance.add(new BN(rawTotalKton) || new BN(0));
-//       // @ts-ignore
-//       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-//       reservedKtonBalance = reservedKtonBalance.add(new BN(rawReservedKton) || new BN(0));
-//
-//       if (Object.keys(tokenMap).length > 1) {
-//         for (const tokenInfo of Object.values(tokenMap)) {
-//           if (_BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)) {
-//             const freeKton = totalKtonBalance.sub(reservedKtonBalance);
-//
-//             callBack({
-//               free: freeKton.toString(),
-//               locked: reservedKtonBalance.toString(),
-//               state: APIItemState.READY,
-//               tokenSlug: tokenInfo.slug
-//             });
-//             break;
-//           }
-//         }
-//       }
-//
-//       const free = totalBalance.sub(miscFrozen);
-//
-//       callBack({
-//         tokenSlug: nativeTokenSlug,
-//         free: free.toString(),
-//         locked: miscFrozen.toString(),
-//         state: APIItemState.READY,
-//         substrateInfo: {
-//           miscFrozen: miscFrozen.toString()
-//         }
-//       });
-//     });
-//   });
-//
-//   return () => {
-//     Promise.all(unsubProms).then((unsubs) => {
-//       unsubs.forEach((unsub) => {
-//         unsub && unsub();
-//       });
-//     }).catch(console.error);
-//   };
-// }
 
 function subscribeERC20Interval (addresses: string[], chain: string, evmApiMap: Record<string, _EvmApi>, callBack: (result: BalanceItem) => void): () => void {
   let tokenList = {} as Record<string, _ChainAsset>;
@@ -304,9 +238,10 @@ function subscribePSP22Balance (addresses: string[], chain: string, api: ApiProm
       try {
         const contract = psp22ContractMap[tokenInfo.slug];
         const balances = await Promise.all(addresses.map(async (address): Promise<string> => {
-          const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: -1 }, address);
+          const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(api) }, address);
+          const balanceObj = _balanceOf?.output?.toPrimitive() as Record<string, any>;
 
-          return _balanceOf.output ? _balanceOf.output.toString() : '0';
+          return _balanceOf.output ? (balanceObj.ok as string || balanceObj.Ok as string) : '0';
         }));
 
         free = sumBN(balances.map((bal) => new BN(bal || 0)));
@@ -318,7 +253,7 @@ function subscribePSP22Balance (addresses: string[], chain: string, api: ApiProm
           state: APIItemState.READY
         } as BalanceItem);
       } catch (err) {
-        console.log('There is a problem fetching ' + tokenInfo.slug + ' PSP-22 token balance', err);
+        console.warn('Problem fetching ' + tokenInfo.slug + ' PSP-22 token balance', err); // TODO: error createType
       }
     });
   };
@@ -541,118 +476,4 @@ export function subscribeEVMBalance (chain: string, addresses: string[], evmApiM
     clearInterval(interval);
     unsub2 && unsub2();
   };
-}
-
-export async function getFreeBalance (chain: string, address: string, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, tokenSlug?: string): Promise<string> {
-  const substrateApi = await substrateApiMap[chain].isReady;
-  const api = substrateApi.api;
-  const web3Api = evmApiMap[chain];
-  const tokenInfo = tokenSlug ? state.getAssetBySlug(tokenSlug) : state.getNativeTokenInfo(chain);
-  const chainInfo = state.getChainInfo(chain);
-
-  // Only EVM Address use with EVM network
-  if (Boolean(web3Api || _isChainEvmCompatible(chainInfo)) !== isEthereumAddress(address)) {
-    if (!isEthereumAddress(address)) {
-      return '0';
-    }
-  }
-
-  // web3Api support mean isEthereum Network support
-  if (web3Api) {
-    if (_isNativeToken(tokenInfo)) {
-      return await web3Api.api?.eth.getBalance(address) || '0';
-    } else {
-      if (_getContractAddressOfToken(tokenInfo).length > 0) {
-        return '0';
-      }
-
-      const contract = getERC20Contract(chain, _getContractAddressOfToken(tokenInfo), evmApiMap);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      const free = await contract.methods.balanceOf(address).call();
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
-      return free?.toString() || '0';
-    }
-  } else {
-    if (tokenSlug) {
-      if (_isSmartContractToken(tokenInfo)) {
-        if (_getContractAddressOfToken(tokenInfo).length > 0) {
-          return '0';
-        }
-
-        const contractPromise = getPSP22ContractPromise(api, _getContractAddressOfToken(tokenInfo));
-
-        const balanceOf = await contractPromise.query['psp22::balanceOf'](address, { gasLimit: -1 }, address);
-
-        return balanceOf.output ? balanceOf.output.toString() : '0';
-      } else if (_BALANCE_CHAIN_GROUP.genshiro.includes(chain)) {
-        const onChainInfo = _getTokenOnChainInfo(tokenInfo);
-        const balance = await api.query.eqBalances.account(address, onChainInfo);
-
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
-        return balance.asPositive?.toString() || '0';
-      } else if (_BALANCE_CHAIN_GROUP.equilibrium_parachain.includes(chain)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const balance = await api.query.system.account(address) as any;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        const balancesData = JSON.parse(balance.data.toString()) as EqBalanceV0;
-        const balanceList = balancesData.v0.balance;
-        let freeTokenBalance: EqBalanceItem | undefined;
-        const assetId = _getTokenOnChainAssetId(tokenInfo);
-
-        if (!_isNativeToken(tokenInfo)) {
-          // @ts-ignore
-          freeTokenBalance = balanceList.find((data: EqBalanceItem) => data[0] === assetId);
-        } else {
-          freeTokenBalance = balanceList[0];
-        }
-
-        return freeTokenBalance ? freeTokenBalance[1].positive.toString() : '0';
-      } else if (_BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)) {
-        // @ts-ignore
-        const balance = await api.query.system.account(address) as { data: { freeKton: Balance } };
-
-        return balance.data?.freeKton?.toString() || '0';
-      } else if (!_isNativeToken(tokenInfo) && _BALANCE_CHAIN_GROUP.statemine.includes(chain)) {
-        const assetId = _getTokenOnChainAssetId(tokenInfo);
-        const balanceInfo = (await api.query.assets.account(assetId, address)).toHuman() as Record<string, string>;
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
-        return balanceInfo?.balance?.replaceAll(',', '') || '0';
-      } else if (!_isNativeToken(tokenInfo) || _BALANCE_CHAIN_GROUP.kintsugi.includes(chain)) {
-        const onChainInfo = _getTokenOnChainInfo(tokenInfo);
-        // @ts-ignore
-        const balance = await api.query.tokens.accounts(address, onChainInfo) as TokenBalanceRaw;
-
-        return balance.free?.toString() || '0';
-      }
-    }
-
-    if (_BALANCE_CHAIN_GROUP.kusama.includes(chain)) {
-      // @ts-ignore
-      const _balance = await api.query.system.account(address);
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-      const balance = _balance.toHuman();
-
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      const freeBalance = new BN(balance.data?.free.replaceAll(',', ''));
-
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      const miscFrozen = new BN(balance.data?.miscFrozen.replaceAll(',', ''));
-
-      const transferable = freeBalance.sub(miscFrozen);
-
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
-      return transferable.toString() || '0';
-    }
-
-    const balance = await api.derive.balances.all(address);
-
-    return balance.availableBalance?.toBn()?.toString() || '0';
-  }
 }

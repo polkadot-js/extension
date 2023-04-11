@@ -25,7 +25,7 @@ export const PREDEFINED_TRANSAK_TOKEN: Record<string, TransakTokenInfo> = {
     support: 'SUBSTRATE'
   },
   ASTR: {
-    transakNetwork: 'mainnet',
+    transakNetwork: 'astar',
     chain: 'astar',
     slug: 'astar-NATIVE-ASTR',
     symbol: 'ASTR',

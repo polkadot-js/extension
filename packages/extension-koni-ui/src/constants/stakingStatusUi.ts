@@ -5,7 +5,7 @@ import { InfoItemBase } from '@subwallet/extension-koni-ui/components/MetaInfo/p
 import { PhosphorIcon } from '@subwallet/extension-koni-ui/types';
 import { CheckCircle, ListChecks, XCircle } from 'phosphor-react';
 
-export type StakingStatusType = 'active' | 'inactive' | 'partialEarning';
+export type StakingStatusType = 'active' | 'inactive' | 'partialEarning' | 'waiting';
 
 interface StakingStatusUiProps {
   schema: InfoItemBase['valueColorSchema'];
@@ -28,5 +28,10 @@ export const StakingStatusUi: Record<StakingStatusType, StakingStatusUiProps> = 
     schema: 'danger' as InfoItemBase['valueColorSchema'],
     icon: XCircle,
     name: 'Not earning'
+  },
+  waiting: {
+    schema: 'success' as InfoItemBase['valueColorSchema'],
+    icon: CheckCircle,
+    name: 'Waiting'
   }
 };

@@ -91,10 +91,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           weight={'light'}
         />,
         onClick: handleDeleteToken,
-        disabled: !_isCustomAsset(tokenInfo.slug)
+        disabled: !(_isCustomAsset(tokenInfo.slug) && _isSmartContractToken(tokenInfo))
       }
     ];
-  }, [handleDeleteToken, token.fontSizeHeading3, tokenInfo.slug]);
+  }, [handleDeleteToken, token.fontSizeHeading3, tokenInfo]);
 
   const contractAddressIcon = useCallback(() => {
     const contractAddress = _getContractAddressOfToken(tokenInfo);

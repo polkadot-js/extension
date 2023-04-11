@@ -86,6 +86,8 @@ function Component ({ className }: Props) {
         return ExtrinsicType.STAKING_CANCEL_UNSTAKE;
       case 'claim-reward':
         return ExtrinsicType.STAKING_CLAIM_REWARD;
+      case 'withdraw':
+        return ExtrinsicType.STAKING_WITHDRAW;
       case 'compound':
         return ExtrinsicType.STAKING_COMPOUNDING;
       case 'send-nft':
@@ -105,6 +107,7 @@ function Component ({ className }: Props) {
       case 'unstake':
       case 'cancel-unstake':
       case 'claim-reward':
+      case 'withdraw':
       case 'compound':
         return '/home/staking';
       case 'send-nft':
@@ -220,8 +223,8 @@ const Transaction = styled(Component)(({ theme }) => {
     '.transaction-footer': {
       display: 'flex',
       flexWrap: 'wrap',
-      padding: `${token.paddingMD}px ${token.padding}px`,
-      paddingBottom: token.paddingLG,
+      padding: `${token.paddingMD}px ${token.padding}px ${token.padding}px`,
+      marginBottom: token.padding,
       gap: token.paddingXS,
 
       '.error-messages': {

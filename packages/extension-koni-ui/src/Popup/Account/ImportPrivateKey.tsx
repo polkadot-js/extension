@@ -171,7 +171,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             name={formName}
           >
             <Form.Item
-              help={validateState.message}
               name={fieldName}
               validateStatus={validateState.status}
             >
@@ -179,6 +178,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 className='private-key-input'
                 onChange={onChange}
                 placeholder={t('Enter or paste private key')}
+                statusHelp={validateState.message}
                 value={autoCorrect || privateKey || ''}
               />
             </Form.Item>

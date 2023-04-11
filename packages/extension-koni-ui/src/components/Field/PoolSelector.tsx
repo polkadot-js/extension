@@ -182,7 +182,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [inactiveModal]);
 
   useEffect(() => {
-    onChange && onChange({ target: { value: nominationPoolValueList[0] } });
+    const selectedPool = nominationPoolValueList[0] || String(PREDEFINED_STAKING_POOL[chain] || '');
+
+    onChange && onChange({ target: { value: selectedPool } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nominationPoolValueList]);
 

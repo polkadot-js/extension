@@ -786,7 +786,7 @@ export const ChainLogoMap: Record<string, string> = {
   polymesh: ProjectLogos.polymesh,
   riochain: ProjectLogos.riochain,
   sherpax: ProjectLogos.sherpax,
-  'sora-substrate': ProjectLogos.sora,
+  sora_substrate: ProjectLogos.sora,
   swapdex: ProjectLogos.swapdex,
   '3dpass': ProjectLogos['3dpass'],
   alephSmartNet: ProjectLogos['aleph-zero'],

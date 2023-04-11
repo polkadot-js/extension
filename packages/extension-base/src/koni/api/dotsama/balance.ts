@@ -407,12 +407,12 @@ async function subscribeAssetsAccountPallet (addresses: string[], chain: string,
         balances.forEach((b) => {
           // @ts-ignore
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-          const bdata = b?.toJSON();
+          const bdata = b?.toHuman();
 
           if (bdata) {
             // @ts-ignore
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
-            const addressBalance = new BN(String(bdata?.balance) || '0');
+            const addressBalance = new BN(String(bdata?.balance).replaceAll(',', '') || '0');
 
             // @ts-ignore
             if (bdata?.isFrozen) {

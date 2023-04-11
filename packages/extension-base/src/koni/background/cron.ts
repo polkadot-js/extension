@@ -116,11 +116,12 @@ export class KoniCron {
       this.setStakingRewardReady();
     }
 
-    const reloadEvents: EventType[] = ['account.add', 'account.remove', 'account.updateCurrent', 'chain.add', 'chain.update', 'chain.enable', 'asset.update', 'asset.enable', 'transaction.done', 'transaction.failed'];
+    const reloadEvents: EventType[] = ['account.add', 'account.remove', 'account.updateCurrent', 'chain.add', 'chain.updateState', 'asset.updateState', 'transaction.done', 'transaction.failed'];
 
     this.state.eventService.onLazy((events, eventTypes) => {
       const serviceInfo = this.state.getServiceInfo();
       const needReload = eventTypes.some((eT) => reloadEvents.includes(eT));
+      const chainUpdated = eventTypes.includes('chain.updateState');
 
       if (!needReload) {
         return;
@@ -141,7 +142,7 @@ export class KoniCron {
       this.removeCron('refreshPoolingStakingReward');
       this.removeCron('checkStatusApiMap');
       this.removeCron('recoverApiMap');
-      this.removeCron('updateChainStakingMetadata');
+      chainUpdated && this.removeCron('updateChainStakingMetadata');
       this.removeCron('updateNominatorMetadata');
 
       if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
@@ -149,7 +150,7 @@ export class KoniCron {
         this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
         this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
-        this.addCron('updateChainStakingMetadata', this.updateChainStakingMetadata(serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_CHAIN_STAKING_METADATA);
+        chainUpdated && this.addCron('updateChainStakingMetadata', this.updateChainStakingMetadata(serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_CHAIN_STAKING_METADATA);
         this.addCron('updateNominatorMetadata', this.updateNominatorMetadata(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_CHAIN_NOMINATOR_METADATA);
       } else {
         this.setStakingRewardReady();

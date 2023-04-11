@@ -41,8 +41,8 @@ export class PriceService {
       .then(() => {
         this.refreshPriceData();
 
-        this.eventService.on('asset.enable', eventHandler);
-        this.eventService.on('asset.update', eventHandler);
+        this.eventService.on('asset.updateState', eventHandler);
+        this.eventService.on('asset.updateState', eventHandler);
       }).catch(console.error);
   }
 

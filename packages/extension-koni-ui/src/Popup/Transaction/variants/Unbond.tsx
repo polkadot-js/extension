@@ -239,14 +239,14 @@ const Component: React.FC<Props> = (props: Props) => {
             onFieldsChange={onFieldsChange}
             onFinish={onSubmit}
           >
-            {isAll &&
-              <Form.Item name={'from'}>
-                <AccountSelector
-                  filter={_accountFilterFunc(allNominatorInfo, chainInfoMap, stakingType, stakingChain)}
-                  label={t('Unstake from account')}
-                />
-              </Form.Item>
-            }
+            <Form.Item
+              hidden={!isAll}
+              name={'from'}>
+              <AccountSelector
+                filter={_accountFilterFunc(allNominatorInfo, chainInfoMap, stakingType, stakingChain)}
+                label={t('Unstake from account')}
+              />
+            </Form.Item>
             <FreeBalance
               address={from}
               chain={chain}

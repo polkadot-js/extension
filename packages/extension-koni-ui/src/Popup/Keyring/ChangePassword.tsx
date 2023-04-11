@@ -58,7 +58,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           newPassword: password,
           oldPassword: oldPassword
         }).then((res) => {
-          if (!res.status) {
+          if (!res?.status) {
             form.setFields([{ name: FormFieldName.OLD_PASSWORD, errors: res.errors }]);
           } else {
             goHome();

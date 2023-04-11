@@ -94,11 +94,8 @@ const _DataContext: DataContextType = {
       // If the handler is set to start immediately
       if (item.isStartImmediately) {
         console.log('====handler item.isStartImmediately', item.isStartImmediately);
-        setTimeout(() => {
-          console.log('====handler item.isStartImmediately Action');
-          item.start(); // Start the handler
-          item.isStarted = true; // Mark the handler as started
-        }, 3000);
+        item.start(); // Start the handler
+        item.isStarted = true; // Mark the handler as started
       }
     }
 
@@ -167,15 +164,13 @@ const _DataContext: DataContextType = {
         this.readyStoreMap[n] = true;
       });
 
-      setTimeout(() => {
-        this.awaitRequestsCache[key] = Promise.all(promiseList).then((data) => {
-          console.log('====handler data', data);
-          return true;
-        }).catch(error => {
-          console.log('====handle rerror', error);
-          return true;
-        });
-      }, 2000)
+      this.awaitRequestsCache[key] = Promise.all(promiseList).then((data) => {
+        console.log('====handler data', data);
+        return true;
+      }).catch(error => {
+        console.log('====handle rerror', error);
+        return true;
+      });
     }
 
     // Wait for all handlers to finish
@@ -230,6 +225,7 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
   // Init subscription
   // Common
+  console.log('====handlesubscribeAccountsData', subscribeAccountsData);
   _DataContext.addHandler({
     ...subscribeAccountsData,
     name: "subscribeAccountsData",

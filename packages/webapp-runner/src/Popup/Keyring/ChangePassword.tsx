@@ -70,7 +70,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             oldPassword: oldPassword,
           })
             .then((res) => {
-              if (!res.status) {
+              if (!res?.status) {
                 setSubmitError(res.errors[0]);
               } else {
                 goHome();

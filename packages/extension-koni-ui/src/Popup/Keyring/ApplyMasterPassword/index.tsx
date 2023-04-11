@@ -132,7 +132,7 @@ const Component: React.FC<Props> = (props: Props) => {
           address: currentAccount.address,
           password: password
         }).then((res) => {
-          if (!res.status) {
+          if (!res?.status) {
             form.setFields([{ name: FormFieldName.PASSWORD, errors: [res.errors[0]] }]);
             selectPassword();
             setIsError(true);

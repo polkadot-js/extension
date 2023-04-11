@@ -49,7 +49,9 @@ import { buildHierarchy } from "@subwallet-webapp/util/account/buildHierarchy";
 // AccountState store
 export const updateAccountData = (data: AccountsWithCurrentAddress) => {
   let currentAccountJson: AccountJson = data.accounts[0];
+  console.log('====handle updateAccountData data', data);
   const accounts = data.accounts;
+  console.log('====handle updateAccountData accounts', accounts);
 
   accounts.forEach((accountJson) => {
     if (accountJson.address === data.currentAddress) {

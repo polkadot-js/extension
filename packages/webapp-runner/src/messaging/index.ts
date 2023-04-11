@@ -279,6 +279,7 @@ export function lazySubscribeMessage<
   const id = getId()
   let cancel = false
   const handlePromise = new Promise((resolve, reject): void => {
+    console.log('====handlePromise ', message);
     handlers[id] = { reject, resolve, subscriber }
   })
 

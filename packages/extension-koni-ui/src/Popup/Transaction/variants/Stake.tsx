@@ -6,7 +6,7 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
+import { ALL_KEY, BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
@@ -430,6 +430,12 @@ const Component: React.FC<Props> = (props: Props) => {
                         }
                       }
 
+                      if (val.gt(nativeTokenBalance.value)) {
+                        const maxString = new BigN(nativeTokenBalance.value).div(BN_TEN.pow(decimals)).toFixed(6);
+
+                        return Promise.reject(t('Value must be equal or less than {{number}}', { replace: { number: maxString } }));
+                      }
+
                       return Promise.resolve();
                     }
                   })
@@ -439,6 +445,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 <AmountInput
                   decimals={(chain && from) ? decimals : -1}
                   maxValue={maxValue}
+                  showMaxButton={false}
                 />
               </Form.Item>
             </div>

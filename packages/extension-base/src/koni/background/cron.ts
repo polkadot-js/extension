@@ -6,8 +6,9 @@ import { ApiMap, ServiceInfo } from '@subwallet/extension-base/background/KoniTy
 import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_CHAIN_NOMINATOR_METADATA, CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-base/constants';
 import { KoniSubscription } from '@subwallet/extension-base/koni/background/subscription';
 import { _ChainState, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { EventType } from '@subwallet/extension-base/services/event-service/types';
+import { EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
+import { waitTimeout } from '@subwallet/extension-base/utils';
 import { Subject, Subscription } from 'rxjs';
 
 import { logger as createLogger } from '@polkadot/util';
@@ -33,6 +34,7 @@ export class KoniCron {
 
   private cronMap: Record<string, any> = {};
   private subjectMap: Record<string, Subject<any>> = {};
+  private eventHandler?: ((events: EventItem<EventType>[], eventTypes: EventType[]) => void);
 
   getCron = (name: string): any => {
     return this.cronMap[name];
@@ -118,7 +120,7 @@ export class KoniCron {
 
     const reloadEvents: EventType[] = ['account.add', 'account.remove', 'account.updateCurrent', 'chain.add', 'chain.update', 'chain.enable', 'asset.update', 'asset.enable', 'transaction.done', 'transaction.failed'];
 
-    this.state.eventService.onLazy((events, eventTypes) => {
+    this.eventHandler = (events, eventTypes) => {
       const serviceInfo = this.state.getServiceInfo();
       const needReload = eventTypes.some((eT) => reloadEvents.includes(eT));
 
@@ -154,7 +156,9 @@ export class KoniCron {
       } else {
         this.setStakingRewardReady();
       }
-    });
+    };
+
+    this.state.eventService.onLazy(this.eventHandler);
 
     this.status = 'running';
   };
@@ -162,6 +166,12 @@ export class KoniCron {
   stop = () => {
     if (this.status === 'stopped') {
       return;
+    }
+
+    // Unsubscribe events
+    if (this.eventHandler) {
+      this.state.eventService.offLazy(this.eventHandler);
+      this.eventHandler = undefined;
     }
 
     if (this.serviceSubscription) {
@@ -258,4 +268,25 @@ export class KoniCron {
         .catch(this.logger.error);
     };
   };
+
+  public async reloadNft () {
+    const address = this.state.keyringService.currentAccount.address;
+    const serviceInfo = this.state.getServiceInfo();
+
+    this.resetNft(address);
+    this.removeCron('refreshNft');
+    this.addCron('refreshNft', this.refreshNft(address, serviceInfo.chainApiMap, this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
+
+    await waitTimeout(1000);
+  }
+
+  public async reloadStaking () {
+    const address = this.state.keyringService.currentAccount.address;
+
+    this.resetStakingReward();
+    this.removeCron('refreshStakingReward');
+    this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
+
+    await waitTimeout(1000);
+  }
 }

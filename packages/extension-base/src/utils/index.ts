@@ -335,3 +335,7 @@ export function isSameAddress (address1: string, address2: string) {
 export function getDomainFromUrl (url: string): string {
   return url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0];
 }
+
+export async function waitTimeout (ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}

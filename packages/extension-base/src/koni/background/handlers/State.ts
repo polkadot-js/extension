@@ -1701,4 +1701,12 @@ export default class KoniState {
       stores.staking.removeAllByAddress(address).catch(console.error);
     });
   }
+
+  public async reloadNft () {
+    return await this.cron.reloadNft();
+  }
+
+  public async reloadStaking () {
+    return await this.cron.reloadStaking();
+  }
 }

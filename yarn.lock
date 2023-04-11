@@ -5326,7 +5326,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/util-crypto@npm:^10.4.2":
+"@polkadot/util-crypto@npm:^10.2.1":
   version: 10.4.2
   resolution: "@polkadot/util-crypto@npm:10.4.2"
   dependencies:
@@ -5347,7 +5347,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/util@npm:^10.4.2":
+"@polkadot/util@npm:^10.2.1":
   version: 10.4.2
   resolution: "@polkadot/util@npm:10.4.2"
   dependencies:
@@ -5460,7 +5460,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/x-fetch@npm:^10.4.2":
+"@polkadot/x-fetch@npm:^10.2.1":
   version: 10.4.2
   resolution: "@polkadot/x-fetch@npm:10.4.2"
   dependencies:

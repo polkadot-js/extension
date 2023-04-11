@@ -42,6 +42,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
 
+  const allNominatorInfo = useGetNominatorInfo(stakingChain, stakingType);
   const nominatorInfo = useGetNominatorInfo(stakingChain, stakingType, from);
   const nominatorMetadata = nominatorInfo[0];
 
@@ -118,10 +119,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const onPreCheckReadOnly = usePreCheckReadOnly(from);
 
   const filterAccount = useCallback((account: AccountJson): boolean => {
-    const nomination = nominatorInfo.find((data) => isSameAddress(data.address, account.address));
+    const nomination = allNominatorInfo.find((data) => isSameAddress(data.address, account.address));
 
     return (nomination ? nomination.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE).length > 0 : false) && accountFilterFunc(chainInfoMap, stakingType, stakingChain)(account);
-  }, [chainInfoMap, nominatorInfo, stakingChain, stakingType]);
+  }, [chainInfoMap, allNominatorInfo, stakingChain, stakingType]);
 
   useEffect(() => {
     const address = currentAccount?.address || '';

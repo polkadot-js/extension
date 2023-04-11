@@ -5,7 +5,7 @@ import { reformatAddress } from '@subwallet/extension-base/utils';
 import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
-import { toShort } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
@@ -21,14 +21,13 @@ import { BasicInputWrapper } from './Base';
 interface Props extends BasicInputWrapper, ThemeProps {
   showAddressBook?: boolean;
   showScanner?: boolean;
-  autoReformatValue?: boolean;
   addressPrefix?: number;
 }
 
 const modalId = 'input-account-address-modal';
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { addressPrefix, autoReformatValue,
+  const { addressPrefix,
     className = '', disabled, id = modalId, label, onBlur, onChange, onFocus,
     placeholder, readOnly, showAddressBook, showScanner, statusHelp, value } = props;
   const { t } = useTranslation();
@@ -41,7 +40,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const [scanError, setScanError] = useState('');
 
   const accountName = useMemo(() => {
-    const account = accounts.find((acc) => acc.address.toLowerCase() === value?.toLowerCase());
+    const account = findAccountByAddress(accounts, value);
 
     return account?.name;
   }, [accounts, value]);
@@ -63,16 +62,8 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const parseAndChangeValue = useCallback((value: string) => {
     const val = value.trim();
 
-    if (autoReformatValue) {
-      if (isAddress(val)) {
-        onChange && onChange({ target: { value: reformatAddress(val, 42) } });
-
-        return;
-      }
-    }
-
     onChange && onChange({ target: { value: val } });
-  }, [onChange, autoReformatValue]);
+  }, [onChange]);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     parseAndChangeValue(event.target.value);

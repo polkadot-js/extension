@@ -919,9 +919,13 @@ export default class KoniExtension {
       accountInfo.address = address;
 
       if (address !== ALL_ACCOUNT_KEY) {
-        const currentKeyPair = keyring.getAccount(address);
+        try {
+          const currentKeyPair = keyring.getPair(address);
 
-        accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
+          accountInfo.currentGenesisHash = currentKeyPair?.meta.genesisHash as string || ALL_GENESIS_HASH;
+        } catch {
+          accountInfo.currentGenesisHash = ALL_GENESIS_HASH;
+        }
       } else {
         accountInfo.currentGenesisHash = accountInfo.allGenesisHash || ALL_GENESIS_HASH;
       }

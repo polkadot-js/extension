@@ -363,7 +363,6 @@ export class KoniSubscription {
 
       await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
         if (isEvmAddress && !_isChainEvmCompatible(chainInfo)) {
-
           return;
         }
 

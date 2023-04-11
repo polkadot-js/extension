@@ -173,7 +173,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         .then(() => console.log('redirecting'))
         .catch(console.error);
     }
-  }, [collectionInfo.image, nftItem.externalUrl, nftItem.image]);
+  }, [nftItem.externalUrl]);
 
   return (
     <PageWrapper

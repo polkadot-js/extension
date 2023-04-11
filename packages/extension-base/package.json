@@ -118,31 +118,5 @@
   },
   "devDependencies": {
     "@subwallet/extension-mocks": "^1.0.2-1"
-  },
-  "resolutions": {
-    "@ethereumjs/common": "^2.6.5",
-    "@polkadot/api": "^9.10.3",
-    "@polkadot/codec": "^9.10.3",
-    "@polkadot/api-contract": "^9.10.3",
-    "@polkadot/networks": "^10.4.2",
-    "@polkadot/rpc-core": "^9.10.3",
-    "@polkadot/types": "^9.10.3",
-    "@polkadot/types-create": "^9.10.3",
-    "@polkadot/ui-keyring": "^2.9.14",
-    "@polkadot/ui-settings": "^2.9.14",
-    "@polkadot/util": "^10.4.2",
-    "@polkadot/util-crypto": "^10.4.2",
-    "@polkadot/x-fetch": "^10.4.2",
-    "@polkadot/wasm-crypto": "^6.4.1",
-    "@polkadot/wasm-bridge": "^6.4.1",
-    "@polkadot/wasm-crypto-wasm": "^6.4.1",
-    "@polkadot/wasm-util": "^6.4.1",
-    "@subwallet/chain-list": "^0.0.27",
-    "@subwallet/keyring": "^0.0.4",
-    "@subwallet/ui-keyring": "^0.0.3",
-    "babel-core": "^7.0.0-bridge.0",
-    "rxjs": "^7.8.0",
-    "safe-buffer": "^5.2.1",
-    "typescript": "^4.8.4"
   }
 }

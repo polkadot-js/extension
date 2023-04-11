@@ -7,6 +7,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
@@ -291,7 +292,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     const isOnChain = chain === destChain;
 
     if (isOnChain) {
-      if (from === _recipientAddress) {
+      if (isSameAddress(from, _recipientAddress)) {
         // todo: change message later
         return Promise.reject(t('The recipient address can not be the same as the sender address'));
       }
@@ -486,6 +487,18 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       })
         .then((balance) => {
           !cancel && setMaxTransfer(balance.value);
+
+          if (!cancel) {
+            const value = form.getFieldValue('value') as string;
+
+            console.log(value);
+
+            if (value) {
+              setTimeout(() => {
+                form.validateFields(['value']).finally(noop);
+              }, 100);
+            }
+          }
         })
         .catch(console.error);
     }
@@ -493,7 +506,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return () => {
       cancel = true;
     };
-  }, [asset, assetRegistry, from]);
+  }, [asset, assetRegistry, form, from]);
 
   return (
     <>
@@ -573,7 +586,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           >
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
-              autoReformatValue
               label={t('Send to account')}
               showScanner={true}
             />

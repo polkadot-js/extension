@@ -3,7 +3,7 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getStakingStatusByNominations, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { isUrl, parseRawNumber } from '@subwallet/extension-base/utils';
@@ -85,6 +85,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
 
   const ledger = _ledger.toPrimitive() as unknown as PalletDappsStakingAccountLedger;
   const currentEra = _era.toString();
+  const minDelegatorStake = chainApi.api.consts.dappsStaking.minimumStakingAmount.toString();
 
   let bnTotalActiveStake = BN_ZERO;
 
@@ -108,13 +109,15 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
       const bnCurrentStake = new BN(currentStake);
 
       if (bnCurrentStake.gt(BN_ZERO)) {
+        const dappStakingStatus = bnCurrentStake.gt(BN_ZERO) && bnCurrentStake.gte(new BN(minDelegatorStake)) ? StakingStatus.EARNING_REWARD : StakingStatus.NOT_EARNING;
+
         bnTotalActiveStake = bnTotalActiveStake.add(bnCurrentStake);
         const dappInfo = dAppInfoMap[dappAddress];
 
         nominationList.push({
-          status: StakingStatus.NOT_EARNING, // TODO
+          status: dappStakingStatus,
           chain,
-          validatorAddress: dappAddress,
+          validatorAddress: dappAddress.toLowerCase(),
           activeStake: currentStake,
           validatorMinStake: '0',
           validatorIdentity: dappInfo?.name,
@@ -145,6 +148,8 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
     return;
   }
 
+  const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);
+
   return {
     chain,
     type: StakingType.NOMINATED,
@@ -152,7 +157,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
     activeStake: bnTotalActiveStake.toString(),
     nominations: nominationList,
     unstakings: unstakingList,
-    status: StakingStatus.NOT_EARNING // TODO
+    status: stakingStatus
   } as NominatorMetadata;
 }
 
@@ -198,7 +203,7 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
     allDappsInfo.push({
       commission: 0,
       expectedReturn: 0,
-      address: dappAddress,
+      address: dappAddress.toLowerCase(),
       totalStake: totalStake,
       ownStake: '0',
       otherStake: totalStake.toString(),

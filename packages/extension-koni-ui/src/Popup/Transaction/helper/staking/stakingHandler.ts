@@ -5,6 +5,7 @@ import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
 import { getBondingOptions, getNominationPoolOptions } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
+import moment from 'moment';
 
 export function getUnstakingPeriod (unstakingPeriod?: number) {
   if (unstakingPeriod) {
@@ -21,16 +22,16 @@ export function getUnstakingPeriod (unstakingPeriod?: number) {
 }
 
 export function getWaitingTime (waitingTime?: number) {
-  const days = waitingTime ? Number(waitingTime / 24).toFixed(2) : 0;
+  const days = waitingTime ? moment.duration(waitingTime, 'hours').humanize() : 0;
 
   if (days < 1) {
     if (days) {
-      return 'Withdraw in <1 day';
+      return 'Withdrawal in a few hours';
     } else {
-      return 'Available for withdraw';
+      return 'Available for withdrawal';
     }
   } else {
-    return `Withdraw in ${days} days`;
+    return `Withdrawal in ${days}`;
   }
 }
 

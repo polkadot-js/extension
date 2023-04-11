@@ -6,7 +6,7 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFocusFormItem, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -75,6 +75,7 @@ const Component: React.FC = () => {
   , [collectionId, nftChain, nftCollections]);
 
   const chainInfo = useMemo(() => chainInfoMap[nftChain], [chainInfoMap, nftChain]);
+  const addressPrefix = useGetChainPrefixBySlug(nftChain);
 
   const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
@@ -214,7 +215,7 @@ const Component: React.FC = () => {
             validateTrigger='onBlur'
           >
             <AddressInput
-              autoReformatValue
+              addressPrefix={addressPrefix}
               label={t('Send to account')}
               showScanner={true}
             />

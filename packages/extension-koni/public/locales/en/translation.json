@@ -1001,5 +1001,19 @@
   "Destination chain": "",
   "Withdraw value": "",
   "Unstake value": "",
-  "Cancel unstake value": ""
+  "Cancel unstake value": "",
+  "Total members": "",
+  "Total nominators": "",
+  "Total stake": "",
+  "Other stake": "",
+  "APY": "",
+  "Transfer confirmation": "",
+  "NFT Transfer confirmation": "",
+  "Add to bond confirm": "",
+  "Unbond confirmation": "",
+  "Withdraw confirm": "",
+  "Claim reward confirm": "",
+  "Cancel unstake confirm": "",
+  "Transaction confirm": "",
+  "Withdraw amount": ""
 }

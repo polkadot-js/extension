@@ -459,10 +459,10 @@ export default class TransactionService {
 
     try {
       // Return one more history record if transaction send to account in the wallets
-      const toAccount = historyItem?.to && keyring.getAccount(historyItem.to);
+      const toAccount = historyItem?.to && keyring.getPair(historyItem.to);
 
       if (toAccount) {
-        return [historyItem, { ...historyItem, address: historyItem.to, direction: TransactionDirection.RECEIVED }];
+        return [historyItem, { ...historyItem, address: toAccount.address, direction: TransactionDirection.RECEIVED }];
       }
     } catch (e) {
       console.warn(e);
@@ -486,13 +486,24 @@ export default class TransactionService {
     switch (transaction.extrinsicType) {
       case ExtrinsicType.SEND_NFT: {
         const inputData = parseTransactionData<ExtrinsicType.SEND_NFT>(transaction.data);
-        const sender = keyring.getAccount(inputData.senderAddress);
-        const recipient = keyring.getAccount(inputData.recipientAddress);
 
-        sender && this.databaseService.handleNftTransfer(transaction.chain, [sender.address, ALL_ACCOUNT_KEY], inputData.nftItem)
-          .catch(console.error);
-        recipient && this.databaseService.addNft(recipient.address, { ...inputData.nftItem, owner: recipient.address })
-          .catch(console.error);
+        try {
+          const sender = keyring.getPair(inputData.senderAddress);
+
+          sender && this.databaseService.handleNftTransfer(transaction.chain, [sender.address, ALL_ACCOUNT_KEY], inputData.nftItem)
+            .catch(console.error);
+        } catch (e) {
+          console.error(e);
+        }
+
+        try {
+          const recipient = keyring.getPair(inputData.recipientAddress);
+
+          recipient && this.databaseService.addNft(recipient.address, { ...inputData.nftItem, owner: recipient.address })
+            .catch(console.error);
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
   }

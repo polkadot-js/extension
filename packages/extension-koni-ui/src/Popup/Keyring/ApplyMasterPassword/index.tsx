@@ -98,9 +98,13 @@ const Component: React.FC<Props> = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const [migrated] = useState(accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && acc.isMasterPassword));
+
   const canMigrate = useMemo(
-    () => accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal)
-    , [accounts]
+    () => accounts
+      .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal)
+      .filter((acc) => !migrated.find((item) => item.address === acc.address))
+    , [accounts, migrated]
   );
 
   const needMigrate = useMemo(

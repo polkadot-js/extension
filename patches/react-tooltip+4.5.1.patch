@@ -1,9 +1,9 @@
 diff --git a/node_modules/react-tooltip/dist/index.es.js b/node_modules/react-tooltip/dist/index.es.js
-index 8fa98b4..e3d3599 100644
+index 0ce3064..affd243 100644
 --- a/node_modules/react-tooltip/dist/index.es.js
 +++ b/node_modules/react-tooltip/dist/index.es.js
-@@ -261,7 +261,7 @@ function windowListener (target) {
- 
+@@ -1720,7 +1720,7 @@ function windowListener (target) {
+    */
    target.prototype.onWindowResize = function () {
      if (!this.mount) return;
 -    this.hideTooltip();

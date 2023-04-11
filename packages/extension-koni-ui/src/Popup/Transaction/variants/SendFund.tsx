@@ -16,14 +16,8 @@ import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/compo
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { getFreeBalance, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
-import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
-import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
-import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
-import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { SendFundParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
+import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
@@ -37,6 +31,9 @@ import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
+
+import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
+import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
 interface TransferFormProps extends TransactionFormBaseProps {
   to: string;

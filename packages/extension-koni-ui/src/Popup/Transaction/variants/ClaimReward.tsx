@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
 import { StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
@@ -22,6 +21,7 @@ import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
@@ -58,6 +58,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const reward = useMemo((): StakingRewardItem | undefined => {
     return stakingRewardMap.find((item) => item.chain === chain && item.address === from && item.type === stakingType);
   }, [chain, from, stakingRewardMap, stakingType]);
+
+  const rewardList = useMemo((): StakingRewardItem[] => {
+    return stakingRewardMap.filter((item) => item.chain === chain && item.type === stakingType);
+  }, [chain, stakingRewardMap, stakingType]);
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -137,17 +141,26 @@ const Component: React.FC<Props> = (props: Props) => {
       return false;
     }
 
-    const exists = allNominatorInfo.find((value) => isSameAddress(value.address, account.address));
+    const isEvmChain = _isChainEvmCompatible(chain);
 
-    if (!exists) {
+    if (isEvmChain !== isEthereumAddress(account.address)) {
       return false;
     }
 
-    const isEvmChain = _isChainEvmCompatible(chain);
-    const isChainAllowClaimReward = _STAKING_CHAIN_GROUP.amplitude.includes(_stakingChain) || _STAKING_CHAIN_GROUP.astar.includes(_stakingChain);
+    const nominatorMetadata = allNominatorInfo.find((value) => isSameAddress(value.address, account.address));
 
-    return (stakingType === StakingType.POOLED || isChainAllowClaimReward) && isEvmChain === isEthereumAddress(account.address);
-  }, [allNominatorInfo, chainInfoMap, stakingChain, stakingType]);
+    if (!nominatorMetadata) {
+      return false;
+    }
+
+    const reward = rewardList.find((value) => isSameAddress(value.address, account.address));
+
+    const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(_stakingChain);
+    const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(_stakingChain);
+    const bnUnclaimedReward = new BN(reward?.unclaimedReward || '0');
+
+    return ((stakingType === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) || isAstarNetwork;
+  }, [allNominatorInfo, chainInfoMap, rewardList, stakingChain, stakingType]);
 
   useEffect(() => {
     const address = currentAccount?.address || '';

@@ -141,6 +141,11 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [defaultSlug, from, defaultStakingType, chain]);
 
+  const minStake = useMemo(() =>
+    stakingType === StakingType.POOLED ? chainStakingMetadata?.minPoolBonding || '0' : chainStakingMetadata?.minStake || '0'
+  , [chainStakingMetadata?.minPoolBonding, chainStakingMetadata?.minStake, stakingType]
+  );
+
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
   const onFieldsChange: FormCallbacks<StakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
@@ -278,7 +283,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 decimals={decimals}
                 label={t('Minimum active:')}
                 suffix={symbol}
-                value={stakingType === StakingType.POOLED ? chainStakingMetadata.minPoolBonding || '0' : chainStakingMetadata.minStake}
+                value={minStake}
                 valueColorSchema={'success'}
               />
             )
@@ -288,7 +293,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return null;
-  }, [chainStakingMetadata, decimals, stakingType, symbol, t]);
+  }, [chainStakingMetadata, decimals, symbol, t, minStake]);
 
   const onPreCheckReadOnly = usePreCheckReadOnly(from);
 
@@ -511,7 +516,8 @@ const Component: React.FC<Props> = (props: Props) => {
             estimatedEarning={chainStakingMetadata.expectedReturn}
             inflation={chainStakingMetadata.inflation}
             maxValidatorPerNominator={chainStakingMetadata.maxValidatorPerNominator}
-            minimumActive={{ decimals, value: chainStakingMetadata.minStake, symbol }}
+            minimumActive={{ decimals, value: minStake, symbol }}
+            stakingType={stakingType}
             unstakingPeriod={chainStakingMetadata.unstakingPeriod}
           />
         )

@@ -4,18 +4,25 @@
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNftByAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNftByAccount, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
+import { ActivityIndicator, ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Image, Plus } from 'phosphor-react';
+import { ArrowClockwise, Image, Plus } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
+
+const reloadIcon = <Icon
+  phosphorIcon={ArrowClockwise}
+  size='sm'
+  type='phosphor'
+/>;
 
 const rightIcon = <Icon
   phosphorIcon={Plus}
@@ -28,8 +35,31 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { nftCollections, nftItems } = useGetNftByAccount();
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const notify = useNotification();
 
   const subHeaderButton: ButtonProps[] = [
+    {
+      icon: reloadIcon,
+      disabled: loading,
+      size: 'sm',
+      onClick: () => {
+        setLoading(true);
+        notify({
+          icon: <ActivityIndicator size={32} />,
+          style: { top: 210 },
+          direction: 'vertical',
+          duration: 1.8,
+          message: t('Reloading')
+        });
+
+        reloadCron({ data: 'nft' })
+          .then(() => {
+            setLoading(false);
+          })
+          .catch(console.error);
+      }
+    },
     {
       icon: rightIcon,
       onClick: () => {

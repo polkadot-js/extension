@@ -1770,6 +1770,10 @@ export interface Notification {
 
 export type NotificationParams = Omit<Notification, 'id'>;
 
+export interface CronReloadRequest {
+  data: 'nft' | 'staking'
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1948,6 +1952,9 @@ export interface KoniRequestSignatures {
 
   // Notification
   'pri(notifications.subscribe)': [null, Notification[], Notification[]];
+
+  // Private
+  'pri(cron.reload)': [CronReloadRequest, boolean];
 
   // Mobile
   'mobile(ping)': [null, string];

@@ -3,7 +3,7 @@
 
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/utils';
+import { formatBalance, toShort } from '@subwallet/extension-koni-ui/utils';
 import { getValidatorKey } from '@subwallet/extension-koni-ui/utils/transaction/stake';
 import { BackgroundIcon, Button, Icon, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
@@ -73,12 +73,18 @@ const Component: React.FC<Props> = (props: Props) => {
 
             <div className={'middle-item__info'}>
               <span className={'middle-item__commission'}>
-                {t(`Commission: ${validatorInfo.commission} %`)}
+                {t('Commission')}: {validatorInfo.commission}%
               </span>
-              -
-              <span className={'middle-item__apy'}>
-                {t(`APY: ${apy}%`)}
-              </span>
+              {
+                apy !== '0' && (
+                  <div>
+                    -
+                    <span className={'middle-item__apy'}>
+                      {t('APY')}: {formatBalance(apy, 0)}%
+                    </span>
+                  </div>
+                )
+              }
             </div>
           </>
         }

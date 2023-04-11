@@ -130,13 +130,19 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
     if (_isSubstrateRelayChain(chainInfo) && networkAPI.query.nominationPools) {
       const poolMemberDatas = await networkAPI.query.nominationPools.poolMembers.multi(addresses);
 
-      for (const _poolMemberData of poolMemberDatas) {
-        const poolMemberData = _poolMemberData.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
+      if (poolMemberDatas) {
+        for (const _poolMemberData of poolMemberDatas) {
+          const poolMemberData = _poolMemberData.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
 
-        if (poolMemberData) {
-          const pooledBalance = new BN(poolMemberData.points.toString());
+          if (poolMemberData) {
+            const pooledBalance = new BN(poolMemberData.points.toString());
 
-          pooledStakingBalance = pooledStakingBalance.add(pooledBalance);
+            pooledStakingBalance = pooledStakingBalance.add(pooledBalance);
+
+            Object.entries(poolMemberData.unbondingEras).forEach(([, amount]) => {
+              pooledStakingBalance = pooledStakingBalance.add(new BN(amount));
+            });
+          }
         }
       }
     }

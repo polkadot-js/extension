@@ -277,7 +277,9 @@ export class KoniCron {
     this.removeCron('refreshNft');
     this.addCron('refreshNft', this.refreshNft(address, serviceInfo.chainApiMap, this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
 
-    await waitTimeout(1000);
+    await waitTimeout(1800);
+
+    return true;
   }
 
   public async reloadStaking () {
@@ -287,6 +289,8 @@ export class KoniCron {
     this.removeCron('refreshStakingReward');
     this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
 
-    await waitTimeout(1000);
+    await waitTimeout(1800);
+
+    return true;
   }
 }

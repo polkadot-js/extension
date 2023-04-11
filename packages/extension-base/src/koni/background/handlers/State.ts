@@ -585,7 +585,7 @@ export default class KoniState {
     if (address === ALL_ACCOUNT_KEY) {
       const pairs = keyring.getAccounts();
       const pair = pairs[0];
-      const pairGenesisHash = pair.meta.genesisHash as string;
+      const pairGenesisHash = pair?.meta.genesisHash as string;
 
       if (pairs.length > 1 || !pair) {
         result.allGenesisHash = currentGenesisHash || undefined;

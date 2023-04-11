@@ -138,8 +138,8 @@ export async function showAccount (address: string, isShowing: boolean): Promise
   return sendMessage('pri(accounts.show)', { address, isShowing });
 }
 
-export async function saveCurrentAccountAddress (data: RequestCurrentAccountAddress, callback: (data: CurrentAccountInfo) => void): Promise<boolean> {
-  return sendMessage('pri(currentAccount.saveAddress)', data, callback);
+export async function saveCurrentAccountAddress (data: RequestCurrentAccountAddress): Promise<CurrentAccountInfo> {
+  return sendMessage('pri(currentAccount.saveAddress)', data);
 }
 
 export async function toggleBalancesVisibility (callback: (data: RequestSettingsType) => void): Promise<boolean> {
@@ -372,10 +372,6 @@ export async function subscribeAccountsInputAddress (cb: (data: OptionInputAddre
 
 export async function saveRecentAccountId (accountId: string): Promise<SingleAddress> {
   return sendMessage('pri(accounts.saveRecent)', { accountId });
-}
-
-export async function triggerAccountsSubscription (): Promise<boolean> {
-  return sendMessage('pri(accounts.triggerSubscription)');
 }
 
 export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {

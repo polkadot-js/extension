@@ -395,50 +395,44 @@ export default class KoniExtension {
 
   private async accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): Promise<AccountsWithCurrentAddress> {
     const cb = createSubscription<'pri(accounts.subscribeWithCurrentAddress)'>(id, port);
+    const keyringService = this.#koniState.keyringService;
 
-    return await new Promise<AccountsWithCurrentAddress>((resolve): void => {
-      const subscription = accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {
-        const transformedAccounts = transformAccounts(storedAccounts);
+    await this.#koniState.eventService.waitAccountReady;
 
-        const accounts: AccountJson[] = transformedAccounts && transformedAccounts.length
-          ? [
-            {
-              ...ACCOUNT_ALL_JSON
-            },
-            ...transformedAccounts
-          ]
-          : [];
+    const currentAccount = keyringService.currentAccount;
+    const accountsSubject = keyring.accounts.subject;
+    const transformedAccounts = transformAccounts(accountsSubject.value);
+    const responseData: AccountsWithCurrentAddress = {
+      accounts: transformedAccounts?.length ? [{ ...ACCOUNT_ALL_JSON }, ...transformedAccounts] : [],
+      currentAddress: currentAccount?.address,
+      currentGenesisHash: currentAccount?.currentGenesisHash
+    };
 
-        const accountsWithCurrentAddress: AccountsWithCurrentAddress = {
-          accounts
-        };
+    const subscriptionAccounts = accountsSubject.subscribe((storedAccounts: SubjectInfo): void => {
+      const transformedAccounts = transformAccounts(storedAccounts);
 
-        setTimeout(() => {
-          const accountInfo = this.#koniState.keyringService.currentAccount;
+      responseData.accounts = transformedAccounts?.length ? [{ ...ACCOUNT_ALL_JSON }, ...transformedAccounts] : [];
 
-          if (accountInfo) {
-            accountsWithCurrentAddress.currentAddress = accountInfo.address;
-
-            if (accountInfo.address === ALL_ACCOUNT_KEY) {
-              accountsWithCurrentAddress.currentGenesisHash = accountInfo.currentGenesisHash;
-            } else {
-              const acc = accounts.find((a) => (a.address === accountInfo.address));
-
-              accountsWithCurrentAddress.currentGenesisHash = acc?.genesisHash || ALL_GENESIS_HASH;
-            }
-          }
-
-          resolve(accountsWithCurrentAddress);
-          cb(accountsWithCurrentAddress);
-        }, 300);
-      });
-
-      this.createUnsubscriptionHandle(id, subscription.unsubscribe);
-
-      port.onDisconnect.addListener((): void => {
-        this.cancelSubscription(id);
-      });
+      cb(responseData);
     });
+
+    const subscriptionCurrentAccount = keyringService.currentAccountSubject.subscribe((currentAccountData) => {
+      responseData.currentAddress = currentAccountData.address;
+      responseData.currentGenesisHash = currentAccountData.currentGenesisHash;
+
+      cb(responseData);
+    });
+
+    this.createUnsubscriptionHandle(id, () => {
+      subscriptionAccounts.unsubscribe();
+      subscriptionCurrentAccount.unsubscribe();
+    });
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return responseData;
   }
 
   private accountsGetAll (id: string, port: chrome.runtime.Port): string {
@@ -464,13 +458,13 @@ export default class KoniExtension {
     return keyring.saveRecent(accountId);
   }
 
-  private triggerAccountsSubscription (): boolean {
-    const accountsSubject = accountsObservable.subject;
-
-    accountsSubject.next(accountsSubject.getValue());
-
-    return true;
-  }
+  // private triggerAccountsSubscription (): boolean {
+  //   const accountsSubject = accountsObservable.subject;
+  //
+  //   accountsSubject.next(accountsSubject.getValue());
+  //
+  //   return true;
+  // }
 
   private _getAuthListV2 (): Promise<AuthUrls> {
     return new Promise<AuthUrls>((resolve, reject) => {
@@ -937,23 +931,17 @@ export default class KoniExtension {
   }
 
   private updateCurrentAccountAddress (address: string): boolean {
-    this._saveCurrentAccountAddress(address, () => {
-      this.triggerAccountsSubscription();
-    });
+    this._saveCurrentAccountAddress(address);
 
     return true;
   }
 
-  private saveCurrentAccountAddress (data: RequestCurrentAccountAddress, id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'pri(currentAccount.saveAddress)'>(id, port);
-
-    this._saveCurrentAccountAddress(data.address, cb);
-
-    port.onDisconnect.addListener((): void => {
-      this.cancelSubscription(id);
+  private async saveCurrentAccountAddress (data: RequestCurrentAccountAddress, id: string, port: chrome.runtime.Port): Promise<CurrentAccountInfo> {
+    return new Promise<CurrentAccountInfo>((resolve) => {
+      this._saveCurrentAccountAddress(data.address, (currentInfo) => {
+        resolve(currentInfo);
+      });
     });
-
-    return true;
   }
 
   private async getAssetSetting (): Promise<Record<string, AssetSetting>> {
@@ -3140,10 +3128,8 @@ export default class KoniExtension {
         return this.accountsGetAll(id, port);
       case 'pri(accounts.saveRecent)':
         return this.saveRecentAccountId(request as RequestSaveRecentAccount);
-      case 'pri(accounts.triggerSubscription)':
-        return this.triggerAccountsSubscription();
       case 'pri(currentAccount.saveAddress)':
-        return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress, id, port);
+        return await this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress, id, port);
       case 'pri(accounts.updateCurrentAddress)':
         return this.updateCurrentAccountAddress(request as string);
       case 'pri(settings.changeBalancesVisibility)':

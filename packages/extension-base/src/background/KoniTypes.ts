@@ -364,8 +364,8 @@ export interface AccountsWithCurrentAddress {
   accounts: AccountJson[];
   currentAddress?: string;
   currentGenesisHash?: string | null;
-  isShowBalance?: boolean;
-  allAccountLogo?: string;
+  isShowBalance?: boolean; // Deprecated and move to setting
+  allAccountLogo?: string; // Deprecated and move to setting
 }
 
 export interface OptionInputAddress {
@@ -1865,10 +1865,9 @@ export interface KoniRequestSignatures {
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, AccountsWithCurrentAddress, AccountsWithCurrentAddress];
   'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
   'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
-  'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(accounts.get.meta)': [RequestAccountMeta, ResponseAccountMeta];
   'pri(accounts.updateCurrentAddress)': [string, boolean];
-  'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
+  'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, CurrentAccountInfo];
 
   // Settings
   'pri(settings.changeBalancesVisibility)': [null, boolean, UiSettings];

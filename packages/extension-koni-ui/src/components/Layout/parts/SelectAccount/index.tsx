@@ -11,7 +11,7 @@ import { useGetCurrentTab } from '@subwallet/extension-koni-ui/hooks/auth/useGet
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
+import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -89,10 +89,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           address: address
         } as CurrentAccountInfo;
 
-        saveCurrentAccountAddress(accountInfo, () => {
-          triggerAccountsSubscription().catch((e) => {
-            console.error('There is a problem when trigger Accounts Subscription', e);
-          });
+        saveCurrentAccountAddress(accountInfo).then(() => {
           const pathName = location.pathname;
           const locationPaths = location.pathname.split('/');
 

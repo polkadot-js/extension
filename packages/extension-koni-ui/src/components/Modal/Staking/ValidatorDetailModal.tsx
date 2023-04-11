@@ -27,10 +27,10 @@ function Component (props: Props): React.ReactElement<Props> {
     expectedReturn: earningEstimated = '',
     identity: validatorName = '',
     minBond: minStake,
-    ownStake,
     otherStake,
-    totalStake,
-    symbol } = validatorItem;
+    ownStake,
+    symbol,
+    totalStake } = validatorItem;
   const { t } = useTranslation();
 
   const { inactiveModal } = useContext(ModalContext);

@@ -37,11 +37,13 @@ export const getAccountInfoByNetwork = (networkMap: Record<string, NetworkJson>,
 
 export const findAccountByAddress = (accounts: AccountJson[], address?: string): AccountJson | null => {
   try {
-    if (!isAddress(address)) {
+    const isAllAccount = address && isAccountAll(address);
+
+    if (!isAddress(address) && !isAllAccount) {
       return null;
     }
 
-    const originAddress = address === ALL_ACCOUNT_KEY ? address : isEthereumAddress(address) ? address : encodeAddress(decodeAddress(address));
+    const originAddress = isAccountAll(address) ? address : isEthereumAddress(address) ? address : encodeAddress(decodeAddress(address));
     const result = accounts.find((account) => account.address.toLowerCase() === originAddress.toLowerCase());
 
     return result || null;

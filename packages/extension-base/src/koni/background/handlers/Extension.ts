@@ -936,7 +936,7 @@ export default class KoniExtension {
     return true;
   }
 
-  private async saveCurrentAccountAddress (data: RequestCurrentAccountAddress, id: string, port: chrome.runtime.Port): Promise<CurrentAccountInfo> {
+  private async saveCurrentAccountAddress (data: RequestCurrentAccountAddress): Promise<CurrentAccountInfo> {
     return new Promise<CurrentAccountInfo>((resolve) => {
       this._saveCurrentAccountAddress(data.address, (currentInfo) => {
         resolve(currentInfo);
@@ -2995,6 +2995,8 @@ export default class KoniExtension {
     } else if (data === 'staking') {
       return await this.#koniState.reloadStaking();
     }
+
+    return Promise.resolve(false);
   }
 
   // --------------------------------------------------------------
@@ -3139,7 +3141,7 @@ export default class KoniExtension {
       case 'pri(accounts.saveRecent)':
         return this.saveRecentAccountId(request as RequestSaveRecentAccount);
       case 'pri(currentAccount.saveAddress)':
-        return await this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress, id, port);
+        return await this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress);
       case 'pri(accounts.updateCurrentAddress)':
         return this.updateCurrentAccountAddress(request as string);
       case 'pri(settings.changeBalancesVisibility)':

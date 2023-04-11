@@ -5,24 +5,17 @@ import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem } from '@subwallet/extension-koni-ui/components';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import {
-  useFilterModal,
-  useGetStakingList,
-  useNotification,
-  usePreCheckReadOnly,
-  useSelector,
-  useTranslation
-} from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetStakingList, useNotification, usePreCheckReadOnly, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import {ActivityIndicator, ButtonProps, Icon, ModalContext, SwList} from '@subwallet/react-ui';
-import {ArrowClockwise, FadersHorizontal, Plus, Trophy} from 'phosphor-react';
+import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { ArrowClockwise, FadersHorizontal, Plus, Trophy } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import MoreActionModal, { MORE_ACTION_MODAL } from './MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from './StakingDetailModal';
-import {reloadCron} from "@subwallet/extension-koni-ui/messaging";
 
 type Props = ThemeProps
 
@@ -66,7 +59,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [address] = useState(currentAccount?.address);
   const [selectedItem, setSelectedItem] = useState<StakingDataType | undefined>(undefined);
 
-    const [loading, setLoading] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
 
   const filterFunction = useMemo<(item: StakingDataType) => boolean>(() => {

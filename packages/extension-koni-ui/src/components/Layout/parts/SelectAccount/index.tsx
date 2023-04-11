@@ -84,6 +84,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     if (address) {
       const accountByAddress = findAccountByAddress(accounts, address);
 
+      console.log(address, accounts);
+
       if (accountByAddress) {
         const accountInfo = {
           address: address

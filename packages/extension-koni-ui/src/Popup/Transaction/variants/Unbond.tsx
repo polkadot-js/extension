@@ -241,7 +241,8 @@ const Component: React.FC<Props> = (props: Props) => {
           >
             <Form.Item
               hidden={!isAll}
-              name={'from'}>
+              name={'from'}
+            >
               <AccountSelector
                 filter={_accountFilterFunc(allNominatorInfo, chainInfoMap, stakingType, stakingChain)}
                 label={t('Unstake from account')}

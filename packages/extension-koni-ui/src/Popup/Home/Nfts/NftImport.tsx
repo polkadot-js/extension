@@ -404,6 +404,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
             <Form.Item
               name='collectionName'
+              required={true}
               rules={[{ validator: collectionNameValidator }]}
               statusHelpAsTooltip={true}
             >

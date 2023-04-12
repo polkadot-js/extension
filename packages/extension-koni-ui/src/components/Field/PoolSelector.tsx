@@ -14,8 +14,9 @@ import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staki
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, InputRef, SelectModal, useExcludeModal } from '@subwallet/react-ui';
+import { Badge, Button, Icon, InputRef, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import BigN from 'bignumber.js';
 import { Book, CaretLeft, FadersHorizontal, Lightning, SortAscending } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,53 +32,25 @@ interface Props extends ThemeProps, BasicInputWrapper {
   onClickBookBtn?: (e: SyntheticEvent) => void;
 }
 
+enum SortKey {
+  MEMBER = 'member',
+  TOTAL_POOLED = 'total-pooled',
+  DEFAULT = 'default'
+}
+
+interface SortOption {
+  label: string;
+  value: SortKey;
+  desc: boolean;
+}
+
+interface FilterOption {
+  label: string;
+  value: NominationPoolDataType['state'];
+}
+
 const SORTING_MODAL_ID = 'pool-sorting-modal';
 const FILTER_MODAL_ID = 'pool-filter-modal';
-
-const sortingOptions = [
-  {
-    label: 'Lowest commission',
-    value: 'commission'
-  },
-  {
-    label: 'Highest return',
-    value: 'return'
-  }
-];
-
-const filterOptions = [
-  {
-    label: 'Active validator',
-    value: ''
-  },
-  {
-    label: 'Waiting list',
-    value: ''
-  },
-  {
-    label: 'Locked',
-    value: ''
-  },
-  {
-    label: 'Destroying',
-    value: ''
-  }
-];
-
-const getFilteredList = (items: NominationPoolDataType[], filters: string[]) => {
-  const filteredList: NominationPoolDataType[] = [];
-
-  items.forEach((item) => {
-    const isValidationPassed = filters.length <= 0;
-
-    // TODO: logic filter
-    if (isValidationPassed) {
-      filteredList.push(item);
-    }
-  });
-
-  return filteredList;
-};
 
 const renderEmpty = () => <EmptyAccount />;
 
@@ -99,10 +72,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return nominatorMetadata[0]?.nominations.map((item) => item.validatorAddress) || [];
   }, [nominatorMetadata]);
 
-  const filteredList = useMemo(() => {
-    return getFilteredList(items, selectedFilters);
-  }, [items, selectedFilters]);
-
   const isDisabled = useMemo(() =>
     disabled ||
     !!nominationPoolValueList.length ||
@@ -110,8 +79,62 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   , [disabled, items.length, nominationPoolValueList.length]
   );
 
+  const sortingOptions: SortOption[] = useMemo(() => {
+    return [
+      {
+        desc: false,
+        label: t('Lowest member'),
+        value: SortKey.MEMBER
+      },
+      {
+        desc: true,
+        label: t('Highest total pooled'),
+        value: SortKey.TOTAL_POOLED
+      }
+    ];
+  }, [t]);
+
+  const filterOptions: FilterOption[] = useMemo(() => ([
+    {
+      label: t('Active validator'),
+      value: 'Open'
+    },
+    {
+      label: t('Locked'),
+      value: 'Locked'
+    },
+    {
+      label: t('Destroying'),
+      value: 'Destroying'
+    }
+  ]), [t]);
+
   const [viewDetailItem, setViewDetailItem] = useState<NominationPoolDataType | undefined>(undefined);
-  const [sortSelection, setSortSelection] = useState<string>('');
+  const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.DEFAULT);
+
+  const resultList = useMemo((): NominationPoolDataType[] => {
+    return [...items]
+      .filter((value) => {
+        const filters = selectedFilters as NominationPoolDataType['state'][];
+
+        if (filters.length) {
+          return filters.includes(value.state);
+        } else {
+          return true;
+        }
+      })
+      .sort((a: NominationPoolDataType, b: NominationPoolDataType) => {
+        switch (sortSelection) {
+          case SortKey.MEMBER:
+            return a.memberCounter - b.memberCounter;
+          case SortKey.TOTAL_POOLED:
+            return new BigN(b.bondedAmount).minus(a.bondedAmount).toNumber();
+          case SortKey.DEFAULT:
+          default:
+            return 0;
+        }
+      });
+  }, [items, selectedFilters, sortSelection]);
 
   const _onSelectItem = useCallback((value: string) => {
     onChange && onChange({ target: { value } });
@@ -169,7 +192,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, []);
 
   const onChangeSortOpt = useCallback((value: string) => {
-    setSortSelection(value);
+    setSortSelection(value as SortKey);
     closeSortingModal();
   }, [closeSortingModal]);
 
@@ -182,14 +205,20 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [inactiveModal]);
 
   useEffect(() => {
-    onChange && onChange({ target: { value: nominationPoolValueList[0] } });
+    const selectedPool = nominationPoolValueList[0] || String(PREDEFINED_STAKING_POOL[chain] || '');
+
+    onChange && onChange({ target: { value: selectedPool } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nominationPoolValueList]);
 
   return (
     <>
       <SelectModal
-        actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+        actionBtnIcon={(
+          <Badge dot={!!selectedFilters.length}>
+            <Icon phosphorIcon={FadersHorizontal} />
+          </Badge>
+        )}
         className={`${className} modal-full`}
         closeIcon={(
           <Icon
@@ -201,7 +230,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         id={id}
         inputClassName={`${className} pool-selector-input`}
         itemKey={'idStr'}
-        items={filteredList}
+        items={resultList}
         label={label}
         loading={loading}
         onClickActionBtn={onClickActionBtn}
@@ -278,7 +307,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       />
 
       <PoolDetailModal
-        decimals={0}
+        decimals={viewDetailItem?.decimals || 0}
         onCancel={onCloseDetail}
         selectedNominationPool={viewDetailItem}
         status={'active'}

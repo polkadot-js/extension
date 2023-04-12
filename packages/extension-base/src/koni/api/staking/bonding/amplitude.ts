@@ -3,12 +3,12 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { BlockHeader, getBondedValidators, isUnstakeAll, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { BlockHeader, getBondedValidators, getStakingStatusByNominations, isUnstakeAll, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
-import { BN } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface InflationConfig {
@@ -78,8 +78,11 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
     chainApi.api.query.parachainStaking.unstaking(address)
   ]);
 
+  const minDelegatorStake = chainApi.api.consts.parachainStaking.minDelegatorStake.toString();
   const delegatorState = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
   const unstakingInfo = _unstakingInfo.toPrimitive() as unknown as Record<string, number>;
+
+  console.log('unstakingInfo ampe', unstakingInfo, !!unstakingInfo);
 
   if (!delegatorState && !unstakingInfo) {
     return;
@@ -88,18 +91,24 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
   let activeStake = '0';
 
   if (delegatorState) { // delegatorState can be null while unstaking all
-    const identityInfo = (await chainApi.api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration;
-    const identity = parseIdentity(identityInfo);
+    const identityInfo = chainApi.api.query.identity ? (await chainApi.api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration : undefined;
+    const identity = identityInfo ? parseIdentity(identityInfo) : undefined;
 
     activeStake = delegatorState.amount.toString();
+    const bnActiveStake = new BN(activeStake);
+    let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
+
+    if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
+      delegationStatus = StakingStatus.EARNING_REWARD;
+    }
 
     nominationList.push({
-      status: StakingStatus.NOT_EARNING,
+      status: delegationStatus,
       chain,
       validatorAddress: delegatorState.owner,
       activeStake: delegatorState.amount.toString(),
       validatorMinStake: '0',
-      hasUnstaking: !!unstakingInfo,
+      hasUnstaking: !!unstakingInfo && Object.values(unstakingInfo).length > 0,
       validatorIdentity: identity
     });
   }
@@ -135,9 +144,12 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
     return;
   }
 
+  const stakingStatus = getStakingStatusByNominations(new BN(activeStake), nominationList);
+
   return {
     chain,
     type: StakingType.NOMINATED,
+    status: stakingStatus,
     address: address,
     activeStake: activeStake,
     nominations: nominationList,
@@ -241,10 +253,4 @@ export async function getAmplitudeClaimRewardExtrinsic (substrateApi: _Substrate
     chainApi.api.tx.parachainStaking.incrementDelegatorRewards(),
     chainApi.api.tx.parachainStaking.claimRewards()
   ]);
-}
-
-export async function getAmplitudeCancelWithdrawalExtrinsic (substrateApi: _SubstrateApi) {
-  const chainApi = await substrateApi.isReady;
-
-  return chainApi.api.tx.parachainStaking.cancelLeaveCandidates();
 }

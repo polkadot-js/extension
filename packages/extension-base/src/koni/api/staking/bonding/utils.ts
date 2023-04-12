@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
@@ -14,6 +14,7 @@ export interface PalletNominationPoolsPoolMember {
   lasRecordedRewardCounter: number,
   unbondingEras: Record<string, number>
 }
+
 export interface PalletDappsStakingDappInfo {
   address: string,
   name: string,
@@ -22,22 +23,26 @@ export interface PalletDappsStakingDappInfo {
   url: string,
   imagesUrl: string[]
 }
+
 export interface PalletDappsStakingUnlockingChunk {
   amount: number,
   unlockEra: number
 }
+
 export interface PalletDappsStakingAccountLedger {
   locked: number,
   unbondingInfo: {
     unlockingChunks: PalletDappsStakingUnlockingChunk[]
   }
 }
+
 export interface BlockHeader {
   parentHash: string,
   number: number,
   stateRoot: string,
   extrinsicsRoot: string
 }
+
 export interface ParachainStakingStakeOption {
   owner: string,
   amount: number
@@ -290,12 +295,8 @@ export function getBondedValidators (nominations: NominationInfo[]) {
   let nominationCount = 0;
 
   for (const nomination of nominations) {
-    const bnActiveStake = new BN(nomination.activeStake);
-
-    if (bnActiveStake.gt(BN_ZERO)) {
-      nominationCount += 1;
-      bondedValidators.push(reformatAddress(nomination.validatorAddress, 0));
-    }
+    nominationCount += 1;
+    bondedValidators.push(reformatAddress(nomination.validatorAddress, 0));
   }
 
   return {
@@ -347,7 +348,7 @@ export function getStakingAvailableActionsByChain (chain: string, type: StakingT
   return [StakingAction.STAKE, StakingAction.UNSTAKE, StakingAction.WITHDRAW, StakingAction.CANCEL_UNSTAKE];
 }
 
-export function getStakingAvailableActionsByNominator (nominatorMetadata: NominatorMetadata): StakingAction[] {
+export function getStakingAvailableActionsByNominator (nominatorMetadata: NominatorMetadata, unclaimedReward?: string): StakingAction[] {
   const result: StakingAction[] = [StakingAction.STAKE];
 
   const bnActiveStake = new BN(nominatorMetadata.activeStake);
@@ -355,9 +356,14 @@ export function getStakingAvailableActionsByNominator (nominatorMetadata: Nomina
   if (nominatorMetadata.activeStake && bnActiveStake.gt(BN_ZERO)) {
     result.push(StakingAction.UNSTAKE);
 
-    const isChainAllowClaimReward = _STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain) || _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
+    const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
+    const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain);
+    const bnUnclaimedReward = new BN(unclaimedReward || '0');
 
-    if (nominatorMetadata.type === StakingType.POOLED || isChainAllowClaimReward) {
+    if (
+      ((nominatorMetadata.type === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) ||
+      isAstarNetwork
+    ) {
       result.push(StakingAction.CLAIM_REWARD);
     }
   }
@@ -410,4 +416,28 @@ export function getWithdrawalInfo (nominatorMetadata: NominatorMetadata) {
   }
 
   return result;
+}
+
+export function getStakingStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): StakingStatus {
+  let stakingStatus: StakingStatus = StakingStatus.EARNING_REWARD;
+
+  if (bnTotalActiveStake.isZero()) {
+    stakingStatus = StakingStatus.NOT_EARNING;
+  } else {
+    let invalidDelegationCount = 0;
+
+    for (const nomination of nominationList) {
+      if (nomination.status === StakingStatus.NOT_EARNING) {
+        invalidDelegationCount += 1;
+      }
+    }
+
+    if (invalidDelegationCount > 0 && invalidDelegationCount < nominationList.length) {
+      stakingStatus = StakingStatus.PARTIALLY_EARNING;
+    } else if (invalidDelegationCount === nominationList.length) {
+      stakingStatus = StakingStatus.NOT_EARNING;
+    }
+  }
+
+  return stakingStatus;
 }

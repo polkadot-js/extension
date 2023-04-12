@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
-import { BasicTxErrorType, TransactionErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, StakingTxErrorType, TransactionErrorType } from '@subwallet/extension-base/background/KoniTypes';
 
 // Todo: finish this map in the future
 const defaultErrorMap = {
@@ -48,6 +48,26 @@ const defaultErrorMap = {
   },
   [BasicTxErrorType.UNSUPPORTED]: {
     message: 'This transaction is not supported',
+    code: undefined
+  },
+  [StakingTxErrorType.NOT_ENOUGH_MIN_STAKE]: {
+    message: 'Not enough min stake',
+    code: undefined
+  },
+  [StakingTxErrorType.EXCEED_MAX_NOMINATIONS]: {
+    message: 'Exceed max nominations',
+    code: undefined
+  },
+  [StakingTxErrorType.EXIST_UNSTAKING_REQUEST]: {
+    message: 'Exist unstaking request',
+    code: undefined
+  },
+  [StakingTxErrorType.INVALID_ACTIVE_STAKE]: {
+    message: 'Invalid active stake',
+    code: undefined
+  },
+  [StakingTxErrorType.EXCEED_MAX_UNSTAKING]: {
+    message: 'Exceed max unstaking',
     code: undefined
   }
 } as Record<TransactionErrorType, { message: string, code?: number }>;

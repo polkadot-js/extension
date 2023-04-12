@@ -42,7 +42,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { inactiveModal } = useContext(ModalContext);
 
-  const { currentAccount } = useSelector((state) => state.accountState);
+  const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
 
   const [selected, setSelected] = useState<StakingAction | undefined>();
 
@@ -64,6 +64,13 @@ const Component: React.FC<Props> = (props: Props) => {
   const handleWithdrawalAction = useCallback(() => {
     if (!nominatorMetadata) {
       setSelected(undefined);
+
+      return;
+    }
+
+    if (isAllAccount) {
+      setSelected(undefined);
+      navigate(`/transaction/withdraw/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
 
       return;
     }
@@ -92,7 +99,7 @@ const Component: React.FC<Props> = (props: Props) => {
       .finally(() => {
         setSelected(undefined);
       });
-  }, [nominatorMetadata, onError, onSuccess]);
+  }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess]);
 
   const handleClaimRewardAction = useCallback(() => {
     if (!nominatorMetadata) {
@@ -101,7 +108,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
-    if (nominatorMetadata.type === StakingType.POOLED) {
+    if (nominatorMetadata.type === StakingType.POOLED || isAllAccount) {
       setSelected(undefined);
       navigate(`/transaction/claim-reward/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
 
@@ -119,15 +126,15 @@ const Component: React.FC<Props> = (props: Props) => {
       .finally(() => {
         setSelected(undefined);
       });
-  }, [navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward]);
+  }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward]);
 
   const availableActions = useMemo(() => {
     if (!nominatorMetadata) {
       return [];
     }
 
-    return getStakingAvailableActionsByNominator(nominatorMetadata);
-  }, [nominatorMetadata]);
+    return getStakingAvailableActionsByNominator(nominatorMetadata, reward?.unclaimedReward);
+  }, [nominatorMetadata, reward?.unclaimedReward]);
 
   const onNavigate = useCallback((url: string) => {
     return () => {

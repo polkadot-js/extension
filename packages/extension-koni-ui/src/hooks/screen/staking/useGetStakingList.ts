@@ -12,6 +12,20 @@ import { useSelector } from 'react-redux';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 
+function validateValueInString (value?: string) {
+  try {
+    if (!value) {
+      return false;
+    }
+
+    const valueInNumber = parseFloat(value);
+
+    return !(isNaN(valueInNumber) || valueInNumber === undefined || valueInNumber === null);
+  } catch (err) {
+    return false;
+  }
+}
+
 const groupStakingItems = (stakingItems: StakingItem[]): StakingItem[] => {
   const itemGroups: string[] = [];
 
@@ -46,9 +60,17 @@ const groupStakingItems = (stakingItems: StakingItem[]): StakingItem[] => {
         groupedStakingItem.type = stakingItem.type;
         groupedStakingItem.state = stakingItem.state;
 
-        groupedBalance += parseFloat(stakingItem.balance as string);
-        groupedActiveBalance += parseFloat(stakingItem.activeBalance as string);
-        groupedUnlockingBalance += parseFloat(stakingItem.unlockingBalance as string);
+        if (validateValueInString(stakingItem.balance as string)) {
+          groupedBalance += parseFloat(stakingItem.balance as string);
+        }
+
+        if (validateValueInString(stakingItem.activeBalance as string)) {
+          groupedActiveBalance += parseFloat(stakingItem.activeBalance as string);
+        }
+
+        if (validateValueInString(stakingItem.unlockingBalance as string)) {
+          groupedUnlockingBalance += parseFloat(stakingItem.unlockingBalance as string);
+        }
       }
     }
 
@@ -93,10 +115,21 @@ const groupStakingRewardItems = (stakingRewardItems: StakingRewardItem[]): Staki
         groupedStakingRewardItem.type = stakingRewardItem.type;
         groupedStakingRewardItem.address = ALL_ACCOUNT_KEY;
 
-        groupedLatestReward += parseFloat(stakingRewardItem.latestReward as string);
-        groupedTotalReward += parseFloat(stakingRewardItem.totalReward as string);
-        groupedTotalSlash += parseFloat(stakingRewardItem.totalSlash as string);
-        groupedUnclaimedReward += parseFloat(stakingRewardItem.unclaimedReward as string);
+        if (validateValueInString(stakingRewardItem.latestReward as string)) {
+          groupedLatestReward += parseFloat(stakingRewardItem.latestReward as string);
+        }
+
+        if (validateValueInString(stakingRewardItem.totalReward as string)) {
+          groupedTotalReward += parseFloat(stakingRewardItem.totalReward as string);
+        }
+
+        if (validateValueInString(stakingRewardItem.totalSlash as string)) {
+          groupedTotalSlash += parseFloat(stakingRewardItem.totalSlash as string);
+        }
+
+        if (validateValueInString(stakingRewardItem.unclaimedReward as string)) {
+          groupedUnclaimedReward += parseFloat(stakingRewardItem.unclaimedReward as string);
+        }
       }
     }
 
@@ -155,6 +188,7 @@ const groupNominatorMetadatas = (nominatorMetadataList: NominatorMetadata[]): No
       if (nominatorMetadata.chain === chain && nominatorMetadata.type === type) {
         groupedActiveStake = groupedActiveStake.add(new BN(nominatorMetadata.activeStake));
         earnMapping[nominatorMetadata.address] = nominatorMetadata.status === StakingStatus.EARNING_REWARD;
+        groupedNominatorMetadata.unstakings = [...groupedNominatorMetadata.unstakings, ...nominatorMetadata.unstakings];
       }
     }
 

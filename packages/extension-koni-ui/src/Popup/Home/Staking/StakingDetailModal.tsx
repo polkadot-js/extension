@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
@@ -37,7 +38,7 @@ export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) =
 };
 
 const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominatorMetadata, rewardItem, staking }: Props) => {
-  const { expectedReturn, minStake, unstakingPeriod } = chainStakingMetadata;
+  const { expectedReturn, minPoolBonding, minStake, unstakingPeriod } = chainStakingMetadata;
   const { activeStake, address, chain, nominations, type, unstakings } = nominatorMetadata;
   const showingOption = isShowNominationByValidator(chain);
   const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
@@ -118,6 +119,10 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
       return StakingStatusUi.partialEarning;
     }
 
+    if (status === StakingStatus.WAITING) {
+      return StakingStatusUi.waiting;
+    }
+
     return StakingStatusUi.inactive;
   }, []);
 
@@ -147,11 +152,13 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           valueColorSchema={'gray'}
         />
 
-        <MetaInfo.Status
-          label={t('Staking status')}
-          statusIcon={getStakingStatus(item.status).icon}
-          statusName={getStakingStatus(item.status).name}
-          valueColorSchema={getStakingStatus(item.status).schema}
+        <MetaInfo.Number
+          decimals={decimals}
+          key={item.validatorAddress}
+          label={t('Min stake')}
+          suffix={staking.nativeToken}
+          value={item.validatorMinStake || '0'}
+          valueColorSchema={'gray'}
         />
 
         {!!unstakingData && showingOption === 'showByValidator' && <MetaInfo.Default
@@ -161,22 +168,26 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         >
           <div>
             <Number
-              className={'common-text text-light-4'}
+              className={'common-text text-light-4 text-right'}
               decimal={decimals}
               suffix={staking.nativeToken}
               value={unstakingData.claimable}
             />
 
-            {/* chi hien thi waiting time khi UnstakingStatus = unlocking, neu waitingTime = 0 && UnstakingStatus = unlocking => soon */}
             {unstakingData.status === UnstakingStatus.UNLOCKING.valueOf() &&
-              <Number
-                className={'sm-text text-light-4'}
-                decimal={0}
-                value={getWaitingTime(unstakingData.waitingTime)}
-              />
+              <div className={'sm-text text-light-4'}>
+                {getWaitingTime(unstakingData.waitingTime)}
+              </div>
             }
           </div>
         </MetaInfo.Default>}
+
+        <MetaInfo.Status
+          label={t('Staking status')}
+          statusIcon={getStakingStatus(item.status).icon}
+          statusName={getStakingStatus(item.status).name}
+          valueColorSchema={getStakingStatus(item.status).schema}
+        />
       </MetaInfo>
     );
   }, [decimals, getStakingStatus, networkPrefix, showingOption, staking.nativeToken, t, unstakings]);
@@ -212,7 +223,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           valueColorSchema={getStakingStatus(nominatorMetadata.status).schema}
         />
 
-        {!!rewardItem?.totalReward && !isNaN(parseFloat(rewardItem?.totalReward)) && (
+        {!!rewardItem?.totalReward && parseFloat(rewardItem?.totalReward) > 0 && (
           <MetaInfo.Number
             decimals={decimals}
             label={t('Total reward')}
@@ -221,7 +232,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           />
         )}
 
-        {!!rewardItem?.unclaimedReward && !isNaN(parseFloat(rewardItem?.unclaimedReward)) && (
+        {!!rewardItem?.unclaimedReward && parseFloat(rewardItem?.unclaimedReward) > 0 && (
           <MetaInfo.Number
             decimals={decimals}
             label={t('Unclaimed reward')}
@@ -237,14 +248,14 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           value={String(parseFloat(activeStake) + parseFloat(staking.unlockingBalance || '0'))}
         />
 
-        {!seeMore && <MetaInfo.Number
+        {<MetaInfo.Number
           decimals={decimals}
           label={t('Active staked')}
           suffix={staking.nativeToken}
           value={activeStake}
         />}
 
-        {!seeMore && <MetaInfo.Number
+        {<MetaInfo.Number
           decimals={decimals}
           label={t('Unstaked')}
           suffix={staking.nativeToken}
@@ -291,7 +302,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
             decimals={decimals}
             label={t('Minimum active')}
             suffix={staking.nativeToken}
-            value={minStake}
+            value={nominatorMetadata.type === StakingType.NOMINATED ? minStake : (minPoolBonding || '0')}
             valueColorSchema={'gray'}
           />
 
@@ -303,7 +314,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </MetaInfo.Default>}
         </MetaInfo>
 
-        {showingOption === 'showByValue' && (nominations && nominations.length > 0) && (
+        {showingOption === 'showByValue' && (nominations && nominations.length > 0) && currentAccount?.address !== ALL_ACCOUNT_KEY && (
           <>
             <MetaInfo valueColorScheme={'light'}>
               <MetaInfo.Number
@@ -358,7 +369,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </>
         )}
 
-        {(showingOption === 'showByValue' || showingOption === 'mixed') && (unstakings && unstakings.length > 0) && (
+        {(showingOption === 'showByValue' || showingOption === 'mixed') && (unstakings && unstakings.length > 0) && currentAccount?.address !== ALL_ACCOUNT_KEY && (
           <>
             <MetaInfo valueColorScheme={'light'}>
               <MetaInfo.Number
@@ -389,7 +400,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           </>
         )}
 
-        {(showingOption === 'showByValidator' || showingOption === 'mixed') && (nominations && nominations.length > 0) && (unstakings && unstakings.length > 0) &&
+        {(showingOption === 'showByValidator' || showingOption === 'mixed') && (nominations && nominations.length > 0) && currentAccount?.address !== ALL_ACCOUNT_KEY &&
           <>
             {nominations && nominations.length && nominations.map((item) => (
               renderUnstakingInfo(item)

@@ -16,7 +16,7 @@ export class EventService extends EventEmitter<EventRegistry> {
   public readonly waitChainReady: Promise<boolean>;
   public readonly waitAssetReady: Promise<boolean>;
 
-  constructor (options: { lazyTime: number } = { lazyTime: 300 }) {
+  constructor (options: { lazyTime: number } = { lazyTime: 99 }) {
     super();
     this.lazyTime = options.lazyTime;
     this.timeoutId = null;

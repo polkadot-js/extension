@@ -14,6 +14,14 @@ export function convertFieldToObject<T = Record<string, any>> (fields: FieldData
   return rs as T;
 }
 
+export function convertFieldToError<T = Record<string, unknown>> (fields: FieldData[]): Record<keyof T, string[]> {
+  return fields.reduce((data, { errors, name }) => {
+    data[name as keyof T] = errors || [];
+
+    return data;
+  }, {} as Record<keyof T, string[]>);
+}
+
 export const simpleCheckForm = (allFields: FormFieldData[]) => {
   const error = allFields.map((data) => data.errors || [])
     .reduce((old, value) => [...old, ...value])

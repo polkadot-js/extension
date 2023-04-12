@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ConfirmationDefinitions } from '@subwallet/extension-base/background/KoniTypes';
+import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
-import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants/signing';
-import { useConfirmationsInfo } from '@subwallet/extension-koni-ui/hooks';
+import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
+import { useConfirmationsInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isRawPayload } from '@subwallet/extension-koni-ui/utils';
@@ -34,6 +34,8 @@ const Component = function ({ className }: Props) {
   const confirmation = confirmationQueue[index] || null;
   const { t } = useTranslation();
 
+  const { transactionRequest } = useSelector((state) => state.requestState);
+
   const nextConfirmation = useCallback(() => {
     setIndex((val) => Math.min(val + 1, numberOfConfirmations - 1));
   }, [numberOfConfirmations]);
@@ -45,10 +47,6 @@ const Component = function ({ className }: Props) {
   const content = useMemo((): React.ReactNode => {
     if (!confirmation) {
       return null;
-    }
-
-    if (confirmation.item.isInternal) {
-      return <TransactionConfirmation confirmation={confirmation} />;
     }
 
     if (NEED_SIGN_CONFIRMATION.includes(confirmation.type)) {
@@ -81,6 +79,10 @@ const Component = function ({ className }: Props) {
           />
         );
       }
+    }
+
+    if (confirmation.item.isInternal) {
+      return <TransactionConfirmation confirmation={confirmation} />;
     }
 
     switch (confirmation.type) {
@@ -119,6 +121,45 @@ const Component = function ({ className }: Props) {
     return null;
   }, [confirmation]);
 
+  const headerTitle = useMemo((): string => {
+    if (!confirmation) {
+      return '';
+    }
+
+    if (confirmation.item.isInternal) {
+      const transaction = transactionRequest[confirmation.item.id];
+
+      if (!transaction) {
+        return t(titleMap[confirmation.type] || '');
+      }
+
+      switch (transaction.extrinsicType) {
+        case ExtrinsicType.TRANSFER_BALANCE:
+        case ExtrinsicType.TRANSFER_TOKEN:
+        case ExtrinsicType.TRANSFER_XCM:
+          return t('Transfer confirmation');
+        case ExtrinsicType.SEND_NFT:
+          return t('NFT Transfer confirmation');
+        case ExtrinsicType.STAKING_JOIN_POOL:
+        case ExtrinsicType.STAKING_BOND:
+          return t('Add to bond confirm');
+        case ExtrinsicType.STAKING_LEAVE_POOL:
+        case ExtrinsicType.STAKING_UNBOND:
+          return t('Unbond confirmation');
+        case ExtrinsicType.STAKING_WITHDRAW:
+          return t('Withdraw confirm');
+        case ExtrinsicType.STAKING_CLAIM_REWARD:
+          return t('Claim reward confirm');
+        case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
+          return t('Cancel unstake confirm');
+        default:
+          return t('Transaction confirm');
+      }
+    } else {
+      return t(titleMap[confirmation.type] || '');
+    }
+  }, [confirmation, t, transactionRequest]);
+
   useEffect(() => {
     if (numberOfConfirmations) {
       if (index >= numberOfConfirmations) {
@@ -134,7 +175,7 @@ const Component = function ({ className }: Props) {
         numberOfConfirmations={numberOfConfirmations}
         onClickNext={nextConfirmation}
         onClickPrev={prevConfirmation}
-        title={t(titleMap[confirmation?.type] || '')}
+        title={headerTitle}
       />
       {content}
     </div>
@@ -150,7 +191,7 @@ const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps
     paddingTop: token.sizeXS,
     paddingBottom: token.sizeXS,
     backgroundColor: 'transparent',
-    marginBottom: token.marginMD,
+    marginBottom: token.marginXS,
 
     h4: {
       marginBottom: 0

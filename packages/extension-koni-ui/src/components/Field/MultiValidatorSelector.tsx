@@ -15,8 +15,9 @@ import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staki
 import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getValidatorKey } from '@subwallet/extension-koni-ui/utils/transaction/stake';
-import { Button, Icon, InputRef, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
+import { Badge, Button, Icon, InputRef, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import BigN from 'bignumber.js';
 import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -33,19 +34,21 @@ interface Props extends ThemeProps, BasicInputWrapper {
   isSingleSelect?: boolean;
 }
 
+enum SortKey {
+  COMMISSION = 'commission',
+  RETURN = 'return',
+  MIN_STAKE = 'min-stake',
+  DEFAULT = 'default'
+}
+
+interface SortOption {
+  label: string;
+  value: SortKey;
+  desc: boolean;
+}
+
 const SORTING_MODAL_ID = 'nominated-sorting-modal';
 const FILTER_MODAL_ID = 'nominated-filter-modal';
-
-const sortingOptions = [
-  {
-    label: 'Lowest commission',
-    value: 'commission'
-  },
-  {
-    label: 'Highest return',
-    value: 'return'
-  }
-];
 
 const filterOptions = [
   {
@@ -85,14 +88,57 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
   const nominations = useMemo(() => nominatorMetadata[0]?.nominations, [nominatorMetadata]);
   const isSingleSelect = useMemo(() => _isSingleSelect || !isRelayChain, [_isSingleSelect, isRelayChain]);
+  const hasReturn = useMemo(() => items[0]?.expectedReturn !== undefined, [items]);
+
+  const sortingOptions: SortOption[] = useMemo(() => {
+    const result: SortOption[] = [
+      {
+        desc: false,
+        label: t('Lowest commission'),
+        value: SortKey.COMMISSION
+      }
+    ];
+
+    if (hasReturn) {
+      result.push({
+        desc: true,
+        label: t('Highest return'),
+        value: SortKey.RETURN
+      });
+    }
+
+    result.push({
+      desc: false,
+      label: t('Lowest min stake'),
+      value: SortKey.MIN_STAKE
+    });
+
+    return result;
+  }, [t, hasReturn]);
 
   const nominatorValueList = useMemo(() => {
     return nominations && nominations.length ? nominations.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)) : [];
   }, [nominations]);
 
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
-  const [sortSelection, setSortSelection] = useState<string>('');
+  const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.DEFAULT);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const resultList = useMemo((): ValidatorDataType[] => {
+    return [...items].sort((a: ValidatorDataType, b: ValidatorDataType) => {
+      switch (sortSelection) {
+        case SortKey.COMMISSION:
+          return a.commission - b.commission;
+        case SortKey.RETURN:
+          return (b.expectedReturn || 0) - (a.expectedReturn || 0);
+        case SortKey.MIN_STAKE:
+          return new BigN(a.minBond).minus(b.minBond).toNumber();
+        case SortKey.DEFAULT:
+        default:
+          return 0;
+      }
+    });
+  }, [items, sortSelection]);
 
   const filterFunction = useMemo<(item: ValidatorDataType) => boolean>(() => {
     return (item) => {
@@ -113,7 +159,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [inactiveModal]);
 
   const onChangeSortOpt = useCallback((value: string) => {
-    setSortSelection(value);
+    setSortSelection(value as SortKey);
     closeSortingModal();
   }, [closeSortingModal]);
 
@@ -136,7 +182,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
     return (
       <StakingValidatorItem
-        apy={'15'}
+        apy={item?.expectedReturn?.toString() || '0'}
         className={'pool-item'}
         isNominated={nominated}
         isSelected={selected}
@@ -212,7 +258,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         id={id}
         onCancel={onCancelSelectValidator}
         rightIconProps={{
-          icon: <Icon phosphorIcon={SortAscending} />,
+          icon: (
+            <Badge dot={sortSelection !== SortKey.DEFAULT}>
+              <Icon phosphorIcon={SortAscending} />
+            </Badge>
+          ),
           onClick: () => {
             activeModal(SORTING_MODAL_ID);
           }
@@ -223,14 +273,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           enableSearchInput={true}
           filterBy={filterFunction}
-          list={items}
+          list={resultList}
           onClickActionBtn={onClickActionBtn}
           renderItem={renderItem}
           renderWhenEmpty={renderEmpty}
           searchFunction={searchFunction}
           searchPlaceholder={t<string>('Search validator')}
           searchableMinCharactersCount={2}
-          showActionBtn
+          // showActionBtn
         />
       </SwModal>
 

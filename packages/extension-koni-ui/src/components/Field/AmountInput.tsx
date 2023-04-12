@@ -67,14 +67,21 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return value.includes('.') ? decimals + 1 + value.split('.')[0].length : 10;
   }, [decimals]);
 
-  const suffix = useMemo(() => showMaxButton && (
-    <Button
-      onClick={_onClickMaxBtn}
-      size='xs'
-      type='ghost'
-    >
-      <span className='max-btn-text'>{t('Max')}</span>
-    </Button>), [showMaxButton, _onClickMaxBtn, t]);
+  const suffix = useMemo((): React.ReactNode => (
+    showMaxButton
+      ? (
+        <Button
+          onClick={_onClickMaxBtn}
+          size='xs'
+          type='ghost'
+        >
+          <span className='max-btn-text'>{t('Max')}</span>
+        </Button>
+      )
+      : (
+        <span />
+      )
+  ), [showMaxButton, _onClickMaxBtn, t]);
 
   const onChangeInput: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     let value = event.target.value;

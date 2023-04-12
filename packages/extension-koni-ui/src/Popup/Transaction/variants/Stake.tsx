@@ -6,12 +6,12 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
-import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
+import { ALL_KEY, BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, parseNominations, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
@@ -141,6 +141,11 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [defaultSlug, from, defaultStakingType, chain]);
 
+  const minStake = useMemo(() =>
+    stakingType === StakingType.POOLED ? chainStakingMetadata?.minPoolBonding || '0' : chainStakingMetadata?.minStake || '0'
+  , [chainStakingMetadata?.minPoolBonding, chainStakingMetadata?.minStake, stakingType]
+  );
+
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
   const onFieldsChange: FormCallbacks<StakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
@@ -189,7 +194,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const result: ValidatorInfo[] = [];
 
     validatorList.forEach((validator) => {
-      if (nominations.includes(validator.address)) {
+      if (nominations.includes(reformatAddress(validator.address, 42))) { // remember the format of the address
         result.push(validator);
       }
     });
@@ -278,7 +283,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 decimals={decimals}
                 label={t('Minimum active:')}
                 suffix={symbol}
-                value={chainStakingMetadata.minStake}
+                value={minStake}
                 valueColorSchema={'success'}
               />
             )
@@ -288,7 +293,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return null;
-  }, [chainStakingMetadata, decimals, symbol, t]);
+  }, [chainStakingMetadata, decimals, symbol, t, minStake]);
 
   const onPreCheckReadOnly = usePreCheckReadOnly(from);
 
@@ -430,6 +435,12 @@ const Component: React.FC<Props> = (props: Props) => {
                         }
                       }
 
+                      if (val.gt(nativeTokenBalance.value)) {
+                        const maxString = new BigN(nativeTokenBalance.value).div(BN_TEN.pow(decimals)).toFixed(6);
+
+                        return Promise.reject(t('Value must be equal or less than {{number}}', { replace: { number: maxString } }));
+                      }
+
                       return Promise.resolve();
                     }
                   })
@@ -437,8 +448,9 @@ const Component: React.FC<Props> = (props: Props) => {
                 statusHelpAsTooltip={true}
               >
                 <AmountInput
-                  decimals={decimals}
+                  decimals={(chain && from) ? decimals : -1}
                   maxValue={maxValue}
+                  showMaxButton={false}
                 />
               </Form.Item>
             </div>
@@ -496,14 +508,16 @@ const Component: React.FC<Props> = (props: Props) => {
         </Button>
       </TransactionFooter>
 
-      {
+      { // TODO: check case for pool
         chainStakingMetadata &&
         (
           <StakingNetworkDetailModal
+            activeNominators={chainStakingMetadata.nominatorCount}
             estimatedEarning={chainStakingMetadata.expectedReturn}
             inflation={chainStakingMetadata.inflation}
             maxValidatorPerNominator={chainStakingMetadata.maxValidatorPerNominator}
-            minimumActive={{ decimals, value: chainStakingMetadata.minStake, symbol }}
+            minimumActive={{ decimals, value: minStake, symbol }}
+            stakingType={stakingType}
             unstakingPeriod={chainStakingMetadata.unstakingPeriod}
           />
         )

@@ -7,6 +7,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
@@ -15,14 +16,8 @@ import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/compo
 import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { getFreeBalance, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
-import FreeBalance from '@subwallet/extension-koni-ui/Popup/Transaction/parts/FreeBalance';
-import TransactionContent from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionContent';
-import TransactionFooter from '@subwallet/extension-koni-ui/Popup/Transaction/parts/TransactionFooter';
-import { TransactionContext, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { SendFundParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { ChainItemType } from '@subwallet/extension-koni-ui/types/network';
+import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
@@ -36,6 +31,9 @@ import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
+
+import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
+import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
 interface TransferFormProps extends TransactionFormBaseProps {
   to: string;
@@ -146,6 +144,8 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
     slug: originChain.slug
   });
 
+  console.log('xcmRefMap', xcmRefMap);
+
   Object.values(xcmRefMap).forEach((xcmRef) => {
     if (xcmRef.srcAsset === tokenSlug) {
       const destinationChain = chainInfoMap[xcmRef.destChain];
@@ -245,6 +245,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
   }, [chainInfoMap, asset, xcmRefMap]);
 
+  console.log('destChainItems', destChainItems);
+
   const currentChainAsset = useMemo(() => {
     return asset ? assetRegistry[asset] : undefined;
   }, [assetRegistry, asset]);
@@ -287,7 +289,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     const isOnChain = chain === destChain;
 
     if (isOnChain) {
-      if (from === _recipientAddress) {
+      if (isSameAddress(from, _recipientAddress)) {
         // todo: change message later
         return Promise.reject(t('The recipient address can not be the same as the sender address'));
       }
@@ -482,6 +484,18 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       })
         .then((balance) => {
           !cancel && setMaxTransfer(balance.value);
+
+          if (!cancel) {
+            const value = form.getFieldValue('value') as string;
+
+            console.log(value);
+
+            if (value) {
+              setTimeout(() => {
+                form.validateFields(['value']).finally(noop);
+              }, 100);
+            }
+          }
         })
         .catch(console.error);
     }
@@ -489,7 +503,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return () => {
       cancel = true;
     };
-  }, [asset, assetRegistry, from]);
+  }, [asset, assetRegistry, form, from]);
 
   return (
     <>
@@ -569,7 +583,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           >
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
-              autoReformatValue
               label={t('Send to account')}
               showScanner={true}
             />

@@ -32,7 +32,7 @@ const Component: React.FC<Props> = (props: Props) => {
         />
       </div>
       <div className='title'>
-        {t('You’re all done!')}
+        {t('All done!')}
       </div>
       <div className='description'>
         {t('You have successfully updated master password to all accounts')}

@@ -45,6 +45,7 @@ export class EventService extends EventEmitter<EventRegistry> {
   }
 
   private emitLazy (): void {
+    console.log(this.pendingEvents);
     this.lazyEmitter.emit('lazy', this.pendingEvents, this.pendingEvents.map((e) => e.type));
     this.pendingEvents = [];
     this.timeoutId = null;

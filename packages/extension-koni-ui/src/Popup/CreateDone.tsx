@@ -7,7 +7,7 @@ import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, DiscordLogo, PaperPlaneTilt, TwitterLogo, X } from 'phosphor-react';
+import { ArrowCircleRight, CheckCircle, DiscordLogo, PaperPlaneTilt, TwitterLogo, X } from 'phosphor-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -56,8 +56,12 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <Layout.WithSubHeaderOnly
       rightFooterButton={{
-        children: t('Exit'),
-        onClick: goHome
+        children: t('Go to home'),
+        onClick: goHome,
+        icon: <Icon
+          phosphorIcon={ArrowCircleRight}
+          weight={'fill'}
+        />
       }}
       showBackButton={true}
       subHeaderLeft={(
@@ -79,7 +83,7 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         </div>
         <div className='title'>
-          {t('You’re all done!')}
+          {t('All done!')}
         </div>
         <div className='description'>
           {t('Follow along with product updates or reach out if you have any questions.')}

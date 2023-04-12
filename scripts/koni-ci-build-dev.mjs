@@ -34,9 +34,11 @@ function npmGetVersion() {
 }
 
 async function uploadBuild() {
+  const prNumber = process.env.PR_NUMBER || '';
+  const branchName = prNumber ? `${process.env.TARGET_BRANCH}-pr-${prNumber}` : process.env.CURRENT_BRANCH;
   const refName = process.env.REF_NAME
   const commitMessage = process.env.COMMIT_MESSAGE
-  const nowTimestamp = new Date().getTime()
+  const buildDateString = new Date().toISOString().slice(0, 19).replaceAll(':', '-')
   const sRefName = refName.replace(/(\/)/g, '-');
 
   discordHook.send('Finish build ' + refName + ': ' + commitMessage)
@@ -45,7 +47,7 @@ async function uploadBuild() {
     const cloudConfig = JSON.parse(process.env.NEXTCLOUD_CONFIG)
     const {nextCloudUrl, nextCloudUsername, nextCloudPassword, folder, shareFolder} = cloudConfig;
 
-    const newName = `./${sRefName}-build-${npmGetVersion()}-${nowTimestamp}.zip`
+    const newName = `./${branchName}-build-${npmGetVersion()}-${buildDateString}UTC.zip`
     const downloadLink = `${nextCloudUrl}/s/${shareFolder}/download?path=%2F&files=${newName}`;
     const uploadUrl = `${nextCloudUrl}/remote.php/dav/files/${nextCloudUsername}/${folder}/${newName}`;
 

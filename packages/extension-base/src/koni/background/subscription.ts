@@ -240,11 +240,7 @@ export class KoniSubscription {
       smartContractNfts,
       (...args) => this.state.updateNftData(...args),
       (...args) => this.state.setNftCollection(...args)
-    )
-      .then(() => {
-        this.logger.debug('Done refreshing NFT state');
-      })
-      .catch(this.logger.log);
+    ).catch(this.logger.log);
   }
 
   async subscribeStakingReward (address: string) {
@@ -268,7 +264,6 @@ export class KoniSubscription {
     const result = await getNominationStakingRewardData(addresses, targetNetworkMap);
 
     this.state.updateStakingReward(result, 'slowInterval');
-    this.logger.log('Set staking reward state done', result);
   }
 
   async subscribeStakingRewardFastInterval (address: string) {
@@ -313,7 +308,6 @@ export class KoniSubscription {
     const result = [...poolingStakingRewards, ...amplitudeUnclaimedStakingRewards];
 
     this.state.updateStakingReward(result, 'fastInterval');
-    this.logger.log('Set staking reward state with fast interval done', result);
   }
 
   async fetchChainStakingMetadata (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {

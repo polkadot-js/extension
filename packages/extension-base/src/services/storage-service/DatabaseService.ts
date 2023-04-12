@@ -1,17 +1,46 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
-import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
-import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
-import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
+import {_ChainAsset} from '@subwallet/chain-list/types';
+import {
+  APIItemState,
+  BalanceItem,
+  ChainStakingMetadata,
+  CrowdloanItem,
+  NftCollection,
+  NftItem,
+  NominatorMetadata,
+  PriceJson,
+  StakingItem,
+  StakingType,
+  TransactionHistoryItem
+} from '@subwallet/extension-base/background/KoniTypes';
+import KoniDatabase, {
+  IBalance,
+  IChain,
+  ICrowdloanItem,
+  INft
+} from '@subwallet/extension-base/services/storage-service/databases';
+import {
+  AssetStore,
+  BalanceStore,
+  ChainStore,
+  CrowdloanStore,
+  MigrationStore,
+  NftCollectionStore,
+  NftStore,
+  PriceStore,
+  StakingStore,
+  TransactionStore
+} from '@subwallet/extension-base/services/storage-service/db-stores';
+import ChainStakingMetadataStore
+  from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
-import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
-import { Subscription } from 'dexie';
+import {HistoryQuery} from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
+import {Subscription} from 'dexie';
 
-import { logger as createLogger } from '@polkadot/util';
-import { Logger } from '@polkadot/util/types';
+import {logger as createLogger} from '@polkadot/util';
+import {Logger} from '@polkadot/util/types';
 
 export default class DatabaseService {
   private _db: KoniDatabase;
@@ -138,11 +167,7 @@ export default class DatabaseService {
 
   // Transaction histories
   async getHistories (query?: HistoryQuery) {
-    const histories = await this.stores.transaction.queryHistory(query);
-
-    this.logger.log('Get histories: ', histories);
-
-    return histories;
+    return this.stores.transaction.queryHistory(query);
   }
 
   async upsertHistory (histories: TransactionHistoryItem[]) {
@@ -208,13 +233,13 @@ export default class DatabaseService {
   }
 
   async bulkUpdateChainStore (data: IChain[]) {
-    this.logger.log('Bulk updating ChainStore');
+    // this.logger.log('Bulk updating ChainStore');
 
     return this.stores.chain.bulkUpsert(data);
   }
 
   async removeFromChainStore (chains: string[]) {
-    this.logger.log('Bulk removing ChainStore');
+    // this.logger.log('Bulk removing ChainStore');
 
     return this.stores.chain.removeChains(chains);
   }
@@ -233,15 +258,13 @@ export default class DatabaseService {
   }
 
   async getAllAssetStore () {
-    const allAssets = await this.stores.asset.getAll();
+    // this.logger.log('Get all stored assets: ', allAssets);
 
-    this.logger.log('Get all stored assets: ', allAssets);
-
-    return allAssets;
+    return this.stores.asset.getAll();
   }
 
   async removeFromAssetStore (items: string[]) {
-    this.logger.log('Bulk removing AssetStore');
+    // this.logger.log('Bulk removing AssetStore');
 
     return this.stores.asset.removeAssets(items);
   }

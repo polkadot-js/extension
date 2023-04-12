@@ -149,7 +149,7 @@ export class KoniCron {
         });
       }
 
-      if (!needReload) {
+      if (!needReload && !chainUpdated && !nftTransferred && !stakingSubmitted) {
         return;
       }
 
@@ -181,10 +181,10 @@ export class KoniCron {
         chainUpdated && this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
         chainUpdated && this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
 
-        (needReload || stakingSubmitted) && this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-        (needReload || stakingSubmitted) && this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
+        (needReload || stakingSubmitted) && this.addCron('refreshStakingReward', this.refreshStakingReward(address, updatedChains), CRON_REFRESH_STAKING_REWARD_INTERVAL);
+        (needReload || stakingSubmitted) && this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address, updatedChains), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
         chainUpdated && this.addCron('updateChainStakingMetadata', this.updateChainStakingMetadata(serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, updatedChains), CRON_REFRESH_CHAIN_STAKING_METADATA);
-        (needReload || stakingSubmitted) && this.addCron('updateNominatorMetadata', this.updateNominatorMetadata(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_CHAIN_NOMINATOR_METADATA);
+        (needReload || stakingSubmitted) && this.addCron('updateNominatorMetadata', this.updateNominatorMetadata(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, updatedChains), CRON_REFRESH_CHAIN_NOMINATOR_METADATA);
       } else {
         this.setStakingRewardReady();
       }
@@ -290,16 +290,36 @@ export class KoniCron {
     this.state.resetStakingReward();
   };
 
-  refreshStakingReward = (address: string) => {
+  refreshStakingReward = (address: string, updatedChains?: string[]) => {
     return () => {
+      const chainInfoMap = this.state.getChainInfoMap();
+
+      if (updatedChains && updatedChains.length > 0) {
+        const updatedChainSupportStaking = updatedChains.some((updatedChain) => _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
+
+        if (!updatedChainSupportStaking) {
+          return;
+        }
+      }
+
       console.debug('Refresh staking reward state');
       this.subscriptions.subscribeStakingReward(address)
         .catch(this.logger.error);
     };
   };
 
-  refreshStakingRewardFastInterval = (address: string) => {
+  refreshStakingRewardFastInterval = (address: string, updatedChains?: string[]) => {
     return () => {
+      const chainInfoMap = this.state.getChainInfoMap();
+
+      if (updatedChains && updatedChains.length > 0) {
+        const updatedChainSupportStaking = updatedChains.some((updatedChain) => _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
+
+        if (!updatedChainSupportStaking) {
+          return;
+        }
+      }
+
       console.debug('Refresh staking reward data with fast interval');
       this.subscriptions.subscribeStakingRewardFastInterval(address)
         .catch(this.logger.error);
@@ -316,7 +336,7 @@ export class KoniCron {
 
   updateChainStakingMetadata = (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, updatedChains?: string[]) => {
     return () => {
-      if (updatedChains) {
+      if (updatedChains && updatedChains.length > 0) {
         const updatedChainSupportStaking = updatedChains.some((updatedChain) => _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
 
         if (!updatedChainSupportStaking) {
@@ -331,8 +351,16 @@ export class KoniCron {
     };
   };
 
-  updateNominatorMetadata = (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) => {
+  updateNominatorMetadata = (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, updatedChains?: string[]) => {
     return () => {
+      if (updatedChains && updatedChains.length > 0) {
+        const updatedChainSupportStaking = updatedChains.some((updatedChain) => _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
+
+        if (!updatedChainSupportStaking) {
+          return;
+        }
+      }
+
       console.debug('Fetching nominator data for', address);
 
       this.subscriptions.fetchNominatorMetadata(address, chainInfoMap, chainStateMap, substrateApiMap)

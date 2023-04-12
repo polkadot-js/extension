@@ -21,7 +21,7 @@ export interface EventRegistry {
 
   'transaction.done': [SWTransaction],
   'transaction.failed': [SWTransaction | undefined],
-  'transaction.submitStaking': [SWTransaction | undefined],
+  'transaction.submitStaking': [string],
   'transaction.transferNft': [SWTransaction | undefined]
 }
 

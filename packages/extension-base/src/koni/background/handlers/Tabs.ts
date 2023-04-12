@@ -20,7 +20,6 @@ import { canDerive } from '@subwallet/extension-base/utils';
 import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { KeyringPair } from '@subwallet/keyring/types';
 import keyring from '@subwallet/ui-keyring';
-import { accounts as accountsObservable } from '@subwallet/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import Web3 from 'web3';
 import { HttpProvider, RequestArguments, WebsocketProvider } from 'web3-core';
@@ -207,12 +206,12 @@ export default class KoniTabs {
     anyType }: RequestAccountList): Promise<InjectedAccount[]> {
     const authInfo = await this.getAuthInfo(url);
 
-    return transformAccountsV2(accountsObservable.subject.getValue(), anyType, authInfo, accountAuthType);
+    return transformAccountsV2(this.#koniState.keyringService.accounts, anyType, authInfo, accountAuthType);
   }
 
   private accountsSubscribeV2 (url: string, { accountAuthType }: RequestAccountSubscribe, id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pub(accounts.subscribeV2)'>(id, port);
-    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
+    const subscription = this.#koniState.keyringService.accountSubject.subscribe((accounts: SubjectInfo): void => {
       this.getAuthInfo(url).then((authInfo) => {
         cb(transformAccountsV2(accounts, false, authInfo, accountAuthType));
       }).catch(console.error);
@@ -242,7 +241,7 @@ export default class KoniTabs {
   private async getEvmCurrentAccount (url: string, getAll = false): Promise<string[]> {
     return await new Promise((resolve) => {
       this.getAuthInfo(url).then((authInfo) => {
-        const allAccounts = accountsObservable.subject.getValue();
+        const allAccounts = this.#koniState.keyringService.accounts;
         const accountList = transformAccountsV2(allAccounts, false, authInfo, 'evm').map((a) => a.address);
         let accounts: string[] = [];
 

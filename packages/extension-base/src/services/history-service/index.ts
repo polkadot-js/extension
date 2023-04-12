@@ -5,9 +5,9 @@ import { TransactionHistoryItem } from '@subwallet/extension-base/background/Kon
 import { CRON_REFRESH_HISTORY_INTERVAL } from '@subwallet/extension-base/constants';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
+import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { keyring } from '@subwallet/ui-keyring';
-import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject } from 'rxjs';
 
 import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
@@ -15,7 +15,7 @@ import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
 export class HistoryService {
   private historySubject: BehaviorSubject<TransactionHistoryItem[]> = new BehaviorSubject([] as TransactionHistoryItem[]);
 
-  constructor (private dbService: DatabaseService, private chainService: ChainService, private eventService: EventService) {
+  constructor (private dbService: DatabaseService, private chainService: ChainService, private eventService: EventService, private keyringService: KeyringService) {
     // Load history from database
     this.dbService.getHistories().then((histories) => {
       this.historySubject.next(histories);
@@ -47,7 +47,7 @@ export class HistoryService {
     const historyRecords = await fetchMultiChainHistories(addresses, chainMap);
 
     // Fill additional info
-    const accountMap = Object.entries(accounts.subject.value).reduce((map, [address, account]) => {
+    const accountMap = Object.entries(this.keyringService.accounts).reduce((map, [address, account]) => {
       map[address.toLowerCase()] = account.json.meta.name || address;
 
       return map;

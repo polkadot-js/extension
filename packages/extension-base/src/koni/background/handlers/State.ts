@@ -33,7 +33,6 @@ import { isContractAddress, parseContractInput } from '@subwallet/extension-base
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { decodePair } from '@subwallet/keyring/pair/decode';
 import { keyring } from '@subwallet/ui-keyring';
-import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
@@ -135,10 +134,10 @@ export default class KoniState {
     this.notificationService = new NotificationService();
     this.chainService = new ChainService(this.dbService, this.eventService);
     this.settingService = new SettingService();
-    this.requestService = new RequestService(this.chainService, this.settingService);
+    this.requestService = new RequestService(this.chainService, this.settingService, this.keyringService);
     this.priceService = new PriceService(this.dbService, this.eventService, this.chainService);
     this.balanceService = new BalanceService(this.chainService);
-    this.historyService = new HistoryService(this.dbService, this.chainService, this.eventService);
+    this.historyService = new HistoryService(this.dbService, this.chainService, this.eventService, this.keyringService);
     this.transactionService = new TransactionService(this.chainService, this.eventService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
     this.migrationService = new MigrationService(this);
     this.subscription = new KoniSubscription(this, this.dbService);
@@ -347,7 +346,7 @@ export default class KoniState {
   }
 
   getAddressList (value = false): Record<string, boolean> {
-    const addressList = Object.keys(accounts.subject.value);
+    const addressList = Object.keys(this.keyringService.accounts);
 
     return addressList.reduce((addressList, v) => ({ ...addressList, [v]: value }), {});
   }

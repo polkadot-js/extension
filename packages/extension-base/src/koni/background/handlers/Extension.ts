@@ -33,7 +33,6 @@ import { MetadataDef } from '@subwallet/extension-inject/types';
 import { createPair } from '@subwallet/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
-import { accounts as accountsObservable } from '@subwallet/ui-keyring/observable/accounts';
 import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
@@ -155,7 +154,8 @@ export default class KoniExtension {
   // FIXME This looks very much like what we have in Tabs
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
-    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
+    const accountSubject = this.#koniState.keyringService.accountSubject;
+    const subscription = accountSubject.subscribe((accounts: SubjectInfo): void =>
       cb(transformAccounts(accounts))
     );
 
@@ -400,15 +400,14 @@ export default class KoniExtension {
     await this.#koniState.eventService.waitAccountReady;
 
     const currentAccount = keyringService.currentAccount;
-    const accountsSubject = keyring.accounts.subject;
-    const transformedAccounts = transformAccounts(accountsSubject.value);
+    const transformedAccounts = transformAccounts(keyringService.accounts);
     const responseData: AccountsWithCurrentAddress = {
       accounts: transformedAccounts?.length ? [{ ...ACCOUNT_ALL_JSON }, ...transformedAccounts] : [],
       currentAddress: currentAccount?.address,
       currentGenesisHash: currentAccount?.currentGenesisHash
     };
 
-    const subscriptionAccounts = accountsSubject.subscribe((storedAccounts: SubjectInfo): void => {
+    const subscriptionAccounts = keyringService.accountSubject.subscribe((storedAccounts: SubjectInfo): void => {
       const transformedAccounts = transformAccounts(storedAccounts);
 
       responseData.accounts = transformedAccounts?.length ? [{ ...ACCOUNT_ALL_JSON }, ...transformedAccounts] : [];
@@ -458,19 +457,12 @@ export default class KoniExtension {
     return keyring.saveRecent(accountId);
   }
 
-  // private triggerAccountsSubscription (): boolean {
-  //   const accountsSubject = accountsObservable.subject;
-  //
-  //   accountsSubject.next(accountsSubject.getValue());
-  //
-  //   return true;
-  // }
-
   private _getAuthListV2 (): Promise<AuthUrls> {
+    const keyringService = this.#koniState.keyringService;
+
     return new Promise<AuthUrls>((resolve, reject) => {
       this.#koniState.getAuthorize((rs: AuthUrls) => {
-        const accounts = accountsObservable.subject.getValue();
-        const addressList = Object.keys(accounts);
+        const addressList = Object.keys(keyringService.accounts);
         const urlList = Object.keys(rs);
 
         if (Object.keys(rs[urlList[0]].isAllowedMap).toString() !== addressList.toString()) {
@@ -607,7 +599,7 @@ export default class KoniExtension {
   }
 
   private getNonReadonlyAccounts (): string[] {
-    const storedAccounts = accountsObservable.subject.getValue();
+    const storedAccounts = this.#koniState.keyringService.accounts;
     const transformedAccounts = transformAccounts(storedAccounts);
 
     return transformedAccounts.filter((a) => !a.isReadOnly).map((a) => a.address);
@@ -1767,22 +1759,6 @@ export default class KoniExtension {
       meta: pair.meta
     };
   }
-
-  // private async isInWalletAccount (address?: string) {
-  //   return new Promise((resolve) => {
-  //     if (address) {
-  //       accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {
-  //         if (storedAccounts[address]) {
-  //           resolve(true);
-  //         }
-  //
-  //         resolve(false);
-  //       });
-  //     } else {
-  //       resolve(false);
-  //     }
-  //   });
-  // }
 
   private accountsTie2 ({ address, genesisHash }: RequestAccountTie): boolean {
     return this.#koniState.setAccountTie(address, genesisHash);

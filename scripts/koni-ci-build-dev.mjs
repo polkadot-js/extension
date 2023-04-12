@@ -35,7 +35,7 @@ function npmGetVersion() {
 
 async function uploadBuild() {
   const prNumber = process.env.PR_NUMBER || '';
-  const branchName = prNumber ? `${process.env.TARGET_BRANCH}-pr-${prNumber}` : process.env.CURRENT_BRANCH.replace('./refs/heads/', '');
+  const branchName = prNumber ? `${process.env.TARGET_BRANCH}-pr-${prNumber}` : process.env.CURRENT_BRANCH.replace('refs/heads/', '');
   const refName = process.env.REF_NAME
   const commitMessage = process.env.COMMIT_MESSAGE
   const buildDateString = new Date().toISOString().slice(0, 19).replaceAll(':', '-')

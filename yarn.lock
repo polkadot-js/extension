@@ -5809,7 +5809,7 @@ __metadata:
     "@subwallet/extension-dapp": ^1.0.2-1
     "@subwallet/extension-inject": ^1.0.2-1
     "@subwallet/extension-mocks": ^1.0.2-1
-    "@subwallet/keyring": ^0.0.4
+    "@subwallet/keyring": ^0.0.5
     "@subwallet/ui-keyring": ^0.0.3
     "@unique-nft/types": ^0.6.0-4
     "@zeitgeistpm/type-defs": ^0.10.0
@@ -5942,8 +5942,8 @@ __metadata:
     "@subwallet/extension-dapp": ^1.0.2-1
     "@subwallet/extension-inject": ^1.0.2-1
     "@subwallet/extension-mocks": ^1.0.2-1
-    "@subwallet/keyring": ^0.0.4
-    "@subwallet/react-ui": 5.1.2-b41
+    "@subwallet/keyring": ^0.0.5
+    "@subwallet/react-ui": 5.1.2-b42
     "@subwallet/ui-keyring": ^0.0.3
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -6042,9 +6042,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/keyring@npm:^0.0.4":
-  version: 0.0.4
-  resolution: "@subwallet/keyring@npm:0.0.4"
+"@subwallet/keyring@npm:^0.0.5":
+  version: 0.0.5
+  resolution: "@subwallet/keyring@npm:0.0.5"
   dependencies:
     "@polkadot/util": ^10.1.7
     "@polkadot/util-crypto": ^10.1.7
@@ -6053,13 +6053,13 @@ __metadata:
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rxjs: ^7.5.6
-  checksum: 58b33c7e67925a150e7c62747dbe204851b8cb4874c27f1489bfbf05c6f4c2afe3efde46301085d64d09f44749a17f9063885357a090f436302b62cb62946224
+  checksum: 4f60849d5bccc5512cabab3c4fa13176f4f57b8669fb4a159601f0abb0e32a63a66ee601d536aa13c18db41be2140e50635f10d9423f09ad8dbb125dda283318
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b41":
-  version: 5.1.2-b41
-  resolution: "@subwallet/react-ui@npm:5.1.2-b41"
+"@subwallet/react-ui@npm:5.1.2-b42":
+  version: 5.1.2-b42
+  resolution: "@subwallet/react-ui@npm:5.1.2-b42"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -6127,7 +6127,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: bfc5d77d9ae191cfc1d1c4e9363d20b87400ef14aa93bcfe42ccd05fb0b97c57226357164afdca8009978d460dc31d452eba52986b149d15d94a7382e3f7077f
+  checksum: be2b1132584c088270fc95a752538b1808af223fc82337b68ef4f12709b614d5109c29aa8ede0c7e802a406dffc57aea9223dbcb47972b0aa2e1ccd226c355fc
   languageName: node
   linkType: hard
 

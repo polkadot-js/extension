@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
 import { getBondingOptions, getNominationPoolOptions } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -52,7 +53,7 @@ const fetchChainValidator = (chain: string, unmount: boolean, setValidatorLoadin
 };
 
 const fetchChainPool = (chain: string, unmount: boolean, setPoolLoading: (value: boolean) => void) => {
-  if (!unmount) {
+  if (!unmount && _STAKING_CHAIN_GROUP.nominationPool.includes(chain)) {
     setPoolLoading(true);
     getNominationPoolOptions(chain)
       .then((result) => {

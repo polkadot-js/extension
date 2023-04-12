@@ -14,7 +14,7 @@ import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEnabled, _isChainEvmCompatible, _isChainSupportSubstrateStaking, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
-import { EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
+import { COMMON_RELOAD_EVENTS, EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 
 import { logger as createLogger } from '@polkadot/util';
@@ -85,11 +85,9 @@ export class KoniSubscription {
       this.subscribeStakingOnChain(currentAddress, this.state.getSubstrateApiMap());
     }
 
-    const reloadEvents: EventType[] = ['account.add', 'account.remove', 'account.updateCurrent', 'chain.add', 'chain.updateState', 'asset.updateState', 'transaction.done', 'transaction.failed'];
-
     this.eventHandler = (events, eventTypes) => {
       const serviceInfo = this.state.getServiceInfo();
-      const needReload = eventTypes.some((eT) => reloadEvents.includes(eT));
+      const needReload = eventTypes.some((eventType) => COMMON_RELOAD_EVENTS.includes(eventType));
 
       if (!needReload) {
         return;
@@ -143,7 +141,7 @@ export class KoniSubscription {
   }
 
   subscribeBalancesAndCrowdloans (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, web3ApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
-    this.state.switchAccount(address).then(() => {
+    this.state.handleSwitchAccount(address).then(() => {
       const addresses = this.state.getDecodedAddresses(address);
 
       if (!addresses.length) {
@@ -244,7 +242,7 @@ export class KoniSubscription {
       (...args) => this.state.setNftCollection(...args)
     )
       .then(() => {
-        this.logger.log('nft state updated');
+        this.logger.debug('Done refreshing NFT state');
       })
       .catch(this.logger.log);
   }

@@ -131,7 +131,7 @@ export class HistoryService {
     const updateRecords = historyItems.filter((item) => {
       const key = `${item.chain}-${item.extrinsicHash}`;
 
-      !excludeKeys.includes(key) && console.log('Cancel update', key);
+      // !excludeKeys.includes(key) && console.log('Cancel update', key);
 
       return item.origin === 'app' || !excludeKeys.includes(key);
     });

@@ -2252,6 +2252,8 @@ export default class KoniExtension {
   private async getNominationPoolOptions (chain: string): Promise<NominationPoolInfo[]> {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
 
+    console.log('chain', chain);
+
     return await getNominationPoolsInfo(chain, substrateApi);
   }
 

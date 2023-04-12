@@ -56,6 +56,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       hot: false,
       liveReload: false,
       webSocketServer: false,
+      historyApiFallback: true,
       compress: true,
       port: 9000
     },
@@ -91,7 +92,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       filename: '[name]-[contenthash].js',
       globalObject: '(typeof self !== \'undefined\' ? self : this)',
       path: path.join(__dirname, 'build'),
-      publicPath: ''
+      publicPath: '/'
     },
     performance: {
       hints: false
@@ -100,6 +101,9 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       new webpack.ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
         process: 'process/browser.js'
+      }),
+      new webpack.ProvidePlugin({
+        process: 'process/browser',
       }),
       new webpack.DefinePlugin({
         'process.env': {
@@ -148,5 +152,6 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
 
 module.exports = createConfig({
   fallback: './src/fallback.ts',
-  'web-runner': './src/webRunner.ts'
+  'web-runner': './src/webRunner.ts',
+  main: "./src/index.tsx",
 }, {}, false);

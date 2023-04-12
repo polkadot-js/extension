@@ -13,6 +13,7 @@ export default function useAutoNavigateToCreatePassword () {
 
   useEffect(() => {
     if (!hasMasterPassword) {
+      console.log('hasMasterPassword useAutoNavigateToCreatePassword', hasMasterPassword);
       navigate('/keyring/create-password', { state: { prevPathname: location.pathname, prevState: location.state as unknown } });
     }
   }, [navigate, hasMasterPassword, location.pathname, location.state]);

@@ -20,7 +20,9 @@ export function responseMessage (response: TransportResponseMessage<keyof Reques
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     window.ReactNativeWebView.postMessage(JSON.stringify(response));
   } else {
-    console.log('Post message in browser ', response);
+    console.log('handleSendMessageFinish Post message in browser ', response);
+    window.postMessage(response);
+    // handleSendMessageFinish(response);
   }
 }
 

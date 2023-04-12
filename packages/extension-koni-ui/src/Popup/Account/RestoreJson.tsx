@@ -221,7 +221,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }, 500);
-  }, [jsonFile, requirePassword, password, accountsInfo, goHome, onComplete]);
+  }, [jsonFile, requirePassword, password, accountsInfo, navigate, onComplete]);
 
   const renderItem = useCallback((account: ResponseJsonGetAccountInfo): React.ReactNode => {
     return (

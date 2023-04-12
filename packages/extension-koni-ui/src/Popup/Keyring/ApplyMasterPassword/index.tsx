@@ -276,7 +276,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [form, needMigrate, deleting, step]);
 
   return (
-    <PageWrapper className={CN(className)}>
+    <PageWrapper
+      animateOnce={true}
+      className={CN(className)}
+    >
       <Layout.WithSubHeaderOnly
         disableBack={loading}
         onBack={onBack}

@@ -14,20 +14,21 @@ export type OptionType = {
   value: string,
 };
 
-type Props = ThemeProps & {
-  id: string,
-  onCancel: () => void,
-  title?: string,
-  applyFilterButtonTitle?: string,
-  onApplyFilter?: () => void,
-  optionSelectionMap: Record<string, boolean>,
-  options: OptionType[],
-  onChangeOption: (value: string, isChecked: boolean) => void,
+interface Props extends ThemeProps {
+  id: string;
+  onCancel: () => void;
+  title?: string;
+  applyFilterButtonTitle?: string;
+  onApplyFilter?: () => void;
+  optionSelectionMap: Record<string, boolean>;
+  options: OptionType[];
+  onChangeOption: (value: string, isChecked: boolean) => void;
+  closeIcon?: React.ReactNode;
 }
 
 function Component (props: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { applyFilterButtonTitle, className = '', id, onApplyFilter, onCancel, onChangeOption, optionSelectionMap, options, title } = props;
+  const { applyFilterButtonTitle, className = '', closeIcon, id, onApplyFilter, onCancel, onChangeOption, optionSelectionMap, options, title } = props;
 
   const _onChangeOption = useCallback((e: CheckboxChangeEvent) => {
     onChangeOption(e.target.value as string, e.target.checked);
@@ -54,6 +55,7 @@ function Component (props: Props): React.ReactElement<Props> {
   return (
     <SwModal
       className={className}
+      closeIcon={closeIcon}
       footer={filterModalFooter}
       id={id}
       onCancel={onCancel}

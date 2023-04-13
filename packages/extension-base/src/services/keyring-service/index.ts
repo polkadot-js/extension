@@ -13,6 +13,7 @@ export class KeyringService {
   readonly currentAccountSubject = new BehaviorSubject<CurrentAccountInfo>({ address: '', currentGenesisHash: null });
 
   readonly accountsSubject = keyring.accounts.subject;
+  readonly addressesSubject = keyring.addresses.subject;
   private beforeAccount: SubjectInfo = keyring.accounts.subject.value;
 
   readonly keyringStateSubject = new BehaviorSubject<KeyringState>({
@@ -91,6 +92,10 @@ export class KeyringService {
 
   get accounts (): SubjectInfo {
     return this.accountsSubject.value;
+  }
+
+  get addresses (): SubjectInfo {
+    return this.addressesSubject.value;
   }
 
   get currentAccount (): CurrentAccountInfo {

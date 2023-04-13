@@ -217,6 +217,7 @@ const Component: React.FC = () => {
             <AddressInput
               addressPrefix={addressPrefix}
               label={t('Send to account')}
+              showAddressBook={true}
               showScanner={true}
             />
           </Form.Item>

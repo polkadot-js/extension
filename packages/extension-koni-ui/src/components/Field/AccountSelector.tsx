@@ -3,20 +3,18 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isAccountAll } from '@subwallet/extension-base/utils';
-import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemWithName';
-import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
+import { useFormatAddress, useSelectModalInputHelper, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findNetworkJsonByGenesisHash, reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
+import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { InputRef, SelectModal } from '@subwallet/react-ui';
 import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+import { AccountItemWithName } from '../Account';
+import { Avatar } from '../Avatar';
 import GeneralEmptyList from '../GeneralEmptyList';
 
 interface Props extends ThemeProps, BasicInputWrapper {
@@ -33,33 +31,16 @@ function defaultFiler (account: AccountJson): boolean {
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
   const { addressPrefix, className = '', disabled, externalAccounts, filter, id = 'account-selector', label, placeholder, readOnly, statusHelp, value } = props;
-  const _items = useSelector((state) => state.accountState.accounts);
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const accounts = useSelector((state) => state.accountState.accounts);
 
   const items = useMemo(() => {
-    return (externalAccounts || _items).filter(filter || defaultFiler);
-  }, [_items, externalAccounts, filter]);
+    return (externalAccounts || accounts).filter(filter || defaultFiler);
+  }, [accounts, externalAccounts, filter]);
 
   const { t } = useTranslation();
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
-  const formatAddress = useCallback((item: AccountJson): string => {
-    let addPrefix = 42;
-
-    if (addressPrefix !== undefined) {
-      addPrefix = addressPrefix;
-    }
-
-    if (item.originGenesisHash) {
-      const network = findNetworkJsonByGenesisHash(chainInfoMap, item.originGenesisHash);
-
-      if (network) {
-        addPrefix = network.substrateInfo?.addressPrefix ?? addPrefix;
-      }
-    }
-
-    return reformatAddress(item.address, addPrefix);
-  }, [addressPrefix, chainInfoMap]);
+  const formatAddress = useFormatAddress(addressPrefix);
 
   const renderSelected = useCallback((item: AccountJson) => {
     const address = formatAddress(item);

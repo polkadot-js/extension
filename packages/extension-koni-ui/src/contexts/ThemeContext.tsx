@@ -152,6 +152,10 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
 
     '.mb-0': {
       marginBottom: 0
+    },
+
+    '.ant-checkbox': {
+      top: 0
     }
   });
 });

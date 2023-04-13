@@ -584,6 +584,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               label={t('Send to account')}
+              showAddressBook={true}
               showScanner={true}
             />
           </Form.Item>

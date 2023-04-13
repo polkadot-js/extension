@@ -6,8 +6,7 @@ import { StakingStatusType } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { SwModal } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ModalContext, SwModal } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 

@@ -120,3 +120,11 @@ export const getAccountAddressType = (address?: string): AccountAddressType => {
     return AccountAddressType.UNKNOWN;
   }
 };
+
+export const funcSortByName = (a: AccountJson, b: AccountJson) => {
+  if (isAccountAll(b.address)) {
+    return 3;
+  }
+
+  return ((a?.name || '').toLowerCase() > (b?.name || '').toLowerCase()) ? 1 : -1;
+};

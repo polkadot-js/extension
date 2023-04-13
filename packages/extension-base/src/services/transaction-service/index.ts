@@ -489,6 +489,8 @@ export default class TransactionService {
       try {
         const sender = keyring.getPair(inputData.senderAddress);
 
+        console.log('sender', sender);
+
         sender && this.databaseService.handleNftTransfer(transaction.chain, [sender.address, ALL_ACCOUNT_KEY], inputData.nftItem)
           .then(() => {
             this.eventService.emit('transaction.transferNft', undefined);

@@ -65,12 +65,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, []);
 
   const onSubmit = useCallback(() => {
-    if (seedPhrase) {
+    const seed = seedPhrase.trimStart().trimEnd();
+
+    if (seed) {
       setSubmitting(true);
       setTimeout(() => {
         createAccountSuriV2({
           name: accountName,
-          suri: seedPhrase,
+          suri: seed,
           isAllowed: true,
           types: keyTypes
         })
@@ -97,8 +99,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       clearTimeout(timeOutRef.current);
     }
 
+    const seed = seedPhrase.trimStart().trimEnd();
+
     if (amount) {
-      if (seedPhrase) {
+      if (seed) {
         setValidating(true);
         setValidateState({
           status: 'validating',
@@ -106,7 +110,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         });
 
         timeOutRef.current = setTimeout(() => {
-          validateSeedV2(seedPhrase, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
+          validateSeedV2(seed, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
             .then((res) => {
               if (amount) {
                 setValidateState({});
@@ -116,7 +120,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               if (amount) {
                 setValidateState({
                   status: 'error',
-                  message: e.message
+                  message: t('Invalid mnemonic seed')
                 });
               }
             })
@@ -130,7 +134,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (changed) {
           setValidateState({
             status: 'error',
-            message: 'Seed phrase is required'
+            message: t('Mnemonic needs to contain 12, 15, 18, 21, 24 words')
           });
         }
       }
@@ -139,7 +143,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     return () => {
       amount = false;
     };
-  }, [seedPhrase, changed]);
+  }, [seedPhrase, changed, t]);
 
   useFocusFormItem(form, fieldName);
 
@@ -164,7 +168,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       >
         <div className='container'>
           <div className='description'>
-            {t('To import an existing Polkdot wallet, please enter the recovery seed phrase here:')}
+            {t('To import an existing Polkadot wallet, please enter the recovery seed phrase here:')}
           </div>
           <Form
             className='form-container'

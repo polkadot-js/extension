@@ -234,7 +234,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   valuePropName='checked'
                 >
                   <Checkbox>
-                    <span className={'__option-label'}>Bond reward</span>
+                    <span className={'__option-label'}>{t('Bond reward after claim')}</span>
                   </Checkbox>
                 </Form.Item>
               )
@@ -295,6 +295,15 @@ const ClaimReward = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.claim-reward-meta-info': {
       marginTop: token.marginXXS
+    },
+
+    '.ant-checkbox-wrapper': {
+      display: 'flex',
+      alignItems: 'center',
+
+      '.ant-checkbox': {
+        top: 0
+      }
     }
   };
 });

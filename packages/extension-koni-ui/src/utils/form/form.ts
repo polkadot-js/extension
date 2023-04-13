@@ -24,7 +24,7 @@ export function convertFieldToError<T = Record<string, unknown>> (fields: FieldD
 
 export const simpleCheckForm = (allFields: FormFieldData[]) => {
   const error = allFields.map((data) => data.errors || [])
-    .reduce((old, value) => [...old, ...value])
+    .reduce((old, value) => [...old, ...value], [])
     .some((value) => !!value);
 
   const empty = allFields.map((data) => data.value as unknown).some((value) => !value);

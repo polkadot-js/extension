@@ -122,8 +122,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       } else {
         navigate(tokenUrl);
       }
-    } else if (pathName === migratePasswordUrl && !needMigrate) {
-      goHome();
     } else if (pathName === loginUrl && !isLocked) {
       goHome();
     } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {

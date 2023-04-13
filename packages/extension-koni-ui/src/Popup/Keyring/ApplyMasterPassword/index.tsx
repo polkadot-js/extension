@@ -3,27 +3,23 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
-import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
-import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
-import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { useDefaultNavigate, useDeleteAccount, useNotification } from '@subwallet/extension-koni-ui/hooks';
 import { forgetAccount, keyringMigrateMasterPassword } from '@subwallet/extension-koni-ui/messaging';
-import MigrateDone from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword/Done';
-import IntroductionMigratePassword from '@subwallet/extension-koni-ui/Popup/Keyring/ApplyMasterPassword/Introduction';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { toShort } from '@subwallet/extension-koni-ui/utils';
-import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
+import { FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { simpleCheckForm, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Field, Form, Icon, Input } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle, Trash } from 'phosphor-react';
-import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
+
+import MigrateDone from './Done';
+import IntroductionMigratePassword from './Introduction';
 
 type Props = ThemeProps;
 
@@ -83,7 +79,7 @@ const selectPassword = () => {
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { t } = useTranslation();
-  const goHome = useDefaultNavigate().goHome;
+  const { goHome } = useDefaultNavigate();
   const notify = useNotification();
   const { token } = useTheme() as Theme;
 
@@ -118,16 +114,20 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 
   const onBack = useCallback(() => {
-    setStep('Introduction');
-  }, []);
+    if (step === 'Migrate') {
+      setStep('Introduction');
+    } else {
+      goHome();
+    }
+  }, [goHome, step]);
 
-  const onUpdate: Callbacks<MigratePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
+  const onUpdate: FormCallbacks<MigratePasswordFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { empty, error } = simpleCheckForm(allFields);
 
     setIsDisable(error || empty);
   }, []);
 
-  const onSubmit: Callbacks<MigratePasswordFormState>['onFinish'] = useCallback((values: MigratePasswordFormState) => {
+  const onSubmit: FormCallbacks<MigratePasswordFormState>['onFinish'] = useCallback((values: MigratePasswordFormState) => {
     const password = values[FormFieldName.PASSWORD];
 
     if (currentAccount?.address && password) {
@@ -289,11 +289,7 @@ const Component: React.FC<Props> = (props: Props) => {
           loading: step === 'Migrate' && loading
         }}
         showBackButton={step !== 'Introduction'}
-        subHeaderIcons={[
-          {
-            icon: <InfoIcon />
-          }
-        ]}
+        subHeaderLeft={step === 'Done' && <CloseIcon />}
         title={title}
       >
         {step === 'Introduction' && <IntroductionMigratePassword />}

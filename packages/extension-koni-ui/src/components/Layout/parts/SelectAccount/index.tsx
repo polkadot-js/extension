@@ -62,7 +62,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const location = useLocation();
   const { goHome } = useDefaultNavigate();
 
-  const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+  const { accounts: _accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
 
   const [connected, setConnected] = useState(0);
   const [canConnect, setCanConnect] = useState(0);
@@ -71,6 +71,16 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const isCurrentTabFetched = !!currentTab;
   const currentAuth = useGetCurrentAuth();
   const isPopup = useIsPopup();
+
+  const accounts = useMemo((): AccountJson[] => {
+    return [..._accounts].sort((a, b) => {
+      if (isAccountAll(b.address)) {
+        return 3;
+      }
+
+      return ((a?.name || '').toLowerCase() > (b?.name || '').toLowerCase()) ? 1 : -1;
+    });
+  }, [_accounts]);
 
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));

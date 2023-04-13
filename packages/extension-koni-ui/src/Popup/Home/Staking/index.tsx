@@ -149,7 +149,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     const searchTextLowerCase = searchText.toLowerCase();
 
     return (
-      item.staking.name.toLowerCase().includes(searchTextLowerCase)
+      item.staking.nativeToken.toLowerCase().includes(searchTextLowerCase)
     );
   }, []);
 

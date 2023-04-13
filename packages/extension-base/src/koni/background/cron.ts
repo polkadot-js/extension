@@ -281,7 +281,7 @@ export class KoniCron {
         const updatedChainSupportStaking = updatedChains.some((updatedChain) => {
           const chainInfo = chainInfoMap[updatedChain];
 
-          return _isChainSupportNativeNft(chainInfo) || _isChainSupportEvmNft(chainInfo) || _isChainSupportWasmNft(chainInfo);
+          return chainInfo && (_isChainSupportNativeNft(chainInfo) || _isChainSupportEvmNft(chainInfo) || _isChainSupportWasmNft(chainInfo));
         });
 
         if (!updatedChainSupportStaking) {
@@ -307,7 +307,7 @@ export class KoniCron {
       const chainInfoMap = this.state.getChainInfoMap();
 
       if (updatedChains && updatedChains.length > 0) {
-        const updatedChainSupportStaking = updatedChains.some((updatedChain) => _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
+        const updatedChainSupportStaking = updatedChains.some((updatedChain) => chainInfoMap[updatedChain] && _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
 
         if (!updatedChainSupportStaking) {
           return;
@@ -325,7 +325,7 @@ export class KoniCron {
       const chainInfoMap = this.state.getChainInfoMap();
 
       if (updatedChains && updatedChains.length > 0) {
-        const updatedChainSupportStaking = updatedChains.some((updatedChain) => _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
+        const updatedChainSupportStaking = updatedChains.some((updatedChain) => chainInfoMap[updatedChain] && _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
 
         if (!updatedChainSupportStaking) {
           return;
@@ -349,7 +349,7 @@ export class KoniCron {
   updateChainStakingMetadata = (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, updatedChains?: string[]) => {
     return () => {
       if (updatedChains && updatedChains.length > 0) {
-        const updatedChainSupportStaking = updatedChains.some((updatedChain) => _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
+        const updatedChainSupportStaking = updatedChains.some((updatedChain) => chainInfoMap[updatedChain] && _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
 
         if (!updatedChainSupportStaking) {
           return;
@@ -366,7 +366,7 @@ export class KoniCron {
   updateNominatorMetadata = (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, updatedChains?: string[]) => {
     return () => {
       if (updatedChains && updatedChains.length > 0) {
-        const updatedChainSupportStaking = updatedChains.some((updatedChain) => _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
+        const updatedChainSupportStaking = updatedChains.some((updatedChain) => chainInfoMap[updatedChain] && _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
 
         if (!updatedChainSupportStaking) {
           return;

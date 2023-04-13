@@ -16,7 +16,7 @@ export class EventService extends EventEmitter<EventRegistry> {
   public readonly waitChainReady: Promise<boolean>;
   public readonly waitAssetReady: Promise<boolean>;
 
-  constructor (options: { lazyTime: number } = { lazyTime: 99 }) {
+  constructor (options: { lazyTime: number } = { lazyTime: 300 }) {
     super();
     this.lazyTime = options.lazyTime;
     this.timeoutId = null;
@@ -45,8 +45,12 @@ export class EventService extends EventEmitter<EventRegistry> {
   }
 
   private emitLazy (): void {
-    console.log(this.pendingEvents);
-    this.lazyEmitter.emit('lazy', this.pendingEvents, this.pendingEvents.map((e) => e.type));
+    try {
+      this.lazyEmitter.emit('lazy', this.pendingEvents, this.pendingEvents.map((e) => e.type));
+    } catch (e) {
+      console.error('Get error in some listener of lazy event', e);
+    }
+
     this.pendingEvents = [];
     this.timeoutId = null;
   }

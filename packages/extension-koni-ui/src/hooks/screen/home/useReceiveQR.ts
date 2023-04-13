@@ -4,9 +4,8 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getMultiChainAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { ReceiveTokensSelectorModalId } from '@subwallet/extension-koni-ui/components';
 import { AccountSelectorModalId } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
-import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType } from '@subwallet/extension-koni-ui/types';
 import { getAccountType, isAccountAll as checkIsAccountAll } from '@subwallet/extension-koni-ui/utils';
@@ -159,7 +158,7 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
         }
       }
 
-      activeModal(ReceiveTokensSelectorModalId);
+      activeModal(RECEIVE_TOKEN_SELECTOR_MODAL);
     }
   }, [activeModal, chainInfoMap, currentAccount, getTokenSelectorItems, tokenGroupSlug]);
 
@@ -179,7 +178,7 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
       }
     }
 
-    activeModal(ReceiveTokensSelectorModalId);
+    activeModal(RECEIVE_TOKEN_SELECTOR_MODAL);
     inactiveModal(AccountSelectorModalId);
   }, [activeModal, getTokenSelectorItems, inactiveModal, tokenGroupSlug]);
 

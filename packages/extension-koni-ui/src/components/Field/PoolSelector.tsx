@@ -61,11 +61,13 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const { t } = useTranslation();
 
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+
+  const isActive = checkActive(id);
 
   const nominatorMetadata = useGetNominatorInfo(chain, StakingType.POOLED, from);
   const items = useGetValidatorList(chain, StakingType.POOLED) as NominationPoolDataType[];
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const nominationPoolValueList = useMemo((): string[] => {
     return nominatorMetadata[0]?.nominations.map((item) => item.validatorAddress) || [];
@@ -176,10 +178,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     );
   }, [onClickMore]);
 
-  const closeSortingModal = useCallback(() => {
-    inactiveModal(SORTING_MODAL_ID);
-  }, [inactiveModal]);
-
   const renderSelected = useCallback((item: NominationPoolDataType) => {
     return (
       <div className={'__selected-item'}>
@@ -192,8 +190,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);
-    closeSortingModal();
-  }, [closeSortingModal]);
+  }, []);
+
+  const onResetSort = useCallback(() => {
+    setSortSelection(SortKey.DEFAULT);
+  }, []);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -209,6 +210,18 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     onChange && onChange({ target: { value: selectedPool } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nominationPoolValueList]);
+
+  useEffect(() => {
+    if (!isActive) {
+      setSortSelection(SortKey.DEFAULT);
+    }
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!isActive) {
+      onResetFilter();
+    }
+  }, [isActive, onResetFilter]);
 
   return (
     <>
@@ -246,7 +259,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         renderSelected={renderSelected}
         renderWhenEmpty={renderEmpty}
         rightIconProps={{
-          icon: <Icon phosphorIcon={SortAscending} />,
+          icon: (
+            <Badge dot={sortSelection !== SortKey.DEFAULT}>
+              <Icon phosphorIcon={SortAscending} />
+            </Badge>
+          ),
           onClick: () => {
             activeModal(SORTING_MODAL_ID);
           }
@@ -299,8 +316,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       <SortingModal
         id={SORTING_MODAL_ID}
-        onCancel={closeSortingModal}
         onChangeOption={onChangeSortOpt}
+        onReset={onResetSort}
         optionSelection={sortSelection}
         options={sortingOptions}
       />

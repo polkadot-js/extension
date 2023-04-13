@@ -181,7 +181,12 @@ function autoFormatAddress (address: string): string {
   }
 }
 
-function generateSignature ({ r, s, v }: { r: string, s: string, v: string }): string {
+function generateSignature (input: { r: string, s: string, v: string }): string {
+  if (!input) {
+    return '';
+  }
+
+  const { r, s, v } = input;
   const rHex = r.startsWith('0x') ? r.slice(2) : r;
   const sHex = s.startsWith('0x') ? s.slice(2) : s;
   const vHex = (parseInt(v)).toString(16);
@@ -377,15 +382,15 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
       return;
     }
 
-    try {
-      usedAddresses.forEach((address) => {
+    usedAddresses.forEach((address) => {
+      try {
         const transactionData = parseSubsquidTransactionData(address, name as SubsquidTransactionType, historyItem, chainInfo, parseData(args), parseData(_data));
 
         histories.push(transactionData);
-      });
-    } catch (e) {
-      console.warn('Parse transaction data failed', e);
-    }
+      } catch (e) {
+        console.warn('Parse transaction data failed', address, e);
+      }
+    });
   });
 
   return histories;

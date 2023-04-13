@@ -28,7 +28,6 @@ export const getTokenPrice = async (priceIds: Set<string>, currency = 'usd'): Pr
     }
 
     if (useBackupApi || res?.status !== 200) {
-      console.log('Use backup api for price');
       useBackupApi = true;
       res = await axios.get(`https://chain-data.subwallet.app/api/price/get?ids=${idStr}`);
     }

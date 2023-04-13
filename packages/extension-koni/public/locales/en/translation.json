@@ -1017,5 +1017,16 @@
   "Transaction confirm": "",
   "Withdraw amount": "",
   "Reloading": "",
-  "Invalid contract for the selected chain": ""
+  "Invalid contract for the selected chain": "",
+  "Lowest min stake": "",
+  "Lowest member": "",
+  "Highest total pooled": "",
+  "Active validator": "",
+  "Destroying": "",
+  "Can not get balance": "",
+  "Chain or token is inactive": "",
+  "Go to home": "",
+  "All done!": "",
+  "Transfer the full account balance": "",
+  "Value must be equal or less than {{number}}": ""
 }

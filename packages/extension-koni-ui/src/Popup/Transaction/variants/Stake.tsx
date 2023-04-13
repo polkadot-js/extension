@@ -508,7 +508,7 @@ const Component: React.FC<Props> = (props: Props) => {
         </Button>
       </TransactionFooter>
 
-      { // TODO: check case for pool
+      {
         chainStakingMetadata &&
         (
           <StakingNetworkDetailModal

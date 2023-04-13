@@ -32,23 +32,31 @@ interface Props extends ThemeProps, BasicInputWrapper {
 
 const renderEmpty = () => <GeneralEmptyList />;
 
+const convertChainActivePriority = (active?: boolean) => active ? 1 : 0;
+
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { className = '', disabled, id = 'token-select', items, label, placeholder, showChainInSelected = false, statusHelp, value, filterFunction = _isAssetFungibleToken, tooltip } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const { chainInfoMap, chainStateMap } = useSelector((state) => state.chainStore);
 
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
   const filteredItems = useMemo((): TokenItemType[] => {
-    return items.filter((item) => {
+    const raw = items.filter((item) => {
       const chainAsset = assetRegistry[item.slug];
 
       return chainAsset ? filterFunction(chainAsset) : false;
     });
-  }, [assetRegistry, filterFunction, items]);
+
+    raw.sort((a, b) => {
+      return convertChainActivePriority(chainStateMap[b.originChain]?.active) - convertChainActivePriority(chainStateMap[a.originChain]?.active);
+    });
+
+    return raw;
+  }, [assetRegistry, chainStateMap, filterFunction, items]);
 
   const chainLogo = useMemo(() => {
     const tokenInfo = filteredItems.find((x) => x.slug === value);
@@ -175,6 +183,7 @@ export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { to
     '.token-logo': {
       bottom: 0,
       right: 0,
+      margin: '-1px 0',
 
       '.-sub-logo': {
         '.ant-image': {

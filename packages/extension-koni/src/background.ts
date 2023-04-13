@@ -96,16 +96,12 @@ chrome.runtime.onStartup.addListener(function () {
 // initial setup
 cryptoWaitReady()
   .then((): void => {
-    console.log('crypto initialized');
-
     // load all the keyring data
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519', password_store: new KeyringStore() });
 
     keyring.restoreKeyringPassword().finally(() => {
       koniState.updateKeyringState();
     });
-
-    console.log('initialization completed');
   })
   .catch((error): void => {
     console.error('initialization failed', error);

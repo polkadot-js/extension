@@ -3,7 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { TokenSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenSelectionItem';
-import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useAssetChecker from '@subwallet/extension-koni-ui/hooks/chain/useAssetChecker';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -20,13 +20,16 @@ interface Props extends ThemeProps {
   items: _ChainAsset[]
 }
 
-export const ReceiveTokensSelectorModalId = 'receiveTokensSelectorModalId';
-
 const renderEmpty = () => <GeneralEmptyList />;
+
+const modalId = RECEIVE_TOKEN_SELECTOR_MODAL;
 
 function Component ({ address, className = '', items, onSelectItem }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+
+  const isActive = checkActive(modalId);
+
   const sectionRef = useRef<SwListSectionRef>(null);
   const checkAsset = useAssetChecker();
 
@@ -39,25 +42,25 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
   }, []);
 
   const onCancel = useCallback(() => {
-    inactiveModal(ReceiveTokensSelectorModalId);
+    inactiveModal(modalId);
   }, [inactiveModal]);
 
   const onClickQrBtn = useCallback((item: _ChainAsset) => {
     return () => {
       onSelectItem && onSelectItem(item);
       checkAsset(item.slug);
-      inactiveModal(ReceiveTokensSelectorModalId);
+      inactiveModal(modalId);
       activeModal(RECEIVE_QR_MODAL);
     };
   }, [activeModal, checkAsset, inactiveModal, onSelectItem]);
 
   useEffect(() => {
-    if (!checkActive(ReceiveTokensSelectorModalId)) {
+    if (!isActive) {
       setTimeout(() => {
         sectionRef.current?.setSearchValue('');
       }, 100);
     }
-  }, [checkActive, sectionRef]);
+  }, [isActive]);
 
   const renderItem = useCallback((item: _ChainAsset) => {
     return (
@@ -79,7 +82,7 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
   return (
     <SwModal
       className={`${className} chain-selector-modal`}
-      id={ReceiveTokensSelectorModalId}
+      id={modalId}
       onCancel={onCancel}
       title={t('Select token')}
     >

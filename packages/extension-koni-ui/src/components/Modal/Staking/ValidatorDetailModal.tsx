@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { StakingStatusType } from '@subwallet/extension-koni-ui/constants';
+import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,11 +13,8 @@ import styled from 'styled-components';
 
 type Props = ThemeProps & {
   onCancel?: () => void;
-  status: StakingStatusType;
   validatorItem: ValidatorDataType;
 };
-
-export const ValidatorDetailModalId = 'validatorDetailModalId';
 
 function Component (props: Props): React.ReactElement<Props> {
   const { className, onCancel, validatorItem } = props;
@@ -36,7 +33,7 @@ function Component (props: Props): React.ReactElement<Props> {
   const { inactiveModal } = useContext(ModalContext);
 
   const _onCancel = useCallback(() => {
-    inactiveModal(ValidatorDetailModalId);
+    inactiveModal(VALIDATOR_DETAIL_MODAL);
 
     onCancel && onCancel();
   }, [inactiveModal, onCancel]);
@@ -44,7 +41,7 @@ function Component (props: Props): React.ReactElement<Props> {
   return (
     <SwModal
       className={className}
-      id={ValidatorDetailModalId}
+      id={VALIDATOR_DETAIL_MODAL}
       onCancel={_onCancel}
       title={t('Validator details')}
     >

@@ -3,6 +3,7 @@
 
 import { getTransactionLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { InfoItemBase } from '@subwallet/extension-koni-ui/components';
+import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, SwIconProps, SwModal } from '@subwallet/react-ui';
@@ -24,8 +25,6 @@ export type StatusType = {
   icon: SwIconProps['phosphorIcon'],
   name: string
 };
-
-export const HistoryDetailModalId = 'historyDetailModalId';
 
 function Component ({ className = '', data, onCancel }: Props): React.ReactElement<Props> {
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
@@ -72,7 +71,7 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
     <SwModal
       className={className}
       footer={modalFooter}
-      id={HistoryDetailModalId}
+      id={HISTORY_DETAIL_MODAL}
       onCancel={onCancel}
       title={data?.displayData?.title || ''}
     >

@@ -100,8 +100,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       if (pathName !== migratePasswordUrl) {
         navigate(migratePasswordUrl);
       }
-    } else if (pathName === migratePasswordUrl) {
-      // Empty
     } else if (hasMasterPassword && isLocked) {
       if (pathName !== loginUrl) {
         navigate(loginUrl);
@@ -124,8 +122,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       } else {
         navigate(tokenUrl);
       }
-    } else if (pathName === migratePasswordUrl && !needMigrate) {
-      goHome();
     } else if (pathName === loginUrl && !isLocked) {
       goHome();
     } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {

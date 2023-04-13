@@ -15,7 +15,7 @@ import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messagin
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, funcSortByName, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { searchAccountFunction } from '@subwallet/extension-koni-ui/utils/account/account';
 import { BackgroundIcon, Logo, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -73,13 +73,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const isPopup = useIsPopup();
 
   const accounts = useMemo((): AccountJson[] => {
-    return [..._accounts].sort((a, b) => {
-      if (isAccountAll(b.address)) {
-        return 3;
-      }
-
-      return ((a?.name || '').toLowerCase() > (b?.name || '').toLowerCase()) ? 1 : -1;
-    });
+    return [..._accounts].sort(funcSortByName);
   }, [_accounts]);
 
   const noAllAccounts = useMemo(() => {

@@ -224,6 +224,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
+  const [, update] = useState({});
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone, setIsTransferAll);
 
@@ -488,11 +489,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           if (!cancel) {
             const value = form.getFieldValue('value') as string;
 
-            console.log(value);
-
             if (value) {
               setTimeout(() => {
-                form.validateFields(['value']).finally(noop);
+                form.validateFields(['value']).finally(() => update({}));
               }, 100);
             }
           }
@@ -620,7 +619,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           onClick={preCheckReadOnly(form.submit)}
           schema={isTransferAll ? 'warning' : undefined}
         >
-          {isTransferAll ? t('Transfer all') : t('Transfer')}
+          {isTransferAll ? t('Transfer the full account balance') : t('Transfer')}
         </Button>
       </TransactionFooter>
     </>
@@ -634,7 +633,7 @@ const SendFund = styled(_SendFund)(({ theme }) => {
     '.__brief': {
       paddingLeft: token.padding,
       paddingRight: token.padding,
-      marginBottom: token.marginLG
+      marginBottom: token.marginMD
     },
 
     '&.-transaction-content.-is-zero-balance': {

@@ -183,6 +183,7 @@ export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { to
     '.token-logo': {
       bottom: 0,
       right: 0,
+      margin: '-1px 0',
 
       '.-sub-logo': {
         '.ant-image': {

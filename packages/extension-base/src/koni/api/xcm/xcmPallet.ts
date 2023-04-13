@@ -31,7 +31,7 @@ function getTokenLocation (sendingValue: string) {
 
 // this pallet is only used by Relaychains
 export function getExtrinsicByXcmPalletPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
-  const weightParam = getDestWeight(api);
+  const weightParam = getDestWeight();
   const destination = getDestinationChainLocation(destinationChainInfo);
   const beneficiary = getBeneficiary(originChainInfo, destinationChainInfo, recipientAddress);
   const tokenLocation = getTokenLocation(value);

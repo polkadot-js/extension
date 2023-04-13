@@ -41,7 +41,7 @@ function getAssetLocation (tokenInfo: _ChainAsset, sendingValue: string) {
 }
 
 export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
-  const weightParam = getDestWeight(api);
+  const weightParam = getDestWeight();
   const beneficiary = getBeneficiary(originChainInfo, destinationChainInfo, recipientAddress);
   const destination = getDestinationChainLocation(destinationChainInfo);
   const assetLocation = getAssetLocation(tokenInfo, value);

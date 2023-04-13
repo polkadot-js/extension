@@ -5,7 +5,6 @@ import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 
-import { ApiPromise } from '@polkadot/api';
 import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 
 export const FOUR_INSTRUCTIONS_WEIGHT = { Limited: 5000000000 };
@@ -39,9 +38,10 @@ export function getBeneficiary (originChainInfo: _ChainInfo, destinationChainInf
   };
 }
 
-export function getDestWeight (api: ApiPromise) {
-  return api.tx.xTokens.transfer.meta.args[3].type.toString() ===
-  'XcmV2WeightLimit'
-    ? 'Unlimited'
-    : FOUR_INSTRUCTIONS_WEIGHT;
+export function getDestWeight () {
+  return 'Unlimited';
+  // return api.tx.xTokens.transfer.meta.args[3].type.toString() ===
+  // 'XcmV2WeightLimit'
+  //   ? 'Unlimited'
+  //   : FOUR_INSTRUCTIONS_WEIGHT;
 }

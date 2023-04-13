@@ -51,7 +51,7 @@ function getMultiLocationForXtokensPallet (originChainInfo: _ChainInfo, destinat
 }
 
 export function getExtrinsicByXtokensPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
-  const weightParam = getDestWeight(api);
+  const weightParam = getDestWeight();
 
   return api.tx.xTokens.transfer(
     getCurrencyId(tokenInfo),

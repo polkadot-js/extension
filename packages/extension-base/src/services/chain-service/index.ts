@@ -1311,7 +1311,6 @@ export class ChainService {
     }
 
     this.eventService.emit('asset.ready', true);
-    console.log('Done init asset settings');
   }
 
   public setAssetSettings (assetSettings: Record<string, AssetSetting>, emitEvent = true): void {

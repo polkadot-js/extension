@@ -1,46 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_ChainAsset} from '@subwallet/chain-list/types';
-import {
-  APIItemState,
-  BalanceItem,
-  ChainStakingMetadata,
-  CrowdloanItem,
-  NftCollection,
-  NftItem,
-  NominatorMetadata,
-  PriceJson,
-  StakingItem,
-  StakingType,
-  TransactionHistoryItem
-} from '@subwallet/extension-base/background/KoniTypes';
-import KoniDatabase, {
-  IBalance,
-  IChain,
-  ICrowdloanItem,
-  INft
-} from '@subwallet/extension-base/services/storage-service/databases';
-import {
-  AssetStore,
-  BalanceStore,
-  ChainStore,
-  CrowdloanStore,
-  MigrationStore,
-  NftCollectionStore,
-  NftStore,
-  PriceStore,
-  StakingStore,
-  TransactionStore
-} from '@subwallet/extension-base/services/storage-service/db-stores';
-import ChainStakingMetadataStore
-  from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
+import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
+import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
-import {HistoryQuery} from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
-import {Subscription} from 'dexie';
+import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
+import { Subscription } from 'dexie';
 
-import {logger as createLogger} from '@polkadot/util';
-import {Logger} from '@polkadot/util/types';
+import { logger as createLogger } from '@polkadot/util';
+import { Logger } from '@polkadot/util/types';
 
 export default class DatabaseService {
   private _db: KoniDatabase;

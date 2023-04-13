@@ -22,6 +22,7 @@ import { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import CN from 'classnames';
 import { DotsThree, FileArrowDown } from 'phosphor-react';
 import React, { ChangeEventHandler, useCallback, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { u8aToString } from '@polkadot/util';
@@ -65,6 +66,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const { t } = useTranslation();
   const onComplete = useCompleteCreateAccount();
+  const navigate = useNavigate();
   const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
   const { goHome } = useDefaultNavigate();
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -202,7 +204,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         .then(() => {
           setTimeout(() => {
             if (isMultiple) {
-              goHome();
+              navigate('/keyring/migrate-password');
             } else {
               onComplete();
             }
@@ -219,7 +221,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }, 500);
-  }, [jsonFile, requirePassword, password, accountsInfo, goHome, onComplete]);
+  }, [jsonFile, requirePassword, password, accountsInfo, navigate, onComplete]);
 
   const renderItem = useCallback((account: ResponseJsonGetAccountInfo): React.ReactNode => {
     return (

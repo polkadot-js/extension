@@ -66,29 +66,42 @@ const handlers: Handlers = {};
 
 port.addEventListener('message', (event: MessageEvent) => {
   const data = event.data;
-  if (data.sender === "BACKGROUND") {
-    const handler = handlers[data.id];
+  const handler = handlers[data.id];
 
-    if (!handler) {
-      console.error(`Unknown response: ${JSON.stringify(data)}`)
+  if (!handler) {
+    // console.error(`Unknown response: ${JSON.stringify(data)}`)
 
-      return
-    }
+    return
+  }
 
-    if (!handler.subscriber) {
-      delete handlers[data.id]
-    }
+  // delete handlers if handler don't include subscriber with event from BACKGROUND
+  if (!handler.subscriber && data.sender === "BACKGROUND") {
+    delete handlers[data.id]
+  }
 
-    if (data.subscription) {
-      // eslint-disable-next-line @typescript-eslint/ban-types
-      ;(handler.subscriber as Function)(data.subscription)
-    }
-    else if (data.error) {
-      handler.reject(new Error(data.error))
-    } else {
-      handler.resolve(data.response)
+  if (data.subscription) {
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    ;(handler.subscriber as Function)(data.subscription)
+  } else {
+    if (data.sender === "BACKGROUND") {
+      // if (!handler.subscriber) {
+      //   delete handlers[data.id]
+      // }
+
+      // if (data.subscription) {
+      //   // eslint-disable-next-line @typescript-eslint/ban-types
+      //   ;(handler.subscriber as Function)(data.subscription)
+      // }
+      // else
+      if (data.error) {
+        handler.reject(new Error(data.error))
+      } else {
+        handler.resolve(data.response)
+      }
     }
   }
+
+
 }, false);
 
 

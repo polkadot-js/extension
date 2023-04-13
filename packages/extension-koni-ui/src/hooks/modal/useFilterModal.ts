@@ -30,11 +30,16 @@ export function useFilterModal (modalId: string) {
     setSelectedFilters(Object.keys(filterSelectionMap).filter((o) => filterSelectionMap[o]));
   }, [filterSelectionMap, inactiveModal, modalId]);
 
+  const onResetFilter = useCallback(() => {
+    setSelectedFilters([]);
+  }, []);
+
   return {
-    onChangeFilterOption,
-    onApplyFilter,
-    onCloseFilterModal,
     filterSelectionMap,
+    onApplyFilter,
+    onChangeFilterOption,
+    onCloseFilterModal,
+    onResetFilter,
     selectedFilters
   };
 }

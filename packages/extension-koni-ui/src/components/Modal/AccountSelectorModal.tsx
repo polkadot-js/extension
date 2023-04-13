@@ -26,6 +26,7 @@ function Component ({ className = '', id = AccountSelectorModalId, items, onSele
   const { t } = useTranslation();
   const { checkActive, inactiveModal } = useContext(ModalContext);
   const sectionRef = useRef<SwListSectionRef>(null);
+  const isActive = checkActive(id);
 
   const onCancel = useCallback(() => {
     inactiveModal(id);
@@ -50,12 +51,12 @@ function Component ({ className = '', id = AccountSelectorModalId, items, onSele
   }, [onSelectItem]);
 
   useEffect(() => {
-    if (!checkActive(id)) {
+    if (!isActive) {
       setTimeout(() => {
         sectionRef.current?.setSearchValue('');
       }, 100);
     }
-  }, [checkActive, id]);
+  }, [isActive]);
 
   const renderItem = useCallback((item: AccountJson) => {
     return (

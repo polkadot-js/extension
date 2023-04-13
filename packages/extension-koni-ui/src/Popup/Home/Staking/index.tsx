@@ -185,10 +185,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t('Staking')}
       >
         <SwList.Section
-          actionBtnIcon={<Icon
-            phosphorIcon={FadersHorizontal}
-            size='sm'
-          />}
+          actionBtnIcon={(
+            <Icon
+              phosphorIcon={FadersHorizontal}
+              size='sm'
+            />
+          )}
           enableSearchInput={true}
           filterBy={filterFunction}
           list={stakingItems}

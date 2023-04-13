@@ -7,9 +7,9 @@ import { _getSubstrateParaId } from '@subwallet/extension-base/services/chain-se
 
 import { ApiPromise } from '@polkadot/api';
 
-function getDestinationChainLocation (destinationChainInfo: _ChainInfo) {
+function getDestinationChainLocation (destinationChainInfo: _ChainInfo, version = 'V1') {
   return {
-    V1: {
+    [version]: {
       parents: 0,
       interior: {
         X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
@@ -18,9 +18,9 @@ function getDestinationChainLocation (destinationChainInfo: _ChainInfo) {
   };
 }
 
-function getTokenLocation (sendingValue: string) {
+function getTokenLocation (sendingValue: string, version = 'V2') {
   return { // always native token of relaychain
-    V1: [
+    [version]: [
       {
         id: { Concrete: { parents: 0, interior: 'Here' } },
         fun: { Fungible: sendingValue }
@@ -32,9 +32,10 @@ function getTokenLocation (sendingValue: string) {
 // this pallet is only used by Relaychains
 export function getExtrinsicByXcmPalletPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
   const weightParam = getDestWeight();
-  const destination = getDestinationChainLocation(destinationChainInfo);
-  const beneficiary = getBeneficiary(originChainInfo, destinationChainInfo, recipientAddress);
-  const tokenLocation = getTokenLocation(value);
+  const xcmVer = ['kusama'].includes(originChainInfo.slug) ? 'V2' : 'V1';
+  const destination = getDestinationChainLocation(destinationChainInfo, xcmVer);
+  const beneficiary = getBeneficiary(originChainInfo, destinationChainInfo, recipientAddress, xcmVer);
+  const tokenLocation = getTokenLocation(value, xcmVer);
 
   let method = 'limitedReserveTransferAssets';
 

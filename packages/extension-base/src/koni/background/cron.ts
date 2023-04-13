@@ -126,13 +126,12 @@ export class KoniCron {
       'account.remove',
       'account.updateCurrent',
       'chain.add',
-      'chain.updateState',
       'asset.updateState'
     ];
 
     this.eventHandler = (events, eventTypes) => {
       const serviceInfo = this.state.getServiceInfo();
-      const needReload = eventTypes.some((eventType) => reloadEvents.includes(eventType));
+      const commonReload = eventTypes.some((eventType) => reloadEvents.includes(eventType));
 
       const chainUpdated = eventTypes.includes('chain.updateState');
       const nftTransferred = eventTypes.includes('transaction.transferNft');
@@ -149,7 +148,7 @@ export class KoniCron {
         });
       }
 
-      if (!needReload && !chainUpdated && !nftTransferred && !stakingSubmitted) {
+      if (!commonReload && !chainUpdated && !nftTransferred && !stakingSubmitted) {
         return;
       }
 
@@ -160,31 +159,36 @@ export class KoniCron {
         return;
       }
 
+      const chainInfoMap = serviceInfo.chainInfoMap;
+
+      const needUpdateNft = this.needUpdateNft(chainInfoMap, updatedChains);
+      const needUpdateStaking = this.needUpdateStaking(chainInfoMap, updatedChains);
+
       // NFT
-      (needReload || nftTransferred) && this.resetNft(address);
-      (needReload || nftTransferred) && this.removeCron('refreshNft');
+      (commonReload || needUpdateNft || nftTransferred) && this.resetNft(address);
+      (commonReload || needUpdateNft || nftTransferred) && this.removeCron('refreshNft');
 
       // Staking
-      (needReload || stakingSubmitted) && this.resetStakingReward();
-      (needReload || stakingSubmitted) && this.removeCron('refreshStakingReward');
-      (needReload || stakingSubmitted) && this.removeCron('refreshPoolingStakingReward');
-      chainUpdated && this.removeCron('updateChainStakingMetadata');
-      (needReload || stakingSubmitted) && this.removeCron('updateNominatorMetadata');
+      (commonReload || needUpdateStaking || stakingSubmitted) && this.resetStakingReward();
+      (commonReload || needUpdateStaking || stakingSubmitted) && this.removeCron('refreshStakingReward');
+      (commonReload || needUpdateStaking || stakingSubmitted) && this.removeCron('refreshPoolingStakingReward');
+      (commonReload || needUpdateStaking || stakingSubmitted) && this.removeCron('updateNominatorMetadata');
+      needUpdateStaking && this.removeCron('updateChainStakingMetadata');
 
       // Chains
       chainUpdated && this.removeCron('checkStatusApiMap');
       chainUpdated && this.removeCron('recoverApiMap');
 
       if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
-        (needReload || nftTransferred) && this.addCron('refreshNft', this.refreshNft(address, serviceInfo.chainApiMap, this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap(), updatedChains), CRON_REFRESH_NFT_INTERVAL);
+        (commonReload || needUpdateNft || nftTransferred) && this.addCron('refreshNft', this.refreshNft(address, serviceInfo.chainApiMap, this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
 
         chainUpdated && this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
         chainUpdated && this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
 
-        (needReload || stakingSubmitted) && this.addCron('refreshStakingReward', this.refreshStakingReward(address, updatedChains), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-        (needReload || stakingSubmitted) && this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address, updatedChains), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
-        chainUpdated && this.addCron('updateChainStakingMetadata', this.updateChainStakingMetadata(serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, updatedChains), CRON_REFRESH_CHAIN_STAKING_METADATA);
-        (needReload || stakingSubmitted) && this.addCron('updateNominatorMetadata', this.updateNominatorMetadata(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, updatedChains), CRON_REFRESH_CHAIN_NOMINATOR_METADATA);
+        (commonReload || needUpdateStaking || stakingSubmitted) && this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
+        (commonReload || needUpdateStaking || stakingSubmitted) && this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
+        (commonReload || needUpdateStaking || stakingSubmitted) && this.addCron('updateNominatorMetadata', this.updateNominatorMetadata(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_CHAIN_NOMINATOR_METADATA);
+        needUpdateStaking && this.addCron('updateChainStakingMetadata', this.updateChainStakingMetadata(serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_CHAIN_STAKING_METADATA);
       } else {
         this.setStakingRewardReady();
       }
@@ -275,20 +279,8 @@ export class KoniCron {
     this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
   };
 
-  refreshNft = (address: string, apiMap: ApiMap, smartContractNfts: _ChainAsset[], chainInfoMap: Record<string, _ChainInfo>, updatedChains?: string[]) => {
+  refreshNft = (address: string, apiMap: ApiMap, smartContractNfts: _ChainAsset[], chainInfoMap: Record<string, _ChainInfo>) => {
     return () => {
-      if (updatedChains && updatedChains.length > 0) {
-        const updatedChainSupportStaking = updatedChains.some((updatedChain) => {
-          const chainInfo = chainInfoMap[updatedChain];
-
-          return chainInfo && (_isChainSupportNativeNft(chainInfo) || _isChainSupportEvmNft(chainInfo) || _isChainSupportWasmNft(chainInfo));
-        });
-
-        if (!updatedChainSupportStaking) {
-          return;
-        }
-      }
-
       console.debug('Refresh NFT state');
       this.subscriptions.subscribeNft(address, apiMap.substrate, apiMap.evm, smartContractNfts, chainInfoMap);
     };
@@ -302,36 +294,16 @@ export class KoniCron {
     this.state.resetStakingReward();
   };
 
-  refreshStakingReward = (address: string, updatedChains?: string[]) => {
+  refreshStakingReward = (address: string) => {
     return () => {
-      const chainInfoMap = this.state.getChainInfoMap();
-
-      if (updatedChains && updatedChains.length > 0) {
-        const updatedChainSupportStaking = updatedChains.some((updatedChain) => chainInfoMap[updatedChain] && _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
-
-        if (!updatedChainSupportStaking) {
-          return;
-        }
-      }
-
       console.debug('Refresh staking reward state');
       this.subscriptions.subscribeStakingReward(address)
         .catch(this.logger.error);
     };
   };
 
-  refreshStakingRewardFastInterval = (address: string, updatedChains?: string[]) => {
+  refreshStakingRewardFastInterval = (address: string) => {
     return () => {
-      const chainInfoMap = this.state.getChainInfoMap();
-
-      if (updatedChains && updatedChains.length > 0) {
-        const updatedChainSupportStaking = updatedChains.some((updatedChain) => chainInfoMap[updatedChain] && _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
-
-        if (!updatedChainSupportStaking) {
-          return;
-        }
-      }
-
       console.debug('Refresh staking reward data with fast interval');
       this.subscriptions.subscribeStakingRewardFastInterval(address)
         .catch(this.logger.error);
@@ -346,16 +318,8 @@ export class KoniCron {
     return Object.keys(serviceInfo.chainApiMap.substrate).length > 0 || Object.keys(serviceInfo.chainApiMap.evm).length > 0;
   };
 
-  updateChainStakingMetadata = (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, updatedChains?: string[]) => {
+  updateChainStakingMetadata = (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) => {
     return () => {
-      if (updatedChains && updatedChains.length > 0) {
-        const updatedChainSupportStaking = updatedChains.some((updatedChain) => chainInfoMap[updatedChain] && _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
-
-        if (!updatedChainSupportStaking) {
-          return;
-        }
-      }
-
       console.debug('Fetching chain staking metadata');
 
       this.subscriptions.fetchChainStakingMetadata(chainInfoMap, chainStateMap, substrateApiMap)
@@ -363,16 +327,8 @@ export class KoniCron {
     };
   };
 
-  updateNominatorMetadata = (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, updatedChains?: string[]) => {
+  updateNominatorMetadata = (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) => {
     return () => {
-      if (updatedChains && updatedChains.length > 0) {
-        const updatedChainSupportStaking = updatedChains.some((updatedChain) => chainInfoMap[updatedChain] && _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
-
-        if (!updatedChainSupportStaking) {
-          return;
-        }
-      }
-
       console.debug('Fetching nominator data for', address);
 
       this.subscriptions.fetchNominatorMetadata(address, chainInfoMap, chainStateMap, substrateApiMap)
@@ -411,5 +367,25 @@ export class KoniCron {
     await waitTimeout(1800);
 
     return true;
+  }
+
+  private needUpdateNft (chainInfoMap: Record<string, _ChainInfo>, updatedChains?: string[]) {
+    if (updatedChains && updatedChains.length > 0) {
+      return updatedChains.some((updatedChain) => {
+        const chainInfo = chainInfoMap[updatedChain];
+
+        return (_isChainSupportNativeNft(chainInfo) || _isChainSupportEvmNft(chainInfo) || _isChainSupportWasmNft(chainInfo));
+      });
+    }
+
+    return false;
+  }
+
+  private needUpdateStaking (chainInfoMap: Record<string, _ChainInfo>, updatedChains?: string[]) {
+    if (updatedChains && updatedChains.length > 0) {
+      return updatedChains.some((updatedChain) => _isChainSupportSubstrateStaking(chainInfoMap[updatedChain]));
+    }
+
+    return false;
   }
 }

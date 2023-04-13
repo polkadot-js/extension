@@ -144,8 +144,6 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
     slug: originChain.slug
   });
 
-  console.log('xcmRefMap', xcmRefMap);
-
   Object.values(xcmRefMap).forEach((xcmRef) => {
     if (xcmRef.srcAsset === tokenSlug) {
       const destinationChain = chainInfoMap[xcmRef.destChain];
@@ -245,8 +243,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
   }, [chainInfoMap, asset, xcmRefMap]);
 
-  console.log('destChainItems', destChainItems);
-
   const currentChainAsset = useMemo(() => {
     return asset ? assetRegistry[asset] : undefined;
   }, [assetRegistry, asset]);
@@ -318,9 +314,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       return Promise.reject(t('Amount is required'));
     }
 
-    if ((new BigN(amount)).eq(new BigN(0))) {
-      return Promise.reject(t('Amount must be greater than 0'));
-    }
+    // if ((new BigN(amount)).eq(new BigN(0))) {
+    //   return Promise.reject(t('Amount must be greater than 0'));
+    // }
 
     if ((new BigN(amount)).gt(new BigN(maxTransfer))) {
       const maxString = new BigN(maxTransfer).div(BN_TEN.pow(decimals)).toFixed(6);
@@ -487,8 +483,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
           if (!cancel) {
             const value = form.getFieldValue('value') as string;
-
-            console.log(value);
 
             if (value) {
               setTimeout(() => {

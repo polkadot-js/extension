@@ -27,12 +27,12 @@ export function getWaitingTime (waitingTime?: number) {
 
   if (days < 1) {
     if (days) {
-      return 'Withdrawal in a few hours';
+      return 'Withdraw in a few hours';
     } else {
       return 'Available for withdrawal';
     }
   } else {
-    return `Withdrawal in ${days}`;
+    return `Withdraw in ${days}`;
   }
 }
 

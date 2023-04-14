@@ -47,11 +47,11 @@ const Component: React.FC<Props> = (props: Props) => {
         />
       </MetaInfo>
 
-      <span className={'text-light-4'}>
+      <span className={CN('text-light-4')}>
         {
           data.bondReward
             ? t('Your rewards will be bonded back into the pool')
-            : t('Withdrawing rewards will immediately transfer them to your account as free balance')
+            : t('Claimed rewards would be immediately added to your account as transferable balance')
         }
       </span>
     </div>
@@ -60,6 +60,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const ClaimRewardTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    textAlign: 'left',
+
     '.meta-info': {
       marginBottom: token.marginSM
     }

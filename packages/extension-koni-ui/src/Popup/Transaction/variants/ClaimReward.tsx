@@ -65,6 +65,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [isBalanceReady, setIsBalanceReady] = useState(true);
 
   const [form] = Form.useForm<ClaimRewardFormProps>();
   const formDefault = useMemo((): ClaimRewardFormProps => ({
@@ -205,6 +206,7 @@ const Component: React.FC<Props> = (props: Props) => {
               chain={chain}
               className={'free-balance'}
               label={t('Available balance:')}
+              onBalanceReady={setIsBalanceReady}
             />
             <Form.Item>
               <MetaInfo
@@ -234,7 +236,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   valuePropName='checked'
                 >
                   <Checkbox>
-                    <span className={'__option-label'}>Bond reward</span>
+                    <span className={'__option-label'}>{t('Bond reward after claim')}</span>
                   </Checkbox>
                 </Form.Item>
               )
@@ -261,7 +263,7 @@ const Component: React.FC<Props> = (props: Props) => {
         </Button>
 
         <Button
-          disabled={isDisable}
+          disabled={isDisable || !isBalanceReady}
           icon={(
             <Icon
               phosphorIcon={ArrowCircleRight}
@@ -295,6 +297,15 @@ const ClaimReward = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.claim-reward-meta-info': {
       marginTop: token.marginXXS
+    },
+
+    '.ant-checkbox-wrapper': {
+      display: 'flex',
+      alignItems: 'center',
+
+      '.ant-checkbox': {
+        top: 0
+      }
     }
   };
 });

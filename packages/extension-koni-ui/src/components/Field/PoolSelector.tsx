@@ -269,8 +269,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           }
         }}
         searchFunction={searchFunction}
+        searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Search validator')}
-        searchableMinCharactersCount={2}
         selected={value || ''}
         showActionBtn
         statusHelp={statusHelp}

@@ -66,6 +66,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const isAll = isAccountAll(currentAccount?.address || '');
 
   const [form] = Form.useForm<UnstakeFormProps>();
+  const [isBalanceReady, setIsBalanceReady] = useState(true);
 
   const formDefault = useMemo((): UnstakeFormProps => ({
     from: from,
@@ -253,6 +254,7 @@ const Component: React.FC<Props> = (props: Props) => {
               chain={chain}
               className={'free-balance'}
               label={t('Available balance:')}
+              onBalanceReady={setIsBalanceReady}
             />
 
             {
@@ -310,7 +312,7 @@ const Component: React.FC<Props> = (props: Props) => {
         warnings={[]}
       >
         <Button
-          disabled={isDisable}
+          disabled={isDisable || !isBalanceReady}
           icon={(
             <Icon
               phosphorIcon={MinusCircle}

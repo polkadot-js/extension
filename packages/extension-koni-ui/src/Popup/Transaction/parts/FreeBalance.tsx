@@ -6,7 +6,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Number, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps & {
@@ -14,12 +14,18 @@ type Props = ThemeProps & {
   tokenSlug?: string;
   label?: string;
   chain?: string;
+  onBalanceReady?: (rs: boolean) => void;
 }
 
-const Component = ({ address, chain, className, label, tokenSlug }: Props) => {
+const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug);
+
+  useEffect(() => {
+    console.log('onBalanceReady', !isLoading && !error);
+    onBalanceReady?.(!isLoading && !error);
+  }, [error, isLoading, onBalanceReady]);
 
   if (!address && !chain) {
     return <></>;

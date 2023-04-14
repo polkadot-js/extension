@@ -53,7 +53,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [balanceLoading, setBalanceLoading] = useState(true);
+  const [isBalanceReady, setIsBalanceReady] = useState(true);
 
   const [form] = Form.useForm<CancelUnstakeFormProps>();
   const formDefault = useMemo((): CancelUnstakeFormProps => ({
@@ -147,7 +147,7 @@ const Component: React.FC<Props> = (props: Props) => {
               chain={chain}
               className={'free-balance'}
               label={t('Available balance:')}
-              onUpdateLoading={setBalanceLoading}
+              onBalanceReady={setIsBalanceReady}
             />
             <Form.Item name={FormFieldName.UNSTAKE}>
               <CancelUnstakeSelector
@@ -179,7 +179,7 @@ const Component: React.FC<Props> = (props: Props) => {
         </Button>
 
         <Button
-          disabled={isDisable || balanceLoading}
+          disabled={isDisable || !isBalanceReady}
           icon={(
             <Icon
               phosphorIcon={ArrowCircleRight}

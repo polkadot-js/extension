@@ -30,10 +30,6 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
     setIsRefresh({});
   }, []);
 
-  // useEffect(() => {
-  //   setIsLoading(true);
-  // }, [chain, tokenSlug, address]);
-
   useEffect(() => {
     let cancel = false;
 
@@ -41,30 +37,32 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
     setTokenBalance(DEFAULT_BALANCE);
 
     if (address && chain) {
-      if (nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible) {
-        getFreeBalance({ address, networkKey: chain })
+      const promiseList = [] as Promise<any>[];
+
+      if (nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible && assetSettingMap[tokenSlug]?.visible) {
+        promiseList.push(getFreeBalance({ address, networkKey: chain })
           .then((balance) => {
             !cancel && setNativeTokenBalance(balance);
           })
           .catch((e: Error) => {
             !cancel && setError(t('Can not get balance'));
             console.error(e);
-          }).finally(() => {
-            !cancel && setIsLoading(false);
-          });
+          }));
 
-        if (tokenSlug && tokenSlug !== nativeTokenSlug && assetSettingMap[tokenSlug]?.visible) {
-          getFreeBalance({ address, networkKey: chain, token: tokenSlug })
+        if (tokenSlug && tokenSlug !== nativeTokenSlug) {
+          promiseList.push(getFreeBalance({ address, networkKey: chain, token: tokenSlug })
             .then((balance) => {
               !cancel && setTokenBalance(balance);
             })
             .catch((e: Error) => {
               !cancel && setError(t('Can not get balance'));
               console.error(e);
-            }).finally(() => {
-              !cancel && setIsLoading(false);
-            });
+            }));
         }
+
+        Promise.all(promiseList).finally(() => {
+          !cancel && setIsLoading(false);
+        });
       } else {
         !cancel && setIsLoading(false);
         !cancel && setError(t('Chain or token is inactive'));

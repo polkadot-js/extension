@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
@@ -235,25 +236,25 @@ const Component: React.FC<Props> = (props: Props) => {
   const items = useMemo((): ExportItem[] => {
     return [
       {
-        disable: account?.isExternal || !account?.isMasterAccount,
+        disable: !account || account.isExternal || !account.isMasterAccount,
         icon: Leaf,
         label: 'Export Seed Phrase',
         type: ExportType.SEED_PHRASE
       },
       {
-        disable: false,
+        disable: !account || !!account.isExternal,
         icon: FileJs,
         label: 'Export JSON file',
         type: ExportType.JSON_FILE
       },
       {
-        disable: false,
+        disable: !account || account.isExternal || !isEthereumAddress(account.address),
         icon: Wallet,
         label: 'Export Private key',
         type: ExportType.PRIVATE_KEY
       },
       {
-        disable: false,
+        disable: !account || !!account?.isExternal,
         icon: QrCode,
         label: 'Export QR Code',
         type: ExportType.QR_CODE

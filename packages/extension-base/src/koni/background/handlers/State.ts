@@ -397,7 +397,7 @@ export default class KoniState {
   }
 
   public async getPooledStakingRecordsByAddress (addresses: string[]): Promise<StakingItem[]> {
-    return await this.dbService.getPooledStakings(addresses, this.activeChainSlugs);
+    return this.dbService.getPooledStakings(addresses, this.activeChainSlugs);
   }
 
   // TODO: delete later

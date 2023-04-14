@@ -8,30 +8,11 @@ import { _getAssetDecimals, _getChainNativeTokenBasicInfo, _isNativeToken } from
 import { EventRecord } from '@polkadot/types/interfaces';
 
 export function parseXcmEventLogs (historyItem: Partial<TransactionHistoryItem>, eventLogs: EventRecord[], chain: string, sendingTokenInfo: _ChainAsset, chainInfo: _ChainInfo) {
-  let isFeeUseMainTokenSymbol = true;
-
   for (let index = 0; index < eventLogs.length; index++) {
     const record = eventLogs[index];
-
-    if (['karura', 'acala', 'acala_testnet'].includes(chain) && sendingTokenInfo && !_isNativeToken(sendingTokenInfo)) {
-      if (record.event.section === 'currencies' &&
-        record.event.method.toLowerCase() === 'transferred') {
-        if (index === 0) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          historyItem.fee = {
-            value: record.event.data[3]?.toString() || '0',
-            symbol: sendingTokenInfo.symbol,
-            decimals: _getAssetDecimals(sendingTokenInfo)
-          };
-
-          isFeeUseMainTokenSymbol = false;
-        }
-      }
-    }
-
     const { decimals: nativeDecimals, symbol: nativeSymbol } = _getChainNativeTokenBasicInfo(chainInfo);
 
-    if (isFeeUseMainTokenSymbol && record.event.section === 'balances' && record.event.method.toLowerCase() === 'withdraw') {
+    if (record.event.section === 'balances' && record.event.method.toLowerCase() === 'withdraw') {
       if (record.event.data[1]?.toString()) {
         historyItem.fee = {
           value: record.event.data[1]?.toString(),
@@ -39,7 +20,7 @@ export function parseXcmEventLogs (historyItem: Partial<TransactionHistoryItem>,
           decimals: nativeDecimals
         };
       }
-    } else if (isFeeUseMainTokenSymbol && record.event.section === 'tokens' && record.event.method.toLowerCase() === 'withdrawn') {
+    } else if (record.event.section === 'tokens' && record.event.method.toLowerCase() === 'withdrawn') {
       if (record.event.data[2]?.toString()) {
         historyItem.fee = {
           value: record.event.data[2]?.toString(),

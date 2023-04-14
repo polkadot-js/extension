@@ -259,7 +259,7 @@ const Component: React.FC<Props> = (props: Props) => {
         type: ExportType.QR_CODE
       }
     ];
-  }, [account?.isExternal, account?.isMasterAccount]);
+  }, [account]);
 
   const onBack = useCallback(() => {
     if (accountAddress) {

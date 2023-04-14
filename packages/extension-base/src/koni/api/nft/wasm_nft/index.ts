@@ -289,6 +289,8 @@ export class WasmNftApi extends BaseNftApi {
     let collectionImage: string | undefined;
     const smartContract = _getContractAddressOfToken(tokenInfo);
 
+    const nftOwnerMap: Record<string, string[]> = {};
+
     await Promise.all(this.addresses.map(async (address) => {
       if (isEthereumAddress(address)) {
         return;
@@ -342,6 +344,8 @@ export class WasmNftApi extends BaseNftApi {
             }
           }
         }));
+
+        nftOwnerMap[address] = nftIds;
       } catch (e) {
         console.error(`error parsing item for ${this.chain} nft`, e);
       }
@@ -365,6 +369,10 @@ export class WasmNftApi extends BaseNftApi {
       } as NftCollection;
 
       nftParams.updateCollection(this.chain, nftCollection);
+
+      Object.entries(nftOwnerMap).forEach(([owner, nftIds]) => {
+        nftParams.cleanUpNfts(this.chain, owner, smartContract, nftIds);
+      });
     }
   }
 

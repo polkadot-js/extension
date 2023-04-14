@@ -164,8 +164,11 @@ export default class StatemineNftApi extends BaseNftApi {
         } as NftCollection;
 
         params.updateCollection(this.chain, parsedCollection);
-        // params.updateReady(true);
       }));
+
+      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => {
+        params.cleanUpNfts(this.chain, address, collectionId, nftIds);
+      });
     } catch (e) {
       console.error('Failed to fetch statemine nft', e);
     }

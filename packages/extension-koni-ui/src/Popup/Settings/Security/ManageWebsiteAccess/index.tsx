@@ -20,7 +20,8 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
-import {isEthereumAddress} from "@polkadot/util-crypto";
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps;
 

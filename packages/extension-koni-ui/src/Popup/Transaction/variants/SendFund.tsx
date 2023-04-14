@@ -223,6 +223,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
   const [, update] = useState({});
+  const [balanceLoading, setBalanceLoading] = useState(true);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone, setIsTransferAll);
 
@@ -596,6 +597,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         <FreeBalance
           address={from}
           chain={chain}
+          onUpdateLoading={setBalanceLoading}
           tokenSlug={asset}
         />
       </TransactionContent>
@@ -605,6 +607,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         warnings={[]}
       >
         <Button
+          disabled={balanceLoading}
           icon={(
             <Icon
               phosphorIcon={PaperPlaneTilt}

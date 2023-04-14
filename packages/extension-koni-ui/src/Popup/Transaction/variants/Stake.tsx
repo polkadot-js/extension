@@ -101,6 +101,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [poolLoading, setPoolLoading] = useState(false);
   const [validatorLoading, setValidatorLoading] = useState(false);
+  const [balanceLoading, setBalanceLoading] = useState(true);
 
   const existentialDeposit = useMemo(() => {
     const assetInfo = assetRegistry[asset];
@@ -398,6 +399,7 @@ const Component: React.FC<Props> = (props: Props) => {
               chain={chain}
               className={'account-free-balance'}
               label={t('Available balance:')}
+              onUpdateLoading={setBalanceLoading}
             />
 
             <div className={'form-row'}>
@@ -494,7 +496,7 @@ const Component: React.FC<Props> = (props: Props) => {
         warnings={[]}
       >
         <Button
-          disabled={isDisable}
+          disabled={isDisable || balanceLoading}
           icon={(
             <Icon
               phosphorIcon={PlusCircle}

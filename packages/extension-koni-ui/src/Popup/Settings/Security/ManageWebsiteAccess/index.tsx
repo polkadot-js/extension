@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import {isEthereumAddress} from "@polkadot/util-crypto";
 
 type Props = ThemeProps;
 
@@ -28,6 +29,16 @@ function getWebsiteItems (authUrlMap: Record<string, AuthUrlInfo>): AuthUrlInfo[
 }
 
 function getAccountCount (item: AuthUrlInfo): number {
+  const authType = item.accountAuthType;
+
+  if (authType === 'evm') {
+    return item.isAllowedMap ? Object.entries(item.isAllowedMap).filter(([address, rs]) => rs && isEthereumAddress(address)).length : 0;
+  }
+
+  if (authType === 'substrate') {
+    return item.isAllowedMap ? Object.entries(item.isAllowedMap).filter(([address, rs]) => rs && !isEthereumAddress(address)).length : 0;
+  }
+
   return Object.values(item.isAllowedMap).filter((i) => i).length;
 }
 

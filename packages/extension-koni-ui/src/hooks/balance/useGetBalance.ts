@@ -14,8 +14,8 @@ const DEFAULT_BALANCE = { value: '0', symbol: '', decimals: 18 };
 
 const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
   const { t } = useTranslation();
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
-  const { assetSettingMap } = useSelector((state) => state.assetRegistry);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const assetSettingMap = useSelector((state) => state.assetRegistry.assetSettingMap);
 
   const chainInfo = useMemo((): _ChainInfo | undefined => (chainInfoMap[chain]), [chainInfoMap, chain]);
   const nativeTokenSlug = useMemo(() => chainInfo ? _getChainNativeTokenSlug(chainInfo) : undefined, [chainInfo]);
@@ -38,8 +38,13 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
 
     if (address && chain) {
       const promiseList = [] as Promise<any>[];
+      let tokenIsActive = nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible;
 
-      if (nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible && assetSettingMap[tokenSlug]?.visible) {
+      if (tokenSlug && tokenSlug !== nativeTokenSlug && !assetSettingMap[tokenSlug]?.visible) {
+        tokenIsActive = false;
+      }
+
+      if (tokenIsActive) {
         promiseList.push(getFreeBalance({ address, networkKey: chain })
           .then((balance) => {
             !cancel && setNativeTokenBalance(balance);

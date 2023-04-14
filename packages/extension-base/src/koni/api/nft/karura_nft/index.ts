@@ -161,8 +161,11 @@ export class KaruraNftApi extends BaseNftApi {
 
         params.updateItem(this.chain, parsedNft, address);
         params.updateCollection(this.chain, parsedCollection);
-        // params.updateReady(true);
       }));
+
+      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => {
+        params.cleanUpNfts(this.chain, address, collectionId, nftIds);
+      });
     } catch (e) {
       console.error('Failed to fetch karura nft', e);
     }

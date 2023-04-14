@@ -6,8 +6,9 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
-import { ValidatorDetailModal, ValidatorDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/ValidatorDetailModal';
+import { ValidatorDetailModal } from '@subwallet/extension-koni-ui/components/Modal/Staking/ValidatorDetailModal';
 import StakingValidatorItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingValidatorItem';
+import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import { useSelectValidators } from '@subwallet/extension-koni-ui/hooks/modal/useSelectValidators';
 import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetChainStakingMetadata';
@@ -16,10 +17,11 @@ import useGetValidatorList, { ValidatorDataType } from '@subwallet/extension-kon
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getValidatorKey } from '@subwallet/extension-koni-ui/utils/transaction/stake';
 import { Badge, Button, Icon, InputRef, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
+import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
 import BigN from 'bignumber.js';
 import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
-import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -75,13 +77,16 @@ const defaultModalId = 'multi-validator-selector';
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, onChange, value, loading } = props;
   const { t } = useTranslation();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { activeModal, checkActive } = useContext(ModalContext);
 
   useExcludeModal(id);
+  const isActive = checkActive(id);
 
   const items = useGetValidatorList(chain, StakingType.NOMINATED) as ValidatorDataType[];
   const nominatorMetadata = useGetNominatorInfo(chain, StakingType.NOMINATED, from);
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
+
+  const sectionRef = useRef<SwListSectionRef>(null);
 
   const maxCount = chainStakingMetadata?.maxValidatorPerNominator || 1;
 
@@ -122,7 +127,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.DEFAULT);
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const resultList = useMemo((): ValidatorDataType[] => {
     return [...items].sort((a: ValidatorDataType, b: ValidatorDataType) => {
@@ -148,20 +153,19 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       // todo: logic filter here
 
-      return false;
+      return true;
     };
   }, [selectedFilters]);
 
   const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator, onInitValidators } = useSelectValidators(id, maxCount, onChange, isSingleSelect);
 
-  const closeSortingModal = useCallback(() => {
-    inactiveModal(SORTING_MODAL_ID);
-  }, [inactiveModal]);
+  const onResetSort = useCallback(() => {
+    setSortSelection(SortKey.DEFAULT);
+  }, []);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);
-    closeSortingModal();
-  }, [closeSortingModal]);
+  }, []);
 
   const onClickItem = useCallback((value: string) => {
     onChangeSelectedValidator(value);
@@ -171,7 +175,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return (e: SyntheticEvent) => {
       e.stopPropagation();
       setViewDetailItem(item);
-      activeModal(ValidatorDetailModalId);
+      activeModal(VALIDATOR_DETAIL_MODAL);
     };
   }, [activeModal]);
 
@@ -222,6 +226,21 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nominations, onInitValidators, isSingleSelect]);
+
+  useEffect(() => {
+    if (!isActive) {
+      setSortSelection(SortKey.DEFAULT);
+      setTimeout(() => {
+        sectionRef.current?.setSearchValue('');
+      }, 100);
+    }
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!isActive) {
+      onResetFilter();
+    }
+  }, [isActive, onResetFilter]);
 
   return (
     <>
@@ -275,11 +294,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           filterBy={filterFunction}
           list={resultList}
           onClickActionBtn={onClickActionBtn}
+          ref={sectionRef}
           renderItem={renderItem}
           renderWhenEmpty={renderEmpty}
           searchFunction={searchFunction}
+          searchMinCharactersCount={2}
           searchPlaceholder={t<string>('Search validator')}
-          searchableMinCharactersCount={2}
           // showActionBtn
         />
       </SwModal>
@@ -295,18 +315,13 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       <SortingModal
         id={SORTING_MODAL_ID}
-        onCancel={closeSortingModal}
         onChangeOption={onChangeSortOpt}
+        onReset={onResetSort}
         optionSelection={sortSelection}
         options={sortingOptions}
       />
 
-      {viewDetailItem &&
-        <ValidatorDetailModal
-          status={'active'}
-          validatorItem={viewDetailItem}
-        />
-      }
+      {viewDetailItem && <ValidatorDetailModal validatorItem={viewDetailItem} />}
     </>
   );
 };

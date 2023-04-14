@@ -179,8 +179,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     const searchTextLowerCase = searchText.toLowerCase();
 
     return (
-      item.origin.toLowerCase().includes(searchTextLowerCase) ||
-      item.id.toLowerCase().includes(searchTextLowerCase)
+      item.origin?.toLowerCase().includes(searchTextLowerCase) ||
+      item.id?.toLowerCase().includes(searchTextLowerCase)
     );
   }, []);
 

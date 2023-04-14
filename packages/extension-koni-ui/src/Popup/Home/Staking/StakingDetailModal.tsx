@@ -42,7 +42,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const { activeStake, address, chain, nominations, type, unstakings } = nominatorMetadata;
   const showingOption = isShowNominationByValidator(chain);
   const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
-  const modalTitle = type === StakingType.NOMINATED.valueOf() ? 'Nominate details' : 'Pooled details';
+  const modalTitle = type === StakingType.NOMINATED.valueOf() ? 'Nomination details' : 'Pooled details';
 
   const { token } = useTheme() as Theme;
   const navigate = useNavigate();
@@ -146,7 +146,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         <MetaInfo.Number
           decimals={decimals}
           key={item.validatorAddress}
-          label={t('Active stake')}
+          label={t('Active staked')}
           suffix={staking.nativeToken}
           value={item.activeStake || ''}
           valueColorSchema={'gray'}
@@ -217,7 +217,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           typeName={stakingTypeNameMap[staking.type]}
         />
         <MetaInfo.Status
-          label={t('Nomination')}
+          label={type === StakingType.NOMINATED ? t('Nomination status') : t('Pooled status')}
           statusIcon={getStakingStatus(nominatorMetadata.status).icon}
           statusName={getStakingStatus(nominatorMetadata.status).name}
           valueColorSchema={getStakingStatus(nominatorMetadata.status).schema}
@@ -243,7 +243,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
         <MetaInfo.Number
           decimals={decimals}
-          label={t('Staked')}
+          label={t('Total staked')}
           suffix={staking.nativeToken}
           value={String(parseFloat(activeStake) + parseFloat(staking.unlockingBalance || '0'))}
         />

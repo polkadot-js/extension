@@ -41,6 +41,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const chainLogo = useMemo(() => {
     return (
       <Logo
+        className='chain-logo'
         network={value}
         shape='squircle'
         size={token.controlHeightSM}
@@ -84,8 +85,8 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       renderSelected={renderChainSelected}
       renderWhenEmpty={renderEmpty}
       searchFunction={searchFunction}
+      searchMinCharactersCount={2}
       searchPlaceholder={t<string>('Search chain')}
-      searchableMinCharactersCount={2}
       selected={value || ''}
       statusHelp={statusHelp}
       title={title || label || placeholder || t('Select chain')}
@@ -98,6 +99,10 @@ export const ChainSelector = styled(forwardRef(Component))<Props>(({ theme: { to
   return ({
     '&.chain-selector-input .__selected-item': {
       color: token.colorText
+    },
+
+    '.chain-logo': {
+      margin: '-1px 0'
     },
 
     '.ant-network-item .__check-icon': {

@@ -15,7 +15,7 @@ import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messagin
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, funcSortByName, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { searchAccountFunction } from '@subwallet/extension-koni-ui/utils/account/account';
 import { BackgroundIcon, Logo, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -62,7 +62,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const location = useLocation();
   const { goHome } = useDefaultNavigate();
 
-  const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+  const { accounts: _accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
 
   const [connected, setConnected] = useState(0);
   const [canConnect, setCanConnect] = useState(0);
@@ -71,6 +71,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const isCurrentTabFetched = !!currentTab;
   const currentAuth = useGetCurrentAuth();
   const isPopup = useIsPopup();
+
+  const accounts = useMemo((): AccountJson[] => {
+    return [..._accounts].sort(funcSortByName);
+  }, [_accounts]);
 
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));
@@ -83,8 +87,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const _onSelect = useCallback((address: string) => {
     if (address) {
       const accountByAddress = findAccountByAddress(accounts, address);
-
-      console.log(address, accounts);
 
       if (accountByAddress) {
         const accountInfo = {
@@ -311,8 +313,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         renderSelected={renderSelectedItem}
         renderWhenEmpty={renderEmpty}
         searchFunction={searchAccountFunction}
+        searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Account name')}
-        searchableMinCharactersCount={2}
         selected={currentAccount?.address || ''}
         shape='round'
         size='small'

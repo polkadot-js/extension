@@ -10,7 +10,7 @@ import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findNetworkJsonByGenesisHash, reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
+import { findNetworkJsonByGenesisHash, funcSortByName, reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import { InputRef, SelectModal } from '@subwallet/react-ui';
 import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -37,7 +37,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
   const { chainInfoMap } = useSelector((state) => state.chainStore);
 
   const items = useMemo(() => {
-    return (externalAccounts || _items).filter(filter || defaultFiler);
+    return (externalAccounts || _items).filter(filter || defaultFiler).sort(funcSortByName);
   }, [_items, externalAccounts, filter]);
 
   const { t } = useTranslation();
@@ -124,8 +124,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
         renderSelected={renderSelected}
         renderWhenEmpty={renderEmpty}
         searchFunction={searchFunction}
+        searchMinCharactersCount={1}
         searchPlaceholder={t<string>('Search name')}
-        searchableMinCharactersCount={2}
         selected={value || ''}
         statusHelp={statusHelp}
         title={label || placeholder || t('Select account')}

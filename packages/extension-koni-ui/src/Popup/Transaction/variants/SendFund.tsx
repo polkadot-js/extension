@@ -13,12 +13,11 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
 import { useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { getFreeBalance, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
@@ -321,7 +320,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     // }
 
     if ((new BigN(amount)).gt(new BigN(maxTransfer))) {
-      const maxString = new BigN(maxTransfer).div(BN_TEN.pow(decimals)).toFixed(6);
+      const maxString = formatBalance(maxTransfer, decimals);
 
       return Promise.reject(t('Amount must be equal or less than {{number}}', { replace: { number: maxString } }));
     }

@@ -2,15 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AddressJson } from '@subwallet/extension-base/background/types';
-import { AccountItemWithName, BackIcon, FilterModal, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountItemWithName, AddContactModal, BackIcon, EditContactModal, FilterModal, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { ADD_ADDRESS_BOOK_MODAL, EDIT_ADDRESS_BOOK_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal, useFormatAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { reformatAddress } from '@subwallet/extension-koni-ui/utils';
-import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
-import { FadersHorizontal } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useRef } from 'react';
+import { FadersHorizontal, Plus } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -100,6 +101,22 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   ]), [t]);
 
+  const [selectedItem, setSelectedItem] = useState<AddressJson | undefined>();
+
+  const openAddContact = useCallback(() => {
+    activeModal(ADD_ADDRESS_BOOK_MODAL);
+  }, [activeModal]);
+
+  const subHeaderIcons = useMemo((): ButtonProps[] => [{
+    icon: (
+      <Icon
+        phosphorIcon={Plus}
+        size='md'
+      />
+    ),
+    onClick: openAddContact
+  }], [openAddContact]);
+
   const openFilter = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
   }, [activeModal]);
@@ -126,6 +143,15 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [t]);
 
+  const onSelectItem = useCallback((item: AccountItem) => {
+    return () => {
+      setSelectedItem(item);
+      setTimeout(() => {
+        activeModal(EDIT_ADDRESS_BOOK_MODAL);
+      }, 10);
+    };
+  }, [activeModal]);
+
   const renderItem = useCallback((item: AccountItem) => {
     const address = formatAddress(item);
 
@@ -135,13 +161,15 @@ const Component: React.FC<Props> = (props: Props) => {
         address={address}
         avatarSize={24}
         key={item.address}
+        onClick={onSelectItem(item)}
       />
     );
-  }, [formatAddress]);
+  }, [formatAddress, onSelectItem]);
 
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
+        subHeaderIcons={subHeaderIcons}
         title={t('Manage address book')}
       >
         <SwList.Section
@@ -178,6 +206,8 @@ const Component: React.FC<Props> = (props: Props) => {
           options={filterOptions}
           title={t('Filter address')}
         />
+        <AddContactModal />
+        {selectedItem && <EditContactModal addressJson={selectedItem} />}
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );

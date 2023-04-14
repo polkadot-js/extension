@@ -4,7 +4,7 @@
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { AddressBookModal } from '@subwallet/extension-koni-ui/components';
 import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { saveRecentAccountId } from '@subwallet/extension-koni-ui/messaging';
+import { saveRecentAccount } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
 import { findAccountByAddress, toShort } from '@subwallet/extension-koni-ui/utils';
@@ -71,7 +71,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     onChange && onChange({ target: { value: val } });
 
     if (isAddress(val)) {
-      saveRecentAccountId(val).catch(console.error);
+      saveRecentAccount(val).catch(console.error);
     }
   }, [onChange]);
 

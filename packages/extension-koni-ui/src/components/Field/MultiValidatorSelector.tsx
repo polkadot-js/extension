@@ -298,8 +298,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           renderItem={renderItem}
           renderWhenEmpty={renderEmpty}
           searchFunction={searchFunction}
+          searchMinCharactersCount={2}
           searchPlaceholder={t<string>('Search validator')}
-          searchableMinCharactersCount={2}
           // showActionBtn
         />
       </SwModal>

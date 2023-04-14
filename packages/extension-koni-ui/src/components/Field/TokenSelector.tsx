@@ -159,8 +159,8 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       renderSelected={renderTokenSelected}
       renderWhenEmpty={renderEmpty}
       searchFunction={searchFunction}
+      searchMinCharactersCount={2}
       searchPlaceholder={t<string>('Search token')}
-      searchableMinCharactersCount={2}
       selected={value || ''}
       statusHelp={statusHelp}
       title={label || placeholder || t('Select token')}

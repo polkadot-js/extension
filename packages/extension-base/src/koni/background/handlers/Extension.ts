@@ -1488,7 +1488,7 @@ export default class KoniExtension {
     const account = keyring.getAccount(toAddress);
     const contact = keyring.getAddress(toAddress);
 
-    if (!(account || contact)) {
+    if (!account && (!contact || contact.meta.isRecent)) {
       keyring.saveAddress(toAddress, {});
     }
   }

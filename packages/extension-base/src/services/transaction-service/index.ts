@@ -483,28 +483,31 @@ export default class TransactionService {
   private handlePostProcessing (id: string) { // must be done after success/failure to make sure the transaction is finalized
     const transaction = this.getTransaction(id);
 
-    switch (transaction.extrinsicType) {
-      case ExtrinsicType.SEND_NFT: {
-        const inputData = parseTransactionData<ExtrinsicType.SEND_NFT>(transaction.data);
+    if (transaction.extrinsicType === ExtrinsicType.SEND_NFT) {
+      const inputData = parseTransactionData<ExtrinsicType.SEND_NFT>(transaction.data);
 
-        try {
-          const sender = keyring.getPair(inputData.senderAddress);
+      try {
+        const sender = keyring.getPair(inputData.senderAddress);
 
-          sender && this.databaseService.handleNftTransfer(transaction.chain, [sender.address, ALL_ACCOUNT_KEY], inputData.nftItem)
-            .catch(console.error);
-        } catch (e) {
-          console.error(e);
-        }
-
-        try {
-          const recipient = keyring.getPair(inputData.recipientAddress);
-
-          recipient && this.databaseService.addNft(recipient.address, { ...inputData.nftItem, owner: recipient.address })
-            .catch(console.error);
-        } catch (e) {
-          console.error(e);
-        }
+        sender && this.databaseService.handleNftTransfer(transaction.chain, [sender.address, ALL_ACCOUNT_KEY], inputData.nftItem)
+          .then(() => {
+            this.eventService.emit('transaction.transferNft', undefined);
+          })
+          .catch(console.error);
+      } catch (e) {
+        console.error(e);
       }
+
+      try {
+        const recipient = keyring.getPair(inputData.recipientAddress);
+
+        recipient && this.databaseService.addNft(recipient.address, { ...inputData.nftItem, owner: recipient.address })
+          .catch(console.error);
+      } catch (e) {
+        console.error(e);
+      }
+    } else if ([ExtrinsicType.STAKING_BOND, ExtrinsicType.STAKING_UNBOND, ExtrinsicType.STAKING_WITHDRAW, ExtrinsicType.STAKING_CANCEL_UNSTAKE, ExtrinsicType.STAKING_CLAIM_REWARD, ExtrinsicType.STAKING_JOIN_POOL, ExtrinsicType.STAKING_POOL_WITHDRAW, ExtrinsicType.STAKING_LEAVE_POOL].includes(transaction.extrinsicType)) {
+      this.eventService.emit('transaction.submitStaking', transaction.chain);
     }
   }
 

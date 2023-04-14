@@ -5,6 +5,7 @@ import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistor
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
 import { EmptyList, FilterModal, HistoryItem, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
@@ -16,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { HistoryDetailModal, HistoryDetailModalId } from './Detail';
+import { HistoryDetailModal } from './Detail';
 
 type Props = ThemeProps
 
@@ -118,12 +119,16 @@ function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'addres
   return `${item.chain}-${item.address}-${item.extrinsicHash}`;
 }
 
+const modalId = HISTORY_DETAIL_MODAL;
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount } = useSelector((root) => root.accountState);
   const { historyList: rawHistoryList } = useSelector((root) => root.transactionHistory);
+
+  const isActive = checkActive(modalId);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
@@ -265,12 +270,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onOpenDetail = useCallback((item: TransactionHistoryDisplayItem) => {
     return () => {
       setSelectedItem(item);
-      activeModal(HistoryDetailModalId);
+      activeModal(modalId);
     };
   }, [activeModal]);
 
   const onCloseDetail = useCallback(() => {
-    inactiveModal(HistoryDetailModalId);
+    inactiveModal(modalId);
     setSelectedItem(null);
     setOpenDetailLink(false);
   }, [inactiveModal]);
@@ -285,13 +290,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       if (existed) {
         setSelectedItem(existed);
-        activeModal(HistoryDetailModalId);
+        activeModal(modalId);
       }
     }
   }, [activeModal, chain, extrinsicHash, openDetailLink, historyList]);
 
   useEffect(() => {
-    if (checkActive(HistoryDetailModalId)) {
+    if (isActive) {
       setSelectedItem((selected) => {
         if (selected) {
           const key = getHistoryItemKey(selected);
@@ -302,11 +307,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       });
     }
-  }, [checkActive, historyMap]);
+  }, [isActive, historyMap]);
 
   useEffect(() => {
     if (currentAccount?.address !== curAdr) {
-      inactiveModal(HistoryDetailModalId);
+      inactiveModal(modalId);
       setSelectedItem(null);
     }
   }, [curAdr, currentAccount?.address, inactiveModal]);

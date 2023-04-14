@@ -832,7 +832,7 @@ export default class KoniState {
     return items || {};
   }
 
-  public async switchAccount (newAddress: string) {
+  public async handleSwitchAccount (newAddress: string) {
     await Promise.all([
       this.resetBalanceMap(newAddress),
       this.resetCrowdloanMap(newAddress)
@@ -1616,6 +1616,10 @@ export default class KoniState {
 
   public createUnsubscriptionHandle (id: string, unsubscribe: () => void): void {
     this.unsubscriptionMap[id] = unsubscribe;
+  }
+
+  public updateChainConnectionStatus (chain: string, status: _ChainConnectionStatus) {
+    this.chainService.setChainConnectionStatus(chain, status);
   }
 
   public async autoEnableChains (addresses: string[]) {

@@ -55,14 +55,12 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
       className={className}
       convertedStakingValue={convertedBalanceValue}
       decimal={0}
-      displayToken={staking.nativeToken}
       networkKey={staking.chain}
       onClickRightIcon={_onClickRightIcon}
       onPressItem={_onPressItem}
       stakingNetwork={staking.nativeToken}
       stakingType={getStakingTypeTag(staking.type)}
       stakingValue={balanceValue}
-      symbol={staking.nativeToken}
     />
   );
 };

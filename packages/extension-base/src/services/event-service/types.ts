@@ -21,11 +21,20 @@ export interface EventRegistry {
 
   'transaction.done': [SWTransaction],
   'transaction.failed': [SWTransaction | undefined],
-  'transaction.submitStaking': [SWTransaction | undefined],
+  'transaction.submitStaking': [string],
   'transaction.transferNft': [SWTransaction | undefined]
 }
 
 export type EventType = keyof EventRegistry;
+
+export const COMMON_RELOAD_EVENTS: EventType[] = [
+  'account.updateCurrent',
+  'asset.updateState',
+  'account.add',
+  'chain.updateState',
+  'account.remove',
+  'chain.add'
+];
 
 export interface EventItem<T extends EventType> {
   type: T;

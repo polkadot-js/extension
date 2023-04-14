@@ -121,7 +121,7 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
     chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
     chainApi.api.query.balances.totalIssuance(),
     chainApi.api.query.auctions?.auctionCounter(),
-    chainApi.api.query.staking.minimumActiveStake(),
+    chainApi.api.query?.staking?.minimumActiveStake && chainApi.api.query?.staking?.minimumActiveStake(),
     chainApi.api.query.staking.minNominatorBond(),
     chainApi.api.query?.nominationPools?.minJoinBond(),
     chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra))
@@ -143,7 +143,7 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
     }
   }
 
-  const minActiveStake = _minimumActiveStake.toString();
+  const minActiveStake = _minimumActiveStake?.toString() || '0';
   const minNominatorBond = _minNominatorBond.toString();
 
   const bnMinActiveStake = new BN(minActiveStake);
@@ -190,15 +190,15 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
   const chainApi = await substrateApi.isReady;
 
   const [_ledger, _nominations, _currentEra, _bonded, _minimumActiveStake, _minNominatorBond] = await Promise.all([
-    chainApi.api.query.staking.ledger(address),
-    chainApi.api.query.staking.nominators(address),
-    chainApi.api.query.staking.currentEra(),
-    chainApi.api.query.staking.bonded(address),
-    chainApi.api.query.staking.minimumActiveStake(),
-    chainApi.api.query.staking.minNominatorBond()
+    chainApi.api.query?.staking?.ledger(address),
+    chainApi.api.query?.staking?.nominators(address),
+    chainApi.api.query?.staking?.currentEra(),
+    chainApi.api.query?.staking?.bonded(address),
+    chainApi.api.query?.staking?.minimumActiveStake && chainApi.api.query?.staking?.minimumActiveStake(),
+    chainApi.api.query?.staking?.minNominatorBond()
   ]);
 
-  const minActiveStake = _minimumActiveStake.toString();
+  const minActiveStake = _minimumActiveStake?.toString() || '0';
   const minNominatorBond = _minNominatorBond.toString();
 
   const bnMinActiveStake = new BN(minActiveStake);

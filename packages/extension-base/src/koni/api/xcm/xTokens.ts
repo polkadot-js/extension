@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { FOUR_INSTRUCTIONS_WEIGHT, getReceiverLocation, NETWORK_USE_UNLIMITED_WEIGHT, POLKADOT_UNLIMITED_WEIGHT } from '@subwallet/extension-base/koni/api/xcm/utils';
+import { FOUR_INSTRUCTIONS_WEIGHT, getDestWeight, getReceiverLocation } from '@subwallet/extension-base/koni/api/xcm/utils';
 import { _XCM_TYPE } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getSubstrateParaId, _getTokenOnChainInfo, _getXcmAssetId, _getXcmAssetMultilocation, _getXcmAssetType, _getXcmTransferType, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 
@@ -51,7 +51,7 @@ function getMultiLocationForXtokensPallet (originChainInfo: _ChainInfo, destinat
 }
 
 export function getExtrinsicByXtokensPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
-  const weightParam = NETWORK_USE_UNLIMITED_WEIGHT.includes(originChainInfo.slug) ? POLKADOT_UNLIMITED_WEIGHT : FOUR_INSTRUCTIONS_WEIGHT;
+  const weightParam = ['pioneer'].includes(originChainInfo.slug) ? FOUR_INSTRUCTIONS_WEIGHT : getDestWeight();
 
   return api.tx.xTokens.transfer(
     getCurrencyId(tokenInfo),

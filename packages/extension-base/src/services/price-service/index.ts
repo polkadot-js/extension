@@ -81,8 +81,6 @@ export class PriceService {
       .then((rs) => {
         this.priceSubject.next({ ...rs, ready: true });
         this.dbService.updatePriceStore(rs).catch(console.error);
-
-        console.log('Get Token Price From CoinGecko');
       })
       .catch(console.error);
 

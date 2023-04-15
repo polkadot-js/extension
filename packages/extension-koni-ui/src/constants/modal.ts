@@ -17,3 +17,4 @@ export const REQUEST_CAMERA_ACCESS_MODAL = 'request-camera-access-modal';
 export const VALIDATOR_DETAIL_MODAL = 'validator-detail-modal';
 export const HISTORY_DETAIL_MODAL = 'history-detail-modal';
 export const RECEIVE_TOKEN_SELECTOR_MODAL = 'receive-tokens-selector-modal';
+export const DOWNLOAD_EXTENSION = "download-extension"

@@ -14,28 +14,32 @@ import { RouterProvider } from 'react-router';
 
 import LoadingScreen from '../components/LoadingScreen';
 import { router } from './router';
+import { ScreenContextProvider } from '../contexts/ScreenContext';
+import './main.css'
 
 export default function Popup (): React.ReactElement {
   return (
     <DataContextProvider>
-      <ThemeProvider>
-        <ModalContextProvider>
-          <SigningContextProvider>
-            <InternalRequestContextProvider>
-              <ScannerContextProvider>
-                <QRContextProvider>
-                  <NotificationProvider>
-                    <RouterProvider
-                      fallbackElement={<LoadingScreen className='root-loading' />}
-                      router={router}
-                    />
-                  </NotificationProvider>
-                </QRContextProvider>
-              </ScannerContextProvider>
-            </InternalRequestContextProvider>
-          </SigningContextProvider>
-        </ModalContextProvider>
-      </ThemeProvider>
+      <ScreenContextProvider>
+        <ThemeProvider>
+          <ModalContextProvider>
+            <SigningContextProvider>
+              <InternalRequestContextProvider>
+                <ScannerContextProvider>
+                  <QRContextProvider>
+                    <NotificationProvider>
+                      <RouterProvider
+                        fallbackElement={<LoadingScreen className='root-loading' />}
+                        router={router}
+                      />
+                    </NotificationProvider>
+                  </QRContextProvider>
+                </ScannerContextProvider>
+              </InternalRequestContextProvider>
+            </SigningContextProvider>
+          </ModalContextProvider>
+        </ThemeProvider>
+      </ScreenContextProvider>
     </DataContextProvider>
   );
 }

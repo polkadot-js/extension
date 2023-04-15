@@ -3,6 +3,7 @@
 
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
+// import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -62,6 +63,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const isPopup = useIsPopup();
   const notify = useNotification();
   const { goHome } = useDefaultNavigate();
+  // const { isWebUI } = useContext(ScreenContext);
 
   const [locking, setLocking] = useState(false);
 

@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { LayoutBaseProps } from './Base';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = Omit<
 LayoutBaseProps,
@@ -19,6 +20,8 @@ const WithSubHeaderOnly = (props: Props) => {
     subHeaderPaddingVertical = true,
     ...restProps } = props;
 
+  const { isWebUI } = useContext(ScreenContext)
+
   return (
     <Layout.Base
       showBackButton={showBackButton}
@@ -29,7 +32,14 @@ const WithSubHeaderOnly = (props: Props) => {
       {...restProps}
       showHeader={false}
     >
-      {children}
+      <div style={{
+        ...(isWebUI && {
+          maxWidth: '70%',
+          margin: '0 auto'
+        })
+      }}>
+        {children}
+      </div>
     </Layout.Base>
   );
 };

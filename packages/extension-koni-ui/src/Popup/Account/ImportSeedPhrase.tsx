@@ -15,13 +15,15 @@ import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountSuriV2, validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
-import { Form, Icon, Input } from '@subwallet/react-ui';
+import { Button, Checkbox, Form, Icon, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown } from 'phosphor-react';
-import React, { ChangeEventHandler, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
 
 type Props = ThemeProps;
 
@@ -35,11 +37,25 @@ const FooterIcon = (
 const formName = 'import-seed-phrase-form';
 const fieldName = 'seed-phrase';
 
+const instructionContent: InstructionContentType[] = [
+  {
+    title: 'What is a seed phrase?',
+    description: 'Seed phrase is a 12- or 24-word phrase that can be used to restore your wallet.',
+    type: 'warning',
+  },
+  {
+    title: 'Is it safe to enter it into SubWallet?',
+    description: 'Yes. It will be stored locally and never leave your device without your explicit permission.',
+    type: 'warning',
+  },
+]
+
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
+  const { isWebUI } = useContext(ScreenContext);
 
   const onComplete = useCompleteCreateAccount();
   const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
@@ -147,17 +163,21 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   useFocusFormItem(form, fieldName);
 
+  const buttonProps = {
+    children: validating ? t('Validating') : t('Import account'),
+    icon: FooterIcon,
+    onClick: onSubmit,
+    disabled: !seedPhrase || !!validateState.status || !keyTypes.length,
+    loading: validating || submitting
+  }
+
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
         onBack={onBack}
-        rightFooterButton={{
-          children: validating ? t('Validating') : t('Import account'),
-          icon: FooterIcon,
-          onClick: onSubmit,
-          disabled: !seedPhrase || !!validateState.status || !keyTypes.length,
-          loading: validating || submitting
-        }}
+        {...(!isWebUI && {
+          rightFooterButton: buttonProps
+        })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -166,34 +186,55 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         ]}
         title={t<string>('Import from seed phrase')}
       >
-        <div className='container'>
-          <div className='description'>
-            {t('To import an existing Polkadot wallet, please enter the recovery seed phrase here:')}
-          </div>
-          <Form
-            className='form-container'
-            form={form}
-            name={formName}
-          >
-            <Form.Item
-              name={fieldName}
-              validateStatus={validateState.status}
+
+        <div className={CN('container', {
+          '__web-ui': isWebUI
+        })}>
+          <div className='secret-phrase-container'>
+            <div className='description'>
+              {t('To import an existing Polkdot wallet, please enter the recovery seed phrase here:')}
+            </div>
+            <Form
+              className='form-container'
+              form={form}
+              name={formName}
             >
-              <Input.TextArea
-                className='seed-phrase-input'
-                onChange={onChange}
-                placeholder={t('Secret phrase')}
-                statusHelp={validateState.message}
-              />
-            </Form.Item>
-            <Form.Item>
-              <SelectAccountType
-                selectedItems={keyTypes}
-                setSelectedItems={setKeyTypes}
-                withLabel={true}
-              />
-            </Form.Item>
-          </Form>
+              <Form.Item
+                name={fieldName}
+                validateStatus={validateState.status}
+              >
+                <Input.TextArea
+                  className='seed-phrase-input'
+                  onChange={onChange}
+                  placeholder={t('Secret phrase')}
+                  statusHelp={validateState.message}
+                />
+              </Form.Item>
+              <Form.Item>
+                <SelectAccountType
+                  selectedItems={keyTypes}
+                  setSelectedItems={setKeyTypes}
+                  withLabel={true}
+                />
+              </Form.Item>
+
+              {isWebUI && (
+                <>
+                  {/* TODO: add logic to form item */}
+                  <Form.Item>
+                    <Checkbox>
+                      <span className={'__option-label'}>Import multiple accounts from this seed phrase</span>
+                    </Checkbox>
+                  </Form.Item>
+                  <Button {...buttonProps} className='action'/>
+                </>
+              )}
+            </Form>
+          </div>
+
+          {isWebUI && (
+            <InstructionContainer contents={instructionContent}/>
+          )}
         </div>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
@@ -203,29 +244,41 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const ImportSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      padding: token.padding
-    },
+      '&.__web-ui': {
+        display: 'flex',
+        justifyContent: 'center',
 
-    '.ant-form-item:last-child': {
-      marginBottom: 0
-    },
+        '& .ant-btn': {
+          width: '100%',
+          marginTop: 24
+        }
+      },
 
-    '.description': {
-      padding: `0 ${token.padding}px`,
-      fontSize: token.fontSizeHeading6,
-      lineHeight: token.lineHeightHeading6,
-      color: token.colorTextDescription,
-      textAlign: 'center'
-    },
+      '.secret-phrase-container': {
+        padding: token.padding
+      },
 
-    '.form-container': {
-      marginTop: token.margin
-    },
+      '.ant-form-item:last-child': {
+        marginBottom: 0
+      },
 
-    '.seed-phrase-input': {
-      textarea: {
-        resize: 'none',
-        height: `${token.sizeLG * 6}px !important`
+      '.description': {
+        padding: `0 ${token.padding}px`,
+        fontSize: token.fontSizeHeading6,
+        lineHeight: token.lineHeightHeading6,
+        color: token.colorTextDescription,
+        textAlign: 'center'
+      },
+
+      '.form-container': {
+        marginTop: token.margin
+      },
+
+      '.seed-phrase-input': {
+        textarea: {
+          resize: 'none',
+          height: `${token.sizeLG * 6}px !important`
+        }
       }
     }
   };

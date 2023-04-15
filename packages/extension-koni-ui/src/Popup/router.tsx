@@ -6,7 +6,8 @@ import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { i18nPromise } from '@subwallet/extension-koni-ui/utils/common/i18n';
 import React, { ComponentType, ReactNode } from 'react';
-import { createHashRouter, Outlet, useLocation } from 'react-router-dom';
+import { createBrowserRouter, Outlet, useLocation } from 'react-router-dom';
+import WebContainer from './WebContainer';
 
 export class LazyLoader {
   public loader;
@@ -28,6 +29,7 @@ export class LazyLoader {
   }
 }
 
+const Porfolio = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Porfolio'));
 const PhishingDetected = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
 const Welcome = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Welcome'));
 const CreateDone = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/CreateDone'));
@@ -99,13 +101,14 @@ export function Example () {
 }
 
 // Todo: Create error page
-export const router = createHashRouter([
+export const router = createBrowserRouter([
   {
     path: '/',
     loader: () => i18nPromise,
     element: <Root />,
     errorElement: <ErrorFallback.element />,
     children: [
+      Porfolio.generateRouterObject('/porfolio'),
       Welcome.generateRouterObject('/welcome'),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),
@@ -160,7 +163,7 @@ export const router = createHashRouter([
       },
       {
         path: '/settings',
-        element: <Outlet />,
+        element: <WebContainer />,
         children: [
           Settings.generateRouterObject('list'),
           GeneralSetting.generateRouterObject('general'),

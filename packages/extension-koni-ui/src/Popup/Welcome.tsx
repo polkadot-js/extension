@@ -5,15 +5,19 @@ import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
-import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, DOWNLOAD_EXTENSION, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
+import { Button, ButtonProps, Divider, Icon, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
+import { Eye, EyeSlash, FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { ScreenContext } from '../contexts/ScreenContext';
+import SocialGroup from '../components/SocialGroup';
+import { openInNewTab } from '../utils';
+import { EXTENSION_URL } from '../constants';
 
 type Props = ThemeProps;
 
@@ -27,122 +31,181 @@ interface WelcomeButtonItem {
 
 const items: WelcomeButtonItem[] = [
   {
-    description: 'Create a new account with SubWallet',
+    description: "Create a new account with SubWallet",
     icon: PlusCircle,
     id: CREATE_ACCOUNT_MODAL,
-    schema: 'primary',
-    title: 'Create a new account'
+    schema: "secondary",
+    title: "Create a new account",
   },
   {
-    description: 'Import an existing account',
+    description: "Import an existing account",
     icon: FileArrowDown,
     id: IMPORT_ACCOUNT_MODAL,
-    schema: 'secondary',
-    title: 'Import an account'
+    schema: "secondary",
+    title: "Import an account",
   },
   {
-    description: 'Attach an account from external wallet',
+    description: "Attach an account from external wallet",
     icon: Swatches,
     id: ATTACH_ACCOUNT_MODAL,
-    schema: 'secondary',
-    title: 'Attach an account'
-  }
-];
+    schema: "secondary",
+    title: "Attach an account",
+  },
+  {
+    description: "For management of your account keys",
+    icon: PuzzlePiece,
+    id: DOWNLOAD_EXTENSION,
+    schema: "secondary",
+    title: "Download SubWallet extension",
+  },
+]
 
-function Component ({ className }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
-  const navigate = useNavigate();
+function Component({ className }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation()
+  const { activeModal, inactiveModal } = useContext(ModalContext)
+  const { isWebUI } = useContext(ScreenContext)
+  const [passwordVisible, setPasswordVisible] = useState<boolean>(false)
+  const navigate = useNavigate()
 
-  const openModal = useCallback((id: string) => {
-    return () => {
-      if (id === CREATE_ACCOUNT_MODAL) {
-        navigate('/accounts/new-seed-phrase', { state: { accountTypes: [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE] } });
-      } else {
-        inactiveModal(SELECT_ACCOUNT_MODAL);
-        activeModal(id);
+  const buttonList = useMemo(() => isWebUI ? items : items.slice(0, 3), [isWebUI]);
+
+  const openModal = useCallback(
+    (id: string) => {
+      return () => {
+        if (id === CREATE_ACCOUNT_MODAL) {
+          navigate("/accounts/new-seed-phrase", {
+            state: { accountTypes: [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE] },
+          })
+          return;
+        }
+
+        if (id === DOWNLOAD_EXTENSION) {
+          openInNewTab(EXTENSION_URL)()
+          return;
+        }
+
+        inactiveModal(SELECT_ACCOUNT_MODAL)
+        activeModal(id)
       }
-    };
-  }, [activeModal, inactiveModal, navigate]);
+    },
+    [activeModal, inactiveModal, navigate]
+  )
 
   return (
-    <Layout.Base
-      className={CN(className)}
-    >
-      <div className='bg-gradient' />
-      <div className='bg-image' />
-      <div className='body-container'>
-        <div className='logo-container'>
-          <Logo3D
-            height={100}
-            width={69}
-          />
+    <Layout.Base className={CN(className)}>
+      <div className="bg-gradient" />
+      <div className="bg-image" />
+      <div className={CN("body-container", {
+        "__web-ui": isWebUI,
+        'flex-column': isWebUI
+      })}>
+        <div className={CN("brand-container", "flex-column")}>
+          <div className="logo-container">
+            <Logo3D height={100} width={69} />
+          </div>
+          <div className="title">{t("SubWallet")}</div>
+          <div className="sub-title">
+            {t(isWebUI ? "Choose how you'd like to set up your wallet" : "Polkadot, Substrate & Ethereum wallet")}
+          </div>
         </div>
-        <div className='title'>
-          {t('SubWallet')}
-        </div>
-        <div className='sub-title'>
-          {t('Polkadot, Substrate & Ethereum wallet')}
-        </div>
-        <div className='buttons-container'>
-          {
-            items.map((item) => (
+
+        <div className="buttons-container">
+          <div className="buttons">
+            {buttonList.map((item) => (
               <Button
                 block={true}
-                className='welcome-import-button'
-                contentAlign='left'
-                icon={(
+                className={CN("welcome-import-button", `type-${item.id}`)}
+                contentAlign="left"
+                icon={
                   <Icon
-                    className='welcome-import-icon'
+                    className="welcome-import-icon"
                     phosphorIcon={item.icon}
-                    size='md'
-                    weight='fill'
+                    size="md"
+                    weight="fill"
                   />
-                )}
+                }
                 key={item.id}
                 onClick={openModal(item.id)}
                 schema={item.schema}
               >
-                <div className='welcome-import-button-content'>
-                  <div className='welcome-import-button-title'>{t(item.title)}</div>
-                  <div className='welcome-import-button-description'>{t(item.description)}</div>
+                <div className="welcome-import-button-content">
+                  <div className="welcome-import-button-title">
+                    {t(item.title)}
+                  </div>
+                  <div className="welcome-import-button-description">
+                    {t(item.description)}
+                  </div>
                 </div>
               </Button>
-            ))
-          }
+            ))}
+          </div>
+
+          <Divider className="divider" />
         </div>
+
+        {isWebUI && (
+          <>
+            <div className={CN("add-wallet-container", "flex-column")}>
+              <div className="sub-title">{t("Watch any wallet")}</div>
+              <Input.Password
+                // disabled={loading}
+                className="address-input"
+                placeholder={t("Enter address")}
+                prefix={<Wallet />}
+                visibilityToggle={{
+                  visible: passwordVisible,
+                  onVisibleChange: setPasswordVisible,
+                }}
+                iconRender={(visible) => (visible ? <Eye /> : <EyeSlash />)}
+              />
+              <Button block className="add-wallet-button" schema="primary">
+                {t("Add watch-only wallet")}
+              </Button>
+            </div>
+
+            <SocialGroup />
+          </>
+        )}
       </div>
     </Layout.Base>
-  );
+  )
 }
 
 const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    position: 'relative',
+    position: "relative",
 
-    '.bg-gradient': {
-      backgroundImage: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
-      height: 290,
-      width: '100%',
-      position: 'absolute',
-      left: 0,
-      top: 0
+    ".flex-column": {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-around",
+      alignItems: "center",
     },
 
-    '.bg-image': {
-      backgroundImage: `url(${LoginBg})`,
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'top',
-      backgroundSize: 'contain',
-      height: '100%',
-      position: 'absolute',
-      width: '100%',
+    ".bg-gradient": {
+      background:
+        "linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)",
+      height: 290,
+      width: "100%",
+      position: "absolute",
       left: 0,
       top: 0,
-      opacity: 0.1
     },
 
-    '.body-container': {
+    ".bg-image": {
+      backgroundImage: `url(${LoginBg})`,
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "top",
+      backgroundSize: "contain",
+      height: "100%",
+      position: "absolute",
+      width: "100%",
+      left: 0,
+      top: 0,
+      opacity: 0.1,
+    },
+
+    ".body-container": {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
 
@@ -202,9 +265,72 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
             }
           }
         }
-      }
-    }
-  };
-});
+      },
 
-export default Welcome;
+      "&.__web-ui": {
+        textAlign: "center",
+        height: "100%",
+        width: "fit-content",
+        margin: "0 auto",
+
+        ".title": {
+          marginTop: token.marginSM + 4,
+          marginBottom: token.marginXS,
+        },
+
+        '.sub-title': {
+          margin: 0,
+        },
+
+        ".buttons-container": {
+          marginBottom: token.marginXL,
+          marginTop: token.marginXXL * 2,
+
+          ".divider": {
+            marginTop: token.marginLG + 2,
+          },
+
+          ".buttons": {
+            display: "grid",
+            // flexDirection: "column",
+            gridTemplateRows: "1fr 1fr",
+            gridTemplateColumns: "1fr 1fr",
+            gap: token.sizeMS,
+
+            [`.type-${CREATE_ACCOUNT_MODAL}`]: {
+              color: token["green-6"],
+            },
+
+            [`.type-${IMPORT_ACCOUNT_MODAL}`]: {
+              color: token["orange-7"],
+            },
+
+            [`.type-${ATTACH_ACCOUNT_MODAL}`]: {
+              color: token["magenta-6"],
+            },
+            [`.type-${DOWNLOAD_EXTENSION}`]: {
+              color: "#4CEAAC",
+            },
+
+            ".welcome-import-button": {
+              width: "100%",
+              paddingRight: token.sizeXL,
+            },
+          },
+        },
+
+        ".add-wallet-container": {
+          width: "50%",
+          alignItems: "stretch",
+          ".address-input": {
+            margin: `${token.marginSM + 4}px 0`,
+          },
+        },
+      },
+    },
+
+
+  }
+})
+
+export default Welcome

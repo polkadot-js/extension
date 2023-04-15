@@ -5,6 +5,7 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
@@ -16,11 +17,11 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
 import { readOnlyScan } from '@subwallet/extension-koni-ui/utils/scanner/attach';
-import { Form, Icon, PageIcon } from '@subwallet/react-ui';
+import { Button, Form, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Eye } from 'phosphor-react';
 import { Callbacks, FieldData, RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -31,22 +32,18 @@ interface ReadOnlyAccountInput {
   address?: string;
 }
 
-const FooterIcon = (
-  <Icon
-    phosphorIcon={Eye}
-    weight='fill'
-  />
-);
+const FooterIcon = <Icon phosphorIcon={Eye} weight="fill" />;
 
-const modalId = 'attach-read-only-scanner-modal';
-const formName = 'attach-read-only-form';
-const fieldName = 'address';
+const modalId = "attach-read-only-scanner-modal";
+const formName = "attach-read-only-form";
+const fieldName = "address";
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
+  const { isWebUI } = useContext(ScreenContext);
 
   const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
@@ -57,7 +54,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const [form] = Form.useForm<ReadOnlyAccountInput>();
 
-  const [reformatAddress, setReformatAddress] = useState('');
+  const [reformatAddress, setReformatAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [isEthereum, setIsEthereum] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
@@ -71,40 +68,47 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, []);
 
-  const onFieldsChange: Callbacks<ReadOnlyAccountInput>['onFieldsChange'] = useCallback((changes: FieldData[], allFields: FieldData[]) => {
-    const { empty, error } = simpleCheckForm(allFields);
+  const onFieldsChange: Callbacks<ReadOnlyAccountInput>["onFieldsChange"] =
+    useCallback(
+      (changes: FieldData[], allFields: FieldData[]) => {
+        const { empty, error } = simpleCheckForm(allFields);
 
-    setIsDisable(error || empty);
+        setIsDisable(error || empty);
 
-    const changeMap = convertFieldToObject<ReadOnlyAccountInput>(changes);
+        const changeMap = convertFieldToObject<ReadOnlyAccountInput>(changes);
 
-    if (changeMap.address) {
-      handleResult(changeMap.address);
-    }
-  }, [handleResult]);
+        if (changeMap.address) {
+          handleResult(changeMap.address);
+        }
+      },
+      [handleResult]
+    );
 
-  const accountAddressValidator = useCallback((rule: RuleObject, value: string) => {
-    const result = readOnlyScan(value);
+  const accountAddressValidator = useCallback(
+    (rule: RuleObject, value: string) => {
+      const result = readOnlyScan(value);
 
-    if (result) {
-      // For each account, check if the address already exists return promise reject
-      for (const account of accounts) {
-        if (account.address === result.content) {
-          setReformatAddress('');
+      if (result) {
+        // For each account, check if the address already exists return promise reject
+        for (const account of accounts) {
+          if (account.address === result.content) {
+            setReformatAddress("");
 
-          return Promise.reject(t('Account already exists'));
+            return Promise.reject(t("Account already exists"));
+          }
+        }
+      } else {
+        setReformatAddress("");
+
+        if (value !== "") {
+          return Promise.reject(t("Invalid address"));
         }
       }
-    } else {
-      setReformatAddress('');
 
-      if (value !== '') {
-        return Promise.reject(t('Invalid address'));
-      }
-    }
-
-    return Promise.resolve();
-  }, [accounts, t]);
+      return Promise.resolve();
+    },
+    [accounts, t]
+  );
 
   const onSubmit = useCallback(() => {
     setLoading(true);
@@ -113,14 +117,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       createAccountExternalV2({
         name: accountName,
         address: reformatAddress,
-        genesisHash: '',
+        genesisHash: "",
         isEthereum: isEthereum,
         isAllowed: false,
-        isReadOnly: true
+        isReadOnly: true,
       })
         .then((errors) => {
           if (errors.length) {
-            form.setFields([{ name: fieldName, errors: errors.map((e) => e.message) }]);
+            form.setFields([
+              { name: fieldName, errors: errors.map((e) => e.message) },
+            ]);
           } else {
             onComplete();
           }
@@ -138,41 +144,47 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   useFocusById(modalId);
 
+  const buttonProps = {
+    children: t("Attach read-only account"),
+    icon: FooterIcon,
+    disabled: isDisable,
+    onClick: onSubmit,
+    loading: loading,
+  }
+
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
         onBack={onBack}
-        rightFooterButton={{
-          children: t('Attach read-only account'),
-          icon: FooterIcon,
-          disabled: isDisable,
-          onClick: onSubmit,
-          loading: loading
-        }}
+        {...(!isWebUI && {
+          rightFooterButton: buttonProps
+        })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
-            onClick: goHome
-          }
+            onClick: goHome,
+          },
         ]}
-        title={t<string>('Attach watch-only account')}
+        title={t<string>("Attach watch-only account")}
       >
-        <div className={CN('container')}>
-          <div className='description'>
-            {t('Track the activity of any wallet without injecting your private key to SubWallet')}
+        <div className={CN("container")}>
+          <div className="description">
+            {t(
+              "Track the activity of any wallet without injecting your private key to SubWallet"
+            )}
           </div>
-          <div className='page-icon'>
+          <div className="page-icon">
             <PageIcon
-              color='var(--page-icon-color)'
+              color="var(--page-icon-color)"
               iconProps={{
-                weight: 'fill',
-                phosphorIcon: Eye
+                weight: "fill",
+                phosphorIcon: Eye,
               }}
             />
           </div>
           <Form
             form={form}
-            initialValues={{ address: '' }}
+            initialValues={{ address: "" }}
             name={formName}
             onFieldsChange={onFieldsChange}
             onFinish={onSubmit}
@@ -181,21 +193,25 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               name={fieldName}
               rules={[
                 {
-                  message: t('Account address is required'),
-                  required: true
+                  message: t("Account address is required"),
+                  required: true,
                 },
                 {
-                  validator: accountAddressValidator
-                }
+                  validator: accountAddressValidator,
+                },
               ]}
               statusHelpAsTooltip={true}
             >
               <AddressInput
                 id={modalId}
-                placeholder={t('Please type or paste account address')}
+                placeholder={t("Please type or paste account address")}
                 showScanner={true}
               />
             </Form.Item>
+
+            {isWebUI && (
+              <Button {...buttonProps} className='submit-button'/>
+            )}
           </Form>
         </div>
       </Layout.WithSubHeaderOnly>
@@ -203,28 +219,35 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   );
 };
 
-const AttachReadOnly = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  return {
-    '.container': {
-      padding: token.padding
-    },
+const AttachReadOnly = styled(Component)<Props>(
+  ({ theme: { token } }: Props) => {
+    return {
+      ".container": {
+        padding: token.padding,
 
-    '.description': {
-      padding: `0 ${token.padding}px`,
-      fontSize: token.fontSizeHeading6,
-      lineHeight: token.lineHeightHeading6,
-      color: token.colorTextDescription,
-      textAlign: 'center'
-    },
+        '& .submit-button': {
+          width: '100%',
+          marginTop: 36
+        }
+      },
 
-    '.page-icon': {
-      display: 'flex',
-      justifyContent: 'center',
-      marginTop: token.controlHeightLG,
-      marginBottom: token.sizeXXL,
-      '--page-icon-color': token.colorSecondary
-    }
-  };
-});
+      ".description": {
+        padding: `0 ${token.padding}px`,
+        fontSize: token.fontSizeHeading6,
+        lineHeight: token.lineHeightHeading6,
+        color: token.colorTextDescription,
+        textAlign: "center",
+      },
+
+      ".page-icon": {
+        display: "flex",
+        justifyContent: "center",
+        marginTop: token.controlHeightLG,
+        marginBottom: token.sizeXXL,
+        "--page-icon-color": token.colorSecondary,
+      },
+    };
+  }
+);
 
 export default AttachReadOnly;

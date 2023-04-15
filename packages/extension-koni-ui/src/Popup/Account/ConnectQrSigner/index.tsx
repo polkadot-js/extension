@@ -16,7 +16,7 @@ import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging'
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
 import { qrSignerScan } from '@subwallet/extension-koni-ui/utils/scanner/attach';
-import { Form, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
+import { Button, Form, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { QrCode } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import ChainLogoMap from '../../../assets/logo';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 const FooterIcon = (
   <Icon
@@ -54,6 +55,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const accountName = useGetDefaultAccountName();
   const { inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [loading, setLoading] = useState(false);
@@ -100,16 +102,20 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { onClose, onError, onSuccess, openCamera } = useScanAccountQr(modalId, qrSignerScan, setValidateState, onSubmit);
 
+  const buttonProps = {
+    children: loading ? t('Creating') : t('Scan the QR code'),
+    icon: FooterIcon,
+    onClick: openCamera,
+    loading: loading
+  }
+
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
         onBack={onBack}
-        rightFooterButton={{
-          children: loading ? t('Creating') : t('Scan the QR code'),
-          icon: FooterIcon,
-          onClick: openCamera,
-          loading: loading
-        }}
+        {...(!isWebUI && {
+          rightFooterButton: buttonProps
+        })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -166,6 +172,10 @@ const Component: React.FC<Props> = (props: Props) => {
             onSuccess={onSuccess}
             overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
           />
+
+          {isWebUI && (
+            <Button {...buttonProps} className='action'/>
+          )}
         </div>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
@@ -175,7 +185,12 @@ const Component: React.FC<Props> = (props: Props) => {
 const ConnectQrSigner = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      padding: token.padding
+      padding: token.padding,
+
+      '& .ant-btn': {
+        width: '100%',
+        marginTop: 36
+      }
     },
 
     '.sub-title': {

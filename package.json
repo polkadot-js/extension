@@ -41,10 +41,7 @@
     "watch-dev": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch -d inline-source-map",
     "web-runner:build": "cd packages/web-runner && yarn webpack --config webpack.config.cjs --mode production",
     "web-runner:dev": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
-    "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
-    "webapp-runner:build": "cd packages/webapp-runner && yarn webpack --config webpack.config.cjs --mode production",
-    "webapp-runner:dev": "cd packages/webapp-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
-    "webapp-runner:watch": "cd packages/webapp-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development"
+    "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development"
   },
   "dependencies": {
     "@types/node": "^17.0.10",

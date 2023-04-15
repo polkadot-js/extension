@@ -139,7 +139,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 const Main = styled.main`
   display: flex;
   height: 100%;
-  flex-direction: column
+  flex-direction: column;
 `;
 
 function _Root ({ className }: ThemeProps): React.ReactElement {

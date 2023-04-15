@@ -18,7 +18,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NewSeedPhraseState } from '@subwallet/extension-koni-ui/types/account';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
-import { Icon, ModalContext } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -27,6 +27,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import InstructionContainer, { InstructionContentType } from '../../components/InstructionContainer';
 
 type Props = ThemeProps;
 
@@ -37,6 +39,19 @@ const FooterIcon = (
   />
 );
 
+const instructionContent: InstructionContentType[] = [
+  {
+    title: "What is a recovery phrase?",
+    description: "Recovery phrase is a 12- or 24-word phrase that can be used to restore your wallet. The recovery phrase alone can give anyone full access to your wallet and the funds.",
+    type: 'warning'
+  },
+  {
+    title: "What if I lose the recovery phrase?",
+    description: "There is no way to get back your recovery phrase if you lose it. Make sure you store them at someplace safe which is accessible only to you.",
+    type: 'warning'
+  },
+]
+
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
   const { t } = useTranslation();
@@ -46,6 +61,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const { goHome } = useDefaultNavigate();
   const { activeModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
@@ -107,6 +123,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       });
   }, []);
 
+  const buttonProps = {
+    children: t('I have saved it somewhere safe'),
+    icon: FooterIcon,
+    onClick: _onCreate,
+    disabled: !seedPhrase,
+    loading: loading
+  }
+
   return (
     <PageWrapper
       className={CN(className)}
@@ -114,13 +138,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     >
       <Layout.WithSubHeaderOnly
         onBack={onBack}
-        rightFooterButton={{
-          children: t('I have saved it somewhere safe'),
-          icon: FooterIcon,
-          onClick: _onCreate,
-          disabled: !seedPhrase,
-          loading: loading
-        }}
+        {...(!isWebUI && {
+            rightFooterButton: buttonProps
+        })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -129,12 +149,25 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         ]}
         title={t<string>('Your recovery phrase')}
       >
-        <div className={'container'}>
-          <div className='description'>
-            {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
+        <div className={CN('container', {
+          '__web-ui': isWebUI
+        })}>
+          <div className={'seed-phrase-container'}>
+            <div className='description'>
+              {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
+            </div>
+            <WordPhrase seedPhrase={seedPhrase} />
+
+            {isWebUI && (
+              <Button {...buttonProps} className='action'/>
+            )}
           </div>
-          <WordPhrase seedPhrase={seedPhrase} />
+
+          {isWebUI && (
+            <InstructionContainer contents={instructionContent} />
+          )}
         </div>
+
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
@@ -143,8 +176,28 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const NewSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      padding: token.padding,
-      textAlign: 'center'
+      ".seed-phrase-container": {
+        padding: token.padding,
+        textAlign: 'center',
+        flex: 1
+      },
+
+      '&.__web-ui': {
+        display: 'flex',
+        justifyContent: 'center',
+
+        '.action': {
+          marginTop: 40,
+          width: '100%'
+        },
+
+        '.instruction-container': {
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10
+        }
+      },
     },
 
     '.description': {

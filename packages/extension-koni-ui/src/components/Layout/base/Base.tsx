@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { SwScreenLayoutProps } from '@subwallet/react-ui';
+import { SwScreenLayoutProps } from '@subwallet/react-ui';
 
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { SwScreenLayout } from '@subwallet/react-ui';

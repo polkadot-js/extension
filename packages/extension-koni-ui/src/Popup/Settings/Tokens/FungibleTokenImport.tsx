@@ -360,8 +360,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 renderSelected={renderChainSelected}
                 renderWhenEmpty={renderEmpty}
                 searchFunction={searchChain}
+                searchMinCharactersCount={2}
                 searchPlaceholder={'Search chain'}
-                searchableMinCharactersCount={2}
                 selected={selectedChain}
                 title={t('Select network')}
               />

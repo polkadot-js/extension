@@ -41,6 +41,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const [isBalanceReady, setIsBalanceReady] = useState(true);
 
   const allNominatorInfo = useGetNominatorInfo(stakingChain, stakingType);
   const nominatorInfo = useGetNominatorInfo(stakingChain, stakingType, from);
@@ -159,6 +160,7 @@ const Component: React.FC<Props> = (props: Props) => {
               chain={chain}
               className={'free-balance'}
               label={t('Available balance:')}
+              onBalanceReady={setIsBalanceReady}
             />
             <Form.Item>
               <MetaInfo
@@ -203,7 +205,7 @@ const Component: React.FC<Props> = (props: Props) => {
         </Button>
 
         <Button
-          disabled={isDisable}
+          disabled={isDisable || !isBalanceReady}
           icon={(
             <Icon
               phosphorIcon={ArrowCircleRight}

@@ -55,6 +55,7 @@ const Component: React.FC = () => {
 
   const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { nftCollections, nftItems } = useSelector((state) => state.nft);
+  const [isBalanceReady, setIsBalanceReady] = useState(true);
 
   const nftItem = useMemo((): NftItem =>
     nftItems.find(
@@ -236,6 +237,7 @@ const Component: React.FC = () => {
         <FreeBalance
           address={from}
           chain={chain}
+          onBalanceReady={setIsBalanceReady}
         />
       </TransactionContent>
       <TransactionFooter
@@ -244,7 +246,7 @@ const Component: React.FC = () => {
         warnings={[]}
       >
         <Button
-          disabled={isDisable}
+          disabled={isDisable || !isBalanceReady}
           icon={(
             <Icon
               phosphorIcon={ArrowCircleRight}

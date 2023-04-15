@@ -85,8 +85,8 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       renderSelected={renderChainSelected}
       renderWhenEmpty={renderEmpty}
       searchFunction={searchFunction}
+      searchMinCharactersCount={2}
       searchPlaceholder={t<string>('Search chain')}
-      searchableMinCharactersCount={2}
       selected={value || ''}
       statusHelp={statusHelp}
       title={title || label || placeholder || t('Select chain')}

@@ -6639,7 +6639,7 @@ __metadata:
     "@subwallet/extension-inject": ^1.0.2-1
     "@subwallet/extension-mocks": ^1.0.2-1
     "@subwallet/keyring": ^0.0.5
-    "@subwallet/react-ui": 5.1.2-b42
+    "@subwallet/react-ui": 5.1.2-b43
     "@subwallet/ui-keyring": ^0.0.3
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -6827,9 +6827,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b42":
-  version: 5.1.2-b42
-  resolution: "@subwallet/react-ui@npm:5.1.2-b42"
+"@subwallet/react-ui@npm:5.1.2-b43":
+  version: 5.1.2-b43
+  resolution: "@subwallet/react-ui@npm:5.1.2-b43"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -6851,7 +6851,7 @@ __metadata:
     classnames: ^2.2.6
     copy-to-clipboard: ^3.2.0
     dayjs: ^1.11.1
-    flatlist-react: ^1.5.13
+    flatlist-react: ^1.5.14
     patch-package: ^6.5.1
     phosphor-react: ^1.4.1
     qrcode.react: ^3.1.0
@@ -6897,7 +6897,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: be2b1132584c088270fc95a752538b1808af223fc82337b68ef4f12709b614d5109c29aa8ede0c7e802a406dffc57aea9223dbcb47972b0aa2e1ccd226c355fc
+  checksum: b39865df9cc36a952f1856612d05d46e6fa61697d187e997ce13baf72a94e2ac66dd272a81fc7bf458c3bba27b40925026b58647bac8d00b144f1af4dd5b19c3
   languageName: node
   linkType: hard
 
@@ -16577,7 +16577,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"flatlist-react@npm:^1.5.13":
+"flatlist-react@npm:^1.5.13, flatlist-react@npm:^1.5.14":
   version: 1.5.14
   resolution: "flatlist-react@npm:1.5.14"
   peerDependencies:

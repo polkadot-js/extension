@@ -158,20 +158,16 @@ export class NftHandler {
   public async handleNfts (
     nftContracts: _ChainAsset[],
     updateItem: (chain: string, data: NftItem, owner: string) => void,
-    updateCollection: (chain: string, data: NftCollection) => void) {
+    updateCollection: (chain: string, data: NftCollection) => void,
+    cleanUpNfts: (chain: string, owner: string, collectionId: string, nftIds: string[]) => void) {
     this.setupApi();
     this.setupNftContracts(nftContracts);
     await Promise.all(this.handlers.map(async (handler) => {
       await handler.fetchNfts({
         updateItem,
-        updateCollection
+        updateCollection,
+        cleanUpNfts
       });
     }));
-  }
-
-  public parseAssetId (id: string) {
-    const numberId = parseInt(id);
-
-    return numberId.toString();
   }
 }

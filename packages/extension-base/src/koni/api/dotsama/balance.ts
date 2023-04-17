@@ -167,7 +167,7 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
 
     callBack({
       tokenSlug: chainNativeTokenSlug,
-      free: free.toString(),
+      free: free.gte(BN_ZERO) ? free.toString() : '0',
       locked: locked.toString(),
       state: APIItemState.READY,
       substrateInfo: {

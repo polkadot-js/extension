@@ -23,25 +23,12 @@ export default class NftStore extends BaseStoreWithAddressAndChain<INft> {
     );
   }
 
-  deleteRemovedNftsFromCollection (chainHash: string, address: string, collection?: string, nftIds: string[] = []) {
-    const conditions: Record<string, string> = { chainHash, address };
-
-    if (!collection && nftIds && nftIds.length) {
-      return this.logger.warn('Missing collection id');
-    }
-
-    if (collection) {
-      conditions.collectionId = collection;
-    }
-
-    return this.table.where(conditions).and((item) => !nftIds.some((nft) => nft === item.id)).delete();
-  }
-
-  deleteNftsFromRemovedCollection (chain: string, address: string, collectionIds: string[]) {
+  cleanUpNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {
     return this.table.where({
       address,
-      chain
-    }).and((nft) => !collectionIds.some((item) => item === nft.collectionId));
+      chain,
+      collectionId
+    }).and((nft) => !nftIds.includes(nft.id)).delete();
   }
 
   deleteNftByAddress (addresses: string[]) {

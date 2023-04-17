@@ -23,7 +23,6 @@ const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug
   const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug);
 
   useEffect(() => {
-    console.log('onBalanceReady', !isLoading && !error);
     onBalanceReady?.(!isLoading && !error);
   }, [error, isLoading, onBalanceReady]);
 

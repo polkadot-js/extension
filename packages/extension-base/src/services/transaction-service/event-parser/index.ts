@@ -21,7 +21,7 @@ export function parseXcmEventLogs (historyItem: Partial<TransactionHistoryItem>,
         };
       }
     } else if (record.event.section === 'tokens' && record.event.method.toLowerCase() === 'withdrawn') {
-      if (record.event.data[2]?.toString()) {
+      if (!historyItem.fee && record.event.data[2]?.toString()) {
         historyItem.fee = {
           value: record.event.data[2]?.toString(),
           symbol: nativeSymbol,

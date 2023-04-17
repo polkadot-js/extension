@@ -3,6 +3,7 @@
 
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 // import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
@@ -12,9 +13,11 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
 import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import CN from 'classnames';
+import WebHeader from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 
 type Props = ThemeProps
 
@@ -63,7 +66,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const isPopup = useIsPopup();
   const notify = useNotification();
   const { goHome } = useDefaultNavigate();
-  // const { isWebUI } = useContext(ScreenContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   const [locking, setLocking] = useState(false);
 
@@ -247,17 +250,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   return (
     <PageWrapper className={`settings ${className}`}>
       <>
-        <SwHeader
-          left='logo'
-          onClickLeft={goHome}
-          rightButtons={headerIcons}
-          showLeftButton={true}
-        >
-          {/*  // todo: i18n Settings */}
-        Settings
-        </SwHeader>
-
-        <div className={'__scroll-container'}>
+        {!isWebUI ?  (
+          <SwHeader
+            left='logo'
+            onClickLeft={goHome}
+            rightButtons={headerIcons}
+            showLeftButton={true}
+          >
+            {/*  // todo: i18n Settings */}
+            Settings
+          </SwHeader>
+        ) : <WebHeader withController={false} title="Settings"/>}
+        <div className={CN({
+          '__scroll-container': !isWebUI,
+          '__web-container': isWebUI,
+        })}>
           {
             SettingGroupItemType.map((group) => {
               return (
@@ -332,6 +339,11 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       fontSize: token.fontSizeHeading4,
       lineHeight: token.lineHeightHeading4,
       fontWeight: token.headingFontWeight
+    },
+
+    '.__web-container': {
+      width: '70%',
+      margin: '0 auto',
     },
 
     '.__scroll-container': {

@@ -60,6 +60,8 @@
     "jest-environment-jsdom": "^29.4.1",
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
+    "sass": "^1.62.0",
+    "sass-loader": "^13.2.2",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {

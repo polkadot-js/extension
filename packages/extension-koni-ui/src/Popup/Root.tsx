@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { BackIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -13,12 +13,13 @@ import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
-import { changeHeaderLogo } from '@subwallet/react-ui';
+import { Icon, changeHeaderLogo } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import React, { useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { ScreenContext } from '../contexts/ScreenContext';
 
 changeHeaderLogo(<Logo2D />);
 
@@ -142,9 +143,35 @@ const Main = styled.main`
   flex-direction: column;
 `;
 
+const SCREENS_SIDE_BAR = [
+  'home',
+  'crowdloans',
+  'staking',
+  'dapps',
+  'history',
+  'settings',
+  'faqs',
+  'contact',
+  'tos',
+]
+
+const SCREENS_HEADER = [
+  'home',
+  'crowdloans',
+  'staking',
+  'dapps',
+  'history',
+]
+
 function _Root ({ className }: ThemeProps): React.ReactElement {
   const dataContext = useContext(DataContext);
+  const { isWebUI } = useContext(ScreenContext);
 
+  const { pathname } = useLocation();
+  const currentPage = pathname.split('/')[1];
+
+  const MainLayout = isWebUI && SCREENS_SIDE_BAR.includes(currentPage) ? Layout.WithSideMenu : React.Fragment
+  // const
   // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
   return (
     <WalletModalContext>
@@ -155,7 +182,12 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
       >
         <DefaultRoute>
           <Main className={className}>
-            <Outlet />
+            <MainLayout
+              withBalanceHeader={currentPage === 'home'}
+              withWebHeader={SCREENS_HEADER.includes(currentPage)}
+            >
+              <Outlet />
+            </MainLayout>
           </Main>
         </DefaultRoute>
       </PageWrapper>

@@ -15,7 +15,7 @@ import { RouterProvider } from 'react-router';
 import LoadingScreen from '../components/LoadingScreen';
 import { router } from './router';
 import { ScreenContextProvider } from '../contexts/ScreenContext';
-import './main.css'
+import './main.scss'
 
 export default function Popup (): React.ReactElement {
   return (

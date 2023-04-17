@@ -21,7 +21,7 @@ SwScreenLayoutProps,
   showFooter?: boolean;
 }
 
-const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
+export const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
   {
     icon: {
       type: 'phosphor',

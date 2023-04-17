@@ -1,11 +1,12 @@
 import { Button, Icon, Typography } from "@subwallet/react-ui"
 import CN from "classnames"
 import { FadersHorizontal } from "phosphor-react"
-import Balance from "./Balance"
 import { ThemeProps } from "@subwallet/extension-koni-ui/types"
 import { MetaInfo } from "@subwallet/extension-koni-ui/components/MetaInfo"
-
-export type Props = ThemeProps
+export type Props = ThemeProps & {
+  withController?: boolean,
+  title?: string,
+}
 
 const mock = [
   {
@@ -26,12 +27,12 @@ const mock = [
   },
 ]
 
-function Component({ className }: Props): React.ReactElement<Props> {
+function Component({ title = 'Porfolio', className, withController = true }: Props): React.ReactElement<Props> {
   return (
     <div className={CN(className)}>
       <div className="common-header">
-        <Typography.Title className="page-name">Porfolio</Typography.Title>
-        <div className="action-group">
+        <Typography.Title className="page-name">{title}</Typography.Title>
+        {withController && <div className="action-group">
           <Button
             icon={<Icon phosphorIcon={FadersHorizontal} size={"sm"} />}
             size={"xs"}
@@ -49,10 +50,8 @@ function Component({ className }: Props): React.ReactElement<Props> {
             content={`${mock.length} networks`}
             // label={t(data.type === StakingType.POOLED ? "Pool" : "Validators")}
           />
-        </div>
+        </div>}
       </div>
-
-      <Balance />
     </div>
   )
 }

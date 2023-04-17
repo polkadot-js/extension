@@ -4,6 +4,7 @@
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetNftByAccount, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
@@ -34,6 +35,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
+  const { isWebUI } = useContext(ScreenContext);
   const { nftCollections, nftItems } = useGetNftByAccount();
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();

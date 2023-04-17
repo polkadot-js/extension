@@ -7,7 +7,6 @@ import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { i18nPromise } from '@subwallet/extension-koni-ui/utils/common/i18n';
 import React, { ComponentType, ReactNode } from 'react';
 import { createBrowserRouter, Outlet, useLocation } from 'react-router-dom';
-import WebContainer from './WebContainer';
 
 export class LazyLoader {
   public loader;
@@ -108,12 +107,13 @@ export const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorFallback.element />,
     children: [
-      Porfolio.generateRouterObject('/porfolio'),
       Welcome.generateRouterObject('/welcome'),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),
+      Crowdloans.generateRouterObject('/crowdloans'),
       {
-        ...Home.generateRouterObject('/home'),
+        // ...Home.generateRouterObject('/home'),
+        ...Porfolio.generateRouterObject('/home'),
         children: [
           Tokens.generateRouterObject('tokens'),
           TokenDetailList.generateRouterObject('tokens/detail/:slug'),
@@ -126,12 +126,11 @@ export const router = createBrowserRouter([
               NftItemDetail.generateRouterObject('item-detail')
             ]
           },
-          Crowdloans.generateRouterObject('crowdloans'),
-          Staking.generateRouterObject('staking'),
-          History.generateRouterObject('history'),
-          History.generateRouterObject('history/:chain/:extrinsicHash')
         ]
       },
+      Staking.generateRouterObject('staking'),
+      History.generateRouterObject('history'),
+      History.generateRouterObject('history/:chain/:extrinsicHash'),
       {
         ...Transaction.generateRouterObject('/transaction'),
         children: [
@@ -163,9 +162,8 @@ export const router = createBrowserRouter([
       },
       {
         path: '/settings',
-        element: <WebContainer />,
         children: [
-          Settings.generateRouterObject('list'),
+          Settings.generateRouterObject('/settings'),
           GeneralSetting.generateRouterObject('general'),
           SecurityList.generateRouterObject('security'),
           ManageWebsiteAccess.generateRouterObject('dapp-access'),

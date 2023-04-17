@@ -4,6 +4,7 @@
 import { BrowserConfirmationType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { languageOptions } from '@subwallet/extension-base/constants/i18n';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveBrowserConfirmationType } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -13,7 +14,7 @@ import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@su
 import CN from 'classnames';
 import i18next from 'i18next';
 import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -93,6 +94,7 @@ type LoadingMap = {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext)
 
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
@@ -209,6 +211,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Layout.WithSubHeaderOnly
         onBack={goBack}
         title={t('General settings')}
+        subHeaderCenter={!isWebUI}
       >
         <div className={'__scroll-container'}>
           <SelectModal

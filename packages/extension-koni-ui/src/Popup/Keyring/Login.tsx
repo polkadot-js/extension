@@ -4,6 +4,7 @@
 import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
@@ -12,7 +13,7 @@ import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
 import { Button, Form, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -31,6 +32,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
 
   const [form] = Form.useForm<LoginFormState>();
+  const { isWebUI } = useContext(ScreenContext)
 
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
@@ -72,7 +74,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     <PageWrapper className={CN(className)}>
       <Layout.Base>
         <div className='bg-gradient' />
-        <div className='bg-image' />
+        {!isWebUI && <div className='bg-image' />}
         <div className='body-container'>
           <div className='logo-container'>
             <Logo3D />

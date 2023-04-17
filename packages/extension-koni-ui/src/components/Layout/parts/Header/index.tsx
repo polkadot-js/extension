@@ -1,7 +1,7 @@
 import styled from "styled-components"
-import Component, { Props } from "./Header"
+import Component, { Props } from "./WebHeader"
 
-const Header = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+const WebHeader = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   ".common-header": {
     paddingBottom: 40,
     display: "flex",
@@ -36,4 +36,4 @@ const Header = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   },
 }))
 
-export default Header
+export default WebHeader

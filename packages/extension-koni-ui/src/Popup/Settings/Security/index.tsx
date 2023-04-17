@@ -3,6 +3,7 @@
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveCameraSetting, windowOpen } from '@subwallet/extension-koni-ui/messaging';
@@ -12,7 +13,7 @@ import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account'
 import { BackgroundIcon, Icon, SettingItem, Switch } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Camera, CaretRight, GlobeHemisphereEast, Key } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -57,6 +58,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const location = useLocation();
   const canGoBack = !!location.state;
   const isPopup = useIsPopup();
+  const { isWebUI } = useContext(ScreenContext)
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
   const { camera } = useSelector((state: RootState) => state.settings);
@@ -129,6 +131,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <Layout.WithSubHeaderOnly
         onBack={onBack}
         title={t('Security settings')}
+        subHeaderCenter={!isWebUI}
       >
         <div className='body-container'>
           <div className='items-container'>

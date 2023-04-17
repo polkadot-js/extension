@@ -1,13 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EmptyList, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, PageWrapper, TokenBalance, TokenItem, TokenPrice } from '@subwallet/extension-koni-ui/components';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenGroupBalanceItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useReceiveQR from '@subwallet/extension-koni-ui/hooks/screen/home/useReceiveQR';
@@ -15,13 +16,14 @@ import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Upper
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, Table } from '@subwallet/react-ui';
 import classNames from 'classnames';
 import { Coins, FadersHorizontal } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import DetailTable from './DetailTable';
 
 type Props = ThemeProps;
 
@@ -43,6 +45,7 @@ const Component = (): React.ReactElement => {
     selectedNetwork,
     tokenSelectorItems } = useReceiveQR();
 
+  const { isWebUI } = useContext(ScreenContext);
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;
 
@@ -168,6 +171,45 @@ const Component = (): React.ReactElement => {
       window.removeEventListener('resize', handleResize);
     };
   }, [handleResize]);
+
+
+  if (isWebUI) return (
+    <DetailTable
+      columns={[
+        {
+          title: 'Token name',
+          dataIndex: 'name',
+          key: 'name',
+          render: (_, row) => {
+            return <TokenItem {...row} />
+          }
+        },
+        {
+          title: 'Portfolio %',
+          dataIndex: 'percentage',
+          key: 'percentage',
+          render: () => <>85%</>
+        },
+        {
+          title: 'Price',
+          dataIndex: 'price',
+          key: 'price',
+          render: (_, row) => {
+            return <TokenPrice {...row} />
+          }
+        },
+        {
+          title: 'Balance',
+          dataIndex: 'balance',
+          key: 'balance',
+          render: (_, row) => {
+            return <TokenBalance {...row} />
+          }
+        }
+      ]}
+      dataSource={tokenGroupBalanceItems}
+    />
+  )
 
   return (
     <div

@@ -73,8 +73,8 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           ]
         },
         {
-          test: /\.css$/i,
-          use: ["style-loader", "css-loader"],
+          test: [/\.css$/i, /\.scss$/i],
+          use: ["style-loader", "css-loader", 'sass-loader'],
         },
         {
           test: [/\.svg$/, /\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.woff2?$/],

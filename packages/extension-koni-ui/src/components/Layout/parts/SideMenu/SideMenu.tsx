@@ -25,7 +25,7 @@ type SideMenuItemType = MenuItem;
 const menuItems: SideMenuItemType[] = [
   {
     label: "Porfolio",
-    key: "porfolio",
+    key: "home",
     icon: <Wallet height={20} width={20} weight="fill" />,
   },
   {

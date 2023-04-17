@@ -6940,6 +6940,8 @@ __metadata:
     os-browserify: ^0.3.0
     path-browserify: ^1.0.1
     process: ^0.11.10
+    sass: ^1.62.0
+    sass-loader: ^13.2.2
     stream-browserify: ^3.0.0
     stream-http: ^3.2.0
     thread-loader: ^3.0.4
@@ -21037,7 +21039,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"klona@npm:^2.0.4, klona@npm:^2.0.5":
+"klona@npm:^2.0.4, klona@npm:^2.0.5, klona@npm:^2.0.6":
   version: 2.0.6
   resolution: "klona@npm:2.0.6"
   checksum: ac9ee3732e42b96feb67faae4d27cf49494e8a3bf3fa7115ce242fe04786788e0aff4741a07a45a2462e2079aa983d73d38519c85d65b70ef11447bbc3c58ce7
@@ -27621,6 +27623,8 @@ __metadata:
     jest-environment-jsdom: ^29.4.1
     patch-package: ^6.4.7
     postinstall-postinstall: ^2.1.0
+    sass: ^1.62.0
+    sass-loader: ^13.2.2
     sinon-chrome: ^3.0.1
     typescript: ^4.5.4
   bin:
@@ -27749,6 +27753,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sass-loader@npm:^13.2.2":
+  version: 13.2.2
+  resolution: "sass-loader@npm:13.2.2"
+  dependencies:
+    klona: ^2.0.6
+    neo-async: ^2.6.2
+  peerDependencies:
+    fibers: ">= 3.1.0"
+    node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
+    sass: ^1.3.0
+    sass-embedded: "*"
+    webpack: ^5.0.0
+  peerDependenciesMeta:
+    fibers:
+      optional: true
+    node-sass:
+      optional: true
+    sass:
+      optional: true
+    sass-embedded:
+      optional: true
+  checksum: 0368e4eaa4e2109bb6c6b6bc7dbfb9d8e412a0ab965f98672d336e84bd103575a1551cfe98395f20335b350f2a94e67f7c816cc8e3f4ab85147a1c1221e22fd8
+  languageName: node
+  linkType: hard
+
 "sass-lookup@npm:^3.0.0":
   version: 3.0.0
   resolution: "sass-lookup@npm:3.0.0"
@@ -27760,7 +27789,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass@npm:^1.60.0":
+"sass@npm:^1.60.0, sass@npm:^1.62.0":
   version: 1.62.0
   resolution: "sass@npm:1.62.0"
   dependencies:

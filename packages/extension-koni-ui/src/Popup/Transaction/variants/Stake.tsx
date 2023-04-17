@@ -102,6 +102,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [poolLoading, setPoolLoading] = useState(false);
   const [validatorLoading, setValidatorLoading] = useState(false);
   const [isBalanceReady, setIsBalanceReady] = useState(true);
+  const [valueChange, setValueChange] = useState(false);
+  const [, update] = useState({});
 
   const existentialDeposit = useMemo(() => {
     const assetInfo = assetRegistry[asset];
@@ -155,7 +157,11 @@ const Component: React.FC<Props> = (props: Props) => {
     const allMap = convertFieldToObject<StakeFormProps>(allFields);
     const changesMap = convertFieldToObject<StakeFormProps>(changedFields);
 
-    const { asset, from } = changesMap;
+    const { asset, from, value } = changesMap;
+
+    if (value) {
+      setValueChange(true);
+    }
 
     if (from) {
       setFrom(from);
@@ -339,6 +345,23 @@ const Component: React.FC<Props> = (props: Props) => {
       unmount = true;
     };
   }, [from, _stakingType, chain]);
+
+  useEffect(() => {
+    let cancel = false;
+
+    if (valueChange) {
+      if (!cancel) {
+        setTimeout(() => {
+          form.validateFields([FormFieldName.VALUE]).finally(() => update({}));
+        }, 100);
+      }
+    }
+
+    return () => {
+      cancel = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, nativeTokenBalance.value]);
 
   return (
     <>

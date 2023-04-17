@@ -8,6 +8,7 @@ import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MigrationStore, N
 import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
+import { reformatAddress } from '@subwallet/extension-base/utils';
 import { Subscription } from 'dexie';
 
 import { logger as createLogger } from '@polkadot/util';
@@ -172,6 +173,14 @@ export default class DatabaseService {
     });
 
     return this.nftSubscription;
+  }
+
+  async cleanUpNft (chain: string, owner: string, collectionId: string, nftIds: string[]) {
+    const result = await this.stores.nft.cleanUpNfts(chain, reformatAddress(owner, 42), collectionId, nftIds);
+
+    result > 0 && console.debug(`Clean up ${result} NFTs from collection ${collectionId} on chain ${chain} for owner ${owner}`);
+
+    return result;
   }
 
   async getNft (addresses: string[], chainHashes?: string[]) {

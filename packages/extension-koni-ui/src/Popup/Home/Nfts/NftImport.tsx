@@ -64,6 +64,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [form] = Form.useForm<NftImportFormType>();
   const selectedChain = Form.useWatch('chain', form);
   const selectedNftType = Form.useWatch('type', form);
+  const collectionName = Form.useWatch('collectionName', form);
 
   const chains = useMemo(() => Object.values(chainInfoMap), [chainInfoMap]);
 
@@ -117,7 +118,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [chainInfoMap, form]);
 
   const onSubmit: FormCallbacks<NftImportFormType>['onFinish'] = useCallback((formValues: NftImportFormType) => {
-    const { chain, collectionName, contractAddress, symbol, type } = formValues;
+    const { chain, contractAddress, symbol, type } = formValues;
     const formattedCollectionName = collectionName.replaceAll(' ', '').toUpperCase();
 
     setLoading(true);
@@ -157,7 +158,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           setLoading(false);
         });
     }, 300);
-  }, [chainInfoMap, showNotification, t, goBack]);
+  }, [collectionName, chainInfoMap, showNotification, t, goBack]);
 
   const collectionNameValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {

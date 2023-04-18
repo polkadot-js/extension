@@ -65,6 +65,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [isBalanceReady, setIsBalanceReady] = useState(true);
 
   const [form] = Form.useForm<ClaimRewardFormProps>();
   const formDefault = useMemo((): ClaimRewardFormProps => ({
@@ -205,6 +206,7 @@ const Component: React.FC<Props> = (props: Props) => {
               chain={chain}
               className={'free-balance'}
               label={t('Available balance:')}
+              onBalanceReady={setIsBalanceReady}
             />
             <Form.Item>
               <MetaInfo
@@ -261,7 +263,7 @@ const Component: React.FC<Props> = (props: Props) => {
         </Button>
 
         <Button
-          disabled={isDisable}
+          disabled={isDisable || !isBalanceReady}
           icon={(
             <Icon
               phosphorIcon={ArrowCircleRight}

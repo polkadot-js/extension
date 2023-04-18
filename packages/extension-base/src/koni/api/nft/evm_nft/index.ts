@@ -91,6 +91,7 @@ export class EvmNftApi extends BaseNftApi {
     let ownItem = false;
 
     let collectionImage: string | undefined;
+    const nftOwnerMap: Record<string, string[]> = {};
 
     await Promise.all(this.addresses.map(async (address) => {
       if (!isEthereumAddress(address)) {
@@ -157,8 +158,10 @@ export class EvmNftApi extends BaseNftApi {
             }
           }
         }));
+
+        nftOwnerMap[address] = nftIds;
       } catch (e) {
-        console.error('evm nft error', e);
+        console.error('EVM NFT error', e);
       }
     }));
 
@@ -172,7 +175,9 @@ export class EvmNftApi extends BaseNftApi {
       } as NftCollection;
 
       nftParams.updateCollection(this.chain, nftCollection);
-      // nftParams.updateReady(true);
+      Object.entries(nftOwnerMap).forEach(([owner, nftIds]) => {
+        nftParams.cleanUpNfts(this.chain, owner, smartContract, nftIds);
+      });
     }
   }
 

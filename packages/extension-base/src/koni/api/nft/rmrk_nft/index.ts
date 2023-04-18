@@ -284,8 +284,18 @@ export class RmrkNftApi extends BaseNftApi {
           chain: this.chain
         } as NftCollection;
 
+        const nftIds: string[] = [];
+
+        allNfts.forEach((nft) => {
+          const nftCollectionId = nft?.collectionId as string;
+
+          if (nftCollectionId === item.collectionId) {
+            nftIds.push(nft?.id as string);
+          }
+        });
+
         params.updateCollection(this.chain, parsedCollection);
-        // params.updateReady(true);
+        params.cleanUpNfts(this.chain, address, item.collectionId, nftIds);
       });
     } catch (e) {
       console.error('Failed to fetch rmrk nft', e);

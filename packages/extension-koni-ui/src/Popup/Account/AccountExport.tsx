@@ -23,6 +23,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
 type Props = ThemeProps;
 
 enum ExportType {
@@ -34,6 +36,7 @@ enum ExportType {
 
 interface ExportItem {
   disable: boolean;
+  hidden: boolean;
   icon: PhosphorIcon;
   label: string;
   type: ExportType;
@@ -235,31 +238,35 @@ const Component: React.FC<Props> = (props: Props) => {
   const items = useMemo((): ExportItem[] => {
     return [
       {
-        disable: account?.isExternal || !account?.isMasterAccount,
+        disable: !account || account.isExternal || !account.isMasterAccount,
+        hidden: false,
         icon: Leaf,
         label: 'Export Seed Phrase',
         type: ExportType.SEED_PHRASE
       },
       {
-        disable: false,
+        disable: !account || !!account.isExternal,
+        hidden: false,
         icon: FileJs,
         label: 'Export JSON file',
         type: ExportType.JSON_FILE
       },
       {
-        disable: false,
+        disable: !account || account.isExternal || !isEthereumAddress(account.address),
+        hidden: !isEthereumAddress(account?.address || ''),
         icon: Wallet,
         label: 'Export Private key',
         type: ExportType.PRIVATE_KEY
       },
       {
-        disable: false,
+        disable: !account || !!account?.isExternal,
+        hidden: false,
         icon: QrCode,
         label: 'Export QR Code',
         type: ExportType.QR_CODE
       }
     ];
-  }, [account?.isExternal, account?.isMasterAccount]);
+  }, [account]);
 
   const onBack = useCallback(() => {
     if (accountAddress) {
@@ -359,6 +366,10 @@ const Component: React.FC<Props> = (props: Props) => {
                     {
                       items.map((item) => {
                         const _selected = exportTypes?.includes(item.type);
+
+                        if (item.hidden) {
+                          return null;
+                        }
 
                         return (
                           <SettingItem

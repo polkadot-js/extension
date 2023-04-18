@@ -36,6 +36,7 @@ enum ExportType {
 
 interface ExportItem {
   disable: boolean;
+  hidden: boolean;
   icon: PhosphorIcon;
   label: string;
   type: ExportType;
@@ -238,24 +239,28 @@ const Component: React.FC<Props> = (props: Props) => {
     return [
       {
         disable: !account || account.isExternal || !account.isMasterAccount,
+        hidden: false,
         icon: Leaf,
         label: 'Export Seed Phrase',
         type: ExportType.SEED_PHRASE
       },
       {
         disable: !account || !!account.isExternal,
+        hidden: false,
         icon: FileJs,
         label: 'Export JSON file',
         type: ExportType.JSON_FILE
       },
       {
         disable: !account || account.isExternal || !isEthereumAddress(account.address),
+        hidden: !isEthereumAddress(account?.address || ''),
         icon: Wallet,
         label: 'Export Private key',
         type: ExportType.PRIVATE_KEY
       },
       {
         disable: !account || !!account?.isExternal,
+        hidden: false,
         icon: QrCode,
         label: 'Export QR Code',
         type: ExportType.QR_CODE
@@ -361,6 +366,10 @@ const Component: React.FC<Props> = (props: Props) => {
                     {
                       items.map((item) => {
                         const _selected = exportTypes?.includes(item.type);
+
+                        if (item.hidden) {
+                          return null;
+                        }
 
                         return (
                           <SettingItem

@@ -27619,6 +27619,7 @@ __metadata:
     axios: ^1.2.1
     dexie: ^3.2.2
     discord-webhook-node: ^1.1.8
+    gh-pages: ^5.0.0
     i18next-scanner: ^4.0.0
     jest-environment-jsdom: ^29.4.1
     patch-package: ^6.4.7

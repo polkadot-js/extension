@@ -41,7 +41,8 @@
     "watch-dev": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch -d inline-source-map",
     "web-runner:build": "cd packages/web-runner && yarn webpack --config webpack.config.cjs --mode production",
     "web-runner:dev": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
-    "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development"
+    "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
+    "web-runner:deploy": "yarn web-runner:build && gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'"
   },
   "dependencies": {
     "@types/node": "^17.0.10",
@@ -56,6 +57,7 @@
     "@types/jest": "^27.4.0",
     "axios": "^1.2.1",
     "discord-webhook-node": "^1.1.8",
+    "gh-pages": "^5.0.0",
     "i18next-scanner": "^4.0.0",
     "jest-environment-jsdom": "^29.4.1",
     "patch-package": "^6.4.7",

@@ -6,13 +6,13 @@ import { AuthRequestV2, ResultResolver } from '@subwallet/extension-base/backgro
 import { AccountAuthType, AuthorizeRequest, RequestAuthorizeTab, Resolver } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { PREDEFINED_CHAIN_DAPP_CHAIN_MAP } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
 import { getDomainFromUrl } from '@subwallet/extension-base/utils';
 import { getId } from '@subwallet/extension-base/utils/getId';
-import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { assert } from '@polkadot/util';
@@ -30,7 +30,7 @@ export default class AuthRequestHandler {
   private readonly evmChainSubject = new Subject<AuthUrls>();
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
-  constructor (requestService: RequestService, chainService: ChainService) {
+  constructor (requestService: RequestService, chainService: ChainService, private keyringService: KeyringService) {
     this.#requestService = requestService;
     this.#chainService = chainService;
   }
@@ -44,7 +44,7 @@ export default class AuthRequestHandler {
   }
 
   private getAddressList (value = false): Record<string, boolean> {
-    const addressList = Object.keys(accounts.subject.value);
+    const addressList = Object.keys(this.keyringService.accounts);
 
     return addressList.reduce((addressList, v) => ({ ...addressList, [v]: value }), {});
   }

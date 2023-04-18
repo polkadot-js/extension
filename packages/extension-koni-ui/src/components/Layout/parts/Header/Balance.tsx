@@ -52,9 +52,6 @@ function Component({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
-    console.log('sortedTokenGroups', sortedTokenGroups);
-  console.log('totalBalanceInfo', totalBalanceInfo);
-  console.log('tokenGroupBalanceMap', tokenGroupBalanceMap);
 
   const { accountSelectorItems,
     onOpenReceive,
@@ -125,7 +122,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
         </div>
         <Number
           className={'balance-value'}
-          decimal={2}
+          decimal={0}
           decimalOpacity={0.45}
           suffix='$'
           size={30}
@@ -135,7 +132,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
         <div className={'__balance-change-container'}>
           <Number
             className={'__balance-change-value'}
-            decimal={2}
+            decimal={0}
             decimalOpacity={1}
             prefix={isTotalBalanceDecrease ? '- $' : '+ $'}
             value={totalChangeValue}
@@ -146,7 +143,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
             shape={'round'}
           >
             <Number
-              decimal={2}
+              decimal={0}
               decimalOpacity={1}
               prefix={isTotalBalanceDecrease ? '-' : '+'}
               suffix={'%'}
@@ -167,11 +164,11 @@ function Component({ className }: Props): React.ReactElement<Props> {
 
         <Number
           className="balance-value"
-          decimalOpacity={0.65}
+          decimalOpacity={0.45}
           size={30}
           value={totalValue}
           suffix="$"
-          decimal={2}
+          decimal={0}
           subFloatNumber
         />
       </div>
@@ -185,11 +182,11 @@ function Component({ className }: Props): React.ReactElement<Props> {
 
         <Number
           className="balance-value"
-          decimalOpacity={0.65}
+          decimalOpacity={0.45}
           size={30}
-          value={3399267}
+          value={totalValue}
           suffix="$"
-          decimal={2}
+          decimal={0}
           subFloatNumber
         />
       </div>

@@ -397,7 +397,7 @@ export default class KoniState {
   }
 
   public async getPooledStakingRecordsByAddress (addresses: string[]): Promise<StakingItem[]> {
-    return await this.dbService.getPooledStakings(addresses, this.activeChainSlugs);
+    return this.dbService.getPooledStakings(addresses, this.activeChainSlugs);
   }
 
   // TODO: delete later
@@ -470,12 +470,12 @@ export default class KoniState {
     callback && callback(nftData);
   }
 
-  public removeNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {
-    return this.dbService.removeNfts(chain, address, collectionId, nftIds);
-  }
-
   public deleteNftCollection (chain: string, collectionId: string) {
     return this.dbService.deleteNftCollection(chain, collectionId);
+  }
+
+  public cleanUpNfts (chain: string, owner: string, collectionId: string, nftIds: string[]) {
+    this.dbService.cleanUpNft(chain, owner, collectionId, nftIds).catch((e) => this.logger.warn(e));
   }
 
   public async getNft (): Promise<NftJson | undefined> {
@@ -583,7 +583,7 @@ export default class KoniState {
     if (address === ALL_ACCOUNT_KEY) {
       const pairs = keyring.getAccounts();
       const pair = pairs[0];
-      const pairGenesisHash = pair?.meta.genesisHash as string;
+      const pairGenesisHash = pair?.meta.genesisHash as string || '';
 
       if (pairs.length > 1 || !pair) {
         result.allGenesisHash = currentGenesisHash || undefined;
@@ -831,7 +831,7 @@ export default class KoniState {
     return items || {};
   }
 
-  public async switchAccount (newAddress: string) {
+  public async handleSwitchAccount (newAddress: string) {
     await Promise.all([
       this.resetBalanceMap(newAddress),
       this.resetCrowdloanMap(newAddress)
@@ -1615,6 +1615,10 @@ export default class KoniState {
 
   public createUnsubscriptionHandle (id: string, unsubscribe: () => void): void {
     this.unsubscriptionMap[id] = unsubscribe;
+  }
+
+  public updateChainConnectionStatus (chain: string, status: _ChainConnectionStatus) {
+    this.chainService.setChainConnectionStatus(chain, status);
   }
 
   public async autoEnableChains (addresses: string[]) {

@@ -3,13 +3,12 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 
-export const FOUR_INSTRUCTIONS_WEIGHT = { Limited: 5000000000 };
-export const POLKADOT_LIMITED_WEIGHT = 1000000000;
-export const POLKADOT_UNLIMITED_WEIGHT = 'Unlimited';
+export const FOUR_INSTRUCTIONS_WEIGHT = 5000000000;
+export const FOUR_INSTRUCTIONS_LIMITED_WEIGHT = { Limited: 5000000000 };
 
 // get multilocation for destination chain from a parachain
 
@@ -27,11 +26,11 @@ export function getReceiverLocation (originChainInfo: _ChainInfo, destinationCha
   return { AccountId32: { network: 'Any', id: decodeAddress(toAddress) } };
 }
 
-export function getBeneficiary (originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string) {
+export function getBeneficiary (originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, version = 'V1') {
   const receiverLocation: Record<string, any> = getReceiverLocation(originChainInfo, destinationChainInfo, recipientAddress);
 
   return {
-    V1: {
+    [version]: {
       parents: 0,
       interior: {
         X1: receiverLocation
@@ -40,4 +39,10 @@ export function getBeneficiary (originChainInfo: _ChainInfo, destinationChainInf
   };
 }
 
-export const NETWORK_USE_UNLIMITED_WEIGHT: string[] = ['acala', 'karura', 'statemint', 'moonriver'];
+export function getDestWeight () {
+  return 'Unlimited';
+  // return api.tx.xTokens.transfer.meta.args[3].type.toString() ===
+  // 'XcmV2WeightLimit'
+  //   ? 'Unlimited'
+  //   : FOUR_INSTRUCTIONS_WEIGHT;
+}

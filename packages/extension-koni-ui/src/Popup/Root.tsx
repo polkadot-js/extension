@@ -97,9 +97,13 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     const pathName = location.pathname;
 
     if (needMigrate && hasMasterPassword && !isLocked) {
-      navigate(migratePasswordUrl);
+      if (pathName !== migratePasswordUrl) {
+        navigate(migratePasswordUrl);
+      }
     } else if (hasMasterPassword && isLocked) {
-      navigate(loginUrl);
+      if (pathName !== loginUrl) {
+        navigate(loginUrl);
+      }
     } else if (!hasMasterPassword) {
       if (isNoAccount(accounts)) {
         if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl].includes(pathName)) {
@@ -118,8 +122,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       } else {
         navigate(tokenUrl);
       }
-    } else if (pathName === migratePasswordUrl && !needMigrate) {
-      goHome();
     } else if (pathName === loginUrl && !isLocked) {
       goHome();
     } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {

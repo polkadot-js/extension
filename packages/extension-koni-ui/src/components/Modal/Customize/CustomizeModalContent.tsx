@@ -13,7 +13,7 @@ import { MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback } from 'react';
 import styled, { useTheme } from 'styled-components';
 
-type Props = ThemeProps
+type Props = ThemeProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -22,7 +22,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const chainInfoList = useChainInfoWithState();
 
   const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
-    const conectSymbol = (chainInfo.connectionStatus === _ChainConnectionStatus.CONNECTED) ? '__connected__' : '__disconnected__';
+    const connectSymbol = (chainInfo.connectionStatus === _ChainConnectionStatus.CONNECTED) ? '__connected__' : '__disconnected__';
 
     return (
       <NetworkItem
@@ -32,7 +32,7 @@ const Component: React.FC<Props> = (props: Props) => {
         name={chainInfo.name}
         networkKey={chainInfo.slug}
         rightItem={<ChainItemFooter chainInfo={chainInfo} />}
-        subSymbol={conectSymbol}
+        subSymbol={connectSymbol}
       />
     );
   }, []);

@@ -97,13 +97,13 @@ export default class AuthRequestHandler {
     const chainInfoMaps = this.#chainService.getChainInfoMap();
     const chainStateMap = this.#chainService.getChainStateMap();
     let defaultChain = options.defaultChain;
-    const needEnableChains: string[] = [];
+    let needEnableChains: string[] = [];
 
     if (options.url) {
       const domain = getDomainFromUrl(options.url);
       const predefinedSupportChains = PREDEFINED_CHAIN_DAPP_CHAIN_MAP[domain];
 
-      if (predefinedSupportChains) {
+      if (!defaultChain && predefinedSupportChains) {
         defaultChain = predefinedSupportChains[0];
         options.autoActive && needEnableChains.push(...predefinedSupportChains);
       }
@@ -123,6 +123,7 @@ export default class AuthRequestHandler {
       }
     }
 
+    needEnableChains = needEnableChains.filter((slug) => !chainStateMap[slug]?.active);
     needEnableChains.length > 0 && this.#chainService.enableChains(needEnableChains);
 
     return chainInfo;

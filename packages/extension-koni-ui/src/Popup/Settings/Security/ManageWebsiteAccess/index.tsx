@@ -21,6 +21,8 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
 type Props = ThemeProps;
 
 function getWebsiteItems (authUrlMap: Record<string, AuthUrlInfo>): AuthUrlInfo[] {
@@ -28,6 +30,16 @@ function getWebsiteItems (authUrlMap: Record<string, AuthUrlInfo>): AuthUrlInfo[
 }
 
 function getAccountCount (item: AuthUrlInfo): number {
+  const authType = item.accountAuthType;
+
+  if (authType === 'evm') {
+    return item.isAllowedMap ? Object.entries(item.isAllowedMap).filter(([address, rs]) => rs && isEthereumAddress(address)).length : 0;
+  }
+
+  if (authType === 'substrate') {
+    return item.isAllowedMap ? Object.entries(item.isAllowedMap).filter(([address, rs]) => rs && !isEthereumAddress(address)).length : 0;
+  }
+
   return Object.values(item.isAllowedMap).filter((i) => i).length;
 }
 
@@ -179,8 +191,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     const searchTextLowerCase = searchText.toLowerCase();
 
     return (
-      item.origin.toLowerCase().includes(searchTextLowerCase) ||
-      item.id.toLowerCase().includes(searchTextLowerCase)
+      item.origin?.toLowerCase().includes(searchTextLowerCase) ||
+      item.id?.toLowerCase().includes(searchTextLowerCase)
     );
   }, []);
 
@@ -249,6 +261,7 @@ const ManageWebsiteAccess = styled(Component)<Props>(({ theme: { token } }: Prop
     flexDirection: 'column',
 
     '.ant-sw-list-section': {
+      paddingTop: token.padding,
       flex: 1,
       marginBottom: token.margin
     },

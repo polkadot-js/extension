@@ -1477,7 +1477,6 @@ export default class KoniExtension {
 
     // Get native token amount
     const freeBalance = await this.#koniState.balanceService.getTokenFreeBalance(from, networkKey, tokenSlug);
-    let edAsWarning = false;
 
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
       chainType = ChainType.EVM;
@@ -1494,7 +1493,6 @@ export default class KoniExtension {
           transaction,
           transferAmount.value
         ] = await getEVMTransactionObject(chainInfo, to, txVal, !!transferAll, evmApiMap);
-        edAsWarning = true;
       }
     } else {
       const substrateApi = this.#koniState.getSubstrateApi(networkKey);
@@ -1508,7 +1506,6 @@ export default class KoniExtension {
         to: to,
         substrateApi
       });
-      edAsWarning = true;
     }
 
     const transferNativeAmount = isTransferNativeToken ? transferAmount.value : '0';
@@ -1525,7 +1522,7 @@ export default class KoniExtension {
       extrinsicType: isTransferNativeToken ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.TRANSFER_TOKEN,
       ignoreWarnings: transferAll,
       isTransferAll: transferAll,
-      edAsWarning: edAsWarning
+      edAsWarning: isTransferNativeToken
     });
   }
 
@@ -2227,6 +2224,8 @@ export default class KoniExtension {
 
   private async getNominationPoolOptions (chain: string): Promise<NominationPoolInfo[]> {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
+
+    console.log('chain', chain);
 
     return await getNominationPoolsInfo(chain, substrateApi);
   }

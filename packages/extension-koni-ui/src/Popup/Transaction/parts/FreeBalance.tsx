@@ -4,9 +4,9 @@
 import { useGetBalance } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Number, Typography } from '@subwallet/react-ui';
+import { ActivityIndicator, Number, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps & {
@@ -14,13 +14,17 @@ type Props = ThemeProps & {
   tokenSlug?: string;
   label?: string;
   chain?: string;
+  onBalanceReady?: (rs: boolean) => void;
 }
 
-const Component = ({ address, chain, className, label, tokenSlug }: Props) => {
+const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
+  const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug);
 
-  const { nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug);
+  useEffect(() => {
+    onBalanceReady?.(!isLoading && !error);
+  }, [error, isLoading, onBalanceReady]);
 
   if (!address && !chain) {
     return <></>;
@@ -29,8 +33,10 @@ const Component = ({ address, chain, className, label, tokenSlug }: Props) => {
   return (
     <Typography.Paragraph className={CN(className, 'free-balance')}>
       {label || t('Sender available balance:')}&nbsp;
+      {isLoading && <ActivityIndicator size={14} />}
+      {error && <Typography.Text className={'error-message'}>{error}</Typography.Text>}
       {
-        !!nativeTokenSlug && (
+        !isLoading && !error && !!nativeTokenSlug && (
           <Number
             decimal={nativeTokenBalance.decimals || 18}
             decimalColor={token.colorTextTertiary}
@@ -43,7 +49,7 @@ const Component = ({ address, chain, className, label, tokenSlug }: Props) => {
         )
       }
       {
-        !!tokenSlug && (tokenSlug !== nativeTokenSlug) && (
+        !isLoading && !error && !!tokenSlug && (tokenSlug !== nativeTokenSlug) && (
           <>
             <span className={'__name'}>&nbsp;{t('and')}&nbsp;</span>
             <Number
@@ -67,6 +73,10 @@ const FreeBalance = styled(Component)<Props>(({ theme: { token } }: Props) => {
     display: 'flex',
     flexWrap: 'wrap',
     color: token.colorTextTertiary,
+
+    '.error-message': {
+      color: token.colorError
+    },
 
     '&.ant-typography': {
       marginBottom: 0

@@ -21,8 +21,6 @@ interface Props extends ThemeProps {
 const Component: React.FC<Props> = (props: Props) => {
   const { className, data } = props;
 
-  console.log(data);
-
   const { t } = useTranslation();
 
   return (

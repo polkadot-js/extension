@@ -290,14 +290,23 @@ export default class KoniTabs {
         if (!web3.currentProvider.connected) {
           console.log(`[Web3] ${slug} is disconnected, trying to connect...`);
           this.#koniState.refreshWeb3Api(slug);
+          let checkingNum = 0;
 
           const poll = (resolve: (value: unknown) => void) => {
+            checkingNum += 1;
+
             if ((web3.currentProvider as WebsocketProvider).connected) {
               console.log(`Network [${slug}] is connected.`);
               resolve(true);
             } else {
               console.log(`Connecting to network [${slug}]`);
-              setTimeout(() => poll(resolve), 400);
+
+              if (checkingNum < 10) {
+                setTimeout(() => poll(resolve), 900);
+              } else {
+                console.log(`Max retry, stop checking [${slug}]`);
+                resolve(false);
+              }
             }
           };
 

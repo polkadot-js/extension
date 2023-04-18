@@ -12,6 +12,7 @@ import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { AppSettings } from '@subwallet/extension-koni-ui/stores/types';
+import { noop, noopBoolean } from '@subwallet/extension-koni-ui/utils';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
 
 // Setup redux stores
@@ -70,7 +71,7 @@ export const updateAuthorizeRequests = (data: AuthorizeRequest[]) => {
   store.dispatch({ type: 'requestState/updateAuthorizeRequests', payload: requests });
 };
 
-export const subscribeAuthorizeRequests = lazySubscribeMessage('pri(authorize.requestsV2)', null, console.debug, updateAuthorizeRequests);
+export const subscribeAuthorizeRequests = lazySubscribeMessage('pri(authorize.requestsV2)', null, noop, updateAuthorizeRequests);
 
 export const updateMetadataRequests = (data: MetadataRequest[]) => {
   // Convert data to object with key as id
@@ -79,7 +80,7 @@ export const updateMetadataRequests = (data: MetadataRequest[]) => {
   store.dispatch({ type: 'requestState/updateMetadataRequests', payload: requests });
 };
 
-export const subscribeMetadataRequests = lazySubscribeMessage('pri(metadata.requests)', null, console.debug, updateMetadataRequests);
+export const subscribeMetadataRequests = lazySubscribeMessage('pri(metadata.requests)', null, noop, updateMetadataRequests);
 
 export const updateSigningRequests = (data: SigningRequest[]) => {
   // Convert data to object with key as id
@@ -88,7 +89,7 @@ export const updateSigningRequests = (data: SigningRequest[]) => {
   store.dispatch({ type: 'requestState/updateSigningRequests', payload: requests });
 };
 
-export const subscribeSigningRequests = lazySubscribeMessage('pri(signing.requests)', null, console.debug, updateSigningRequests);
+export const subscribeSigningRequests = lazySubscribeMessage('pri(signing.requests)', null, noopBoolean, updateSigningRequests);
 
 export const updateConfirmationRequests = (data: ConfirmationsQueue) => {
   store.dispatch({ type: 'requestState/updateConfirmationRequests', payload: data });

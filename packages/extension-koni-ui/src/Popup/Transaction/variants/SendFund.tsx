@@ -144,8 +144,6 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
     slug: originChain.slug
   });
 
-  console.log('xcmRefMap', xcmRefMap);
-
   Object.values(xcmRefMap).forEach((xcmRef) => {
     if (xcmRef.srcAsset === tokenSlug) {
       const destinationChain = chainInfoMap[xcmRef.destChain];
@@ -224,6 +222,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
+  const [, update] = useState({});
+  const [isBalanceReady, setIsBalanceReady] = useState(true);
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone, setIsTransferAll);
 
@@ -244,8 +244,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
   }, [chainInfoMap, asset, xcmRefMap]);
-
-  console.log('destChainItems', destChainItems);
 
   const currentChainAsset = useMemo(() => {
     return asset ? assetRegistry[asset] : undefined;
@@ -318,9 +316,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       return Promise.reject(t('Amount is required'));
     }
 
-    if ((new BigN(amount)).eq(new BigN(0))) {
-      return Promise.reject(t('Amount must be greater than 0'));
-    }
+    // if ((new BigN(amount)).eq(new BigN(0))) {
+    //   return Promise.reject(t('Amount must be greater than 0'));
+    // }
 
     if ((new BigN(amount)).gt(new BigN(maxTransfer))) {
       const maxString = new BigN(maxTransfer).div(BN_TEN.pow(decimals)).toFixed(6);
@@ -488,11 +486,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           if (!cancel) {
             const value = form.getFieldValue('value') as string;
 
-            console.log(value);
-
             if (value) {
               setTimeout(() => {
-                form.validateFields(['value']).finally(noop);
+                form.validateFields(['value']).finally(() => update({}));
               }, 100);
             }
           }
@@ -601,6 +597,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         <FreeBalance
           address={from}
           chain={chain}
+          onBalanceReady={setIsBalanceReady}
           tokenSlug={asset}
         />
       </TransactionContent>
@@ -610,6 +607,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         warnings={[]}
       >
         <Button
+          disabled={!isBalanceReady}
           icon={(
             <Icon
               phosphorIcon={PaperPlaneTilt}
@@ -620,7 +618,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           onClick={preCheckReadOnly(form.submit)}
           schema={isTransferAll ? 'warning' : undefined}
         >
-          {isTransferAll ? t('Transfer all') : t('Transfer')}
+          {isTransferAll ? t('Transfer the full account balance') : t('Transfer')}
         </Button>
       </TransactionFooter>
     </>
@@ -634,7 +632,7 @@ const SendFund = styled(_SendFund)(({ theme }) => {
     '.__brief': {
       paddingLeft: token.padding,
       paddingRight: token.padding,
-      marginBottom: token.marginLG
+      marginBottom: token.marginMD
     },
 
     '&.-transaction-content.-is-zero-balance': {

@@ -46,7 +46,7 @@ export default function useChainChecker () {
           // eslint-disable-next-line react/jsx-no-bind
           onClick={_onEnabled}
           schema={'warning'}
-          size={'md'}
+          size={'xs'}
         >
           {t('Turn it on')}
         </Button>;

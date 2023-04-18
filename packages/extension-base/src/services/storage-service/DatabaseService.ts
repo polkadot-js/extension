@@ -60,6 +60,7 @@ export default class DatabaseService {
 
   // Balance
   async getStoredBalance () {
+    console.log('====this.stores.balance.table.toArray', this.stores.balance.table.toArray());
     return this.stores.balance.table.toArray();
   }
 

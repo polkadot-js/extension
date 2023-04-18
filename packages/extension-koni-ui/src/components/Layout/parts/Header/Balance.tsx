@@ -52,6 +52,9 @@ function Component({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
+    console.log('sortedTokenGroups', sortedTokenGroups);
+  console.log('totalBalanceInfo', totalBalanceInfo);
+  console.log('tokenGroupBalanceMap', tokenGroupBalanceMap);
 
   const { accountSelectorItems,
     onOpenReceive,
@@ -67,6 +70,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
   const totalChangePercent = totalBalanceInfo.change.percent;
   const totalChangeValue = totalBalanceInfo.change.value;
   const totalValue = totalBalanceInfo.convertedValue;
+  console.log('totalValue', totalValue);
 
   const onOpenBuyTokens = useCallback(() => {
     navigate('/buy-tokens');
@@ -126,7 +130,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
           suffix='$'
           size={30}
           subFloatNumber
-          value={3399327}
+          value={totalValue}
         />
         <div className={'__balance-change-container'}>
           <Number
@@ -158,14 +162,14 @@ function Component({ className }: Props): React.ReactElement<Props> {
 
       <div className="balance-item">
         <Typography.Text className="balance-title">
-          Total balance
+          Transferable balance
         </Typography.Text>
 
         <Number
           className="balance-value"
           decimalOpacity={0.65}
           size={30}
-          value={3399267}
+          value={totalValue}
           suffix="$"
           decimal={2}
           subFloatNumber
@@ -176,7 +180,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
 
       <div className="balance-item">
         <Typography.Text className="balance-title">
-          Total balance
+          Locked balance
         </Typography.Text>
 
         <Number

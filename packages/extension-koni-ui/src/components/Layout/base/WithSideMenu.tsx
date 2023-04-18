@@ -9,6 +9,8 @@ import SideMenu from '../parts/SideMenu';
 import BalanceHeader from '../parts/Header/Balance';
 import styled from 'styled-components';
 import WebHeader from '../parts/Header';
+import { useAccountBalance, useGetChainSlugsByAccountType, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
+import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 
 type Props = Omit<
 LayoutBaseProps,
@@ -40,20 +42,33 @@ const WithSideMenu = (props: Props) => {
     ...restProps
   } = props;
 
-  return (
-    <Layout>
-      <Layout.Sider width={250}>
-        <SideMenu />
-      </Layout.Sider>
+  const chainsByAccountType = useGetChainSlugsByAccountType();
+  console.log('====chainsByAccountType', chainsByAccountType);
+  const tokenGroupStructure = useTokenGroup(chainsByAccountType);
+  console.log('tokenGroupStructure', tokenGroupStructure);
+  const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
+  console.log('accountBalance', accountBalance);
 
-      <LayoutContainer>
-        <FixedHeader>
-          {withWebHeader && <WebHeader />}
-          {withBalanceHeader && <BalanceHeader />}
-        </FixedHeader>
-        {children}
-      </LayoutContainer>
-    </Layout>
+  return (
+    <HomeContext.Provider value={{
+      tokenGroupStructure,
+      accountBalance
+    }}
+    >
+      <Layout>
+        <Layout.Sider width={250}>
+          <SideMenu />
+        </Layout.Sider>
+
+        <LayoutContainer>
+          <FixedHeader>
+            {withWebHeader && <WebHeader />}
+            {withBalanceHeader && <BalanceHeader />}
+          </FixedHeader>
+          {children}
+        </LayoutContainer>
+      </Layout>
+    </HomeContext.Provider>
   );
 };
 

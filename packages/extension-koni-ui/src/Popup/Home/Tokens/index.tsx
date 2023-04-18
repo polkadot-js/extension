@@ -35,7 +35,9 @@ const Component = (): React.ReactElement => {
   const topBlockRef = useRef<HTMLDivElement>(null);
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+    const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+    console.log('==TOKEN tokenGroupBalanceMap', tokenGroupBalanceMap);
+    console.log('==TOKEN totalBalanceInfo', totalBalanceInfo);
   const notify = useNotification();
   const { accountSelectorItems,
     onOpenReceive,

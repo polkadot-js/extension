@@ -167,7 +167,6 @@ const Component: React.FC<Props> = (props: Props) => {
       <AccountItemWithName
         accountName={item.name}
         address={address}
-        addressForName={false}
         avatarSize={24}
         key={item.address}
         onClick={onSelectItem(item)}

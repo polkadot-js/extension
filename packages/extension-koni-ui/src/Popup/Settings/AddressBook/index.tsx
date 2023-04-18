@@ -13,6 +13,7 @@ import CN from 'classnames';
 import { FadersHorizontal, Plus } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isAddress } from '@polkadot/util-crypto';
@@ -62,6 +63,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { activeModal } = useContext(ModalContext);
 
@@ -69,7 +71,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const sectionRef = useRef<SwListSectionRef>(null);
 
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const { filterSelectionMap,
+    onApplyFilter,
+    onChangeFilterOption,
+    onCloseFilterModal,
+    selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const formatAddress = useFormatAddress();
 
   const items = useMemo((): AccountItem[] => {
@@ -107,15 +113,17 @@ const Component: React.FC<Props> = (props: Props) => {
     activeModal(ADD_ADDRESS_BOOK_MODAL);
   }, [activeModal]);
 
-  const subHeaderIcons = useMemo((): ButtonProps[] => [{
-    icon: (
-      <Icon
-        phosphorIcon={Plus}
-        size='md'
-      />
-    ),
-    onClick: openAddContact
-  }], [openAddContact]);
+  const subHeaderIcons = useMemo((): ButtonProps[] => [
+    {
+      icon: (
+        <Icon
+          phosphorIcon={Plus}
+          size='md'
+        />
+      ),
+      onClick: openAddContact
+    }
+  ], [openAddContact]);
 
   const openFilter = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -159,6 +167,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <AccountItemWithName
         accountName={item.name}
         address={address}
+        addressForName={false}
         avatarSize={24}
         key={item.address}
         onClick={onSelectItem(item)}
@@ -166,9 +175,14 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [formatAddress, onSelectItem]);
 
+  const goBack = useCallback(() => {
+    navigate('/settings/list');
+  }, [navigate]);
+
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
+        onBack={goBack}
         subHeaderIcons={subHeaderIcons}
         title={t('Manage address book')}
       >
@@ -193,7 +207,7 @@ const Component: React.FC<Props> = (props: Props) => {
           rowGap='var(--row-gap)'
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search chain')}
+          searchPlaceholder={t<string>('Account name')}
           showActionBtn={true}
         />
         <FilterModal
@@ -215,7 +229,19 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const ManageAddressBook = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--row-gap': token.sizeXS
+    '--row-gap': token.sizeXS,
+
+    '.ant-sw-screen-layout-body': {
+      paddingTop: token.padding,
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
+    '.ant-sw-list-section': {
+      flex: 1,
+      marginBottom: token.margin
+    }
   };
 });
 

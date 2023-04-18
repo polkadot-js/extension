@@ -10,7 +10,8 @@ import { simpleCheckForm, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Input, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { PlusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useState } from 'react';
+import { RuleObject } from 'rc-field-form/lib/interface';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -41,7 +42,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const notification = useNotification();
 
-  const { inactiveModal } = useContext(ModalContext);
+  const { checkActive, inactiveModal } = useContext(ModalContext);
+  const isActive = checkActive(modalId);
 
   const [form] = Form.useForm<AddContactFormProps>();
 
@@ -53,6 +55,18 @@ const Component: React.FC<Props> = (props: Props) => {
   const onCancel = useCallback(() => {
     inactiveModal(modalId);
   }, [inactiveModal]);
+
+  const addressValidator = useCallback((rule: RuleObject, address: string): Promise<void> => {
+    if (!address) {
+      return Promise.reject(new Error(t('Contact address is required')));
+    }
+
+    if (!isAddress(address)) {
+      return Promise.reject(new Error(t('Invalid contact address')));
+    }
+
+    return Promise.resolve();
+  }, [t]);
 
   const onFieldsChange: FormCallbacks<AddContactFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { empty, error } = simpleCheckForm(allFields);
@@ -81,6 +95,12 @@ const Component: React.FC<Props> = (props: Props) => {
         });
     }, 300);
   }, [inactiveModal, notification]);
+
+  useEffect(() => {
+    if (!isActive) {
+      form.resetFields();
+    }
+  }, [form, isActive]);
 
   return (
     <SwModal
@@ -123,8 +143,7 @@ const Component: React.FC<Props> = (props: Props) => {
           name={FormFieldName.ADDRESS}
           rules={[
             {
-              required: true,
-              message: t('Contact address is required')
+              validator: addressValidator
             }
           ]}
           statusHelpAsTooltip={true}

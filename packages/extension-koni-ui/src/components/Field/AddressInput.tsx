@@ -7,7 +7,7 @@ import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } fro
 import { saveRecentAccount } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
-import { findAccountByAddress, toShort } from '@subwallet/extension-koni-ui/utils';
+import { findContactByAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
@@ -37,7 +37,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const accounts = useSelector((root) => root.accountState.accounts);
+  const { accounts, contacts } = useSelector((root) => root.accountState);
 
   const scannerId = useMemo(() => id ? `${id}-scanner-modal` : defaultScannerModalId, [id]);
   const addressBookId = useMemo(() => id ? `${id}-address-book-modal` : defaultAddressBookModalId, [id]);
@@ -45,11 +45,13 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const inputRef = useForwardInputRef(ref);
   const [scanError, setScanError] = useState('');
 
+  const _contacts = useMemo(() => [...accounts, ...contacts], [accounts, contacts]);
+
   const accountName = useMemo(() => {
-    const account = findAccountByAddress(accounts, value);
+    const account = findContactByAddress(_contacts, value);
 
     return account?.name;
-  }, [accounts, value]);
+  }, [_contacts, value]);
 
   const formattedAddress = useMemo((): string => {
     const _value = value || '';

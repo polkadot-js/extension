@@ -3,7 +3,7 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson } from '@subwallet/extension-base/background/types';
+import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isAccountAll } from '@subwallet/extension-base/utils';
@@ -48,7 +48,7 @@ export const findAccountByAddress = (accounts: AccountJson[], address?: string):
 
     return result || null;
   } catch (e) {
-    console.error('Fail to detect adddress', e);
+    console.error('Fail to detect address', e);
 
     return null;
   }
@@ -127,4 +127,23 @@ export const funcSortByName = (a: AccountJson, b: AccountJson) => {
   }
 
   return ((a?.name || '').toLowerCase() > (b?.name || '').toLowerCase()) ? 1 : -1;
+};
+
+export const findContactByAddress = (contacts: AbstractAddressJson[], address?: string): AbstractAddressJson | null => {
+  try {
+    const isAllAccount = address && isAccountAll(address);
+
+    if (!isAddress(address) && !isAllAccount) {
+      return null;
+    }
+
+    const originAddress = isAccountAll(address) ? address : isEthereumAddress(address) ? address : encodeAddress(decodeAddress(address));
+    const result = contacts.find((contact) => contact.address.toLowerCase() === originAddress.toLowerCase());
+
+    return result || null;
+  } catch (e) {
+    console.error('Fail to detect address', e);
+
+    return null;
+  }
 };

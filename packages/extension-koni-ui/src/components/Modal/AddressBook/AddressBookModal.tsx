@@ -6,7 +6,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { BackIcon } from '@subwallet/extension-koni-ui/components';
 import { useFilterModal, useFormatAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll, reformatAddress } from '@subwallet/extension-koni-ui/utils';
+import { isAccountAll, reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
@@ -141,7 +141,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return (
       <AccountItemWithName
-        accountName={item.name}
+        accountName={item.name || toShort(item.address, 4, 4)}
         address={address}
         avatarSize={24}
         isSelected={selected}
@@ -227,7 +227,7 @@ const Component: React.FC<Props> = (props: Props) => {
           rowGap='var(--row-gap)'
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search chain')}
+          searchPlaceholder={t<string>('Account name')}
           showActionBtn={true}
         />
       </SwModal>

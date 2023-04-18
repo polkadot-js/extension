@@ -5,6 +5,7 @@ import { CurrentAccountInfo, KeyringState } from '@subwallet/extension-base/back
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { CurrentAccountStore } from '@subwallet/extension-base/stores';
 import { keyring } from '@subwallet/ui-keyring';
+import { accounts as accountsObservable } from '@subwallet/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import { BehaviorSubject } from 'rxjs';
 
@@ -12,9 +13,10 @@ export class KeyringService {
   private readonly currentAccountStore = new CurrentAccountStore();
   readonly currentAccountSubject = new BehaviorSubject<CurrentAccountInfo>({ address: '', currentGenesisHash: null });
 
-  readonly accountsSubject = keyring.accounts.subject;
+  private _rawAccountsSubject = accountsObservable.subject;
   readonly addressesSubject = keyring.addresses.subject;
-  private beforeAccount: SubjectInfo = keyring.accounts.subject.value;
+  private beforeAccount: SubjectInfo = this._rawAccountsSubject.value;
+  public readonly accountSubject = new BehaviorSubject<SubjectInfo>(this._rawAccountsSubject.value);
 
   readonly keyringStateSubject = new BehaviorSubject<KeyringState>({
     isReady: false,
@@ -22,9 +24,7 @@ export class KeyringService {
     isLocked: false
   });
 
-  private eventService: EventService;
-  constructor (eventService: EventService) {
-    this.eventService = eventService;
+  constructor (private eventService: EventService) {
     this.currentAccountStore.get('CurrentAccountInfo', (rs) => {
       this.currentAccountSubject.next(rs);
     });
@@ -33,18 +33,24 @@ export class KeyringService {
 
   private async subscribeAccounts () {
     // Wait until account ready
-    await new Promise((resolve) => {
-      const onReady = () => {
-        this.eventService.off('account.ready', onReady);
-        resolve(true);
-      };
+    await this.eventService.waitAccountReady;
 
-      this.eventService.on('account.ready', onReady);
+    this.beforeAccount = { ...this._rawAccountsSubject.value };
+
+    let accountNextTimeout: NodeJS.Timeout | undefined;
+
+    this._rawAccountsSubject.subscribe((value) => {
+      if (accountNextTimeout) {
+        clearTimeout(accountNextTimeout);
+      }
+
+      // Add some small lazy time to avoid spam
+      accountNextTimeout = setTimeout(() => {
+        this.accountSubject.next(value);
+      }, 99);
     });
 
-    this.beforeAccount = { ...this.accountsSubject.value };
-
-    this.accountsSubject.subscribe((subjectInfo) => {
+    this.accountSubject.subscribe((subjectInfo) => {
       // Check if accounts changed
       const beforeAddresses = Object.keys(this.beforeAccount);
       const afterAddresses = Object.keys(subjectInfo);
@@ -91,7 +97,7 @@ export class KeyringService {
   }
 
   get accounts (): SubjectInfo {
-    return this.accountsSubject.value;
+    return this.accountSubject.value;
   }
 
   get addresses (): SubjectInfo {

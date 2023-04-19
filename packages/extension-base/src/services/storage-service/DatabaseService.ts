@@ -144,8 +144,9 @@ export default class DatabaseService {
 
   async upsertHistory (histories: TransactionHistoryItem[]) {
     // this.logger.log('Updating transaction histories');
+    const cleanedHistory = histories.filter((x) => x && x.address && x.chain && x.extrinsicHash);
 
-    return this.stores.transaction.bulkUpsert(histories);
+    return this.stores.transaction.bulkUpsert(cleanedHistory);
   }
 
   // NFT Collection

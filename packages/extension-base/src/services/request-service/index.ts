@@ -4,6 +4,7 @@
 import { AuthRequestV2, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestSign, ResponseSigning, SigningRequest } from '@subwallet/extension-base/background/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import AuthRequestHandler from '@subwallet/extension-base/services/request-service/handler/AuthRequestHandler';
 import EvmRequestHandler from '@subwallet/extension-base/services/request-service/handler/EvmRequestHandler';
 import MetadataRequestHandler from '@subwallet/extension-base/services/request-service/handler/MetadataRequestHandler';
@@ -12,7 +13,6 @@ import SubstrateRequestHandler from '@subwallet/extension-base/services/request-
 import { AuthUrls, MetaRequest } from '@subwallet/extension-base/services/request-service/types';
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import { MetadataDef } from '@subwallet/extension-inject/types';
-import { accounts } from '@subwallet/ui-keyring/observable/accounts';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
@@ -28,12 +28,12 @@ export default class RequestService {
   readonly #evmRequestHandler: EvmRequestHandler;
 
   // Common
-  constructor (chainService: ChainService, settingService: SettingService) {
+  constructor (chainService: ChainService, settingService: SettingService, private keyringService: KeyringService) {
     this.#chainService = chainService;
     this.settingService = settingService;
     this.#popupHandler = new PopupHandler(this);
     this.#metadataRequestHandler = new MetadataRequestHandler(this);
-    this.#authRequestHandler = new AuthRequestHandler(this, this.#chainService);
+    this.#authRequestHandler = new AuthRequestHandler(this, this.#chainService, this.keyringService);
     this.#substrateRequestHandler = new SubstrateRequestHandler(this);
     this.#evmRequestHandler = new EvmRequestHandler(this);
 
@@ -50,7 +50,7 @@ export default class RequestService {
   }
 
   getAddressList (value = false): Record<string, boolean> {
-    const addressList = Object.keys(accounts.subject.value);
+    const addressList = Object.keys(this.keyringService.accounts);
 
     return addressList.reduce((addressList, v) => ({ ...addressList, [v]: value }), {});
   }

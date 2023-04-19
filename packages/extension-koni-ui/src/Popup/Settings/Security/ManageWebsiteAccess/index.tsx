@@ -261,6 +261,7 @@ const ManageWebsiteAccess = styled(Component)<Props>(({ theme: { token } }: Prop
     flexDirection: 'column',
 
     '.ant-sw-list-section': {
+      paddingTop: token.padding,
       flex: 1,
       marginBottom: token.margin
     },

@@ -3,8 +3,8 @@
 
 import { SettingItemSelection } from '@subwallet/extension-koni-ui/components/Setting/SettingItemSelection';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
-import { ArrowClockwise, SortAscending, SortDescending } from 'phosphor-react';
+import { BackgroundIcon, Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
+import { ArrowsClockwise, SortAscending, SortDescending } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -54,16 +54,6 @@ function Component (props: Props): React.ReactElement<Props> {
       className={className}
       id={id}
       onCancel={_onCancel}
-      rightIconProps={onReset && ({
-        onClick: _onReset,
-        icon: (
-          <Icon
-            phosphorIcon={ArrowClockwise}
-            size='md'
-            type='phosphor'
-          />
-        )
-      })}
       title={title || t('Sorting')}
     >
       <div className={'__options-container'}>
@@ -83,6 +73,21 @@ function Component (props: Props): React.ReactElement<Props> {
               onClickItem={onSelectOption(option.value)}
             />
           ))
+        }
+        {
+          onReset && (
+            <Button
+              block={true}
+              icon={(
+                <Icon
+                  phosphorIcon={ArrowsClockwise}
+                />
+              )}
+              onClick={_onReset}
+            >
+              {t('Reset sorting')}
+            </Button>
+          )
         }
       </div>
     </SwModal>

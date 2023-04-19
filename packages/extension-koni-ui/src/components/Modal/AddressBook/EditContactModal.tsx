@@ -51,10 +51,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const modalProps: SwModalFuncProps = useMemo(() => {
     return {
       closable: true,
-      content: t('You will no longer be able to access this account via this extension'),
+      content: t('You would no longer see this address in your address book'),
       id: DELETE_ADDRESS_BOOK_MODAL,
       okText: t('Remove'),
-      subTitle: t('You are about to remove the account'),
+      subTitle: t('Delete this contact?'),
       title: t('Confirmation'),
       type: 'error',
       maskClosable: true

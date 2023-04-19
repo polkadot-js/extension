@@ -32,6 +32,15 @@ export function useFilterModal (modalId: string) {
 
   const onResetFilter = useCallback(() => {
     setSelectedFilters([]);
+    setFilterSelectionMap((prevState) => {
+      const result = { ...prevState };
+
+      for (const key of Object.keys(result)) {
+        result[key] = false;
+      }
+
+      return result;
+    });
   }, []);
 
   return {

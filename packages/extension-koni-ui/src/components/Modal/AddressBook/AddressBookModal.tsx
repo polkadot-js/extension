@@ -7,7 +7,7 @@ import { BackIcon } from '@subwallet/extension-koni-ui/components';
 import { useFilterModal, useFormatAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll, reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
-import { Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
+import { Badge, Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
@@ -64,13 +64,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
 
+  const isActive = checkActive(id);
+
   const { accounts, contacts, recent } = useSelector((state) => state.accountState);
 
   const formatAddress = useFormatAddress(addressPrefix);
 
   const filterModal = useMemo(() => `${id}-filter-modal`, [id]);
 
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(filterModal);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters, onResetFilter } = useFilterModal(filterModal);
 
   const sectionRef = useRef<SwListSectionRef>(null);
 
@@ -90,27 +92,27 @@ const Component: React.FC<Props> = (props: Props) => {
   ]), [t]);
 
   const items = useMemo((): AccountItem[] => {
-    const map: Record<string, AccountItem> = {};
+    const result: AccountItem[] = [];
 
     (!selectedFilters.length || selectedFilters.includes(AccountGroup.RECENT)) && recent.forEach((acc) => {
       const address = isAddress(acc.address) ? reformatAddress(acc.address) : acc.address;
 
-      map[address] = ({ ...acc, address: address, group: AccountGroup.RECENT });
+      result.push({ ...acc, address: address, group: AccountGroup.RECENT });
     });
 
     (!selectedFilters.length || selectedFilters.includes(AccountGroup.CONTACT)) && contacts.forEach((acc) => {
       const address = isAddress(acc.address) ? reformatAddress(acc.address) : acc.address;
 
-      map[address] = ({ ...acc, address: address, group: AccountGroup.CONTACT });
+      result.push({ ...acc, address: address, group: AccountGroup.CONTACT });
     });
 
     (!selectedFilters.length || selectedFilters.includes(AccountGroup.WALLET)) && accounts.filter((acc) => !isAccountAll(acc.address)).forEach((acc) => {
       const address = isAddress(acc.address) ? reformatAddress(acc.address) : acc.address;
 
-      map[address] = ({ ...acc, address: address, group: AccountGroup.WALLET });
+      result.push({ ...acc, address: address, group: AccountGroup.WALLET });
     });
 
-    return Object.values(map).sort((a, b) => getGroupPriority(b) - getGroupPriority(a));
+    return result.sort((a, b) => getGroupPriority(b) - getGroupPriority(a));
   }, [accounts, contacts, recent, selectedFilters]);
 
   const searchFunction = useCallback((item: AccountItem, searchText: string) => {
@@ -145,7 +147,7 @@ const Component: React.FC<Props> = (props: Props) => {
         address={address}
         avatarSize={24}
         isSelected={selected}
-        key={item.address}
+        key={`${item.address}_${item.group}`}
         onClick={onSelectItem(item)}
       />
     );
@@ -154,7 +156,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const groupSeparator = useCallback((group: AccountItem[], idx: number, groupKey: string) => {
     const _group = groupKey as AccountGroup;
 
-    let groupLabel = '';
+    let groupLabel = _group;
 
     switch (_group) {
       case AccountGroup.WALLET:
@@ -191,12 +193,18 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [activeModal, id, onCloseFilterModal]);
 
   useEffect(() => {
-    if (!checkActive(id)) {
+    if (!isActive) {
       setTimeout(() => {
         sectionRef.current?.setSearchValue('');
       }, 100);
     }
-  }, [checkActive, sectionRef, id]);
+  }, [isActive, sectionRef]);
+
+  useEffect(() => {
+    if (!isActive) {
+      onResetFilter();
+    }
+  }, [isActive, onResetFilter]);
 
   return (
     <>
@@ -208,12 +216,14 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <SwList.Section
           actionBtnIcon={(
-            <Icon
-              phosphorIcon={FadersHorizontal}
-              size='sm'
-              type='phosphor'
-              weight='fill'
-            />
+            <Badge dot={!!selectedFilters.length}>
+              <Icon
+                phosphorIcon={FadersHorizontal}
+                size='sm'
+                type='phosphor'
+                weight='fill'
+              />
+            </Badge>
           )}
           displayRow={true}
           enableSearchInput={true}

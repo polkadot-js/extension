@@ -117,8 +117,8 @@ export default class AuthRequestHandler {
       chainInfo = (defaultChain ? chainInfoMaps[defaultChain] : evmChains.find((chain) => chainStateMap[chain.slug]?.active)) || evmChains[0];
 
       if (options.autoActive) {
-        if (!needEnableChains.includes(chainInfo.slug)) {
-          needEnableChains.push(chainInfo.slug);
+        if (!needEnableChains.includes(chainInfo?.slug)) {
+          needEnableChains.push(chainInfo?.slug);
         }
       }
     }

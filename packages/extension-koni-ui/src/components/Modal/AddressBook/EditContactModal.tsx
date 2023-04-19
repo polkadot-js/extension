@@ -3,17 +3,19 @@
 
 import { AddressJson } from '@subwallet/extension-base/background/types';
 import { Avatar } from '@subwallet/extension-koni-ui/components';
-import { EDIT_ADDRESS_BOOK_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DELETE_ADDRESS_BOOK_MODAL, EDIT_ADDRESS_BOOK_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useCopy, useNotification } from '@subwallet/extension-koni-ui/hooks';
-import { editContactAddress } from '@subwallet/extension-koni-ui/messaging';
+import { editContactAddress, removeContactAddress } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { simpleCheckForm, toShort } from '@subwallet/extension-koni-ui/utils';
-import { Button, Field, Form, Icon, Input, ModalContext, SwModal } from '@subwallet/react-ui';
+import { noop, simpleCheckForm, toShort } from '@subwallet/extension-koni-ui/utils';
+import { Button, Field, Form, Icon, Input, ModalContext, SwModal, SwModalFuncProps, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, CopySimple, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { CopySimple, Trash } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+
+import useConfirmModal from '../../../hooks/modal/useConfirmModal';
 
 interface Props extends ThemeProps {
   addressJson: AddressJson
@@ -42,11 +44,29 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { checkActive, inactiveModal } = useContext(ModalContext);
 
+  useExcludeModal(modalId);
+
   const isActive = checkActive(modalId);
+
+  const modalProps: SwModalFuncProps = useMemo(() => {
+    return {
+      closable: true,
+      content: t('You will no longer be able to access this account via this extension'),
+      id: DELETE_ADDRESS_BOOK_MODAL,
+      okText: t('Remove'),
+      subTitle: t('You are about to remove the account'),
+      title: t('Confirmation'),
+      type: 'error',
+      maskClosable: true
+    };
+  }, [t]);
+
+  const { handleSimpleConfirmModal: onClickDelete } = useConfirmModal(modalProps);
 
   const [form] = Form.useForm<AddContactFormProps>();
 
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [isDisabled, setIsDisabled] = useState(!defaultName?.trim());
 
   const onCopyAddress = useCopy(address);
@@ -83,6 +103,22 @@ const Component: React.FC<Props> = (props: Props) => {
     }, 300);
   }, [address, inactiveModal, notification]);
 
+  const onDelete = useCallback(() => {
+    if (!address) {
+      return;
+    }
+
+    onClickDelete()
+      .then(() => {
+        setDeleting(true);
+        removeContactAddress(address).finally(() => {
+          setDeleting(false);
+          inactiveModal(modalId);
+        });
+      })
+      .finally(noop);
+  }, [address, onClickDelete, inactiveModal]);
+
   useEffect(() => {
     form.setFieldValue(FormFieldName.NAME, defaultName || '');
   }, [defaultName, form, isActive]);
@@ -91,8 +127,7 @@ const Component: React.FC<Props> = (props: Props) => {
     <SwModal
       className={CN(className)}
       id={modalId}
-      maskClosable={!loading}
-      onCancel={onCancel}
+      onCancel={(!loading && !deleting) ? onCancel : undefined}
       title={t('Edit contact')}
     >
       <Form
@@ -149,14 +184,20 @@ const Component: React.FC<Props> = (props: Props) => {
           className='button-container'
         >
           <Button
-            block={true}
             disabled={loading}
             icon={(
               <Icon
-                phosphorIcon={XCircle}
+                phosphorIcon={Trash}
                 weight='fill'
               />
             )}
+            loading={deleting}
+            onClick={onDelete}
+            schema='danger'
+          />
+          <Button
+            block={true}
+            disabled={loading || deleting}
             onClick={onCancel}
             schema='secondary'
           >
@@ -164,14 +205,8 @@ const Component: React.FC<Props> = (props: Props) => {
           </Button>
           <Button
             block={true}
-            disabled={isDisabled}
+            disabled={isDisabled || deleting}
             htmlType='submit'
-            icon={(
-              <Icon
-                phosphorIcon={CheckCircle}
-                weight='fill'
-              />
-            )}
             loading={loading}
           >
             {t('Save')}

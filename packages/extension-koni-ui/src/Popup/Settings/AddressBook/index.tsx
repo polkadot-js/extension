@@ -7,7 +7,7 @@ import { ADD_ADDRESS_BOOK_MODAL, EDIT_ADDRESS_BOOK_MODAL } from '@subwallet/exte
 import { useFilterModal, useFormatAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { reformatAddress } from '@subwallet/extension-koni-ui/utils';
-import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Badge, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
 import { FadersHorizontal, Plus } from 'phosphor-react';
@@ -79,21 +79,21 @@ const Component: React.FC<Props> = (props: Props) => {
   const formatAddress = useFormatAddress();
 
   const items = useMemo((): AccountItem[] => {
-    const map: Record<string, AccountItem> = {};
+    const result: AccountItem[] = [];
 
     (!selectedFilters.length || selectedFilters.includes(AccountGroup.CONTACT)) && contacts.forEach((acc) => {
       const address = isAddress(acc.address) ? reformatAddress(acc.address) : acc.address;
 
-      map[address] = ({ ...acc, address: address, group: AccountGroup.CONTACT });
+      result.push({ ...acc, address: address, group: AccountGroup.CONTACT });
     });
 
     (!selectedFilters.length || selectedFilters.includes(AccountGroup.RECENT)) && recent.forEach((acc) => {
       const address = isAddress(acc.address) ? reformatAddress(acc.address) : acc.address;
 
-      map[address] = ({ ...acc, address: address, group: AccountGroup.RECENT });
+      result.push({ ...acc, address: address, group: AccountGroup.RECENT });
     });
 
-    return Object.values(map).sort((a, b) => getGroupPriority(b) - getGroupPriority(a));
+    return result.sort((a, b) => getGroupPriority(b) - getGroupPriority(a));
   }, [contacts, recent, selectedFilters]);
 
   const filterOptions: FilterOption[] = useMemo(() => ([
@@ -187,12 +187,14 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <SwList.Section
           actionBtnIcon={(
-            <Icon
-              phosphorIcon={FadersHorizontal}
-              size='sm'
-              type='phosphor'
-              weight='fill'
-            />
+            <Badge dot={!!selectedFilters.length}>
+              <Icon
+                phosphorIcon={FadersHorizontal}
+                size='sm'
+                type='phosphor'
+                weight='fill'
+              />
+            </Badge>
           )}
           displayRow={true}
           enableSearchInput={true}

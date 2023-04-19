@@ -840,6 +840,10 @@ export interface RequestEditContactAccount {
   meta: KeyringPair$Meta;
 }
 
+export interface RequestDeleteContactAccount {
+  address: string;
+}
+
 /// Sign Transaction
 
 /// Sign External Request
@@ -1889,6 +1893,7 @@ export interface KoniRequestSignatures {
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, CurrentAccountInfo];
   'pri(accounts.subscribeAddresses)': [null, AddressBookInfo, AddressBookInfo];
   'pri(accounts.editContact)': [RequestEditContactAccount, boolean];
+  'pri(accounts.deleteContact)': [RequestDeleteContactAccount, boolean];
 
   // Settings
   'pri(settings.changeBalancesVisibility)': [null, boolean, UiSettings];

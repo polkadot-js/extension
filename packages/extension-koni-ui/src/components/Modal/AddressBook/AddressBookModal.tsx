@@ -72,13 +72,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const filterModal = useMemo(() => `${id}-filter-modal`, [id]);
 
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters, onResetFilter } = useFilterModal(filterModal);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(filterModal);
 
   const sectionRef = useRef<SwListSectionRef>(null);
 
   const filterOptions: FilterOption[] = useMemo(() => ([
     {
-      label: t('My wallets'),
+      label: t('My wallÒets'),
       value: AccountGroup.WALLET
     },
     {

@@ -25,15 +25,11 @@ enum FormFieldName {
   NAME = 'name'
 }
 
-interface AddContactFormProps {
+interface EditContactFormProps {
   [FormFieldName.NAME]: string;
 }
 
 const modalId = EDIT_ADDRESS_BOOK_MODAL;
-
-const defaultFormValues: AddContactFormProps = {
-  [FormFieldName.NAME]: ''
-};
 
 const Component: React.FC<Props> = (props: Props) => {
   const { addressJson, className } = props;
@@ -47,6 +43,10 @@ const Component: React.FC<Props> = (props: Props) => {
   useExcludeModal(modalId);
 
   const isActive = checkActive(modalId);
+
+  const defaultValues = useMemo((): EditContactFormProps => ({
+    [FormFieldName.NAME]: defaultName || ''
+  }), [defaultName]);
 
   const modalProps: SwModalFuncProps = useMemo(() => {
     return {
@@ -63,7 +63,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { handleSimpleConfirmModal: onClickDelete } = useConfirmModal(modalProps);
 
-  const [form] = Form.useForm<AddContactFormProps>();
+  const [form] = Form.useForm<EditContactFormProps>();
 
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -75,13 +75,13 @@ const Component: React.FC<Props> = (props: Props) => {
     inactiveModal(modalId);
   }, [inactiveModal]);
 
-  const onFieldsChange: FormCallbacks<AddContactFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<EditContactFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { empty, error } = simpleCheckForm(allFields);
 
     setIsDisabled(empty || error);
   }, []);
 
-  const onSubmit: FormCallbacks<AddContactFormProps>['onFinish'] = useCallback((values: AddContactFormProps) => {
+  const onSubmit: FormCallbacks<EditContactFormProps>['onFinish'] = useCallback((values: EditContactFormProps) => {
     const { [FormFieldName.NAME]: name } = values;
 
     setLoading(true);
@@ -120,8 +120,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [address, onClickDelete, inactiveModal]);
 
   useEffect(() => {
-    form.setFieldValue(FormFieldName.NAME, defaultName || '');
-  }, [defaultName, form, isActive]);
+    form.resetFields([FormFieldName.NAME]);
+  }, [form, isActive]);
 
   return (
     <SwModal
@@ -133,7 +133,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <Form
         className='form-space-sm'
         form={form}
-        initialValues={defaultFormValues}
+        initialValues={defaultValues}
         name='edit-contact-form'
         onFieldsChange={onFieldsChange}
         onFinish={onSubmit}

@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AddressJson } from '@subwallet/extension-base/background/types';
-import { AccountItemWithName, AddContactModal, BackIcon, EditContactModal, FilterModal, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountItemBase, AccountItemWithName, AddContactModal, BackIcon, EditContactModal, FilterModal, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ADD_ADDRESS_BOOK_MODAL, EDIT_ADDRESS_BOOK_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal, useFormatAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { reformatAddress } from '@subwallet/extension-koni-ui/utils';
+import { funcSortByName, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { Badge, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
@@ -93,7 +93,7 @@ const Component: React.FC<Props> = (props: Props) => {
       result.push({ ...acc, address: address, group: AccountGroup.RECENT });
     });
 
-    return result.sort((a, b) => getGroupPriority(b) - getGroupPriority(a));
+    return result.sort(funcSortByName).sort((a, b) => getGroupPriority(b) - getGroupPriority(a));
   }, [contacts, recent, selectedFilters]);
 
   const filterOptions: FilterOption[] = useMemo(() => ([
@@ -162,6 +162,17 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const renderItem = useCallback((item: AccountItem) => {
     const address = formatAddress(item);
+
+    if (item.group === AccountGroup.RECENT) {
+      return (
+        <AccountItemBase
+          address={address}
+          avatarSize={24}
+          key={item.address}
+          onClick={onSelectItem(item)}
+        />
+      );
+    }
 
     return (
       <AccountItemWithName
@@ -242,6 +253,13 @@ const ManageAddressBook = styled(Component)<Props>(({ theme: { token } }: Props)
     '.ant-sw-list-section': {
       flex: 1,
       marginBottom: token.margin
+    },
+
+    '.ant-account-item-address': {
+      fontWeight: token.fontWeightStrong,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      color: token.colorTextBase
     }
   };
 });

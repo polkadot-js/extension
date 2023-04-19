@@ -6,7 +6,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { BackIcon } from '@subwallet/extension-koni-ui/components';
 import { useFilterModal, useFormatAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll, reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
+import { funcSortByName, isAccountAll, reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Badge, Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
@@ -112,7 +112,7 @@ const Component: React.FC<Props> = (props: Props) => {
       result.push({ ...acc, address: address, group: AccountGroup.WALLET });
     });
 
-    return result.sort((a, b) => getGroupPriority(b) - getGroupPriority(a));
+    return result.sort(funcSortByName).sort((a, b) => getGroupPriority(b) - getGroupPriority(a));
   }, [accounts, contacts, recent, selectedFilters]);
 
   const searchFunction = useCallback((item: AccountItem, searchText: string) => {

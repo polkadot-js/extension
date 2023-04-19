@@ -121,7 +121,7 @@ export const getAccountAddressType = (address?: string): AccountAddressType => {
   }
 };
 
-export const funcSortByName = (a: AccountJson, b: AccountJson) => {
+export const funcSortByName = (a: AbstractAddressJson, b: AbstractAddressJson) => {
   if (isAccountAll(b.address)) {
     return 3;
   }

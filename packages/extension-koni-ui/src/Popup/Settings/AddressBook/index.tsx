@@ -167,6 +167,8 @@ const Component: React.FC<Props> = (props: Props) => {
       return (
         <AccountItemBase
           address={address}
+          addressPreLength={8}
+          addressSufLength={8}
           avatarSize={24}
           key={item.address}
           onClick={onSelectItem(item)}

@@ -65,7 +65,14 @@ export default class RequestService {
   }
 
   public popupOpen (): void {
-    this.#popupHandler.popupOpen();
+    // Not open new popup and use existed
+    const popupList = this.#popupHandler.popup;
+
+    if (popupList && popupList.length > 0) {
+      chrome.windows.update(popupList[0], { focused: true })?.catch(console.error);
+    } else {
+      this.#popupHandler.popupOpen();
+    }
   }
 
   // Metadata

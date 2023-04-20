@@ -749,9 +749,8 @@ export default class KoniTabs {
       if (e.code) {
         throw e;
       } else {
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, e.message);
+        console.error(e);
+        throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, e?.toString());
       }
     }
   }

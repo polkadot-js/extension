@@ -92,15 +92,7 @@ export default class EvmRequestHandler {
     this.confirmationsQueueSubject.next(confirmations);
 
     if (!isInternal) {
-      // Not open new popup and use existed
-      const popupList = this.#requestService.popup;
-
-      if (this.#requestService.popup.length > 0) {
-      // eslint-disable-next-line no-void
-        void chrome.windows.update(popupList[0], { focused: true });
-      } else {
-        this.#requestService.popupOpen();
-      }
+      this.#requestService.popupOpen();
     }
 
     this.#requestService.updateIconV2();

@@ -139,7 +139,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: ShareNetwork,
           leftIconBgColor: token['purple-7'],
           rightIcon: CaretRight,
-          title: 'Manage Chains',
+          title: 'Manage chains',
           onClick: () => {
             navigate('/settings/chains/manage');
           }

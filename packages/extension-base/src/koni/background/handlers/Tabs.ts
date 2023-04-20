@@ -284,9 +284,9 @@ export default class KoniTabs {
     if (currentEvmNetwork) {
       const { evmInfo, slug } = currentEvmNetwork;
       const evmApi = this.#koniState.getEvmApi(slug);
-      const web3 = evmApi.api;
+      const web3 = evmApi?.api;
 
-      if (web3.currentProvider instanceof Web3.providers.WebsocketProvider) {
+      if (web3?.currentProvider instanceof Web3.providers.WebsocketProvider) {
         if (!web3.currentProvider.connected) {
           console.log(`[Web3] ${slug} is disconnected, trying to connect...`);
           this.#koniState.refreshWeb3Api(slug);

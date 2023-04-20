@@ -1642,7 +1642,7 @@ export default class KoniState {
       balanceData && balanceData.forEach(({ balance, bonded, category, locked, network, symbol }) => {
         const chain = SUBSCAN_CHAIN_MAP_REVERSE[network];
         const chainInfo = chain ? chainMap[chain] : null;
-        const balanceIsEmpty = (!balance || balance === '0') && (!locked && locked === '0') && (!bonded || bonded === '0');
+        const balanceIsEmpty = (!balance || balance === '0') && (!locked || locked === '0') && (!bonded || bonded === '0');
 
         // Cancel if chain is not supported or is testnet or balance is 0
         if (!chainInfo || chainInfo.isTestnet || balanceIsEmpty) {

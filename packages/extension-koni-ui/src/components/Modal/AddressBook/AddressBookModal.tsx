@@ -78,7 +78,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const filterOptions: FilterOption[] = useMemo(() => ([
     {
-      label: t('My wallÒets'),
+      label: t('My wallet'),
       value: AccountGroup.WALLET
     },
     {

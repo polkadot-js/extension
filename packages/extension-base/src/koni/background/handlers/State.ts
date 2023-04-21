@@ -676,7 +676,11 @@ export default class KoniState {
     return this.requestService.addConfirmation(id, url, 'addNetworkRequest', networkData)
       .then(async ({ isApproved }) => {
         if (isApproved) {
-          await this.upsertChainInfo(networkData);
+          if (networkData.mode === 'insert') {
+            await this.upsertChainInfo(networkData);
+          } else {
+            // TODO: update existed network (need more discussion)
+          }
 
           return null;
         } else {
@@ -1238,7 +1242,7 @@ export default class KoniState {
       return [undefined, undefined];
     }
 
-    const rs = Object.entries(this.chainService.getChainInfoMap()).find(([networkKey, chainInfo]) => (_getEvmChainId(chainInfo) === chainId));
+    const rs = Object.entries(this.chainService.getChainInfoMap()).find(([networkKey, chainInfo]) => (chainInfo?.evmInfo?.evmChainId === chainId));
 
     if (rs) {
       return rs;
@@ -1642,7 +1646,7 @@ export default class KoniState {
       balanceData && balanceData.forEach(({ balance, bonded, category, locked, network, symbol }) => {
         const chain = SUBSCAN_CHAIN_MAP_REVERSE[network];
         const chainInfo = chain ? chainMap[chain] : null;
-        const balanceIsEmpty = (!balance || balance === '0') && (!locked && locked === '0') && (!bonded || bonded === '0');
+        const balanceIsEmpty = (!balance || balance === '0') && (!locked || locked === '0') && (!bonded || bonded === '0');
 
         // Cancel if chain is not supported or is testnet or balance is 0
         if (!chainInfo || chainInfo.isTestnet || balanceIsEmpty) {

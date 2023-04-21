@@ -8,9 +8,9 @@ export enum Screens {
 }
 
 const ScreenBreakpoint: Record<Screens, [number, number?]> = {
-  [Screens.DESKTOP]: [1024],
+  [Screens.DESKTOP]: [1025],
   [Screens.TABLET_HORIZONTAL]: [992, 1024],
-  [Screens.TABLET_VERTICAL]: [768, 992],
+  [Screens.TABLET_VERTICAL]: [768, 991],
   [Screens.MOBILE]: [0, 768],
 }
 

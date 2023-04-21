@@ -112,8 +112,7 @@ export const router = createBrowserRouter([
       CreateDone.generateRouterObject('/create-done'),
       Crowdloans.generateRouterObject('/crowdloans'),
       {
-        // ...Home.generateRouterObject('/home'),
-        ...Porfolio.generateRouterObject('/home'),
+        ...Home.generateRouterObject('/home'),
         children: [
           Tokens.generateRouterObject('tokens'),
           TokenDetailList.generateRouterObject('tokens/detail/:slug'),

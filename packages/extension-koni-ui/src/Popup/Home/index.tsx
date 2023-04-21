@@ -3,15 +3,17 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { useGetChainSlugsByAccountType } from '@subwallet/extension-koni-ui/hooks/screen/home/useGetChainSlugsByAccountType';
 import useTokenGroup from '@subwallet/extension-koni-ui/hooks/screen/home/useTokenGroup';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { Outlet } from 'react-router';
 import styled from 'styled-components';
+import Porfolio from '../Porfolio';
 
 type Props = ThemeProps;
 
@@ -19,6 +21,7 @@ export const GlobalSearchTokenModalId = 'globalSearchToken';
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
   const chainsByAccountType = useGetChainSlugsByAccountType();
   const tokenGroupStructure = useTokenGroup(chainsByAccountType);
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
@@ -31,13 +34,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     inactiveModal(GlobalSearchTokenModalId);
   }, [inactiveModal]);
 
-  return (
-    <>
-      <HomeContext.Provider value={{
-        tokenGroupStructure,
-        accountBalance
-      }}
-      >
+  const HomeContent = useMemo(() => {
+    if (!isWebUI) {
+      return (
         <div className={`home home-container ${className}`}>
           <Layout.Home
             onClickSearchIcon={onOpenGlobalSearchToken}
@@ -47,6 +46,27 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Outlet />
           </Layout.Home>
         </div>
+      )
+    }
+
+    return (
+      <Layout.WithSideMenu
+        withBalanceHeader
+        withWebHeader
+      >
+        <Porfolio />
+      </Layout.WithSideMenu>
+    )
+  }, [isWebUI])
+
+  return (
+    <>
+      <HomeContext.Provider value={{
+        tokenGroupStructure,
+        accountBalance
+      }}
+      >
+        {HomeContent}
       </HomeContext.Provider>
 
       <GlobalSearchTokenModal

@@ -1,12 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionDirection } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicStatus, TransactionDirection } from '@subwallet/extension-base/background/KoniTypes';
+import { getTransactionLink } from '@subwallet/extension-base/services/transaction-service/utils';
+import { StatusType } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { Icon, Logo, Number, Web3Block } from '@subwallet/react-ui';
+import { openInNewTab, toShort } from '@subwallet/extension-koni-ui/utils';
+import { Icon, Logo, Number, Typography, Web3Block, Tag, Button } from '@subwallet/react-ui';
+import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
-import { CaretRight } from 'phosphor-react';
-import React from 'react';
+import { t } from 'i18next';
+import moment from 'moment';
+import { ArrowSquareOut, CaretRight, CheckCircle, ProhibitInset, Spinner, StopCircle } from 'phosphor-react';
+import React, { useContext, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -17,8 +26,9 @@ type Props = ThemeProps & {
 function Component (
   { className = '', item, onClick }: Props) {
   const displayData = item.displayData;
+  const { isWebUI } = useContext(ScreenContext)
 
-  return (
+  if (!isWebUI) return (
     <Web3Block
       className={CN('history-item', className, displayData.className)}
       leftItem={(
@@ -74,6 +84,116 @@ function Component (
       )}
     />
   );
+
+  const statusMap = useMemo<Record<string, StatusType>>(
+    () => ({
+      [ExtrinsicStatus.SUCCESS]: {
+        schema: "success",
+        icon: CheckCircle,
+        name: t("Completed"),
+      },
+      [ExtrinsicStatus.FAIL]: {
+        schema: "danger",
+        icon: ProhibitInset,
+        name: t("Failed"),
+      },
+      [ExtrinsicStatus.PROCESSING]: {
+        schema: "gold",
+        icon: Spinner,
+        name: t("Processing"),
+      },
+      [ExtrinsicStatus.PENDING]: {
+        schema: "gold",
+        icon: Spinner,
+        name: t("Pending"),
+      },
+      [ExtrinsicStatus.UNKNOWN]: {
+        schema: "danger",
+        icon: StopCircle,
+        name: t("Unknown"),
+      },
+    }),
+    [t]
+  );
+
+  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
+
+  const chainInfo = chainInfoMap[item.chain];
+  const time = moment(item.time).format('hh:mm A')
+  const link = !!item.extrinsicHash && getTransactionLink(chainInfo, item.extrinsicHash);
+
+  return (
+    <div className={CN(className, displayData.className, '__web-ui')} onClick={onClick}>
+      <div className='account-wrapper'>
+        <SwAvatar
+          size={30}
+          value={item.address}
+        />
+        <div className='account-info'>
+          <Typography.Text>{item.direction === TransactionDirection.SEND ? (item.fromName || item.from || '') : (item.toName || item.to || '')}</Typography.Text>
+          <Typography.Text className='account-address'>{toShort(item.address)}</Typography.Text>
+        </div>
+      </div>
+
+      <div className="status-wrapper">
+        <div className={'__main-icon-wrapper'}>
+          <Icon
+            className={'__main-icon'}
+            phosphorIcon={displayData.icon}
+            size={'md'}
+            iconColor='success'
+          />
+          <Logo
+            className={'__chain-logo'}
+            network={item.chain}
+            size={16}
+          />
+        </div>
+        <div>
+          <div className={'__account-name'}>{item.displayData.name}</div>
+          <div className={'__meta'}>{time}</div>
+        </div>
+      </div>
+
+      <div className='value-wrapper'>
+        <Number
+          className={'__value'}
+          decimal={0}
+          decimalOpacity={0.45}
+          value={11}
+          suffix={item.amount?.symbol}
+        />
+        <Number
+          className={'__converted-value'}
+          decimal={0}
+          decimalOpacity={0.45}
+          intOpacity={0.45}
+          prefix='$'
+          size={12}
+          unitOpacity={0.45}
+          value={11122}
+        />
+      </div>
+
+      <div className="status-tag">
+        <Tag
+          className='tag'
+          color={statusMap[item.status].schema}
+        >
+          {statusMap[item.status].name}
+        </Tag>
+
+        <Button
+          type='ghost'
+          onClick={(e) => {
+            e.stopPropagation()
+            link && openInNewTab(link)()
+          }}
+          icon={<Icon phosphorIcon={ArrowSquareOut} size="sm" />}
+        />
+      </div>
+    </div>
+  )
 }
 
 export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
@@ -84,7 +204,7 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
     paddingBottom: 0,
     minHeight: 68,
 
-    '.ant-number .ant-typography': {
+    '&:not(.__web-ui) .ant-number .ant-typography': {
       fontSize: 'inherit !important',
       fontWeight: 'inherit !important',
       lineHeight: 'inherit'
@@ -192,6 +312,60 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
       '.__main-icon': {
         color: token.colorSuccess
       }
-    }
+    },
+
+    '&.__web-ui': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingLeft: 12,
+      marginBottom: 8,
+      cursor: 'pointer',
+
+      '.__account-name': {
+        fontWeight: 500
+      },
+
+      "&:hover": {
+
+      },
+
+      ".status-wrapper": {
+        display: 'flex',
+        justifyContent: 'center',
+        '.__main-icon-wrapper': {
+          marginRight: 8
+        }
+      },
+
+      ".account-wrapper": {
+        display: 'inline-flex',
+        alignItems: 'center',
+
+        ".account-info": {
+          display: "flex",
+          flexDirection: 'column',
+          marginLeft: 8,
+
+          '.account-address': {
+            color: 'rgba(255, 255, 255, 0.45)',
+            fontSize: '12px',
+            lineHeight: '20px',
+            fontWeight: 500,
+          },
+        },
+      },
+
+      ".status-tag": {
+        display:'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end'
+      },
+
+      ".value-wrapper": {
+        textAlign: 'right',
+      },
+    },
+
   });
 });

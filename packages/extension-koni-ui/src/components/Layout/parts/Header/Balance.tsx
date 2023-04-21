@@ -1,6 +1,5 @@
-import { NumberItem } from "@subwallet/extension-koni-ui/components/MetaInfo/parts"
 import { PhosphorIcon, ThemeProps } from "@subwallet/extension-koni-ui/types"
-import { Button, Icon, Typography, Number, SwNumberProps, Tag, Divider } from "@subwallet/react-ui"
+import { Button, Icon, Typography, Number, Tag, Divider } from "@subwallet/react-ui"
 import CN from "classnames"
 import {
   EyeClosed,
@@ -53,13 +52,15 @@ function Component({ className }: Props): React.ReactElement<Props> {
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
 
-  const { accountSelectorItems,
+  const {
     onOpenReceive,
-    openSelectAccount,
-    openSelectToken,
-    selectedAccount,
-    selectedNetwork,
-    tokenSelectorItems } = useReceiveQR();
+    // accountSelectorItems,
+    // openSelectAccount,
+    // openSelectToken,
+    // selectedAccount,
+    // selectedNetwork,
+    // tokenSelectorItems
+  } = useReceiveQR();
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const notify = useNotification();
 
@@ -67,7 +68,6 @@ function Component({ className }: Props): React.ReactElement<Props> {
   const totalChangePercent = totalBalanceInfo.change.percent;
   const totalChangeValue = totalBalanceInfo.change.value;
   const totalValue = totalBalanceInfo.convertedValue;
-  console.log('totalValue', totalValue);
 
   const onOpenBuyTokens = useCallback(() => {
     navigate('/buy-tokens');

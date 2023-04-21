@@ -29,10 +29,7 @@ function Component (
 
   const marginColor = priceChangeStatus === 'increase' ? token.colorSuccess : token.colorError
   const margin = !price24hValue || !priceValue ? 0 : Math.abs(price24hValue - priceValue) / price24hValue * 100;
-  if (symbol === 'HKO') console.log('====>', {
-    price24hValue,
-    priceValue
-  })
+
   return (
     <div className={classNames('token-price', className, {
       '-price-decrease': priceChangeStatus === 'decrease'

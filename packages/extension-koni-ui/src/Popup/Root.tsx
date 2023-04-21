@@ -143,36 +143,10 @@ const Main = styled.main`
   flex-direction: column;
 `;
 
-const SCREENS_SIDE_BAR = [
-  'home',
-  'crowdloans',
-  'staking',
-  'dapps',
-  'history',
-  'settings',
-  'faqs',
-  'contact',
-  'tos',
-]
-
-const SCREENS_HEADER = [
-  'home',
-  'crowdloans',
-  'staking',
-  'dapps',
-  'history',
-]
-
 function _Root ({ className }: ThemeProps): React.ReactElement {
   const dataContext = useContext(DataContext);
-  const { isWebUI } = useContext(ScreenContext);
-
-  const { pathname } = useLocation();
-  const currentPage = pathname.split('/')[1];
-
-  const MainLayout = isWebUI && SCREENS_SIDE_BAR.includes(currentPage) ? Layout.WithSideMenu : React.Fragment
-  // const
   // Implement WalletModalContext in Root component to make it available for all children and can use react-router-dom and ModalContextProvider
+
   return (
     <WalletModalContext>
       <PageWrapper
@@ -182,12 +156,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
       >
         <DefaultRoute>
           <Main className={className}>
-            <MainLayout
-              withBalanceHeader={currentPage === 'home'}
-              withWebHeader={SCREENS_HEADER.includes(currentPage)}
-            >
-              <Outlet />
-            </MainLayout>
+            <Outlet />
           </Main>
         </DefaultRoute>
       </PageWrapper>

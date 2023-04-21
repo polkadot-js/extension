@@ -4,6 +4,7 @@
 import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
+import SocialGroup from '@subwallet/extension-koni-ui/components/SocialGroup';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
@@ -75,54 +76,60 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <Layout.Base>
         <div className='bg-gradient' />
         {!isWebUI && <div className='bg-image' />}
-        <div className='body-container'>
-          <div className='logo-container'>
-            <Logo3D />
-          </div>
-          <div className='title'>
-            {t('Welcome back!')}
-          </div>
-          <div className='sub-title'>
-            {t('Enter your password to unlock account')}
-          </div>
-          <Form
-            form={form}
-            initialValues={{ [FormFieldName.PASSWORD]: '' }}
-            onFieldsChange={onUpdate}
-            onFinish={onSubmit}
-          >
-            <Form.Item
-              name={FormFieldName.PASSWORD}
-              rules={[
-                {
-                  message: 'Password is required',
-                  required: true
-                }
-              ]}
-              statusHelpAsTooltip={true}
+        <div className={CN('body-container', {
+          '__web-ui': isWebUI
+        })}>
+          <div className='main-wrapper'>
+            <div className='logo-container'>
+              <Logo3D />
+            </div>
+            <div className='title'>
+              {t('Welcome back!')}
+            </div>
+            <div className='sub-title'>
+              {t('Enter your password to unlock account')}
+            </div>
+            <Form
+              form={form}
+              initialValues={{ [FormFieldName.PASSWORD]: '' }}
+              onFieldsChange={onUpdate}
+              onFinish={onSubmit}
             >
-              <Input.Password
-                containerClassName='password-input'
-                id={passwordInputId}
-                placeholder={t('Password')}
-              />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                block={true}
-                disabled={isDisable}
-                htmlType='submit'
-                loading={loading}
+              <Form.Item
+                name={FormFieldName.PASSWORD}
+                rules={[
+                  {
+                    message: 'Password is required',
+                    required: true
+                  }
+                ]}
+                statusHelpAsTooltip={true}
               >
-                {t('Unlock')}
-              </Button>
-            </Form.Item>
-            <Form.Item>
-              <div className='forgot-password'>
-                {t('Forgot password')}
-              </div>
-            </Form.Item>
-          </Form>
+                <Input.Password
+                  containerClassName='password-input'
+                  id={passwordInputId}
+                  placeholder={t('Password')}
+                />
+              </Form.Item>
+              <Form.Item>
+                <Button
+                  block={true}
+                  disabled={isDisable}
+                  htmlType='submit'
+                  loading={loading}
+                >
+                  {t('Unlock')}
+                </Button>
+              </Form.Item>
+              <Form.Item>
+                <div className='forgot-password'>
+                  {t('Forgot password')}
+                </div>
+              </Form.Item>
+            </Form>
+
+          </div>
+          <SocialGroup />
         </div>
       </Layout.Base>
     </PageWrapper>
@@ -134,6 +141,25 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
 
   return {
     position: 'relative',
+
+    '.__web-ui': {
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+
+      '.main-wrapper': {
+
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: 'center',
+        padding: '0 20%',
+
+        '.logo-container': {
+          margin: 0,
+        }
+      }
+    },
 
     '.bg-gradient': {
       backgroundImage: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',

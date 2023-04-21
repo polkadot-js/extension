@@ -10,19 +10,19 @@ export type Props = ThemeProps & {
 
 const mock = [
   {
-    address: "string",
+    address: "1",
     name: "string",
   },
   {
-    address: "string",
+    address: "2",
     name: "string",
   },
   {
-    address: "string",
+    address: "3",
     name: "string",
   },
   {
-    address: "string",
+    address: "4",
     name: "string",
   },
 ]
@@ -42,13 +42,11 @@ function Component({ title = 'Porfolio', className, withController = true }: Pro
             className="ava-group"
             accounts={mock}
             content={`${mock.length} networks`}
-            // label={t(data.type === StakingType.POOLED ? "Pool" : "Validators")}
           />
           <MetaInfo.AccountGroup
             className="ava-group"
             accounts={mock}
             content={`${mock.length} networks`}
-            // label={t(data.type === StakingType.POOLED ? "Pool" : "Validators")}
           />
         </div>}
       </div>

@@ -2,14 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
-import { Icon, StakingItem, Tag } from '@subwallet/react-ui';
+import { Button, Icon, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
-import { User, Users } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import { DotsThree, User, Users } from 'phosphor-react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
+import styled, { ThemeContext } from 'styled-components';
+import CN from 'classnames';
+import { TokenItem } from '../TokenItem';
+import {Number as NumberItem} from '@subwallet/react-ui';
 
 interface Props extends ThemeProps {
   stakingData: StakingDataType,
@@ -36,6 +40,7 @@ const getStakingTypeTag = (stakingType: StakingType) => {
 
 const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickRightIcon, priceMap, stakingData }: Props) => {
   const { staking } = stakingData;
+  const { isWebUI } = useContext(ScreenContext);
 
   const balanceValue = getBalanceValue(staking.balance || '0', decimals);
 
@@ -50,19 +55,99 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
 
   const _onPressItem = useCallback(() => onClickItem(stakingData), [onClickItem, stakingData]);
 
+  if (!isWebUI)
+    return (
+      <StakingItem
+        className={className}
+        convertedStakingValue={convertedBalanceValue}
+        decimal={0}
+        networkKey={staking.chain}
+        onClickRightIcon={_onClickRightIcon}
+        onPressItem={_onPressItem}
+        stakingNetwork={staking.nativeToken}
+        stakingType={getStakingTypeTag(staking.type)}
+        stakingValue={balanceValue}
+      />
+    );
+
+  const {
+    staking: {
+      chain,
+      nativeToken
+    }
+  } = stakingData;
+
+  const { token } = useContext(ThemeContext)
+
+  // TODO: update priceChangeStatus
+  let priceChangeStatus = 'increase'
+  const marginColor = priceChangeStatus === 'increase' ? token.colorSuccess : token.colorError
+
   return (
-    <StakingItem
-      className={className}
-      convertedStakingValue={convertedBalanceValue}
-      decimal={0}
-      networkKey={staking.chain}
-      onClickRightIcon={_onClickRightIcon}
-      onPressItem={_onPressItem}
-      stakingNetwork={staking.nativeToken}
-      stakingType={getStakingTypeTag(staking.type)}
-      stakingValue={balanceValue}
-    />
-  );
+    <div className={CN(className, '__web-ui')} onClick={_onPressItem}>
+      <TokenItem
+        logoKey={chain}
+        symbol={nativeToken}
+      />
+
+      <div className='type-wrapper'>
+        {getStakingTypeTag(staking.type)}
+      </div>
+
+      <div className={CN('price-wrapper', className)}>
+        <NumberItem
+          value={10}
+          prefix={'$'}
+          decimal={0}
+          decimalOpacity={0.45}
+        />
+        <NumberItem
+          value={10}
+          suffix='%'
+          prefix={'decrease' === 'decrease' ? '-' : '+'}
+          className='margin-percentage'
+          decimal={0}
+          size={12}
+          unitColor={marginColor}
+          intColor={marginColor}
+          decimalColor={marginColor}
+        />
+      </div>
+
+      <div className='funds-wrapper'>
+        <div className='funds'>
+          <NumberItem
+            className={'__value'}
+            decimal={0}
+            decimalOpacity={0.45}
+            value={11}
+            suffix={staking.unit}
+          />
+          <NumberItem
+            className={'__converted-value'}
+            decimal={0}
+            decimalOpacity={0.45}
+            intOpacity={0.45}
+            prefix='$'
+            size={12}
+            unitOpacity={0.45}
+            value={11122}
+          />
+        </div>
+        <Button
+          type='ghost'
+          icon={<Icon
+            className={'right-icon'}
+            type="phosphor"
+            phosphorIcon={DotsThree}
+            size="xs"
+          />}
+          onClick={_onClickRightIcon}
+          size='sm'
+        />
+      </div>
+    </div>
+  )
 };
 
 const SwStakingItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
@@ -98,6 +183,32 @@ const SwStakingItem = styled(Component)<Props>(({ theme: { token } }: Props) => 
       '&::before': {
         borderRadius: token.borderRadiusLG
       }
+    },
+
+    '&.__web-ui': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      background: '#1A1A1A',
+      borderRadius: 8,
+      padding: '15px 13px',
+      cursor: 'pointer',
+
+      '.type-wrapper': {
+        alignSelf: 'start',
+      },
+
+      '.funds-wrapper': {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+
+      '.price-wrapper, .funds': {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'end',
+      },
     }
   };
 });

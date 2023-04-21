@@ -3,9 +3,8 @@
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { ActivityIndicator, BalanceItem, BalanceItemProps, Icon, Logo, Number, Typography, Web3Block } from '@subwallet/react-ui';
+import {  BalanceItemProps, Logo, Typography } from '@subwallet/react-ui';
 import classNames from 'classnames';
-import { CaretRight } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -41,8 +40,8 @@ function Component (
     <div className={classNames('token-item-container', className)}>
       <Logo
         size={40}
-        network={symbol}
-        token={logoKey}
+        network={logoKey}
+        token={symbol}
         shape={'squircle'}
         isShowSubLogo={false}
       />

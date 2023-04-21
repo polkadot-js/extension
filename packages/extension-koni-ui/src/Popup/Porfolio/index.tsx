@@ -57,44 +57,22 @@ function Component({ className }: Props): React.ReactElement<Props> {
 
   return (
     <>
-      {/* <HomeContext.Provider value={{
-        tokenGroupStructure,
-        accountBalance
-      }}
-      > */}
       <div className={CN('home', 'home-container', className, {
         '__web-ui': isWebUI
       })}>
-        {isWebUI ?
-            <ScreenTab rightSection={rightSection}>
-              <ScreenTab.SwTabPanel key={'tokens'} label="Tokens">
-                <>
-                  <Tokens />
-                </>
-              </ScreenTab.SwTabPanel>
-              <ScreenTab.SwTabPanel key={'collections'} label="Collections">
-                <>
-                  <NftCollections />
-                </>
-              </ScreenTab.SwTabPanel>
-            </ScreenTab>
-        :
-          <Layout.Home
-            onClickSearchIcon={onOpenGlobalSearchToken}
-            showFilterIcon
-            showSearchIcon
-          >
-            <Outlet />
-        </Layout.Home>}
+          <ScreenTab rightSection={rightSection}>
+            <ScreenTab.SwTabPanel key={'tokens'} label="Tokens">
+              <>
+                <Tokens />
+              </>
+            </ScreenTab.SwTabPanel>
+            <ScreenTab.SwTabPanel key={'collections'} label="Collections">
+              <>
+                <NftCollections />
+              </>
+            </ScreenTab.SwTabPanel>
+          </ScreenTab>
       </div>
-      {/* </HomeContext.Provider> */}
-
-      <GlobalSearchTokenModal
-        id={GlobalSearchTokenModalId}
-        onCancel={onCloseGlobalSearchToken}
-        sortedTokenSlugs={tokenGroupStructure.sortedTokenSlugs}
-        tokenBalanceMap={accountBalance.tokenBalanceMap}
-      />
     </>
   )
 }

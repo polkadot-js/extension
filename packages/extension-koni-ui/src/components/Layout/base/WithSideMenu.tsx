@@ -9,10 +9,8 @@ import SideMenu from '../parts/SideMenu';
 import BalanceHeader from '../parts/Header/Balance';
 import styled from 'styled-components';
 import WebHeader from '../parts/Header';
-import { useAccountBalance, useGetChainSlugsByAccountType, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
-import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 
-type Props = Omit<
+export type SideMenuProps = Omit<
 LayoutBaseProps,
 'headerBackground' | 'headerIcons' | 'headerLeft' | 'headerCenter' | 'headerOnClickLeft' | 'headerPaddingVertical' | 'showHeader'
 > & {
@@ -20,55 +18,47 @@ LayoutBaseProps,
   withWebHeader?: boolean
 };
 
-const LayoutContainer = styled(Layout.Content)`
+const LayoutContainer = styled(Layout)`
   padding: 20px 36px 80px 44px;
   background: #0C0C0C;
   height: 100%;
   overflow: scroll;
 `
 
-const FixedHeader = styled.div`
-  /* position: 'fixed'; */
-`
+// const LayoutHeader = styled(Layout.Header)`
+//   padding: 0;
+//   padding-inline: 0 !important;
+//   background: #0C0C0C !important;
+//   height: fit-content !important;
+// `
 
-const WithSideMenu = (props: Props) => {
+const WithSideMenu = (props: SideMenuProps) => {
   const {
     children,
-    showBackButton = false,
-    subHeaderCenter = true,
-    subHeaderPaddingVertical = true,
     withBalanceHeader = false,
     withWebHeader = false,
-    ...restProps
+    // ...restProps
   } = props;
 
-  const chainsByAccountType = useGetChainSlugsByAccountType();
-  console.log('====chainsByAccountType', chainsByAccountType);
-  const tokenGroupStructure = useTokenGroup(chainsByAccountType);
-  console.log('tokenGroupStructure', tokenGroupStructure);
-  const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
-  console.log('accountBalance', accountBalance);
-
   return (
-    <HomeContext.Provider value={{
-      tokenGroupStructure,
-      accountBalance
-    }}
-    >
-      <Layout>
-        <Layout.Sider width={250}>
-          <SideMenu />
-        </Layout.Sider>
+    <Layout>
+      <Layout.Sider width={250}>
+        <SideMenu />
+      </Layout.Sider>
 
-        <LayoutContainer>
-          <FixedHeader>
+      <LayoutContainer>
+        {(withWebHeader || withBalanceHeader) && (
+          <div>
             {withWebHeader && <WebHeader />}
             {withBalanceHeader && <BalanceHeader />}
-          </FixedHeader>
+          </div>
+        )}
+
+        <Layout.Content>
           {children}
-        </LayoutContainer>
-      </Layout>
-    </HomeContext.Provider>
+        </Layout.Content>
+      </LayoutContainer>
+    </Layout>
   );
 };
 

@@ -6,6 +6,7 @@ export { default as useAccountAvatarTheme } from './useAccountAvatarTheme';
 export { default as useAccountRecoded } from './useAccountRecoded';
 export { default as useCompleteCreateAccount } from './useCompleteCreateAccount';
 export { default as useDeleteAccount } from './useDeleteAccount';
+export { default as useFormatAddress } from './useFormatAddress';
 export { default as useGetAccountByAddress } from './useGetAccountByAddress';
 export { default as useGetAccountSignModeByAddress } from './useGetAccountSignModeByAddress';
 export { default as useGetAccountTitleByAddress } from './useGetAccountTitleByAddress';

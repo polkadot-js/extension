@@ -6,6 +6,7 @@ export { default as RequestCreatePasswordModal } from './RequestCreatePasswordMo
 export { SortingModal } from './SortingModal';
 
 export * from './Account';
+export * from './AddressBook';
 export * from './ActionModal';
 export * from './Customize/CustomizeModal';
 export * from './FilterModal';

@@ -4,15 +4,14 @@
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountAuthType, AccountJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
+import { AccountAuthType, AccountJson, AddressJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
-import { SingleAddress } from '@subwallet/ui-keyring/observable/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
-import { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
+import { KeyringAddress, KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
@@ -633,7 +632,7 @@ export enum ProviderErrorType {
   USER_REJECT = 'USER_REJECT',
 }
 
-// Manage account
+/// Manage account
 // Export private key
 
 export interface RequestAccountExportPrivateKey {
@@ -828,6 +827,21 @@ export interface RequestAccountCreateWithSecretKey {
 export interface ResponseAccountCreateWithSecretKey {
   errors: AccountExternalError[];
   success: boolean;
+}
+
+// Subscribe Address Book
+
+export interface AddressBookInfo {
+  addresses: AddressJson[]
+}
+
+export interface RequestEditContactAccount {
+  address: string;
+  meta: KeyringPair$Meta;
+}
+
+export interface RequestDeleteContactAccount {
+  address: string;
 }
 
 /// Sign Transaction
@@ -1630,6 +1644,11 @@ export interface KeyringState {
   isLocked: boolean;
 }
 
+export interface AddressBookState {
+  contacts: AddressJson[];
+  recent: AddressJson[];
+}
+
 export interface RequestChangeMasterPassword {
   oldPassword?: string;
   newPassword: string;
@@ -1869,10 +1888,13 @@ export interface KoniRequestSignatures {
   'pri(accounts.checkPublicAndSecretKey)': [RequestCheckPublicAndSecretKey, ResponseCheckPublicAndSecretKey];
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, AccountsWithCurrentAddress, AccountsWithCurrentAddress];
   'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
-  'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
+  'pri(accounts.saveRecent)': [RequestSaveRecentAccount, KeyringAddress];
   'pri(accounts.get.meta)': [RequestAccountMeta, ResponseAccountMeta];
   'pri(accounts.updateCurrentAddress)': [string, boolean];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, CurrentAccountInfo];
+  'pri(accounts.subscribeAddresses)': [null, AddressBookInfo, AddressBookInfo];
+  'pri(accounts.editContact)': [RequestEditContactAccount, boolean];
+  'pri(accounts.deleteContact)': [RequestDeleteContactAccount, boolean];
 
   // Settings
   'pri(settings.changeBalancesVisibility)': [null, boolean, UiSettings];

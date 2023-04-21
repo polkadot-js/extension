@@ -31,9 +31,11 @@ export class LazyLoader {
 const PhishingDetected = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
 const Welcome = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Welcome'));
 const CreateDone = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/CreateDone'));
-const Tokens = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens'));
 const BuyTokens = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/BuyTokens'));
 const Staking = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
+
+const Tokens = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens'));
+const TokenDetailList = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailList'));
 
 const NftItemDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftItemDetail'));
 const NftCollections = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/NftCollections'));
@@ -45,15 +47,17 @@ const Crowdloans = new LazyLoader(() => import('@subwallet/extension-koni-ui/Pop
 const Home = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home'));
 
 const Settings = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
+const GeneralSetting = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
+const ManageAddressBook = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/AddressBook'));
+
 const ManageChains = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ManageChains'));
 const ChainImport = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ChainImport'));
 const AddProvider = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/AddProvider'));
 const ChainDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ChainDetail'));
+
 const ManageTokens = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/ManageTokens'));
 const FungibleTokenImport = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/FungibleTokenImport'));
 const TokenDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Tokens/TokenDetail'));
-const GeneralSetting = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
-const TokenDetailList = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailList'));
 
 const SecurityList = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Security'));
 const ManageWebsiteAccess = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/Security/ManageWebsiteAccess'));
@@ -164,6 +168,7 @@ export const router = createHashRouter([
         children: [
           Settings.generateRouterObject('list'),
           GeneralSetting.generateRouterObject('general'),
+          ManageAddressBook.generateRouterObject('address-book'),
           SecurityList.generateRouterObject('security'),
           ManageWebsiteAccess.generateRouterObject('dapp-access'),
           ManageWebsiteAccessDetail.generateRouterObject('dapp-access-edit'),

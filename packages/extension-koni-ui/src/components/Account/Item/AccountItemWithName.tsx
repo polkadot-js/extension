@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountJson } from '@subwallet/extension-base/background/types';
+import { AbstractAddressJson } from '@subwallet/extension-base/background/types';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import AccountItemBase, { AccountItemBaseProps } from '@subwallet/extension-koni-ui/components/Account/Item/AccountItemBase';
 import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/utils';
@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 interface Props extends AccountItemBaseProps {
   direction?: 'vertical' | 'horizontal';
-  accounts?: AccountJson[];
+  accounts?: AbstractAddressJson[];
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -28,7 +28,7 @@ const Component: React.FC<Props> = (props: Props) => {
       leftItem={isAll ? <AvatarGroup accounts={accounts} /> : props.leftItem}
       middleItem={(
         <div className={CN('account-item-content-wrapper', `direction-${direction}`)}>
-          <div className={'account-item-name'}>{isAll ? t('All accounts') : accountName}</div>
+          <div className={'account-item-name'}>{isAll ? t('All accounts') : (accountName || toShort(address, addressPreLength, addressSufLength))}</div>
           {!isAll && <div className={'account-item-address-wrapper'}>{toShort(address, addressPreLength, addressSufLength)}</div>}
         </div>
       )}

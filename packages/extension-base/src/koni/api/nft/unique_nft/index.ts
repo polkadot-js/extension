@@ -165,7 +165,8 @@ export default class UniqueNftApi extends BaseNftApi {
         }
       }));
 
-      const nftCollectionMap: Record<string, string[]> = {};
+      const collectionIds: string[] = [];
+      let allNftIds: string[] = [];
 
       await Promise.all(allCollectionId.map(async (collectionId) => {
         const collectionIdStr = collectionId.toString();
@@ -176,7 +177,8 @@ export default class UniqueNftApi extends BaseNftApi {
         collectionMap[collectionIdStr] = collection;
         const nftIds = Object.entries(nftMap).filter((item) => item[1] === collectionId).map((item) => item[0]);
 
-        nftCollectionMap[collectionIdStr] = nftIds;
+        collectionIds.push(collectionIdStr);
+        allNftIds = allNftIds.concat(nftIds);
 
         const parsedCollection: NftCollection = {
           collectionId: collectionIdStr,
@@ -213,9 +215,7 @@ export default class UniqueNftApi extends BaseNftApi {
         }));
       }));
 
-      Object.entries(nftCollectionMap).forEach(([collectionId, nftIds]) => {
-        params.cleanUpNfts(this.chain, address, collectionId, nftIds);
-      });
+      params.cleanUpNfts(this.chain, address, collectionIds, allNftIds);
     } catch (e) {
       console.error('Failed to fetch unique nft', e);
     }

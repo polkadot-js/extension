@@ -474,8 +474,8 @@ export default class KoniState {
     return this.dbService.deleteNftCollection(chain, collectionId);
   }
 
-  public cleanUpNfts (chain: string, owner: string, collectionId: string, nftIds: string[]) {
-    this.dbService.cleanUpNft(chain, owner, collectionId, nftIds).catch((e) => this.logger.warn(e));
+  public cleanUpNfts (chain: string, owner: string, collectionId: string[], nftIds: string[], ownNothing?: boolean) {
+    this.dbService.cleanUpNft(chain, owner, collectionId, nftIds, ownNothing).catch((e) => this.logger.warn(e));
   }
 
   public async getNft (): Promise<NftJson | undefined> {

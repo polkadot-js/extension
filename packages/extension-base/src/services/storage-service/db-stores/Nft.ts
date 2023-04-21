@@ -23,12 +23,18 @@ export default class NftStore extends BaseStoreWithAddressAndChain<INft> {
     );
   }
 
-  cleanUpNfts (chain: string, address: string, collectionId: string, nftIds: string[]) {
+  cleanUpNfts (chain: string, address: string, collectionIds: string[], nftIds: string[]) {
     return this.table.where({
       address,
-      chain,
-      collectionId
-    }).and((nft) => !nftIds.includes(nft.id)).delete();
+      chain
+    }).and((nft) => !collectionIds.includes(nft.collectionId) || (collectionIds.includes(nft.collectionId) && !nftIds.includes(nft.id))).delete();
+  }
+
+  deleteNftsByChainAndOwner (chain: string, address: string) {
+    return this.table.where({
+      address,
+      chain
+    }).delete();
   }
 
   deleteNftByAddress (addresses: string[]) {

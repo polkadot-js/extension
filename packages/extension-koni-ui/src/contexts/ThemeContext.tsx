@@ -45,6 +45,16 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       borderBottomWidth: token.lineWidth * 2
     },
 
+    '.ant-sw-modal .ant-sw-modal-header': {
+      borderRadius: '24px 24px 0 0'
+    },
+
+    '.ant-sw-modal .ant-sw-modal-content': {
+      width: 390 - token.lineWidth * 2,
+      left: token.lineWidth,
+      bottom: token.lineWidth + 1
+    },
+
     '.modal-full': {
       '.ant-sw-modal-content': {
         boxShadow: `inset 0 0 0 ${token.lineWidth}px ${token.colorBgInput}, inset 0 -${token.lineWidth}px 0 ${token.lineWidth}px ${token.colorBgInput}`,

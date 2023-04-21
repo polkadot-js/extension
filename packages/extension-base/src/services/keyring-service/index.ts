@@ -26,7 +26,7 @@ export class KeyringService {
 
   constructor (private eventService: EventService) {
     this.currentAccountStore.get('CurrentAccountInfo', (rs) => {
-      this.currentAccountSubject.next(rs);
+      rs && this.currentAccountSubject.next(rs);
     });
     this.subscribeAccounts().catch(console.error);
   }

@@ -114,8 +114,6 @@ const Component: React.FC<Props> = ({ account, className, payload: { era, nonce,
     [method, chain, specVersion]
   );
 
-  console.log(tip.toNumber());
-
   return (
     <MetaInfo className={className}>
       {

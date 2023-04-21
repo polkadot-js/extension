@@ -119,20 +119,23 @@ export class KaruraNftApi extends BaseNftApi {
 
     try {
       if (!assetIds || assetIds.length === 0) {
+        params.cleanUpNfts(this.chain, address, [], [], true);
+
         return;
       }
 
-      const collectionNftIds: Record<string, string[]> = {};
+      const collectionIds: string[] = [];
+      const nftIds: string[] = [];
 
       await Promise.all(assetIds.map(async (assetId) => {
         const parsedClassId = this.parseTokenId(assetId.classId as string);
         const parsedTokenId = this.parseTokenId(assetId.tokenId as string);
 
-        if (collectionNftIds[parsedClassId]) {
-          collectionNftIds[parsedClassId].push(parsedTokenId);
-        } else {
-          collectionNftIds[parsedClassId] = [parsedTokenId];
+        if (!collectionIds.includes(parsedClassId)) {
+          collectionIds.push(parsedClassId);
         }
+
+        nftIds.push(parsedTokenId);
 
         const [tokenInfo, collectionMeta] = await Promise.all([
           this.getTokenDetails(assetId),
@@ -163,9 +166,7 @@ export class KaruraNftApi extends BaseNftApi {
         params.updateCollection(this.chain, parsedCollection);
       }));
 
-      Object.entries(collectionNftIds).forEach(([collectionId, nftIds]) => {
-        params.cleanUpNfts(this.chain, address, collectionId, nftIds);
-      });
+      params.cleanUpNfts(this.chain, address, collectionIds, nftIds);
     } catch (e) {
       console.error('Failed to fetch karura nft', e);
     }

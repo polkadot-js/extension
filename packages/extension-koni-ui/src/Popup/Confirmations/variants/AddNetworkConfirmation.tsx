@@ -26,7 +26,7 @@ const handleCancel = async ({ id }: ConfirmationDefinitions['addNetworkRequest']
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, request } = props;
-  const { payload: { chainEditInfo, chainSpec } } = request;
+  const { payload: { chainEditInfo, chainSpec, mode } } = request;
 
   const { t } = useTranslation();
 
@@ -176,6 +176,9 @@ const Component: React.FC<Props> = (props: Props) => {
         </Tooltip>
       </div>
       <div className='confirmation-footer'>
+        {mode === 'update' && (<div className={'warning-message'}>
+          {t('The network already exists')}
+        </div>)}
         <Button
           disabled={loading}
           icon={(
@@ -190,6 +193,7 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Cancel')}
         </Button>
         <Button
+          disabled={mode === 'update'}
           icon={(
             <Icon
               phosphorIcon={CheckCircle}

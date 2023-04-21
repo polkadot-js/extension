@@ -393,13 +393,16 @@ export default class KoniTabs {
       originChain: chain
     });
 
-    if (validate.isExist) {
-      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current token is existed');
-    } else if (validate.contractError) {
+    // Below code is comment because we will handle exited token in the ui-view
+    // if (validate.isExist) {
+    //   throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current token is existed');
+    // } else
+    if (validate.contractError) {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Contract address is invalid');
     }
 
     const tokenInfo: AddTokenRequestExternal = {
+      slug: validate?.existedSlug,
       type: tokenType,
       name: validate.name,
       contractAddress: input.options.address,
@@ -419,13 +422,36 @@ export default class KoniTabs {
 
       if (chainId) {
         const chainIdNum = parseInt(chainId, 16);
-        const [networkKey] = this.#koniState.findNetworkKeyByChainId(chainIdNum);
+        const [existedNetworkSlug, existedChainInfo] = this.#koniState.findNetworkKeyByChainId(chainIdNum);
 
-        if (networkKey) {
+        if (existedNetworkSlug && existedChainInfo && existedChainInfo?.evmInfo) {
+          const evmInfo = existedChainInfo.evmInfo;
+          const substrateInfo = existedChainInfo.substrateInfo;
+          const chainState = this.#koniState.getChainStateByKey(existedNetworkSlug);
+
+          await this.#koniState.addNetworkConfirm(id, url, {
+            mode: 'update',
+            chainSpec: {
+              evmChainId: evmInfo.evmChainId,
+              decimals: evmInfo.decimals,
+              existentialDeposit: evmInfo.existentialDeposit,
+              genesisHash: substrateInfo?.genesisHash || '',
+              paraId: substrateInfo?.paraId || null,
+              addressPrefix: substrateInfo?.addressPrefix || 0
+            },
+            chainEditInfo: {
+              blockExplorer: blockExplorerUrls?.[0],
+              slug: existedNetworkSlug,
+              currentProvider: chainState.currentProvider,
+              providers: existedChainInfo.providers,
+              symbol: evmInfo.symbol,
+              chainType: 'EVM',
+              name: existedChainInfo.name
+            }
+          });
+
           return await this.switchEvmChain(id, url, { method: 'wallet_switchEthereumChain', params: [{ chainId }] });
-        }
-
-        if (rpcUrls && chainName) {
+        } else if (rpcUrls && chainName) {
           const filteredUrls = rpcUrls.filter((targetString) => {
             let url;
 
@@ -472,6 +498,8 @@ export default class KoniTabs {
               name: chainInfo.name
             }
           });
+        } else {
+          throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid provider');
         }
       }
     }

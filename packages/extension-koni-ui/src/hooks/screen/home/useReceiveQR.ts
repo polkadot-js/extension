@@ -8,7 +8,7 @@ import { AccountSelectorModalId } from '@subwallet/extension-koni-ui/components/
 import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType } from '@subwallet/extension-koni-ui/types';
-import { getAccountType, isAccountAll as checkIsAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, getAccountType, isAccountAll as checkIsAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -69,11 +69,9 @@ function getAccountTypeByTokenGroup (
 
 export default function useReceiveQR (tokenGroupSlug?: string) {
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const accounts = useSelector((state: RootState) => state.accountState.accounts);
-  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-  const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
-  const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
+  const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+  const { assetRegistry: assetRegistryMap } = useSelector((root: RootState) => root.assetRegistry);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const [tokenSelectorItems, setTokenSelectorItems] = useState<_ChainAsset[]>([]);
   const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(
     { selectedAccount: isAllAccount ? undefined : currentAccount?.address }
@@ -109,8 +107,13 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
     }
 
     const isEvmAddress = isEthereumAddress(_selectedAccount);
+    const acc = findAccountByAddress(accounts, _selectedAccount);
 
     return Object.values(assetRegistryMap).filter((asset) => {
+      if (acc?.originGenesisHash && chainInfoMap[asset.originChain].substrateInfo?.genesisHash !== acc.originGenesisHash) {
+        return false;
+      }
+
       if (_isAssetFungibleToken(asset)) {
         if (_isChainEvmCompatible(chainInfoMap[asset.originChain]) === isEvmAddress) {
           if (tokenGroupSlug) {
@@ -123,7 +126,7 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
 
       return false;
     });
-  }, [tokenGroupSlug, assetRegistryMap, chainInfoMap]);
+  }, [tokenGroupSlug, assetRegistryMap, chainInfoMap, accounts]);
 
   const onOpenReceive = useCallback(() => {
     if (!currentAccount) {

@@ -236,7 +236,7 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
 
       to = autoFormatAddress(parsedArgs.to);
       from = autoFormatAddress(parsedArgs.from);
-      extrinsicHash = parsedArgs.transactionHash;
+      extrinsicHash = parsedArgs.transactionHash || extrinsic.hash;
       amount = transaction.value || '0';
       fee = (parseInt(transaction.gasPrice) * parseInt(transaction.gasLimit)).toString();
       signature = generateSignature(transaction.signature);

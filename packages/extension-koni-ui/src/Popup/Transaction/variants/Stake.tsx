@@ -6,12 +6,12 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
-import { ALL_KEY, BN_TEN } from '@subwallet/extension-koni-ui/constants';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, formatBalance, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
@@ -102,6 +102,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [poolLoading, setPoolLoading] = useState(false);
   const [validatorLoading, setValidatorLoading] = useState(false);
   const [isBalanceReady, setIsBalanceReady] = useState(true);
+  const [valueChange, setValueChange] = useState(false);
+  const [, update] = useState({});
 
   const existentialDeposit = useMemo(() => {
     const assetInfo = assetRegistry[asset];
@@ -155,7 +157,11 @@ const Component: React.FC<Props> = (props: Props) => {
     const allMap = convertFieldToObject<StakeFormProps>(allFields);
     const changesMap = convertFieldToObject<StakeFormProps>(changedFields);
 
-    const { asset, from } = changesMap;
+    const { asset, from, value } = changesMap;
+
+    if (value) {
+      setValueChange(true);
+    }
 
     if (from) {
       setFrom(from);
@@ -340,6 +346,23 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [from, _stakingType, chain]);
 
+  useEffect(() => {
+    let cancel = false;
+
+    if (valueChange) {
+      if (!cancel) {
+        setTimeout(() => {
+          form.validateFields([FormFieldName.VALUE]).finally(() => update({}));
+        }, 100);
+      }
+    }
+
+    return () => {
+      cancel = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, nativeTokenBalance.value]);
+
   return (
     <>
       <TransactionContent>
@@ -438,7 +461,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       }
 
                       if (val.gt(nativeTokenBalance.value)) {
-                        const maxString = new BigN(nativeTokenBalance.value).div(BN_TEN.pow(decimals)).toFixed(6);
+                        const maxString = formatBalance(nativeTokenBalance.value, decimals);
 
                         return Promise.reject(t('Value must be equal or less than {{number}}', { replace: { number: maxString } }));
                       }

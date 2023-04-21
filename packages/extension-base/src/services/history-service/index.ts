@@ -122,8 +122,6 @@ export class HistoryService {
 
   // Insert history with check override origin 'app'
   async addHistoryItems (historyItems: TransactionHistoryItem[]) {
-    console.debug('addHistory', historyItems);
-
     // Prevent override record with original is 'app'
     const appRecords = this.historySubject.value.filter((item) => item.origin === 'app');
     const excludeKeys = appRecords.map((item) => {

@@ -1164,6 +1164,7 @@ export interface AddNetworkExternalRequest { // currently only support adding pu
 }
 
 export interface AddTokenRequestExternal {
+  slug?: string;
   contractAddress: string;
   originChain: string;
   type: _AssetType;

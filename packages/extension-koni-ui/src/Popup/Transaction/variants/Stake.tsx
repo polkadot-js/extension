@@ -6,7 +6,7 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
-import { ALL_KEY, BN_TEN } from '@subwallet/extension-koni-ui/constants';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
@@ -29,7 +29,7 @@ import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 type Props = ThemeProps
 
 enum FormFieldName {
-  VALUE = 'value',
+  VALUE = 'Amount',
   NOMINATE = 'nominate',
   POOL = 'pool',
   TYPE = 'type',
@@ -427,20 +427,18 @@ const Component: React.FC<Props> = (props: Props) => {
 
                       if (type === StakingType.POOLED) {
                         if (val.lte(0)) {
-                          return Promise.reject(new Error('Value must be greater than 0'));
+                          return Promise.reject(new Error('Amount must be greater than 0'));
                         }
                       } else {
                         if (!nominatorMetadata?.isBondedBefore || !isRelayChain) {
                           if (val.lte(0)) {
-                            return Promise.reject(new Error('Value must be greater than 0'));
+                            return Promise.reject(new Error('Amount must be greater than 0'));
                           }
                         }
                       }
 
                       if (val.gt(nativeTokenBalance.value)) {
-                        const maxString = new BigN(nativeTokenBalance.value).div(BN_TEN.pow(decimals)).toFixed(6);
-
-                        return Promise.reject(t('Value must be equal or less than {{number}}', { replace: { number: maxString } }));
+                        return Promise.reject(t('Amount cannot exceed your balance'));
                       }
 
                       return Promise.resolve();

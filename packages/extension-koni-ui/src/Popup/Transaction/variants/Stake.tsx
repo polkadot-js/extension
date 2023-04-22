@@ -6,12 +6,13 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-s
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
-import { ALL_KEY, BN_TEN } from '@subwallet/extension-koni-ui/constants';
+import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import useFetchChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainAssetInfo';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, formatBalance, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
@@ -29,7 +30,7 @@ import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 type Props = ThemeProps
 
 enum FormFieldName {
-  VALUE = 'value',
+  VALUE = 'Amount',
   NOMINATE = 'nominate',
   POOL = 'pool',
   TYPE = 'type',
@@ -61,9 +62,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   // TODO: should do better to get validators info
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state) => state.bonding);
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
-  const { currentAccount } = useSelector((state) => state.accountState);
-  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const chainState = useFetchChainState(chain);
+  const currentAccount = useSelector((state) => state.accountState.currentAccount);
+  const assetInfo = useFetchChainAssetInfo(asset);
 
   const isEthAdr = isEthereumAddress(currentAccount?.address);
 
@@ -102,16 +105,16 @@ const Component: React.FC<Props> = (props: Props) => {
   const [poolLoading, setPoolLoading] = useState(false);
   const [validatorLoading, setValidatorLoading] = useState(false);
   const [isBalanceReady, setIsBalanceReady] = useState(true);
+  const [valueChange, setValueChange] = useState(false);
+  const [, update] = useState({});
 
   const existentialDeposit = useMemo(() => {
-    const assetInfo = assetRegistry[asset];
-
     if (assetInfo) {
       return assetInfo.minAmount || '0';
     }
 
     return '0';
-  }, [assetRegistry, asset]);
+  }, [assetInfo]);
 
   const maxValue = useMemo(() => {
     const balance = new BigN(nativeTokenBalance.value);
@@ -155,7 +158,11 @@ const Component: React.FC<Props> = (props: Props) => {
     const allMap = convertFieldToObject<StakeFormProps>(allFields);
     const changesMap = convertFieldToObject<StakeFormProps>(changedFields);
 
-    const { asset, from } = changesMap;
+    const { asset, from, value } = changesMap;
+
+    if (value) {
+      setValueChange(true);
+    }
 
     if (from) {
       setFrom(from);
@@ -331,14 +338,31 @@ const Component: React.FC<Props> = (props: Props) => {
 
     // fetch validators when change chain
     // _stakingType is predefined form start
-    if (!!chain && !!from) {
+    if (!!chain && !!from && chainState?.active) {
       fetchChainValidators(chain, _stakingType || ALL_KEY, unmount, setPoolLoading, setValidatorLoading);
     }
 
     return () => {
       unmount = true;
     };
-  }, [from, _stakingType, chain]);
+  }, [from, _stakingType, chain, chainState?.active]);
+
+  useEffect(() => {
+    let cancel = false;
+
+    if (valueChange) {
+      if (!cancel) {
+        setTimeout(() => {
+          form.validateFields([FormFieldName.VALUE]).finally(() => update({}));
+        }, 100);
+      }
+    }
+
+    return () => {
+      cancel = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, nativeTokenBalance.value]);
 
   return (
     <>
@@ -427,20 +451,18 @@ const Component: React.FC<Props> = (props: Props) => {
 
                       if (type === StakingType.POOLED) {
                         if (val.lte(0)) {
-                          return Promise.reject(new Error('Value must be greater than 0'));
+                          return Promise.reject(new Error('Amount must be greater than 0'));
                         }
                       } else {
                         if (!nominatorMetadata?.isBondedBefore || !isRelayChain) {
                           if (val.lte(0)) {
-                            return Promise.reject(new Error('Value must be greater than 0'));
+                            return Promise.reject(new Error('Amount must be greater than 0'));
                           }
                         }
                       }
 
                       if (val.gt(nativeTokenBalance.value)) {
-                        const maxString = new BigN(nativeTokenBalance.value).div(BN_TEN.pow(decimals)).toFixed(6);
-
-                        return Promise.reject(t('Value must be equal or less than {{number}}', { replace: { number: maxString } }));
+                        return Promise.reject(t('Amount cannot exceed your balance'));
                       }
 
                       return Promise.resolve();

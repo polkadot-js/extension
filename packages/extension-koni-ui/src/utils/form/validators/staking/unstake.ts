@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BN_TEN, BN_ZERO } from '@subwallet/extension-koni-ui/constants';
+import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { FormRule } from '@subwallet/extension-koni-ui/types';
+import { formatBalance } from '@subwallet/extension-koni-ui/utils';
 import BigN from 'bignumber.js';
 
 export const validateUnStakeValue = (min: number | string | BigN, max: number | string | BigN, decimals: number, name?: string): FormRule => {
@@ -10,14 +11,14 @@ export const validateUnStakeValue = (min: number | string | BigN, max: number | 
   const maxValue = new BigN(max);
   const middleValue = maxValue.minus(minValue);
   const maxString = maxValue.div(BN_TEN.pow(decimals)).toString();
-  const middleString = middleValue.div(BN_TEN.pow(decimals)).toString();
+  // const middleString = middleValue.div(BN_TEN.pow(decimals)).toString();
 
   return {
     validator: (_, value: string) => {
       const val = new BigN(value);
 
       if (val.gt(maxValue)) {
-        return Promise.reject(new Error(`${name || 'Value'} must be equal or lesser than ${maxString}`));
+        return Promise.reject(new Error(`${name || 'Value'} must be equal or less than ${maxString}`));
       }
 
       if (val.lte(BN_ZERO)) {
@@ -29,7 +30,7 @@ export const validateUnStakeValue = (min: number | string | BigN, max: number | 
       }
 
       if (val.gt(middleValue) && val.lt(maxValue)) {
-        return Promise.reject(new Error(`${name || 'Value'} must be between 0 and ${middleString} or equal ${maxString}`));
+        return Promise.reject(new Error('Invalid. If you unstake this amount your staking would fall below minimum stake required'));
       }
 
       return Promise.resolve();

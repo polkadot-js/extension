@@ -32,7 +32,7 @@ const handleCancel = async ({ id }: ConfirmationDefinitions['addTokenRequest'][0
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, request } = props;
-  const { payload: { contractAddress, decimals, originChain, symbol, type } } = request;
+  const { payload: { contractAddress, decimals, originChain, slug, symbol, type } } = request;
 
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
@@ -146,6 +146,9 @@ const Component: React.FC<Props> = (props: Props) => {
         </Row>
       </div>
       <div className='confirmation-footer'>
+        {slug && (<div className='warning-message'>
+          {t<string>('The token already exists.')}
+        </div>)}
         <Button
           disabled={loading}
           icon={(
@@ -160,6 +163,7 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Cancel')}
         </Button>
         <Button
+          disabled={!!slug}
           icon={(
             <Icon
               phosphorIcon={CheckCircle}

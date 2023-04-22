@@ -17,10 +17,10 @@ import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps & {
-  staking?: StakingItem;
+  staking: StakingItem;
   reward?: StakingRewardItem;
-  chainStakingMetadata?: ChainStakingMetadata;
-  nominatorMetadata?: NominatorMetadata;
+  chainStakingMetadata: ChainStakingMetadata;
+  nominatorMetadata: NominatorMetadata;
 }
 
 export const MORE_ACTION_MODAL = 'more-action-modal';
@@ -55,7 +55,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onDoneTransaction = useCallback((extrinsicHash: string) => {
     if (chainStakingMetadata) {
-      navigate(`/transaction-done/substrate/${chainStakingMetadata?.chain}/${extrinsicHash}`);
+      navigate(`/transaction-done/substrate/${chainStakingMetadata.chain}/${extrinsicHash}`);
     }
   }, [chainStakingMetadata, navigate]);
 
@@ -157,7 +157,7 @@ const Component: React.FC<Props> = (props: Props) => {
           backgroundIconColor: 'magenta-6',
           icon: MinusCircle,
           label: 'Unstake funds',
-          onClick: onNavigate(`/transaction/unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
+          onClick: onNavigate(`/transaction/unstake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
         };
       } else if (action === StakingAction.WITHDRAW) {
         return {
@@ -181,7 +181,7 @@ const Component: React.FC<Props> = (props: Props) => {
           backgroundIconColor: 'purple-8',
           icon: ArrowArcLeft,
           label: 'Cancel unstake',
-          onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
+          onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
         };
       }
 
@@ -190,7 +190,7 @@ const Component: React.FC<Props> = (props: Props) => {
         backgroundIconColor: 'green-6',
         icon: PlusCircle,
         label: 'Stake more',
-        onClick: onNavigate(`/transaction/stake/${chainStakingMetadata?.type || ALL_KEY}/${chainStakingMetadata?.chain || ALL_KEY}`)
+        onClick: onNavigate(`/transaction/stake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
       };
     });
   }, [chainStakingMetadata, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);

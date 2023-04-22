@@ -176,10 +176,14 @@ export default class DatabaseService {
     return this.nftSubscription;
   }
 
-  async cleanUpNft (chain: string, owner: string, collectionId: string, nftIds: string[]) {
-    const result = await this.stores.nft.cleanUpNfts(chain, reformatAddress(owner, 42), collectionId, nftIds);
+  async cleanUpNft (chain: string, owner: string, collectionIds: string[], nftIds: string[], ownNothing?: boolean) {
+    if (ownNothing) {
+      return this.stores.nft.deleteNftsByChainAndOwner(chain, reformatAddress(owner, 42));
+    }
 
-    result > 0 && console.debug(`Clean up ${result} NFTs from collection ${collectionId} on chain ${chain} for owner ${owner}`);
+    const result = await this.stores.nft.cleanUpNfts(chain, reformatAddress(owner, 42), collectionIds, nftIds);
+
+    result > 0 && console.debug(`Cleaned up ${result} NFTs on chain ${chain} for owner ${reformatAddress(owner, 42)}`, collectionIds, nftIds);
 
     return result;
   }

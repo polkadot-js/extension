@@ -19,7 +19,7 @@ export function isAccountAll (address?: string): boolean {
   return address === ALL_ACCOUNT_KEY;
 }
 
-export function reformatAddress (address: string, networkPrefix: number, isEthereum = false): string {
+export function reformatAddress (address: string, networkPrefix = 42, isEthereum = false): string {
   try {
     if (isEthereumAddress(address)) {
       return address;

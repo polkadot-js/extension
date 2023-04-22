@@ -148,8 +148,10 @@ const Component: React.FC<Props> = ({ account, className, payload: { era, nonce,
       />
       {!tip.isEmpty && (
         <MetaInfo.Number
+          decimals={chainInfo?.substrateInfo?.decimals || 0}
           label={t<string>('Tip')}
-          value={formatNumber(tip || '0')}
+          suffix={chainInfo?.substrateInfo?.symbol}
+          value={tip.toNumber()}
         />
       )}
       {renderMethod(method, decoded, t)}

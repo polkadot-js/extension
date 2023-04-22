@@ -159,7 +159,7 @@ export class NftHandler {
     nftContracts: _ChainAsset[],
     updateItem: (chain: string, data: NftItem, owner: string) => void,
     updateCollection: (chain: string, data: NftCollection) => void,
-    cleanUpNfts: (chain: string, owner: string, collectionId: string, nftIds: string[]) => void) {
+    cleanUpNfts: (chain: string, owner: string, collectionId: string[], nftIds: string[], ownNothing?: boolean) => void) {
     this.setupApi();
     this.setupNftContracts(nftContracts);
     await Promise.all(this.handlers.map(async (handler) => {

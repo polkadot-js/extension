@@ -120,14 +120,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onClick: () => {
             navigate('/settings/security', { state: true });
           }
+        },
+        {
+          key: 'manage-address-book',
+          leftIcon: BookBookmark,
+          leftIconBgColor: token['blue-6'],
+          rightIcon: CaretRight,
+          title: 'Manage address book',
+          onClick: () => {
+            navigate('/settings/address-book');
+          }
         }
-        // {
-        //   key: 'manage-address-book',
-        //   leftIcon: BookBookmark,
-        //   leftIconBgColor: token['blue-6'],
-        //   rightIcon: CaretRight,
-        //   title: 'Manage address book'
-        // }
       ]
     },
     {
@@ -139,7 +142,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           leftIcon: ShareNetwork,
           leftIconBgColor: token['purple-7'],
           rightIcon: CaretRight,
-          title: 'Manage Chains',
+          title: 'Manage chains',
           onClick: () => {
             navigate('/settings/chains/manage');
           }

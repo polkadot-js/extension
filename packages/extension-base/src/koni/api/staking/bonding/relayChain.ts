@@ -58,6 +58,10 @@ export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: str
   let bnTotalStake = new BN(amount);
   const bnMinStake = new BN(chainStakingMetadata.minPoolBonding || '0');
 
+  if (selectedPool.state !== 'Open') {
+    errors.push(new TransactionError(StakingTxErrorType.INACTIVE_NOMINATION_POOL));
+  }
+
   if (nominatorMetadata) {
     const bnCurrentActiveStake = new BN(nominatorMetadata.activeStake);
 

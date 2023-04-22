@@ -10,8 +10,8 @@ export const validateUnStakeValue = (min: number | string | BigN, max: number | 
   const minValue = new BigN(min);
   const maxValue = new BigN(max);
   const middleValue = maxValue.minus(minValue);
-  const maxString = formatBalance(maxValue, decimals);
-  const middleString = formatBalance(middleValue, decimals);
+  const maxString = maxValue.div(BN_TEN.pow(decimals)).toString();
+  // const middleString = middleValue.div(BN_TEN.pow(decimals)).toString();
 
   return {
     validator: (_, value: string) => {
@@ -30,7 +30,7 @@ export const validateUnStakeValue = (min: number | string | BigN, max: number | 
       }
 
       if (val.gt(middleValue) && val.lt(maxValue)) {
-        return Promise.reject(new Error(`${name || 'Value'} must be between 0 and ${middleString} or equal ${maxString}`));
+        return Promise.reject(new Error('Invalid. If you unstake this amount your staking would fall below minimum stake required'));
       }
 
       return Promise.resolve();

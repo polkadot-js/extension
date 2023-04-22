@@ -278,7 +278,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <Form.Item
               name={FormFieldName.VALUE}
               rules={[
-                { required: true, message: 'Value is required' },
+                { required: true, message: 'Amount is required' },
                 validateUnStakeValue(minValue, bondedValue, decimals)
               ]}
               statusHelpAsTooltip={true}

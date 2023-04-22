@@ -29,7 +29,7 @@ import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 type Props = ThemeProps
 
 enum FormFieldName {
-  VALUE = 'value',
+  VALUE = 'Amount',
   NOMINATE = 'nominate',
   POOL = 'pool',
   TYPE = 'type',
@@ -450,20 +450,18 @@ const Component: React.FC<Props> = (props: Props) => {
 
                       if (type === StakingType.POOLED) {
                         if (val.lte(0)) {
-                          return Promise.reject(new Error('Value must be greater than 0'));
+                          return Promise.reject(new Error('Amount must be greater than 0'));
                         }
                       } else {
                         if (!nominatorMetadata?.isBondedBefore || !isRelayChain) {
                           if (val.lte(0)) {
-                            return Promise.reject(new Error('Value must be greater than 0'));
+                            return Promise.reject(new Error('Amount must be greater than 0'));
                           }
                         }
                       }
 
                       if (val.gt(nativeTokenBalance.value)) {
-                        const maxString = formatBalance(nativeTokenBalance.value, decimals);
-
-                        return Promise.reject(t('Value must be equal or less than {{number}}', { replace: { number: maxString } }));
+                        return Promise.reject(t('Amount cannot exceed your balance'));
                       }
 
                       return Promise.resolve();

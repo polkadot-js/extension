@@ -13,10 +13,10 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
-  "version": "0.46.0",
+  "version": "0.46.1",
   "versions": {
-    "git": "0.45.6-2-x",
-    "npm": "0.45.5"
+    "git": "0.46.1",
+    "npm": "0.46.1"
   },
   "workspaces": [
     "packages/*"

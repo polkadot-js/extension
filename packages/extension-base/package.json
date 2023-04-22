@@ -3,7 +3,7 @@
   "bugs": "https://github.com/polkadot-js/extension/issues",
   "description": "Functions, classes and other utilities used in @polkadot/extension",
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-base#readme",
   "license": "Apache-2.0",
@@ -18,13 +18,13 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.46.0",
+  "version": "0.46.1",
   "main": "index.js",
   "dependencies": {
     "@polkadot/api": "^10.4.1",
-    "@polkadot/extension-chains": "0.46.0",
-    "@polkadot/extension-dapp": "0.46.0",
-    "@polkadot/extension-inject": "0.46.0",
+    "@polkadot/extension-chains": "0.46.1",
+    "@polkadot/extension-dapp": "0.46.1",
+    "@polkadot/extension-inject": "0.46.1",
     "@polkadot/keyring": "^12.0.1",
     "@polkadot/networks": "^12.0.1",
     "@polkadot/phishing": "^0.21.1",
@@ -39,6 +39,6 @@
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@polkadot/extension-mocks": "0.46.0"
+    "@polkadot/extension-mocks": "0.46.1"
   }
 }

@@ -14,7 +14,7 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-const Welcome = function ({ className }: Props): React.ReactElement<Props> {
+function Welcome ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
@@ -46,7 +46,7 @@ const Welcome = function ({ className }: Props): React.ReactElement<Props> {
       </ButtonArea>
     </>
   );
-};
+}
 
 export default styled(Welcome)(({ theme }: Props) => `
   p {

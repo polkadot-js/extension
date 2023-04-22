@@ -10,9 +10,8 @@ import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/ty
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
+import type { ALLOWED_PATH } from '../defaults.js';
 import type { AuthResponse } from './handlers/State.js';
-
-import { ALLOWED_PATH } from '../defaults.js';
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K

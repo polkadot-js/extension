@@ -17,9 +17,9 @@
   "type": "module",
   "version": "0.46.0",
   "dependencies": {
-    "@polkadot/extension-base": "^0.45.5",
-    "@polkadot/extension-inject": "^0.45.5",
-    "@polkadot/extension-ui": "^0.45.5",
+    "@polkadot/extension-base": "0.46.0",
+    "@polkadot/extension-inject": "0.46.0",
+    "@polkadot/extension-ui": "0.46.0",
     "tslib": "^2.5.0"
   },
   "devDependencies": {

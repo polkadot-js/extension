@@ -133,7 +133,8 @@ export interface _SmartContractTokenInfo {
 }
 
 export interface _ValidateCustomAssetResponse extends _SmartContractTokenInfo {
-  isExist: boolean
+  isExist: boolean,
+  existedSlug?: string
 }
 
 export const _FUNGIBLE_CONTRACT_STANDARDS = [

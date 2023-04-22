@@ -7,8 +7,7 @@ import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo'
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Number, SwModal, SwNumberProps } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { ModalContext, Number, SwModal, SwNumberProps } from '@subwallet/react-ui';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 

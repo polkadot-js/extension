@@ -120,14 +120,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onClick: () => {
             navigate('/settings/security', { state: true });
           }
+        },
+        {
+          key: 'manage-address-book',
+          leftIcon: BookBookmark,
+          leftIconBgColor: token['blue-6'],
+          rightIcon: CaretRight,
+          title: 'Manage address book',
+          onClick: () => {
+            navigate('/settings/address-book');
+          }
         }
-        // {
-        //   key: 'manage-address-book',
-        //   leftIcon: BookBookmark,
-        //   leftIconBgColor: token['blue-6'],
-        //   rightIcon: CaretRight,
-        //   title: 'Manage address book'
-        // }
       ]
     },
     {

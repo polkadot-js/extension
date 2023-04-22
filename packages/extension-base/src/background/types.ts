@@ -32,8 +32,15 @@ type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T];
 
 export type SeedLengths = 12 | 24;
 
-export interface AccountJson extends KeyringPair$Meta {
+export interface AbstractAddressJson extends KeyringPair$Meta {
   address: string;
+  type?: KeypairType;
+  whenCreated?: number;
+  name?: string;
+  originGenesisHash?: string | null;
+}
+
+export interface AccountJson extends AbstractAddressJson {
   accountIndex?: number;
   addressOffset?: number;
   genesisHash?: string | null;
@@ -43,12 +50,12 @@ export interface AccountJson extends KeyringPair$Meta {
   isMasterAccount?: boolean;
   isMasterPassword?: boolean;
   isReadOnly?: boolean;
-  name?: string;
-  originGenesisHash?: string | null;
   parentAddress?: string;
   suri?: string;
-  type?: KeypairType;
-  whenCreated?: number;
+}
+
+export interface AddressJson extends AbstractAddressJson {
+  isRecent?: boolean;
 }
 
 // all Accounts and the address of the current Account

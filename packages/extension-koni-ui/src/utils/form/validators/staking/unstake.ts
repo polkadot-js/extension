@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BN_TEN, BN_ZERO } from '@subwallet/extension-koni-ui/constants';
+import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { FormRule } from '@subwallet/extension-koni-ui/types';
+import { formatBalance } from '@subwallet/extension-koni-ui/utils';
 import BigN from 'bignumber.js';
 
 export const validateUnStakeValue = (min: number | string | BigN, max: number | string | BigN, decimals: number, name?: string): FormRule => {
@@ -17,7 +18,7 @@ export const validateUnStakeValue = (min: number | string | BigN, max: number | 
       const val = new BigN(value);
 
       if (val.gt(maxValue)) {
-        return Promise.reject(new Error(`${name || 'Value'} must be equal or lesser than ${maxString}`));
+        return Promise.reject(new Error(`${name || 'Value'} must be equal or less than ${maxString}`));
       }
 
       if (val.lte(BN_ZERO)) {

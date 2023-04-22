@@ -9,7 +9,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Image, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight } from 'phosphor-react';
@@ -19,7 +19,7 @@ import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
+import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { nftParamsHandler } from '../helper';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
@@ -101,9 +101,7 @@ const Component: React.FC = () => {
           return Promise.reject(t('The recipient address is required'));
         }
 
-        try {
-          reformatAddress(_recipientAddress);
-        } catch (e) {
+        if (!isAddress(_recipientAddress)) {
           return Promise.reject(t('Invalid recipient address'));
         }
 
@@ -215,11 +213,11 @@ const Component: React.FC = () => {
               recipientValidator
             ]}
             statusHelpAsTooltip={true}
-            validateTrigger='onBlur'
           >
             <AddressInput
               addressPrefix={addressPrefix}
               label={t('Send to account')}
+              showAddressBook={true}
               showScanner={true}
             />
           </Form.Item>

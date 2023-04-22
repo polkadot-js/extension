@@ -11,7 +11,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, formatBalance, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Divider, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
@@ -102,6 +102,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [poolLoading, setPoolLoading] = useState(false);
   const [validatorLoading, setValidatorLoading] = useState(false);
   const [isBalanceReady, setIsBalanceReady] = useState(true);
+  const [valueChange, setValueChange] = useState(false);
+  const [, update] = useState({});
 
   const existentialDeposit = useMemo(() => {
     const assetInfo = assetRegistry[asset];
@@ -155,7 +157,11 @@ const Component: React.FC<Props> = (props: Props) => {
     const allMap = convertFieldToObject<StakeFormProps>(allFields);
     const changesMap = convertFieldToObject<StakeFormProps>(changedFields);
 
-    const { asset, from } = changesMap;
+    const { asset, from, value } = changesMap;
+
+    if (value) {
+      setValueChange(true);
+    }
 
     if (from) {
       setFrom(from);
@@ -339,6 +345,23 @@ const Component: React.FC<Props> = (props: Props) => {
       unmount = true;
     };
   }, [from, _stakingType, chain]);
+
+  useEffect(() => {
+    let cancel = false;
+
+    if (valueChange) {
+      if (!cancel) {
+        setTimeout(() => {
+          form.validateFields([FormFieldName.VALUE]).finally(() => update({}));
+        }, 100);
+      }
+    }
+
+    return () => {
+      cancel = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, nativeTokenBalance.value]);
 
   return (
     <>

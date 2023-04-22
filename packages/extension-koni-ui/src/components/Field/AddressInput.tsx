@@ -2,14 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { reformatAddress } from '@subwallet/extension-base/utils';
+import { AddressBookModal } from '@subwallet/extension-koni-ui/components';
 import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { saveRecentAccount } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
-import { findAccountByAddress, toShort } from '@subwallet/extension-koni-ui/utils';
+import { findContactByAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
-import React, { ChangeEventHandler, ForwardedRef, forwardRef, useCallback, useContext, useMemo, useState } from 'react';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
@@ -24,26 +26,32 @@ interface Props extends BasicInputWrapper, ThemeProps {
   addressPrefix?: number;
 }
 
-const modalId = 'input-account-address-modal';
+const defaultScannerModalId = 'input-account-address-scanner-modal';
+const defaultAddressBookModalId = 'input-account-address-book-modal';
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { addressPrefix,
-    className = '', disabled, id = modalId, label, onBlur, onChange, onFocus,
+    className = '', disabled, id, label, onBlur, onChange, onFocus,
     placeholder, readOnly, showAddressBook, showScanner, statusHelp, value } = props;
   const { t } = useTranslation();
 
-  const { inactiveModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const accounts = useSelector((root) => root.accountState.accounts);
+  const { accounts, contacts } = useSelector((root) => root.accountState);
+
+  const scannerId = useMemo(() => id ? `${id}-scanner-modal` : defaultScannerModalId, [id]);
+  const addressBookId = useMemo(() => id ? `${id}-address-book-modal` : defaultAddressBookModalId, [id]);
 
   const inputRef = useForwardInputRef(ref);
   const [scanError, setScanError] = useState('');
 
+  const _contacts = useMemo(() => [...accounts, ...contacts], [accounts, contacts]);
+
   const accountName = useMemo(() => {
-    const account = findAccountByAddress(accounts, value);
+    const account = findContactByAddress(_contacts, value);
 
     return account?.name;
-  }, [accounts, value]);
+  }, [_contacts, value]);
 
   const formattedAddress = useMemo((): string => {
     const _value = value || '';
@@ -63,13 +71,22 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     const val = value.trim();
 
     onChange && onChange({ target: { value: val } });
+
+    if (isAddress(val)) {
+      saveRecentAccount(val).catch(console.error);
+    }
   }, [onChange]);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     parseAndChangeValue(event.target.value);
   }, [parseAndChangeValue]);
 
-  const onOpenScanner = useOpenQrScanner(id);
+  const openScanner = useOpenQrScanner(scannerId);
+
+  const onOpenScanner = useCallback((e?: SyntheticEvent) => {
+    e && e.stopPropagation();
+    openScanner();
+  }, [openScanner]);
 
   const onScanError = useCallback((error: string) => {
     setScanError(error);
@@ -78,16 +95,27 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const onSuccess = useCallback((result: ScannerResult) => {
     inputRef?.current?.focus();
     setScanError('');
-    inactiveModal(id);
+    inactiveModal(scannerId);
     parseAndChangeValue(result.text);
     inputRef?.current?.blur();
-  }, [inactiveModal, id, parseAndChangeValue, inputRef]);
+  }, [inactiveModal, scannerId, parseAndChangeValue, inputRef]);
 
   const onCloseScan = useCallback(() => {
     inputRef?.current?.focus();
     setScanError('');
     inputRef?.current?.blur();
   }, [inputRef]);
+
+  const onOpenAddressBook = useCallback((e?: SyntheticEvent) => {
+    e && e.stopPropagation();
+    activeModal(addressBookId);
+  }, [activeModal, addressBookId]);
+
+  const onSelectAddressBook = useCallback((value: string) => {
+    inputRef?.current?.focus();
+    parseAndChangeValue(value);
+    inputRef?.current?.blur();
+  }, [inputRef, parseAndChangeValue]);
 
   // todo: Will work with "Manage address book" feature later
   return (
@@ -133,42 +161,69 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         statusHelp={statusHelp}
         suffix={(
           <>
-            {showAddressBook && <Button
-              icon={(
-                <Icon
-                  phosphorIcon={Book}
-                  size='sm'
+            {
+              showAddressBook &&
+              (
+                <Button
+                  icon={(
+                    <Icon
+                      phosphorIcon={Book}
+                      size='sm'
+                    />
+                  )}
+                  onClick={onOpenAddressBook}
+                  size='xs'
+                  type='ghost'
                 />
-              )}
-              size='xs'
-              type='ghost'
-            />}
-            {showScanner && <Button
-              disabled={disabled}
-              icon={(
-                <Icon
-                  phosphorIcon={Scan}
-                  size='sm'
+              )
+            }
+            {
+              showScanner &&
+              (
+                <Button
+                  disabled={disabled}
+                  icon={(
+                    <Icon
+                      phosphorIcon={Scan}
+                      size='sm'
+                    />
+                  )}
+                  onClick={onOpenScanner}
+                  size='xs'
+                  type='ghost'
                 />
-              )}
-              onClick={onOpenScanner}
-              size='xs'
-              type='ghost'
-            />}
+              )
+            }
           </>
         )}
         value={value}
       />
 
-      {showScanner && <SwQrScanner
-        className={className}
-        id={id}
-        isError={!!scanError}
-        onClose={onCloseScan}
-        onError={onScanError}
-        onSuccess={onSuccess}
-        overlay={scanError && <QrScannerErrorNotice message={scanError} />}
-      />}
+      {
+        showScanner &&
+        (
+          <SwQrScanner
+            className={className}
+            id={scannerId}
+            isError={!!scanError}
+            onClose={onCloseScan}
+            onError={onScanError}
+            onSuccess={onSuccess}
+            overlay={scanError && <QrScannerErrorNotice message={scanError} />}
+          />
+        )
+      }
+      {
+        showAddressBook &&
+        (
+          <AddressBookModal
+            addressPrefix={addressPrefix}
+            id={addressBookId}
+            onSelect={onSelectAddressBook}
+            value={value}
+          />
+        )
+      }
     </>
   );
 }
@@ -209,7 +264,7 @@ export const AddressInput = styled(forwardRef(Component))<Props>(({ theme: { tok
       pointerEvents: 'none'
     },
 
-    '&:focus-within, &.-status-error': {
+    '&:has(input:focus), &.-status-error': {
       '.__overlay': {
         pointerEvents: 'none',
         opacity: 0

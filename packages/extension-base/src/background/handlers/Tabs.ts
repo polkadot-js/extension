@@ -9,6 +9,7 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { MessageTypes, RequestAccountList, RequestAccountUnsubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types.js';
 import type { AuthResponse } from './State.js';
+import type State from './State.js';
 
 import { checkIfDenied } from '@polkadot/phishing';
 import keyring from '@polkadot/ui-keyring';
@@ -20,7 +21,6 @@ import { canDerive } from '../../utils/index.js';
 import RequestBytesSign from '../RequestBytesSign.js';
 import RequestExtrinsicSign from '../RequestExtrinsicSign.js';
 import { withErrorLog } from './helpers.js';
-import State from './State.js';
 import { createSubscription, unsubscribe } from './subscriptions.js';
 
 interface AccountSub {

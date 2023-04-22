@@ -5,10 +5,11 @@ import type { TFunction } from 'i18next';
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
+import type { BN } from '@polkadot/util';
 
 import React, { useMemo, useRef } from 'react';
 
-import { BN, bnToBn, formatNumber } from '@polkadot/util';
+import { bnToBn, formatNumber } from '@polkadot/util';
 
 import { Table } from '../../components/index.js';
 import useMetadata from '../../hooks/useMetadata.js';

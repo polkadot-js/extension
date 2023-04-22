@@ -10,7 +10,7 @@ export const validateUnStakeValue = (min: number | string | BigN, max: number | 
   const minValue = new BigN(min);
   const maxValue = new BigN(max);
   const middleValue = maxValue.minus(minValue);
-  const maxString = maxValue.div(BN_TEN.pow(decimals)).toString();
+  const maxString = formatBalance(maxValue, decimals);
   // const middleString = middleValue.div(BN_TEN.pow(decimals)).toString();
 
   return {

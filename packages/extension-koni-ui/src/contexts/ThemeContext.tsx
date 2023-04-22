@@ -40,12 +40,18 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       fontSize: token.size
     },
 
-    '#root': {
-      border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`
+    '.main-page-container': {
+      border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`,
     },
 
     '.ant-sw-modal .ant-sw-modal-header': {
       borderRadius: '24px 24px 0 0'
+    },
+
+    '.ant-sw-modal .ant-sw-modal-content': {
+      width: 390 - token.lineWidth * 2,
+      left: token.lineWidth,
+      bottom: token.lineWidth + 1
     },
 
     '.modal-full': {

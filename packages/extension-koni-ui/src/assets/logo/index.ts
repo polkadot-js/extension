@@ -734,6 +734,7 @@ export const ChainLogoMap: Record<string, string> = {
   imbue_network: ProjectLogos['imbue-network'],
   subspace_test: ProjectLogos.subspace,
   subspace_gemini_2a: ProjectLogos.subspace,
+  subspace_gemini_3c: ProjectLogos.subspace,
   origintrail: ProjectLogos.origintrail,
   dorafactory: ProjectLogos['dora-factory'],
   bajun: ProjectLogos['bajun-network'],

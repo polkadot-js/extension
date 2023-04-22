@@ -8,7 +8,8 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import useFetchChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainAssetInfo';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, formatBalance, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -61,9 +62,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   // TODO: should do better to get validators info
   const { nominationPoolInfoMap, validatorInfoMap } = useSelector((state) => state.bonding);
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
-  const { currentAccount } = useSelector((state) => state.accountState);
-  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const chainState = useFetchChainState(chain);
+  const currentAccount = useSelector((state) => state.accountState.currentAccount);
+  const assetInfo = useFetchChainAssetInfo(asset);
 
   const isEthAdr = isEthereumAddress(currentAccount?.address);
 
@@ -106,14 +109,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const [, update] = useState({});
 
   const existentialDeposit = useMemo(() => {
-    const assetInfo = assetRegistry[asset];
-
     if (assetInfo) {
       return assetInfo.minAmount || '0';
     }
 
     return '0';
-  }, [assetRegistry, asset]);
+  }, [assetInfo]);
 
   const maxValue = useMemo(() => {
     const balance = new BigN(nativeTokenBalance.value);
@@ -337,14 +338,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
     // fetch validators when change chain
     // _stakingType is predefined form start
-    if (!!chain && !!from) {
+    if (!!chain && !!from && chainState?.active) {
       fetchChainValidators(chain, _stakingType || ALL_KEY, unmount, setPoolLoading, setValidatorLoading);
     }
 
     return () => {
       unmount = true;
     };
-  }, [from, _stakingType, chain]);
+  }, [from, _stakingType, chain, chainState?.active]);
 
   useEffect(() => {
     let cancel = false;

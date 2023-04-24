@@ -67,7 +67,8 @@ const defaultLogoMap: Web3LogoMap = {
     ...IconMap,
     ...SwLogosMap,
     ...TokenLogoMap
-  }
+  },
+  default: SwLogosMap.default
 };
 
 // Todo: i18n for theme name

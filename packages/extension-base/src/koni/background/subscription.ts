@@ -22,6 +22,8 @@ import { Logger } from '@polkadot/util/types';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import KoniState from './handlers/State';
+import axios from "axios";
+import {ChainStakingMetadata} from "@subwallet/extension-base/background/KoniTypes";
 
 type SubscriptionName = 'balance' | 'crowdloan' | 'stakingOnChain';
 
@@ -311,6 +313,20 @@ export class KoniSubscription {
     this.state.updateStakingReward(result, 'fastInterval');
   }
 
+  async fetchingStakingFromApi (): Promise<Record<string, ChainStakingMetadata>> {
+    try {
+      const response = await axios.get('https://staking-data.subwallet.app/api/staking/get');
+
+      if (response.status === 200) {
+        return response.data as Record<string, ChainStakingMetadata>;
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    return {};
+  }
+
   async fetchChainStakingMetadata (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
     const filteredChainInfoMap: Record<string, _ChainInfo> = {};
 
@@ -326,10 +342,19 @@ export class KoniSubscription {
       return;
     }
 
-    await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
-      const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
+    // Fetch data from helper API
+    const dataFromApi = await this.fetchingStakingFromApi();
 
-      this.state.updateChainStakingMetadata(chainStakingMetadata);
+    await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
+      // Use fetch API data if available
+      if (dataFromApi[chainInfo.slug]) {
+        this.state.updateChainStakingMetadata(dataFromApi[chainInfo.slug]);
+      } else {
+        console.warn('Not found staking data from api', chainInfo.slug);
+        const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
+
+        this.state.updateChainStakingMetadata(chainStakingMetadata);
+      }
     }));
   }
 

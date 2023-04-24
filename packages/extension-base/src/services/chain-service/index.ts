@@ -4,7 +4,6 @@
 import { AssetRefMap, ChainAssetMap, ChainInfoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
 import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
@@ -50,8 +49,6 @@ export class ChainService {
 
   private logger: Logger;
 
-  private refreshChainStateTimeout: NodeJS.Timeout | undefined;
-
   constructor (dbService: DatabaseService, eventService: EventService) {
     this.dbService = dbService;
     this.eventService = eventService;
@@ -67,7 +64,7 @@ export class ChainService {
 
     this.logger = createLogger('chain-service');
 
-    this.refreshChainStateInterval(3000);
+    this.refreshChainStateInterval(3000, 6);
   }
 
   // Getter
@@ -530,7 +527,7 @@ export class ChainService {
     this.lockChainInfoMap = true;
     chainStateMap[chainSlug].active = true;
     this.initApiForChain(chainInfo);
-    this.refreshChainStateInterval(1000);
+    this.refreshChainStateInterval(3000, 6);
 
     this.dbService.updateChainStore({
       ...chainInfo,
@@ -1233,21 +1230,33 @@ export class ChainService {
     return this.substrateChainHandler.resumeAllApis();
   }
 
-  // Interval update api status
-  private refreshChainStateInterval (delay = 0) {
+  private refreshChainStateTimeout: NodeJS.Timeout | undefined = undefined;
+  private refreshChainStateTimes = 0;
+
+  private refreshChainStateInterval (delay = 0, times?: number) {
     clearTimeout(this.refreshChainStateTimeout);
 
     setTimeout(() => {
-      this.updateApiMapStatus();
+      if (times) {
+        this.refreshChainStateTimes = times;
+      }
+
+      this.refreshChainStateTimes -= 1;
+
+      if (this.refreshChainStateTimes < 0) {
+        return;
+      }
+
+      this.updateApiMapStatus().catch(console.error);
 
       this.refreshChainStateTimeout = setTimeout(() => {
-        this.updateApiMapStatus();
-        this.refreshChainStateInterval();
-      }, CRON_GET_API_MAP_STATUS);
+        this.updateApiMapStatus().catch(console.error);
+        this.refreshChainStateInterval(0);
+      }, 3000);
     }, delay);
   }
 
-  private updateApiMapStatus () {
+  public async updateApiMapStatus () {
     const substrateApiMap = this.getSubstrateApiMap();
     const evmApiMap = this.getEvmApiMap();
     const chainStateMap = this.getChainStateMap();
@@ -1260,29 +1269,35 @@ export class ChainService {
       }
     }
 
-    Object.entries(chainStateMap).forEach(([chain, chainState]) => {
-      if (chainState.active) {
-        if (substrateApiMap[chain]) {
-          const api = substrateApiMap[chain];
+    const promiseList = Object.entries(chainStateMap).map(async ([chain, chainState]) => {
+      try {
+        if (chainState.active) {
+          if (substrateApiMap[chain]) {
+            const api = substrateApiMap[chain];
 
-          if (api) {
-            updateState(chainState, _ChainConnectionStatus.CONNECTED);
+            if (api.isApiConnected) {
+              updateState(chainState, _ChainConnectionStatus.CONNECTED);
 
-            return;
-          }
-        } else if (evmApiMap[chain]) {
-          const api = evmApiMap[chain];
+              return;
+            }
+          } else if (evmApiMap[chain]) {
+            const api = evmApiMap[chain];
 
-          if (api) {
-            updateState(chainState, _ChainConnectionStatus.CONNECTED);
+            if (await api?.api?.eth.net.isListening()) {
+              updateState(chainState, _ChainConnectionStatus.CONNECTED);
 
-            return;
+              return;
+            }
           }
         }
-      }
 
-      updateState(chainState, _ChainConnectionStatus.DISCONNECTED);
+        updateState(chainState, _ChainConnectionStatus.DISCONNECTED);
+      } catch (e) {
+        updateState(chainState, _ChainConnectionStatus.DISCONNECTED);
+      }
     });
+
+    await Promise.all(promiseList);
 
     if (update) {
       console.log('Update chain connection state');

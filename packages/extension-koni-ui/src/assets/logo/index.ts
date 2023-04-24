@@ -806,7 +806,7 @@ export const ChainLogoMap: Record<string, string> = {
   optimism: ProjectLogos.optimism,
   polygon: ProjectLogos.polygon,
   tomochain: ProjectLogos.tomochain,
-  zksync: ProjectLogos.zksync,
+  zksync: ProjectLogos.zksync
 };
 
 export const TokenLogoMap: Record<string, string> = {

@@ -93,6 +93,8 @@ export default class TransactionService {
     };
     const { additionalValidator, address, chain, edAsWarning, isTransferAll, transaction } = validation;
 
+    console.log('validationInput', validationInput);
+
     // Check duplicate transaction
     validation.errors.push(...this.checkDuplicate(validationInput));
 

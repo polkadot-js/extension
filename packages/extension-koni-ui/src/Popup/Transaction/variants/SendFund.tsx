@@ -14,7 +14,7 @@ import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInp
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import { useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { getFreeBalance, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
@@ -315,6 +315,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       return Promise.reject(t('Amount is required'));
     }
 
+    // TODO: enable this when release
     // if ((new BigN(amount)).eq(new BigN(0))) {
     //   return Promise.reject(t('Amount must be greater than 0'));
     // }
@@ -382,6 +383,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
     let sendPromise: Promise<SWTransactionResponse>;
 
+    console.log('isTransferAll', isTransferAll);
+
     if (chain === destChain) {
       // Transfer token or send fund
       sendPromise = makeTransfer({
@@ -400,7 +403,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         originNetworkKey: chain,
         tokenSlug: asset,
         to,
-        value
+        value,
+        transferAll: isTransferAll
       });
     }
 
@@ -415,6 +419,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       ;
     }, 300);
   }, [chain, from, asset, isTransferAll, onSuccess, onError]);
+
+  console.log('isTransferAll', isTransferAll);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
@@ -474,10 +480,12 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     let cancel = false;
 
     if (from && asset) {
-      getFreeBalance({
+      getMaxTransfer({
         address: from,
         networkKey: assetRegistry[asset].originChain,
-        token: asset
+        token: asset,
+        isXcmTransfer: chain !== destChain,
+        destChain
       })
         .then((balance) => {
           !cancel && setMaxTransfer(balance.value);
@@ -501,7 +509,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return () => {
       cancel = true;
     };
-  }, [asset, assetRegistry, assetSettingMap, form, from]);
+  }, [asset, assetRegistry, assetSettingMap, chain, destChain, form, from]);
+
+  console.log('max transfer', maxTransfer);
 
   return (
     <>
@@ -554,7 +564,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
                 decimals={decimals}
                 maxValue={maxTransfer}
                 onSetMax={setIsTransferAll}
-                showMaxButton={chain === destChain && assetRegistry[asset]?.assetType === _AssetType.NATIVE}
+                showMaxButton={true}
                 tooltip={t('Amount')}
               />
             </Form.Item>

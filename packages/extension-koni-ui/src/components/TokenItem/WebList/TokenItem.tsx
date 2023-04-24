@@ -40,8 +40,8 @@ function Component (
     <div className={classNames('token-item-container', className)}>
       <Logo
         size={40}
-        network={logoKey}
-        token={symbol}
+        // network={logoKey}
+        token={logoKey}
         shape={'squircle'}
         isShowSubLogo={false}
       />

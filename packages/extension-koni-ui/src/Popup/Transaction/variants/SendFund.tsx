@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { BN } from '@polkadot/util';
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
@@ -318,9 +319,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }
 
     // TODO: enable this when release
-    // if ((new BigN(amount)).eq(new BigN(0))) {
-    //   return Promise.reject(t('Amount must be greater than 0'));
-    // }
+    if ((new BigN(amount)).eq(new BigN(0))) {
+      return Promise.reject(t('Amount must be greater than 0'));
+    }
 
     if ((new BigN(amount)).gt(new BigN(maxTransfer))) {
       const maxString = formatBalance(maxTransfer, decimals);
@@ -385,8 +386,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
     let sendPromise: Promise<SWTransactionResponse>;
 
-    console.log('isTransferAll', isTransferAll);
-
     if (chain === destChain) {
       // Transfer token or send fund
       sendPromise = makeTransfer({
@@ -433,8 +432,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       ;
     }, 300);
   }, [chain, from, asset, isTransferAll, accounts, notification, t, onSuccess, onError]);
-
-  console.log('isTransferAll', isTransferAll);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
@@ -525,7 +522,13 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     };
   }, [asset, assetRegistry, assetSettingMap, chain, destChain, form, from]);
 
-  console.log('max transfer', maxTransfer);
+  const onSetMaxTransferable = useCallback((value: boolean) => {
+    const bnMaxTransfer = new BN(maxTransfer);
+
+    if (!bnMaxTransfer.isZero()) {
+      setIsTransferAll(value);
+    }
+  }, [maxTransfer]);
 
   return (
     <>
@@ -577,7 +580,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               <AmountInput
                 decimals={decimals}
                 maxValue={maxTransfer}
-                onSetMax={setIsTransferAll}
+                onSetMax={onSetMaxTransferable}
                 showMaxButton={true}
                 tooltip={t('Amount')}
               />

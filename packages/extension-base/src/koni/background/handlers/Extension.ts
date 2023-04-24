@@ -43,7 +43,7 @@ import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { TypeRegistry } from '@polkadot/types';
-import { assert, BN, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
+import { assert, BN, BN_ZERO, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { base64Decode, decodeAddress, isAddress, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
@@ -1649,6 +1649,7 @@ export default class KoniExtension {
       extrinsicType: ExtrinsicType.TRANSFER_XCM,
       chainType: ChainType.SUBSTRATE,
       transferNativeAmount: _isNativeToken(originTokenInfo) ? value : '0',
+      isTransferAll: inputData.transferAll,
       errors
     });
   }
@@ -1770,8 +1771,6 @@ export default class KoniExtension {
         } else {
           maxTransferable = maxTransferable.sub(new BN(tokenInfo.minAmount || '0'));
 
-          console.log('xcm transfer', maxTransferable.toString());
-
           const mockTx = await createXcmExtrinsic({
             chainInfoMap,
             destinationTokenInfo,
@@ -1801,16 +1800,11 @@ export default class KoniExtension {
         estimatedFee = paymentInfo?.partialFee?.toString() || '0';
       }
 
-      console.log('estimated fee', estimatedFee.toString());
-      console.log('maxTransferable after ED', maxTransferable.toString());
-
       maxTransferable = maxTransferable.sub(new BN(estimatedFee));
-
-      console.log('final maxTransferable', maxTransferable.toString());
 
       return {
         ...freeBalance,
-        value: maxTransferable.toString() || '0'
+        value: maxTransferable.gt(BN_ZERO) ? (maxTransferable.toString() || '0') : '0'
       } as AmountData;
     }
   }

@@ -7,7 +7,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AmountData, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BondingOptionParams, BrowserConfirmationType, ChainType, CreateDeriveAccountInfo, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestChangeMasterPassword, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AddressBookInfo, AmountData, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BondingOptionParams, BrowserConfirmationType, ChainType, CreateDeriveAccountInfo, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestChangeMasterPassword, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeleteContactAccount, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestEditContactAccount, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeCancel, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApproveSignature, RequestSigningCancel, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseType, SigningRequest } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, DEFAULT_TIME_AUTO_LOCK } from '@subwallet/extension-base/constants';
@@ -27,13 +27,16 @@ import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChain
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { SWTransaction, SWTransactionResponse, SWTransactionResult, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
+import { reformatAddress } from '@subwallet/extension-base/utils';
+import { convertSubjectInfoToAddresses } from '@subwallet/extension-base/utils/address';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { createPair } from '@subwallet/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
-import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
+import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
+import { KeyringAddress } from '@subwallet/ui-keyring/types';
 import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
 import { TransactionConfig } from 'web3-core';
@@ -41,7 +44,7 @@ import { TransactionConfig } from 'web3-core';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { TypeRegistry } from '@polkadot/types';
 import { assert, BN, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
-import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
+import { base64Decode, decodeAddress, isAddress, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
@@ -454,8 +457,63 @@ export default class KoniExtension {
     return id;
   }
 
-  private saveRecentAccountId ({ accountId }: RequestSaveRecentAccount): SingleAddress {
-    return keyring.saveRecent(accountId);
+  private subscribeAddresses (id: string, port: chrome.runtime.Port): AddressBookInfo {
+    const _cb = createSubscription<'pri(accounts.subscribeAddresses)'>(id, port);
+    const subscription = this.#koniState.keyringService.addressesSubject.subscribe((subjectInfo: SubjectInfo): void => {
+      const addresses = convertSubjectInfoToAddresses(subjectInfo);
+
+      _cb({
+        addresses: addresses
+      });
+    });
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    const subjectInfo = this.#koniState.keyringService.addresses;
+
+    return {
+      addresses: convertSubjectInfoToAddresses(subjectInfo)
+    };
+  }
+
+  private saveRecentAccount ({ accountId }: RequestSaveRecentAccount): KeyringAddress {
+    if (isAddress((accountId))) {
+      const address = reformatAddress(accountId);
+      const account = keyring.getAccount(address);
+      const contact = keyring.getAddress(address);
+
+      return account || contact || { ...keyring.saveRecent(accountId).json, publicKey: decodeAddress(address) };
+    } else {
+      throw Error('Invalid address');
+    }
+  }
+
+  private editContactAccount ({ address, meta }: RequestEditContactAccount): boolean {
+    if (isAddress((address))) {
+      const _address = reformatAddress(address);
+
+      keyring.saveAddress(_address, meta);
+
+      return true;
+    } else {
+      throw Error('Invalid address');
+    }
+  }
+
+  private deleteContactAccount ({ address }: RequestDeleteContactAccount): boolean {
+    if (isAddress((address))) {
+      const _address = reformatAddress(address);
+
+      keyring.forgetAddress(_address);
+
+      return true;
+    } else {
+      throw Error('Invalid address');
+    }
   }
 
   private _getAuthListV2 (): Promise<AuthUrls> {
@@ -1430,6 +1488,16 @@ export default class KoniExtension {
     return historySubject.getValue();
   }
 
+  private addContact (to: string) {
+    const toAddress = reformatAddress(to);
+    const account = keyring.getAccount(toAddress);
+    const contact = keyring.getAddress(toAddress);
+
+    if (!account && (!contact || contact.meta.isRecent)) {
+      keyring.saveAddress(toAddress, {});
+    }
+  }
+
   private validateTransfer (tokenSlug: string, from: string, to: string, value: string | undefined, transferAll: boolean | undefined): [TransactionError[], KeyringPair | undefined, BN | undefined, _ChainAsset] {
     const errors: TransactionError[] = [];
     const keypair = keyring.getPair(from);
@@ -1511,6 +1579,8 @@ export default class KoniExtension {
 
     const transferNativeAmount = isTransferNativeToken ? transferAmount.value : '0';
 
+    this.addContact(to);
+
     return this.#koniState.transactionService.handleTransaction({
       errors,
       warnings,
@@ -1569,6 +1639,8 @@ export default class KoniExtension {
       });
     }
 
+    this.addContact(to);
+
     return await this.#koniState.transactionService.handleTransaction({
       url: EXTENSION_REQUEST_URL,
       address: from,
@@ -1588,6 +1660,8 @@ export default class KoniExtension {
     const tokenId = params.tokenId as string;
 
     const transaction = await getERC721Transaction(this.#koniState.getEvmApi(networkKey), contractAddress, senderAddress, recipientAddress, tokenId);
+
+    this.addContact(recipientAddress);
 
     return await this.#koniState.transactionService.handleTransaction({
       address: senderAddress,
@@ -1725,6 +1799,8 @@ export default class KoniExtension {
     const extrinsic = !isPSP34
       ? getNftTransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params || {})
       : await getPSP34TransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params || {});
+
+    this.addContact(recipientAddress);
 
     const rs = await this.#koniState.transactionService.handleTransaction({
       address: senderAddress,
@@ -2998,9 +3074,6 @@ export default class KoniExtension {
       case 'pri(accounts.changePassword)':
         return this.accountsChangePassword(request as RequestAccountChangePassword);
 
-      case 'pri(accounts.edit)':
-        return this.accountsEdit(request as RequestAccountEdit);
-
       case 'pri(accounts.export)':
         return this.accountsExport(request as RequestAccountExport);
 
@@ -3088,38 +3161,6 @@ export default class KoniExtension {
         return this.getAuthListV2();
       case 'pri(authorize.toggle)':
         return this.toggleAuthorization2(request as string);
-      case 'pri(accounts.create.suriV2)':
-        return await this.accountsCreateSuriV2(request as RequestAccountCreateSuriV2);
-      case 'pri(accounts.forget)':
-        return await this.accountsForgetOverride(request as RequestAccountForget);
-      case 'pri(accounts.create.externalV2)':
-        return await this.accountsCreateExternalV2(request as RequestAccountCreateExternalV2);
-      case 'pri(accounts.create.hardwareV2)':
-        return await this.accountsCreateHardwareV2(request as RequestAccountCreateHardwareV2);
-      case 'pri(accounts.create.hardwareMultiple)':
-        return await this.accountsCreateHardwareMultiple(request as RequestAccountCreateHardwareMultiple);
-      case 'pri(accounts.create.withSecret)':
-        return await this.accountsCreateWithSecret(request as RequestAccountCreateWithSecretKey);
-      case 'pri(seed.createV2)':
-        return this.seedCreateV2(request as RequestSeedCreateV2);
-      case 'pri(seed.validateV2)':
-        return this.seedValidateV2(request as RequestSeedValidateV2);
-      case 'pri(privateKey.validateV2)':
-        return this.metamaskPrivateKeyValidateV2(request as RequestSeedValidateV2);
-      case 'pri(accounts.exportPrivateKey)':
-        return this.accountExportPrivateKey(request as RequestAccountExportPrivateKey);
-      case 'pri(accounts.checkPublicAndSecretKey)':
-        return this.checkPublicAndSecretKey(request as RequestCheckPublicAndSecretKey);
-      case 'pri(accounts.subscribeWithCurrentAddress)':
-        return await this.accountsGetAllWithCurrentAddress(id, port);
-      case 'pri(accounts.subscribeAccountsInputAddress)':
-        return this.accountsGetAll(id, port);
-      case 'pri(accounts.saveRecent)':
-        return this.saveRecentAccountId(request as RequestSaveRecentAccount);
-      case 'pri(currentAccount.saveAddress)':
-        return await this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress);
-      case 'pri(accounts.updateCurrentAddress)':
-        return this.updateCurrentAccountAddress(request as string);
       case 'pri(settings.changeBalancesVisibility)':
         return this.toggleBalancesVisibility(id, port);
       case 'pri(settings.subscribe)':
@@ -3168,6 +3209,65 @@ export default class KoniExtension {
         return this.subscribeStakingReward(id, port);
       case 'pri(transaction.history.getSubscription)':
         return await this.subscribeHistory(id, port);
+
+      /// Account management
+      // Add account
+      case 'pri(accounts.create.suriV2)':
+        return await this.accountsCreateSuriV2(request as RequestAccountCreateSuriV2);
+      case 'pri(accounts.create.externalV2)':
+        return await this.accountsCreateExternalV2(request as RequestAccountCreateExternalV2);
+      case 'pri(accounts.create.hardwareV2)':
+        return await this.accountsCreateHardwareV2(request as RequestAccountCreateHardwareV2);
+      case 'pri(accounts.create.hardwareMultiple)':
+        return await this.accountsCreateHardwareMultiple(request as RequestAccountCreateHardwareMultiple);
+      case 'pri(accounts.create.withSecret)':
+        return await this.accountsCreateWithSecret(request as RequestAccountCreateWithSecretKey);
+      case 'pri(seed.createV2)':
+        return this.seedCreateV2(request as RequestSeedCreateV2);
+
+      // Remove account
+      case 'pri(accounts.forget)':
+        return await this.accountsForgetOverride(request as RequestAccountForget);
+
+      // Validate account
+      case 'pri(seed.validateV2)':
+        return this.seedValidateV2(request as RequestSeedValidateV2);
+      case 'pri(privateKey.validateV2)':
+        return this.metamaskPrivateKeyValidateV2(request as RequestSeedValidateV2);
+      case 'pri(accounts.checkPublicAndSecretKey)':
+        return this.checkPublicAndSecretKey(request as RequestCheckPublicAndSecretKey);
+
+      // Export account
+      case 'pri(accounts.exportPrivateKey)':
+        return this.accountExportPrivateKey(request as RequestAccountExportPrivateKey);
+
+      // Subscribe account
+      case 'pri(accounts.subscribeWithCurrentAddress)':
+        return await this.accountsGetAllWithCurrentAddress(id, port);
+      case 'pri(accounts.subscribeAccountsInputAddress)':
+        return this.accountsGetAll(id, port);
+
+      // Save current account
+      case 'pri(currentAccount.saveAddress)':
+        return await this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress);
+      case 'pri(accounts.updateCurrentAddress)':
+        return this.updateCurrentAccountAddress(request as string);
+
+      // Edit account
+      case 'pri(accounts.edit)':
+        return this.accountsEdit(request as RequestAccountEdit);
+
+      // Save contact address
+      case 'pri(accounts.saveRecent)':
+        return this.saveRecentAccount(request as RequestSaveRecentAccount);
+      case 'pri(accounts.editContact)':
+        return this.editContactAccount(request as RequestEditContactAccount);
+      case 'pri(accounts.deleteContact)':
+        return this.deleteContactAccount(request as RequestDeleteContactAccount);
+
+      // Subscribe address
+      case 'pri(accounts.subscribeAddresses)':
+        return this.subscribeAddresses(id, port);
 
       // ChainService
       case 'pri(chainService.subscribeChainInfoMap)':
@@ -3225,7 +3325,7 @@ export default class KoniExtension {
       case 'pri(accounts.get.meta)':
         return this.getAccountMeta(request as RequestAccountMeta);
 
-      // Send NFT
+      /// Send NFT
       case 'pri(evmNft.submitTransaction)':
         return this.evmNftSubmitTransaction(request as NftTransactionRequest);
       case 'pri(substrateNft.submitTransaction)':

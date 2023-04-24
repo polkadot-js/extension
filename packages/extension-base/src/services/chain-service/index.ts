@@ -1150,23 +1150,24 @@ export class ChainService {
 
   public async validateCustomToken (data: _ValidateCustomAssetRequest): Promise<_ValidateCustomAssetResponse> {
     const assetRegistry = this.getSmartContractTokens();
-    let isExist = false;
+    let existedToken: _ChainAsset | undefined;
 
     for (const token of Object.values(assetRegistry)) {
       const contractAddress = token?.metadata?.contractAddress as string;
 
       if (_isEqualContractAddress(contractAddress, data.contractAddress) && token.assetType === data.type && token.originChain === data.originChain) {
-        isExist = true;
+        existedToken = token;
         break;
       }
     }
 
-    if (isExist) {
+    if (existedToken) {
       return {
-        decimals: -1,
-        name: '',
-        symbol: '',
-        isExist,
+        decimals: existedToken.decimals || 0,
+        name: existedToken.name,
+        symbol: existedToken.symbol,
+        isExist: !!existedToken,
+        existedSlug: existedToken?.slug,
         contractError: false
       };
     }
@@ -1177,7 +1178,7 @@ export class ChainService {
       name,
       decimals,
       symbol,
-      isExist,
+      isExist: !!existedToken,
       contractError
     };
   }

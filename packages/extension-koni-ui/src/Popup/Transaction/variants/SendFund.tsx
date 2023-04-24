@@ -13,12 +13,11 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { BN_TEN } from '@subwallet/extension-koni-ui/constants';
-import { useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { getFreeBalance, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
@@ -209,6 +208,8 @@ const filterAccountFunc = (
 
 const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { t } = useTranslation();
+  const notification = useNotification();
+
   const locationState = useLocation().state as SendFundParam;
   const [sendFundSlug] = useState<string | undefined>(locationState?.slug);
 
@@ -321,7 +322,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     // }
 
     if ((new BigN(amount)).gt(new BigN(maxTransfer))) {
-      const maxString = new BigN(maxTransfer).div(BN_TEN.pow(decimals)).toFixed(6);
+      const maxString = formatBalance(maxTransfer, decimals);
 
       return Promise.reject(t('Amount must be equal or less than {{number}}', { replace: { number: maxString } }));
     }
@@ -394,6 +395,18 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         transferAll: isTransferAll
       });
     } else {
+      const acc = findAccountByAddress(accounts, from);
+
+      if (acc?.isHardware) {
+        setLoading(false);
+        notification({
+          message: t('This feature is not available for Ledger account'),
+          type: 'warning'
+        });
+
+        return;
+      }
+
       // Make cross chain transfer
       sendPromise = makeCrossChainTransfer({
         destinationNetworkKey: destChain,
@@ -415,7 +428,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         })
       ;
     }, 300);
-  }, [chain, from, asset, isTransferAll, onSuccess, onError]);
+  }, [chain, from, asset, isTransferAll, accounts, notification, t, onSuccess, onError]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
@@ -482,7 +495,11 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       })
         .then((balance) => {
           !cancel && setMaxTransfer(balance.value);
-
+        })
+        .catch(() => {
+          !cancel && setMaxTransfer('0');
+        })
+        .finally(() => {
           if (!cancel) {
             const value = form.getFieldValue('value') as string;
 
@@ -492,14 +509,13 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               }, 100);
             }
           }
-        })
-        .catch(console.error);
+        });
     }
 
     return () => {
       cancel = true;
     };
-  }, [asset, assetRegistry, form, from]);
+  }, [asset, assetRegistry, assetSettingMap, form, from]);
 
   return (
     <>
@@ -580,6 +596,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               label={t('Send to account')}
+              showAddressBook={true}
               showScanner={true}
             />
           </Form.Item>

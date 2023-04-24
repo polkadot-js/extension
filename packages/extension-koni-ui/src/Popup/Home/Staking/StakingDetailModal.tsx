@@ -15,8 +15,7 @@ import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staki
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, Number, SwModal } from '@subwallet/react-ui';
-import { ModalContext } from '@subwallet/react-ui/es/sw-modal/provider';
+import { Button, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';

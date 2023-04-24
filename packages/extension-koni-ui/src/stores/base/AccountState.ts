@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { KeyringState } from '@subwallet/extension-base/background/KoniTypes';
+import { AddressBookInfo, KeyringState } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext } from '@subwallet/extension-base/background/types';
 import { AccountState, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
@@ -19,7 +19,9 @@ const initialState: AccountState = {
 
   // AccountsContext
   accounts: [],
+  contacts: [],
   hierarchy: [],
+  recent: [],
   master: undefined,
 
   reduxStatus: ReduxStatus.INIT
@@ -54,6 +56,19 @@ const accountStateSlice = createSlice({
         ...state,
         currentAccount: payload,
         isAllAccount: isAccountAll(payload?.address),
+        reduxStatus: ReduxStatus.READY
+      };
+    },
+    updateAddressBook (state, action: PayloadAction<AddressBookInfo>) {
+      const { addresses } = action.payload;
+
+      const contacts = addresses.filter((value) => !value.isRecent);
+      const recent = addresses.filter((value) => value.isRecent);
+
+      return {
+        ...state,
+        contacts: contacts,
+        recent: recent,
         reduxStatus: ReduxStatus.READY
       };
     }

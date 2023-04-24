@@ -92,7 +92,7 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
         renderWhenEmpty={renderEmpty}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
-        searchPlaceholder={t<string>('Search chain')}
+        searchPlaceholder={t<string>('Search token')}
       />
     </SwModal>
   );

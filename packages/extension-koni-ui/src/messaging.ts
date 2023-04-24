@@ -5,7 +5,7 @@ import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageT
 import type { Message } from '@subwallet/extension-base/types';
 import type { Chain } from '@subwallet/extension-chains/types';
 import type { KeyringPair$Json } from '@subwallet/keyring/types';
-import type { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
+import type { KeyringAddress, KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -19,7 +19,6 @@ import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
-import { SingleAddress } from '@subwallet/ui-keyring/observable/types';
 
 import { _getKnownHashes, _getKnownNetworks } from './utils/chain/defaultChains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -414,8 +413,16 @@ export async function subscribeAccountsInputAddress (cb: (data: OptionInputAddre
   return sendMessage('pri(accounts.subscribeAccountsInputAddress)', {}, cb);
 }
 
-export async function saveRecentAccountId (accountId: string): Promise<SingleAddress> {
+export async function saveRecentAccount (accountId: string): Promise<KeyringAddress> {
   return sendMessage('pri(accounts.saveRecent)', { accountId });
+}
+
+export async function editContactAddress (address: string, name: string): Promise<boolean> {
+  return sendMessage('pri(accounts.editContact)', { address: address, meta: { name: name } });
+}
+
+export async function removeContactAddress (address: string): Promise<boolean> {
+  return sendMessage('pri(accounts.deleteContact)', { address: address });
 }
 
 export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {

@@ -18,3 +18,6 @@ export const VALIDATOR_DETAIL_MODAL = 'validator-detail-modal';
 export const HISTORY_DETAIL_MODAL = 'history-detail-modal';
 export const RECEIVE_TOKEN_SELECTOR_MODAL = 'receive-tokens-selector-modal';
 export const DOWNLOAD_EXTENSION = "download-extension"
+export const ADD_ADDRESS_BOOK_MODAL = 'add-address-book-modal';
+export const EDIT_ADDRESS_BOOK_MODAL = 'edit-address-book-modal';
+export const DELETE_ADDRESS_BOOK_MODAL = 'delete-address-book-modal';

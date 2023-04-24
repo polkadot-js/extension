@@ -58,6 +58,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     const transformVal = getInputValuesFromString(maxValue, decimals);
 
     setInputValue(transformVal);
+    setFirstTime(false);
     onChange && onChange({ target: { value: maxValue } });
     onSetMax?.(true);
     inputRef.current?.blur();
@@ -92,6 +93,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     }
 
     setInputValue(value);
+    setFirstTime(false);
 
     const transformVal = getOutputValuesFromString(value, decimals);
 
@@ -134,10 +136,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
     return () => {
       amount = false;
-
-      if (decimals >= 0) {
-        setFirstTime(false);
-      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decimals]);

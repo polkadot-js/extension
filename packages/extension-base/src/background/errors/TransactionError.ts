@@ -69,6 +69,10 @@ const defaultErrorMap = {
   [StakingTxErrorType.EXCEED_MAX_UNSTAKING]: {
     message: 'Exceed max unstaking',
     code: undefined
+  },
+  [StakingTxErrorType.INACTIVE_NOMINATION_POOL]: {
+    message: 'This nomination pool is not active',
+    code: undefined
   }
 } as Record<TransactionErrorType, { message: string, code?: number }>;
 

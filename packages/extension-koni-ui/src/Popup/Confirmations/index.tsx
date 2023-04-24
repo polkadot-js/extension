@@ -221,6 +221,11 @@ const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps
     gap: token.sizeSM,
     marginBottom: token.margin,
 
+    '.warning-message': {
+      width: '100%',
+      color: token.colorWarning
+    },
+
     '.ant-btn': {
       flex: 1,
 

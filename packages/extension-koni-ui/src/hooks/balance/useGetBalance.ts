@@ -51,6 +51,7 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
           })
           .catch((e: Error) => {
             !cancel && setError(t('Can not get balance'));
+            !cancel && setNativeTokenBalance(DEFAULT_BALANCE);
             console.error(e);
           }));
 
@@ -61,6 +62,7 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
             })
             .catch((e: Error) => {
               !cancel && setError(t('Can not get balance'));
+              !cancel && setTokenBalance(DEFAULT_BALANCE);
               console.error(e);
             }));
         }
@@ -69,6 +71,8 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
           !cancel && setIsLoading(false);
         });
       } else {
+        !cancel && setNativeTokenBalance(DEFAULT_BALANCE);
+        !cancel && setTokenBalance(DEFAULT_BALANCE);
         !cancel && setIsLoading(false);
         !cancel && setError(t('Chain or token is inactive'));
       }

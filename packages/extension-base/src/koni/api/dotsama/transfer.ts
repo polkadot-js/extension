@@ -151,7 +151,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     if (transferAll) {
       // currently genshiro_testnet, genshiro, equilibrium_parachain do not have transfer all method for tokens
     } else if (value) {
-      transfer = api.tx.eqBalances.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
+      transfer = api.tx.eqBalances.transfer([_getTokenOnChainAssetId(tokenInfo)], to, value);
     }
   } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
     if (transferAll) {

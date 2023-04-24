@@ -5,7 +5,6 @@ import { CurrentAccountInfo, KeyringState } from '@subwallet/extension-base/back
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { CurrentAccountStore } from '@subwallet/extension-base/stores';
 import { keyring } from '@subwallet/ui-keyring';
-import { accounts as accountsObservable } from '@subwallet/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import { BehaviorSubject } from 'rxjs';
 
@@ -13,9 +12,9 @@ export class KeyringService {
   private readonly currentAccountStore = new CurrentAccountStore();
   readonly currentAccountSubject = new BehaviorSubject<CurrentAccountInfo>({ address: '', currentGenesisHash: null });
 
-  private _rawAccountsSubject = accountsObservable.subject;
-  private beforeAccount: SubjectInfo = this._rawAccountsSubject.value;
-  public readonly accountSubject = new BehaviorSubject<SubjectInfo>(this._rawAccountsSubject.value);
+  readonly addressesSubject = keyring.addresses.subject;
+  public readonly accountSubject = keyring.accounts.subject;
+  private beforeAccount: SubjectInfo = this.accountSubject.value;
 
   readonly keyringStateSubject = new BehaviorSubject<KeyringState>({
     isReady: false,
@@ -34,20 +33,7 @@ export class KeyringService {
     // Wait until account ready
     await this.eventService.waitAccountReady;
 
-    this.beforeAccount = { ...this._rawAccountsSubject.value };
-
-    let accountNextTimeout: NodeJS.Timeout | undefined;
-
-    this._rawAccountsSubject.subscribe((value) => {
-      if (accountNextTimeout) {
-        clearTimeout(accountNextTimeout);
-      }
-
-      // Add some small lazy time to avoid spam
-      accountNextTimeout = setTimeout(() => {
-        this.accountSubject.next(value);
-      }, 99);
-    });
+    this.beforeAccount = { ...this.accountSubject.value };
 
     this.accountSubject.subscribe((subjectInfo) => {
       // Check if accounts changed
@@ -97,6 +83,10 @@ export class KeyringService {
 
   get accounts (): SubjectInfo {
     return this.accountSubject.value;
+  }
+
+  get addresses (): SubjectInfo {
+    return this.addressesSubject.value;
   }
 
   get currentAccount (): CurrentAccountInfo {

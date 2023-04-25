@@ -163,7 +163,7 @@ export class KoniCron {
       if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
         (commonReload || needUpdateNft) && this.addCron('refreshNft', this.refreshNft(address, serviceInfo.chainApiMap, this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
 
-        chainUpdated && this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
+        chainUpdated && this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS, false);
         chainUpdated && this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
 
         (commonReload || needUpdateStaking || stakingSubmitted) && this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
@@ -222,40 +222,41 @@ export class KoniCron {
   };
 
   updateApiMapStatus = () => {
-    const apiMap = this.state.getApiMap();
-    const networkMap = this.state.getChainStateMap();
-
-    for (const [key, substrateApi] of Object.entries(apiMap.substrate)) {
-      let status: _ChainConnectionStatus = _ChainConnectionStatus.CONNECTING;
-
-      if (substrateApi.isApiConnected) {
-        status = _ChainConnectionStatus.CONNECTED;
-      }
-
-      if (!networkMap[key].connectionStatus) {
-        this.state.updateChainConnectionStatus(key, status);
-      } else if (networkMap[key].connectionStatus && networkMap[key].connectionStatus !== status) {
-        this.state.updateChainConnectionStatus(key, status);
-      }
-    }
-
-    for (const [key, evmApi] of Object.entries(apiMap.evm)) {
-      evmApi.api.eth.net.isListening()
-        .then(() => {
-          if (!networkMap[key].connectionStatus) {
-            this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTED);
-          } else if (networkMap[key].connectionStatus && networkMap[key].connectionStatus !== _ChainConnectionStatus.CONNECTED) {
-            this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTED);
-          }
-        })
-        .catch(() => {
-          if (!networkMap[key].connectionStatus) {
-            this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTING);
-          } else if (networkMap[key].connectionStatus && networkMap[key].connectionStatus !== _ChainConnectionStatus.CONNECTING) {
-            this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTING);
-          }
-        });
-    }
+    this.state.chainService.updateApiMapStatus().catch(console.error);
+    // const apiMap = this.state.getApiMap();
+    // const networkMap = this.state.getChainStateMap();
+    //
+    // for (const [key, substrateApi] of Object.entries(apiMap.substrate)) {
+    //   let status: _ChainConnectionStatus = _ChainConnectionStatus.CONNECTING;
+    //
+    //   if (substrateApi.isApiConnected) {
+    //     status = _ChainConnectionStatus.CONNECTED;
+    //   }
+    //
+    //   if (!networkMap[key].connectionStatus) {
+    //     this.state.updateChainConnectionStatus(key, status);
+    //   } else if (networkMap[key].connectionStatus && networkMap[key].connectionStatus !== status) {
+    //     this.state.updateChainConnectionStatus(key, status);
+    //   }
+    // }
+    //
+    // for (const [key, evmApi] of Object.entries(apiMap.evm)) {
+    //   evmApi.api.eth.net.isListening()
+    //     .then(() => {
+    //       if (!networkMap[key].connectionStatus) {
+    //         this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTED);
+    //       } else if (networkMap[key].connectionStatus && networkMap[key].connectionStatus !== _ChainConnectionStatus.CONNECTED) {
+    //         this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTED);
+    //       }
+    //     })
+    //     .catch(() => {
+    //       if (!networkMap[key].connectionStatus) {
+    //         this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTING);
+    //       } else if (networkMap[key].connectionStatus && networkMap[key].connectionStatus !== _ChainConnectionStatus.CONNECTING) {
+    //         this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTING);
+    //       }
+    //     });
+    // }
   };
 
   recoverApiMap = () => {

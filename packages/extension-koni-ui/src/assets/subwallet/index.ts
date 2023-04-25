@@ -30,6 +30,7 @@ const SwLogosMap: Record<string, string> = {
   subwallet: require('./256.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   avatar_placeholder: require('./avatar_placeholder.png'),
+  default: ProjectLogos.default,
   transak: ProjectLogos.transak,
   onramper: ProjectLogos.onramper,
   moonpay: ProjectLogos.moonpay

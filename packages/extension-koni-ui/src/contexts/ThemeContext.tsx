@@ -41,8 +41,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
     },
 
     '.main-page-container': {
-      border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`,
-      borderBottomWidth: token.lineWidth * 2
+      border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`
     },
 
     '.ant-sw-modal .ant-sw-modal-header': {
@@ -52,15 +51,13 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
     '.ant-sw-modal .ant-sw-modal-content': {
       width: 390 - token.lineWidth * 2,
       left: token.lineWidth,
-      bottom: token.lineWidth + 1
+      bottom: 0,
+      borderBottom: `1px solid ${token.colorBgInput}`
     },
 
     '.modal-full': {
       '.ant-sw-modal-content': {
-        boxShadow: `inset 0 0 0 ${token.lineWidth}px ${token.colorBgInput}, inset 0 -${token.lineWidth}px 0 ${token.lineWidth}px ${token.colorBgInput}`,
-
         '.ant-sw-modal-header': {
-          boxShadow: `inset 0 ${token.lineWidth}px 0 ${token.lineWidth}px ${token.colorBgInput}`,
           borderRadius: 0
         }
       }

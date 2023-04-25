@@ -645,7 +645,12 @@ export const ProjectLogos: Record<string, string> = {
   riochain: '/images/projects/riochain.png',
   swapdex: '/images/projects/swapdex.png',
   '3dpass': '/images/projects/3dpass.png',
-  tfa: '/images/projects/tfa.png'
+  tfa: '/images/projects/tfa.png',
+  arbitrum: '/images/projects/arbitrum.png',
+  optimism: '/images/projects/optimism.png',
+  polygon: '/images/projects/polygon.png',
+  tomochain: '/images/projects/tomochain.png',
+  zksync: '/images/projects/zksync.png'
 };
 
 export const ChainLogoMap: Record<string, string> = {
@@ -796,7 +801,12 @@ export const ChainLogoMap: Record<string, string> = {
   subwallet: ProjectLogos.subwallet,
   parity: ProjectLogos.parity,
   keystone: ProjectLogos.keystone,
-  ledger: ProjectLogos.ledger
+  ledger: ProjectLogos.ledger,
+  arbitrum_one: ProjectLogos.arbitrum,
+  optimism: ProjectLogos.optimism,
+  polygon: ProjectLogos.polygon,
+  tomochain: ProjectLogos.tomochain,
+  zksync: ProjectLogos.zksync
 };
 
 export const TokenLogoMap: Record<string, string> = {
@@ -914,7 +924,7 @@ export const TokenLogoMap: Record<string, string> = {
   gala: ProjectLogos.gala,
   knc: ProjectLogos.kyber,
   mkr: ProjectLogos.mkr,
-  matic: ProjectLogos.matic,
+  matic: ProjectLogos.polygon,
   sand: ProjectLogos.sand,
   near: ProjectLogos.near,
   theta: ProjectLogos.theta,
@@ -1029,13 +1039,16 @@ export const TokenLogoMap: Record<string, string> = {
   p3d: ProjectLogos['3dpass'],
   szero: ProjectLogos['aleph-zero'],
   klp: ProjectLogos['kulupu-network'],
-  joy: ProjectLogos.joystream
+  joy: ProjectLogos.joystream,
+  arb: ProjectLogos.arbitrum,
+  op: ProjectLogos.optimism,
+  tomo: ProjectLogos.tomochain
 };
 
 export const IconMap = {
-  __connected__: './images/icons/__connected__.png',
-  __disconnected__: './images/icons/__disconnected__.png',
-  __qr_code__: './images/icons/__qr_code__.png'
+  __connected__: '/images/icons/__connected__.png',
+  __disconnected__: '/images/icons/__disconnected__.png',
+  __qr_code__: '/images/icons/__qr_code__.png'
 };
 
 export default ChainLogoMap;

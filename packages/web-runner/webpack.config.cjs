@@ -51,7 +51,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
     entry,
     devServer: {
       static: {
-        directory: path.join(__dirname, 'build')
+        directory: path.join(__dirname, 'public')
       },
       hot: false,
       liveReload: false,

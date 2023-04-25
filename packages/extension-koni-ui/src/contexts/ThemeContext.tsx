@@ -193,7 +193,7 @@ export interface ThemeProviderProps {
 const getModalContainer = () => document.getElementById('popup-container') || document.body;
 const getPopupContainer = () => document.getElementById('tooltip-container') || document.body;
 
-const TooltipContainer = styled.div`z-index: 10000`;
+const TooltipContainer = styled.div`z-index: 10000;`;
 
 export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactElement<ThemeProviderProps> {
   const themeName = useSelector((state: RootState) => state.settings.theme);

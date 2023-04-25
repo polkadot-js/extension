@@ -111,10 +111,17 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={onBack}
-        {...(!isWebUI && {
-          rightFooterButton: buttonProps
+        {...(!isWebUI ? {
+          rightFooterButton: buttonProps,
+          showBackButton: true,
+          subHeaderPaddingVertical: true,
+          showSubHeader: true,
+          subHeaderCenter: true,
+          subHeaderBackground: 'transparent'
+        }: {
+          headerList: ['Simple']
         })}
         subHeaderIcons={[
           {
@@ -124,7 +131,9 @@ const Component: React.FC<Props> = (props: Props) => {
         ]}
         title={title}
       >
-        <div className={CN('container')}>
+        <div className={CN('container', {
+          '__web-ui': isWebUI
+        })}>
           <div className='sub-title'>
             {subTitle}
           </div>
@@ -177,13 +186,17 @@ const Component: React.FC<Props> = (props: Props) => {
             <Button {...buttonProps} className='action'/>
           )}
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
 
 const ConnectQrSigner = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.__web-ui': {
+      maxWidth: '50%',
+      margin: '0 auto',
+    },
     '.container': {
       padding: token.padding,
 

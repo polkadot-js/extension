@@ -154,10 +154,17 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={onBack}
-        {...(!isWebUI && {
-          rightFooterButton: buttonProps
+        {...(!isWebUI ? {
+          rightFooterButton: buttonProps,
+          showBackButton: true,
+          subHeaderPaddingVertical: true,
+          showSubHeader: true,
+          subHeaderCenter: true,
+          subHeaderBackground: 'transparent'
+        }: {
+          headerList: ['Simple']
         })}
         subHeaderIcons={[
           {
@@ -167,7 +174,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         ]}
         title={t<string>("Attach watch-only account")}
       >
-        <div className={CN("container")}>
+        <div className={CN("container", {
+          '__web-ui': isWebUI
+        })}>
           <div className="description">
             {t(
               "Track the activity of any wallet without injecting your private key to SubWallet"
@@ -214,7 +223,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             )}
           </Form>
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
@@ -222,6 +231,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const AttachReadOnly = styled(Component)<Props>(
   ({ theme: { token } }: Props) => {
     return {
+      '.__web-ui': {
+        maxWidth: '60%',
+        margin: '0 auto',
+      },
       ".container": {
         padding: token.padding,
 

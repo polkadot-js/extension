@@ -17,7 +17,7 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 import CN from 'classnames';
-import WebHeader from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
+import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 
 type Props = ThemeProps
 
@@ -263,7 +263,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             {/*  // todo: i18n Settings */}
             Settings
           </SwHeader>
-        ) : <WebHeader withController={false} title="Settings"/>}
+        ) : <Headers.Controller title="Settings"/>}
         <div className={CN({
           '__scroll-container': !isWebUI,
           '__web-container': isWebUI,

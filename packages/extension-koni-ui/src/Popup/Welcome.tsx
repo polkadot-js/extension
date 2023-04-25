@@ -92,9 +92,12 @@ function Component({ className }: Props): React.ReactElement<Props> {
   )
 
   return (
-    <Layout.Base className={CN(className)}>
+    <Layout.Base
+      className={CN(className, '__welcome-layout-containter')}
+      headerList={['Simple']}
+    >
       <div className="bg-gradient" />
-      <div className="bg-image" />
+      {!isWebUI && <div className="bg-image" />}
       <div className={CN("body-container", {
         "__web-ui": isWebUI,
         'flex-column': isWebUI
@@ -103,7 +106,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
           <div className="logo-container">
             <Logo3D height={100} width={69} />
           </div>
-          <div className="title">{t("SubWallet")}</div>
+          <div className="title">{t(isWebUI ? "Welcome to SubWallet!" : "SubWallet")}</div>
           <div className="sub-title">
             {t(isWebUI ? "Choose how you'd like to set up your wallet" : "Polkadot, Substrate & Ethereum wallet")}
           </div>
@@ -174,6 +177,11 @@ function Component({ className }: Props): React.ReactElement<Props> {
 const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     position: "relative",
+
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
 
     ".flex-column": {
       display: "flex",
@@ -282,9 +290,14 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
           margin: 0,
         },
 
+        '.logo-container': {
+          marginTop: 0,
+          color: token.colorTextBase
+        },
+
         ".buttons-container": {
           marginBottom: token.marginXL,
-          marginTop: token.marginXXL * 2,
+          marginTop: token.marginXL * 2,
 
           ".divider": {
             marginTop: token.marginLG + 2,

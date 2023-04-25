@@ -73,7 +73,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base>
+      <Layout.Base className='login-container'>
         <div className='bg-gradient' />
         {!isWebUI && <div className='bg-image' />}
         <div className={CN('body-container', {
@@ -142,13 +142,17 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
   return {
     position: 'relative',
 
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column',
+    },
+
     '.__web-ui': {
       height: "100%",
       display: "flex",
       flexDirection: "column",
 
       '.main-wrapper': {
-
         flex: 1,
         display: "flex",
         flexDirection: "column",

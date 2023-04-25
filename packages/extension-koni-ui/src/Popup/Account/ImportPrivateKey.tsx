@@ -166,11 +166,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={onBack}
-        {...(!isWebUI && {
-          rightFooterButton: buttonProps
-        })}
+        {...(!isWebUI ? {
+          rightFooterButton: buttonProps,
+          showBackButton: true,
+          subHeaderPaddingVertical: true,
+          showSubHeader: true,
+          subHeaderCenter: true,
+          subHeaderBackground: 'transparent'
+      }: {
+        headerList: ['Simple']
+      })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -214,7 +221,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             <InstructionContainer contents={instructionContents}/>
           )}
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
@@ -225,6 +232,8 @@ const ImportPrivateKey = styled(Component)<Props>(({ theme: { token } }: Props) 
       "&.__web-ui": {
         display: 'flex',
         justifyContent: 'center',
+        maxWidth: '60%',
+        margin: '0 auto',
 
         '& > *': {
           flex: 1

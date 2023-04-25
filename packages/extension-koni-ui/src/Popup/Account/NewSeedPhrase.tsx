@@ -136,10 +136,17 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       className={CN(className)}
       resolve={new Promise((resolve) => !!seedPhrase && resolve(true))}
     >
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={onBack}
-        {...(!isWebUI && {
-            rightFooterButton: buttonProps
+        {...(!isWebUI ? {
+            rightFooterButton: buttonProps,
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+        }: {
+          headerList: ['Simple']
         })}
         subHeaderIcons={[
           {
@@ -168,7 +175,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           )}
         </div>
 
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
@@ -185,6 +192,8 @@ const NewSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => 
       '&.__web-ui': {
         display: 'flex',
         justifyContent: 'center',
+        maxWidth: '60%',
+        margin: '0 auto',
 
         '.action': {
           marginTop: 40,

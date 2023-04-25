@@ -7,11 +7,14 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import { Aperture, Clock, Database, Rocket, Wallet } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import Footer from '../parts/Footer';
 import SelectAccount from '../parts/SelectAccount';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import BaseWeb from './BaseWeb';
+import Headers, { CompoundedHeader } from '../parts/Header';
 
 export interface LayoutBaseProps extends Omit<
 SwScreenLayoutProps,
@@ -19,6 +22,10 @@ SwScreenLayoutProps,
 > {
   children: React.ReactNode | React.ReactNode[];
   showFooter?: boolean;
+  className?: string;
+  headerList?: (keyof CompoundedHeader)[];
+  withSideMenu?: boolean,
+  withController?: boolean,
 }
 
 export const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
@@ -74,7 +81,18 @@ export const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }>
   }
 ];
 
-const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBaseProps) => {
+const Base = (props: LayoutBaseProps) => {
+  const {
+    children,
+    headerIcons,
+    onBack,
+    showFooter,
+    className,
+    headerList,
+    withSideMenu = false,
+    withController,
+    ...rest
+  } = props;
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
   const { pathname } = useLocation();
@@ -103,9 +121,22 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
     goHome();
   }, [goHome]);
 
-  return (
-    <SwScreenLayout
+  const renderHeader = useCallback((name: keyof CompoundedHeader, key: number) => {
+    const CurComponent = Headers[name];
+
+    return <CurComponent title={props.title} key={key} onBack={onBack} />
+  }, [props.title]);
+
+
+  return withSideMenu ? (
+    <BaseWeb
       {...props}
+      headerList={headerList}
+    />
+  ) : (
+    <SwScreenLayout
+      className={className}
+      {...rest}
       footer={showFooter && <Footer />}
       headerContent={props.showHeader && <SelectAccount />}
       headerIcons={headerIcons}
@@ -116,9 +147,13 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
         onClick: onSelectTab(item.url)
       }))}
     >
+
+      {headerList?.map((name: keyof CompoundedHeader, index: number) =>
+        renderHeader(name, index)
+      )}
       {children}
     </SwScreenLayout>
-  );
+  )
 };
 
 export default Base;

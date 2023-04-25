@@ -139,8 +139,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-    <Layout.WithSubHeaderOnly
-      {...(!isWebUI && {
+    <Layout.Base
+      {...(!isWebUI ? {
         rightFooterButton: {
           children: t("Continue"),
           onClick: form.submit,
@@ -148,7 +148,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           disabled: isDisabled,
           icon: FooterIcon,
         },
-      })}
+        showBackButton: true,
+        subHeaderPaddingVertical: true,
+        showSubHeader: true,
+        subHeaderCenter: true,
+        subHeaderBackground: 'transparent'
+      } : {
+          headerList:['Simple'],
+        }
+      )}
       subHeaderIcons={[
         {
           icon: <InfoIcon />,
@@ -248,7 +256,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           )}
         </div>
       </div>
-    </Layout.WithSubHeaderOnly>
+    </Layout.Base>
   </PageWrapper>
   );
 };

@@ -8,11 +8,13 @@ import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle, DiscordLogo, PaperPlaneTilt, TwitterLogo, X } from 'phosphor-react';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { Layout } from '../components';
+import SocialGroup from '../components/SocialGroup';
+import { ScreenContext } from '../contexts/ScreenContext';
 
 type Props = ThemeProps;
 
@@ -50,19 +52,29 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
   const { goHome } = useDefaultNavigate();
+  const { isWebUI } = useContext(ScreenContext);
 
   const { t } = useTranslation();
 
   return (
-    <Layout.WithSubHeaderOnly
-      rightFooterButton={{
-        children: t('Go to home'),
-        onClick: goHome,
-        icon: <Icon
-          phosphorIcon={ArrowCircleRight}
-          weight={'fill'}
-        />
-      }}
+    <Layout.Base
+      {...(!isWebUI ? {
+        rightFooterButton: {
+          children: t('Go to home'),
+          onClick: goHome,
+          icon: <Icon
+            phosphorIcon={ArrowCircleRight}
+            weight={'fill'}
+          />
+        },
+        showBackButton: true,
+        subHeaderPaddingVertical: true,
+        showSubHeader: true,
+        subHeaderCenter: true,
+        subHeaderBackground: 'transparent'
+    }: {
+      headerList: ['Simple']
+    })}
       showBackButton={true}
       subHeaderLeft={(
         <Icon
@@ -72,7 +84,9 @@ const Component: React.FC<Props> = (props: Props) => {
       )}
       title={t('Successful')}
     >
-      <div className={CN(className)}>
+      <div className={CN(className, {
+        '__web-ui': isWebUI
+      })}>
         <div className='page-icon'>
           <PageIcon
             color='var(--page-icon-color)'
@@ -88,32 +102,36 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className='description'>
           {t('Follow along with product updates or reach out if you have any questions.')}
         </div>
-        <div className='button-group'>
-          {
-            items.map((item) => (
-              <Button
-                className={CN(`type-${item.type}`)}
-                icon={(
-                  <Icon
-                    phosphorIcon={item.icon}
-                    weight='fill'
-                  />
-                )}
-                key={item.type}
-                onClick={openInNewTab(item.url)}
-                shape='squircle'
-              />
-            ))
-          }
-        </div>
+
+        {isWebUI && (
+          <Button
+            onClick={goHome}
+            icon={<Icon
+              phosphorIcon={ArrowCircleRight}
+              weight={'fill'}
+            />}
+            style={{
+              width: '100%',
+              marginBottom: 80
+            }}
+          >
+            {t('Go to Porfolio')}
+          </Button>
+        )}
+        <SocialGroup />
       </div>
-    </Layout.WithSubHeaderOnly>
+    </Layout.Base>
   );
 };
 
 const CreatePasswordDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     textAlign: 'center',
+
+    '&.__web-ui': {
+      maxWidth: '50%',
+      margin: '0 auto',
+    },
 
     '.page-icon': {
       display: 'flex',

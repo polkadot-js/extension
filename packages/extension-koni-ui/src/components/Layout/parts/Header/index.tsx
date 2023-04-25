@@ -1,39 +1,20 @@
-import styled from "styled-components"
-import Component, { Props } from "./WebHeader"
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
 
-const WebHeader = styled(Component)<Props>(({ theme: { token } }: Props) => ({
-  ".common-header": {
-    paddingBottom: 40,
-    display: "flex",
-    justifyContent: "space-between",
+import Balance from './Balance';
+import Controller from './Controller';
+import Simple from './Simple';
 
-    ".page-name": {
-      fontSize: 30,
-      lineHeight: "38px",
-      color: "#FFF",
-      margin: 0,
-    },
+export type CompoundedHeader = {
+  Controller: typeof Controller;
+  Balance: typeof Balance;
+  Simple: typeof Simple;
+};
 
-    ".action-group": {
-      display: "flex",
-      justifyContent: "center",
-      ".ava-group": {
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        margin: "0 4px",
-        padding: "8px 16px",
+const Headers: CompoundedHeader = {
+  Controller: Controller,
+  Balance: Balance,
+  Simple: Simple,
+};
 
-        background: "#1A1A1A",
-        borderRadius: 32,
-        ".__account-item": {
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        },
-      },
-    },
-  },
-}))
-
-export default WebHeader
+export default Headers;

@@ -127,10 +127,17 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={onBack}
-        {...(!isWebUI && {
-          rightFooterButton: buttonProps
+        {...(!isWebUI ? {
+          rightFooterButton: buttonProps,
+          showBackButton: true,
+          subHeaderPaddingVertical: true,
+          showSubHeader: true,
+          subHeaderCenter: true,
+          subHeaderBackground: 'transparent'
+        }: {
+          headerList: ['Simple']
         })}
         subHeaderIcons={[
           {
@@ -140,7 +147,9 @@ const Component: React.FC<Props> = (props: Props) => {
         ]}
         title={t('Import your wallet by QR')}
       >
-        <div className={CN('container')}>
+        <div className={CN('container', {
+          '__web-ui': isWebUI
+        })}>
           <div className='sub-title'>
             {t('Please make sure that you have granted SubWallet the access to your device\'s camera.')}
           </div>
@@ -200,13 +209,17 @@ const Component: React.FC<Props> = (props: Props) => {
             <Button {...buttonProps} className='action'/>
           )}
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
 
 const ImportQrCode = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.__web-ui': {
+      maxWidth: '60%',
+      margin: '0 auto',
+    },
     '.container': {
       padding: token.padding,
 

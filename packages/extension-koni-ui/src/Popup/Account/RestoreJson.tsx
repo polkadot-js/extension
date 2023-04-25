@@ -290,10 +290,17 @@ function Component({ className }: Props): JSX.Element {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={onBack}
-        {...(!isWebUI && {
-          rightFooterButton: buttonProps
+        {...(!isWebUI ? {
+            rightFooterButton: buttonProps,
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+        }: {
+          headerList: ['Simple']
         })}
         subHeaderIcons={[
           {
@@ -393,7 +400,7 @@ function Component({ className }: Props): JSX.Element {
             <InstructionContainer contents={instructionContent}/>
           )}
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 }
@@ -407,6 +414,8 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
       "&.__web-ui": {
         display: 'flex',
         justifyContent: 'center',
+        maxWidth: '60%',
+        margin: '0 auto',
       },
 
       '.import-container': {

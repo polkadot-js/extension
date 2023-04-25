@@ -8,7 +8,7 @@ import { Layout } from '@subwallet/react-ui';
 import SideMenu from '../parts/SideMenu';
 import BalanceHeader from '../parts/Header/Balance';
 import styled from 'styled-components';
-import WebHeader from '../parts/Header';
+import Controller from '../parts/Header/Controller';
 
 export type SideMenuProps = Omit<
 LayoutBaseProps,
@@ -49,7 +49,7 @@ const WithSideMenu = (props: SideMenuProps) => {
       <LayoutContainer>
         {(withWebHeader || withBalanceHeader) && (
           <div>
-            {withWebHeader && <WebHeader />}
+            {withWebHeader && <Controller />}
             {withBalanceHeader && <BalanceHeader />}
           </div>
         )}

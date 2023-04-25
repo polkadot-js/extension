@@ -12,12 +12,13 @@ import { ChainItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Icon, Image, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, CircleNotch, Swatches } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import LogosMap from '../../assets/logo';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps;
 
@@ -40,6 +41,7 @@ const Component: React.FC<Props> = (props: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { className } = props;
+  const { isWebUI } = useContext(ScreenContext)
 
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
@@ -227,15 +229,25 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={firstStep ? onBack : onPreviousStep}
-        rightFooterButton={{
-          children: t('Connect Ledger device'),
-          icon: FooterIcon,
-          disabled: !isConnected || (!firstStep && !selectedAccounts.length),
-          onClick: firstStep ? onNextStep : onSubmit,
-          loading: isSubmitting
-        }}
+        {...(!isWebUI ? {
+          rightFooterButton: {
+            children: t('Connect Ledger device'),
+            icon: FooterIcon,
+            disabled: !isConnected || (!firstStep && !selectedAccounts.length),
+            onClick: firstStep ? onNextStep : onSubmit,
+            loading: isSubmitting
+          },
+          showBackButton: true,
+          subHeaderPaddingVertical: true,
+          showSubHeader: true,
+          subHeaderCenter: true,
+          subHeaderBackground: 'transparent'
+        } : {
+            headerList:['Simple'],
+          }
+        )}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -244,7 +256,9 @@ const Component: React.FC<Props> = (props: Props) => {
         ]}
         title={t('Connect Ledger device')}
       >
-        <div className={CN('container')}>
+        <div className={CN('container', {
+          '__web-ui': isWebUI,
+        })}>
           <div className='sub-title'>
             {t('Connect and unlock your Ledger, then open the DApps on your Ledger.')}
           </div>
@@ -320,6 +334,17 @@ const Component: React.FC<Props> = (props: Props) => {
               </>
             )
           }
+          {isWebUI && (
+              <Button
+                className='ledger-button'
+                icon={FooterIcon}
+                disabled={!isConnected || (!firstStep && !selectedAccounts.length)}
+                onClick={firstStep ? onNextStep : onSubmit}
+                loading={isSubmitting}
+              >
+                {t('Connect Ledger device')}
+              </Button>
+            )}
           {
             !firstStep && (
               <SwList.Section
@@ -337,7 +362,7 @@ const Component: React.FC<Props> = (props: Props) => {
             )
           }
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
@@ -350,12 +375,21 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
       overflow: 'hidden'
     },
 
+    '.__web-ui': {
+      width: '60%',
+      margin: '0 auto',
+
+      '.ledger-button': {
+        marginTop: 30
+      }
+    },
+
     '.container': {
       padding: `${token.padding}px ${token.padding}px 0`,
       overflow: 'hidden',
       height: '100%',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
     },
 
     '.sub-title': {

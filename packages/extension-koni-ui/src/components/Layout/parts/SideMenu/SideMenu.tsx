@@ -1,5 +1,5 @@
 
-import { Layout, Menu, MenuProps } from "@subwallet/react-ui"
+import { Menu, MenuProps } from "@subwallet/react-ui"
 import CN from "classnames"
 import MenuItem from "@subwallet/react-ui/es/menu/MenuItem"
 import {

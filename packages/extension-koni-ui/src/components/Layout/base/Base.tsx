@@ -96,6 +96,7 @@ const Base = (props: LayoutBaseProps) => {
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
   const { pathname } = useLocation();
+  const { isWebUI } = useContext(ScreenContext)
 
   const selectedTab = useMemo((): string => {
     const isHomePath = pathname.includes('/home');
@@ -127,12 +128,18 @@ const Base = (props: LayoutBaseProps) => {
     return <CurComponent title={props.title} key={key} onBack={onBack} />
   }, [props.title]);
 
+  const isWebBase = useMemo(() => isWebUI && withSideMenu, [isWebUI, withSideMenu])
 
-  return withSideMenu ? (
+  return isWebBase ? (
     <BaseWeb
-      {...props}
+      {...{
+        onBack,
+        title: props.title,
+      }}
       headerList={headerList}
-    />
+    >
+      {children}
+    </BaseWeb>
   ) : (
     <SwScreenLayout
       className={className}
@@ -147,7 +154,6 @@ const Base = (props: LayoutBaseProps) => {
         onClick: onSelectTab(item.url)
       }))}
     >
-
       {headerList?.map((name: keyof CompoundedHeader, index: number) =>
         renderHeader(name, index)
       )}

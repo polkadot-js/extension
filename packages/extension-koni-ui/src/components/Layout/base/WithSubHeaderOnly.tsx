@@ -17,6 +17,7 @@ const WithSubHeaderOnly = (props: Props) => {
     showBackButton = true,
     subHeaderCenter = true,
     subHeaderPaddingVertical = true,
+    withSideMenu = false,
     ...restProps } = props;
 
   return (
@@ -28,6 +29,7 @@ const WithSubHeaderOnly = (props: Props) => {
       subHeaderPaddingVertical={subHeaderPaddingVertical}
       {...restProps}
       showHeader={false}
+      withSideMenu={withSideMenu}
     >
       {children}
     </Layout.Base>

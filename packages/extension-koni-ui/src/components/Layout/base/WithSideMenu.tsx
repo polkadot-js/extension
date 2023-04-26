@@ -4,7 +4,6 @@
 import React from 'react';
 
 import { LayoutBaseProps } from './Base';
-import { Layout } from '@subwallet/react-ui';
 import SideMenu from '../parts/SideMenu';
 import BalanceHeader from '../parts/Header/Balance';
 import styled from 'styled-components';
@@ -18,47 +17,71 @@ LayoutBaseProps,
   withWebHeader?: boolean
 };
 
-const LayoutContainer = styled(Layout)`
-  padding: 20px 36px 80px 44px;
-  background: #0C0C0C;
-  height: 100%;
-  overflow: scroll;
-`
-
-// const LayoutHeader = styled(Layout.Header)`
-//   padding: 0;
-//   padding-inline: 0 !important;
-//   background: #0C0C0C !important;
-//   height: fit-content !important;
-// `
-
 const WithSideMenu = (props: SideMenuProps) => {
   const {
     children,
     withBalanceHeader = false,
     withWebHeader = false,
-    // ...restProps
   } = props;
 
+  const StyledLayout = styled('div')(({}) => {
+    return {
+        // height: '100vh',
+        // width: '100vw',
+        display: 'flex',
+        flex: 'auto',
+        position: 'relative',
+
+        '.layout-sider': {
+          position: 'sticky',
+          top: 0,
+          maxHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          width: 250,
+          background: '#1A1A1A',
+        },
+
+        '.layout-content': {
+          overflow: 'auto',
+          width: '100%',
+          padding: '20px 36px 80px 44px',
+          background: '#0C0C0C',
+          maxHeight: '100vh',
+          flex: 1,
+
+          '.layout-header': {
+
+          },
+
+          '.layout-content-main': {
+
+          }
+        }
+    }
+  })
+
   return (
-    <Layout>
-      <Layout.Sider width={250}>
+    <StyledLayout className='layout-container'>
+      <div className='layout-sider'>
         <SideMenu />
-      </Layout.Sider>
+      </div>
 
-      <LayoutContainer>
-        {(withWebHeader || withBalanceHeader) && (
-          <div>
-            {withWebHeader && <Controller />}
-            {withBalanceHeader && <BalanceHeader />}
-          </div>
-        )}
+      <div className='layout-content'>
+        <div className="layout-header">
+          {(withWebHeader || withBalanceHeader) && (
+            <div>
+              {withWebHeader && <Controller />}
+              {withBalanceHeader && <BalanceHeader />}
+            </div>
+          )}
+        </div>
 
-        <Layout.Content>
+        <div className="layout-content-main">
           {children}
-        </Layout.Content>
-      </LayoutContainer>
-    </Layout>
+        </div>
+      </div>
+    </StyledLayout>
   );
 };
 

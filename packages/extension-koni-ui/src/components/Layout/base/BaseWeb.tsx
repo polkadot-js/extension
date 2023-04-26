@@ -1,50 +1,66 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, SwScreenLayoutProps } from '@subwallet/react-ui';
-
-import React, { useCallback, useEffect, useState } from 'react';
-import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import React, { useCallback, useMemo } from 'react';
 
 import styled from 'styled-components';
 import SideMenu from '../parts/SideMenu';
 import Headers, { CompoundedHeader } from '../parts/Header';
-import { useTokenGroup, useAccountBalance, useGetChainSlugsByAccountType } from '@subwallet/extension-koni-ui/hooks';
+import { useLocation, useRoutes } from 'react-router-dom';
+import console from 'console';
 
-export interface LayoutBaseProps extends Omit<
-SwScreenLayoutProps,
-'tabBarItems' | 'footer' | 'headerContent' | 'selectedTabBarItem'
-> {
+export interface LayoutBaseWebProps  {
   children: React.ReactNode | React.ReactNode[];
-  showFooter?: boolean;
   className?: string;
-  //
   withSideMenu?: boolean;
-  headerList?: (keyof CompoundedHeader)[]
+  headerList?: (keyof CompoundedHeader)[];
+  onBack?: () => void;
+  title?: string | React.ReactNode;
 }
 
+const StyledLayout = styled('div')(({ }) => {
+  return {
+    display: 'flex',
+    flex: 'auto',
+    position: 'relative',
+
+    '.layout-sider': {
+      position: 'sticky',
+      top: 0,
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      width: 250,
+      background: '#1A1A1A',
+    },
+
+    '.layout-content': {
+      overflow: 'auto',
+      width: '100%',
+      padding: '20px 36px 80px 44px',
+      background: '#0C0C0C',
+      maxHeight: '100vh',
+      flex: 1,
+
+      '.layout-header': {
+
+      },
+
+      '.layout-content-main': {
+
+      }
+    }
+  }
+});
+
 const BaseWeb = ({
-  children,
-  withSideMenu,
-  headerIcons,
-  onBack,
-  showFooter,
   className,
   headerList,
   title,
+  onBack,
+  children,
   ...props
-}: LayoutBaseProps) => {
-  const chainsByAccountType = useGetChainSlugsByAccountType();
-  const tokenGroupStructure = useTokenGroup(chainsByAccountType);
-  const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
-
-  const LayoutContainer = styled(Layout)`
-    padding: 20px 36px 80px 44px;
-    background: #0C0C0C;
-    height: 100%;
-    overflow: auto;
-  `
-
+}: LayoutBaseWebProps) => {
   const renderHeader = useCallback((name: keyof CompoundedHeader, key: number) => {
     const CurComponent = Headers[name];
 
@@ -52,31 +68,27 @@ const BaseWeb = ({
   }, [title]);
 
   return (
-    <Layout style={{
-      height: '100%'
-    }}>
-      <HomeContext.Provider value={{
-          tokenGroupStructure,
-          accountBalance
-        }}
-      >
-        <Layout.Sider width={250}>
-          <SideMenu />
-        </Layout.Sider>
+    <StyledLayout className='layout-container'>
+      <div className='layout-sider'>
+        <SideMenu />
+      </div>
 
-        <LayoutContainer>
+      <div className='layout-content'>
+        <div className="layout-header">
           {(headerList && headerList.length) && (
               headerList.map((name: keyof CompoundedHeader, index: number) =>
                 renderHeader(name, index)
               )
           )}
-          <Layout.Content>
-            {children}
-          </Layout.Content>
-        </LayoutContainer>
-      </HomeContext.Provider>
-    </Layout>
+        </div>
+
+        <div className="layout-content-main">
+          {children}
+        </div>
+      </div>
+    </StyledLayout>
   );
 };
 
 export default BaseWeb;
+

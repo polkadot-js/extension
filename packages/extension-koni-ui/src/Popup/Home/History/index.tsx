@@ -18,6 +18,7 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { HistoryDetailModal } from './Detail';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps
 
@@ -124,6 +125,7 @@ const modalId = HISTORY_DETAIL_MODAL;
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
+  const { isWebUI } = useContext(ScreenContext);
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount } = useSelector((root) => root.accountState);
   const { historyList: rawHistoryList } = useSelector((root) => root.transactionHistory);
@@ -357,33 +359,27 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
-  return (
-    <>
-      <PageWrapper
-        className={`history ${className}`}
-        resolve={dataContext.awaitStores(['transactionHistory'])}
-      >
-        <SwSubHeader
-          background={'transparent'}
-          center={false}
-          className={'history-header'}
-          paddingVertical
-          // todo: enable this code if support download feature
-          // rightButtons={[
-          //   {
-          //     icon: (
-          //       <Icon
-          //         phosphorIcon={DownloadSimple}
-          //         size={'md'}
-          //         type='phosphor'
-          //       />
-          //     )
-          //   }
-          // ]}
-          showBackButton={false}
-          title={t('History')}
+  const listSection = useMemo(() => {
+    if (isWebUI) {
+      return (
+        <SwList
+          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+          enableSearchInput
+          filterBy={filterFunction}
+          groupBy={groupBy}
+          groupSeparator={groupSeparator}
+          list={historyList}
+          onClickActionBtn={onClickActionBtn}
+          renderItem={renderItem}
+          renderWhenEmpty={emptyList}
+          searchFunction={searchFunc}
+          searchMinCharactersCount={2}
+          searchPlaceholder={t<string>('Search history')}
+          showActionBtn
         />
-
+      )
+    }
+    return (
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
           enableSearchInput
@@ -399,6 +395,40 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           searchPlaceholder={t<string>('Search history')}
           showActionBtn
         />
+    )
+  }, [isWebUI])
+
+  return (
+    <>
+      <PageWrapper
+        className={`history ${className}`}
+        resolve={dataContext.awaitStores(['transactionHistory'])}
+      >
+        {!isWebUI && (
+           <SwSubHeader
+            background={'transparent'}
+            center={false}
+            className={'history-header'}
+            paddingVertical
+            // todo: enable this code if support download feature
+            // rightButtons={[
+            //   {
+            //     icon: (
+            //       <Icon
+            //         phosphorIcon={DownloadSimple}
+            //         size={'md'}
+            //         type='phosphor'
+            //       />
+            //     )
+            //   }
+            // ]}
+            showBackButton={false}
+            title={t('History')}
+          />
+        )}
+
+
+        {listSection}
       </PageWrapper>
 
       <HistoryDetailModal

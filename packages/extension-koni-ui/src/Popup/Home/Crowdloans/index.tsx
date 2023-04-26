@@ -5,6 +5,7 @@ import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTyp
 import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
@@ -57,6 +58,7 @@ const FILTER_MODAL_ID = 'crowdloan-filter-modal';
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
+  const { isWebUI } = useContext(ScreenContext);
   const items: CrowdloanItemType[] = useGetCrowdloanList();
   const { activeModal } = useContext(ModalContext);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
@@ -180,11 +182,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['crowdloan', 'price', 'chainStore'])}
     >
       <Layout.Base
-        showSubHeader={true}
-        subHeaderBackground={'transparent'}
-        subHeaderCenter={false}
-        subHeaderPaddingVertical={true}
-        title={t<string>('Crowdloans')}
+        {...!isWebUI && {
+          title: t<string>('Crowdloans'),
+          subHeaderBackground:'transparent',
+          subHeaderCenter:false,
+          subHeaderPaddingVertical:true,
+          showSubHeader:true,
+        }}
       >
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}

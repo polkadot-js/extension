@@ -103,7 +103,6 @@ export function Example () {
   </PageWrapper>;
 }
 
-// Todo: Create error page
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -111,13 +110,14 @@ export const router = createBrowserRouter([
     element: <Root />,
     errorElement: <ErrorFallback.element />,
     children: [
+      Porfolio.generateRouterObject('/porfolio'),
       Welcome.generateRouterObject('/welcome'),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),
-      Crowdloans.generateRouterObject('/crowdloans'),
       {
         ...Home.generateRouterObject('/home'),
         children: [
+          Porfolio.generateRouterObject('porfolio'),
           Tokens.generateRouterObject('tokens'),
           TokenDetailList.generateRouterObject('tokens/detail/:slug'),
           {
@@ -129,11 +129,16 @@ export const router = createBrowserRouter([
               NftItemDetail.generateRouterObject('item-detail')
             ]
           },
+          Crowdloans.generateRouterObject('crowdloans'),
+          Staking.generateRouterObject('staking'),
+          History.generateRouterObject('history'),
+          History.generateRouterObject('history/:chain/:extrinsicHash'),
+          {
+            path: 'dapps',
+            element: <Outlet />
+          }
         ]
       },
-      Staking.generateRouterObject('staking'),
-      History.generateRouterObject('history'),
-      History.generateRouterObject('history/:chain/:extrinsicHash'),
       {
         ...Transaction.generateRouterObject('/transaction'),
         children: [

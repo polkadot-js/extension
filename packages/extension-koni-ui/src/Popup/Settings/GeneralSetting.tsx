@@ -211,6 +211,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Layout.WithSubHeaderOnly
         onBack={goBack}
         title={t('General settings')}
+        withSideMenu
         subHeaderCenter={!isWebUI}
       >
         <div className={'__scroll-container'}>

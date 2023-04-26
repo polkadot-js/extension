@@ -47,6 +47,7 @@ const Controller = styled(Component)<Props>(({ }: Props) => ({
       display: "flex",
       justifyContent: "center",
       ".ava-group": {
+        cursor: 'pointer',
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

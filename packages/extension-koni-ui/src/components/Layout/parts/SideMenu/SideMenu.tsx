@@ -16,8 +16,10 @@ import {
 import { Logo3D } from "@subwallet/extension-koni-ui/components/Logo"
 import { ThemeProps } from "@subwallet/extension-koni-ui/types"
 import { useLocation, useNavigate } from "react-router"
+import styled from "styled-components"
+import { useMemo } from "react"
 
-export type Props = ThemeProps;
+export type Props = ThemeProps ;
 
 type MenuItem = Required<MenuProps>["items"][number]
 type SideMenuItemType = MenuItem;
@@ -25,32 +27,32 @@ type SideMenuItemType = MenuItem;
 const menuItems: SideMenuItemType[] = [
   {
     label: "Porfolio",
-    key: "home",
+    key: '/home/porfolio',
     icon: <Wallet height={20} width={20} weight="fill" />,
   },
   {
     label: "Crowdloans",
-    key: "crowdloans",
+    key: '/home/crowdloans',
     icon: <Rocket height={20} width={20} weight="fill" />,
   },
   {
     label: "Staking",
-    key: "staking",
+    key: '/home/staking',
     icon: <Database height={20} width={20} weight="fill" />,
   },
   {
     label: "DApps",
-    key: "dapps",
+    key: '/home/dapps',
     icon: <Globe height={20} width={20} weight="fill" />,
   },
   {
     label: "History",
-    key: "history",
+    key: '/home/history',
     icon: <Clock height={20} width={20} weight="fill" />,
   },
   {
     label: "Settings",
-    key: "settings",
+    key: '/settings',
     icon: <Gear height={20} width={20} weight="fill" />,
   },
 ]
@@ -58,17 +60,17 @@ const menuItems: SideMenuItemType[] = [
 const staticMenuItems: SideMenuItemType[] = [
   {
     label: "FAQs",
-    key: "faqs",
+    key: '/home/faqs',
     icon: <Info height={20} width={20} weight="fill" />,
   },
   {
     label: "Contact",
-    key: "contact",
+    key: '/home/contact',
     icon: <MessengerLogo height={20} width={20} weight="fill" />,
   },
   {
     label: "Terms of services",
-    key: "tos",
+    key: '/home/tos',
     icon: <ArrowSquareUpRight height={20} width={20} weight="fill" />,
   },
 ]
@@ -79,7 +81,13 @@ function Component({ className }: Props): React.ReactElement<Props> {
 
   const handleNavigate = ({ key }: {
     key: string
-  }) => navigate(`/${key}`)
+  }) => navigate(`${key}`)
+
+  // const activeMenu = useMemo(() => {
+  //   const pathEl = pathname.split('/').filter((i: string) => !!i);
+
+  //   return pathEl[pathEl.length - 1]
+  // }, [pathname])
 
   return (
     <div className={CN(className, "flex-col")}>
@@ -87,11 +95,19 @@ function Component({ className }: Props): React.ReactElement<Props> {
         <Logo3D height={70} width={50} />
       </div>
       <div className={CN("menu-wrapper", "flex-col")}>
-        <Menu items={menuItems} selectedKeys={[pathname.split('/')[1]]} onClick={handleNavigate} />
-        <Menu items={staticMenuItems} selectedKeys={[pathname.split('/')[1]]} onClick={handleNavigate} />
+        <Menu items={menuItems} selectedKeys={[pathname]} onClick={handleNavigate} />
+        <Menu items={staticMenuItems} selectedKeys={[pathname]} onClick={handleNavigate} />
       </div>
     </div>
   )
 }
 
-export default Component
+const SideMenu = styled(Component)<Props>(({ theme: { token }}) => {
+  return {
+    '.ant-menu-light': {
+      background: '#1A1A1A'
+    }
+  }
+})
+
+export default SideMenu;

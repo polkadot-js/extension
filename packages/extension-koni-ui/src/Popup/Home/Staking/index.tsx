@@ -16,6 +16,7 @@ import styled from 'styled-components';
 
 import MoreActionModal, { MORE_ACTION_MODAL } from './MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from './StakingDetailModal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps
 
@@ -48,6 +49,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const dataContext = useContext(DataContext);
+  const { isWebUI } = useContext(ScreenContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { data: stakingItems, priceMap } = useGetStakingList();
@@ -177,14 +179,34 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['staking', 'price'])}
     >
       <Layout.Base
-        showSubHeader={true}
-        subHeaderBackground={'transparent'}
-        subHeaderCenter={false}
-        subHeaderIcons={subHeaderButton}
-        subHeaderPaddingVertical={true}
-        title={t('Staking')}
+        {...!isWebUI && {
+          title: t('Staking'),
+          subHeaderBackground:'transparent',
+          subHeaderCenter:false,
+          subHeaderIcons:subHeaderButton,
+          subHeaderPaddingVertical:true,
+          showSubHeader:true,
+        }}
       >
         <SwList.Section
+          actionBtnIcon={(
+            <Icon
+              phosphorIcon={FadersHorizontal}
+              size='sm'
+            />
+          )}
+          enableSearchInput={true}
+          filterBy={filterFunction}
+          list={stakingItems}
+          onClickActionBtn={onClickActionBtn}
+          renderItem={renderItem}
+          renderWhenEmpty={emptyStakingList}
+          searchFunction={searchFunction}
+          searchMinCharactersCount={2}
+          searchPlaceholder={t<string>('Search project')}
+          showActionBtn
+        />
+        {/* <SwList.Section
           actionBtnIcon={(
             <Icon
               phosphorIcon={FadersHorizontal}
@@ -233,7 +255,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               staking={selectedItem.staking}
             />
           )
-        }
+        } */}
       </Layout.Base>
     </PageWrapper>
   );

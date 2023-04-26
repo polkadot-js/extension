@@ -1,29 +1,21 @@
-import React, { useCallback, useContext } from 'react';
+import React, { useContext } from 'react';
 import { ThemeProps } from "@subwallet/extension-koni-ui/types"
 import styled from 'styled-components';
 import { ScreenTab } from '@subwallet/extension-koni-ui/components';
 // import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
-import { GlobalSearchTokenModalId } from '../Home';
 // import { useGetChainSlugsByAccountType } from '@subwallet/extension-koni-ui/hooks';
-import { Button, Icon, Input, ModalContext } from '@subwallet/react-ui';
+import { Button, Icon, Input } from '@subwallet/react-ui';
 import { DownloadSimple, MagnifyingGlass } from 'phosphor-react';
 import Tokens from '../Home/Tokens';
 import NftCollections from '../Home/Nfts/NftCollections';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import CN from 'classnames';
-import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 
 type Props = ThemeProps & {
   className?: string;
 }
 
 function Component({ className }: Props): React.ReactElement<Props> {
-  // const chainsByAccountType = useGetChainSlugsByAccountType();
-  // console.log('====chainsByAccountType', chainsByAccountType);
-  // const tokenGroupStructure = useTokenGroup(chainsByAccountType);
-  // console.log('tokenGroupStructure', tokenGroupStructure);
-  // const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
-  // console.log('accountBalance', accountBalance);
   const { isWebUI } = useContext(ScreenContext)
   const rightSection: React.ReactElement = (
     <div className="right-section">

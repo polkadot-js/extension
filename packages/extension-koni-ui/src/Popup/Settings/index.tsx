@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 // import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -252,7 +252,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   return (
     <PageWrapper className={`settings ${className}`}>
-      <>
+      <Layout.Base
+        withSideMenu
+      >
         {!isWebUI ?  (
           <SwHeader
             left='logo'
@@ -318,7 +320,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         </div>
 
         <Outlet />
-      </>
+      </Layout.Base>
     </PageWrapper>
   );
 }

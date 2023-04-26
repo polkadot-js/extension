@@ -448,9 +448,13 @@ export default class TransactionService {
         break;
       }
 
-      case ExtrinsicType.EVM_EXECUTE:
-        // Todo: Update historyItem.to
+      case ExtrinsicType.EVM_EXECUTE: {
+        const data = parseTransactionData<ExtrinsicType.EVM_EXECUTE>(transaction.data);
+
+        historyItem.to = data?.to || '';
         break;
+      }
+
       case ExtrinsicType.UNKNOWN:
         break;
     }

@@ -1780,9 +1780,14 @@ export default class KoniExtension {
             substrateApi
           });
 
-          const paymentInfo = await mockTx.paymentInfo(address);
+          try {
+            const paymentInfo = await mockTx.paymentInfo(address);
 
-          estimatedFee = paymentInfo?.partialFee?.toString() || '0';
+            estimatedFee = paymentInfo?.partialFee?.toString() || '0';
+          } catch (e) {
+            estimatedFee = '0';
+            console.warn('Error estimating fee', e);
+          }
         }
       } else {
         const [mockTx] = await createTransferExtrinsic({
@@ -1795,9 +1800,14 @@ export default class KoniExtension {
           value: '0'
         });
 
-        const paymentInfo = await mockTx?.paymentInfo(address);
+        try {
+          const paymentInfo = await mockTx?.paymentInfo(address);
 
-        estimatedFee = paymentInfo?.partialFee?.toString() || '0';
+          estimatedFee = paymentInfo?.partialFee?.toString() || '0';
+        } catch (e) {
+          estimatedFee = '0';
+          console.warn('Error estimating fee', e);
+        }
       }
 
       maxTransferable = maxTransferable.sub(new BN(estimatedFee));

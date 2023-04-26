@@ -226,8 +226,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const [isTransferAll, setIsTransferAll] = useState(false);
   const [, update] = useState({});
   const [isBalanceReady, setIsBalanceReady] = useState(true);
+  const [forceUpdateMaxValue, setForceUpdateMaxValue] = useState<object|undefined>(undefined);
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone, setIsTransferAll);
+  const handleTransferAll = useCallback((value: boolean) => {
+    setForceUpdateMaxValue({});
+    setIsTransferAll(value);
+  }, []);
+
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDone, handleTransferAll);
 
   const [form] = Form.useForm<TransferFormProps>();
   const formDefault = useMemo((): TransferFormProps => {
@@ -579,6 +585,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             >
               <AmountInput
                 decimals={decimals}
+                forceUpdateMaxValue={forceUpdateMaxValue}
                 maxValue={maxTransfer}
                 onSetMax={onSetMaxTransferable}
                 showMaxButton={true}

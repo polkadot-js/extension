@@ -42,7 +42,8 @@
     "web-runner:build": "cd packages/web-runner && yarn webpack --config webpack.config.cjs --mode production",
     "web-runner:dev": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
-    "web-runner:deploy": "yarn web-runner:build && gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'"
+    "web-runner:deploy": "yarn web-runner:build && gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'",
+    "web-runner:publish": "gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'"
   },
   "dependencies": {
     "@types/node": "^17.0.10",

@@ -117,10 +117,24 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
         }
       }),
       new CopyPlugin({
-        patterns: [{
-          from: path.resolve(__dirname, './package.json'),
-          to: path.resolve(__dirname, './build/package.json')
-        }]
+        patterns: [
+          {
+            from: path.resolve(__dirname, './package.json'),
+            to: path.resolve(__dirname, './build/package.json')
+          },
+          {
+            from: path.resolve(__dirname, './public/images'),
+            to: path.resolve(__dirname, './build/images')
+          },
+          {
+            from: path.resolve(__dirname, './public/fonts'),
+            to: path.resolve(__dirname, './build/fonts')
+          },
+          {
+            from: path.resolve(__dirname, './public/locales'),
+            to: path.resolve(__dirname, './build/locales')
+          },
+        ]
       }),
       new HtmlWebpackPlugin({
         filename: 'index.html',

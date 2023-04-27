@@ -26,6 +26,7 @@ SwScreenLayoutProps,
   headerList?: (keyof CompoundedHeader)[];
   withSideMenu?: boolean,
   withController?: boolean,
+  showWebHeader?: boolean,
 }
 
 export const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
@@ -91,6 +92,7 @@ const Base = (props: LayoutBaseProps) => {
     headerList,
     withSideMenu = false,
     withController,
+    showWebHeader = false,
     ...rest
   } = props;
   const navigate = useNavigate();
@@ -122,7 +124,7 @@ const Base = (props: LayoutBaseProps) => {
     goHome();
   }, [goHome]);
 
-  const renderHeader = useCallback((name: keyof CompoundedHeader, key: number) => {
+  const renderHeader = useCallback((name: keyof CompoundedHeader, key?: number) => {
     const CurComponent = Headers[name];
 
     return <CurComponent title={props.title} key={key} onBack={onBack} />
@@ -154,7 +156,7 @@ const Base = (props: LayoutBaseProps) => {
         onClick: onSelectTab(item.url)
       }))}
     >
-      {headerList?.map((name: keyof CompoundedHeader, index: number) =>
+      {showWebHeader && headerList?.map((name: keyof CompoundedHeader, index: number) =>
         renderHeader(name, index)
       )}
       {children}

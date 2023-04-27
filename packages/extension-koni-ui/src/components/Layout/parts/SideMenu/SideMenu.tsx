@@ -1,7 +1,6 @@
 
-import { Menu, MenuProps } from "@subwallet/react-ui"
+import { Menu } from "@subwallet/react-ui"
 import CN from "classnames"
-import MenuItem from "@subwallet/react-ui/es/menu/MenuItem"
 import {
   Wallet,
   Rocket,
@@ -17,17 +16,17 @@ import { Logo3D } from "@subwallet/extension-koni-ui/components/Logo"
 import { ThemeProps } from "@subwallet/extension-koni-ui/types"
 import { useLocation, useNavigate } from "react-router"
 import styled from "styled-components"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
+import { MenuItemType } from "@subwallet/react-ui/es/menu/hooks/useItems"
 
 export type Props = ThemeProps ;
 
-type MenuItem = Required<MenuProps>["items"][number]
-type SideMenuItemType = MenuItem;
+type SideMenuItemType = MenuItemType;
 
 const menuItems: SideMenuItemType[] = [
   {
     label: "Porfolio",
-    key: '/home/porfolio',
+    key: '/home',
     icon: <Wallet height={20} width={20} weight="fill" />,
   },
   {
@@ -78,21 +77,22 @@ const staticMenuItems: SideMenuItemType[] = [
 function Component({ className }: Props): React.ReactElement<Props> {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const [isHovered, setHovered] = useState<boolean>(false);
 
   const handleNavigate = ({ key }: {
     key: string
   }) => navigate(`${key}`)
 
-  // const activeMenu = useMemo(() => {
-  //   const pathEl = pathname.split('/').filter((i: string) => !!i);
-
-  //   return pathEl[pathEl.length - 1]
-  // }, [pathname])
-
   return (
-    <div className={CN(className, "flex-col")}>
+    <div
+      className={CN(className, "flex-col", "side-menu-wrapper",{
+        '__expanded': isHovered
+      })}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <div className="logo-container">
-        <Logo3D height={70} width={50} />
+        <Logo3D />
       </div>
       <div className={CN("menu-wrapper", "flex-col")}>
         <Menu items={menuItems} selectedKeys={[pathname]} onClick={handleNavigate} />
@@ -102,12 +102,4 @@ function Component({ className }: Props): React.ReactElement<Props> {
   )
 }
 
-const SideMenu = styled(Component)<Props>(({ theme: { token }}) => {
-  return {
-    '.ant-menu-light': {
-      background: '#1A1A1A'
-    }
-  }
-})
-
-export default SideMenu;
+export default Component;

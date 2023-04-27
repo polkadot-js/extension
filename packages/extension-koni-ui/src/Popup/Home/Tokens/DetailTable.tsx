@@ -5,11 +5,13 @@ type Props<T> = {
   className?: string
   columns: ColumnsType<T>
   dataSource: T[]
+  onClick: (item: T) => void
 }
 
 const Component = <T extends object>({
   columns,
-  dataSource
+  dataSource,
+  onClick
 }: Props<T>): React.ReactElement<Props<T>> => {
   console.log('dataSource', dataSource)
   return (
@@ -17,6 +19,13 @@ const Component = <T extends object>({
       dataSource={dataSource}
       columns={columns}
       pagination={false}
+      onRow={(record, rowIndex) => {
+        return {
+          onClick: () => {
+            onClick && onClick(record)
+          },
+        };
+      }}
     />
   )
 }

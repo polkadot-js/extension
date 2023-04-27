@@ -17,6 +17,7 @@ import styled from 'styled-components';
 import MoreActionModal, { MORE_ACTION_MODAL } from './MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from './StakingDetailModal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import Search from '@subwallet/extension-koni-ui/components/Search';
 
 type Props = ThemeProps
 
@@ -47,6 +48,7 @@ const reloadIcon = <Icon
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [searchInput, setSearchInput] = useState<string>('')
 
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
@@ -173,21 +175,30 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [address, currentAccount?.address, inactiveModal, navigate]);
 
-  return (
-    <PageWrapper
-      className={`staking ${className}`}
-      resolve={dataContext.awaitStores(['staking', 'price'])}
-    >
-      <Layout.Base
-        {...!isWebUI && {
-          title: t('Staking'),
-          subHeaderBackground:'transparent',
-          subHeaderCenter:false,
-          subHeaderIcons:subHeaderButton,
-          subHeaderPaddingVertical:true,
-          showSubHeader:true,
-        }}
-      >
+  const listSection = useMemo(() => {
+    if (isWebUI) {
+      return (
+        <div className='web-list'>
+          <Search
+            searchValue={searchInput}
+            placeholder={"Chain, Address, Type,..."}
+            onSearch={(value: string) => setSearchInput(value)}
+            onClickActionBtn={onClickActionBtn}
+            actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} size='sm'/>}
+            showActionBtn
+          />
+          <SwList
+            filterBy={filterFunction}
+            list={stakingItems}
+            searchBy={searchFunction}
+            searchTerm={searchInput}
+            renderItem={renderItem}
+            renderWhenEmpty={emptyStakingList}
+          />
+        </div>
+      )
+    }
+    return (
         <SwList.Section
           actionBtnIcon={(
             <Icon
@@ -206,24 +217,26 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           searchPlaceholder={t<string>('Search project')}
           showActionBtn
         />
-        {/* <SwList.Section
-          actionBtnIcon={(
-            <Icon
-              phosphorIcon={FadersHorizontal}
-              size='sm'
-            />
-          )}
-          enableSearchInput={true}
-          filterBy={filterFunction}
-          list={stakingItems}
-          onClickActionBtn={onClickActionBtn}
-          renderItem={renderItem}
-          renderWhenEmpty={emptyStakingList}
-          searchFunction={searchFunction}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search project')}
-          showActionBtn
-        />
+    )
+  }, [isWebUI, searchInput, selectedFilters])
+
+  return (
+    <PageWrapper
+      className={`staking ${className}`}
+      resolve={dataContext.awaitStores(['staking', 'price'])}
+    >
+      <Layout.Base
+        {...!isWebUI && {
+          title: t('Staking'),
+          subHeaderBackground:'transparent',
+          subHeaderCenter:false,
+          subHeaderIcons:subHeaderButton,
+          subHeaderPaddingVertical:true,
+          showSubHeader:true,
+        }}
+      >
+
+        {listSection}
 
         <FilterModal
           id={FILTER_MODAL_ID}
@@ -255,7 +268,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               staking={selectedItem.staking}
             />
           )
-        } */}
+        }
       </Layout.Base>
     </PageWrapper>
   );
@@ -265,6 +278,14 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
+
+    '.web-list': {
+      width: '100%',
+
+      '.container': {
+        marginBottom: 12,
+      }
+    },
 
     '.ant-sw-screen-layout-body': {
       display: 'flex'

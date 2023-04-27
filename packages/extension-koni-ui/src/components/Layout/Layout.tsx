@@ -4,20 +4,17 @@
 import Base from './base/Base';
 import { Home } from './base/Home';
 import { WithSubHeaderOnly } from './base/WithSubHeaderOnly';
-import { WithSideMenu } from './base/WithSideMenu';
 
 export type CompoundedComponent = {
   Home: typeof Home;
   Base: typeof Base;
   WithSubHeaderOnly: typeof WithSubHeaderOnly;
-  WithSideMenu: typeof WithSideMenu;
 };
 
 const Layout: CompoundedComponent = {
   Home: Home,
   Base: Base,
   WithSubHeaderOnly: WithSubHeaderOnly,
-  WithSideMenu: WithSideMenu,
 };
 
 export default Layout;

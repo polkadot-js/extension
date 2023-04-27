@@ -29,8 +29,8 @@ export const RouteState = {
 };
 
 const welcomeUrl = '/welcome';
-// const tokenUrl = '/home/tokens';
-const porfolioUrl = '/home/porfolio';
+const tokenUrl = '/home/tokens';
+// const porfolioUrl = '/home/porfolio';
 const loginUrl = '/keyring/login';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
@@ -122,7 +122,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       if (hasConfirmations) {
         openPModal('confirmations');
       } else {
-        navigate(porfolioUrl);
+        navigate(tokenUrl);
       }
     } else if (pathName === loginUrl && !isLocked) {
       goHome();

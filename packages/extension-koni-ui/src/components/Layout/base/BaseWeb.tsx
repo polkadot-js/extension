@@ -6,8 +6,6 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import SideMenu from '../parts/SideMenu';
 import Headers, { CompoundedHeader } from '../parts/Header';
-import { useLocation, useRoutes } from 'react-router-dom';
-import console from 'console';
 
 export interface LayoutBaseWebProps  {
   children: React.ReactNode | React.ReactNode[];
@@ -30,8 +28,6 @@ const StyledLayout = styled('div')(({ }) => {
       height: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      width: 250,
-      background: '#1A1A1A',
     },
 
     '.layout-content': {
@@ -75,7 +71,7 @@ const BaseWeb = ({
 
       <div className='layout-content'>
         <div className="layout-header">
-          {(headerList && headerList.length) && (
+          {(headerList && !!headerList.length) && (
               headerList.map((name: keyof CompoundedHeader, index: number) =>
                 renderHeader(name, index)
               )

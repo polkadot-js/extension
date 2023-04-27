@@ -74,8 +74,15 @@ const _ScreenTab = styled(Component)<Props>(({ theme: { token } }: Props) => {
       margin: `0 ${token.padding}px ${token.padding}px`,
       background: "#1A1A1A",
 
-      ".__with-search": {
+      "&.__with-search": {
         margin: 0,
+        display: 'flex',
+        justifyContent: 'start',
+        alignItems: 'center',
+
+        '& > li': {
+          paddingBottom: '8px !important',
+        }
       },
     },
 

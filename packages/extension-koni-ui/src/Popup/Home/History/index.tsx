@@ -10,8 +10,8 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
-import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
-import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
+import { Button, Icon, Input, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
+import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, DownloadSimple, FadersHorizontal, MagnifyingGlass, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -19,6 +19,8 @@ import styled from 'styled-components';
 
 import { HistoryDetailModal } from './Detail';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import Search from '@subwallet/extension-koni-ui/components/Search';
+
 
 type Props = ThemeProps
 
@@ -129,6 +131,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount } = useSelector((root) => root.accountState);
   const { historyList: rawHistoryList } = useSelector((root) => root.transactionHistory);
+  const [searchInput, setSearchInput] = useState<string>('')
 
   const isActive = checkActive(modalId);
 
@@ -362,21 +365,26 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const listSection = useMemo(() => {
     if (isWebUI) {
       return (
-        <SwList
-          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-          enableSearchInput
-          filterBy={filterFunction}
-          groupBy={groupBy}
-          groupSeparator={groupSeparator}
-          list={historyList}
-          onClickActionBtn={onClickActionBtn}
-          renderItem={renderItem}
-          renderWhenEmpty={emptyList}
-          searchFunction={searchFunc}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search history')}
-          showActionBtn
-        />
+        <div className='web-list'>
+          <Search
+            searchValue={searchInput}
+            placeholder={"Chain, Address, Type,..."}
+            onSearch={(value: string) => setSearchInput(value)}
+            onClickActionBtn={onClickActionBtn}
+            actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+            showActionBtn
+          />
+          <SwList
+            filterBy={filterFunction}
+            groupBy={groupBy}
+            groupSeparator={groupSeparator}
+            list={historyList}
+            searchBy={searchFunc}
+            searchTerm={searchInput}
+            renderItem={renderItem}
+            renderWhenEmpty={emptyList}
+          />
+        </div>
       )
     }
     return (
@@ -396,7 +404,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           showActionBtn
         />
     )
-  }, [isWebUI])
+  }, [isWebUI, searchInput, selectedFilters])
 
   return (
     <>

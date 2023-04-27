@@ -73,7 +73,8 @@ const Component: React.FC<Props> = (props: Props) => {
         subHeaderCenter: true,
         subHeaderBackground: 'transparent'
     }: {
-      headerList: ['Simple']
+        headerList: ['Simple'],
+        showWebHeader: true
     })}
       showBackButton={true}
       subHeaderLeft={(

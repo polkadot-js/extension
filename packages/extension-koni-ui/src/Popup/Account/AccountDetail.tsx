@@ -3,6 +3,8 @@
 
 import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
+import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
@@ -18,7 +20,7 @@ import { convertFieldToObject } from '@subwallet/extension-koni-ui/utils/form/fo
 import { BackgroundIcon, Button, Field, Form, Icon, Input, QRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, Swatches, TrashSimple, User } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -39,6 +41,20 @@ interface DetailFormState {
   [FormFieldName.NAME]: string;
 }
 
+
+const instructionContents: InstructionContentType[] = [
+  {
+    title: "Why do I need to enter a password?",
+    description: "For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it.",
+    type: 'warning'
+  },
+  {
+    title: "Can I recover a password?",
+    description: "The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!",
+    type: 'warning'
+  }
+]
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
@@ -53,6 +69,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const account = useGetAccountByAddress(accountAddress);
   const deleteAccountAction = useDeleteAccount();
+
+  const { isWebUI } = useContext(ScreenContext);
 
   const saveTimeOutRef = useRef<NodeJS.Timer>();
 
@@ -206,8 +224,18 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         disableBack={deriving}
+        headerList={['Simple']}
+        showWebHeader={isWebUI}
+        {...!isWebUI && {
+          showBackButton: true,
+          showSubHeader: true,
+          subHeaderBackground:'transparent',
+          subHeaderCenter: true,
+          subHeaderPaddingVertical: true,
+          showHeader: false,
+        }}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -217,144 +245,154 @@ const Component: React.FC<Props> = (props: Props) => {
         ]}
         title={t('Account detail')}
       >
-        <div className='body-container'>
-          <div className='account-qr'>
-            <QRCode
-              errorLevel='M'
-              icon=''
-              iconSize={token.sizeLG * 1.5}
-              size={token.sizeXL * 3.5}
-              value={account.address}
-            />
-          </div>
-          <Form
-            form={form}
-            initialValues={{
-              [FormFieldName.NAME]: account.name || ''
-            }}
-            name='account-detail-form'
-            onFieldsChange={onUpdate}
-            onFinish={onSubmit}
-          >
-            <Form.Item
-              className={CN('account-field')}
-              name={FormFieldName.NAME}
-              rules={[
-                {
-                  message: 'Wallet name is required',
-                  transform: (value: string) => value.trim(),
-                  required: true
-                }
-              ]}
-              statusHelpAsTooltip={true}
-            >
-              <Input
-                className='account-name-input'
-                disabled={deriving}
-                label={t('Wallet name')}
-                onBlur={form.submit}
-                placeholder={t('Wallet name')}
-                prefix={(
-                  <BackgroundIcon
-                    backgroundColor='var(--wallet-name-icon-bg-color)'
-                    iconColor='var(--wallet-name-icon-color)'
-                    phosphorIcon={walletNamePrefixIcon}
-                  />
-                )}
-                suffix={(
-                  <Icon
-                    className={CN({ loading: saving })}
-                    phosphorIcon={saving ? CircleNotch : FloppyDiskBack}
-                    size='sm'
-                  />
-                )}
-              />
-            </Form.Item>
-          </Form>
-          <div className={CN('account-field', 'mb-lg')}>
-            <Field
-              content={toShort(account.address, 11, 13)}
-              label={t('Wallet address')}
-              placeholder={t('Wallet address')}
-              prefix={(
-                <AccountAvatar
-                  size={token.sizeMD}
+        <div className={CN('body-container', {
+          '__web-ui': isWebUI
+        })}>
+          <div className="main-content">
+            {!isWebUI && (
+              <div className='account-qr'>
+                <QRCode
+                  errorLevel='M'
+                  icon=''
+                  iconSize={token.sizeLG * 1.5}
+                  size={token.sizeXL * 3.5}
                   value={account.address}
                 />
-              )}
-              suffix={(
-                <Button
-                  icon={(
+              </div>
+            )}
+            <Form
+              form={form}
+              initialValues={{
+                [FormFieldName.NAME]: account.name || ''
+              }}
+              name='account-detail-form'
+              onFieldsChange={onUpdate}
+              onFinish={onSubmit}
+            >
+              <Form.Item
+                className={CN('account-field')}
+                name={FormFieldName.NAME}
+                rules={[
+                  {
+                    message: 'Wallet name is required',
+                    transform: (value: string) => value.trim(),
+                    required: true
+                  }
+                ]}
+                statusHelpAsTooltip={true}
+              >
+                <Input
+                  className='account-name-input'
+                  disabled={deriving}
+                  label={t('Wallet name')}
+                  onBlur={form.submit}
+                  placeholder={t('Wallet name')}
+                  prefix={(
+                    <BackgroundIcon
+                      backgroundColor='var(--wallet-name-icon-bg-color)'
+                      iconColor='var(--wallet-name-icon-color)'
+                      phosphorIcon={walletNamePrefixIcon}
+                    />
+                  )}
+                  suffix={(
                     <Icon
-                      phosphorIcon={CopySimple}
+                      className={CN({ loading: saving })}
+                      phosphorIcon={saving ? CircleNotch : FloppyDiskBack}
                       size='sm'
                     />
                   )}
-                  onClick={onCopyAddress}
-                  size='xs'
-                  type='ghost'
+                />
+              </Form.Item>
+            </Form>
+            <div className={CN('account-field', 'mb-lg')}>
+              <Field
+                content={toShort(account.address, 11, 13)}
+                label={t('Wallet address')}
+                placeholder={t('Wallet address')}
+                prefix={(
+                  <AccountAvatar
+                    size={token.sizeMD}
+                    value={account.address}
+                  />
+                )}
+                suffix={(
+                  <Button
+                    icon={(
+                      <Icon
+                        phosphorIcon={CopySimple}
+                        size='sm'
+                      />
+                    )}
+                    onClick={onCopyAddress}
+                    size='xs'
+                    type='ghost'
+                  />
+                )}
+              />
+            </div>
+            <Button
+              block={true}
+              className={CN('account-button', `action-type-${ActionType.DERIVE}`)}
+              contentAlign='left'
+              disabled={!canDerive}
+              icon={(
+                <BackgroundIcon
+                  backgroundColor='var(--icon-bg-color)'
+                  phosphorIcon={ShareNetwork}
+                  size='sm'
+                  weight='fill'
                 />
               )}
-            />
+              loading={deriving}
+              onClick={onDerive}
+              schema='secondary'
+            >
+              {t('Derive account')}
+            </Button>
+            <Button
+              block={true}
+              className={CN('account-button', `action-type-${ActionType.EXPORT}`)}
+              contentAlign='left'
+              disabled={account.isExternal || deriving}
+              icon={(
+                <BackgroundIcon
+                  backgroundColor='var(--icon-bg-color)'
+                  phosphorIcon={Export}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+              onClick={onExport}
+              schema='secondary'
+            >
+              {t('Export account')}
+            </Button>
+            <Button
+              block={true}
+              className={CN('account-button', `action-type-${ActionType.DELETE}`)}
+              contentAlign='left'
+              disabled={deriving}
+              icon={(
+                <BackgroundIcon
+                  backgroundColor='var(--icon-bg-color)'
+                  phosphorIcon={TrashSimple}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+              loading={deleting}
+              onClick={onDelete}
+              schema='secondary'
+            >
+              {t('Remove account')}
+            </Button>
           </div>
-          <Button
-            block={true}
-            className={CN('account-button', `action-type-${ActionType.DERIVE}`)}
-            contentAlign='left'
-            disabled={!canDerive}
-            icon={(
-              <BackgroundIcon
-                backgroundColor='var(--icon-bg-color)'
-                phosphorIcon={ShareNetwork}
-                size='sm'
-                weight='fill'
-              />
-            )}
-            loading={deriving}
-            onClick={onDerive}
-            schema='secondary'
-          >
-            {t('Derive account')}
-          </Button>
-          <Button
-            block={true}
-            className={CN('account-button', `action-type-${ActionType.EXPORT}`)}
-            contentAlign='left'
-            disabled={account.isExternal || deriving}
-            icon={(
-              <BackgroundIcon
-                backgroundColor='var(--icon-bg-color)'
-                phosphorIcon={Export}
-                size='sm'
-                weight='fill'
-              />
-            )}
-            onClick={onExport}
-            schema='secondary'
-          >
-            {t('Export account')}
-          </Button>
-          <Button
-            block={true}
-            className={CN('account-button', `action-type-${ActionType.DELETE}`)}
-            contentAlign='left'
-            disabled={deriving}
-            icon={(
-              <BackgroundIcon
-                backgroundColor='var(--icon-bg-color)'
-                phosphorIcon={TrashSimple}
-                size='sm'
-                weight='fill'
-              />
-            )}
-            loading={deleting}
-            onClick={onDelete}
-            schema='secondary'
-          >
-            {t('Remove account')}
-          </Button>
+
+          {isWebUI &&
+            <InstructionContainer contents={instructionContents}/>
+          }
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
@@ -362,6 +400,24 @@ const Component: React.FC<Props> = (props: Props) => {
 const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.body-container': {
+      '&.__web-ui': {
+        display: "flex",
+        justifyContent: "center",
+        gap: 16,
+        width: '60%',
+        margin: '0 auto',
+
+        "& > *": {
+          flex: 1,
+        },
+
+        ".form-container": {
+          ".ant-btn": {
+            width: "100%",
+          },
+        },
+      },
+
       padding: `0 ${token.padding}px`,
       '--wallet-name-icon-bg-color': token['geekblue-6'],
       '--wallet-name-icon-color': token.colorWhite,

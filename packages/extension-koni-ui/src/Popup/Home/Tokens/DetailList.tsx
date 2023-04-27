@@ -19,7 +19,7 @@ import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import classNames from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -31,7 +31,6 @@ type CurrentSelectToken = {
 
 function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
-
   return (
     <PageWrapper
       className={`tokens ${className}`}
@@ -46,6 +45,10 @@ const TokenDetailModalId = 'tokenDetailModalId';
 
 function Component (): React.ReactElement {
   const { slug: tokenGroupSlug } = useParams();
+  const outletContext: {
+      searchInput: string,
+      setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
+  } = useOutletContext();
 
   const notify = useNotification();
   const { t } = useTranslation();
@@ -255,6 +258,10 @@ function Component (): React.ReactElement {
       window.removeEventListener('resize', handleResize);
     };
   }, [handleResize]);
+
+  useEffect(() => {
+    outletContext?.setDetailTitle(<div className='header-content'>{t('Token')}: {symbol}</div>)
+  }, [symbol, outletContext])
 
   return (
     <div

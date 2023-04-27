@@ -5,6 +5,7 @@ import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useNavigateOnChangeAccount } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -18,8 +19,8 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Image, Trash } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -34,6 +35,11 @@ const subHeaderRightButton = <Icon
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const location = useLocation();
   const { collectionInfo, nftList } = location.state as INftCollectionDetail;
+  const outletContext: {
+    searchInput: string,
+    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
+  } = useOutletContext();
+  const { isWebUI } = useContext(ScreenContext)
 
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -127,6 +133,25 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   ];
 
+  const title = useMemo(() => {
+    return (
+       <div className={CN('header-content')}>
+          <div className={CN('collection-name')}>
+            {collectionInfo.collectionName || collectionInfo.collectionId}
+          </div>
+          <div className={CN('collection-count')}>
+            &nbsp;({nftList.length})
+          </div>
+        </div>
+    )
+  }, [collectionInfo, nftList])
+
+  useEffect(() => {
+    if (outletContext) {
+      outletContext.setDetailTitle(title)
+    }
+  }, [outletContext, title])
+
   return (
     <PageWrapper
       className={`${className}`}
@@ -134,37 +159,46 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     >
       <Layout.Base
         onBack={onBack}
-        showBackButton={true}
-        showSubHeader={true}
-        subHeaderBackground={'transparent'}
-        subHeaderCenter={false}
-        subHeaderIcons={subHeaderButton}
-        subHeaderPaddingVertical={true}
-        title={(
-          <div className={CN('header-content')}>
-            <div className={CN('collection-name')}>
-              {collectionInfo.collectionName || collectionInfo.collectionId}
-            </div>
-            <div className={CN('collection-count')}>
-              &nbsp;({nftList.length})
-            </div>
-          </div>
-        )}
+        {...!isWebUI && {
+          showBackButton:true,
+          showSubHeader:true,
+          subHeaderBackground:'transparent',
+          subHeaderCenter:false,
+          subHeaderIcons:subHeaderButton,
+          subHeaderPaddingVertical:true,
+          title: title
+        }}
       >
-        <SwList.Section
-          className={CN('nft_item_list__container')}
-          displayGrid={true}
-          enableSearchInput={true}
-          gridGap={'14px'}
-          list={nftList}
-          minColumnWidth={'160px'}
-          renderItem={renderNft}
-          renderOnScroll={true}
-          renderWhenEmpty={emptyNft}
-          searchFunction={searchNft}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search Nft name or ID')}
-        />
+        {isWebUI ? (
+          <SwList
+            className={CN('nft_item_list__container')}
+            displayGrid={true}
+            enableSearchInput={true}
+            gridGap={'14px'}
+            list={nftList}
+            minColumnWidth={'160px'}
+            renderItem={renderNft}
+            renderOnScroll={true}
+            renderWhenEmpty={emptyNft}
+            searchTerm={outletContext.searchInput}
+            searchBy={searchNft}
+          />
+        ) : (
+          <SwList.Section
+            className={CN('nft_item_list__container')}
+            displayGrid={true}
+            enableSearchInput={true}
+            gridGap={'14px'}
+            list={nftList}
+            minColumnWidth={'160px'}
+            renderItem={renderNft}
+            renderOnScroll={true}
+            renderWhenEmpty={emptyNft}
+            searchFunction={searchNft}
+            searchMinCharactersCount={2}
+            searchPlaceholder={t<string>('Search Nft name or ID')}
+          />
+        )}
       </Layout.Base>
     </PageWrapper>
   );

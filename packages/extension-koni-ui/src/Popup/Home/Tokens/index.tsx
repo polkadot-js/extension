@@ -16,12 +16,12 @@ import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Upper
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { Button, Icon, Table } from '@subwallet/react-ui';
+import { Button, Icon } from '@subwallet/react-ui';
 import classNames from 'classnames';
 import { Coins, FadersHorizontal } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
 import DetailTable from './DetailTable';
 
@@ -35,9 +35,12 @@ const Component = (): React.ReactElement => {
   const topBlockRef = useRef<HTMLDivElement>(null);
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
-    const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-    console.log('==TOKEN tokenGroupBalanceMap', tokenGroupBalanceMap);
-    console.log('==TOKEN totalBalanceInfo', totalBalanceInfo);
+  const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+
+  const { searchInput }: {
+    searchInput: string
+  } = useOutletContext()
+
   const notify = useNotification();
   const { accountSelectorItems,
     onOpenReceive,
@@ -123,9 +126,7 @@ const Component = (): React.ReactElement => {
   const isTotalBalanceDecrease = totalBalanceInfo.change.status === 'decrease';
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
-    return () => {
-      navigate(`/home/tokens/detail/${item.slug}`);
-    };
+    navigate(`/home/tokens/detail/${item.slug}`);
   }, [navigate]);
 
   const onClickManageToken = useCallback(() => {
@@ -156,15 +157,16 @@ const Component = (): React.ReactElement => {
 
   const tokenGroupBalanceItems = useMemo<TokenBalanceItemType[]>(() => {
     const result: TokenBalanceItemType[] = [];
+      const searchTextLowerCase = searchInput?.toLowerCase() || '';
 
-    sortedTokenGroups.forEach((tokenGroupSlug) => {
-      if (tokenGroupBalanceMap[tokenGroupSlug]) {
-        result.push(tokenGroupBalanceMap[tokenGroupSlug]);
-      }
-    });
+      sortedTokenGroups.forEach((tokenGroupSlug) => {
+        if (tokenGroupBalanceMap[tokenGroupSlug]) {
+          result.push(tokenGroupBalanceMap[tokenGroupSlug]);
+        }
+      })
 
-    return result;
-  }, [sortedTokenGroups, tokenGroupBalanceMap]);
+      return result.filter((item) => item.symbol.toLowerCase().includes(searchTextLowerCase));
+  }, [sortedTokenGroups, tokenGroupBalanceMap, searchInput]);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
@@ -190,7 +192,7 @@ const Component = (): React.ReactElement => {
           title: 'Portfolio %',
           dataIndex: 'percentage',
           key: 'percentage',
-          // render: () => <>85%</>
+          render: () => <>85%</>
         },
         {
           title: 'Price',
@@ -210,6 +212,7 @@ const Component = (): React.ReactElement => {
         }
       ]}
       dataSource={tokenGroupBalanceItems}
+      onClick={onClickItem}
     />
   )
 
@@ -246,7 +249,7 @@ const Component = (): React.ReactElement => {
               <TokenGroupBalanceItem
                 key={item.slug}
                 {...item}
-                onPressItem={onClickItem(item)}
+                onPressItem={() => onClickItem(item)}
               />
             );
           })
@@ -292,7 +295,11 @@ const Component = (): React.ReactElement => {
   );
 };
 
-const WrapperComponent = ({ className = '' }: ThemeProps): React.ReactElement<Props> => {
+type WrapperProps = ThemeProps & {
+  searchInput?: string
+}
+
+const WrapperComponent = ({ className = '', searchInput }: WrapperProps): React.ReactElement<Props> => {
   const dataContext = useContext(DataContext);
 
   return (
@@ -305,7 +312,7 @@ const WrapperComponent = ({ className = '' }: ThemeProps): React.ReactElement<Pr
   );
 };
 
-const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, token } }: ThemeProps) => {
+const Tokens = styled(WrapperComponent)<WrapperProps>(({ theme: { extendToken, token } }: WrapperProps) => {
   return ({
     overflow: 'hidden',
 

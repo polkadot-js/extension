@@ -164,7 +164,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           subHeaderCenter: true,
           subHeaderBackground: 'transparent'
         }: {
-          headerList: ['Simple']
+          headerList: ['Simple'],
+          showWebHeader: true
         })}
         subHeaderIcons={[
           {

@@ -5,9 +5,10 @@ import { Layout } from '@subwallet/extension-koni-ui/components';
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
 import { FadersHorizontal, MagnifyingGlass } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CompoundedHeader } from '@subwallet/extension-koni-ui/components/Layout/parts/Header'
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = {
   children?: React.ReactNode;
@@ -22,6 +23,7 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
   const navigate = useNavigate();
   const { activeModal } = useContext(ModalContext);
   const { pathname } = useLocation();
+  const { isWebUI } = useContext(ScreenContext);
 
   const onOpenCustomizeModal = useCallback(() => {
     activeModal(CUSTOMIZE_MODAL);
@@ -57,20 +59,19 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
     return icons;
   }, [onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon]);
 
-const SCREEN_HEADERS: Record<keyof CompoundedHeader, string[]> = {
-  'Controller': [
-    'porfolio',
-    'crowdloans',
-    'history',
-    'dapps',
-    'staking'
-  ],
-  'Balance': [
-    'porfolio'
-  ],
-  'Simple': []
-}
-
+  const SCREEN_HEADERS: Record<keyof CompoundedHeader, string[]> = {
+    'Controller': [
+      'porfolio',
+      'crowdloans',
+      'history',
+      'dapps',
+      'staking'
+    ],
+    'Balance': [
+      'porfolio'
+    ],
+    'Simple': []
+  }
 
   const onClickListIcon = useCallback(() => {
     navigate('/settings/list');
@@ -80,7 +81,6 @@ const SCREEN_HEADERS: Record<keyof CompoundedHeader, string[]> = {
     const pathEls = pathname.split('/').filter((i: string) => !!i);
     return pathEls[pathEls.length - 1];
   }, [pathname])
-
 
   const pageHeaders: (keyof CompoundedHeader)[] = useMemo(() => {
     const headerKeys = Object.keys(SCREEN_HEADERS).map((i: string) => i as keyof CompoundedHeader);

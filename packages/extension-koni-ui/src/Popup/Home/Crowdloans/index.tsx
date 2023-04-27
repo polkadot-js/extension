@@ -1,5 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+
 
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';

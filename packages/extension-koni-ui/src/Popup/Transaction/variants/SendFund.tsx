@@ -29,7 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { BN } from '@polkadot/util';
+import { BN, BN_ZERO } from '@polkadot/util';
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
@@ -248,6 +248,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   }, [chain, from]);
 
   const destChain = Form.useWatch('destChain', form);
+  const transferAmount = Form.useWatch('value', form);
 
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
@@ -344,6 +345,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
       if (part.from) {
         setFrom(part.from);
+        setForceUpdateMaxValue(undefined);
         form.resetFields(['asset']);
       }
 
@@ -366,6 +368,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         setChain(chain);
         setAsset(part.asset);
         setIsTransferAll(false);
+        setForceUpdateMaxValue(undefined);
       }
 
       if (part.destChain) {
@@ -440,6 +443,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   }, [chain, from, asset, isTransferAll, accounts, notification, t, onSuccess, onError]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
+
+  const onSetMaxTransferable = useCallback((value: boolean) => {
+    const bnMaxTransfer = new BN(maxTransfer);
+
+    if (!bnMaxTransfer.isZero()) {
+      setIsTransferAll(value);
+    }
+  }, [maxTransfer]);
 
   // TODO: Need to review
   useEffect(() => {
@@ -528,13 +539,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     };
   }, [asset, assetRegistry, assetSettingMap, chain, destChain, form, from]);
 
-  const onSetMaxTransferable = useCallback((value: boolean) => {
-    const bnMaxTransfer = new BN(maxTransfer);
+  useEffect(() => {
+    const bnTransferAmount = new BN(transferAmount || '0');
+    const bnMaxTransfer = new BN(maxTransfer || '0');
 
-    if (!bnMaxTransfer.isZero()) {
-      setIsTransferAll(value);
+    if (bnTransferAmount.gt(BN_ZERO) && bnTransferAmount.eq(bnMaxTransfer)) {
+      setIsTransferAll(true);
     }
-  }, [maxTransfer]);
+  }, [maxTransfer, transferAmount]);
 
   return (
     <>

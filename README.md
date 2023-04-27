@@ -1,4 +1,3 @@
-![Github Cover](https://user-images.githubusercontent.com/2582652/234853615-b681f413-97ba-4411-8988-fccee19c1c1e.png)
 ## SubWallet Extension
 Our SubWallet is forked from polkadot-js/extension. We aim to adding more features while being able to rebase the polkadot-js origin at any time.
 ## Main Concept

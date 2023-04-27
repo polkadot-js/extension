@@ -449,8 +449,10 @@ export default class TransactionService {
       }
 
       case ExtrinsicType.EVM_EXECUTE: {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const data = parseTransactionData<ExtrinsicType.EVM_EXECUTE>(transaction.data);
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
         historyItem.to = data?.to || '';
         break;
       }

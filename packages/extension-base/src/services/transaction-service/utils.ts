@@ -12,17 +12,19 @@ export function parseTransactionData<T extends ExtrinsicType> (data: unknown): E
 }
 
 export function getTransactionLink (chainInfo: _ChainInfo, extrinsicHash: string): string | undefined {
-  const explorerLink = _getBlockExplorerFromChain(chainInfo);
-
-  if (_isPureEvmChain(chainInfo)) {
-    if (explorerLink) {
-      return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}tx/${extrinsicHash}`);
-    }
-  } else {
+  if (extrinsicHash.startsWith('0x')) {
     const explorerLink = _getBlockExplorerFromChain(chainInfo);
 
-    if (explorerLink) {
-      return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}extrinsic/${extrinsicHash}`);
+    if (_isPureEvmChain(chainInfo)) {
+      if (explorerLink) {
+        return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}tx/${extrinsicHash}`);
+      }
+    } else {
+      const explorerLink = _getBlockExplorerFromChain(chainInfo);
+
+      if (explorerLink) {
+        return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}extrinsic/${extrinsicHash}`);
+      }
     }
   }
 

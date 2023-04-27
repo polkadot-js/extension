@@ -149,6 +149,17 @@ export default class DatabaseService {
     return this.stores.transaction.bulkUpsert(cleanedHistory);
   }
 
+  async updateHistoryByNewExtrinsicHash (extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
+    // this.logger.log('Updating transaction histories');
+    const canUpdate = updateData && extrinsicHash;
+
+    if (!canUpdate) {
+      return;
+    }
+
+    return this.stores.transaction.updateWithQuery({ extrinsicHash }, updateData);
+  }
+
   // NFT Collection
   async addNftCollection (collection: NftCollection) {
     // this.logger.log(`Updating NFT collection for [${collection.chain}]`);

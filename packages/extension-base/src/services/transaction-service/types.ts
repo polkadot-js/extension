@@ -53,6 +53,8 @@ export interface TransactionEventResponse extends ValidateTransactionResponse {
   eventLogs?: EventRecord[]
 }
 export interface TransactionEventMap {
+  send: (response: TransactionEventResponse) => void;
+  signed: (response: TransactionEventResponse) => void;
   extrinsicHash: (response: TransactionEventResponse) => void;
   error: (response: TransactionEventResponse) => void;
   success: (response: TransactionEventResponse) => void;

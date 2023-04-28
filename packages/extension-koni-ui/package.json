@@ -14,7 +14,7 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "1.0.2-1",
+  "version": "1.0.2-2",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
     "@ethereumjs/common": "^2.6.5",
@@ -85,7 +85,7 @@
     "web3": "^1.9.0"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^1.0.2-1",
+    "@subwallet/extension-mocks": "^1.0.2-2",
     "@types/bn.js": "^5.1.1",
     "@types/enzyme": "^3.10.12",
     "@types/enzyme-adapter-react-16": "^1.0.6",

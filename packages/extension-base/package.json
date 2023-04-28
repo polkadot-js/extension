@@ -17,7 +17,7 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "1.0.2-1",
+  "version": "1.0.2-2",
   "main": "index.js",
   "dependencies": {
     "@acala-network/api": "^4.1.8-2.3",
@@ -117,6 +117,6 @@
     "web3-utils": "^1.9.0"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^1.0.2-1"
+    "@subwallet/extension-mocks": "^1.0.2-2"
   }
 }

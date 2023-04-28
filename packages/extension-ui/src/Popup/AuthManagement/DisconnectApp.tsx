@@ -42,11 +42,10 @@ function DisconnectApp({ className }: Props): React.ReactElement<Props> {
   const { goTo } = useGoTo();
 
   const handleDisconnect = useCallback(() => {
-    show(t<string>('App disconnected'), 'success', () => {
-      removeAuthorization(decodedUrl)
-        .then(() => onAction('/auth-list'))
-        .catch(console.error);
-    });
+    show(t<string>('App disconnected'), 'success');
+    removeAuthorization(decodedUrl)
+      .then(() => onAction('/auth-list'))
+      .catch(console.error);
   }, [decodedUrl, onAction, show, t]);
 
   return (

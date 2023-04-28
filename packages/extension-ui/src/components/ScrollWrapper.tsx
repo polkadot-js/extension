@@ -47,5 +47,9 @@ export default styled(ScrollWrapper)(
     width: 360px;
   }
 
+  .password-icon {
+    right: 12px;
+  }
+
 `
 );

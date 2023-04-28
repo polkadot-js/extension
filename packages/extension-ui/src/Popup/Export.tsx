@@ -25,7 +25,7 @@ import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
 import { Header } from '../partials';
 
-const MIN_LENGTH = 6;
+const MIN_LENGTH = 0;
 
 interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
@@ -109,7 +109,14 @@ function Export({
               {t<string>('Password is too short')}
             </Warning>
           )}
-          {error && <Warning isDanger>{error}</Warning>}
+          {error && (
+            <Warning
+              isDanger
+              isBelowInput
+            >
+              {error}
+            </Warning>
+          )}
         </div>
       </div>
       <VerticalSpace />

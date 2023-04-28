@@ -20,10 +20,21 @@ const InputLock: React.FC<InputLockProps> = ({ className, isLocked, onClick }) =
     onClick(!isLocked);
   }, [isLocked, onClick]);
 
+  const _onKeyPress = useCallback(
+    (event: React.KeyboardEvent<HTMLSpanElement>) => {
+      if (event.key === 'Enter' || event.key === 'Space') {
+        onClick(!isLocked);
+      }
+    },
+    [isLocked, onClick]
+  );
+
   return (
     <div
       className={className}
       onClick={handleClick}
+      onKeyPress={_onKeyPress}
+      tabIndex={0}
     >
       <Svg
         className='lock-icon'
@@ -47,7 +58,7 @@ export default styled(InputLock)(
     height: 24px;
     cursor: pointer;
     
-    :hover {
+    :hover, :focus {
       background: ${theme.headerIconBackgroundHover};
     }
   }

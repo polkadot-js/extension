@@ -125,7 +125,13 @@ function Address({
 
   const _onClick = useCallback(() => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
 
-  const _onCopy = useCallback(() => show(t<string>('Public address copied to your clipboard'), 'success'), [show, t]);
+  const _onCopy = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+      show(t<string>('Public address copied to your clipboard'), 'success');
+    },
+    [show, t]
+  );
 
   const Name = () => {
     const accountName = name || account?.name;
@@ -163,8 +169,28 @@ function Address({
 
   const _ellipsisName = useCallback(ellipsisName, [ellipsisName]);
 
+  const handleOnClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!address) {
+        return;
+      }
+
+      if (actions) {
+        onAction(`/account/edit-menu/${address}${isExternal ? '?isExternal=true' : '?isExternal=false'}`);
+      }
+
+      if (withExport) {
+        onAction(`/account/export/${address}`);
+      }
+    },
+    [address, actions, withExport, onAction, isExternal]
+  );
+
   return (
-    <div className={className}>
+    <div
+      className={className}
+      onClick={handleOnClick}
+    >
       <div className='infoRow'>
         <Identicon
           className='identityIcon'
@@ -231,7 +257,7 @@ function Address({
             className='export'
             onClick={_goTo(`/account/export/${address}`)}
           >
-            <img
+            <Svg
               className='exportIcon'
               src={exportIcon}
             />
@@ -277,11 +303,28 @@ export default styled(Address)(
   position: relative;
   transition: background 0.2s ease;
 
+
+
   :hover {
     background: ${withExport || actions ? theme.menuBackground : 'transparent'};
+    cursor: ${actions || withExport ? 'pointer' : 'default'};
+
+    ${Identicon} {
+      .icon {
+        cursor: pointer;
+      }
+    }
 
     .detailsIcon {
       background: ${theme.headerIconBackgroundHover};
+    }
+
+    & .infoRow .export {
+      color: ${theme.headerIconBackgroundHover};
+
+      .exportIcon {
+        background: ${theme.headerIconBackgroundHover};
+      }
     }
   }
 
@@ -298,12 +341,12 @@ export default styled(Address)(
   
   .chain {
     position: absolute;
-    bottom: 0;
+    bottom: -1px;
     background: ${theme.boxBorderColor};
     border-radius: 8px 0px;
     color: ${theme.subTextColor};
     padding: 2px 8px;
-    right: 0;
+    right: -1px;
     z-index: ${Z_INDEX.ADDRESS};
   }
 
@@ -382,11 +425,22 @@ export default styled(Address)(
       align-items: center;
       height: 100%;
       cursor: pointer;
+      transition: 0.2s ease;
 
       .exportIcon {
         width: 16px;
         height: 16px;
-      } 
+        background: ${theme.primaryColor};
+        transition: 0.2s ease;
+      }
+
+      :hover {
+        color: ${theme.headerIconBackgroundHover};
+
+        .exportIcon {
+          background: ${theme.headerIconBackgroundHover};
+        }
+      }
     }
 
   }
@@ -471,6 +525,7 @@ export default styled(Address)(
     width: 24px;
     height: 24px;
 
+    
     &.active {
       background: ${theme.accountDotsIconColor};
     }

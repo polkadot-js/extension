@@ -322,6 +322,7 @@ export default styled(SeedAndPath)(
     font-size: 13px;
     line-height: 130%;
     letter-spacing: 0.06em;
+    padding-bottom: 16px;
   }
 
   .icon {

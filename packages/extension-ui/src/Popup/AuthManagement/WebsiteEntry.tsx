@@ -92,7 +92,7 @@ export default styled(WebsiteEntry)(
     gap: 8px;
   }
 
-  &:hover {
+  &:hover, &:focus {
     cursor: pointer;
     background: ${theme.editCardBackgroundHover};
   

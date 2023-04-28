@@ -13,6 +13,7 @@ interface Props {
   text: string;
   total: number;
   withBackArrow?: boolean;
+  withBackdrop?: boolean;
 }
 
 interface StepProps extends ThemeProps {
@@ -47,12 +48,13 @@ const Steps = styled.div`
   }
 `;
 
-function HeaderWithSteps({ step, text, total, withBackArrow = false }: Props): React.ReactElement<Props> {
+function HeaderWithSteps({ step, text, total, withBackArrow = false, withBackdrop }: Props): React.ReactElement<Props> {
   return (
     <>
       <Header
         text={text}
         withBackArrow={withBackArrow}
+        withBackdrop={withBackdrop}
         withHelp
         withStepper
       ></Header>

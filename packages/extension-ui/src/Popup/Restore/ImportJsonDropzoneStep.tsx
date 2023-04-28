@@ -35,6 +35,12 @@ function ImportJsonDropzoneStep({ className, isFileError, onChangeFile, setFileN
 }
 
 export default styled(ImportJsonDropzoneStep)`
+  + .splash {
+    border: 1px solid red;
+    display: none;
+    opacity: 0;
+  }
+
   .restoreButton {
     margin-top: 16px;
   }

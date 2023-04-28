@@ -22,7 +22,7 @@ export default React.memo(
     justify-content: center;
     width: 100%;
     margin-bottom: 16px;
-    margin-top: 24px;
+    margin-top: 16px;
     gap: 4px;
     padding: 0 16px;
 

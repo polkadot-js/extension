@@ -160,6 +160,7 @@ export default React.memo(
 
     &:disabled {
       color: ${theme.disabledTextColor};
+      cursor: default;
     }
 
     &:focus {

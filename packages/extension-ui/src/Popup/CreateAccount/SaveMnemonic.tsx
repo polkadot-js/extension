@@ -157,6 +157,10 @@ export default React.memo(
     }
     .copy-button {
       margin: 0 auto;
+
+      :focus {
+        margin-top: 0px;
+      }
     }
 `
   )

@@ -142,7 +142,10 @@ function Account({
   );
 
   return (
-    <div className={className}>
+    <div
+      className={className}
+      onClick={_onCheckboxChange}
+    >
       <Address
         actions={withMenu ? _actions : null}
         address={address}
@@ -182,9 +185,9 @@ export default styled(Account)(
   ({ theme, withCheckbox }: Props) => `
   ${Address}:hover {
     background: ${withCheckbox ? theme.menuBackground : theme.menuBackground};
-  
-    ${Checkbox} span {
-    border: 1px solid ${theme.primaryColor};
+    ${withCheckbox ? ' cursor: pointer;' : ''}   
+    ${Checkbox} label span {
+      outline-color:  ${theme.primaryColor};
     }
   }
 

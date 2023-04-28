@@ -58,7 +58,7 @@ export default styled(MenuCard)(
   cursor: ${onClick ? 'pointer' : 'default'};
   transition: 0.2s ease;
 
-  :hover {
+  :hover, :focus {
     background: ${theme.editCardBackgroundHover};
   }
 

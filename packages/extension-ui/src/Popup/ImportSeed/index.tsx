@@ -3,7 +3,7 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { AccountContext, ActionContext } from '../../components';
+import { AccountContext, ActionContext, ScrollWrapper } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useMetadata from '../../hooks/useMetadata';
@@ -65,12 +65,13 @@ function ImportSeed(): React.ReactElement {
   const _onChangeNetwork = useCallback((newGenesisHash: string) => setGenesis(newGenesisHash), []);
 
   return (
-    <>
+    <ScrollWrapper>
       <HeaderWithSteps
         step={step}
         text={t<string>('Import existing account')}
         total={2}
         withBackArrow
+        withBackdrop
       />
       {step === 1 && (
         <SeedAndPath
@@ -98,7 +99,7 @@ function ImportSeed(): React.ReactElement {
           setGenesis={_onChangeNetwork}
         />
       )}
-    </>
+    </ScrollWrapper>
   );
 }
 

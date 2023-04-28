@@ -10,10 +10,12 @@ import styled from 'styled-components';
 import { deleteAuthRequest } from '@polkadot/extension-ui/messaging';
 
 import animatedWarning from '../../assets/anim_warning.svg';
+import border from '../../assets/border.svg';
 import helpIcon from '../../assets/help.svg';
 import { AnimatedSvg, Button, ButtonArea, LearnMore, Link, Svg, VerticalSpace } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
 import { LINKS } from '../../links';
+import { Z_INDEX } from '../../zindex';
 
 interface Props extends ThemeProps {
   authId: string;
@@ -79,6 +81,10 @@ function NoAccount({ authId, className }: Props): React.ReactElement<Props> {
     <>
       <div className={className}>
         <div className='content-inner'>
+          <Svg
+            className='border'
+            src={border}
+          />
           <AnimatedSvg
             className='warning-icon'
             src={animatedWarning}
@@ -117,6 +123,21 @@ export default styled(NoAccount)(
   .acceptButton {
     width: 90%;
     margin: 25px auto 0;
+  }
+
+  body {    
+    height: 600px;
+  }
+
+  .border {
+    z-index: ${Z_INDEX.BORDER};
+    position: absolute;
+    top: 0;
+    right: 0;
+    pointer-events: none;
+    background: ${theme.warningColor};
+    height: 600px;
+    width: 360px;
   }
 
   .warning-icon {

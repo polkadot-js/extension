@@ -7,8 +7,10 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { Loading, PopupBorderContainer, SigningReqContext } from '../../components';
+import border from '../../assets/border.svg';
+import { Loading, PopupBorderContainer, SigningReqContext, Svg } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
+import { Z_INDEX } from '../../zindex';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
 
@@ -42,8 +44,12 @@ function Signing({ className }: Props): React.ReactElement<Props> {
   const isTransaction = !!(request?.request?.payload as SignerPayloadJSON)?.blockNumber;
 
   return request ? (
-    <PopupBorderContainer>
+    <>
       <div className={className}>
+        <Svg
+          className='border'
+          src={border}
+        />
         <div className='content'>
           {requests.length > 1 && (
             <div className='centered'>
@@ -60,13 +66,14 @@ function Signing({ className }: Props): React.ReactElement<Props> {
             account={request.account}
             buttonText={isTransaction ? t('Sign') : t('Sign the message')}
             isFirst={requestIndex === 0}
+            isLast={requests.length === 1}
             request={request.request}
             signId={request.id}
             url={request.url}
           />
         </div>
       </div>
-    </PopupBorderContainer>
+    </>
   ) : (
     <Loading />
   );
@@ -76,12 +83,21 @@ export default React.memo(
   styled(Signing)(
     ({ theme }: Props) => `
     .content {
-      outline: ${theme.newTransactionBackground} solid 37px;
       border-radius: 32px;
       height: 584px;
-      margin-top: 8px;
       overflow-y: hidden;
       overflow-x: hidden;
+    }
+
+    .border {
+      z-index: ${Z_INDEX.BORDER};
+      position: absolute;
+      top: 0;
+      right: 0;
+      pointer-events: none;
+      background: ${theme.newTransactionBackground};
+      height: 600px;
+      width: 360px;
     }
 
     .centered {

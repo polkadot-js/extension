@@ -81,6 +81,7 @@ function Request({ authId, className, isFirst, request: { origin }, url }: Props
     deleteAuthRequest(authId)
       .then(() => onAction())
       .catch((error: Error) => console.error(error));
+    window.close();
   }, [authId, onAction]);
 
   if (!accounts.length) {

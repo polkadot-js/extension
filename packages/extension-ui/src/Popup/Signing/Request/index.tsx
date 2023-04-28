@@ -27,6 +27,7 @@ interface Props {
   request: RequestSign;
   signId: string;
   url: string;
+  isLast: boolean;
 }
 
 interface Data {
@@ -67,6 +68,7 @@ export default function Request({
   account: { accountIndex, addressOffset, genesisHash, isExternal, isHardware },
   buttonText,
   isFirst,
+  isLast,
   request,
   signId,
   url
@@ -149,6 +151,7 @@ export default function Request({
             error={error}
             isExternal={isExternal}
             isFirst={isFirst}
+            isLast={isLast}
             setError={setError}
             signId={signId}
           />
@@ -200,6 +203,7 @@ export default function Request({
             error={error}
             isExternal={isExternal}
             isFirst={isFirst}
+            isLast={isLast}
             setError={setError}
             signId={signId}
           />

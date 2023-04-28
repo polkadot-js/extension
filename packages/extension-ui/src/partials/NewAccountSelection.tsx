@@ -168,14 +168,15 @@ export default styled(NewAccountSelection)(
     padding-bottom: 48px;
   }
 
-  ${Checkbox} label span {
+  ${Checkbox}:not(.accountTree-checkbox) label span {
     left: -10px;
   }
 
-  .border{
+  .border {
     z-index: ${Z_INDEX.BORDER};
     position: absolute;
     top: 0;
+    right: 0;
     pointer-events: none;
     background: ${theme.newTransactionBackground};
     height: 600px;
@@ -183,13 +184,17 @@ export default styled(NewAccountSelection)(
   }
 
   .new {
+    position: relative;
+    
     ${Account} {
       .name {
         margin: 2px 8px 0px 0px;
       }
 
-      position: relative;
-      
+      ${Checkbox} label span {
+        left: -4px;
+      }
+
       &:before {
         content: url(${ribbon});
         display: block;

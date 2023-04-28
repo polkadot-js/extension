@@ -11,14 +11,7 @@ import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import { Z_INDEX } from '@polkadot/extension-ui/zindex';
 
-import {
-  AccountContext,
-  ActionContext,
-  BottomWrapper,
-  Button,
-  ButtonArea,
-  PopupBorderContainer
-} from '../../components';
+import { AccountContext, ActionContext, BottomWrapper, Button, PopupBorderContainer } from '../../components';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { getAuthList, updateAuthorization, updateAuthorizationDate } from '../../messaging';
@@ -37,7 +30,7 @@ const ButtonsGroup = styled.div`
   gap: 8px;
   padding-bottom: 0px;
   position: absolute;
-  bottom: 8px;
+  bottom: 6px;
   left: 0px;
   right: 0px;
   height: 56px;

@@ -133,7 +133,7 @@ export default styled(EditMenuCard)(
   };
   transition: 0.2s ease;
 
-  &:hover {
+  &:hover, &:focus {
     background: ${theme.editCardBackgroundHover};
 
     ${Svg}:not(.icon):not(.forgetIcon) {

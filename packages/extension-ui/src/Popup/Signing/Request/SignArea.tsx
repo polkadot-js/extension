@@ -19,9 +19,10 @@ interface Props {
   isFirst: boolean;
   setError: (value: string | null) => void;
   signId: string;
+  isLast: boolean;
 }
 
-function SignArea({ buttonText, className, error, isExternal, isFirst, setError, signId }: Props): JSX.Element {
+function SignArea({ buttonText, className, error, isExternal, isFirst, isLast, setError, signId }: Props): JSX.Element {
   const [savePass, setSavePass] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [password, setPassword] = useState('');
@@ -57,22 +58,22 @@ function SignArea({ buttonText, className, error, isExternal, isFirst, setError,
       setIsBusy(true);
       await approveSignPassword(signId, savePass, password);
       setIsBusy(false);
-      onAction('transaction-status/signed');
+      onAction(`transaction-status/signed?isLast=${isLast.toString()}`);
     } catch (error) {
       setIsBusy(false);
       setError((error as Error).message);
       console.error(error);
     }
-  }, [onAction, password, savePass, setError, signId]);
+  }, [isLast, onAction, password, savePass, setError, signId]);
 
   const _onCancel = useCallback(async (): Promise<void> => {
     try {
       await cancelSignRequest(signId);
-      onAction('transaction-status/declined');
+      onAction(`transaction-status/declined?isLast=${isLast.toString()}`);
     } catch (error) {
       console.error(error);
     }
-  }, [onAction, signId]);
+  }, [isLast, onAction, signId]);
 
   const StyledCheckbox = styled(Checkbox)`
     margin-left: 8px;

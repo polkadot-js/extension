@@ -49,6 +49,10 @@ const StyledScrollWrapper = styled(ScrollWrapper)`
   }
 `;
 
+const StyledButtonArea = styled(ButtonArea)`
+  padding-right: 0px;
+`;
+
 function Accounts({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [filter, setFilter] = useState('');
@@ -154,9 +158,9 @@ function Accounts({ className }: Props): React.ReactElement {
               withSettings
             />
             <div className={`${className || ''} ${areAllAleph ? 'all-aleph-main' : 'all-grouped'}`}>{accounts}</div>
-            <ButtonArea>
+            <StyledButtonArea>
               <AddButton />
-            </ButtonArea>
+            </StyledButtonArea>
           </StyledScrollWrapper>
           <VerticalSpace />
         </>

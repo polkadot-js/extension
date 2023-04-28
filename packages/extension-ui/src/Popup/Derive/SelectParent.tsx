@@ -55,7 +55,7 @@ const StyledFooter = styled(HelperFooter)`
   gap: 8px;
 `;
 
-const MIN_PASSWORD_LENGTH = 6;
+const MIN_PASSWORD_LENGTH = 0;
 
 function SelectParent({
   className,
@@ -270,6 +270,7 @@ export default React.memo(
   styled(SelectParent)(
     ({ theme }: Props) => `
     margin-top: 24px;
+    margin-right: 8px;
 
     .text {
       display: flex;

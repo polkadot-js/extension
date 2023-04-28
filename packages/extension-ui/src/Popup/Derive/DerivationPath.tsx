@@ -28,6 +28,9 @@ const StyledInputWithLabel = styled(InputWithLabel)`
   gap: 4px;
   position: relative;
   margin-bottom: 4px;
+  &:disabled {
+    color: ${({ theme }: StyledInputWithLabelProps) => theme.disabledTextColor};
+  }
 
   label {
     color: ${({ isLocked, theme }: StyledInputWithLabelProps) =>
@@ -119,7 +122,7 @@ export default React.memo(
     width: 100%;
 
     &.locked input {
-      opacity: 50%;
+      color: ${theme.disabledTextColor};
     }
   }
 

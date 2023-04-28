@@ -100,6 +100,7 @@ function Header({
             {withHelp && (
               <Tooltip text={t<string>('Help')}>
                 <a
+                  className='focused-icon'
                   href={LINKS.GENERAL_INTRODUCTION}
                   rel='noreferrer'
                   target='_blank'
@@ -113,7 +114,10 @@ function Header({
             )}
             {withSettings && (
               <Tooltip text={t<string>('Settings')}>
-                <Link to={'/account/settings'}>
+                <Link
+                  className='focused-icon'
+                  to={'/account/settings'}
+                >
                   <Svg
                     className='popupToggle'
                     data-toggle-settings
@@ -185,6 +189,12 @@ export default React.memo(
     justify-content: center;
     align-items: center;
     padding: 8px 0px;
+
+    :focus {
+      ${Svg} {
+        background: ${theme.headerIconBackgroundHover};
+      }
+    }
   }
 
   .connectedAccountsWrapper {
@@ -204,7 +214,6 @@ export default React.memo(
     margin: 0 auto;
     width: fit-content;
     transition: 0.2s ease;
-
   }
 
   .connectedAccounts {
@@ -335,7 +344,7 @@ export default React.memo(
     height: 20px;
     background: ${theme.iconNeutralColor};
 
-    :hover {
+    :hover, :focus {
       background: ${theme.headerIconBackgroundHover};
     }
 
@@ -346,6 +355,14 @@ export default React.memo(
 
   &.smallMargin {
     margin-bottom: 15px;
+  }
+
+  .focused-icon {
+    :focus {
+      ${Svg} {
+        background: ${theme.headerIconBackgroundHover};
+      }
+    }
   }
 `
   )

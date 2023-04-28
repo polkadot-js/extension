@@ -3,8 +3,16 @@
 
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
+import styled from 'styled-components';
 
-import { AccountContext, AccountNamePasswordCreation, ActionContext } from '../../components';
+import {
+  AccountContext,
+  AccountNamePasswordCreation,
+  ActionContext,
+  BottomWrapper,
+  ButtonArea,
+  ScrollWrapper
+} from '../../components';
 import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
 import { deriveAccount } from '../../messaging';
@@ -28,6 +36,13 @@ interface ConfirmState {
   account: PathState;
   parentPassword: string;
 }
+
+const StyledAccountNamePasswordCreation = styled(AccountNamePasswordCreation)`
+ ~ ${BottomWrapper} ${ButtonArea} {
+    margin-right: 0px;
+    padding-top: 30px;
+  }
+`;
 
 function Derive({ isLocked }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -82,12 +97,13 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
 
   return (
-    <>
+    <ScrollWrapper>
       <HeaderWithSteps
         step={step}
         text={t<string>('Derive sub-account')}
         total={2}
         withBackArrow
+        withBackdrop
       />
       {!account && step === 1 && (
         <SelectParent
@@ -100,7 +116,7 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
         />
       )}
       {account && step === 2 && (
-        <AccountNamePasswordCreation
+        <StyledAccountNamePasswordCreation
           address={account.address}
           buttonLabel={t<string>('Create')}
           genesisHash={parentGenesis}
@@ -112,7 +128,7 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
           parentName={parentName}
         />
       )}
-    </>
+    </ScrollWrapper>
   );
 }
 

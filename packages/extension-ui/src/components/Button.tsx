@@ -50,8 +50,8 @@ function Button({ children, className = '', isBusy, isDisabled, onClick, to }: P
       className={`${className}${isDisabled || isBusy ? ' isDisabled' : ''}${isBusy ? ' isBusy' : ''}`}
       disabled={isDisabled || isBusy}
       onClick={_onClick}
-      ref={buttonRef}
       onMouseLeave={onMouseLeave}
+      ref={buttonRef}
     >
       <div className='children'>{children}</div>
       <Spinner className='busyOverlay' />
@@ -125,7 +125,11 @@ export default styled(Button)(
 
   &:focus {
     outline: none;
-    border: ${secondary ? theme.buttonSecondaryBorderFocused : tertiary ? 'none' : theme.buttonBorderFocused};
+    border: ${
+      secondary ? theme.buttonSecondaryBorderFocused : tertiary ? theme.addButtonFocusBorder : theme.buttonBorderFocused
+    };
+
+
   }
 
   &:not(:disabled):hover, &:active {

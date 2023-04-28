@@ -15,10 +15,12 @@ import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends RouteComponentProps<{ status: string }>, ThemeProps {
   className?: string;
+  isLast?: string;
 }
 
 function TransactionStatus({
   className,
+  location: { search },
   match: {
     params: { status }
   }
@@ -26,13 +28,19 @@ function TransactionStatus({
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const isSigned = status === 'signed';
+  const searchParams = new URLSearchParams(search);
+  const isLast = searchParams.get('isLast');
 
   useEffect(() => {
     // we're using setTimeout here because TransactionStatus is only a temporary element signaling the status(signed/declined) of the transaction
     setTimeout(() => {
-      onAction('..');
+      if (isLast !== 'true') {
+        onAction('..');
+      } else {
+        window.close();
+      }
     }, 2000);
-  }, [onAction]);
+  }, [isLast, onAction]);
 
   return (
     <PopupBorderContainer>

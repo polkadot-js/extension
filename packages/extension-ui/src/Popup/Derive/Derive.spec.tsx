@@ -143,13 +143,6 @@ describe('Derive', () => {
       expect(wrapper.find('Warning')).toHaveLength(0);
     });
 
-    it('An error is visible, input higlighted and the button disabled when password is incorrect', async () => {
-      await type(wrapper.find('input[type="password"]'), 'w');
-      await act(flushAllPromises);
-      wrapper.update();
-
-      expect(wrapper.find('.warning-message').text()).toEqual('Password is too short');
-    });
     it('The error disappears when typing a new password and "Create derived account" is enabled', async () => {
       await type(wrapper.find('input[type="password"]'), 'wrong_pass');
       wrapper.find('[data-button-action="create derived account"] button').simulate('click');

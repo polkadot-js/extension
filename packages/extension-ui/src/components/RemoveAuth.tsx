@@ -79,7 +79,7 @@ export default styled(RemoveAuth)(
       color: ${theme.dangerBackground};
     }
 
-    :hover {
+    :hover, :focus {
       .remove-text{
         color: ${theme.buttonBackgroundDangerHover};
       }

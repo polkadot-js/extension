@@ -56,17 +56,16 @@ function Forget({
   const _goTo = useCallback((path: string) => () => onAction(path), [onAction]);
 
   const _onClick = useCallback((): void => {
-    show(t<string>('Account forgotten'), 'success', () => {
-      setIsBusy(true);
-      forgetAccount(address)
-        .then(() => {
-          setIsBusy(false);
-        })
-        .catch((error: Error) => {
-          setIsBusy(false);
-          console.error(error);
-        });
-    });
+    setIsBusy(true);
+    forgetAccount(address)
+      .then(() => {
+        setIsBusy(false);
+      })
+      .catch((error: Error) => {
+        setIsBusy(false);
+        console.error(error);
+      });
+    show(t<string>('Account forgotten'), 'success');
     onAction('/');
   }, [address, onAction, show, t]);
 

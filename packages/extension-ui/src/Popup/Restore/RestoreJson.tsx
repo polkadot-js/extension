@@ -126,7 +126,6 @@ function Upload(): React.ReactElement {
         step={step}
         text={t<string>('Import from JSON file')}
         total={2}
-        withBackArrow
       />
       {step === 1 && (
         <ImportJsonDropzoneStep

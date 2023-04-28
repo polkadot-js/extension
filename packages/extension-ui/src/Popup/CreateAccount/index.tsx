@@ -69,12 +69,13 @@ function CreateAccount(): React.ReactElement {
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
   return (
-    <>
+    <ScrollWrapper>
       <HeaderWithSteps
         step={step}
         text={t<string>('Create an account')}
         total={3}
         withBackArrow
+        withBackdrop
       />
       <Loading>
         {step === 1 && <SafetyFirst onNextStep={_onNextStep} />}
@@ -98,7 +99,7 @@ function CreateAccount(): React.ReactElement {
           />
         )}
       </Loading>
-    </>
+    </ScrollWrapper>
   );
 }
 

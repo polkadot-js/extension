@@ -6,7 +6,6 @@ import type { SnackbarTypes, ThemeProps } from '../../types';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import useTranslation from '../../hooks/useTranslation';
 import { Z_INDEX } from '../../zindex';
 import * as icons from './iconsList';
 import ToastCloseIcon from './ToastCloseIcon';
@@ -17,22 +16,11 @@ interface Props extends ThemeProps {
   className?: string;
   type: SnackbarTypes;
   visible: boolean;
-  undoTimeout?: NodeJS.Timeout | undefined;
   toastTimeout?: NodeJS.Timeout | undefined;
-  onUndoClick?: (shouldRedirectBack: boolean) => void;
   setVisible?: (visible: boolean) => void;
 }
 
-function Toast({
-  className,
-  content,
-  onUndoClick,
-  setVisible,
-  toastTimeout,
-  type,
-  undoTimeout
-}: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
+function Toast({ className, content, setVisible, toastTimeout, type }: Props): React.ReactElement<Props> {
   const _getIconByType = useCallback((type: SnackbarTypes): string => icons?.[type] ?? icons.info, []);
 
   const _closeToast = useCallback(() => {
@@ -43,30 +31,16 @@ function Toast({
     clearTimeout(toastTimeout);
   }, [setVisible, toastTimeout]);
 
-  const _onUndoClick = useCallback(() => {
-    if (onUndoClick) {
-      onUndoClick(true);
-    }
-  }, [onUndoClick]);
-
   return (
     <div className={className}>
-      <div>
+      <div className='first-group'>
         <img
           className='snackbar-icon'
           src={_getIconByType(type)}
         />
+        <div className='snackbar-content'>{content}</div>
       </div>
-      <div className='snackbar-content'>{content}</div>
       <div className='snackbar-end-group'>
-        {undoTimeout && (
-          <div
-            className='snackbar-undo'
-            onClick={_onUndoClick}
-          >
-            {t<string>('Undo')}
-          </div>
-        )}
         <div
           className='snackbar-close'
           onClick={_closeToast}
@@ -88,6 +62,7 @@ export default styled(Toast)(
   right: 8px;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   border-radius: 4px;
   box-shadow: ${theme.toastBoxShadow};;
   gap: 14px;
@@ -99,19 +74,27 @@ export default styled(Toast)(
   animation: toast 0.2s, toast  0.2s linear ${TOAST_TIMEOUT / 1000}s reverse;
   z-index: ${Z_INDEX.TOAST}};
 
+  .first-group {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+
   @keyframes toast {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+
   .snackbar-close {
     cursor: pointer;
   }
+
   .snackbar-undo {
     display: flex;
     width: fit-content;

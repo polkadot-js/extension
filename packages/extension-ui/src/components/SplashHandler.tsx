@@ -90,4 +90,5 @@ export default styled(SplashHandler)`
     left: 0px;
     z-index: ${Z_INDEX.SPLASH_HEADER};
   }
+
   `;

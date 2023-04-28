@@ -17,6 +17,7 @@ import {
   FileNameDisplay,
   Input,
   InputWithLabel,
+  Label,
   ScrollWrapper,
   ValidatedInput,
   VerticalSpace,
@@ -136,7 +137,9 @@ function ImportJsonConfirmStep({
 
 export default styled(ImportJsonConfirmStep)`
     margin-top: 32px;
-
+    ${Address}, ${Label}:not(.label) {
+      width: 100%;
+    }
     .error {
       ${ValidatedInput} ${Input} {
         border: 1px solid ${({ theme }: ThemeProps) => theme.dangerBackground};

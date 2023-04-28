@@ -107,8 +107,8 @@ function AuthManagement({ className }: Props): React.ReactElement<Props> {
                 <WebsiteEntry
                   info={info}
                   key={url}
-                  url={url}
                   tabIndex={0}
+                  url={url}
                 />
               ))}
             </div>

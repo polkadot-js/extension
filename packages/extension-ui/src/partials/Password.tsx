@@ -7,7 +7,7 @@ import viewOff from '../assets/viewOff.svg';
 import viewOn from '../assets/viewOn.svg';
 import { InputWithLabel, ValidatedInput } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import { allOf, isNotShorterThan, isSameAs, Validator } from '../util/validators';
+import { allOf, isNotShorterThan, isSameAs } from '../util/validators';
 
 interface Props {
   isFocussed?: boolean;

@@ -1,13 +1,8 @@
 import React, { ChangeEventHandler, useContext, useEffect, useMemo, useState } from 'react';
 import { ThemeProps } from "@subwallet/extension-koni-ui/types"
 import styled from 'styled-components';
-import { Layout, ScreenTab } from '@subwallet/extension-koni-ui/components';
-// import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
-// import { useGetChainSlugsByAccountType } from '@subwallet/extension-koni-ui/hooks';
-import { Button, Icon, Input, SwSubHeader } from '@subwallet/react-ui';
-import { DownloadSimple, MagnifyingGlass } from 'phosphor-react';
-import Tokens from '../Home/Tokens';
-import NftCollections from '../Home/Nfts/NftCollections';
+import { Layout } from '@subwallet/extension-koni-ui/components';
+import { Input, SwSubHeader } from '@subwallet/react-ui';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import CN from 'classnames';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -24,11 +19,6 @@ function Component({ className }: Props): React.ReactElement<Props> {
 
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState<string>('')
-
-  useEffect(() => {
-    setSearchInput('')
-    setDetailTitle('')
-  }, [pathname])
 
   const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const value = e?.target?.value;

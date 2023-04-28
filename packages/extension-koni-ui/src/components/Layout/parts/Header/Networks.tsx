@@ -5,7 +5,7 @@ import useChainInfoWithState, { ChainInfoWithState } from "@subwallet/extension-
 import { ThemeProps } from "@subwallet/extension-koni-ui/types";
 import { Button, Divider, Icon, Popover, SwList } from "@subwallet/react-ui";
 import { ListChecks, SlidersHorizontal } from "phosphor-react";
-import { useCallback, useMemo } from "react";
+import { LegacyRef, forwardRef, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components";
 
@@ -93,6 +93,17 @@ const Component: React.FC = () => {
     )
   }, [])
 
+  // Remove ref error
+  const TriggerComponent = forwardRef((props, ref) => (
+    <div {...props} ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}>
+      <MetaInfo.AccountGroup
+        className="ava-group"
+        accounts={[]}
+        content={`${chainInfoList.length} networks`}
+      />
+    </div>
+  ))
+
   return (
     <Popover
       content={popOverContent}
@@ -103,11 +114,7 @@ const Component: React.FC = () => {
         padding: '16px 0',
       }}
     >
-      <MetaInfo.AccountGroup
-        className="ava-group"
-        accounts={[]}
-        content={`${chainInfoList.length} networks`}
-      />
+      <TriggerComponent />
     </Popover>
   )
 }

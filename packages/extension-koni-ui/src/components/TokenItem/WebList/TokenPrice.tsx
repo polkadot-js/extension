@@ -2,23 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { ActivityIndicator, BalanceItem, BalanceItemProps, Icon, Number } from '@subwallet/react-ui';
+import { BalanceItemProps, Number } from '@subwallet/react-ui';
 import classNames from 'classnames';
-import { CaretRight } from 'phosphor-react';
 import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-type Props = TokenBalanceItemType & ThemeProps & {
+type Props = ThemeProps & {
   onPressItem?: BalanceItemProps['onPressItem'],
+  value: number,
+  pastValue: number,
+  priceChangeStatus?: string,
 };
 
 function Component (
   { className = '',
     priceChangeStatus,
-    priceValue,
-    price24hValue,
-    symbol
+    value,
+    pastValue,
   }: Props) {
   // todo: Update BalanceItem in react-ui lib
   // - loading
@@ -28,7 +28,7 @@ function Component (
   const { token } = useContext(ThemeContext)
 
   const marginColor = priceChangeStatus === 'increase' ? token.colorSuccess : token.colorError
-  const margin = !price24hValue || !priceValue ? 0 : Math.abs(price24hValue - priceValue) / price24hValue * 100;
+  const margin = !pastValue || !value ? 0 : Math.abs(pastValue - value) / pastValue * 100;
 
   return (
     <div className={classNames('token-price', className, {
@@ -36,7 +36,7 @@ function Component (
     })}
     >
       <Number
-        value={priceValue}
+        value={value}
         prefix={'$'}
         decimal={0}
         decimalOpacity={0.45}

@@ -2,52 +2,52 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { ActivityIndicator, BalanceItem, BalanceItemProps, Icon, Number } from '@subwallet/react-ui';
+import { BalanceItemProps, Number } from '@subwallet/react-ui';
 import classNames from 'classnames';
-import { CaretRight } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
+import BigN from 'bignumber.js';
 
-type Props = TokenBalanceItemType & ThemeProps & {
+type Props = ThemeProps & {
   onPressItem?: BalanceItemProps['onPressItem'],
+  value: BigN,
+  convertedValue: BigN,
+  symbol: string,
 };
 
 function Component (
-  { className = '',
-    priceChangeStatus,
-    total, symbol }: Props) {
+  {
+    className = '',
+    value,
+    convertedValue,
+    symbol
+  }: Props) {
   // todo: Update BalanceItem in react-ui lib
   // - loading
   // - auto detect logo, only use logoKey
   // - price change status
 
   return (
-    <div className={classNames('token-group-balance-item', className, {
-      '-price-decrease': priceChangeStatus === 'decrease'
-    })}
-    >
-      <>
-        <div className={'ant-balance-item-balance-info-wrapper'}>
-          <Number
-            className={'__value'}
-            decimal={0}
-            decimalOpacity={0.45}
-            value={total.value}
-            suffix={symbol}
-          />
-          <Number
-            className={'__converted-value'}
-            decimal={0}
-            decimalOpacity={0.45}
-            intOpacity={0.45}
-            prefix='$'
-            size={12}
-            unitOpacity={0.45}
-            value={total.convertedValue}
-          />
-        </div>
-      </>
+    <div className={classNames('token-group-balance-item', className)}>
+      <div className={'ant-balance-item-balance-info-wrapper'}>
+        <Number
+          className={'__value'}
+          decimal={0}
+          decimalOpacity={0.45}
+          value={value}
+          suffix={symbol}
+        />
+        <Number
+          className={'__converted-value'}
+          decimal={0}
+          decimalOpacity={0.45}
+          intOpacity={0.45}
+          prefix='$'
+          size={12}
+          unitOpacity={0.45}
+          value={convertedValue}
+        />
+      </div>
     </div>
   );
 }

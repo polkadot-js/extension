@@ -1,14 +1,12 @@
 import { AccountJson } from "@subwallet/extension-base/background/types";
 import EmptyList from "@subwallet/extension-koni-ui/components/EmptyList";
 import { MetaInfo } from "@subwallet/extension-koni-ui/components/MetaInfo";
-import NetworkToggleItem from "@subwallet/extension-koni-ui/components/NetworkToggleItem";
-import useChainInfoWithState, { ChainInfoWithState } from "@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState";
 import { RootState } from "@subwallet/extension-koni-ui/stores";
 import { ThemeProps } from "@subwallet/extension-koni-ui/types";
 import { funcSortByName, isAccountAll, searchAccountFunction } from "@subwallet/extension-koni-ui/utils";
-import { Button, Divider, Icon, Logo, Popover, SwList } from "@subwallet/react-ui";
-import { ListChecks, SlidersHorizontal } from "phosphor-react";
-import { useCallback, useMemo } from "react";
+import { Divider, Logo, Popover, SwList } from "@subwallet/react-ui";
+import { ListChecks } from "phosphor-react";
+import { LegacyRef, forwardRef, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
@@ -55,7 +53,7 @@ const StyledActions = styled.div<ThemeProps>(({ theme: { token } }: ThemeProps) 
 });
 const Component: React.FC = () => {
   const { t } = useTranslation();
-  const { accounts: _accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+  const { accounts: _accounts } = useSelector((state: RootState) => state.accountState);
 
   const accounts = useMemo((): AccountJson[] => {
     return [..._accounts].sort(funcSortByName);
@@ -105,6 +103,17 @@ const Component: React.FC = () => {
     );
   }, [t]);
 
+  // Remove ref error
+  const TriggerComponent = forwardRef((props, ref) => (
+    <div {...props} ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}>
+      <MetaInfo.AccountGroup
+        className="ava-group"
+        accounts={accounts}
+        content={`${accounts.length} accounts`}
+      />
+    </div>
+  ))
+
   const popOverContent = useMemo(() => {
     return (
       <>
@@ -137,11 +146,7 @@ const Component: React.FC = () => {
         padding: '16px 0',
       }}
     >
-      <MetaInfo.AccountGroup
-        className="ava-group"
-        accounts={accounts}
-        content={`${accounts.length} accounts`}
-      />
+      <TriggerComponent />
     </Popover>
   )
 }

@@ -6,7 +6,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
-import { Button, Icon, StakingItem, Tag } from '@subwallet/react-ui';
+import { Button, Icon, Popover, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { DotsThree, User, Users } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
@@ -70,12 +70,17 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
       />
     );
 
+
+
   const {
     staking: {
+      name,
       chain,
       nativeToken
     }
   } = stakingData;
+  console.log('%c Rainbowww!', 'font-weight: bold; font-size: 50px;color: red; text-shadow: 3px 3px 0 rgb(217,31,38) , 6px 6px 0 rgb(226,91,14) , 9px 9px 0 rgb(245,221,8) , 12px 12px 0 rgb(5,148,68) , 15px 15px 0 rgb(2,135,206) , 18px 18px 0 rgb(4,77,145) , 21px 21px 0 rgb(42,21,113); margin-bottom: 12px; padding: 5%;');
+  console.log('stakingData', stakingData)
 
   const { token } = useContext(ThemeContext)
 
@@ -86,8 +91,10 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
   return (
     <div className={CN(className, '__web-ui')} onClick={_onPressItem}>
       <TokenItem
-        logoKey={chain}
+        networkKey={chain}
+        logoKey={nativeToken}
         symbol={nativeToken}
+        chainDisplayName={name || ''}
       />
 
       <div className='type-wrapper'>

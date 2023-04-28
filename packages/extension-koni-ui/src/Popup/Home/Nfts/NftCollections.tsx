@@ -34,7 +34,7 @@ const rightIcon = <Icon
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { searchInput }: {
+  const outletContext: {
     searchInput: string
   } = useOutletContext()
   const dataContext = useContext(DataContext);
@@ -154,7 +154,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <SwList
         list={nftCollections}
         searchBy={searchCollection}
-        searchTerm={searchInput}
+        searchTerm={outletContext?.searchInput}
         renderItem={renderNftCollection}
         renderWhenEmpty={emptyNft}
         gridGap={'14px'}
@@ -168,7 +168,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     renderNftCollection,
     searchCollection,
     isWebUI,
-    searchInput,
+    outletContext?.searchInput,
     emptyNft
   ])
 

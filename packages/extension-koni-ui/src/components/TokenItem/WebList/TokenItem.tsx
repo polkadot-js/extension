@@ -2,26 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import {  BalanceItemProps, Logo, Typography } from '@subwallet/react-ui';
 import classNames from 'classnames';
 import React from 'react';
 import styled from 'styled-components';
 
-type Props = ThemeProps & Omit<TokenBalanceItemType,
-"slug" |
-"chain" |
-"chainDisplayName" |
-"isTestnet" |
-"priceValue" |
-"price24hValue" |
-"priceChangeStatus" |
-"free" |
-"locked" |
-"total" |
-"isReady"
-> & {
+type Props = ThemeProps & {
   onPressItem?: BalanceItemProps['onPressItem'],
+  logoKey?: string,
+  symbol: string,
+  chainDisplayName: string,
+  chain?: string,
+  networkKey?: string,
+  subSymbol?: string,
+  slug?: string,
 } ;
 
 function Component (
@@ -29,7 +23,12 @@ function Component (
   const {
     className = '',
     logoKey,
-    symbol
+    symbol,
+    chainDisplayName,
+    chain,
+    networkKey,
+    subSymbol,
+    slug = ''
   } = props
   // todo: Update BalanceItem in react-ui lib
   // - loading
@@ -40,17 +39,23 @@ function Component (
     <div className={classNames('token-item-container', className)}>
       <Logo
         size={40}
-        // network={logoKey}
+        network={networkKey}
         token={logoKey}
         shape={'squircle'}
-        isShowSubLogo={false}
+        isShowSubLogo={!!chain && !slug.includes('NATIVE')}
+        {
+          ...chain && {
+            subNetwork: chain,
+            subToken: subSymbol
+          }
+        }
       />
       <div className='token-item-information'>
         <Typography.Text className='token-item-information__title'>
           {symbol}
         </Typography.Text>
         <Typography.Text className='token-item-information__sub-title'>
-          {logoKey}
+          {chainDisplayName?.replace(' Relay Chain', '')}
         </Typography.Text>
       </div>
     </div>

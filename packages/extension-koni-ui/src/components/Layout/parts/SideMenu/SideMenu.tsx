@@ -15,8 +15,7 @@ import {
 import { Logo3D } from "@subwallet/extension-koni-ui/components/Logo"
 import { ThemeProps } from "@subwallet/extension-koni-ui/types"
 import { useLocation, useNavigate } from "react-router"
-import styled from "styled-components"
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { MenuItemType } from "@subwallet/react-ui/es/menu/hooks/useItems"
 
 export type Props = ThemeProps ;
@@ -77,7 +76,8 @@ const staticMenuItems: SideMenuItemType[] = [
 function Component({ className }: Props): React.ReactElement<Props> {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [isHovered, setHovered] = useState<boolean>(false);
+  // animate sidebar
+  const [isHovered, setHovered] = useState<boolean>(true);
 
   const handleNavigate = ({ key }: {
     key: string
@@ -88,8 +88,6 @@ function Component({ className }: Props): React.ReactElement<Props> {
       className={CN(className, "flex-col", "side-menu-wrapper",{
         '__expanded': isHovered
       })}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       <div className="logo-container">
         <Logo3D />

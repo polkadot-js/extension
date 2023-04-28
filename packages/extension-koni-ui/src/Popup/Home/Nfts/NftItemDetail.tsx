@@ -19,14 +19,15 @@ import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
 import { CaretLeft, Info, PaperPlaneTilt } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import ChainLogoMap from '../../../assets/logo';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps
 
@@ -42,6 +43,12 @@ const modalCloseButton = <Icon
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const location = useLocation();
   const { collectionInfo, nftItem } = location.state as INftItemDetail;
+  const outletContext: {
+    searchInput: string,
+    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
+  } = useOutletContext()
+
+  const { isWebUI } = useContext(ScreenContext);
 
   const { t } = useTranslation();
   const notify = useNotification();
@@ -175,22 +182,30 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [nftItem.externalUrl]);
 
+  useEffect(() => {
+    outletContext?.setDetailTitle(nftItem.name || nftItem.id);
+  }, [nftItem, outletContext])
+
   return (
     <PageWrapper
       className={`${className}`}
       resolve={dataContext.awaitStores(['nft', 'accountState', 'chainStore'])}
     >
       <Layout.Base
-        onBack={goBack}
-        showBackButton={true}
-        showSubHeader={true}
-        subHeaderBackground={'transparent'}
-        subHeaderCenter={false}
-        subHeaderIcons={subHeaderRightButton}
-        subHeaderPaddingVertical={true}
-        title={nftItem.name || nftItem.id}
+        {...!isWebUI && {
+          onBack: goBack,
+          showBackButton: true,
+          showSubHeader: true,
+          subHeaderBackground: 'transparent',
+          subHeaderCenter: false,
+          subHeaderIcons: subHeaderRightButton,
+          subHeaderPaddingVertical: true,
+          title: nftItem.name || nftItem.id,
+        }}
       >
-        <div className={'nft_item_detail__container'}>
+        <div className={CN('nft_item_detail__container', {
+          '__web-ui': isWebUI,
+        })}>
           <div className={'nft_item_detail__nft_image'}>
             <Image
               className={CN({ clickable: nftItem.externalUrl })}
@@ -198,10 +213,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               onClick={onImageClick}
               src={nftItem.image}
             />
+
+            {isWebUI && (
+              <Button
+                block
+                icon={<Icon
+                  phosphorIcon={PaperPlaneTilt}
+                  type='phosphor'
+                  weight={'fill'}
+                />}
+                onClick={onClickSend}
+              >
+                <span className={'nft_item_detail__send_text'}>Send</span>
+              </Button>
+            )}
           </div>
 
           <div className={'nft_item_detail__info_container'}>
-            <div className={'nft_item_detail__section_title'}>{t<string>('NFT information')}</div>
+            {!isWebUI && <div className={'nft_item_detail__section_title'}>{t<string>('NFT information')}</div>}
             {
               nftItem.description && (
                 <div
@@ -269,17 +298,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             )
           }
 
-          <Button
-            block
-            icon={<Icon
-              phosphorIcon={PaperPlaneTilt}
-              type='phosphor'
-              weight={'fill'}
-            />}
-            onClick={onClickSend}
-          >
-            <span className={'nft_item_detail__send_text'}>Send</span>
-          </Button>
+          {!isWebUI && (
+             <Button
+              block
+              icon={<Icon
+                phosphorIcon={PaperPlaneTilt}
+                type='phosphor'
+                weight={'fill'}
+              />}
+              onClick={onClickSend}
+            >
+              <span className={'nft_item_detail__send_text'}>Send</span>
+            </Button>
+         )}
         </div>
 
         <SwModal
@@ -320,8 +351,34 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       marginTop: token.marginSM,
       paddingRight: token.margin,
       paddingLeft: token.margin,
-      paddingBottom: token.margin
+      paddingBottom: token.margin,
+
+      '&.__web-ui': {
+        display: 'flex',
+        gap: 16,
+        paddingRight: 0,
+
+        '.nft_item_detail__nft_image': {
+          gap: 16,
+          flex: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'stretch',
+          maxWidth: 358,
+
+          'img': {
+            aspectRatio: '1',
+            objectFit: 'cover'
+          }
+        },
+
+        '.nft_item_detail__info_container': {
+          margin: 0
+        }
+      },
     },
+
+
 
     '.clickable': {
       cursor: 'pointer'

@@ -37,7 +37,7 @@ const Component = (): React.ReactElement => {
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
 
-  const { searchInput }: {
+  const outletContext: {
     searchInput: string
   } = useOutletContext()
 
@@ -157,7 +157,7 @@ const Component = (): React.ReactElement => {
 
   const tokenGroupBalanceItems = useMemo<TokenBalanceItemType[]>(() => {
     const result: TokenBalanceItemType[] = [];
-      const searchTextLowerCase = searchInput?.toLowerCase() || '';
+      const searchTextLowerCase = outletContext?.searchInput?.toLowerCase() || '';
 
       sortedTokenGroups.forEach((tokenGroupSlug) => {
         if (tokenGroupBalanceMap[tokenGroupSlug]) {
@@ -166,7 +166,7 @@ const Component = (): React.ReactElement => {
       })
 
       return result.filter((item) => item.symbol.toLowerCase().includes(searchTextLowerCase));
-  }, [sortedTokenGroups, tokenGroupBalanceMap, searchInput]);
+  }, [sortedTokenGroups, tokenGroupBalanceMap, outletContext?.searchInput]);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
@@ -185,7 +185,13 @@ const Component = (): React.ReactElement => {
           dataIndex: 'name',
           key: 'name',
           render: (_, row) => {
-            return <TokenItem {...row} />
+            return <TokenItem
+              logoKey={row.logoKey}
+              symbol={row.symbol}
+              chainDisplayName={row.chainDisplayName || ''}
+              chain={row.chain}
+              slug={row.slug}
+            />
           }
         },
         {
@@ -199,7 +205,13 @@ const Component = (): React.ReactElement => {
           dataIndex: 'price',
           key: 'price',
           render: (_, row) => {
-            return <TokenPrice {...row} />
+            return (
+              <TokenPrice
+                value={row.priceValue}
+                priceChangeStatus={row.priceChangeStatus}
+                pastValue={row.price24hValue}
+              />
+            )
           }
         },
         {
@@ -207,7 +219,13 @@ const Component = (): React.ReactElement => {
           dataIndex: 'balance',
           key: 'balance',
           render: (_, row) => {
-            return <TokenBalance {...row} />
+            return (
+              <TokenBalance
+                value={row.total.value}
+                convertedValue={row.total.convertedValue}
+                symbol={row.symbol}
+              />
+            )
           }
         }
       ]}

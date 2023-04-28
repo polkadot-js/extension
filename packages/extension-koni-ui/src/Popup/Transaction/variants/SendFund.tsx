@@ -14,7 +14,7 @@ import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInp
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { getFreeBalance, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { BN, BN_ZERO } from '@polkadot/util';
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
@@ -225,8 +226,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const [isTransferAll, setIsTransferAll] = useState(false);
   const [, update] = useState({});
   const [isBalanceReady, setIsBalanceReady] = useState(true);
+  const [forceUpdateMaxValue, setForceUpdateMaxValue] = useState<object|undefined>(undefined);
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone, setIsTransferAll);
+  const handleTransferAll = useCallback((value: boolean) => {
+    setForceUpdateMaxValue({});
+    setIsTransferAll(value);
+  }, []);
+
+  const { onError, onSuccess } = useHandleSubmitTransaction(onDone, handleTransferAll);
 
   const [form] = Form.useForm<TransferFormProps>();
   const formDefault = useMemo((): TransferFormProps => {
@@ -241,6 +248,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   }, [chain, from]);
 
   const destChain = Form.useWatch('destChain', form);
+  const transferAmount = Form.useWatch('value', form);
 
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
@@ -317,9 +325,10 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       return Promise.reject(t('Amount is required'));
     }
 
-    // if ((new BigN(amount)).eq(new BigN(0))) {
-    //   return Promise.reject(t('Amount must be greater than 0'));
-    // }
+    // TODO: enable this when release
+    if ((new BigN(amount)).eq(new BigN(0))) {
+      return Promise.reject(t('Amount must be greater than 0'));
+    }
 
     if ((new BigN(amount)).gt(new BigN(maxTransfer))) {
       const maxString = formatBalance(maxTransfer, decimals);
@@ -336,6 +345,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
       if (part.from) {
         setFrom(part.from);
+        setForceUpdateMaxValue(undefined);
         form.resetFields(['asset']);
       }
 
@@ -358,6 +368,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         setChain(chain);
         setAsset(part.asset);
         setIsTransferAll(false);
+        setForceUpdateMaxValue(undefined);
       }
 
       if (part.destChain) {
@@ -414,7 +425,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         originNetworkKey: chain,
         tokenSlug: asset,
         to,
-        value
+        value,
+        transferAll: isTransferAll
       });
     }
 
@@ -431,6 +443,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   }, [chain, from, asset, isTransferAll, accounts, notification, t, onSuccess, onError]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
+
+  const onSetMaxTransferable = useCallback((value: boolean) => {
+    const bnMaxTransfer = new BN(maxTransfer);
+
+    if (!bnMaxTransfer.isZero()) {
+      setIsTransferAll(value);
+    }
+  }, [maxTransfer]);
 
   // TODO: Need to review
   useEffect(() => {
@@ -488,10 +508,12 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     let cancel = false;
 
     if (from && asset) {
-      getFreeBalance({
+      getMaxTransfer({
         address: from,
         networkKey: assetRegistry[asset].originChain,
-        token: asset
+        token: asset,
+        isXcmTransfer: chain !== destChain,
+        destChain
       })
         .then((balance) => {
           !cancel && setMaxTransfer(balance.value);
@@ -515,7 +537,16 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return () => {
       cancel = true;
     };
-  }, [asset, assetRegistry, assetSettingMap, form, from]);
+  }, [asset, assetRegistry, assetSettingMap, chain, destChain, form, from]);
+
+  useEffect(() => {
+    const bnTransferAmount = new BN(transferAmount || '0');
+    const bnMaxTransfer = new BN(maxTransfer || '0');
+
+    if (bnTransferAmount.gt(BN_ZERO) && bnTransferAmount.eq(bnMaxTransfer)) {
+      setIsTransferAll(true);
+    }
+  }, [maxTransfer, transferAmount]);
 
   return (
     <>
@@ -566,9 +597,10 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             >
               <AmountInput
                 decimals={decimals}
+                forceUpdateMaxValue={forceUpdateMaxValue}
                 maxValue={maxTransfer}
-                onSetMax={setIsTransferAll}
-                showMaxButton={chain === destChain && assetRegistry[asset]?.assetType === _AssetType.NATIVE}
+                onSetMax={onSetMaxTransferable}
+                showMaxButton={true}
                 tooltip={t('Amount')}
               />
             </Form.Item>

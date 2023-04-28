@@ -204,7 +204,6 @@ export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactEle
       theme={themeConfig}
     >
       <ThemeGenerator themeConfig={themeConfig}>
-        <TooltipContainer id='tooltip-container' />
         {children}
       </ThemeGenerator>
     </ConfigProvider>

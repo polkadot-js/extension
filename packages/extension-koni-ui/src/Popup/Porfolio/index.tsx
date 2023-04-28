@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEventHandler, useContext, useMemo, useState } from 'react';
 import { ThemeProps } from "@subwallet/extension-koni-ui/types"
 import styled from 'styled-components';
 import { Layout } from '@subwallet/extension-koni-ui/components';
@@ -79,7 +79,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
                 <SwSubHeader
                   title={detailTitle}
                   showBackButton
-                  onBack={() => {}}
+                  onBack={() => navigate(-1)}
                   background='transparent'
                   className='web-header'
                   center={false}
@@ -97,10 +97,12 @@ function Component({ className }: Props): React.ReactElement<Props> {
           </div>
         </div>
 
-        <Outlet context={{
-          searchInput,
-          setDetailTitle
-        }} />
+        <Outlet
+          context={{
+            searchInput,
+            setDetailTitle
+          }}
+        />
       </div>
     </Layout.Base>
   )
@@ -138,6 +140,7 @@ const Porfolio = styled(Component)<Props>(({ theme: { token }}) => {
         justifyContent: "space-between",
         flex: 1,
         background: "transparent",
+        marginBottom: 24,
 
         '.web-header': {
           flex: 1,

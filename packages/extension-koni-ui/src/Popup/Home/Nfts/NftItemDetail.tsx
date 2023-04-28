@@ -229,74 +229,87 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             )}
           </div>
 
-          <div className={'nft_item_detail__info_container'}>
-            {!isWebUI && <div className={'nft_item_detail__section_title'}>{t<string>('NFT information')}</div>}
-            {
-              nftItem.description && (
-                <div
-                  className={'nft_item_detail__description_container'}
-                  onClick={handleShowNftDescription}
-                  style={{ cursor: nftItem.description.length > NFT_DESCRIPTION_MAX_LENGTH ? 'pointer' : 'auto' }}
-                >
-                  <div className={'nft_item_detail__description_content'}>
-                    {nftItem.description.length > NFT_DESCRIPTION_MAX_LENGTH ? `${nftItem.description.slice(0, NFT_DESCRIPTION_MAX_LENGTH)}...` : nftItem.description}
+          <div className={'nft_item_detail_field_container'}>
+            <div className={'nft_item_detail__info_container'}>
+              {!isWebUI && <div className={'nft_item_detail__section_title'}>{t<string>('NFT information')}</div>}
+              {
+                nftItem.description && (
+                  <div
+                    className={'nft_item_detail__description_container'}
+                    onClick={handleShowNftDescription}
+                    style={{ cursor: nftItem.description.length > NFT_DESCRIPTION_MAX_LENGTH ? 'pointer' : 'auto' }}
+                  >
+                    <div className={'nft_item_detail__description_content'}>
+                      {nftItem.description.length > NFT_DESCRIPTION_MAX_LENGTH ? `${nftItem.description.slice(0, NFT_DESCRIPTION_MAX_LENGTH)}...` : nftItem.description}
+                    </div>
+                    <div className={'nft_item_detail__description_title'}>
+                      <Icon
+                        iconColor={token.colorIcon}
+                        phosphorIcon={Info}
+                        type='phosphor'
+                        weight={'fill'}
+                      />
+                      <div>{t<string>('Description')}</div>
+                    </div>
                   </div>
-                  <div className={'nft_item_detail__description_title'}>
-                    <Icon
-                      iconColor={token.colorIcon}
-                      phosphorIcon={Info}
-                      type='phosphor'
-                      weight={'fill'}
-                    />
-                    <div>{t<string>('Description')}</div>
+                )
+              }
+
+              <div className='nft_item_detail__info_field_container'>
+                <Field
+                  content={collectionInfo.collectionName || collectionInfo.collectionId}
+                  label={t<string>('NFT collection name')}
+                  suffix={nftItem.externalUrl && externalInfoIcon('collection')}
+                />
+
+                <Field
+                  content={ownerInfo()}
+                  label={t<string>('Owned by')}
+                  prefix={nftItem.owner && ownerPrefix()}
+                  suffix={externalInfoIcon('account')}
+                />
+
+                {isWebUI && (
+                  <Field
+                    content={'created by...'}
+                    label={t<string>('Created By')}
+                    prefix={nftItem.owner && ownerPrefix()}
+                    suffix={externalInfoIcon('account')}
+                  />
+                )}
+
+                <Field
+                  content={originChainInfo.name}
+                  label={t<string>('Chain')}
+                  prefix={originChainLogo()}
+                />
+              </div>
+            </div>
+
+            {
+              nftItem.properties && nftItem.properties.length > 0 && (
+                <div className={'nft_item_detail__prop_section'}>
+                  <div className={'nft_item_detail__section_title'}>{t<string>('Properties')}</div>
+                  <div className={'nft_item_detail__atts_container'}>
+                    {
+                      Object.entries(nftItem.properties).map(([attName, attValueObj], index) => {
+                        const { value: attValue } = attValueObj as Record<string, string>;
+
+                        return (
+                          <Field
+                            content={attValue.toString()}
+                            key={index}
+                            label={attName}
+                            width={'fit-content'}
+                          />
+                        );
+                      })
+                    }
                   </div>
                 </div>
               )
             }
-
-            <Field
-              content={collectionInfo.collectionName || collectionInfo.collectionId}
-              label={t<string>('NFT collection name')}
-              suffix={nftItem.externalUrl && externalInfoIcon('collection')}
-            />
-
-            <Field
-              content={ownerInfo()}
-              label={t<string>('Owned by')}
-              prefix={nftItem.owner && ownerPrefix()}
-              suffix={externalInfoIcon('account')}
-            />
-
-            <Field
-              content={originChainInfo.name}
-              label={t<string>('Chain')}
-              prefix={originChainLogo()}
-            />
           </div>
-
-          {
-            nftItem.properties && (
-              <div className={'nft_item_detail__prop_section'}>
-                <div className={'nft_item_detail__section_title'}>{t<string>('Properties')}</div>
-                <div className={'nft_item_detail__atts_container'}>
-                  {
-                    Object.entries(nftItem.properties).map(([attName, attValueObj], index) => {
-                      const { value: attValue } = attValueObj as Record<string, string>;
-
-                      return (
-                        <Field
-                          content={attValue.toString()}
-                          key={index}
-                          label={attName}
-                          width={'fit-content'}
-                        />
-                      );
-                    })
-                  }
-                </div>
-              </div>
-            )
-          }
 
           {!isWebUI && (
              <Button
@@ -353,6 +366,13 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       paddingLeft: token.margin,
       paddingBottom: token.margin,
 
+
+      '.nft_item_detail__info_field_container': {
+        gap: 8,
+        display: 'flex',
+        flexDirection: 'column',
+      },
+
       '&.__web-ui': {
         display: 'flex',
         gap: 16,
@@ -372,13 +392,28 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
           }
         },
 
-        '.nft_item_detail__info_container': {
-          margin: 0
+        '.nft_item_detail_field_container': {
+          flex: 1,
+
+          '.nft_item_detail__info_container': {
+            margin: 0,
+            marginBottom: 16,
+
+            '.nft_item_detail__info_field_container': {
+              gap: 8,
+              display: 'flex',
+              flexWrap: 'wrap',
+              flexDirection: 'row',
+
+              '.ant-field-container': {
+                flex: '0 1',
+                minWidth: 'calc(50% - 4px)'
+              }
+            }
+          }
         }
       },
     },
-
-
 
     '.clickable': {
       cursor: 'pointer'

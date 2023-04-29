@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## master
+
+Changes:
+
+- Adjust compilation output for `__internal__` class fields
+- Bump to `@polkadot/util` 12.1.1
+
+
 ## 0.46.1 Apr 22, 2023
 
 - **Important** Not published to the stores, aligns with latest released packages.

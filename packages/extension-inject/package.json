@@ -20,13 +20,13 @@
   "dependencies": {
     "@polkadot/rpc-provider": "^10.4.1",
     "@polkadot/types": "^10.4.1",
-    "@polkadot/util": "^12.0.1",
-    "@polkadot/util-crypto": "^12.0.1",
-    "@polkadot/x-global": "^12.0.1",
+    "@polkadot/util": "^12.1.1",
+    "@polkadot/util-crypto": "^12.1.1",
+    "@polkadot/x-global": "^12.1.1",
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.233",
+    "@types/chrome": "^0.0.234",
     "@types/firefox-webext-browser": "^111.0.1"
   },
   "peerDependencies": {

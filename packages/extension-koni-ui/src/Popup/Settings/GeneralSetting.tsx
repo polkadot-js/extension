@@ -10,13 +10,14 @@ import { saveBrowserConfirmationType } from '@subwallet/extension-koni-ui/messag
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateBrowserConfirmationType, updateLanguage, updateTheme } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import i18next from 'i18next';
 import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps;
@@ -95,7 +96,7 @@ type LoadingMap = {
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext)
-
+  const navigate = useNavigate();
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
@@ -214,7 +215,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         withSideMenu
         subHeaderCenter={!isWebUI}
       >
-        <div className={'__scroll-container'}>
+         {isWebUI && <SwSubHeader
+          title={t('General settings')}
+          background='transparent'
+          center={false}
+          onBack={() => navigate(-1)}
+          showBackButton={true}
+        />}
+        <div className={CN('__scroll-container', {
+          '__web-ui': isWebUI
+        })}>
           <SelectModal
             background={'default'}
             className={`__modal ${className}`}
@@ -333,7 +343,13 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
         paddingTop: token.padding,
         paddingRight: token.padding,
         paddingLeft: token.padding,
-        paddingBottom: token.paddingLG
+        paddingBottom: token.paddingLG,
+
+        '&.__web-ui': {
+          maxWidth: '70%',
+          margin: '0 auto',
+          paddingTop: token.padding + 24,
+        }
       }
     },
 

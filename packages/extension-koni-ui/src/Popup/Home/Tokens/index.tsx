@@ -38,8 +38,13 @@ const Component = (): React.ReactElement => {
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
 
   const outletContext: {
-    searchInput: string
+    searchInput: string,
+    setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
   } = useOutletContext()
+
+  useEffect(() => {
+    outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Token name')
+  }, [outletContext?.setSearchPlaceholder])
 
   const notify = useNotification();
   const { accountSelectorItems,

@@ -181,7 +181,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <div className='web-list'>
           <Search
             searchValue={searchInput}
-            placeholder={"Chain, Address, Type,..."}
+            placeholder={"Token name"}
             onSearch={(value: string) => setSearchInput(value)}
             onClickActionBtn={onClickActionBtn}
             actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} size='sm'/>}

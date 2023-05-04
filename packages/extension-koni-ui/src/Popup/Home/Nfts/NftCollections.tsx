@@ -13,7 +13,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowClockwise, Image, Plus } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -35,13 +35,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const outletContext: {
-    searchInput: string
+    searchInput: string,
+    setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
   } = useOutletContext()
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
   const { nftCollections, nftItems } = useGetNftByAccount();
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
+
+  useEffect(() => {
+    outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Collectible name')
+  }, [outletContext?.setSearchPlaceholder])
 
   const subHeaderButton: ButtonProps[] = [
     {

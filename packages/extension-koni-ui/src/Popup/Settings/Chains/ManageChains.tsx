@@ -11,11 +11,13 @@ import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { ButtonProps, Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { FadersHorizontal, ListChecks, Plus } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import CN from 'classnames'
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps
 
@@ -41,6 +43,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
+  const { isWebUI } = useContext(ScreenContext);
   const { activeModal } = useContext(ModalContext);
   const chainInfoList = useChainInfoWithState();
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
@@ -144,27 +147,38 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
         title={t<string>('Manage chains')}
+        withSideMenu
       >
-        <SwList.Section
-          actionBtnIcon={<Icon
-            phosphorIcon={FadersHorizontal}
-            size='sm'
-            weight={'fill'}
-          />}
-          className={'manage_chains__container'}
-          enableSearchInput
-          filterBy={filterFunction}
-          list={chainInfoList}
-          mode={'boxed'}
-          onClickActionBtn={openFilterModal}
-          renderItem={renderChainItem}
-          renderWhenEmpty={emptyTokenList}
-          searchFunction={searchToken}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search chain')}
-          showActionBtn
-        />
-
+         {isWebUI && <SwSubHeader
+          title={t<string>('Manage chains')}
+          background='transparent'
+          center={false}
+          onBack={() => navigate(-1)}
+          showBackButton={true}
+        />}
+        <div className={CN('container', {
+          '__web-ui': isWebUI
+        })}>
+          <SwList.Section
+            actionBtnIcon={<Icon
+              phosphorIcon={FadersHorizontal}
+              size='sm'
+              weight={'fill'}
+            />}
+            className={'manage_chains__container'}
+            enableSearchInput
+            filterBy={filterFunction}
+            list={chainInfoList}
+            mode={'boxed'}
+            onClickActionBtn={openFilterModal}
+            renderItem={renderChainItem}
+            renderWhenEmpty={emptyTokenList}
+            searchFunction={searchToken}
+            searchMinCharactersCount={2}
+            searchPlaceholder={t<string>('Search chain')}
+            showActionBtn
+          />
+        </div>
         <FilterModal
           id={FILTER_MODAL_ID}
           onApplyFilter={onApplyFilter}
@@ -182,6 +196,15 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.ant-sw-screen-layout-body': {
       display: 'flex'
+    },
+
+    '.container': {
+      width: '100%',
+      '&.__web-ui': {
+        padding: `${token.padding + 24}px ${token.padding}px ${token.padding}px`,
+        maxWidth: '70%',
+        margin: '0 auto',
+      },
     },
 
     '.ant-sw-list-wrapper.ant-sw-list-wrapper:before': {

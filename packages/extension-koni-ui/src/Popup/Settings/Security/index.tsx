@@ -10,7 +10,7 @@ import { saveCameraSetting, windowOpen } from '@subwallet/extension-koni-ui/mess
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
-import { BackgroundIcon, Icon, SettingItem, Switch } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, SettingItem, SwSubHeader, Switch } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Camera, CaretRight, GlobeHemisphereEast, Key } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -128,12 +128,21 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
+        withSideMenu
         onBack={onBack}
         title={t('Security settings')}
-        subHeaderCenter={!isWebUI}
       >
-        <div className='body-container'>
+        {isWebUI && <SwSubHeader
+          title={t('Security settings')}
+          background='transparent'
+          center={false}
+          onBack={() => navigate(-1)}
+          showBackButton={true}
+        />}
+        <div className={CN('body-container', {
+          '__web-ui': isWebUI
+        })}>
           <div className='items-container'>
             {
               items.map((item) => (
@@ -195,7 +204,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </div>
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
@@ -203,7 +212,13 @@ const Component: React.FC<Props> = (props: Props) => {
 const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.body-container': {
-      padding: `${token.padding}px ${token.padding}px`
+      padding: `${token.padding}px ${token.padding}px`,
+
+      '&.__web-ui': {
+        padding: `${token.padding + 24}px ${token.padding}px ${token.padding}px`,
+        maxWidth: '70%',
+        margin: '0 auto',
+      }
     },
 
     '.items-container': {

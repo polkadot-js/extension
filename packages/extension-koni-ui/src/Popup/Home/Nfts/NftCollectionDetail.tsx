@@ -37,7 +37,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { collectionInfo, nftList } = location.state as INftCollectionDetail;
   const outletContext: {
     searchInput: string,
-    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
+    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>,
+    setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
   } = useOutletContext();
   const { isWebUI } = useContext(ScreenContext)
 
@@ -149,6 +150,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useEffect(() => {
     if (outletContext) {
       outletContext.setDetailTitle(title)
+      outletContext.setSearchPlaceholder('NFTid')
     }
   }, [outletContext, title])
 

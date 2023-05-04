@@ -16,6 +16,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
   const { isWebUI } = useContext(ScreenContext)
   const { pathname } = useLocation();
   const [detailTitle, setDetailTitle] = useState<string | React.ReactNode>()
+  const [searchPlaceholder, setSearchPlaceholder] = useState<string>()
 
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState<string>('')
@@ -90,7 +91,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
             <Input.Search
               className="search-input"
               size="md"
-              placeholder="Token name"
+              placeholder={searchPlaceholder}
               onChange={handleInputChange}
               value={searchInput}
             />
@@ -100,7 +101,8 @@ function Component({ className }: Props): React.ReactElement<Props> {
         <Outlet
           context={{
             searchInput,
-            setDetailTitle
+            setDetailTitle,
+            setSearchPlaceholder
           }}
         />
       </div>

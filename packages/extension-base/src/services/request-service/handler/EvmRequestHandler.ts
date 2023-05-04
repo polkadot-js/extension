@@ -146,7 +146,7 @@ export default class EvmRequestHandler {
       data: toBuffer(config.data)
     };
 
-    const common = Common.custom({ chainId: config.chainId });
+    const common = Common.custom({ chainId: config.chainId, defaultHardfork: 'petersburg' });
 
     // @ts-ignore
     return new Transaction(txData, { common });
@@ -154,14 +154,17 @@ export default class EvmRequestHandler {
 
   private async signTransaction (confirmation: ConfirmationDefinitions['evmSendTransactionRequest'][0]): Promise<string> {
     const transaction = confirmation.payload;
-    const { estimateGas, from, gasPrice } = transaction;
+    const { estimateGas, from, gas, gasPrice, value } = transaction;
     const pair = keyring.getPair(from as string);
     const params = {
       ...transaction,
+      gas: anyNumberToBN(gas).toNumber(),
+      value: anyNumberToBN(value).toNumber(),
       gasPrice: anyNumberToBN(gasPrice).toNumber(),
       gasLimit: anyNumberToBN(estimateGas).toNumber()
       // nonce: await web3.eth.getTransactionCount(from) // Todo: fill this value from transaction service
     } as TransactionConfig;
+
     const tx = this.configToTransaction(params);
 
     await Promise.resolve();

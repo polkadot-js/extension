@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
+import LoginBg from '@subwallet/extension-koni-ui/assets/LoginBg.png';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
 import SocialGroup from '@subwallet/extension-koni-ui/components/SocialGroup';
@@ -183,13 +183,13 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       position: 'absolute',
       width: '100%',
       left: 0,
-      top: 0,
-      opacity: 0.1
+      top: 0
     },
 
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
+      opacity: 0.999,
 
       '.logo-container': {
         marginTop: token.paddingXL * 3.25 + 2,

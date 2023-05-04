@@ -217,6 +217,7 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
     ".body-container": {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
+      opacity: 0.999, // Hot fix show wrong opacity in browser
 
       '.logo-container': {
         marginTop: token.sizeLG * 3,

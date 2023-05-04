@@ -1,5 +1,53 @@
 # CHANGELOG
 
+## 1.0.2
+Build date: Apr 28, 2023.
+
+Update:
+- Support Address Book
+
+Bug fixes:
+- Fix many bugs from version 1.0.1
+
+## 1.0.1
+Build date: Apr 10, 2023.
+
+Upgrade:
+- All extension UI
+- New Transaction Handler
+- ...
+
+## 0.8.4 (Koni)
+Build date: Mar 31, 2023.
+
+Update:
+- Integrate Aventus Network (#646)
+- Add ArtZero API & fix bug show NFT (#1112)
+- Update Azero block explorer (#1117)
+
+Bug fixes:
+- Fix bug importing PSP22 tokens (#1118)
+
+## 0.8.3 (Koni)
+Build date: Mar 29, 2023.
+
+Update:
+- Update explorer for Gemini 3c, 2a (#1089)
+- Equilibrium logo update (#1098)
+- Add XCM for Kusama --> Statemint (#1094)
+- Update logic for ink 4.0 and delete old PSP token (#1095)
+
+## 0.8.2 (Koni)
+Build date: Mar 15, 2023.
+
+Update:
+- Update Token's logo of the Equilibrium (#1032)
+- Add support Subspace Gemini 3c (#1077)
+- Temporarily hide Kintsugi in the Origin Chain list (#1086)
+
+Bug fixes:
+- Fix bug XCM for Moonbeam, Bifrost Kusama (#1000)
+
 ## 0.8.1 (Koni)
 Build date: Feb 03, 2022.
 

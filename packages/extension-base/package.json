@@ -17,7 +17,7 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "1.0.2-1",
+  "version": "1.0.2-3",
   "main": "index.js",
   "dependencies": {
     "@acala-network/api": "^4.1.8-2.3",
@@ -57,7 +57,7 @@
     "@polkadot/hw-ledger": "^10.1.9",
     "@polkadot/keyring": "^10.2.1",
     "@polkadot/networks": "^10.2.1",
-    "@polkadot/phishing": "^0.20.3",
+    "@polkadot/phishing": "^0.21.1",
     "@polkadot/react-identicon": "^2.9.14",
     "@polkadot/react-qr": "^2.9.14",
     "@polkadot/rpc-provider": "^9.10.3",
@@ -75,10 +75,10 @@
     "@subsocial/types": "^0.6.8",
     "@substrate/connect": "^0.7.18",
     "@subwallet/chain-list": "^0.0.32",
-    "@subwallet/extension-base": "^1.0.2-1",
-    "@subwallet/extension-chains": "^1.0.2-1",
-    "@subwallet/extension-dapp": "^1.0.2-1",
-    "@subwallet/extension-inject": "^1.0.2-1",
+    "@subwallet/extension-base": "^1.0.2-3",
+    "@subwallet/extension-chains": "^1.0.2-3",
+    "@subwallet/extension-dapp": "^1.0.2-3",
+    "@subwallet/extension-inject": "^1.0.2-3",
     "@subwallet/keyring": "^0.0.5",
     "@subwallet/ui-keyring": "^0.0.3",
     "@unique-nft/types": "^0.6.0-4",
@@ -110,13 +110,13 @@
     "protobufjs": "^7.1.2",
     "rlp": "^3.0.0",
     "rxjs": "^7.8.0",
-    "web3": "^1.8.1",
-    "web3-core": "^1.8.1",
-    "web3-core-helpers": "^1.8.1",
-    "web3-eth-contract": "^1.8.1",
-    "web3-utils": "^1.8.1"
+    "web3": "^1.9.0",
+    "web3-core": "^1.9.0",
+    "web3-core-helpers": "^1.9.0",
+    "web3-eth-contract": "^1.9.0",
+    "web3-utils": "^1.9.0"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^1.0.2-1"
+    "@subwallet/extension-mocks": "^1.0.2-3"
   }
 }

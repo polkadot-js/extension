@@ -47,10 +47,10 @@ export const HistoryStatusMap: Record<ExtrinsicStatus, StatusType> = {
     icon: Queue,
     name: 'Queued'
   },
-  [ExtrinsicStatus.SENDING]: {
+  [ExtrinsicStatus.SUBMITTING]: {
     schema: 'gold',
     icon: PaperPlaneTilt,
-    name: 'Sending'
+    name: 'Submitting'
   },
   [ExtrinsicStatus.PROCESSING]: {
     schema: 'gold',

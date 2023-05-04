@@ -463,7 +463,7 @@ export interface ExtrinsicDataTypeMap {
 
 export enum ExtrinsicStatus {
   QUEUED = 'queued', // Transaction in queue
-  SENDING = 'sending', // Transaction in queue
+  SUBMITTING = 'submitting', // Transaction in queue
   PROCESSING = 'processing', // Transaction is sending
   SUCCESS = 'success', // Send successfully
   FAIL = 'fail', // Send failed

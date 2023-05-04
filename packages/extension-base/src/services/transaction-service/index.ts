@@ -491,7 +491,7 @@ export default class TransactionService {
 
   private onSend ({ id }: TransactionEventResponse) {
     // Update transaction status
-    this.updateTransaction(id, { status: ExtrinsicStatus.SENDING });
+    this.updateTransaction(id, { status: ExtrinsicStatus.SUBMITTING });
 
     // Create Input History Transaction History
     this.historyService.insertHistories(this.transactionToHistories(id)).catch(console.error);

@@ -29,7 +29,11 @@ const initialState = {
   // Media settings
   mediaAllowed: false,
 
-  reduxStatus: ReduxStatus.INIT
+  reduxStatus: ReduxStatus.INIT,
+  logoMaps: {
+    chainLogoMap: {},
+    assetLogoMap: {}
+  }
 } as AppSettings;
 
 const settingsSlice = createSlice({
@@ -79,6 +83,10 @@ const settingsSlice = createSlice({
     updateTheme (state, action: PayloadAction<ThemeNames>) {
       const theme = action.payload;
 
+      if (theme === state.theme) {
+        return state;
+      }
+
       return {
         ...state,
         theme
@@ -102,6 +110,12 @@ const settingsSlice = createSlice({
       return {
         ...state,
         browserConfirmationType: action.payload
+      };
+    },
+    updateLogoMaps (state, action: PayloadAction<AppSettings['logoMaps']>) {
+      return {
+        ...state,
+        logoMaps: action.payload
       };
     }
   }

@@ -1803,6 +1803,11 @@ export interface CronReloadRequest {
   data: 'nft' | 'staking'
 }
 
+export interface AllLogoMap {
+  chainLogoMap: Record<string, string>
+  assetLogoMap: Record<string, string>
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1912,6 +1917,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
   'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
+  'pri(settings.getLogoMaps)': [null, AllLogoMap];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

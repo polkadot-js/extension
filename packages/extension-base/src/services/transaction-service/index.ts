@@ -221,8 +221,6 @@ export default class TransactionService {
     transactions[transaction.id] = transaction;
     this.transactionSubject.next({ ...transactions });
 
-    console.log(transaction);
-
     // Send transaction
     return await this.sendTransaction(transaction);
   }
@@ -623,6 +621,10 @@ export default class TransactionService {
           ? (await parseContractInput(payload.data || '', payload.to || '', chainInfo)).result
           : ''
         : payload.data || '';
+    }
+
+    if ('data' in payload && payload.data === undefined) {
+      delete payload.data;
     }
 
     // Set unique nonce to avoid transaction errors

@@ -20,7 +20,9 @@ const useHandleSubmitTransaction = (onDone: (extrinsicHash: string) => void, set
         });
       }
 
-      warnings[0] && setIgnoreWarnings?.(true);
+      if (!errors.length) {
+        warnings[0] && setIgnoreWarnings?.(true);
+      }
     } else if (extrinsicHash) {
       onDone(extrinsicHash);
     }

@@ -1010,6 +1010,14 @@ export interface RequestFreeBalance {
   token?: string
 }
 
+export interface RequestMaxTransferable {
+  address: string,
+  networkKey: string,
+  token?: string,
+  isXcmTransfer?: boolean,
+  destChain: string
+}
+
 export interface RequestTransferCheckReferenceCount {
   address: string,
   networkKey: string
@@ -1911,6 +1919,7 @@ export interface KoniRequestSignatures {
   'pri(transfer.checkReferenceCount)': [RequestTransferCheckReferenceCount, boolean];
   'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, SupportTransferResponse];
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];
+  'pri(transfer.getMaxTransferable)': [RequestMaxTransferable, AmountData];
   'pri(subscription.cancel)': [string, boolean];
   'pri(freeBalance.get)': [RequestFreeBalance, AmountData];
   'pri(freeBalance.subscribe)': [RequestFreeBalance, AmountData, AmountData];

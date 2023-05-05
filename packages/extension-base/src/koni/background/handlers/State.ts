@@ -1501,14 +1501,23 @@ export default class KoniState {
       canSign: true
     };
 
-    // Todo: Convert this to handle transaction
+    const eType = transaction.value ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.EVM_EXECUTE;
+
+    const transactionData = { ...transaction };
+
+    if (eType === ExtrinsicType.TRANSFER_BALANCE) {
+      // @ts-ignore
+      transactionData.tokenSlug = this.chainService.getNativeTokenInfo(networkKey).slug;
+    }
+
+    // Custom handle this instead of general handler transaction
     const transactionEmitter = await this.transactionService.addTransaction({
       transaction: requestPayload,
       address: requestPayload.from as string,
       chain: networkKey,
       url,
-      data: { ...transaction },
-      extrinsicType: transaction.value ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.EVM_EXECUTE,
+      data: transactionData,
+      extrinsicType: eType,
       chainType: ChainType.EVM
     });
 

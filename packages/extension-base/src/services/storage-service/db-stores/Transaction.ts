@@ -5,7 +5,7 @@ import BaseStoreWithAddressAndChain from '@subwallet/extension-base/services/sto
 
 import { ITransactionHistoryItem } from '../databases';
 
-export interface HistoryQuery {chain?: string, address?: string, extrinsicHash?: string}
+export interface HistoryQuery {chain?: string, address?: string, extrinsicHash?: string, transactionId?: string}
 
 export default class TransactionStore extends BaseStoreWithAddressAndChain<ITransactionHistoryItem> {
   async getHistoryByAddressAsObject (address: string) {
@@ -41,14 +41,14 @@ export default class TransactionStore extends BaseStoreWithAddressAndChain<ITran
   public override async bulkUpsert (records: ITransactionHistoryItem[]): Promise<unknown> {
     await this.table.bulkPut(records);
 
-    // await Promise.all(records.map((record) => {
-    //   return this.table.where({
-    //     chain: record.chain,
-    //     address: record.address,
-    //     extrinsicHash: record.extrinsicHash
-    //   }).filter((item) => (item.origin === 'app' && record.origin !== 'app'))
-    //     .delete();
-    // }));
+    return true;
+  }
+
+  public async updateWithQuery (query: HistoryQuery, update: Partial<ITransactionHistoryItem>): Promise<unknown> {
+    await this.table.where(query)
+      .modify((record) => {
+        return Object.assign(record, update);
+      });
 
     return true;
   }

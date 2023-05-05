@@ -13,3 +13,4 @@ export * from './FilterModal';
 export * from './GlobalSearchTokenModal';
 export * from './ReceiveModal';
 export * from './Staking';
+export * from './CustomModal';

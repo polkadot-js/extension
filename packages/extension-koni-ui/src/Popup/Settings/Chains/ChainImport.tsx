@@ -1,5 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors // SPDX-License-Identifier: Apache-2.0
 
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
@@ -7,17 +6,19 @@ import { _generateCustomProviderKey } from '@subwallet/extension-base/services/c
 import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, Col, Form, Icon, Input, Row } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, Col, Form, Icon, Input, Row, SwSubHeader } from '@subwallet/react-ui';
 import { FloppyDiskBack, Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import CN from 'classnames';
 
 type Props = ThemeProps
 
@@ -46,7 +47,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
   const [form] = Form.useForm<ChainImportForm>();
-
+  const { isWebUI } = useContext(ScreenContext);
   const [loading, setLoading] = useState(false);
   const [isPureEvmChain, setIsPureEvmChain] = useState(false);
   const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);
@@ -272,37 +273,57 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useFocusFormItem(form, 'provider');
 
+  const backBtnProps = useMemo(() => ({
+    onClick: onBack,
+    children: 'Cancel'
+  }), [onBack])
+
+  const submitBtnProps = useMemo(() => ({
+    block: true,
+    disabled: isSubmitDisabled(),
+    icon: !isWebUI && (
+      <Icon
+        phosphorIcon={FloppyDiskBack}
+        type='phosphor'
+        weight={'fill'}
+      />
+    ),
+    loading: loading,
+    onClick: onSubmit,
+    children: 'Save'
+  }), [isSubmitDisabled, onSubmit, isWebUI])
+
+  const subHeaderProps = useMemo(() => isWebUI ? {
+    title:t('Add network'),
+    center: false
+  } : {
+    title:t<string>('Import chain'),
+    center: true,
+    rightButtons: [
+      {
+        icon: <InfoIcon />,
+        onClick: handleClickSubheaderButton
+      }
+    ]
+  }, [isWebUI, handleClickSubheaderButton])
+
   return (
     <PageWrapper className={`chain_import ${className}`}>
-      <Layout.WithSubHeaderOnly
-        leftFooterButton={{
-          onClick: onBack,
-          children: 'Cancel'
-        }}
+      <Layout.Base
+        leftFooterButton={backBtnProps}
+        withSideMenu
         onBack={onBack}
-        rightFooterButton={{
-          block: true,
-          disabled: isSubmitDisabled(),
-          icon: (
-            <Icon
-              phosphorIcon={FloppyDiskBack}
-              type='phosphor'
-              weight={'fill'}
-            />
-          ),
-          loading: loading,
-          onClick: onSubmit,
-          children: 'Save'
-        }}
-        subHeaderIcons={[
-          {
-            icon: <InfoIcon />,
-            onClick: handleClickSubheaderButton
-          }
-        ]}
-        title={t<string>('Import chain')}
+        rightFooterButton={submitBtnProps}
       >
-        <div className={'chain_import__container'}>
+        <SwSubHeader
+          background='transparent'
+          onBack={() => navigate(-1)}
+          showBackButton={true}
+          {...subHeaderProps}
+        />
+        <div className={CN('chain_import__container', {
+          '__web-ui': isWebUI
+        })}>
           <div className={'chain_import__header_info'}>
             {t('Currently support WSS provider for Substrate networks and HTTP provider for EVM network')}
           </div>
@@ -336,7 +357,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               </Form.Item>
 
               <Row gutter={token.paddingSM}>
-                <Col span={16}>
+                <Col span={isWebUI ? 12 : 16}>
                   <Form.Item name={'name'}>
                     <Input
                       disabled={true}
@@ -353,7 +374,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     />
                   </Form.Item>
                 </Col>
-                <Col span={8}>
+                <Col span={isWebUI ? 12 : 8}>
                   <Form.Item name={'symbol'}>
                     <Input
                       disabled={true}
@@ -412,9 +433,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 />
               </Form.Item>
             </div>
+            {isWebUI && (
+              <div className='action-wrapper'>
+                <Button {...backBtnProps} schema='secondary' />
+                <Button {...submitBtnProps} />
+              </div>
+            )}
           </Form>
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 }
@@ -434,7 +461,29 @@ const ChainImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.chain_import__container': {
       marginRight: token.margin,
-      marginLeft: token.margin
+      marginLeft: token.margin,
+
+      '&.__web-ui': {
+        margin: '0 auto',
+        width: '60%',
+
+        ".chain_import__header_info": {
+          margin: `${token.margin}px auto`,
+          maxWidth: '50%',
+        },
+
+        '.action-wrapper': {
+          display: 'flex',
+          width: '100%',
+          marginTop: token.marginMD,
+          gap: 16,
+
+          '& > *': {
+            flex: 1
+          }
+        }
+
+      }
     },
 
     '.chain_import__attributes_container': {

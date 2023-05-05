@@ -1,5 +1,5 @@
 import { PhosphorIcon, ThemeProps } from "@subwallet/extension-koni-ui/types"
-import { Button, Icon, Typography, Number, Tag, Divider } from "@subwallet/react-ui"
+import { Button, Icon, Typography, Number, Tag, Divider, ModalContext } from "@subwallet/react-ui"
 import CN from "classnames"
 import {
   EyeClosed,
@@ -16,6 +16,14 @@ import { useNotification, useReceiveQR, useTranslation } from "@subwallet/extens
 import { useSelector } from 'react-redux';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { HomeContext } from "@subwallet/extension-koni-ui/contexts/screen/HomeContext"
+import { CustomModal, ReceiveQrModal, TokensSelectorModal } from "@subwallet/extension-koni-ui/components/Modal"
+import SendFund from "@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund"
+import Transaction from "@subwallet/extension-koni-ui/Popup/Transaction/Transaction"
+import BuyTokens from "@subwallet/extension-koni-ui/Popup/BuyTokens"
+import { AccountSelectorModal } from "@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal"
+
+const TRANSFER_FUND_MODAL = 'transfer-fund-modal';
+const BUY_TOKEN_MODAL = 'buy-token-modal';
 
 export type Props = ThemeProps
 
@@ -49,18 +57,19 @@ function Component({ className }: Props): React.ReactElement<Props> {
 
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { accountBalance: { tokenGroupBalanceMap,
-    totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
-
+  const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
   const {
     onOpenReceive,
-    // accountSelectorItems,
-    // openSelectAccount,
-    // openSelectToken,
-    // selectedAccount,
-    // selectedNetwork,
-    // tokenSelectorItems
+    accountSelectorItems,
+    openSelectAccount,
+    openSelectToken,
+    selectedAccount,
+    selectedNetwork,
+    tokenSelectorItems
   } = useReceiveQR();
+
+
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const notify = useNotification();
 
@@ -70,10 +79,8 @@ function Component({ className }: Props): React.ReactElement<Props> {
   const totalValue = totalBalanceInfo.convertedValue;
 
   const onOpenBuyTokens = useCallback(() => {
-    navigate('/buy-tokens');
-  },
-  [navigate]
-  );
+    activeModal(BUY_TOKEN_MODAL)
+  }, [activeModal]);
 
   const onOpenSendFund = useCallback(() => {
     if (currentAccount && currentAccount.isReadOnly) {
@@ -86,9 +93,9 @@ function Component({ className }: Props): React.ReactElement<Props> {
       return;
     }
 
-    navigate('/transaction/send-fund');
+    activeModal(TRANSFER_FUND_MODAL)
   },
-  [currentAccount, navigate, notify, t]
+  [currentAccount, navigate, notify, t, activeModal]
   );
 
   const handleClick = useCallback((type: string) => {
@@ -201,7 +208,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
             <div key={item.type} className="action-button">
               <Button
                 className={CN(`type-${item.type}`)}
-                icon={<Icon phosphorIcon={item.icon} weight="fill" />}
+                icon={<Icon phosphorIcon={item.icon} weight="bold" />}
                 shape="squircle"
                 size="sm"
                 onClick={() => handleClick(item.type)}
@@ -211,6 +218,40 @@ function Component({ className }: Props): React.ReactElement<Props> {
           ))}
         </div>
       </div>
+
+      <CustomModal
+        id={TRANSFER_FUND_MODAL}
+        onCancel={() => inactiveModal(TRANSFER_FUND_MODAL)}
+        title={t("Transfer")}
+      >
+        <Transaction modalContent>
+          <SendFund modalContent />
+        </Transaction>
+      </CustomModal>
+
+      <CustomModal
+        id={BUY_TOKEN_MODAL}
+        onCancel={() => inactiveModal(BUY_TOKEN_MODAL)}
+        title={t("Buy token")}
+      >
+        <BuyTokens modalContent />
+      </CustomModal>
+
+      <AccountSelectorModal
+        items={accountSelectorItems}
+        onSelectItem={openSelectAccount}
+      />
+
+      <TokensSelectorModal
+        address={selectedAccount}
+        items={tokenSelectorItems}
+        onSelectItem={openSelectToken}
+      />
+
+      <ReceiveQrModal
+        address={selectedAccount}
+        selectedNetwork={selectedNetwork}
+      />
     </div>
   )
 }

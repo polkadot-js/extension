@@ -16,6 +16,7 @@ import { Logo3D } from "@subwallet/extension-koni-ui/components/Logo"
 import { ThemeProps } from "@subwallet/extension-koni-ui/types"
 import { useLocation, useNavigate } from "react-router"
 import { MenuItemType } from "@subwallet/react-ui/es/menu/hooks/useItems"
+import { useMemo } from "react"
 
 export type Props = ThemeProps ;
 
@@ -82,19 +83,28 @@ function Component({ className }: Props): React.ReactElement<Props> {
     key: string
   }) => navigate(`${key}`)
 
+  const selectedKey = useMemo(() => {
+    const availableKey: string[] = [
+      ...menuItems.map(i => i.key as string),
+      ...staticMenuItems.map(i => i.key as string)
+    ]
+    const current = availableKey.filter((i: string) => i !== '/home' && pathname.includes(i))
+    return !!current.length ? current : ['/home']
+  }, [pathname])
+
   return (
     <div
       className={CN(className, "flex-col", "side-menu-wrapper",{
         '__expanded': true
-        // '__expanded': isHovered
+       // '__expanded': isHovered
       })}
     >
       <div className="logo-container">
         <Logo3D />
       </div>
       <div className={CN("menu-wrapper", "flex-col")}>
-        <Menu items={menuItems} selectedKeys={[pathname]} onClick={handleNavigate} />
-        <Menu items={staticMenuItems} selectedKeys={[pathname]} onClick={handleNavigate} />
+        <Menu items={menuItems} selectedKeys={selectedKey} onClick={handleNavigate} />
+        <Menu items={staticMenuItems} selectedKeys={selectedKey} onClick={handleNavigate} />
       </div>
     </div>
   )

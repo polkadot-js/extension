@@ -41,7 +41,9 @@ interface TransferFormProps extends TransactionFormBaseProps {
   value: string;
 }
 
-type Props = ThemeProps;
+type Props = ThemeProps & {
+  modalContent?: boolean
+};
 
 function isAssetTypeValid (
   chainAsset: _ChainAsset,
@@ -207,7 +209,7 @@ const filterAccountFunc = (
   };
 };
 
-const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
+const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<Props> => {
   const { t } = useTranslation();
   const notification = useNotification();
 
@@ -651,7 +653,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         />
       </TransactionContent>
       <TransactionFooter
-        className={`${className} -transaction-footer`}
+        className={CN(`${className} -transaction-footer`, {
+          '__modal-footer': modalContent
+        })}
         errors={[]}
         warnings={[]}
       >
@@ -682,6 +686,13 @@ const SendFund = styled(_SendFund)(({ theme }) => {
       paddingLeft: token.padding,
       paddingRight: token.padding,
       marginBottom: token.marginMD
+    },
+
+    '&.__modal-footer': {
+      '.ant-btn': {
+        width: '100%',
+        margin: '16px 0'
+      }
     },
 
     '&.-transaction-content.-is-zero-balance': {

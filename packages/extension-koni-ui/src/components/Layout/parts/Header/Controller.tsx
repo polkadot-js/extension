@@ -1,16 +1,24 @@
-import { Button, Icon, Typography } from "@subwallet/react-ui"
+import { Button, Icon, ModalContext, Typography } from "@subwallet/react-ui"
 import CN from "classnames"
 import { FadersHorizontal } from "phosphor-react"
 import { ThemeProps } from "@subwallet/extension-koni-ui/types"
 import Networks from "./Networks"
 import Accounts from "./Accounts"
 import styled from "styled-components"
+import { useCallback, useContext } from "react"
+import { CUSTOMIZE_MODAL } from "@subwallet/extension-koni-ui/constants"
 
 export type Props = ThemeProps & {
   title?: string | React.ReactNode;
 }
 
 function Component({ title = 'Porfolio', className }: Props): React.ReactElement<Props> {
+  const { activeModal } = useContext(ModalContext)
+
+  const onOpenCustomizeModal = useCallback(() => {
+    activeModal(CUSTOMIZE_MODAL);
+  }, [activeModal]);
+
   return (
     <div className={CN(className)}>
       <div className="common-header">
@@ -20,8 +28,8 @@ function Component({ title = 'Porfolio', className }: Props): React.ReactElement
             icon={<Icon phosphorIcon={FadersHorizontal} size={"sm"} />}
             size={"xs"}
             type={"ghost"}
+            onClick={onOpenCustomizeModal}
           />
-
           <Networks />
           <Accounts />
         </div>

@@ -198,6 +198,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         </div>
       )
     }
+
     return (
         <SwList.Section
           actionBtnIcon={(

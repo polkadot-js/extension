@@ -29,7 +29,9 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-type Props = ThemeProps;
+type Props = ThemeProps & {
+  modalContent?: boolean
+};
 
 type BuyTokensFormProps = {
   address: string,
@@ -77,7 +79,7 @@ const tokenKeyMapIsEthereum: Record<string, boolean> = (() => {
 
 const TransakUrl = 'https://global.transak.com';
 
-function Component ({ className }: Props) {
+function Component ({ className, modalContent }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
   const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
   const fixedTokenKey = currentSymbol ? PREDEFINED_TRANSAK_TOKEN[currentSymbol]?.slug : undefined;
@@ -208,12 +210,8 @@ function Component ({ className }: Props) {
   }, [fixedTokenKey]);
 
   return (
-    <Layout.Home
-      showFilterIcon
-      showTabBar={false}
-    >
       <PageWrapper className={CN(className, 'transaction-wrapper')}>
-        <SwSubHeader
+        {!modalContent && <SwSubHeader
           background={'transparent'}
           center
           className={'transaction-header'}
@@ -221,7 +219,7 @@ function Component ({ className }: Props) {
           paddingVertical
           showBackButton
           title={t('Buy tokens')}
-        />
+        />}
         <div className={'__scroll-container'}>
           <div className='__buy-icon-wrapper'>
             <Icon
@@ -284,11 +282,27 @@ function Component ({ className }: Props) {
           </Button>
         </div>
       </PageWrapper>
-    </Layout.Home>
   );
 }
 
-const BuyTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
+function Wrapper({ modalContent, ...rest }: Props) {
+  if (modalContent) {
+    return <>
+      <Component modalContent={modalContent} {...rest} />
+    </>
+  }
+
+  return (
+    <Layout.Home
+      showFilterIcon
+      showTabBar={false}
+    >
+      <Component modalContent={modalContent} {...rest} />
+    </Layout.Home>
+  )
+}
+
+const BuyTokens = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
     flexDirection: 'column',

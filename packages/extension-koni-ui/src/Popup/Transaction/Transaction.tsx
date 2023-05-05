@@ -19,9 +19,10 @@ import styled from 'styled-components';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {
-  title: string,
-
-  transactionType: string
+  title?: string,
+  children?: React.ReactElement
+  transactionType?: string
+  modalContent?: boolean
 }
 
 export interface TransactionFormBaseProps {
@@ -63,7 +64,7 @@ export const TransactionContext = React.createContext<TransactionContextProps>({
   setDisabledRightBtn: (value) => {}
 });
 
-function Component ({ className }: Props) {
+function Component ({ className, modalContent = false, children }: Props) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -174,6 +175,16 @@ function Component ({ className }: Props) {
     asset !== '' && checkAsset(asset);
   }, [asset, checkAsset]);
 
+  if (modalContent) return (
+    <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn, asset, setAsset }}>
+      <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
+        <div className={CN(className, 'transaction-wrapper __modal-content')}>
+          {children}
+        </div>
+      </PageWrapper>
+    </TransactionContext.Provider>
+  )
+
   return (
     <Layout.Home
       showFilterIcon
@@ -206,6 +217,12 @@ const Transaction = styled(Component)(({ theme }) => {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
+
+    '&.__modal-content': {
+      '.transaction-content': {
+        flex: '1 1 auto',
+      },
+    },
 
     '.transaction-header': {
       paddingTop: token.paddingSM,

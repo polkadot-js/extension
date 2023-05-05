@@ -203,6 +203,7 @@ export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactEle
       getPopupContainer={getPopupContainer}
       theme={themeConfig}
     >
+      <TooltipContainer id='tooltip-container' />
       <ThemeGenerator themeConfig={themeConfig}>
         {children}
       </ThemeGenerator>

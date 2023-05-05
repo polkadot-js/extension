@@ -13,7 +13,7 @@ import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilt
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { FadersHorizontal, ListChecks, Plus } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import CN from 'classnames'
@@ -43,6 +43,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
+
   const { isWebUI } = useContext(ScreenContext);
   const { activeModal } = useContext(ModalContext);
   const chainInfoList = useChainInfoWithState();
@@ -149,12 +150,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t<string>('Manage chains')}
         withSideMenu
       >
-         {isWebUI && <SwSubHeader
+        {isWebUI && <SwSubHeader
           title={t<string>('Manage chains')}
           background='transparent'
           center={false}
           onBack={() => navigate(-1)}
           showBackButton={true}
+          rightButtons={subHeaderButton}
         />}
         <div className={CN('container', {
           '__web-ui': isWebUI
@@ -204,6 +206,10 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
         padding: `${token.padding + 24}px ${token.padding}px ${token.padding}px`,
         maxWidth: '70%',
         margin: '0 auto',
+
+        '.ant-sw-list-wrapper': {
+          flex: '1 1 auto'
+        }
       },
     },
 

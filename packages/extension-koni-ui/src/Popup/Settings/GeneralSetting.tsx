@@ -227,7 +227,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         })}>
           <SelectModal
             background={'default'}
-            className={`__modal ${className}`}
+            className={CN(`__modal ${className}`, {
+              '__web-ui': isWebUI
+            })}
             customInput={renderModalTrigger({
               key: 'wallet-theme-trigger',
               leftIcon: Image,
@@ -247,7 +249,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
           <SelectModal
             background={'default'}
-            className={`__modal ${className}`}
+            className={CN(`__modal ${className}`, {
+              '__web-ui': isWebUI
+            })}
             customInput={renderModalTrigger({
               key: 'languages-trigger',
               leftIcon: GlobeHemisphereEast,
@@ -269,7 +273,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
           <SelectModal
             background={'default'}
-            className={`__modal ${className}`}
+            className={CN(`__modal ${className}`, {
+              '__web-ui': isWebUI
+            })}
             customInput={renderModalTrigger({
               key: 'browser-confirmation-type-trigger',
               leftIcon: BellSimpleRinging,
@@ -349,16 +355,22 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
           maxWidth: '70%',
           margin: '0 auto',
           paddingTop: token.padding + 24,
-        }
+       }
       }
     },
 
     '&.__modal': {
+      '&.__web-ui': {
+
+          '.ant-sw-list-wrapper': {
+            flex: '1 1 auto !important',
+          }
+
+      },
       '.__selection-item .ant-web3-block-right-item': {
         color: token.colorSuccess
       }
     }
   });
 });
-
 export default GeneralSetting;

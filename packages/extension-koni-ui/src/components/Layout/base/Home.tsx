@@ -23,7 +23,6 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
   const navigate = useNavigate();
   const { activeModal } = useContext(ModalContext);
   const { pathname } = useLocation();
-  const { isWebUI } = useContext(ScreenContext);
 
   const onOpenCustomizeModal = useCallback(() => {
     activeModal(CUSTOMIZE_MODAL);

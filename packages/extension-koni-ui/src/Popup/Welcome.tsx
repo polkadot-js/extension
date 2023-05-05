@@ -69,20 +69,19 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     <Layout.Base
       className={CN(className)}
     >
-      <div className='bg-gradient' />
       <div className='bg-image' />
       <div className='body-container'>
         <div className='logo-container'>
           <Logo3D
             height={100}
-            width={69}
+            width={66}
           />
         </div>
         <div className='title'>
           {t('SubWallet')}
         </div>
         <div className='sub-title'>
-          {t('Polkadot, Substrate & Ethereum wallet')}
+          {t('Choose how you\'d like to set up your wallet')}
         </div>
         <div className='buttons-container'>
           {
@@ -120,15 +119,6 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     position: 'relative',
 
-    '.bg-gradient': {
-      backgroundImage: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
-      height: 290,
-      width: '100%',
-      position: 'absolute',
-      left: 0,
-      top: 0
-    },
-
     '.bg-image': {
       backgroundImage: `url(${LoginBg})`,
       backgroundRepeat: 'no-repeat',
@@ -138,13 +128,13 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
       position: 'absolute',
       width: '100%',
       left: 0,
-      top: 0,
-      opacity: 0.1
+      top: 0
     },
 
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
+      opacity: 0.999, // Hot fix show wrong opacity in browser
 
       '.logo-container': {
         marginTop: token.sizeLG * 3,

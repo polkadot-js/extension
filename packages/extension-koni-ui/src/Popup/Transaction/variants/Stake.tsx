@@ -30,7 +30,7 @@ import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 type Props = ThemeProps
 
 enum FormFieldName {
-  VALUE = 'Amount',
+  VALUE = 'amount',
   NOMINATE = 'nominate',
   POOL = 'pool',
   TYPE = 'type',
@@ -158,7 +158,7 @@ const Component: React.FC<Props> = (props: Props) => {
     const allMap = convertFieldToObject<StakeFormProps>(allFields);
     const changesMap = convertFieldToObject<StakeFormProps>(changedFields);
 
-    const { asset, from, [FormFieldName.VALUE]: value } = changesMap;
+    const { amount: value, asset, from } = changesMap;
 
     if (value) {
       setValueChange(true);

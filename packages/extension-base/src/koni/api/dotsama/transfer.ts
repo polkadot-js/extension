@@ -80,15 +80,16 @@ export async function checkSupportTransfer (networkKey: string, tokenInfo: _Chai
     };
   }
 
+  // TODO: need review
   if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
     result.supportTransfer = true;
-    result.supportTransferAll = false;
+    result.supportTransferAll = true;
   } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxTokensSupported) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
   } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported) {
     result.supportTransfer = true;
-    result.supportTransferAll = false;
+    result.supportTransferAll = true;
   } else if (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) && _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
@@ -136,11 +137,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
     transferAmount = value;
   } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
-    if (transferAll) {
-      // currently Acala, Karura, Acala testnet do not have transfer all method for sub token
-    } else if (value) {
-      transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
-    }
+    transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
   } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxTokensSupported) {
     if (transferAll) {
       transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo), false);
@@ -148,11 +145,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
       transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo), new BN(value));
     }
   } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported) {
-    if (transferAll) {
-      // currently genshiro_testnet, genshiro, equilibrium_parachain do not have transfer all method for tokens
-    } else if (value) {
-      transfer = api.tx.eqBalances.transfer([_getTokenOnChainAssetId(tokenInfo)], to, value);
-    }
+    transfer = api.tx.eqBalances.transfer([_getTokenOnChainAssetId(tokenInfo)], to, value);
   } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
     if (transferAll) {
       transfer = api.tx.kton.transferAll(to, false);

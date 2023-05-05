@@ -292,6 +292,8 @@ export default class KoniState {
   public onReady () {
     this.subscription.start();
     this.cron.start();
+    this.historyService.start().catch(console.error);
+    this.priceService.start().catch(console.error);
 
     this.ready = true;
 
@@ -1604,12 +1606,16 @@ export default class KoniState {
     this.cron.stop();
     this.subscription.stop();
     await this.pauseAllNetworks(undefined, 'IDLE mode');
+    await this.historyService.stop();
+    await this.priceService.stop();
   }
 
   public async wakeup () {
     await this.resumeAllNetworks();
     this.cron.start();
     this.subscription.start();
+    await this.historyService.start();
+    await this.priceService.start();
   }
 
   public cancelSubscription (id: string): boolean {

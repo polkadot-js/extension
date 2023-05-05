@@ -3,13 +3,13 @@
 
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, AddressBookInfo, AssetSetting, BalanceJson, ChainStakingMetadata, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, NominatorMetadata, PriceJson, StakingJson, StakingRewardJson, ThemeNames, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, AddressBookInfo, AllLogoMap, AssetSetting, BalanceJson, ChainStakingMetadata, ConfirmationsQueue, CrowdloanJson, KeyringState, NftCollection, NftJson, NominatorMetadata, PriceJson, StakingJson, StakingRewardJson, ThemeNames, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
-import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
+import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { AppSettings } from '@subwallet/extension-koni-ui/stores/types';
 import { noop, noopBoolean } from '@subwallet/extension-koni-ui/utils';
@@ -134,6 +134,12 @@ export const updateUiSettings = (data: UiSettings) => {
 };
 
 export const subscribeUiSettings = lazySubscribeMessage('pri(settings.subscribe)', null, updateUiSettings, updateUiSettings);
+
+export const updateLogoMaps = (data: AllLogoMap) => {
+  store.dispatch({ type: 'settings/updateLogoMaps', payload: data });
+};
+
+export const getLogoMaps = lazySendMessage('pri(settings.getLogoMaps)', null, updateLogoMaps);
 
 //
 // export const updateAppSettings = (data: AccountJson) => {

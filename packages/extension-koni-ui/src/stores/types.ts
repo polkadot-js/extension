@@ -3,7 +3,7 @@
 
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { AddressBookState, AssetSetting, BalanceItem, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, NominationPoolInfo, NominatorMetadata, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AddressBookState, AllLogoMap, AssetSetting, BalanceItem, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, NftCollection, NftItem, NominationPoolInfo, NominatorMetadata, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
@@ -78,7 +78,8 @@ export interface LocalUiSettings {
 
 export interface AppSettings extends LocalUiSettings, UiSettings, Omit<SettingsStruct, 'camera' | 'notification'>, BaseReduxStore {
   authUrls: Record<string, AuthUrlInfo>,
-  mediaAllowed: boolean
+  logoMaps: AllLogoMap,
+  mediaAllowed: boolean,
 }
 
 export interface AccountState extends AccountsContext, KeyringState, AddressBookState, BaseReduxStore {

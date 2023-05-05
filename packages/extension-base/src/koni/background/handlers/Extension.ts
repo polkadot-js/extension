@@ -3119,6 +3119,15 @@ export default class KoniExtension {
     return Promise.resolve(false);
   }
 
+  private async getLogoMap () {
+    const [chainLogoMap, assetLogoMap] = await Promise.all([this.#koniState.chainService.getChainLogoMap(), this.#koniState.chainService.getAssetLogoMap()]);
+
+    return {
+      chainLogoMap,
+      assetLogoMap
+    };
+  }
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -3506,6 +3515,9 @@ export default class KoniExtension {
 
       case 'pri(cron.reload)':
         return await this.reloadCron(request as CronReloadRequest);
+
+      case 'pri(settings.getLogoMaps)':
+        return await this.getLogoMap();
 
       // Default
       default:

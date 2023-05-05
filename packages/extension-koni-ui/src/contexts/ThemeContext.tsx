@@ -202,8 +202,8 @@ export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactEle
   const themeConfig = useMemo(() => {
     const config = SW_THEME_CONFIGS[themeName];
 
-    config.logoMap.network = logoMaps.chainLogoMap;
-    config.logoMap.symbol = logoMaps.assetLogoMap;
+    Object.assign(config.logoMap.network, logoMaps.chainLogoMap);
+    Object.assign(config.logoMap.symbol, logoMaps.assetLogoMap);
 
     return config;
   }, [logoMaps, themeName]);

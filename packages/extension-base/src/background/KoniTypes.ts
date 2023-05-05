@@ -457,15 +457,17 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: RequestTuringCancelStakeCompound,
   [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: RequestStakeCancelWithdrawal,
   [ExtrinsicType.STAKING_POOL_WITHDRAW]: any,
-  [ExtrinsicType.EVM_EXECUTE]: any,
+  [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.UNKNOWN]: any
 }
 
 export enum ExtrinsicStatus {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  SUCCESS = 'success',
-  FAIL = 'fail',
+  QUEUED = 'queued', // Transaction in queue
+  SUBMITTING = 'submitting', // Transaction in queue
+  PROCESSING = 'processing', // Transaction is sending
+  SUCCESS = 'success', // Send successfully
+  FAIL = 'fail', // Send failed
+  CANCELLED = 'cancelled', // Is remove before sending
   UNKNOWN = 'unknown'
 }
 
@@ -528,6 +530,7 @@ export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType
   toName?: string,
   address: string,
   status: ExtrinsicStatus,
+  transactionId?: string, // Available for transaction history
   extrinsicHash: string,
   time: number,
   data?: string,

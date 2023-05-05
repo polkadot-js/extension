@@ -80,6 +80,11 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     await this.addHistoryItems(updatedRecords);
   }
 
+  async updateHistoryByExtrinsicHash (extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
+    await this.dbService.updateHistoryByNewExtrinsicHash(extrinsicHash, updateData);
+    this.historySubject.next(await this.dbService.getHistories());
+  }
+
   // Insert history without check override origin 'app'
   async insertHistories (historyItems: TransactionHistoryItem[]) {
     await this.dbService.upsertHistory(historyItems);

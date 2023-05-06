@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { persistor, store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import { subscribeAccountsData, subscribeAddressBook, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeChainInfoMap, subscribeChainStakingMetadata, subscribeChainStateMap, subscribeConfirmationRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeSigningRequests, subscribeStaking, subscribeStakingNominatorMetadata, subscribeStakingReward, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings, subscribeXcmRefMap } from '@subwallet/extension-koni-ui/stores/utils';
+import { getLogoMaps, subscribeAccountsData, subscribeAddressBook, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeChainInfoMap, subscribeChainStakingMetadata, subscribeChainStateMap, subscribeConfirmationRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeSigningRequests, subscribeStaking, subscribeStakingNominatorMetadata, subscribeStakingReward, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings, subscribeXcmRefMap } from '@subwallet/extension-koni-ui/stores/utils';
 import Bowser from 'bowser';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -34,6 +34,7 @@ export interface DataContextType {
   removeHandler: (name: string) => void,
   awaitRequestsCache: Record<string, Promise<boolean>>,
   awaitStores: (storeNames: StoreName[], renew?: boolean) => Promise<boolean>
+  awaitStartImmediately: () => Promise<boolean>
 }
 
 const _DataContext: DataContextType = {
@@ -137,6 +138,19 @@ const _DataContext: DataContextType = {
 
     // Wait for all handlers to finish
     return this.awaitRequestsCache[key];
+  },
+  awaitStartImmediately: function () {
+    const key = 'startImmediately';
+
+    if (!Object.hasOwnProperty.call(this.awaitRequestsCache, key)) {
+      const promiseList = Object.values(this.handlerMap).filter((handler) => handler.isStartImmediately).map((handler) => {
+        return handler.promise;
+      });
+
+      this.awaitRequestsCache[key] = Promise.all(promiseList).then(() => true);
+    }
+
+    return this.awaitRequestsCache[key];
   }
 };
 
@@ -188,6 +202,7 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
 
   // Settings
   _DataContext.addHandler({ ...subscribeUiSettings, name: 'subscribeUiSettings', relatedStores: ['settings'], isStartImmediately: true });
+  _DataContext.addHandler({ ...getLogoMaps, name: 'getLogoMaps', relatedStores: ['settings'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeAuthUrls, name: 'subscribeAuthUrls', relatedStores: ['settings'], isStartImmediately: true });
 
   // Confirmations

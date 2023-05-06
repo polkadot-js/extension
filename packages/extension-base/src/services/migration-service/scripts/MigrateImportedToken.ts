@@ -39,7 +39,7 @@ export default class MigrateImportedToken extends BaseMigrationJob {
                   priceId: null,
                   slug: '',
                   symbol: item.symbol || '',
-                  icon: 'default.png'
+                  icon: ''
                 });
               } catch (e) {
                 console.log(e);

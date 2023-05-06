@@ -459,53 +459,16 @@ export class ChainService {
     });
   }
 
-  private async getLatestAssetRefMap () {
-    await fetch(_ASSET_REF_SRC)
-      .then((resp) => {
-        if (resp.ok) {
-          resp.json()
-            .then((data: Record<string, _AssetRef>) => {
-              this.dataMap.assetRefMap = data;
-            })
-            .catch(() => {
-              this.dataMap.assetRefMap = AssetRefMap;
-            });
-        } else {
-          this.dataMap.assetRefMap = AssetRefMap;
-        }
-      })
-      .catch(() => {
-        this.dataMap.assetRefMap = AssetRefMap;
-      });
-  }
-
-  private async getLatestMultiChainAssetMap () {
-    await fetch(_MULTI_CHAIN_ASSET_SRC)
-      .then((resp) => {
-        if (resp.ok) {
-          resp.json()
-            .then((data: Record<string, _MultiChainAsset>) => {
-              this.multiChainAssetMapSubject.next(data);
-            })
-            .catch(() => {
-              this.multiChainAssetMapSubject.next(MultiChainAssetMap);
-            });
-        } else {
-          this.multiChainAssetMapSubject.next(MultiChainAssetMap);
-        }
-      })
-      .catch(() => {
-        this.multiChainAssetMapSubject.next(MultiChainAssetMap);
-      });
-  }
-
   // Business logic
   public async init () {
     // TODO: reconsider the flow of initiation
-    await Promise.all([
-      this.getLatestAssetRefMap(),
-      this.getLatestMultiChainAssetMap()
+    const [latestAssetRefMap, latestMultiChainAssetMap] = await Promise.all([
+      this.fetchLatestData(_ASSET_REF_SRC, AssetRefMap),
+      this.fetchLatestData(_MULTI_CHAIN_ASSET_SRC, MultiChainAssetMap)
     ]);
+
+    this.multiChainAssetMapSubject.next(latestMultiChainAssetMap as Record<string, _MultiChainAsset>);
+    this.dataMap.assetRefMap = latestAssetRefMap as Record<string, _AssetRef>;
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
@@ -653,28 +616,26 @@ export class ChainService {
     return duplicatedSlug;
   }
 
+  private async fetchLatestData (src: string, defaultValue: unknown) {
+    let result = defaultValue;
+    const resp = await fetch(src);
+
+    if (resp.ok) {
+      try {
+        result = await resp.json();
+      } catch (err) {
+        console.warn('Error parsing latest data', src, err);
+      }
+    }
+
+    console.log('latest data', src, result);
+
+    return result;
+  }
+
   private async initChains () {
     const storedChainSettings = await this.dbService.getAllChainStore();
-    let latestChainInfoMap: Record<string, _ChainInfo> = ChainInfoMap;
-
-    await fetch(_CHAIN_INFO_SRC)
-      .then((resp) => {
-        if (resp.ok) {
-          resp.json()
-            .then((data: Record<string, _ChainInfo>) => {
-              latestChainInfoMap = data;
-            })
-            .catch(() => {
-              latestChainInfoMap = ChainInfoMap;
-            });
-        } else {
-          latestChainInfoMap = ChainInfoMap;
-        }
-      })
-      .catch(() => {
-        latestChainInfoMap = ChainInfoMap;
-      });
-
+    const latestChainInfoMap = await this.fetchLatestData(_CHAIN_INFO_SRC, ChainInfoMap) as Record<string, _ChainInfo>;
     const storedChainSettingMap: Record<string, IChain> = {};
 
     storedChainSettings.forEach((chainStoredSetting) => {
@@ -797,25 +758,7 @@ export class ChainService {
 
   private async initAssetRegistry (deprecatedCustomChainMap: Record<string, string>) {
     const storedAssetRegistry = await this.dbService.getAllAssetStore();
-    let latestAssetRegistry: Record<string, _ChainAsset> = ChainAssetMap;
-
-    await fetch(_CHAIN_ASSET_SRC)
-      .then((resp) => {
-        if (resp.ok) {
-          resp.json()
-            .then((data: Record<string, _ChainAsset>) => {
-              latestAssetRegistry = data;
-            })
-            .catch(() => {
-              latestAssetRegistry = ChainAssetMap;
-            });
-        } else {
-          latestAssetRegistry = ChainAssetMap;
-        }
-      })
-      .catch(() => {
-        latestAssetRegistry = ChainAssetMap;
-      });
+    const latestAssetRegistry = await this.fetchLatestData(_CHAIN_ASSET_SRC, ChainAssetMap) as Record<string, _ChainAsset>;
 
     if (storedAssetRegistry.length === 0) {
       this.dataMap.assetRegistry = latestAssetRegistry;

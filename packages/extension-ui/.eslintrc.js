@@ -26,6 +26,7 @@ module.exports = {
     'sort-keys': 'off',
     'react/jsx-no-bind': 'off',
     '@typescript-eslint/no-misused-promises': 'off',
+    '@typescript-eslint/no-floating-promises': 'off'
   },
   plugins: [...base.plugins, 'prettier'],
   extends: [...base.extends, 'prettier']

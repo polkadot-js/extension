@@ -324,3 +324,7 @@ export async function setNotification(notification: string): Promise<boolean> {
 export async function ping(): Promise<boolean> {
   return sendMessage('pri(ping)', null);
 }
+
+export async function clearClipboard(timeout: number): Promise<boolean> {
+  return sendMessage('pri(clipboard.clear)', timeout);
+}

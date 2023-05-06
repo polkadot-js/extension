@@ -706,7 +706,8 @@ export default class KoniState {
             assetType: tokenInfo.type,
             metadata: _parseMetadataForSmartContractAsset(tokenInfo.contractAddress),
             multiChainAsset: null,
-            hasValue: _isChainTestNet(this.chainService.getChainInfoByKey(tokenInfo.originChain))
+            hasValue: _isChainTestNet(this.chainService.getChainInfoByKey(tokenInfo.originChain)),
+            icon: ''
           });
 
           return isApproved;

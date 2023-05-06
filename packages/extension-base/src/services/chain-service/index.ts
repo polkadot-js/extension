@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AssetRefMap, ChainAssetMap, ChainInfoMap, MultiChainAssetMap } from '@subwallet/chain-list';
+import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
@@ -199,7 +199,8 @@ export class ChainService {
       priceId: '',
       slug: '',
       symbol: '',
-      hasValue: true
+      hasValue: true,
+      icon: ''
     };
 
     for (const assetInfo of Object.values(this.getAssetRegistry())) {
@@ -687,7 +688,8 @@ export class ChainService {
               evmInfo: storedChainInfo.evmInfo,
               substrateInfo: storedChainInfo.substrateInfo,
               isTestnet: storedChainInfo.isTestnet,
-              chainStatus: storedChainInfo.chainStatus
+              chainStatus: storedChainInfo.chainStatus,
+              icon: storedChainInfo.icon
             };
             this.dataMap.chainStateMap[storedSlug] = {
               currentProvider: storedChainInfo.currentProvider,
@@ -883,7 +885,8 @@ export class ChainService {
       substrateInfo,
       evmInfo,
       isTestnet: false,
-      chainStatus: _ChainStatus.ACTIVE
+      chainStatus: _ChainStatus.ACTIVE,
+      icon: '' // Todo: Allow update with custom chain
     };
 
     // insert new chainInfo
@@ -912,7 +915,8 @@ export class ChainService {
       priceId: params.chainEditInfo.priceId || null,
       slug: '',
       symbol: params.chainEditInfo.symbol as string,
-      hasValue: true
+      hasValue: true,
+      icon: ''
     });
 
     // update subscription
@@ -1402,5 +1406,13 @@ export class ChainService {
 
   public subscribeAssetSettings () {
     return this.assetSettingSubject;
+  }
+
+  public async getChainLogoMap (): Promise<Record<string, string>> {
+    return Promise.resolve(ChainLogoMap);
+  }
+
+  public async getAssetLogoMap (): Promise<Record<string, string>> {
+    return Promise.resolve(AssetLogoMap);
   }
 }

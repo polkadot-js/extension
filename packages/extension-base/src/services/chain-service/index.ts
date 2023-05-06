@@ -465,7 +465,6 @@ export class ChainService {
         if (resp.ok) {
           resp.json()
             .then((data: Record<string, _AssetRef>) => {
-              console.log('got asset ref from chainlist');
               this.dataMap.assetRefMap = data;
             })
             .catch(() => {
@@ -486,7 +485,6 @@ export class ChainService {
         if (resp.ok) {
           resp.json()
             .then((data: Record<string, _MultiChainAsset>) => {
-              console.log('got multichain asset from chainlist');
               this.multiChainAssetMapSubject.next(data);
             })
             .catch(() => {
@@ -664,7 +662,6 @@ export class ChainService {
         if (resp.ok) {
           resp.json()
             .then((data: Record<string, _ChainInfo>) => {
-              console.log('got chainInfo from chainlist');
               latestChainInfoMap = data;
             })
             .catch(() => {

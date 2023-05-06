@@ -50,6 +50,10 @@ const defaultErrorMap = {
     message: 'This transaction is not supported',
     code: undefined
   },
+  [BasicTxErrorType.TIMEOUT]: {
+    message: 'Transaction timeout',
+    code: undefined
+  },
   [StakingTxErrorType.NOT_ENOUGH_MIN_STAKE]: {
     message: 'Not enough min stake',
     code: undefined

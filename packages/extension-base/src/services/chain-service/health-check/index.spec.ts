@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { checkEvmEndpoint, checkProviders, checkSubstrateEndpoint } from '@subwallet/extension-base/services/chain-service/heath-check/index';
+import { checkEvmEndpoint, checkProviders, checkSubstrateEndpoint } from '@subwallet/extension-base/services/chain-service/health-check/index';
 
 jest.setTimeout(10000);
 

@@ -4,7 +4,7 @@
 import { AssetRefMap, ChainAssetMap, ChainInfoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { _DEFAULT_ACTIVE_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
+import { _ASSET_REF_SRC, _CHAIN_ASSET_SRC, _CHAIN_INFO_SRC, _DEFAULT_ACTIVE_CHAINS, _MULTI_CHAIN_ASSET_SRC } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
@@ -59,7 +59,6 @@ export class ChainService {
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
-    this.multiChainAssetMapSubject.next(MultiChainAssetMap);
     this.xcmRefMapSubject.next(this.getXcmRefMap());
 
     this.logger = createLogger('chain-service');
@@ -199,7 +198,8 @@ export class ChainService {
       priceId: '',
       slug: '',
       symbol: '',
-      hasValue: true
+      hasValue: true,
+      icon: 'default.png'
     };
 
     for (const assetInfo of Object.values(this.getAssetRegistry())) {
@@ -459,10 +459,56 @@ export class ChainService {
     });
   }
 
+  private async getLatestAssetRefMap () {
+    await fetch(_ASSET_REF_SRC)
+      .then((resp) => {
+        if (resp.ok) {
+          resp.json()
+            .then((data: Record<string, _AssetRef>) => {
+              console.log('got asset ref from chainlist');
+              this.dataMap.assetRefMap = data;
+            })
+            .catch(() => {
+              this.dataMap.assetRefMap = AssetRefMap;
+            });
+        } else {
+          this.dataMap.assetRefMap = AssetRefMap;
+        }
+      })
+      .catch(() => {
+        this.dataMap.assetRefMap = AssetRefMap;
+      });
+  }
+
+  private async getLatestMultiChainAssetMap () {
+    await fetch(_MULTI_CHAIN_ASSET_SRC)
+      .then((resp) => {
+        if (resp.ok) {
+          resp.json()
+            .then((data: Record<string, _MultiChainAsset>) => {
+              console.log('got multichain asset from chainlist');
+              this.multiChainAssetMapSubject.next(data);
+            })
+            .catch(() => {
+              this.multiChainAssetMapSubject.next(MultiChainAssetMap);
+            });
+        } else {
+          this.multiChainAssetMapSubject.next(MultiChainAssetMap);
+        }
+      })
+      .catch(() => {
+        this.multiChainAssetMapSubject.next(MultiChainAssetMap);
+      });
+  }
+
   // Business logic
   public async init () {
     // TODO: reconsider the flow of initiation
-    this.dataMap.assetRefMap = AssetRefMap;
+    await Promise.all([
+      this.getLatestAssetRefMap(),
+      this.getLatestMultiChainAssetMap()
+    ]);
+
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
     this.chainStateMapSubject.next(this.getChainStateMap());
@@ -589,17 +635,17 @@ export class ChainService {
     return true;
   }
 
-  private checkExistedPredefinedChain (genesisHash?: string, evmChainId?: number) {
+  private checkExistedPredefinedChain (latestChainInfoMap: Record<string, _ChainInfo>, genesisHash?: string, evmChainId?: number) {
     let duplicatedSlug = '';
 
     if (genesisHash) {
-      Object.values(ChainInfoMap).forEach((chainInfo) => {
+      Object.values(latestChainInfoMap).forEach((chainInfo) => {
         if (chainInfo.substrateInfo && chainInfo.substrateInfo.genesisHash === genesisHash) {
           duplicatedSlug = chainInfo.slug;
         }
       });
     } else if (evmChainId) {
-      Object.values(ChainInfoMap).forEach((chainInfo) => {
+      Object.values(latestChainInfoMap).forEach((chainInfo) => {
         if (chainInfo.evmInfo && chainInfo.evmInfo.evmChainId === evmChainId) {
           duplicatedSlug = chainInfo.slug;
         }
@@ -611,6 +657,26 @@ export class ChainService {
 
   private async initChains () {
     const storedChainSettings = await this.dbService.getAllChainStore();
+    let latestChainInfoMap: Record<string, _ChainInfo> = ChainInfoMap;
+
+    await fetch(_CHAIN_INFO_SRC)
+      .then((resp) => {
+        if (resp.ok) {
+          resp.json()
+            .then((data: Record<string, _ChainInfo>) => {
+              console.log('got chainInfo from chainlist');
+              latestChainInfoMap = data;
+            })
+            .catch(() => {
+              latestChainInfoMap = ChainInfoMap;
+            });
+        } else {
+          latestChainInfoMap = ChainInfoMap;
+        }
+      })
+      .catch(() => {
+        latestChainInfoMap = ChainInfoMap;
+      });
 
     const storedChainSettingMap: Record<string, IChain> = {};
 
@@ -623,8 +689,8 @@ export class ChainService {
     const deprecatedChainMap: Record<string, string> = {};
 
     if (storedChainSettings.length === 0) {
-      this.dataMap.chainInfoMap = ChainInfoMap;
-      Object.values(ChainInfoMap).forEach((chainInfo) => {
+      this.dataMap.chainInfoMap = latestChainInfoMap;
+      Object.values(latestChainInfoMap).forEach((chainInfo) => {
         this.dataMap.chainStateMap[chainInfo.slug] = {
           currentProvider: Object.keys(chainInfo.providers)[0],
           slug: chainInfo.slug,
@@ -640,10 +706,10 @@ export class ChainService {
         });
       });
     } else {
-      const mergedChainInfoMap: Record<string, _ChainInfo> = ChainInfoMap;
+      const mergedChainInfoMap: Record<string, _ChainInfo> = latestChainInfoMap;
 
       for (const [storedSlug, storedChainInfo] of Object.entries(storedChainSettingMap)) {
-        if (storedSlug in ChainInfoMap) { // check predefined chains first, update providers and currentProvider
+        if (storedSlug in latestChainInfoMap) { // check predefined chains first, update providers and currentProvider
           mergedChainInfoMap[storedSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[storedSlug].providers };
           this.dataMap.chainStateMap[storedSlug] = {
             currentProvider: storedChainInfo.currentProvider,
@@ -659,7 +725,7 @@ export class ChainService {
           });
         } else { // only custom chains are left
           // check custom chain duplicated with predefined chain => merge into predefined chain
-          const duplicatedDefaultSlug = this.checkExistedPredefinedChain(storedChainInfo.substrateInfo?.genesisHash, storedChainInfo.evmInfo?.evmChainId);
+          const duplicatedDefaultSlug = this.checkExistedPredefinedChain(latestChainInfoMap, storedChainInfo.substrateInfo?.genesisHash, storedChainInfo.evmInfo?.evmChainId);
 
           if (duplicatedDefaultSlug.length > 0) { // merge custom chain with existed chain
             mergedChainInfoMap[duplicatedDefaultSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[duplicatedDefaultSlug].providers };
@@ -687,7 +753,8 @@ export class ChainService {
               evmInfo: storedChainInfo.evmInfo,
               substrateInfo: storedChainInfo.substrateInfo,
               isTestnet: storedChainInfo.isTestnet,
-              chainStatus: storedChainInfo.chainStatus
+              chainStatus: storedChainInfo.chainStatus,
+              icon: storedChainInfo.icon
             };
             this.dataMap.chainStateMap[storedSlug] = {
               currentProvider: storedChainInfo.currentProvider,
@@ -733,11 +800,30 @@ export class ChainService {
 
   private async initAssetRegistry (deprecatedCustomChainMap: Record<string, string>) {
     const storedAssetRegistry = await this.dbService.getAllAssetStore();
+    let latestAssetRegistry: Record<string, _ChainAsset> = ChainAssetMap;
+
+    await fetch(_CHAIN_ASSET_SRC)
+      .then((resp) => {
+        if (resp.ok) {
+          resp.json()
+            .then((data: Record<string, _ChainAsset>) => {
+              latestAssetRegistry = data;
+            })
+            .catch(() => {
+              latestAssetRegistry = ChainAssetMap;
+            });
+        } else {
+          latestAssetRegistry = ChainAssetMap;
+        }
+      })
+      .catch(() => {
+        latestAssetRegistry = ChainAssetMap;
+      });
 
     if (storedAssetRegistry.length === 0) {
-      this.dataMap.assetRegistry = ChainAssetMap;
+      this.dataMap.assetRegistry = latestAssetRegistry;
     } else {
-      const mergedAssetRegistry: Record<string, _ChainAsset> = ChainAssetMap;
+      const mergedAssetRegistry: Record<string, _ChainAsset> = latestAssetRegistry;
 
       const parsedStoredAssetRegistry: Record<string, _ChainAsset> = {};
       const deprecatedAssets: string[] = [];
@@ -762,7 +848,7 @@ export class ChainService {
       for (const assetInfo of Object.values(parsedStoredAssetRegistry)) {
         let duplicated = false;
 
-        for (const defaultChainAsset of Object.values(ChainAssetMap)) {
+        for (const defaultChainAsset of Object.values(latestAssetRegistry)) {
           // case merge custom asset with default asset
           if (_isEqualSmartContractAsset(assetInfo, defaultChainAsset)) {
             duplicated = true;
@@ -883,7 +969,8 @@ export class ChainService {
       substrateInfo,
       evmInfo,
       isTestnet: false,
-      chainStatus: _ChainStatus.ACTIVE
+      chainStatus: _ChainStatus.ACTIVE,
+      icon: 'default.png'
     };
 
     // insert new chainInfo
@@ -912,7 +999,8 @@ export class ChainService {
       priceId: params.chainEditInfo.priceId || null,
       slug: '',
       symbol: params.chainEditInfo.symbol as string,
-      hasValue: true
+      hasValue: true,
+      icon: 'default.png'
     });
 
     // update subscription

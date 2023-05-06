@@ -203,3 +203,8 @@ export const _XCM_TYPE = {
 export const _DEFAULT_ACTIVE_CHAINS = [
   ..._DEFAULT_CHAINS
 ];
+
+export const _CHAIN_INFO_SRC = 'https://raw.githubusercontent.com/Koniverse/SubWallet-Chain/master/packages/chain-list/src/data/ChainInfo.json';
+export const _CHAIN_ASSET_SRC = 'https://raw.githubusercontent.com/Koniverse/SubWallet-Chain/master/packages/chain-list/src/data/ChainAsset.json';
+export const _ASSET_REF_SRC = 'https://raw.githubusercontent.com/Koniverse/SubWallet-Chain/master/packages/chain-list/src/data/AssetRef.json';
+export const _MULTI_CHAIN_ASSET_SRC = 'https://raw.githubusercontent.com/Koniverse/SubWallet-Chain/master/packages/chain-list/src/data/AssetRef.json';

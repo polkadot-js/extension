@@ -617,20 +617,24 @@ export class ChainService {
   }
 
   private async fetchLatestData (src: string, defaultValue: unknown) {
-    let result = defaultValue;
-    const resp = await fetch(src);
+    try {
+      let result = defaultValue;
+      const resp = await fetch(src);
 
-    if (resp.ok) {
-      try {
-        result = await resp.json();
-      } catch (err) {
-        console.warn('Error parsing latest data', src, err);
+      if (resp.ok) {
+        try {
+          result = await resp.json();
+        } catch (err) {
+          console.warn('Error parsing latest data', src, err);
+        }
       }
+
+      return result;
+    } catch (e) {
+      console.warn('Error fetching latest data', src, e);
+
+      return defaultValue;
     }
-
-    console.log('latest data', src, result);
-
-    return result;
   }
 
   private async initChains () {
@@ -667,7 +671,7 @@ export class ChainService {
       const mergedChainInfoMap: Record<string, _ChainInfo> = latestChainInfoMap;
 
       for (const [storedSlug, storedChainInfo] of Object.entries(storedChainSettingMap)) {
-        if (storedSlug in latestChainInfoMap) { // check predefined chains first, update providers and currentProvider
+        if (storedSlug in latestChainInfoMap) { // check predefined chains first, keep setting for providers and currentProvider
           mergedChainInfoMap[storedSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[storedSlug].providers };
           this.dataMap.chainStateMap[storedSlug] = {
             currentProvider: storedChainInfo.currentProvider,

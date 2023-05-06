@@ -135,7 +135,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         assetType: type,
         metadata: _parseMetadataForSmartContractAsset(contractAddress),
         multiChainAsset: null,
-        hasValue: _isChainTestNet(chainInfoMap[chain])
+        hasValue: _isChainTestNet(chainInfoMap[chain]),
+        icon: ''
       })
         .then((result) => {
           if (result) {

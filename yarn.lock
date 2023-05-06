@@ -4128,15 +4128,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.21.1":
-  version: 0.21.1
-  resolution: "@polkadot/phishing@npm:0.21.1"
+"@polkadot/phishing@npm:^0.21.2":
+  version: 0.21.2
+  resolution: "@polkadot/phishing@npm:0.21.2"
   dependencies:
-    "@polkadot/util": ^12.0.1
-    "@polkadot/util-crypto": ^12.0.1
-    "@polkadot/x-fetch": ^12.0.1
+    "@polkadot/util": ^12.1.1
+    "@polkadot/util-crypto": ^12.1.1
+    "@polkadot/x-fetch": ^12.1.1
     tslib: ^2.5.0
-  checksum: cccf66c003c748a6235a226403f4de0c9c9fc743436701d0dc722cfeb1bce3ae4a3b1377f8b3d1b3e661ab8674a1bddf3026dd97aadee1dfdddbbc6ab2a50d82
+  checksum: 82799c9c076921fa4d50b65b20e98511b0f8fb2352ac82349d4f8658253576489d0e2c29e02ae8db62b47228c082cfbb61edcbc4e7398a04683e2b37706132c4
   languageName: node
   linkType: hard
 
@@ -5419,7 +5419,7 @@ __metadata:
     "@polkadot/hw-ledger": ^10.1.9
     "@polkadot/keyring": ^10.2.1
     "@polkadot/networks": ^10.2.1
-    "@polkadot/phishing": ^0.21.1
+    "@polkadot/phishing": ^0.21.2
     "@polkadot/react-identicon": ^2.9.14
     "@polkadot/react-qr": ^2.9.14
     "@polkadot/rpc-provider": ^9.10.3

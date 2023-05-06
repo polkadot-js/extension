@@ -23,7 +23,9 @@ module.exports = {
     '@typescript-eslint/indent': [0],
     'react/jsx-closing-bracket-location': 0,
     'react/jsx-newline': ['warn', { prevent: true, allowMultilines: false }],
-    'sort-keys': 'off'
+    'sort-keys': 'off',
+    'react/jsx-no-bind': 'off',
+    '@typescript-eslint/no-misused-promises': 'off',
   },
   plugins: [...base.plugins, 'prettier'],
   extends: [...base.extends, 'prettier']

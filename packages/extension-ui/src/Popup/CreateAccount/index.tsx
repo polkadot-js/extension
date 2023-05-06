@@ -1,10 +1,11 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Loading, ScrollWrapper } from '../../components';
+import { Loading, ScrollWrapper } from '../../components';
+import AccounCreationSuccess from "../../components/AccounCreationSuccess";
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useMetadata from '../../hooks/useMetadata';
@@ -17,13 +18,11 @@ import SaveMnemonic from './SaveMnemonic';
 
 function CreateAccount(): React.ReactElement {
   const { t } = useTranslation();
-  const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
   const [address, setAddress] = useState<null | string>(null);
   const [seed, setSeed] = useState<null | string>(null);
   const [type, setType] = useState(DEFAULT_TYPE);
-  const [name, setName] = useState('');
   const [genesisHash, setGenesis] = useState(ALEPH_ZERO_GENESIS_HASH);
   const chain = useMetadata(genesisHash, true);
 
@@ -54,29 +53,33 @@ function CreateAccount(): React.ReactElement {
         setIsBusy(true);
 
         createAccountSuri(name, password, seed, type, genesisHash)
-          .then(() => onAction('/'))
+          .then(() => setStep((currentStep) => currentStep + 1))
           .catch((error: Error): void => {
             setIsBusy(false);
             console.error(error);
           });
       }
     },
-    [genesisHash, onAction, seed, type]
+    [genesisHash, seed, type]
   );
 
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
 
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
+  const isLastStep = step === 4;
+
   return (
     <ScrollWrapper>
-      <HeaderWithSteps
-        step={step}
-        text={t<string>('Create an account')}
-        total={3}
-        withBackArrow
-        withBackdrop
-      />
+      {isLastStep || (
+        <HeaderWithSteps
+          step={step}
+          text={t<string>('Create an account')}
+          total={3}
+          withBackArrow
+          withBackdrop
+        />
+      )}
       <Loading>
         {step === 1 && <SafetyFirst onNextStep={_onNextStep} />}
         {seed && step === 2 && (
@@ -94,17 +97,16 @@ function CreateAccount(): React.ReactElement {
             isBusy={isBusy}
             onBackClick={_onPreviousStep}
             onCreate={_onCreate}
-            onNameChange={setName}
             setGenesis={setGenesis}
           />
         )}
+        {step === 4 && <AccounCreationSuccess />}
       </Loading>
     </ScrollWrapper>
   );
 }
 
 export default styled(CreateAccount)`
-
   label::after {
     right: 36px;
   }

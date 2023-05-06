@@ -14,7 +14,7 @@ const PORT_EXTENSION = `${PORT_PREFIX}-extension`;
 const MESSAGE_ORIGIN_PAGE = `${PORT_PREFIX}-page`;
 const MESSAGE_ORIGIN_CONTENT = `${PORT_PREFIX}-content`;
 
-const ALLOWED_PATH = ['/', '/account/import-ledger', '/account/restore-json'] as const;
+const ALLOWED_PATH = ['/', '/account/import-ledger', '/account/restore-json', '/account/create', '/account/import-seed'] as const;
 const PHISHING_PAGE_REDIRECT = '/phishing-page-detected';
 const PASSWORD_EXPIRY_MIN = 15;
 const PASSWORD_EXPIRY_MS = PASSWORD_EXPIRY_MIN * 60 * 1000;

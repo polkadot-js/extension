@@ -4,6 +4,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { AccountContext, ActionContext, ScrollWrapper } from '../../components';
+import AccounCreationSuccess from "../../components/AccounCreationSuccess";
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useMetadata from '../../hooks/useMetadata';
@@ -25,7 +26,6 @@ function ImportSeed(): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
-  const [name, setName] = useState<string | null>(null);
   const [step, setStep] = useState<number>(1);
   const [type, setType] = useState(DEFAULT_TYPE);
   const [path, setPath] = useState<string | null>(null);
@@ -48,14 +48,14 @@ function ImportSeed(): React.ReactElement {
         setIsBusy(true);
 
         createAccountSuri(name, password, account.suri, type, account.genesis)
-          .then(() => onAction('/'))
+          .then(() => setStep((currentStep) => currentStep + 1))
           .catch((error): void => {
             setIsBusy(false);
             console.error(error);
           });
       }
     },
-    [account, onAction, type]
+    [account, type]
   );
 
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
@@ -64,15 +64,19 @@ function ImportSeed(): React.ReactElement {
 
   const _onChangeNetwork = useCallback((newGenesisHash: string) => setGenesis(newGenesisHash), []);
 
+  const isLastStep = step === 3;
+
   return (
     <ScrollWrapper>
-      <HeaderWithSteps
-        step={step}
-        text={t<string>('Import existing account')}
-        total={2}
-        withBackArrow
-        withBackdrop
-      />
+      {isLastStep || (
+        <HeaderWithSteps
+          step={step}
+          text={t<string>('Import existing account')}
+          total={2}
+          withBackArrow
+          withBackdrop
+        />
+      )}
       {step === 1 && (
         <SeedAndPath
           genesis={genesis}
@@ -94,11 +98,11 @@ function ImportSeed(): React.ReactElement {
           isImporting
           onBackClick={_onPreviousStep}
           onCreate={_onCreate}
-          onNameChange={setName}
           seed={seed}
           setGenesis={_onChangeNetwork}
         />
       )}
+      {step === 3 && <AccounCreationSuccess />}
     </ScrollWrapper>
   );
 }

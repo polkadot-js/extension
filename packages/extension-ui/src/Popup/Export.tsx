@@ -111,8 +111,8 @@ function Export({
           )}
           {error && (
             <Warning
-              isDanger
               isBelowInput
+              isDanger
             >
               {error}
             </Warning>

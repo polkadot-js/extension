@@ -10,7 +10,6 @@ import Address from '../components/Address';
 import ButtonArea from '../components/ButtonArea';
 import { ALEPH_ZERO_GENESIS_HASH } from '../constants';
 import useGenesisHashOptions from '../hooks/useGenesisHashOptions';
-import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { LINKS } from '../links';
 import { Name, Password } from '../partials';
@@ -69,41 +68,23 @@ function AccountNamePasswordCreation({
   genesisHash,
   isBusy,
   isDeriving = false,
-  isImporting = false,
   onBackClick,
   onCreate,
-  onNameChange,
   onPasswordChange,
   parentName,
-  setGenesis
+  setGenesis,
 }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
   const { t } = useTranslation();
-  const { show } = useToast();
   const options = useGenesisHashOptions();
   const { master } = useContext(AccountContext);
-  const toastMessage = isDeriving
-    ? t('Creating a sub-account successfully!')
-    : isImporting
-    ? t('Import successful')
-    : t('Account created successfully!');
 
   const _onCreate = useCallback(async () => {
     if (name && password) {
-      show(toastMessage, 'success');
-
       await onCreate(name, password);
     }
-  }, [name, password, show, toastMessage, onCreate]);
-
-  const _onNameChange = useCallback(
-    (name: string | null) => {
-      onNameChange(name || '');
-      setName(name);
-    },
-    [onNameChange]
-  );
+  }, [name, password, onCreate]);
 
   const _onPasswordChange = useCallback(
     (password: string | null) => {
@@ -114,10 +95,9 @@ function AccountNamePasswordCreation({
   );
 
   const _onBackClick = useCallback(() => {
-    _onNameChange(null);
     setPassword(null);
     onBackClick && onBackClick();
-  }, [_onNameChange, onBackClick]);
+  }, [onBackClick]);
 
   const _onChangeNetwork = useCallback((newGenesisHash: string) => setGenesis(newGenesisHash), [setGenesis]);
 
@@ -158,7 +138,7 @@ function AccountNamePasswordCreation({
         />
         <Name
           isFocused
-          onChange={_onNameChange}
+          onChange={setName}
         />
         <Password
           label={isDeriving ? t<string>('Set sub-account password') : undefined}

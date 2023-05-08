@@ -5,15 +5,16 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { validateSeed, windowOpen } from '@polkadot/extension-ui/messaging';
+import { validateSeed } from '@polkadot/extension-ui/messaging';
 import { objectSpread } from '@polkadot/util';
 
 import helpIcon from '../../assets/help.svg';
 import infoIcon from '../../assets/information.svg';
 import {
+  ActionContext,
   Button,
   ButtonArea,
   InputLock,
@@ -97,6 +98,7 @@ function SeedAndPath({
   const [error, setError] = useState('');
   const [isLocked, setLocked] = useState<boolean>(true);
   const isValid = !!error && !!seed;
+  const onAction = useContext(ActionContext);
 
   const { goTo } = useGoTo();
 
@@ -126,8 +128,8 @@ function SeedAndPath({
   }, []);
 
   const _onClick = useCallback(() => {
-    windowOpen('/account/restore-json').catch(console.error);
-  }, []);
+    onAction('/account/restore-json');
+  }, [onAction]);
 
   const footer = (
     <CustomFooter>

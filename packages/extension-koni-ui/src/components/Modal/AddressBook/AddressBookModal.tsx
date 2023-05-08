@@ -128,14 +128,16 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onClose = useCallback(() => {
     inactiveModal(id);
-  }, [id, inactiveModal]);
+    onResetFilter();
+  }, [id, inactiveModal, onResetFilter]);
 
   const onSelectItem = useCallback((item: AccountItem) => {
     return () => {
       inactiveModal(id);
       onSelect(item.address);
+      onResetFilter();
     };
-  }, [id, inactiveModal, onSelect]);
+  }, [id, inactiveModal, onResetFilter, onSelect]);
 
   const renderItem = useCallback((item: AccountItem) => {
     const address = formatAddress(item);
@@ -199,12 +201,6 @@ const Component: React.FC<Props> = (props: Props) => {
       }, 100);
     }
   }, [isActive, sectionRef]);
-
-  useEffect(() => {
-    if (!isActive) {
-      onResetFilter();
-    }
-  }, [isActive, onResetFilter]);
 
   return (
     <>

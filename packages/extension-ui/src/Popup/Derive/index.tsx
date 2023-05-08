@@ -5,6 +5,8 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
+import useToast from "@polkadot/extension-ui/hooks/useToast";
+
 import {
   AccountContext,
   AccountNamePasswordCreation,
@@ -54,6 +56,7 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [parentPassword, setParentPassword] = useState<string | null>(null);
   const [step, setStep] = useState(1);
+  const { show } = useToast();
 
   const parentGenesis = useMemo(
     () => accounts.find((a) => a.address === parentAddress)?.genesisHash || null,
@@ -78,13 +81,17 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
 
       setIsBusy(true);
       deriveAccount(parentAddress, account.suri, parentPassword, name, password, parentGenesis)
-        .then(() => onAction('/'))
+        .then(() => {
+          show(t('Creating a sub-account successfully!'), 'success');
+          onAction('/');
+        })
         .catch((error): void => {
           setIsBusy(false);
+          show(t('Sub-account creation was not successful.'), 'critical');
           console.error(error);
         });
     },
-    [account, onAction, parentAddress, parentGenesis, parentPassword]
+    [account, onAction, parentAddress, parentGenesis, parentPassword, show, t]
   );
 
   const _onDerivationConfirmed = useCallback(({ account, parentPassword }: ConfirmState) => {

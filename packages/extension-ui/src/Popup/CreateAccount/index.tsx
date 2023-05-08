@@ -4,6 +4,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import useToast from "@polkadot/extension-ui/hooks/useToast";
+
 import { Loading, ScrollWrapper } from '../../components';
 import AccounCreationSuccess from "../../components/AccounCreationSuccess";
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
@@ -25,6 +27,7 @@ function CreateAccount(): React.ReactElement {
   const [type, setType] = useState(DEFAULT_TYPE);
   const [genesisHash, setGenesis] = useState(ALEPH_ZERO_GENESIS_HASH);
   const chain = useMetadata(genesisHash, true);
+  const { show } = useToast();
 
   useEffect((): void => {
     createSeed(undefined)
@@ -56,11 +59,12 @@ function CreateAccount(): React.ReactElement {
           .then(() => setStep((currentStep) => currentStep + 1))
           .catch((error: Error): void => {
             setIsBusy(false);
+            show(t('Account creation was not successful.'), 'critical');
             console.error(error);
           });
       }
     },
-    [genesisHash, seed, type]
+    [genesisHash, seed, type, show, t]
   );
 
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);

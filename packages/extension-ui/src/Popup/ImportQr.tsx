@@ -42,19 +42,27 @@ export default function ImportQr(): React.ReactElement {
   }, []);
 
   const _onCreate = useCallback(() => {
-    if (name && password) {
-      show(t('Account created successfully!'), 'success');
-    }
-
     if (account && name) {
       if (account.isAddress) {
         createAccountExternal(name, account.content, account.genesisHash)
-          .then(() => onAction('/'))
-          .catch((error: Error) => console.error(error));
+          .then(() => {
+            show(t('Account created successfully!'), 'success');
+            onAction('/');
+          })
+          .catch((error: Error) => {
+            show(t('Account creation was not successful.'), 'critical');
+            console.error(error);
+          });
       } else if (password) {
         createAccountSuri(name, password, account.content, 'sr25519', account.genesisHash)
-          .then(() => onAction('/'))
-          .catch((error: Error) => console.error(error));
+          .then(() => {
+            show(t('Account created successfully!'), 'success');
+            onAction('/');
+          })
+          .catch((error: Error) => {
+            show(t('Account creation was not successful.'), 'critical');
+            console.error(error);
+          });
       }
     }
   }, [account, name, onAction, password, show, t]);

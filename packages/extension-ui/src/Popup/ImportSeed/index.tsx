@@ -3,6 +3,8 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
+import useToast from "@polkadot/extension-ui/hooks/useToast";
+
 import { AccountContext, ActionContext, ScrollWrapper } from '../../components';
 import AccounCreationSuccess from "../../components/AccounCreationSuccess";
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
@@ -32,6 +34,7 @@ function ImportSeed(): React.ReactElement {
   const [genesis, setGenesis] = useState(ALEPH_ZERO_GENESIS_HASH);
   const [seed, setSeed] = useState<string | null>(null);
   const chain = useMetadata(account && account.genesis, true);
+  const { show } = useToast();
 
   useEffect((): void => {
     !accounts.length && onAction();
@@ -51,11 +54,12 @@ function ImportSeed(): React.ReactElement {
           .then(() => setStep((currentStep) => currentStep + 1))
           .catch((error): void => {
             setIsBusy(false);
+            show(t('Account creation was not successful.'), 'critical');
             console.error(error);
           });
       }
     },
-    [account, type]
+    [account, type, show, t]
   );
 
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);

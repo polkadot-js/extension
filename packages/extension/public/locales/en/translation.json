@@ -351,5 +351,7 @@
   "Capitalization doesn't help very much": "",
   "All-uppercase is almost as easy to guess as all-lowercase": "",
   "Reversed words aren't much harder to guess": "",
-  "Predictable substitutions like '@' instead of 'a' don't help very much": ""
+  "Predictable substitutions like '@' instead of 'a' don't help very much": "",
+  "Account creation was not successful.": "",
+  "Sub-account creation was not successful.": ""
 }

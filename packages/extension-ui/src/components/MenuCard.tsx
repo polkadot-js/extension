@@ -28,12 +28,12 @@ function MenuCard({
   return (
     <div
       className={className}
+      onClick={onClick}
       onKeyPress={onClick}
       tabIndex={tabIndex}
     >
       <div
         className='flex-container'
-        onClick={onClick}
       >
         {preIcon && <div className='icon'>{preIcon}</div>}
         <div className='flex-group'>

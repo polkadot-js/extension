@@ -112,7 +112,8 @@ const darkTheme = {
   tooltipBoxShadowTransaction: '8px 16px 24px rgba(69, 79, 89, 0.04)',
   tooltipTextColor: '#BCCBD6',
   warningBoxBackground: 'linear-gradient(0deg, rgba(255, 210, 63, 0.05), rgba(255, 210, 63, 0.05)), #14202A;',
-  warningColor: '#FFD23F'
+  warningColor: '#FFD23F',
+  progressBarInactive: '#273847',
 };
 
 export declare type Theme = typeof darkTheme;

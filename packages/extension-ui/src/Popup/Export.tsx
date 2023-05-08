@@ -8,8 +8,6 @@ import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
-import viewOff from '../assets/viewOff.svg';
-import viewOn from '../assets/viewOn.svg';
 import {
   ActionContext,
   Address,
@@ -43,7 +41,6 @@ function Export({
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const _goTo = (path: string) => () => onAction(path);
 
@@ -70,8 +67,6 @@ function Export({
       });
   }, [address, onAction, pass, show, t]);
 
-  const _handleInputTypeChange = useCallback(() => setIsPasswordVisible((isPasswordVisible) => !isPasswordVisible), []);
-
   return (
     <>
       <Header
@@ -92,15 +87,9 @@ function Export({
             isError={!!error}
             label={t<string>('Password')}
             onChange={onPassChange}
-            type={isPasswordVisible ? 'text' : 'password'}
+            type='password'
             value={pass}
           />
-          <div className='password-icon'>
-            <img
-              onClick={_handleInputTypeChange}
-              src={isPasswordVisible ? viewOn : viewOff}
-            />
-          </div>
           {pass.length < MIN_LENGTH && pass !== '' && (
             <Warning
               isBelowInput
@@ -148,12 +137,6 @@ export default withRouter(styled(Export)`
 
   .password-container {
     position: relative;
-  }
-  .password-icon {
-    position: absolute;
-    top: 18px;
-    right: 20px;
-    cursor: pointer;
   }
 
   .center {

@@ -5,6 +5,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '../types';
+import { StyledPasswordFeedback } from './PasswordField/PasswordField';
 import Address from './Address';
 import Label from './Label';
 
@@ -39,17 +40,12 @@ export default styled(ScrollWrapper)(
     width: 8px;
   }
 
-  ${Label}:not(.label), ${Address} {
+  ${Label}:not(.label), ${Address}, ${StyledPasswordFeedback} {
     width: calc(100% + 8px);
   }
 
   .header .container{
     width: 360px;
   }
-
-  .password-icon {
-    right: 12px;
-  }
-
 `
 );

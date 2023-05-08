@@ -277,7 +277,7 @@ describe('Derive', () => {
       it('correctly creates the derived account', async () => {
         const newAccount = {
           name: 'newName',
-          password: 'somePassword'
+          password: 'Alice has a cat'
         };
         const deriveMock = jest.spyOn(messaging, 'deriveAccount');
 

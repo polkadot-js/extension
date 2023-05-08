@@ -1,12 +1,10 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { isNotShorterThan } from '@polkadot/extension-ui/util/validators';
 
-import viewOff from '../../assets/viewOff.svg';
-import viewOn from '../../assets/viewOn.svg';
 import { InputWithLabel, ValidatedInput, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
@@ -31,7 +29,6 @@ function Unlock({
   setPassword
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const _onChangePassword = useCallback(
     (password: string): void => {
       setPassword(password);
@@ -39,10 +36,6 @@ function Unlock({
     },
     [setError, setPassword]
   );
-
-  const _handleInputTypeChange = useCallback(() => {
-    setIsPasswordVisible(!isPasswordVisible);
-  }, [isPasswordVisible]);
 
   const isPasswordValid = useMemo(() => isNotShorterThan(MIN_PASSWORD_LENGTH, t<string>('Password is too short')), [t]);
 
@@ -57,15 +50,7 @@ function Unlock({
         label={t<string>('Password for this account')}
         onEnter={onSign}
         onValidatedChange={_onChangePassword}
-        showPasswordElement={
-          <button className='password-icon'>
-            <img
-              onClick={_handleInputTypeChange}
-              src={isPasswordVisible ? viewOn : viewOff}
-            />
-          </button>
-        }
-        type={isPasswordVisible ? 'text' : 'password'}
+        type='password'
         validator={isPasswordValid}
         value={password}
       />

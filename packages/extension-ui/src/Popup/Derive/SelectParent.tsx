@@ -9,8 +9,6 @@ import styled from 'styled-components';
 import { canDerive } from '@polkadot/extension-base/utils';
 
 import helpIcon from '../../assets/help.svg';
-import viewOff from '../../assets/viewOff.svg';
-import viewOn from '../../assets/viewOn.svg';
 import {
   AccountContext,
   ActionContext,
@@ -152,12 +150,6 @@ function SelectParent({
 
   const { goTo } = useGoTo();
 
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-
-  const _handleInputTypeChange = useCallback(() => {
-    setIsPasswordVisible(!isPasswordVisible);
-  }, [isPasswordVisible]);
-
   const isPasswordValid = useMemo(() => isNotShorterThan(MIN_PASSWORD_LENGTH, t<string>('Password is too short')), [t]);
 
   const footer = (
@@ -203,15 +195,7 @@ function SelectParent({
             data-input-password
             label={t<string>('Main account password')}
             onValidatedChange={_onParentPasswordEnter}
-            showPasswordElement={
-              <button className='password-icon'>
-                <img
-                  onClick={_handleInputTypeChange}
-                  src={isPasswordVisible ? viewOn : viewOff}
-                />
-              </button>
-            }
-            type={isPasswordVisible ? 'text' : 'password'}
+            type='password'
             validator={isPasswordValid}
           />
           {!!parentPassword && !isProperParentPassword && (

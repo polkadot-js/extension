@@ -17,6 +17,8 @@ import { ThemeProps } from '../types';
 import { AccountContext } from './contexts';
 import HelperFooter from './HelperFooter';
 
+const APP_RELATED_INPUTS = ['aleph', 'zero', 'aleph zero', 'signer'];
+
 interface Props {
   address: string | null;
   buttonLabel?: string;
@@ -121,6 +123,12 @@ function AccountNamePasswordCreation({
     </CustomFooter>
   );
 
+  const nameRelatedInputs = name ? [name, ...name.split(/[^a-zA-Z]+/)] : [];
+  const validationUserInput = [
+    ...APP_RELATED_INPUTS,
+    ...nameRelatedInputs,
+  ];
+
   return (
     <>
       <div className={className}>
@@ -143,6 +151,7 @@ function AccountNamePasswordCreation({
         <Password
           label={isDeriving ? t<string>('Set sub-account password') : undefined}
           onChange={_onPasswordChange}
+          validationUserInput={validationUserInput}
         />
         {!isDeriving && (
           <Dropdown

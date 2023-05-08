@@ -7,8 +7,6 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import viewOff from '../../assets/viewOff.svg';
-import viewOn from '../../assets/viewOn.svg';
 import {
   Address,
   BackButton,
@@ -49,12 +47,7 @@ function ImportJsonConfirmStep({
   requirePassword
 }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(true);
-
-  const _handleInputTypeChange = useCallback(() => {
-    setIsPasswordVisible(!isPasswordVisible);
-  }, [isPasswordVisible]);
 
   const MIN_LENGTH = 0;
   const isPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')), [t]);
@@ -98,15 +91,7 @@ function ImportJsonConfirmStep({
                 isError={isPasswordError}
                 label={t<string>('Password')}
                 onValidatedChange={_onChangePass}
-                showPasswordElement={
-                  <div className='password-icon'>
-                    <img
-                      onClick={_handleInputTypeChange}
-                      src={isPasswordVisible ? viewOn : viewOff}
-                    />
-                  </div>
-                }
-                type={isPasswordVisible ? 'text' : 'password'}
+                type='password'
                 validator={isPasswordValid}
               />
               {isPasswordError && (

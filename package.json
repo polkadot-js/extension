@@ -36,10 +36,14 @@
     "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --detectOpenHandles",
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
+  "dependencies": {
+    "zxcvbn": "4.4.2"
+  },
   "devDependencies": {
     "@babel/core": "^7.20.12",
     "@polkadot/dev": "^0.67.177",
     "@types/jest": "^29.2.5",
+    "@types/zxcvbn": "^4.4.1",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
     "i18next-scanner": "^4.1.0",

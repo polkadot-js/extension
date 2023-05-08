@@ -37,7 +37,7 @@ const StyledFaviconBox = styled(FaviconBox)`
   }
 `;
 
-function AccounSelection({
+function AccountSelection({
   className,
 
   onChange,
@@ -136,7 +136,7 @@ function AccounSelection({
   );
 }
 
-export default styled(AccounSelection)(
+export default styled(AccountSelection)(
   ({ theme }: Props) => `
 
   // due to internal padding

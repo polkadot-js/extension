@@ -40,8 +40,8 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
           {seedArray.map((word, index) => (
             <MnemonicPill
               className='mnemonic-pill'
-              index={index + 1}
-              key={index + 1}
+              index={index}
+              key={index}
               name={`mnemonic-${index}`}
               word={word}
             />

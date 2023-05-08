@@ -4,6 +4,8 @@
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
+import viewOff from '../assets/viewOff.svg';
+import viewOn from '../assets/viewOn.svg';
 import { ThemeProps } from '../types';
 import Label from './Label';
 import { Input } from './TextInputs';
@@ -18,7 +20,7 @@ interface Props extends ThemeProps {
   label: string;
   onBlur?: () => void;
   onChange?: (value: string) => void;
-  onEnter?: () => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   placeholder?: string;
   type?: 'text' | 'password';
   value?: string;
@@ -35,7 +37,7 @@ function InputWithLabel({
   label = '',
   onBlur,
   onChange,
-  onEnter,
+  onKeyDown,
   placeholder,
   type = 'text',
   value,
@@ -49,6 +51,7 @@ function InputWithLabel({
   );
 
   const [focused, setIsFocused] = React.useState(false);
+  const [isObscured, setIsObscured] = React.useState(true);
 
   const handleFocus = useCallback(() => {
     setIsFocused(true);
@@ -61,6 +64,10 @@ function InputWithLabel({
 
     setIsFocused(false);
   }, [onBlur]);
+
+  const toggleObscure = useCallback(() => {
+    setIsObscured((prevIsObscure) => !prevIsObscure);
+  }, [setIsObscured]);
 
   return (
     <Label
@@ -77,23 +84,40 @@ function InputWithLabel({
         onBlur={handleBlur}
         onChange={_onChange}
         onFocus={handleFocus}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         readOnly={isReadOnly}
         spellCheck={false}
-        type={type}
+        type={isObscured ? type : 'text'}
         value={value}
         withError={isError}
       />
+      {type === "password" && (
+        <IconButton onClick={toggleObscure}>
+          <img src={isObscured ? viewOff : viewOn} />
+        </IconButton>
+      )}
     </Label>
   );
 }
 
-export default styled(InputWithLabel)(
-  ({ label }: Props) => `
+const IconButton = styled.button`
+    all: unset;
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    cursor: pointer;
+
+    &:focus {
+      outline-style: auto;
+    }
+`;
+
+export default styled(InputWithLabel)`
   margin-bottom: 16px;
  
   > ${Input} {
-    padding-top: ${!label.trim() ? '0px' : '11px'};
+    padding-top: ${({ label }) => !label.trim() ? '0px' : '11px'};
  }
 
   &.withoutMargin {
@@ -103,5 +127,4 @@ export default styled(InputWithLabel)(
       margin-top: 6px;
     }
   }
-`
-);
+`;

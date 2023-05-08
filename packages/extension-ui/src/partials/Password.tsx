@@ -1,29 +1,24 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import viewOff from '../assets/viewOff.svg';
-import viewOn from '../assets/viewOn.svg';
 import { InputWithLabel, ValidatedInput } from '../components';
+import PasswordField from '../components/PasswordField';
 import useTranslation from '../hooks/useTranslation';
-import { allOf, isNotShorterThan, isSameAs } from '../util/validators';
+import { allOf, isSameAs } from '../util/validators';
 
-interface Props {
+type Props = {
   isFocussed?: boolean;
   onChange: (password: string | null) => void;
+  validationUserInput?: string[];
   label?: string;
 }
 
-const MIN_LENGTH = 6;
-
-export default function Password({ isFocussed, label, onChange }: Props): React.ReactElement<Props> {
+const Password = ({ label, onChange, validationUserInput }: Props) => {
   const { t } = useTranslation();
   const [pass1, setPass1] = useState<string>('');
   const [pass2, setPass2] = useState<string>('');
-  const [isFirstPasswordVisible, setIsFirstPasswordVisible] = useState(false);
-  const [isSecondPasswordVisible, setIsSecondPasswordVisible] = useState(false);
-  const isFirstPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')), [t]);
   const isSecondPasswordValid = useCallback(
     (firstPassword: string) => allOf(isSameAs(firstPassword, t<string>('Passwords do not match'))),
     [t]
@@ -33,49 +28,24 @@ export default function Password({ isFocussed, label, onChange }: Props): React.
     onChange(pass1 && pass2 ? pass1 : null);
   }, [onChange, pass1, pass2]);
 
-  const _handleFistInputTypeChange = useCallback(() => {
-    setIsFirstPasswordVisible(!isFirstPasswordVisible);
-  }, [isFirstPasswordVisible]);
-
-  const _handleSecondInputTypeChange = useCallback(() => {
-    setIsSecondPasswordVisible(!isSecondPasswordVisible);
-  }, [isSecondPasswordVisible]);
-
   return (
     <>
-      <ValidatedInput
-        component={InputWithLabel}
-        data-input-password
-        isFocused={isFocussed}
+      <PasswordField
         label={label || t<string>('Set password')}
         onValidatedChange={setPass1}
-        showPasswordElement={
-          <div className='password-icon'>
-            <img
-              onClick={_handleFistInputTypeChange}
-              src={isFirstPasswordVisible ? viewOn : viewOff}
-            />
-          </div>
-        }
-        type={isFirstPasswordVisible ? 'text' : 'password'}
-        validator={isFirstPasswordValid}
+        validationUserInput={validationUserInput}
       />
       <ValidatedInput
         component={InputWithLabel}
         data-input-repeat-password
         label={t<string>('Confirm password')}
         onValidatedChange={setPass2}
-        showPasswordElement={
-          <div className='password-icon'>
-            <img
-              onClick={_handleSecondInputTypeChange}
-              src={isSecondPasswordVisible ? viewOn : viewOff}
-            />
-          </div>
-        }
-        type={isSecondPasswordVisible ? 'text' : 'password'}
+        shouldCheckCapsLock
+        type='password'
         validator={isSecondPasswordValid(pass1)}
       />
     </>
   );
-}
+};
+
+export default Password;

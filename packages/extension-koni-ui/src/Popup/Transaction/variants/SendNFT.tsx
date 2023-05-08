@@ -219,6 +219,7 @@ const Component: React.FC = () => {
               label={t('Send to account')}
               showAddressBook={true}
               showScanner={true}
+              saveAddress={true}
             />
           </Form.Item>
 

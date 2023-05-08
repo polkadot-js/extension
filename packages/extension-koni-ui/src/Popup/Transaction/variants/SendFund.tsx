@@ -630,6 +630,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               label={t('Send to account')}
               showAddressBook={true}
               showScanner={true}
+              saveAddress={true}
             />
           </Form.Item>
 

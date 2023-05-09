@@ -142,9 +142,9 @@ export interface RequestSignatures {
   'pub(phishing.redirectIfDenied)': [null, boolean];
   'pub(ping)': [null, boolean];
   'pub(rpc.listProviders)': [void, ResponseRpcListProviders];
-  'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
+  'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse<unknown>];
   'pub(rpc.startProvider)': [string, ProviderMeta];
-  'pub(rpc.subscribe)': [RequestRpcSubscribe, number, JsonRpcResponse];
+  'pub(rpc.subscribe)': [RequestRpcSubscribe, number, JsonRpcResponse<unknown>];
   'pub(rpc.subscribeConnected)': [null, boolean, boolean];
   'pub(rpc.unsubscribe)': [RequestRpcUnsubscribe, boolean];
 }

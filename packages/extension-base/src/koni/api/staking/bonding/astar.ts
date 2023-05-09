@@ -1,17 +1,30 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getStakingStatusByNominations, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { isUrl, parseRawNumber } from '@subwallet/extension-base/utils';
+import {_ChainInfo} from '@subwallet/chain-list/types';
+import {
+  ChainStakingMetadata,
+  NominationInfo,
+  NominatorMetadata,
+  StakingStatus,
+  StakingType,
+  UnstakingInfo,
+  UnstakingStatus,
+  ValidatorInfo
+} from '@subwallet/extension-base/background/KoniTypes';
+import {
+  getStakingStatusByNominations,
+  PalletDappsStakingAccountLedger,
+  PalletDappsStakingDappInfo
+} from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import {_STAKING_ERA_LENGTH_MAP} from '@subwallet/extension-base/services/chain-service/constants';
+import {_SubstrateApi} from '@subwallet/extension-base/services/chain-service/types';
+import {isUrl, parseRawNumber} from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
-import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { BN, BN_ZERO } from '@polkadot/util';
-import { isEthereumAddress } from '@polkadot/util-crypto';
+import {SubmittableExtrinsic} from '@polkadot/api/promise/types';
+import {BN, BN_ZERO} from '@polkadot/util';
+import {isEthereumAddress} from '@polkadot/util-crypto';
 
 export async function getAstarStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   const aprPromise = new Promise(function (resolve) {
@@ -303,4 +316,25 @@ export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi,
   console.log('no of astar claim reward tx: ', transactions.length);
 
   return apiPromise.api.tx.utility.batch(transactions);
+}
+
+export function getAstarWithdrawable (nominatorMetadata: NominatorMetadata): UnstakingInfo {
+  const unstakingInfo: UnstakingInfo = {
+    chain: nominatorMetadata.chain,
+    status: UnstakingStatus.CLAIMABLE,
+    claimable: '0',
+    waitingTime: 0
+  };
+
+  const bnWithdrawable = BN_ZERO;
+
+  for (const unstaking of nominatorMetadata.unstakings) {
+    if (unstaking.status === UnstakingStatus.CLAIMABLE) {
+      bnWithdrawable.add(new BN(unstaking.claimable));
+    }
+  }
+
+  unstakingInfo.claimable = bnWithdrawable.toString();
+
+  return unstakingInfo;
 }

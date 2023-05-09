@@ -22,6 +22,8 @@ import styled from 'styled-components';
 
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
+import {_STAKING_CHAIN_GROUP} from "@subwallet/extension-base/services/chain-service/constants";
+import {getAstarWithdrawable} from "@subwallet/extension-base/koni/api/staking/bonding/astar";
 
 type Props = ThemeProps;
 
@@ -49,6 +51,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const unstakingInfo = useMemo((): UnstakingInfo | undefined => {
     if (from && !isAccountAll(from)) {
+      if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain)) {
+        return getAstarWithdrawable(nominatorMetadata);
+      }
+
       return nominatorMetadata.unstakings.filter((data) => data.status === UnstakingStatus.CLAIMABLE)[0];
     }
 

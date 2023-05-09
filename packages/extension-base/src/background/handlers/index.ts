@@ -33,7 +33,7 @@ export default function handler<TMessageType extends MessageTypes> ({ id, messag
     : tabs.handle(id, message, request, from, port);
 
   promise
-    .then((response): void => {
+    .then((response: unknown): void => {
       console.log(`[out] ${source}`); // :: ${JSON.stringify(response)}`);
 
       // between the start and the end of the promise, the user may have closed

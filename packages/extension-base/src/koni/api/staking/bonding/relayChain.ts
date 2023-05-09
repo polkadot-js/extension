@@ -1,18 +1,49 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import { reformatAddress } from '@subwallet/extension-base/utils';
+import {_ChainInfo} from '@subwallet/chain-list/types';
+import {TransactionError} from '@subwallet/extension-base/background/errors/TransactionError';
+import {
+  ChainStakingMetadata,
+  NominationInfo,
+  NominationPoolInfo,
+  NominatorMetadata,
+  PalletNominationPoolsBondedPoolInner,
+  StakingStatus,
+  StakingTxErrorType,
+  StakingType,
+  UnstakingInfo,
+  UnstakingStatus,
+  ValidatorInfo
+} from '@subwallet/extension-base/background/KoniTypes';
+import {
+  calculateAlephZeroValidatorReturn,
+  calculateChainStakedReturn,
+  calculateInflation,
+  calculateValidatorStakedReturn,
+  getCommission,
+  PalletIdentityRegistration,
+  PalletNominationPoolsPoolMember,
+  PalletStakingExposure,
+  parseIdentity,
+  parsePoolStashAddress,
+  transformPoolName,
+  ValidatorExtraInfo
+} from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import {
+  _STAKING_CHAIN_GROUP,
+  _STAKING_ERA_LENGTH_MAP
+} from '@subwallet/extension-base/services/chain-service/constants';
+import {_SubstrateApi} from '@subwallet/extension-base/services/chain-service/types';
+import {
+  _getChainNativeTokenBasicInfo,
+  _getChainSubstrateAddressPrefix
+} from '@subwallet/extension-base/services/chain-service/utils';
+import {reformatAddress} from '@subwallet/extension-base/utils';
 
-import { Bytes } from '@polkadot/types';
-import { BN, BN_ZERO } from '@polkadot/util';
-import { isEthereumAddress } from '@polkadot/util-crypto';
+import {Bytes} from '@polkadot/types';
+import {BN, BN_ZERO} from '@polkadot/util';
+import {isEthereumAddress} from '@polkadot/util-crypto';
 
 export interface PalletStakingNominations {
   targets: string[],
@@ -84,7 +115,7 @@ export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: st
   let bnTotalStake = new BN(amount);
   const bnMinStake = new BN(chainStakingMetadata.minStake);
 
-  if (!nominatorMetadata) {
+  if (!nominatorMetadata || nominatorMetadata.status === StakingStatus.NOT_STAKING) {
     if (!bnTotalStake.gte(bnMinStake)) {
       errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
     }

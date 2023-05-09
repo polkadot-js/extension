@@ -57,7 +57,8 @@ const Component: React.FC<Props> = (props: Props) => {
       subTitle: t('Delete this contact?'),
       title: t('Confirmation'),
       type: 'error',
-      maskClosable: true
+      maskClosable: true,
+      zIndex: 1005
     };
   }, [t]);
 

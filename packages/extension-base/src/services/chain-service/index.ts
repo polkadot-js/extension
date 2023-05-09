@@ -618,8 +618,21 @@ export class ChainService {
 
   private async fetchLatestData (src: string, defaultValue: unknown) {
     try {
+      const timeout= await new Promise((resolve) => {
+        const id = setTimeout(() => {
+          clearTimeout(id);
+          resolve(null);
+        }, 1000);
+      });
       let result = defaultValue;
-      const resp = await fetch(src);
+      const resp = await Promise.race([
+        timeout,
+        fetch(src)
+      ]) as Response || null;
+
+      if (!resp) {
+        return result;
+      }
 
       if (resp.ok) {
         try {

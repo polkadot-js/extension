@@ -1696,7 +1696,6 @@ export interface AddressBookState {
   recent: AddressJson[];
 }
 
-
 // Change master password
 export interface RequestChangeMasterPassword {
   oldPassword?: string;

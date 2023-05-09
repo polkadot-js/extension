@@ -1415,4 +1415,19 @@ export class ChainService {
   public async getAssetLogoMap (): Promise<Record<string, string>> {
     return Promise.resolve(AssetLogoMap);
   }
+
+  public resetWallet (resetAll: boolean) {
+    if (resetAll) {
+      this.setAssetSettings({});
+
+      // Disconnect chain
+      const chainInfos = this.getActiveChainInfos();
+
+      for (const chain of Object.keys(chainInfos)) {
+        if (!_DEFAULT_ACTIVE_CHAINS.includes(chain)) {
+          this.disableChain(chain);
+        }
+      }
+    }
+  }
 }

@@ -5442,8 +5442,8 @@ __metadata:
     "@subwallet/extension-dapp": ^1.0.2-3
     "@subwallet/extension-inject": ^1.0.2-3
     "@subwallet/extension-mocks": ^1.0.2-3
-    "@subwallet/keyring": ^0.0.5
-    "@subwallet/ui-keyring": ^0.0.3
+    "@subwallet/keyring": ^0.0.6
+    "@subwallet/ui-keyring": ^0.0.6
     "@unique-nft/types": ^0.6.0-4
     "@zeitgeistpm/type-defs": ^0.10.0
     "@zeroio/type-definitions": ^0.0.14
@@ -5575,9 +5575,9 @@ __metadata:
     "@subwallet/extension-dapp": ^1.0.2-3
     "@subwallet/extension-inject": ^1.0.2-3
     "@subwallet/extension-mocks": ^1.0.2-3
-    "@subwallet/keyring": ^0.0.5
+    "@subwallet/keyring": ^0.0.6
     "@subwallet/react-ui": 5.1.2-b48
-    "@subwallet/ui-keyring": ^0.0.3
+    "@subwallet/ui-keyring": ^0.0.6
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
     "@types/enzyme-adapter-react-16": ^1.0.6
@@ -5675,9 +5675,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/keyring@npm:^0.0.5":
-  version: 0.0.5
-  resolution: "@subwallet/keyring@npm:0.0.5"
+"@subwallet/keyring@npm:^0.0.6":
+  version: 0.0.6
+  resolution: "@subwallet/keyring@npm:0.0.6"
   dependencies:
     "@polkadot/util": ^10.1.7
     "@polkadot/util-crypto": ^10.1.7
@@ -5686,7 +5686,7 @@ __metadata:
     ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rxjs: ^7.5.6
-  checksum: 4f60849d5bccc5512cabab3c4fa13176f4f57b8669fb4a159601f0abb0e32a63a66ee601d536aa13c18db41be2140e50635f10d9423f09ad8dbb125dda283318
+  checksum: d39527d9ef775a29e41c2b31ac75ad797297e3065194c8b118e465746ce53aa12ccdcc79aa772cc09ea070c0b5bcb3612841d64133643a1073f5d5ba3c257cdc
   languageName: node
   linkType: hard
 
@@ -5764,19 +5764,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/ui-keyring@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "@subwallet/ui-keyring@npm:0.0.3"
+"@subwallet/ui-keyring@npm:^0.0.6":
+  version: 0.0.6
+  resolution: "@subwallet/ui-keyring@npm:0.0.6"
   dependencies:
     "@babel/runtime": ^7.20.1
     "@polkadot/ui-settings": 2.9.14
     "@polkadot/util": ^10.1.13
     "@polkadot/util-crypto": ^10.1.13
-    "@subwallet/keyring": ^0.0.3
+    "@subwallet/keyring": ^0.0.6
     mkdirp: ^1.0.4
     rxjs: ^7.5.7
     store: ^2.0.12
-  checksum: 5a8cc33a2198ded63956c46888f404506ac640d706fd7fbe70355fdbbb7a50c4d10c3226b23beffdf9f7041569d17d979f70f8eeba5a31ee759d6cc6a92dafab
+  checksum: d68ffc9b64c2e4ffd2b5bcb66e99e315a843b7fd9a7d741fc1122bef9a0699c18c23f191cf8100a508b18c49595ef4370627f2294d2871834c395242e3674d2e
   languageName: node
   linkType: hard
 

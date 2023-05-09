@@ -198,4 +198,11 @@ export default class RequestService {
   public get numRequests (): number {
     return this.numMetaRequests + this.numAuthRequests + this.numSubstrateRequests + this.numEvmRequests;
   }
+
+  public resetWallet (): void {
+    this.#authRequestHandler.resetWallet();
+    this.#substrateRequestHandler.resetWallet();
+    this.#evmRequestHandler.resetWallet();
+    this.#metadataRequestHandler.resetWallet();
+  }
 }

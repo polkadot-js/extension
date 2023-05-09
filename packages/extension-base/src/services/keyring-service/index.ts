@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CurrentAccountInfo, KeyringState } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { CurrentAccountStore } from '@subwallet/extension-base/stores';
 import { keyring } from '@subwallet/ui-keyring';
@@ -97,5 +98,11 @@ export class KeyringService {
     this.currentAccountSubject.next(currentAccountData);
     this.eventService.emit('account.updateCurrent', currentAccountData);
     this.currentAccountStore.set('CurrentAccountInfo', currentAccountData);
+  }
+
+  resetWallet () {
+    keyring.resetWallet();
+    this.updateKeyringState();
+    this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
   }
 }

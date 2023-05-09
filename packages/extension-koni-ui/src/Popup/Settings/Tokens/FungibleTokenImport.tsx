@@ -10,7 +10,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainChecker, useDefaultNavigate, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Col, Field, Form, Icon, Image, Input, NetworkItem, Row, SelectModal, SettingItem } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Col, Field, Form, Icon, Image, Input, NetworkItem, Row, SelectModal, SettingItem, SwSubHeader } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
@@ -19,6 +19,8 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import CN from 'classnames';
 
 type Props = ThemeProps
 
@@ -65,6 +67,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
+  const { isWebUI } = useContext(ScreenContext);
 
   const formRef = useRef<FormInstance<TokenImportFormType>>(null);
   const chainInfoMap = useGetContractSupportedChains();
@@ -317,7 +320,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       className={`import_token ${className}`}
       resolve={dataContext.awaitStores(['nft'])}
     >
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
+        withSideMenu
         onBack={goBack}
         rightFooterButton={{
           block: true,
@@ -334,7 +338,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }}
         title={t<string>('Import token')}
       >
-        <div className={'import_token__container'}>
+        <SwSubHeader
+          background='transparent'
+          onBack={goBack}
+          showBackButton={true}
+          title={t<string>('Import token')}
+          center={!isWebUI}
+        />
+        <div className={CN('import_token__container', {
+          '__web-ui': isWebUI
+        })}>
           <Form
             initialValues={{
               contractAddress: '',
@@ -436,8 +449,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               validateStatus={contractValidation.status}
             />
           </Form>
+          {isWebUI && (
+              <div className='action-wrapper'>
+              <Button
+                block={true}
+                disabled={isSubmitDisabled()}
+                icon={<Icon phosphorIcon={PlusCircle} weight='fill' />}
+                loading={loading}
+                onSubmit={onSubmit}
+                children={t('Save')}
+              />
+              </div>
+            )}
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 }
@@ -447,7 +472,12 @@ const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Prop
     '.import_token__container': {
       paddingTop: token.padding,
       marginLeft: token.margin,
-      marginRight: token.margin
+      marginRight: token.margin,
+
+      '&.__web-ui': {
+        width: '60%',
+        margin: '0 auto'
+      }
     },
 
     '.import_token__selected_option': {

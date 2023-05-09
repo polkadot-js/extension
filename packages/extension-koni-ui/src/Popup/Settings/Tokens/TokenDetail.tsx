@@ -13,20 +13,24 @@ import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/
 import useGetChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useGetChainAssetInfo';
 import { deleteCustomAssets, upsertCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Col, Field, Icon, Input, Logo, Row, Tooltip } from '@subwallet/react-ui';
+import { Button, ButtonProps, Col, Field, Icon, Input, Logo, Row, SwSubHeader, Tooltip } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { CheckCircle, Copy, Trash } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import CN from 'classnames';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const dataContext = useContext(DataContext);
+  const { isWebUI } = useContext(ScreenContext)
   const { token } = useTheme() as Theme;
   const goBack = useDefaultNavigate().goBack;
   const location = useLocation();
@@ -222,13 +226,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
         title={t<string>('Token detail')}
+        withSideMenu
       >
-        <div className={'token_detail__container'}>
+        {isWebUI && <SwSubHeader
+          title={t<string>('Token detail')}
+          background='transparent'
+          center={false}
+          onBack={() => navigate(-1)}
+          showBackButton={true}
+        />}
+        <div className={CN('token_detail__container', {
+          '__web-ui': isWebUI
+        })}>
           <div className={'token_detail__header_container'}>
             <div className={'token_detail__header_icon_wrapper'}>
               <Logo
                 size={112}
                 token={tokenInfo.symbol.toLowerCase()}
+                shape={isWebUI ? 'circle' : 'squircle'}
               />
             </div>
 
@@ -305,6 +320,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 />
               </div>
             </Tooltip>
+
+            {isWebUI && <Button
+              schema='danger'
+              icon={<Icon phosphorIcon={Trash} size='sm' weight='fill'/>}
+              onClick={handleDeleteToken}
+              disabled={!(_isCustomAsset(tokenInfo.slug) && _isSmartContractToken(tokenInfo))}
+            >
+              {t<string>('Delete token')}
+            </Button>}
           </div>
         </div>
       </Layout.Base>
@@ -316,7 +340,12 @@ const TokenDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.token_detail__container': {
       marginLeft: token.margin,
-      marginRight: token.margin
+      marginRight: token.margin,
+
+      '&.__web-ui': {
+        width: '60%',
+        margin: '0 auto'
+      }
     },
 
     '.token_detail__header_container': {

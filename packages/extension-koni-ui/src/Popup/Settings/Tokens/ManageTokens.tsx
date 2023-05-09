@@ -151,14 +151,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderPaddingVertical={true}
         title={t<string>('Manage tokens')}
         withSideMenu
-
       >
         {isWebUI && <SwSubHeader
-          title={t<string>('Manage chains')}
+          title={t<string>('Manage tokens')}
           background='transparent'
           center={false}
           onBack={() => navigate(-1)}
           showBackButton={true}
+          rightButtons={subHeaderButton}
         />}
 
         <div className={CN('container', {

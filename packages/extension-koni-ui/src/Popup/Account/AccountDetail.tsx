@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { CloseIcon, CustomModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
 import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -17,13 +17,15 @@ import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { copyToClipboard } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/utils/form/form';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, QRCode } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, QRCode, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, Swatches, TrashSimple, User } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import NftImport from '../Home/Nfts/NftImport';
+import AccountExport from './AccountExport';
 
 type Props = ThemeProps;
 
@@ -41,6 +43,7 @@ interface DetailFormState {
   [FormFieldName.NAME]: string;
 }
 
+const EXPORT_ACCOUNT_MODAL = 'export_account_modal';
 
 const instructionContents: InstructionContentType[] = [
   {
@@ -64,6 +67,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const notify = useNotification();
   const { token } = useTheme() as Theme;
   const { accountAddress } = useParams();
+  const { activeModal, inactiveModal } = useContext(ModalContext)
 
   const [form] = Form.useForm<DetailFormState>();
 
@@ -164,9 +168,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onExport = useCallback(() => {
     if (account?.address) {
-      navigate(`/accounts/export/${account.address}`);
+      if (isWebUI) {
+        activeModal(EXPORT_ACCOUNT_MODAL)
+      } else {
+        navigate(`/accounts/export/${account.address}`);
+      }
     }
-  }, [account?.address, navigate]);
+  }, [account?.address, navigate, isWebUI]);
 
   const onCopyAddress = useCallback(() => {
     copyToClipboard(account?.address || '');
@@ -392,6 +400,16 @@ const Component: React.FC<Props> = (props: Props) => {
             <InstructionContainer contents={instructionContents}/>
           }
         </div>
+
+        {isWebUI && (
+           <CustomModal
+            id={EXPORT_ACCOUNT_MODAL}
+            onCancel={() => inactiveModal(EXPORT_ACCOUNT_MODAL)}
+            title={t("Export account")}
+          >
+            <AccountExport accountAddress={account?.address} modalContent/>
+          </CustomModal>
+        )}
       </Layout.Base>
     </PageWrapper>
   );

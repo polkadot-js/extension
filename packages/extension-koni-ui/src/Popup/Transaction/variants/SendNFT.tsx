@@ -25,7 +25,10 @@ import { nftParamsHandler } from '../helper';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
 
-type Props = ThemeProps;
+type Props = ThemeProps & {
+  nftDetail?: NftItem
+  modalContent?: boolean
+};
 
 enum FormFieldName {
   TO = 'to'
@@ -47,7 +50,10 @@ const DEFAULT_ITEM: NftItem = {
   id: 'unknown'
 };
 
-const Component: React.FC = () => {
+const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({
+  nftDetail = DEFAULT_ITEM,
+  modalContent = false
+}) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -57,28 +63,54 @@ const Component: React.FC = () => {
   const { nftCollections, nftItems } = useSelector((state) => state.nft);
   const [isBalanceReady, setIsBalanceReady] = useState(true);
 
-  const nftItem = useMemo((): NftItem =>
-    nftItems.find(
+  const currentNftDetails = useMemo(() => modalContent ? {
+      nftChain: nftDetail.chain,
+      collectionId: nftDetail.collectionId,
+      itemId: nftDetail.id,
+      owner: nftDetail.owner
+    } : {
+      nftChain,
+      collectionId,
+      itemId,
+      owner
+    }, [collectionId, itemId, nftChain, nftItems, owner, modalContent, nftDetail])
+
+  const nftItem = useMemo((): NftItem => {
+    const {
+      nftChain,
+      collectionId,
+      itemId,
+      owner,
+    } = currentNftDetails;
+
+    return nftItems.find(
       (item) =>
         isSameAddress(item.owner, owner) &&
         nftChain === item.chain &&
         item.collectionId === collectionId &&
         item.id === itemId
     ) || DEFAULT_ITEM
-  , [collectionId, itemId, nftChain, nftItems, owner]);
+   }, [currentNftDetails]);
 
-  const collectionInfo = useMemo((): NftCollection =>
-    nftCollections.find(
+  const collectionInfo = useMemo((): NftCollection => {
+    const {
+      nftChain,
+      collectionId,
+    } = currentNftDetails;
+
+    return nftCollections.find(
       (item) =>
         nftChain === item.chain &&
       item.collectionId === collectionId
     ) || DEFAULT_COLLECTION
-  , [collectionId, nftChain, nftCollections]);
+  }, [currentNftDetails, nftCollections]);
 
   const chainInfo = useMemo(() => chainInfoMap[nftChain], [chainInfoMap, nftChain]);
   const addressPrefix = useGetChainPrefixBySlug(nftChain);
 
   const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
+  console.log('%c Rainbowww!', 'font-weight: bold; font-size: 50px;color: red; text-shadow: 3px 3px 0 rgb(217,31,38) , 6px 6px 0 rgb(226,91,14) , 9px 9px 0 rgb(245,221,8) , 12px 12px 0 rgb(5,148,68) , 15px 15px 0 rgb(2,135,206) , 18px 18px 0 rgb(4,77,145) , 21px 21px 0 rgb(42,21,113); margin-bottom: 12px; padding: 5%;');
+  console.log('==>>', {chain, from, onDone, setChain, setFrom })
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
@@ -190,9 +222,11 @@ const Component: React.FC = () => {
   return (
     <>
       <TransactionContent className={CN('-transaction-content')}>
-        <div className={'nft_item_detail text-center'}>
+        <div className={CN('nft_item_detail text-center', {
+            '__modal-ui': modalContent
+          })}>
           <Image
-            height={120}
+            height={modalContent ? 180 : 120}
             src={nftItem.image}
           />
           <Typography.Title level={5}>
@@ -201,7 +235,9 @@ const Component: React.FC = () => {
         </div>
 
         <Form
-          className={'form-container form-space-sm'}
+          className={CN('form-container form-space-sm', {
+            '__modal-ui': modalContent
+          })}
           form={form}
           initialValues={formDefault}
           onFieldsChange={onFieldsChange}
@@ -239,7 +275,9 @@ const Component: React.FC = () => {
         />
       </TransactionContent>
       <TransactionFooter
-        className={'send-nft-transaction-footer'}
+        className={CN('send-nft-transaction-footer', {
+          '__modal-ui': modalContent
+        })}
         errors={[]}
         warnings={[]}
       >
@@ -271,7 +309,7 @@ const Wrapper: React.FC<Props> = (props: Props) => {
       className={className}
       resolve={dataContext.awaitStores(['nft'])}
     >
-      <Component />
+      <Component nftDetail={props.nftDetail} modalContent={props.modalContent} />
     </PageWrapper>
   );
 };
@@ -286,6 +324,25 @@ const SendNFT = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.nft_item_detail h5': {
       marginTop: token.marginXS,
       marginBottom: token.margin
+    },
+
+    '.__modal-ui': {
+      '&.form-container': {
+        display: 'flex',
+        flexDirection: 'column-reverse',
+      },
+
+      '&.send-nft-transaction-footer': {
+        '& > .ant-btn': {
+          width: '100%',
+        }
+      },
+
+      '&.nft_item_detail': {
+        'img': {
+          aspectRatio: '1'
+        }
+      }
     }
   };
 });

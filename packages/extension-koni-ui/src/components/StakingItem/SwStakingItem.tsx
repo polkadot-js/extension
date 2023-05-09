@@ -6,7 +6,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
-import { Button, Icon, Popover, StakingItem, Tag } from '@subwallet/react-ui';
+import { Button, Icon, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { DotsThree, User, Users } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
@@ -69,8 +69,6 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
         stakingValue={balanceValue}
       />
     );
-
-
 
   const {
     staking: {

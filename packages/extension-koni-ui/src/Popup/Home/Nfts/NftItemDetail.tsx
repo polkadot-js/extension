@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { CustomModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useNavigateOnChangeAccount } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -28,10 +28,13 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import ChainLogoMap from '../../../assets/logo';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import Transaction from '../../Transaction/Transaction';
+import SendNFT from '../../Transaction/variants/SendNFT';
 
 type Props = ThemeProps
 
 const NFT_DESCRIPTION_MAX_LENGTH = 70;
+const TRANSFER_NFT_MODAL = 'transfer-nft-modal';
 
 const modalCloseButton = <Icon
   customSize={'24px'}
@@ -83,9 +86,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         return;
       }
     }
-
-    navigate(`/transaction/send-nft/${nftItem.owner}/${nftItem.chain}/${nftItem.collectionId}/${nftItem.id}`);
-  }, [accounts, navigate, nftItem, notify, t]);
+    if (isWebUI) {
+      activeModal(TRANSFER_NFT_MODAL)
+    } else {
+      navigate(`/transaction/send-nft/${nftItem.owner}/${nftItem.chain}/${nftItem.collectionId}/${nftItem.id}`);
+    }
+  }, [accounts, navigate, nftItem, isWebUI, activeModal, notify, t]);
 
   const subHeaderRightButton: ButtonProps[] = [
     {
@@ -325,6 +331,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             </Button>
          )}
         </div>
+
+        <CustomModal
+          id={TRANSFER_NFT_MODAL}
+          onCancel={() => inactiveModal(TRANSFER_NFT_MODAL)}
+          title={t("Transfer")}
+        >
+          <Transaction modalContent>
+            <SendNFT modalContent nftDetail={nftItem} />
+          </Transaction>
+        </CustomModal>
 
         <SwModal
           className={CN('nft_item_detail__description_modal')}

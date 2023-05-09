@@ -280,7 +280,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               key: 'browser-confirmation-type-trigger',
               leftIcon: BellSimpleRinging,
               leftIconBgColor: token['volcano-6'],
-              title: t('Browser confirmation type')
+              title: !isWebUI ? t('Browser confirmation type') : t('Notifications')
             })}
             disabled={loadingMap.browserConfirmationType}
             id='browser-confirmation-type-select-modal'
@@ -292,7 +292,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             selected={browserConfirmationType}
             shape='round'
             size='small'
-            title={t('Browser confirmation type')}
+            title={!isWebUI ? t('Browser confirmation type') : t('Notifications')}
           />
         </div>
       </Layout.WithSubHeaderOnly>

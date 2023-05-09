@@ -34,8 +34,13 @@ function Component (props: Props): React.ReactElement<Props> {
 
 export const CustomModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+
+    '.ant-sw-modal-content': {
+      maxHeight: 'unset',
+    },
+
     '.ant-sw-modal-body': {
-      paddingBottom: token.paddingXS
+      paddingBottom: token.paddingXS,
     },
 
     '.ant-sw-modal-footer': {

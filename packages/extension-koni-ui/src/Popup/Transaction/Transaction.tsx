@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import { TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
@@ -13,10 +13,13 @@ import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import Controller from '@subwallet/extension-koni-ui/components/Layout/parts/Header/Controller';
+import NetworkInformation from '@subwallet/extension-koni-ui/components/NetworkInformation';
 
 interface Props extends ThemeProps {
   title?: string,
@@ -68,8 +71,16 @@ function Component ({ className, modalContent = false, children }: Props) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+  const { chain: stakingChain, type: _stakingType } = useParams();
+  const [currentStakeType, setCurrentStakeType] = useState<StakingType>()
+
+  useEffect(() => {
+    setCurrentStakeType(stakingChain as StakingType)
+  }, [stakingChain])
+
 
   const { activeModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
   const dataContext = useContext(DataContext);
 
   const { currentAccount, isAllAccount } = useSelector((root: RootState) => root.accountState);
@@ -193,7 +204,7 @@ function Component ({ className, modalContent = false, children }: Props) {
       <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn, asset, setAsset }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
-            <SwSubHeader
+            {!isWebUI ? <SwSubHeader
               background={'transparent'}
               center
               className={'transaction-header'}
@@ -201,8 +212,20 @@ function Component ({ className, modalContent = false, children }: Props) {
               rightButtons={subHeaderButton}
               showBackButton
               title={titleMap[transactionType]}
-            />
-            <Outlet />
+            /> :
+            <Controller
+              onBack={goBack}
+              showBackButton
+              title={titleMap[transactionType]}
+            />}
+            <div className={CN('content', {
+              '__web-ui': isWebUI
+            })}>
+              <div className='outlet-container'>
+                <Outlet context={{ modalContent, setCurrentStakeType }} />
+              </div>
+              {isWebUI && <NetworkInformation stakeStype={currentStakeType} />}
+            </div>
           </div>
         </PageWrapper>
       </TransactionContext.Provider>
@@ -217,6 +240,21 @@ const Transaction = styled(Component)(({ theme }) => {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
+
+    '.content': {
+      '&.__web-ui': {
+        display: 'flex',
+        gap: 16,
+        justifyContent: 'center',
+        width: '80%',
+        margin: '0 auto',
+
+        '& > *': {
+          maxWidth: '50%',
+          flex: 1,
+        }
+      }
+    },
 
     '&.__modal-content': {
       '.transaction-content': {

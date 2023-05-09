@@ -18,7 +18,7 @@ import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
+import { useOutletContext, useParams } from 'react-router';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -26,6 +26,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 import { accountFilterFunc, fetchChainValidators } from '../helper';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps
 
@@ -50,6 +51,11 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chain: stakingChain, type: _stakingType } = useParams();
 
   const dataContext = useContext(DataContext);
+  const { isWebUI } = useContext(ScreenContext);
+  const { setStakingType }: {
+    setStakingType: React.Dispatch<React.SetStateAction<React.ReactNode>>
+  } = useOutletContext();
+
   const { asset,
     chain,
     from,
@@ -90,6 +96,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const [isDisable, setIsDisable] = useState(true);
 
   const stakingType = Form.useWatch(FormFieldName.TYPE, form);
+
+  useEffect(() => {
+    setStakingType && setStakingType(stakingType)
+  }, [stakingType])
 
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
   const nominatorMetadataList = useGetNominatorInfo(chain, stakingType, from);
@@ -503,7 +513,7 @@ const Component: React.FC<Props> = (props: Props) => {
             </Form.Item>
           </Form>
           {
-            chainStakingMetadata && (
+            (chainStakingMetadata && !isWebUI) && (
               <>
                 <Divider className='staking-divider' />
                 {getMetaInfo()}

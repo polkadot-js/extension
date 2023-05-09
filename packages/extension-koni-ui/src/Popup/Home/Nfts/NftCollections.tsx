@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { CustomModal, EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetNftByAccount, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -10,12 +10,14 @@ import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, ButtonProps, Icon, SwList } from '@subwallet/react-ui';
+import { ActivityIndicator, ButtonProps, Icon, SwList, Button, ModalContext } from '@subwallet/react-ui';
+import { PlusCircle } from 'phosphor-react';
 import CN from 'classnames';
 import { ArrowClockwise, Image, Plus } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
+import NftImport from './NftImport';
 
 type Props = ThemeProps
 
@@ -31,6 +33,8 @@ const rightIcon = <Icon
   type='phosphor'
 />;
 
+const IMPORT_NFT_MODAL = 'import-nft-modal';
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -44,6 +48,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
 
+  const { activeModal, inactiveModal } = useContext(ModalContext);
   useEffect(() => {
     outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Collectible name')
   }, [outletContext?.setSearchPlaceholder])
@@ -193,7 +198,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }}
       >
         {listSection}
+        <Button
+          type='ghost'
+          icon={<Icon phosphorIcon={PlusCircle} size='xs' />}
+          onClick={() => activeModal(IMPORT_NFT_MODAL)}
+          children={t("Import collectible")}
+          block
+        />
       </Layout.Base>
+
+       <CustomModal
+        id={IMPORT_NFT_MODAL}
+        onCancel={() => inactiveModal(IMPORT_NFT_MODAL)}
+        title={t("Import NFT")}
+      >
+        <NftImport modalContent/>
+      </CustomModal>
     </PageWrapper>
   );
 }

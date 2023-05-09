@@ -618,7 +618,7 @@ export class ChainService {
 
   private async fetchLatestData (src: string, defaultValue: unknown) {
     try {
-      const timeout= await new Promise((resolve) => {
+      const timeout = await new Promise((resolve) => {
         const id = setTimeout(() => {
           clearTimeout(id);
           resolve(null);
@@ -1410,14 +1410,13 @@ export class ChainService {
     return this.assetSettingSubject.value;
   }
 
-  public async updateAssetSetting (assetSlug: string, assetSetting: AssetSetting): Promise<boolean | undefined> {
+  public async updateAssetSetting (assetSlug: string, assetSetting: AssetSetting, autoEnableNativeToken?: boolean): Promise<boolean | undefined> {
     const currentAssetSettings = await this.getAssetSettings();
 
     let needUpdateSubject: boolean | undefined;
 
     // Update settings
     currentAssetSettings[assetSlug] = assetSetting;
-    this.setAssetSettings(currentAssetSettings);
 
     if (assetSetting.visible) {
       const assetInfo = this.getAssetBySlug(assetSlug);
@@ -1427,8 +1426,16 @@ export class ChainService {
       if (chainState && !chainState.active) {
         this.enableChain(chainState.slug);
         needUpdateSubject = true;
+
+        if (autoEnableNativeToken) {
+          const nativeAsset = this.getNativeTokenInfo(assetInfo.originChain);
+
+          currentAssetSettings[nativeAsset.slug] = { visible: true };
+        }
       }
     }
+
+    this.setAssetSettings(currentAssetSettings);
 
     return needUpdateSubject;
   }

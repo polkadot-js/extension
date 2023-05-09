@@ -18,15 +18,15 @@
   "version": "0.46.2",
   "main": "index.js",
   "dependencies": {
-    "@polkadot/rpc-provider": "^10.5.1",
-    "@polkadot/types": "^10.5.1",
-    "@polkadot/util": "^12.1.1",
-    "@polkadot/util-crypto": "^12.1.1",
-    "@polkadot/x-global": "^12.1.1",
+    "@polkadot/rpc-provider": "^10.6.1",
+    "@polkadot/types": "^10.6.1",
+    "@polkadot/util": "^12.1.2",
+    "@polkadot/util-crypto": "^12.1.2",
+    "@polkadot/x-global": "^12.1.2",
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.234",
+    "@types/chrome": "^0.0.235",
     "@types/firefox-webext-browser": "^111.0.1"
   },
   "peerDependencies": {

@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 1.0.3
+Build date: May 06, 2023.
+
+Update:
+- Improve transaction UX (1254)
+- Update wake up / sleep with history and price service (#1239)
+- Update get chain, assets logo direct from @subwallet/chain-list package (#1273)
+- Update fetching staking info with middleware service (#1263)
+
+Bugs:
+- Update out date libs (#1306)
+
+Bug fixes:
+- Fix many bugs from version 1.0.1
+
 ## 1.0.2
 Build date: Apr 28, 2023.
 

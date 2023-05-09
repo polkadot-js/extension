@@ -145,7 +145,15 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
   }
 
   if (nominationList.length === 0 && unstakingList.length === 0) {
-    return;
+    return {
+      chain: chainInfo.slug,
+      type: StakingType.NOMINATED,
+      address,
+      status: StakingStatus.NOT_STAKING,
+      activeStake: '0',
+      nominations: [],
+      unstakings: []
+    } as NominatorMetadata;
   }
 
   const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);

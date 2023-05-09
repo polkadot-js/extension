@@ -218,7 +218,16 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
   const bonded = _bonded.toHuman();
 
   if (!ledger) {
-    return;
+    return {
+      chain,
+      type: StakingType.NOMINATED,
+      status: StakingStatus.NOT_STAKING,
+      address: address,
+      activeStake: '0',
+
+      nominations: [],
+      unstakings: []
+    } as NominatorMetadata;
   }
 
   const activeStake = ledger.active.toString();
@@ -320,7 +329,7 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
       chain: chainInfo.slug,
       type: StakingType.POOLED,
       address,
-      status: StakingStatus.NOT_EARNING,
+      status: StakingStatus.NOT_STAKING,
       activeStake: '0',
       nominations: [], // can only join 1 pool at a time
       unstakings: []

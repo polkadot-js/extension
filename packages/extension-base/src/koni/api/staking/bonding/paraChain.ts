@@ -181,7 +181,15 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
   const delegatorState = _delegatorState.toPrimitive() as unknown as PalletParachainStakingDelegator;
 
   if (!delegatorState) {
-    return;
+    return {
+      chain: chainInfo.slug,
+      type: StakingType.NOMINATED,
+      address,
+      status: StakingStatus.NOT_STAKING,
+      activeStake: '0',
+      nominations: [],
+      unstakings: []
+    } as NominatorMetadata;
   }
 
   let bnTotalActiveStake = BN_ZERO;

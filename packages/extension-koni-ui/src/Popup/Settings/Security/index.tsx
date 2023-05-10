@@ -2,17 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EDIT_AUTO_LOCK_TIME_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { saveCameraSetting, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { saveAutoLockTime, saveCameraSetting, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { noop } from '@subwallet/extension-koni-ui/utils';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
-import { BackgroundIcon, Icon, SettingItem, Switch } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Camera, CaretRight, GlobeHemisphereEast, Key } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, ShieldCheck } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -24,6 +26,7 @@ enum SecurityType {
   WALLET_PASSWORD = 'wallet-password',
   WEBSITE_ACCESS = 'website-access',
   CAMERA_ACCESS = 'camera-access',
+  AUTO_LOCK = 'auto-lock'
 }
 
 interface SecurityItem {
@@ -31,6 +34,11 @@ interface SecurityItem {
   key: SecurityType;
   title: string;
   url: string;
+}
+
+interface AutoLockOption {
+  label: string;
+  value: number;
 }
 
 const items: SecurityItem[] = [
@@ -45,8 +53,16 @@ const items: SecurityItem[] = [
     key: SecurityType.WEBSITE_ACCESS,
     title: 'Manage website access',
     url: '/settings/dapp-access'
+  },
+  {
+    icon: ShieldCheck,
+    key: SecurityType.AUTO_LOCK,
+    title: 'Auto lock',
+    url: ''
   }
 ];
+
+const modalId = EDIT_AUTO_LOCK_TIME_MODAL;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -58,10 +74,35 @@ const Component: React.FC<Props> = (props: Props) => {
   const canGoBack = !!location.state;
   const isPopup = useIsPopup();
 
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+
   const { accounts } = useSelector((state: RootState) => state.accountState);
-  const { camera } = useSelector((state: RootState) => state.settings);
+  const { camera, timeAutoLock } = useSelector((state: RootState) => state.settings);
 
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
+
+  const autoLockOptions = useMemo((): AutoLockOption[] => [
+    {
+      label: '5 minutes',
+      value: 5
+    },
+    {
+      label: '10 minutes',
+      value: 10
+    },
+    {
+      label: '15 minutes',
+      value: 15
+    },
+    {
+      label: '20 minutes',
+      value: 20
+    },
+    {
+      label: '30 minutes',
+      value: 30
+    }
+  ], []);
 
   const [loading, setLoading] = useState(false);
 
@@ -105,11 +146,28 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, [isPopup]);
 
-  const onClickItem = useCallback((url: string) => {
+  const onClickItem = useCallback((item: SecurityItem) => {
     return () => {
-      navigate(url);
+      switch (item.key) {
+        case SecurityType.AUTO_LOCK:
+          activeModal(modalId);
+          break;
+        default:
+          navigate(item.url);
+      }
     };
-  }, [navigate]);
+  }, [activeModal, navigate]);
+
+  const onCloseModal = useCallback(() => {
+    inactiveModal(modalId);
+  }, [inactiveModal]);
+
+  const onSelectTime = useCallback((item: AutoLockOption) => {
+    return () => {
+      inactiveModal(modalId);
+      saveAutoLockTime(item.value).finally(noop);
+    };
+  }, [inactiveModal]);
 
   useEffect(() => {
     if (camera) {
@@ -153,7 +211,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     />
                   )}
                   name={t(item.title)}
-                  onPressItem={noAccount ? undefined : onClickItem(item.url)}
+                  onPressItem={noAccount ? undefined : onClickItem(item)}
                   rightItem={(
                     <Icon
                       className='security-item-right-icon'
@@ -192,6 +250,43 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </div>
         </div>
+        <SwModal
+          className={className}
+          id={modalId}
+          onCancel={onCloseModal}
+          title={t('Auto lock times')}
+        >
+          <div className='modal-body-container'>
+            {
+              autoLockOptions.map((item) => {
+                const _selected = timeAutoLock === item.value;
+
+                return (
+                  <SettingItem
+                    className={CN('__selection-item')}
+                    key={item.value}
+                    name={item.label}
+                    onPressItem={onSelectTime(item)}
+                    rightItem={
+                      _selected
+                        ? (
+                          <Icon
+                            className='__right-icon'
+                            iconColor='var(--icon-color)'
+                            phosphorIcon={CheckCircle}
+                            size='sm'
+                            type='phosphor'
+                            weight='fill'
+                          />
+                        )
+                        : null
+                    }
+                  />
+                );
+              })
+            }
+          </div>
+        </SwModal>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
@@ -233,6 +328,14 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
       }
     },
 
+    [`.security-type-${SecurityType.AUTO_LOCK}`]: {
+      '--icon-bg-color': token['green-6'],
+
+      '&:hover': {
+        '--icon-bg-color': token['green-7']
+      }
+    },
+
     '.security-item': {
       '.ant-web3-block-right-item': {
         marginRight: token.sizeXXS,
@@ -267,6 +370,20 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
         color: token.colorTextLabel,
         textTransform: 'uppercase'
       }
+    },
+
+    '.modal-body-container': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.sizeXS
+    },
+
+    '.__selection-item': {
+      '--icon-color': token.colorSuccess
+    },
+
+    '.__right-icon': {
+      marginRight: token.marginXS
     }
   };
 });

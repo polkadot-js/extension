@@ -400,11 +400,14 @@ export interface UiSettings {
   accountAllLogo: string;
   theme: ThemeNames;
   camera: boolean;
+  timeAutoLock: number;
 }
 
 export type RequestSettingsType = UiSettings;
 
 export type RequestCameraSettings = { camera: boolean };
+
+export type RequestChangeTimeAutoLock = { autoLockTime: number };
 
 export interface RandomTestRequest {
   start: number;
@@ -1920,6 +1923,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
   'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
+  'pri(settings.saveAutoLockTime)': [RequestChangeTimeAutoLock, boolean];
   'pri(settings.getLogoMaps)': [null, AllLogoMap];
 
   // Subscription

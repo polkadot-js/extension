@@ -147,6 +147,8 @@ export async function saveCurrentAccountAddress (data: RequestCurrentAccountAddr
   return sendMessage('pri(currentAccount.saveAddress)', data);
 }
 
+// Settings
+
 export async function toggleBalancesVisibility (callback: (data: RequestSettingsType) => void): Promise<boolean> {
   return sendMessage('pri(settings.changeBalancesVisibility)', null, callback);
 }
@@ -169,6 +171,10 @@ export async function saveTheme (theme: ThemeNames, callback: (data: RequestSett
 
 export async function subscribeSettings (data: RequestSubscribeBalancesVisibility, callback: (data: UiSettings) => void): Promise<UiSettings> {
   return sendMessage('pri(settings.subscribe)', data, callback);
+}
+
+export async function saveAutoLockTime (value: number): Promise<boolean> {
+  return sendMessage('pri(settings.saveAutoLockTime)', { autoLockTime: value });
 }
 
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {

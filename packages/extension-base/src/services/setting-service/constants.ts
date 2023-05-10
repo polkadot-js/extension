@@ -5,3 +5,4 @@ import { BrowserConfirmationType, ThemeNames } from '@subwallet/extension-base/b
 
 export const DEFAULT_THEME: ThemeNames = ThemeNames.DARK;
 export const DEFAULT_NOTIFICATION_TYPE: BrowserConfirmationType = 'popup';
+export const DEFAULT_AUTO_LOCK_TIME = 15;

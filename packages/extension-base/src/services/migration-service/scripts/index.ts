@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import AutoEnableChainsTokens from '@subwallet/extension-base/services/migration-service/scripts/AutoEnableChainsTokens';
+import MigrateAutoLock from '@subwallet/extension-base/services/migration-service/scripts/MigrateAutoLock';
 import MigrateImportedToken from '@subwallet/extension-base/services/migration-service/scripts/MigrateImportedToken';
 import MigrateNetworkSettings from '@subwallet/extension-base/services/migration-service/scripts/MigrateNetworkSettings';
 import MigrateSettings from '@subwallet/extension-base/services/migration-service/scripts/MigrateSettings';
@@ -16,6 +17,7 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.0.1-20': MigrateImportedToken,
   '1.0.1-30': MigrateTransactionHistory,
   '1.0.1-40': AutoEnableChainsTokens,
-  '1.0.1-50': MigrateSettings
+  '1.0.1-50': MigrateSettings,
+  '1.0.3-01': MigrateAutoLock
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

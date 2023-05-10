@@ -6,7 +6,7 @@ import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } fr
 import type { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
 
 import { RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
-import { DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from '@subwallet/extension-base/services/setting-service/constants';
+import { DEFAULT_AUTO_LOCK_TIME, DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from '@subwallet/extension-base/services/setting-service/constants';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@subwallet/extension-chains';
@@ -224,7 +224,8 @@ export default class State {
             isShowBalance: false,
             accountAllLogo: '',
             theme: DEFAULT_THEME,
-            camera: false
+            camera: false,
+            timeAutoLock: DEFAULT_AUTO_LOCK_TIME
           }
         );
       } else {

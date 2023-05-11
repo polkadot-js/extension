@@ -125,7 +125,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 className='forgot-password'
                 onClick={onReset}
               >
-                {t('Forgot password')}
+                {t('Forgot password?')}
               </div>
             </Form.Item>
           </Form>

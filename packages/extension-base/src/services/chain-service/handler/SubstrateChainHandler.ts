@@ -130,7 +130,7 @@ export class SubstrateChainHandler {
           decimals = decimalsResp.output ? (new BN((decimalsObj.Ok || decimalsObj.ok) as string | number)).toNumber() : 0;
           symbol = decimalsResp.output ? (symbolObj.Ok as string || symbolObj.ok as string) : '';
 
-          if (name === '' || symbol === '' || typeof name === 'object' || typeof symbol === 'object') {
+          if (!name || !symbol || typeof name === 'object' || typeof symbol === 'object') {
             contractError = true;
           }
 

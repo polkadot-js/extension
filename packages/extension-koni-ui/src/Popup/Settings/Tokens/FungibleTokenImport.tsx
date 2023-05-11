@@ -99,7 +99,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       metadata: _parseMetadataForSmartContractAsset(formValues.contractAddress),
       multiChainAsset: null,
       hasValue: _isChainTestNet(chainInfoMap[formValues.chain]),
-      icon: ''
+      icon: 'default.png'
     })
       .then((result) => {
         setLoading(false);

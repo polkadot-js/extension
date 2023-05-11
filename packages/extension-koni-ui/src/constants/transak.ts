@@ -58,6 +58,13 @@ export const PREDEFINED_TRANSAK_TOKEN: Record<string, TransakTokenInfo> = {
     slug: 'binance-NATIVE-BNB',
     symbol: 'BNB',
     support: 'ETHEREUM'
+  },
+  NEER: {
+    transakNetwork: 'pioneer',
+    chain: 'pioneer',
+    slug: 'pioneer-NATIVE-NEER',
+    symbol: 'NEER',
+    support: 'SUBSTRATE'
   }
 };
 

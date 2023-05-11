@@ -104,11 +104,15 @@ global.chrome.storage = {
   local: {
     // @ts-ignore
     get: (
-      keys: string[] | undefined | null,
+      keys: string[] | string | undefined | null,
       callback: (val: object) => void
     ) => {
       if (!keys) {
         keys = getLocalStorageKeys();
+      }
+
+      if (typeof keys === 'string') {
+        keys = [keys];
       }
 
       const rs: Record<string, any> = {};

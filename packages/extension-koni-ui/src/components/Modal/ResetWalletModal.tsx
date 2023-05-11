@@ -4,10 +4,9 @@
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { resetWallet } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Checkbox, Icon, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
-import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
+import { Button, Icon, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Trash, WarningCircle } from 'phosphor-react';
+import { ArrowCounterClockwise, Trash, WarningCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -27,43 +26,43 @@ const Component: React.FC<Props> = (props: Props) => {
   const { inactiveModal } = useContext(ModalContext);
 
   const [loading, setLoading] = useState(false);
-  const [resetAll, setResetAll] = useState(false);
+  const [loadingAll, setLoadingAll] = useState(false);
 
   const onClose = useCallback(() => {
     inactiveModal(modalId);
   }, [inactiveModal]);
 
-  const onReset = useCallback(() => {
-    setLoading(true);
+  const onReset = useCallback((resetAll: boolean) => {
+    return () => {
+      const _setLoading = resetAll ? setLoadingAll : setLoading;
 
-    setTimeout(() => {
-      resetWallet({
-        resetAll: resetAll
-      })
-        .then((rs) => {
-          if (!rs.status) {
+      _setLoading(true);
+
+      setTimeout(() => {
+        resetWallet({
+          resetAll: resetAll
+        })
+          .then((rs) => {
+            if (!rs.status) {
+              notify({
+                message: rs.errors[0],
+                type: 'error'
+              });
+            }
+          })
+          .catch((e: Error) => {
             notify({
-              message: rs.errors[0],
+              message: e.message,
               type: 'error'
             });
-          }
-        })
-        .catch((e: Error) => {
-          notify({
-            message: e.message,
-            type: 'error'
+          })
+          .finally(() => {
+            _setLoading(false);
+            onClose();
           });
-        })
-        .finally(() => {
-          setLoading(false);
-          onClose();
-        });
-    }, 300);
-  }, [notify, resetAll, onClose]);
-
-  const onChange = useCallback((e: CheckboxChangeEvent) => {
-    setResetAll(e.target.checked);
-  }, []);
+      }, 300);
+    };
+  }, [notify, onClose]);
 
   return (
     <SwModal
@@ -82,29 +81,40 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className='description'>
           {t('We do not keep a copy of your password. If you’re having trouble unlocking your account, you will need to reset your wallet using the Secret Recovery Phrase')}
         </div>
-        <div className='check-box-container'>
-          <Checkbox
-            checked={resetAll}
-            className='check-box-wrapper'
-            onChange={onChange}
+        <div className='footer-area'>
+          <Button
+            block={true}
+            className='footer-button'
+            disabled={loadingAll}
+            icon={(
+              <Icon
+                phosphorIcon={ArrowCounterClockwise}
+                weight='fill'
+              />
+            )}
+            loading={loading}
+            onClick={onReset(false)}
+            schema='secondary'
           >
-            {t('Reset all settings')}
-          </Checkbox>
+            {t('Reset account')}
+          </Button>
+          <Button
+            block={true}
+            className='footer-button'
+            disabled={loading}
+            icon={(
+              <Icon
+                phosphorIcon={Trash}
+                weight='fill'
+              />
+            )}
+            loading={loadingAll}
+            onClick={onReset(true)}
+            schema='danger'
+          >
+            {t('Erase all')}
+          </Button>
         </div>
-        <Button
-          block={true}
-          icon={(
-            <Icon
-              phosphorIcon={Trash}
-              weight='fill'
-            />
-          )}
-          loading={loading}
-          onClick={onReset}
-          schema='danger'
-        >
-          {t('Reset wallet')}
-        </Button>
       </div>
     </SwModal>
   );
@@ -125,14 +135,6 @@ const ResetWalletModal = styled(Component)<Props>(({ theme: { token } }: Props) 
       marginBottom: token.marginXXS
     },
 
-    '.check-box-container': {
-      width: '100%'
-    },
-
-    '.check-box-wrapper': {
-      alignItems: 'center'
-    },
-
     '.description': {
       paddingLeft: token.padding,
       paddingRight: token.padding,
@@ -140,6 +142,17 @@ const ResetWalletModal = styled(Component)<Props>(({ theme: { token } }: Props) 
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
       color: token.colorTextDescription
+    },
+
+    '.footer-area': {
+      display: 'flex',
+      flexDirection: 'row',
+      gap: token.sizeSM,
+      width: '100%'
+    },
+
+    '.footer-button': {
+      width: 172
     }
   };
 });

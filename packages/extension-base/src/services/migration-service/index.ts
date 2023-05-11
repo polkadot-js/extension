@@ -21,8 +21,11 @@ export default class MigrationService {
     this.logger.log('Migrating...');
     const keys = Object.keys(MigrationScripts).sort((a, b) => a.localeCompare(b));
 
-    try {
-      for (let i = 0; i < keys.length; i++) {
+    // Await timeout 2s
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    for (let i = 0; i < keys.length; i++) {
+      try {
         const JobClass = MigrationScripts[keys[i]];
         const key = keys[i];
         const name = JobClass.name;
@@ -43,9 +46,9 @@ export default class MigrationService {
             timestamp: new Date().getTime()
           });
         }
+      } catch (error) {
+        this.logger.error('Migration error: ', MigrationScripts[keys[i]].name, error);
       }
-    } catch (error) {
-      this.logger.error('Migration error: ', error);
     }
 
     this.logger.log('Migration done.');

@@ -13,7 +13,7 @@ import { noop } from '@subwallet/extension-koni-ui/utils';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, ShieldCheck } from 'phosphor-react';
+import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, LockLaminated } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -53,16 +53,12 @@ const items: SecurityItem[] = [
     key: SecurityType.WEBSITE_ACCESS,
     title: 'Manage website access',
     url: '/settings/dapp-access'
-  },
-  {
-    icon: ShieldCheck,
-    key: SecurityType.AUTO_LOCK,
-    title: 'Auto lock',
-    url: ''
   }
 ];
 
 const modalId = EDIT_AUTO_LOCK_TIME_MODAL;
+
+const timeOptions = [5, 10, 15, 30, 60];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -81,28 +77,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
 
-  const autoLockOptions = useMemo((): AutoLockOption[] => [
-    {
-      label: '5 minutes',
-      value: 5
-    },
-    {
-      label: '10 minutes',
-      value: 10
-    },
-    {
-      label: '15 minutes',
-      value: 15
-    },
-    {
-      label: '20 minutes',
-      value: 20
-    },
-    {
-      label: '30 minutes',
-      value: 30
-    }
-  ], []);
+  const autoLockOptions = useMemo((): AutoLockOption[] => timeOptions.map((value) => ({
+    value: value,
+    label: t('{{time}} minutes', { replace: { time: value } })
+  })), [t]);
 
   const [loading, setLoading] = useState(false);
 
@@ -148,15 +126,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onClickItem = useCallback((item: SecurityItem) => {
     return () => {
-      switch (item.key) {
-        case SecurityType.AUTO_LOCK:
-          activeModal(modalId);
-          break;
-        default:
-          navigate(item.url);
-      }
+      navigate(item.url);
     };
-  }, [activeModal, navigate]);
+  }, [navigate]);
+
+  const onOpenModal = useCallback(() => {
+    activeModal(modalId);
+  }, [activeModal]);
 
   const onCloseModal = useCallback(() => {
     inactiveModal(modalId);
@@ -224,7 +200,7 @@ const Component: React.FC<Props> = (props: Props) => {
               ))
             }
           </div>
-          <div className='camera-access-container'>
+          <div className='setting-config-container'>
             <div className='label'>
               {t('Camera access')}
             </div>
@@ -249,12 +225,39 @@ const Component: React.FC<Props> = (props: Props) => {
               )}
             />
           </div>
+          <div className='setting-config-container'>
+            <div className='label'>
+              {t('Auto lock')}
+            </div>
+            <SettingItem
+              className={CN('security-item', `security-type-${SecurityType.AUTO_LOCK}`)}
+              leftItemIcon={(
+                <BackgroundIcon
+                  backgroundColor={'var(--icon-bg-color)'}
+                  phosphorIcon={LockLaminated}
+                  size='sm'
+                  type='phosphor'
+                  weight='fill'
+                />
+              )}
+              name={t('Extension auto lock')}
+              onPressItem={onOpenModal}
+              rightItem={(
+                <Icon
+                  className='security-item-right-icon'
+                  phosphorIcon={CaretRight}
+                  size='sm'
+                  type='phosphor'
+                />
+              )}
+            />
+          </div>
         </div>
         <SwModal
           className={className}
           id={modalId}
           onCancel={onCloseModal}
-          title={t('Auto lock times')}
+          title={t('Auto lock')}
         >
           <div className='modal-body-container'>
             {
@@ -329,10 +332,10 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     [`.security-type-${SecurityType.AUTO_LOCK}`]: {
-      '--icon-bg-color': token['green-6'],
+      '--icon-bg-color': token['geekblue-6'],
 
       '&:hover': {
-        '--icon-bg-color': token['green-7']
+        '--icon-bg-color': token['geekblue-7']
       }
     },
 
@@ -357,7 +360,7 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
       }
     },
 
-    '.camera-access-container': {
+    '.setting-config-container': {
       marginTop: token.marginLG,
       display: 'flex',
       flexDirection: 'column',

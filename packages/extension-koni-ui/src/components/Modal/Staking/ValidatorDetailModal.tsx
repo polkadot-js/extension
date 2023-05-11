@@ -3,6 +3,7 @@
 
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,10 +14,11 @@ import styled from 'styled-components';
 type Props = ThemeProps & {
   onCancel?: () => void;
   validatorItem: ValidatorDataType;
+  chain: string;
 };
 
 function Component (props: Props): React.ReactElement<Props> {
-  const { className, onCancel, validatorItem } = props;
+  const { chain, className, onCancel, validatorItem } = props;
   const { address: validatorAddress,
     commission,
     decimals,
@@ -30,6 +32,8 @@ function Component (props: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const { inactiveModal } = useContext(ModalContext);
+
+  const networkPrefix = useGetChainPrefixBySlug(chain);
 
   const _onCancel = useCallback(() => {
     inactiveModal(VALIDATOR_DETAIL_MODAL);
@@ -53,6 +57,7 @@ function Component (props: Props): React.ReactElement<Props> {
           address={validatorAddress}
           label={t('Validator')}
           name={validatorName}
+          networkPrefix={networkPrefix}
         />
 
         {/* <MetaInfo.Status */}

@@ -618,11 +618,11 @@ export class ChainService {
 
   private async fetchLatestData (src: string, defaultValue: unknown) {
     try {
-      const timeout = await new Promise((resolve) => {
+      const timeout = new Promise((resolve) => {
         const id = setTimeout(() => {
           clearTimeout(id);
           resolve(null);
-        }, 1000);
+        }, 1500);
       });
       let result = defaultValue;
       const resp = await Promise.race([
@@ -631,12 +631,15 @@ export class ChainService {
       ]) as Response || null;
 
       if (!resp) {
+        console.warn('Error fetching latest data', src);
+
         return result;
       }
 
       if (resp.ok) {
         try {
           result = await resp.json();
+          console.log('Fetched latest data', src);
         } catch (err) {
           console.warn('Error parsing latest data', src, err);
         }

@@ -618,7 +618,7 @@ export class ChainService {
 
   private async fetchLatestData (src: string, defaultValue: unknown) {
     try {
-      const timeout= await new Promise((resolve) => {
+      const timeout = await new Promise((resolve) => {
         const id = setTimeout(() => {
           clearTimeout(id);
           resolve(null);

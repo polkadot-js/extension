@@ -73,6 +73,30 @@ function transformAccountsV2 (accounts: SubjectInfo, anyType = false, authInfo?:
     }));
 }
 
+interface ChainPatrolResponse {
+  reason: string;
+  reports: Array<{ createdAt: string, id: number }>;
+  status: 'UNKNOWN' | 'ALLOWED' | 'BLOCKED';
+}
+
+// check if a URL is blocked
+export const chainPatrolCheckUrl = async (url: string) => {
+  const response = await fetch(
+    'https://app.chainpatrol.io/api/v2/asset/check',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-KEY': 'e5e88cd0-7994-4667-9071-bab849c2ba71'
+      },
+      body: JSON.stringify({ type: 'URL', content: url })
+    }
+  );
+  const data = await response.json() as ChainPatrolResponse;
+
+  return data.status === 'BLOCKED';
+};
+
 export default class KoniTabs {
   readonly #koniState: KoniState;
   private evmEventEmitterMap: Record<string, Record<string, (eventName: EvmEventType, payload: any) => void>> = {};
@@ -177,6 +201,14 @@ export default class KoniTabs {
     const isInDenyList = await checkIfDenied(url);
 
     if (isInDenyList) {
+      this.redirectPhishingLanding(url);
+
+      return true;
+    }
+
+    const isInChainPatrolDenyList = await chainPatrolCheckUrl(url);
+
+    if (isInChainPatrolDenyList) {
       this.redirectPhishingLanding(url);
 
       return true;

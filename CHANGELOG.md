@@ -1,19 +1,33 @@
 # CHANGELOG
 
+## 1.0.4
+Build date: May 12, 2023.
+
+Fixed bugs:
+- Still allows importing tokens without Decimal, Symbol (#1314)
+- Can't pool after withdraw all (#1323)
+- Do not automatically switch the network according to the dApp in case of version upgrade (#1301)
+- Show the alternate title name of Dapp in the Manage website access screen (#1234)
+- Bug related to address book (#1279)
+- Handling the case of importing multiple accounts using a JSON file when an account already exists (#1329)
+
+Update, Features:
+- Add support for $NEER on Transak (#1317)
+- Enable native token automatically when enabling local token from the transfer screen (#1289)
+- Reset Wallet Feature (#1224)
+
+
 ## 1.0.3
 Build date: May 06, 2023.
 
 Update:
-- Improve transaction UX (1254)
+- Improve transaction UX (#1254)
 - Update wake up / sleep with history and price service (#1239)
 - Update get chain, assets logo direct from @subwallet/chain-list package (#1273)
 - Update fetching staking info with middleware service (#1263)
 
 Bugs:
 - Update out date libs (#1306)
-
-Bug fixes:
-- Fix many bugs from version 1.0.1
 
 ## 1.0.2
 Build date: Apr 28, 2023.

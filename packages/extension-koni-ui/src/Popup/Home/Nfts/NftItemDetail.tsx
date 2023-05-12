@@ -14,17 +14,7 @@ import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/uti
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
-import {
-  BackgroundIcon,
-  Button,
-  ButtonProps,
-  Field,
-  Icon,
-  Image,
-  Logo,
-  ModalContext,
-  SwModal
-} from '@subwallet/react-ui';
+import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, Logo, ModalContext, SwModal } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';

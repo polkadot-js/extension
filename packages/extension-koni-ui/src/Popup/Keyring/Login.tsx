@@ -2,17 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import LoginBg from '@subwallet/extension-koni-ui/assets/LoginBg.png';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
+import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
-import { Button, Form, Input } from '@subwallet/react-ui';
+import { Button, Form, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -29,6 +30,7 @@ const passwordInputId = 'login-password';
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
+  const { activeModal } = useContext(ModalContext);
 
   const [form] = Form.useForm<LoginFormState>();
 
@@ -65,6 +67,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         });
     }, 500);
   }, [onError]);
+
+  const onReset = useCallback(() => {
+    activeModal(RESET_WALLET_MODAL);
+  }, [activeModal]);
 
   useFocusById(passwordInputId);
 
@@ -115,11 +121,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               </Button>
             </Form.Item>
             <Form.Item>
-              <div className='forgot-password'>
-                {t('Forgot password')}
+              <div
+                className='forgot-password'
+                onClick={onReset}
+              >
+                {t('Forgot password?')}
               </div>
             </Form.Item>
           </Form>
+          <ResetWalletModal />
         </div>
       </Layout.Base>
     </PageWrapper>

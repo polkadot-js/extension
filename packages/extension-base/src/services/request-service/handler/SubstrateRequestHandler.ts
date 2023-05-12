@@ -100,4 +100,12 @@ export default class SubstrateRequestHandler {
       }
     });
   }
+
+  public resetWallet () {
+    for (const request of Object.values(this.#substrateRequests)) {
+      request.reject(new Error('Reset wallet'));
+    }
+
+    this.signSubject.next([]);
+  }
 }

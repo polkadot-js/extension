@@ -831,4 +831,8 @@ export default class TransactionService {
 
     return emitter;
   }
+
+  public resetWallet (): void {
+    this.transactionSubject.next({});
+  }
 }

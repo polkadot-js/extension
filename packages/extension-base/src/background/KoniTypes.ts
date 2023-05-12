@@ -1455,7 +1455,8 @@ export enum StakingStatus {
   EARNING_REWARD = 'EARNING_REWARD',
   PARTIALLY_EARNING = 'PARTIALLY_EARNING',
   NOT_EARNING = 'NOT_EARNING',
-  WAITING = 'WAITING'
+  WAITING = 'WAITING',
+  NOT_STAKING = 'NOT_STAKING'
 }
 
 export interface NominatorMetadata {
@@ -1648,26 +1649,6 @@ export type RequestCreateCompoundStakeExternal = InternalRequestSign<TuringStake
 
 export type RequestCancelCompoundStakeExternal = InternalRequestSign<TuringCancelStakeCompoundParams>;
 
-/// Keyring state
-
-export interface KeyringState {
-  isReady: boolean;
-  hasMasterPassword: boolean;
-  isLocked: boolean;
-}
-
-export interface AddressBookState {
-  contacts: AddressJson[];
-  recent: AddressJson[];
-}
-
-export interface RequestChangeMasterPassword {
-  oldPassword?: string;
-  newPassword: string;
-
-  createNew: boolean;
-}
-
 export enum ChainEditStandard {
   EVM = 'EVM',
   SUBSTRATE = 'SUBSTRATE',
@@ -1703,10 +1684,33 @@ export interface ChainSpecInfo {
   decimals: number
 }
 
+/// Keyring state
+
+export interface KeyringState {
+  isReady: boolean;
+  hasMasterPassword: boolean;
+  isLocked: boolean;
+}
+
+export interface AddressBookState {
+  contacts: AddressJson[];
+  recent: AddressJson[];
+}
+
+// Change master password
+export interface RequestChangeMasterPassword {
+  oldPassword?: string;
+  newPassword: string;
+
+  createNew: boolean;
+}
+
 export interface ResponseChangeMasterPassword {
   status: boolean;
   errors: string[];
 }
+
+// Migrate password
 
 export interface RequestMigratePassword {
   address: string;
@@ -1718,6 +1722,8 @@ export interface ResponseMigratePassword {
   errors: string[];
 }
 
+// Unlock
+
 export interface RequestUnlockKeyring {
   password: string;
 }
@@ -1726,6 +1732,8 @@ export interface ResponseUnlockKeyring {
   status: boolean;
   errors: string[];
 }
+
+// Export mnemonic
 
 export interface RequestKeyringExportMnemonic {
   address: string;
@@ -1736,14 +1744,26 @@ export interface ResponseKeyringExportMnemonic {
   result: string;
 }
 
+// Reset wallet
+
+export interface RequestResetWallet {
+  resetAll: boolean;
+}
+
+export interface ResponseResetWallet {
+  status: boolean;
+  errors: string[];
+}
+
 /// Signing
 export interface RequestSigningApprovePasswordV2 {
   id: string;
 }
 
 export interface AssetSettingUpdateReq {
-  tokenSlug: string,
-  assetSetting: AssetSetting
+  tokenSlug: string;
+  assetSetting: AssetSetting;
+  autoEnableNativeToken?: boolean;
 }
 
 export interface RequestGetTransaction {
@@ -1977,6 +1997,7 @@ export interface KoniRequestSignatures {
   'pri(keyring.unlock)': [RequestUnlockKeyring, ResponseUnlockKeyring];
   'pri(keyring.lock)': [null, void];
   'pri(keyring.export.mnemonic)': [RequestKeyringExportMnemonic, ResponseKeyringExportMnemonic];
+  'pri(keyring.reset)': [RequestResetWallet, ResponseResetWallet];
 
   // Signing
   'pri(signing.approve.passwordV2)': [RequestSigningApprovePasswordV2, boolean];

@@ -3,7 +3,7 @@
 
 import { Avatar } from '@subwallet/extension-koni-ui/components';
 import { ADD_ADDRESS_BOOK_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useNotification } from '@subwallet/extension-koni-ui/hooks';
+import { useNotification, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { editContactAddress } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { simpleCheckForm, toShort } from '@subwallet/extension-koni-ui/utils';
@@ -11,7 +11,7 @@ import { Button, Form, Icon, Input, ModalContext, SwModal } from '@subwallet/rea
 import CN from 'classnames';
 import { PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -45,12 +45,16 @@ const Component: React.FC<Props> = (props: Props) => {
   const { checkActive, inactiveModal } = useContext(ModalContext);
   const isActive = checkActive(modalId);
 
+  const { contacts } = useSelector((state) => state.accountState);
+
   const [form] = Form.useForm<AddContactFormProps>();
 
   const [loading, setLoading] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
 
   const address = Form.useWatch(FormFieldName.ADDRESS, form);
+
+  const existNames = useMemo(() => contacts.map((contact) => (contact.name || '').trimStart().trimEnd()), [contacts]);
 
   const onCancel = useCallback(() => {
     inactiveModal(modalId);
@@ -68,6 +72,18 @@ const Component: React.FC<Props> = (props: Props) => {
     return Promise.resolve();
   }, [t]);
 
+  const nameValidator = useCallback((rule: RuleObject, name: string): Promise<void> => {
+    if (!name) {
+      return Promise.reject(new Error(t('Contact name is required')));
+    }
+
+    if (existNames.includes(name)) {
+      return Promise.reject(new Error(t('Contact name must be unique')));
+    }
+
+    return Promise.resolve();
+  }, [existNames, t]);
+
   const onFieldsChange: FormCallbacks<AddContactFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { empty, error } = simpleCheckForm(allFields);
 
@@ -75,7 +91,9 @@ const Component: React.FC<Props> = (props: Props) => {
   }, []);
 
   const onSubmit: FormCallbacks<AddContactFormProps>['onFinish'] = useCallback((values: AddContactFormProps) => {
-    const { [FormFieldName.ADDRESS]: address, [FormFieldName.NAME]: name } = values;
+    const { [FormFieldName.ADDRESS]: address, [FormFieldName.NAME]: _name } = values;
+
+    const name = _name.trimStart().trimEnd();
 
     setLoading(true);
 
@@ -122,9 +140,8 @@ const Component: React.FC<Props> = (props: Props) => {
           name={FormFieldName.NAME}
           rules={[
             {
-              required: true,
-              transform: (value: string) => value.trim(),
-              message: t('Contact name is required')
+              transform: (value: string) => value.trimStart().trimEnd(),
+              validator: nameValidator
             }
           ]}
           statusHelpAsTooltip={true}

@@ -24,6 +24,7 @@ interface Props extends BasicInputWrapper, ThemeProps {
   showAddressBook?: boolean;
   showScanner?: boolean;
   addressPrefix?: number;
+  saveAddress?: boolean;
 }
 
 const defaultScannerModalId = 'input-account-address-scanner-modal';
@@ -32,7 +33,7 @@ const defaultAddressBookModalId = 'input-account-address-book-modal';
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { addressPrefix,
     className = '', disabled, id, label, onBlur, onChange, onFocus,
-    placeholder, readOnly, showAddressBook, showScanner, statusHelp, value } = props;
+    placeholder, readOnly, saveAddress, showAddressBook, showScanner, statusHelp, value } = props;
   const { t } = useTranslation();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -72,10 +73,10 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
     onChange && onChange({ target: { value: val } });
 
-    if (isAddress(val)) {
+    if (isAddress(val) && saveAddress) {
       saveRecentAccount(val).catch(console.error);
     }
-  }, [onChange]);
+  }, [onChange, saveAddress]);
 
   const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
     parseAndChangeValue(event.target.value);

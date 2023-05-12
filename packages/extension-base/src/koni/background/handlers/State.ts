@@ -1716,4 +1716,20 @@ export default class KoniState {
   public async reloadStaking () {
     return await this.cron.reloadStaking();
   }
+
+  public async resetWallet (resetAll: boolean) {
+    this.keyringService.resetWallet(resetAll);
+    this.requestService.resetWallet();
+    this.transactionService.resetWallet();
+    await this.dbService.resetWallet(resetAll);
+    this.accountRefStore.set('refList', []);
+
+    if (resetAll) {
+      this.settingService.resetWallet();
+    }
+
+    this.chainService.resetWallet(resetAll);
+
+    await this.chainService.init();
+  }
 }

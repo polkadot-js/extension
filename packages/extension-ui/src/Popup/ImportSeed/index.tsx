@@ -77,7 +77,6 @@ function ImportSeed(): React.ReactElement {
           step={step}
           text={t<string>('Import existing account')}
           total={2}
-          withBackArrow
           withBackdrop
         />
       )}

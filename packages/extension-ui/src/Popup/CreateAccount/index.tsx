@@ -80,7 +80,6 @@ function CreateAccount(): React.ReactElement {
           step={step}
           text={t<string>('Create an account')}
           total={3}
-          withBackArrow
           withBackdrop
         />
       )}

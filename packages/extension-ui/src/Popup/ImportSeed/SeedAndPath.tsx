@@ -27,7 +27,6 @@ import {
   Warning
 } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
-import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';
 
@@ -99,8 +98,6 @@ function SeedAndPath({
   const [isLocked, setLocked] = useState<boolean>(true);
   const isValid = !!error && !!seed;
   const onAction = useContext(ActionContext);
-
-  const { goTo } = useGoTo();
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -225,7 +222,7 @@ function SeedAndPath({
       <VerticalSpace />
       <ButtonArea footer={footer}>
         <Button
-          onClick={goTo('/')}
+          onClick={window.close}
           secondary
         >
           {t<string>('Cancel')}

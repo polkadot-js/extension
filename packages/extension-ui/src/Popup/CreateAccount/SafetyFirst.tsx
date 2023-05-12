@@ -10,7 +10,6 @@ import animatedLockIcon from '../../assets/anim_locked.svg';
 import helpIcon from '../../assets/help.svg';
 import { AnimatedSvg, Button, ButtonArea, LearnMore, Svg, VerticalSpace } from '../../components';
 import HelperFooter from '../../components/HelperFooter';
-import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';
 
@@ -34,7 +33,6 @@ const StyledFooter = styled(HelperFooter)`
 
 function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { goTo } = useGoTo();
 
   const footer = (
     <StyledFooter>
@@ -70,7 +68,7 @@ function SafetyFirst({ className, onNextStep }: Props): React.ReactElement<Props
       <VerticalSpace />
       <ButtonArea footer={footer}>
         <Button
-          onClick={goTo('/')}
+          onClick={window.close}
           secondary
         >
           {t<string>('Cancel')}

@@ -1,6 +1,6 @@
-    1615	Nam Phạm                      	
-    1235	AnhMTV                        	Fix eslint problems after merge
-     744	S2kael                        	[Issue-1329] [MigratePassword] Fix missing account
+    1627	Nam Phạm                      	[Issue 1314] Invalidate excess space in nft collection name
+    1250	AnhMTV                        	Update yarn.lock after merge
+     762	S2kael                        	[Issue-1224] [ResetWallet] [EraseAll] Update keyring service
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	
@@ -21,6 +21,7 @@
        4	Quangdm-cdm                   	
        3	Antoine Estienne              	Add eth test for extension signature (#909)
        3	quangdm                       	Update style for Auth Transaction Screen, Export Screen, Derive Screen
+       3	S2kael                        	
        2	Axel Chalon                   	Add typings to messages (#130)
        2	Bartłomiej Rutkowski          	Allow account creation by derivation from existing one (#296)
        2	carumusan                     	Support ipfs and ipns urls (#667)

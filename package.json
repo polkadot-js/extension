@@ -50,13 +50,13 @@
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^9.11.1",
-    "@polkadot/keyring": "^10.2.3",
-    "@polkadot/networks": "patch:@polkadot/networks@npm:^10.4.2#.yarn/patches/@polkadot-networks-npm-10.4.2-69bf99e7c4.patch",
-    "@polkadot/types": "^9.11.1",
-    "@polkadot/util": "^10.2.3",
-    "@polkadot/util-crypto": "^10.2.3",
-    "@polkadot/x-fetch": "^10.2.3",
+    "@polkadot/api": "^10.5.1",
+    "@polkadot/keyring": "^12.1.2",
+    "@polkadot/networks": "patch:@polkadot/networks@npm:12.1.2#.yarn/patches/@polkadot-networks-npm-12.1.2-012217f8ff.patch",
+    "@polkadot/types": "^10.5.1",
+    "@polkadot/util": "^12.1.2",
+    "@polkadot/util-crypto": "^12.1.2",
+    "@polkadot/x-fetch": "^12.1.2",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.9.4"

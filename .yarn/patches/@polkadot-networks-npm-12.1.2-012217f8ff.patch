@@ -1,0 +1,108 @@
+diff --git a/cjs/defaults/genesis.js b/cjs/defaults/genesis.js
+index e501bf0e09417522a852fc14ff62d9a3355f5ccf..1ea6cc7257185ecc0e5628c2ae483917b9229a50 100644
+--- a/cjs/defaults/genesis.js
++++ b/cjs/defaults/genesis.js
+@@ -8,9 +8,12 @@ exports.knownGenesis = {
+     ajuna: [
+         '0xe358eb1d11b31255a286c12e44fe6780b7edb171d657905a97e39f71d9c6c3ee'
+     ],
+-    'aleph-node': [
++    'aleph-zero': [
+         '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e'
+     ],
++    'aleph-zero-testnet': [
++        '0x05d5279c52c484cc80396535a316add7d47b1c5b9e0398dd1f584149341460c5'
++    ],
+     astar: [
+         '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6'
+     ],
+diff --git a/defaults/genesis.js b/defaults/genesis.js
+index 13282ec2604b5ca2d5c8135ccff42364fa9ccc31..383ac09aca01e823fdb45e2bc80812dca742bb12 100644
+--- a/defaults/genesis.js
++++ b/defaults/genesis.js
+@@ -5,9 +5,12 @@ export const knownGenesis = {
+     ajuna: [
+         '0xe358eb1d11b31255a286c12e44fe6780b7edb171d657905a97e39f71d9c6c3ee'
+     ],
+-    'aleph-node': [
++    'aleph-zero': [
+         '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e'
+     ],
++    'aleph-zero-testnet': [
++        '0x05d5279c52c484cc80396535a316add7d47b1c5b9e0398dd1f584149341460c5'
++    ],
+     astar: [
+         '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6'
+     ],
+diff --git a/interfaces.d.ts b/interfaces.d.ts
+index 21153ee04ea4fb0a441872203f48effaff555b1a..bab251939464ca0c7bdeaded9ba3f66221d2d637 100644
+--- a/interfaces.d.ts
++++ b/interfaces.d.ts
+@@ -2,3 +2,4 @@ import type { Network, SubstrateNetwork } from './types.js';
+ export declare const allNetworks: SubstrateNetwork[];
+ export declare const availableNetworks: Network[];
+ export declare const selectableNetworks: Network[];
++export declare const testNetworks: Network[];
+\ No newline at end of file
+diff --git a/interfaces.js b/interfaces.js
+index 311842aa3627b58457a71bbb0a2a724a8568617a..571c714e7963e75fb0b69f89af118255fb05718d 100644
+--- a/interfaces.js
++++ b/interfaces.js
+@@ -1,6 +1,9 @@
+ import knownSubstrate from '@substrate/ss58-registry';
+ import { knownGenesis, knownIcon, knownLedger, knownTestnet } from './defaults/index.js';
+ const UNSORTED = [0, 2, 42];
++const ALEPH_GENESIS_HASH = '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e';
++const ALEPH_TESTNET_GENESIS_HASH = '0x05d5279c52c484cc80396535a316add7d47b1c5b9e0398dd1f584149341460c5';
++
+ const TESTNETS = ['testnet'];
+ function toExpanded(o) {
+     const network = o.network || '';
+@@ -13,15 +16,15 @@ function toExpanded(o) {
+     n.genesisHash = knownGenesis[network] || [];
+     n.icon = knownIcon[network] || 'substrate';
+     // filtering
+-    n.isTestnet = !!knownTestnet[network] || TESTNETS.includes(nameParts[nameParts.length - 1]);
+-    n.isIgnored = n.isTestnet || (!(o.standardAccount &&
++    n.isTestnet = !!knownTestnet[network];
++    n.isIgnored = (!(o.standardAccount &&
+         o.decimals && o.decimals.length &&
+         o.symbols && o.symbols.length) &&
+         o.prefix !== 42);
+     return n;
+ }
+ function filterSelectable({ genesisHash, prefix }) {
+-    return !!genesisHash.length || prefix === 42;
++    return !!genesisHash.length || genesisHash !== ALEPH_GENESIS_HASH || genesisHash !== ALEPH_TESTNET_GENESIS_HASH || prefix === 42;
+ }
+ function filterAvailable(n) {
+     return !n.isIgnored && !!n.network;
+@@ -37,6 +40,27 @@ function sortNetworks(a, b) {
+             ? -1
+             : 1;
+ }
+-export const allNetworks = knownSubstrate.map(toExpanded);
++
++const alephNetworks = [{
++    "prefix": 42,
++    "network": "aleph-zero",
++    "displayName": "Aleph Zero",
++    "symbols": ["AZERO"],
++    "decimals": [12],
++    "standardAccount": "*25519",
++    "website": "https://alephzero.org/"
++},
++{
++    "prefix": 42,
++    "network": "aleph-zero-testnet",
++    "displayName": "Aleph Zero Testnet",
++    "symbols": ["TZERO"],
++    "decimals": [12],
++    "standardAccount": "*25519",
++    "website": "https://alephzero.org/"
++}];
++
++export const allNetworks = knownSubstrate.concat(alephNetworks).map(toExpanded);
+ export const availableNetworks = allNetworks.filter(filterAvailable).sort(sortNetworks);
++export const testNetworks = allNetworks.filter(network => network.isTestnet).sort(sortNetworks);
+ export const selectableNetworks = availableNetworks.filter(filterSelectable);

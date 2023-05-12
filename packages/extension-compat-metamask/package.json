@@ -24,7 +24,7 @@
     "@metamask/detect-provider": "^1.2.0",
     "@polkadot/extension-inject": "^0.44.8",
     "@polkadot/types": "^9.11.1",
-    "@polkadot/util": "^10.2.3",
+    "@polkadot/util": "^12.1.2",
     "web3": "^1.8.1"
   },
   "peerDependencies": {

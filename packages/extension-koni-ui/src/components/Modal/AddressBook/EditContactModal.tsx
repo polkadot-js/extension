@@ -4,13 +4,14 @@
 import { AddressJson } from '@subwallet/extension-base/background/types';
 import { Avatar } from '@subwallet/extension-koni-ui/components';
 import { DELETE_ADDRESS_BOOK_MODAL, EDIT_ADDRESS_BOOK_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useCopy, useNotification } from '@subwallet/extension-koni-ui/hooks';
+import { useCopy, useNotification, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { editContactAddress, removeContactAddress } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop, simpleCheckForm, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Field, Form, Icon, Input, ModalContext, SwModal, SwModalFuncProps, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CopySimple, Trash } from 'phosphor-react';
+import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -42,6 +43,12 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useExcludeModal(modalId);
 
+  const { contacts } = useSelector((state) => state.accountState);
+
+  const existNames = useMemo(() => contacts
+    .filter((contact) => contact.address !== addressJson.address)
+    .map((contact) => (contact.name || '').trimStart().trimEnd()), [contacts, addressJson.address]);
+
   const isActive = checkActive(modalId);
 
   const defaultValues = useMemo((): EditContactFormProps => ({
@@ -57,7 +64,8 @@ const Component: React.FC<Props> = (props: Props) => {
       subTitle: t('Delete this contact?'),
       title: t('Confirmation'),
       type: 'error',
-      maskClosable: true
+      maskClosable: true,
+      zIndex: 1005
     };
   }, [t]);
 
@@ -81,8 +89,22 @@ const Component: React.FC<Props> = (props: Props) => {
     setIsDisabled(empty || error);
   }, []);
 
+  const nameValidator = useCallback((rule: RuleObject, name: string): Promise<void> => {
+    if (!name) {
+      return Promise.reject(new Error(t('Contact name is required')));
+    }
+
+    if (existNames.includes(name)) {
+      return Promise.reject(new Error(t('Contact name must be unique')));
+    }
+
+    return Promise.resolve();
+  }, [existNames, t]);
+
   const onSubmit: FormCallbacks<EditContactFormProps>['onFinish'] = useCallback((values: EditContactFormProps) => {
-    const { [FormFieldName.NAME]: name } = values;
+    const { [FormFieldName.NAME]: _name } = values;
+
+    const name = _name.trimStart().trimEnd();
 
     setLoading(true);
 
@@ -142,9 +164,8 @@ const Component: React.FC<Props> = (props: Props) => {
           name={FormFieldName.NAME}
           rules={[
             {
-              required: true,
-              transform: (value: string) => value.trim(),
-              message: t('Contact name is required')
+              transform: (value: string) => value.trimStart().trimEnd(),
+              validator: nameValidator
             }
           ]}
           statusHelpAsTooltip={true}

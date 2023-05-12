@@ -100,8 +100,8 @@ export class KeyringService {
     this.currentAccountStore.set('CurrentAccountInfo', currentAccountData);
   }
 
-  resetWallet () {
-    keyring.resetWallet();
+  resetWallet (resetAll: boolean) {
+    keyring.resetWallet(resetAll);
     this.updateKeyringState();
     this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
   }

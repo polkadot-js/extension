@@ -24,25 +24,23 @@ export interface AccountInfo {
 
 function ImportSeed(): React.ReactElement {
   const { t } = useTranslation();
+  const { show } = useToast();
+
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
+
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [step, setStep] = useState<number>(1);
-  const [type, setType] = useState(DEFAULT_TYPE);
-  const [path, setPath] = useState<string | null>(null);
   const [genesis, setGenesis] = useState(ALEPH_ZERO_GENESIS_HASH);
-  const [seed, setSeed] = useState<string | null>(null);
+
   const chain = useMetadata(account && account.genesis, true);
-  const { show } = useToast();
+
+  const type = chain && chain.definition.chainType === 'ethereum' ? 'ethereum' : DEFAULT_TYPE;
 
   useEffect((): void => {
     !accounts.length && onAction();
   }, [accounts, onAction]);
-
-  useEffect((): void => {
-    setType(chain && chain.definition.chainType === 'ethereum' ? 'ethereum' : DEFAULT_TYPE);
-  }, [chain]);
 
   const _onCreate = useCallback(
     (name: string, password: string): void => {
@@ -85,10 +83,6 @@ function ImportSeed(): React.ReactElement {
           genesis={genesis}
           onAccountChange={setAccount}
           onNextStep={_onNextStep}
-          path={path}
-          seed={seed}
-          setPath={setPath}
-          setSeed={setSeed}
           type={type}
         />
       )}
@@ -101,7 +95,6 @@ function ImportSeed(): React.ReactElement {
           isImporting
           onBackClick={_onPreviousStep}
           onCreate={_onCreate}
-          seed={seed}
           setGenesis={_onChangeNetwork}
         />
       )}

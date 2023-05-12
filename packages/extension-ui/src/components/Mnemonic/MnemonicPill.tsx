@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../../types';
 
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
@@ -11,12 +11,13 @@ interface Props extends ThemeProps {
   index: number;
   word: string;
   name: string;
-  readonly?: boolean;
-  isError?: boolean;
-  onChange?: (value: string, key: any) => void;
+  showError?: boolean;
+  onChange?: (value: string, key: number) => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  inputRef?: React.Ref<HTMLInputElement>;
 }
 
-const MnemonicPill = ({ className, index, name, onChange, readonly = true, word }: Props) => {
+const MnemonicPill = ({ className, index, inputRef, name, onChange, onKeyDown, word }: Props) => {
   const _handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       if (onChange) {
@@ -32,27 +33,27 @@ const MnemonicPill = ({ className, index, name, onChange, readonly = true, word 
       <input
         name={name}
         onChange={_handleChange}
-        readOnly={!!readonly}
+        onKeyDown={onKeyDown}
+        ref={inputRef}
         value={word}
       />
     </div>
   );
 };
 
-export default styled(MnemonicPill)(
-  ({ isError, theme }: Props) => `
+export default styled(MnemonicPill)`
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 1px;
-  border: 1px solid ${isError ? theme.textColorDanger : theme.boxBorderColor};
-  background: ${theme.mnemonicBackground};
-  border-radius: ${theme.buttonBorderRadius};
+  border: 1px solid ${({ showError, theme }) => showError ? theme.textColorDanger : theme.boxBorderColor};
+  background: ${({ theme }) => theme.mnemonicBackground};
+  border-radius: ${({ theme }) => theme.buttonBorderRadius};
   padding: 4px;
   max-width: 106px;
 
   &:focus-within {
-    border: 1px solid ${isError ? theme.textColorDanger : theme.primaryColor};
+    border: 1px solid ${({ showError, theme }) => showError ? theme.textColorDanger : theme.primaryColor};
   }
 
   input {
@@ -62,11 +63,11 @@ export default styled(MnemonicPill)(
     font-weight: 300;
     line-height: 145%;
     letter-spacing: 0.07em;
-    color: ${theme.textColor};
+    color: ${({ theme }) => theme.textColor};
     flex: 1;
     text-align: left;
     width: 70px;
-    border-radius: ${theme.buttonBorderRadius};
+    border-radius: ${({ theme }) => theme.buttonBorderRadius};
     outline: none;
 
     :read-only {
@@ -79,8 +80,8 @@ export default styled(MnemonicPill)(
     display: flex;
     align-items: center;
     justify-content: center;
-    color: ${theme.subTextColor};
-    background: ${theme.menuBackground};
+    color: ${({ theme }) => theme.subTextColor};
+    background: ${({ theme }) => theme.menuBackground};
     min-width: 24px;
     min-height: 24px;
     font-weight: 300;
@@ -88,5 +89,4 @@ export default styled(MnemonicPill)(
     line-height: 130%;
     border-radius: 50%;
   }
-`
-);
+`;

@@ -57,10 +57,6 @@ function Upload(): React.ReactElement {
       try {
         json = JSON.parse(u8aToString(file)) as KeyringPair$Json | KeyringPairs$Json;
 
-        if ('meta' in json) {
-          json.meta.whenCreated = Date.now();
-        }
-
         setFile(json);
         _onNextStep();
       } catch (e) {
@@ -97,7 +93,7 @@ function Upload(): React.ReactElement {
     [_onNextStep]
   );
 
-  const _onRestore = useCallback((): void => {
+  const _onRestore = useCallback((skipJsonAuthenticityCheck: boolean): void => {
     if (!file) {
       return;
     }
@@ -108,7 +104,11 @@ function Upload(): React.ReactElement {
 
     setIsBusy(true);
 
-    (isKeyringPairs$Json(file) ? batchRestore(file, password) : jsonRestore(file, password))
+    (
+      isKeyringPairs$Json(file) ?
+        batchRestore(file, password, skipJsonAuthenticityCheck) :
+        jsonRestore(file, password, skipJsonAuthenticityCheck)
+    )
       .then(() => {
         show(t('Import successful'), 'success');
         window.close();

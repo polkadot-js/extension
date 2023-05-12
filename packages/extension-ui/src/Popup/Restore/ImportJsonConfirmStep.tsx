@@ -8,18 +8,19 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import {
-  Address,
-  BackButton,
-  Button,
-  ButtonArea,
-  FileNameDisplay,
-  Input,
-  InputWithLabel,
-  Label,
-  ScrollWrapper,
-  ValidatedInput,
-  VerticalSpace,
-  Warning
+Address,
+BackButton,
+Button,
+ButtonArea,
+Checkbox,
+FileNameDisplay,
+Input,
+InputWithLabel,
+Label,
+ScrollWrapper,
+ValidatedInput,
+VerticalSpace,
+Warning
 } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { DEFAULT_TYPE } from '../../util/defaultType';
@@ -28,7 +29,7 @@ import { isNotShorterThan } from '../../util/validators';
 interface Props {
   className?: string;
   onPreviousStep: () => void;
-  onNextStep: () => void;
+  onNextStep: (jsonSignatureMissing: boolean) => void;
   accountsInfo: ResponseJsonGetAccountInfo[];
   requirePassword: boolean;
   isPasswordError: boolean;
@@ -48,6 +49,7 @@ function ImportJsonConfirmStep({
 }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [isDisabled, setIsDisabled] = useState<boolean>(true);
+  const [isExportFromA0Signer, setIsExportFromA0Signer] = useState(true);
 
   const MIN_LENGTH = 0;
   const isPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')), [t]);
@@ -85,24 +87,44 @@ function ImportJsonConfirmStep({
             />
           ))}
           {requirePassword && (
-            <div className={`${isPasswordError ? 'error' : ''}`}>
-              <ValidatedInput
-                component={InputWithLabel}
-                isError={isPasswordError}
-                label={t<string>('Password')}
-                onValidatedChange={_onChangePass}
-                type='password'
-                validator={isPasswordValid}
-              />
-              {isPasswordError && (
-                <Warning
-                  isBelowInput
-                  isDanger
-                >
-                  {t<string>('Unable to decode using the supplied passphrase')}
-                </Warning>
-              )}
-            </div>
+            <>
+              <div className={`${isPasswordError ? 'error' : ''}`}>
+                <ValidatedInput
+                  component={InputWithLabel}
+                  isError={isPasswordError}
+                  label={t<string>('Password')}
+                  onValidatedChange={_onChangePass}
+                  type='password'
+                  validator={isPasswordValid}
+                />
+                {isPasswordError && (
+                  <Warning
+                    isBelowInput
+                    isDanger
+                  >
+                    {t<string>('Unable to decode using the supplied passphrase')}
+                  </Warning>
+                )}
+              </div>
+              <div>
+                  <Checkbox
+                    checked={isExportFromA0Signer}
+                    label={
+                      <>
+                        {t('The JSON has been exported from the Aleph Zero Signer.')}
+                        <Hint>
+                          {t(
+                            `Uncheck only if the JSON has NOT been exported from the Aleph Zero Signer.
+                             Unchecking turns off some additional safety measures that the Aleph Zero Signer
+                             introduces and is only available for compatibility with other extensions.`
+                          )}
+                        </Hint>
+                      </>
+                    }
+                    onChange={setIsExportFromA0Signer}
+                  />
+              </div>
+            </>
           )}
         </div>
       </ScrollWrapper>
@@ -111,7 +133,7 @@ function ImportJsonConfirmStep({
         <BackButton onClick={onPreviousStep} />
         <Button
           isDisabled={isDisabled}
-          onClick={onNextStep}
+          onClick={() => onNextStep(!isExportFromA0Signer)}
         >
           {t<string>('Import')}
         </Button>
@@ -130,4 +152,14 @@ export default styled(ImportJsonConfirmStep)`
         border: 1px solid ${({ theme }: ThemeProps) => theme.dangerBackground};
       }
     }
+`;
+
+const Hint = styled.span`
+  display: block;
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  color: ${({ theme }: ThemeProps) => theme.subTextColor};
+  opacity: 0.6;
+  margin-top: 5px;
 `;

@@ -309,12 +309,12 @@ export async function jsonGetAccountInfo(json: KeyringPair$Json): Promise<Respon
   return sendMessage('pri(json.account.info)', json);
 }
 
-export async function jsonRestore(file: KeyringPair$Json, password: string): Promise<void> {
-  return sendMessage('pri(json.restore)', { file, password });
+export async function jsonRestore(file: KeyringPair$Json, password: string, skipAuthenticityCheck?: boolean): Promise<void> {
+  return sendMessage('pri(json.restore)', { file, password, skipAuthenticityCheck });
 }
 
-export async function batchRestore(file: KeyringPairs$Json, password: string): Promise<void> {
-  return sendMessage('pri(json.batchRestore)', { file, password });
+export async function batchRestore(file: KeyringPairs$Json, password: string, skipAuthenticityCheck?: boolean): Promise<void> {
+  return sendMessage('pri(json.batchRestore)', { file, password, skipAuthenticityCheck });
 }
 
 export async function setNotification(notification: string): Promise<boolean> {

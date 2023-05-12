@@ -406,11 +406,13 @@ export interface RequestSign {
 export interface RequestJsonRestore {
   file: KeyringPair$Json;
   password: string;
+  skipAuthenticityCheck?: boolean,
 }
 
 export interface RequestBatchRestore {
   file: KeyringPairs$Json;
   password: string;
+  skipAuthenticityCheck?: boolean,
 }
 
 export interface ResponseJsonRestore {

@@ -5,12 +5,8 @@ const nodeCrypto = require('crypto');
 const { TextDecoder } = require('@polkadot/x-textencoder/node');
 const { TextEncoder } = require('@polkadot/x-textencoder/node');
 
-Object.defineProperty(window, 'crypto', {
-  value: {
-    getRandomValues: function (buffer) {
-      return nodeCrypto.randomFillSync(buffer);
-    }
-  }
+Object.defineProperty(global.self, 'crypto', {
+  value: nodeCrypto.webcrypto
 });
 
 global.TextDecoder = TextDecoder;

@@ -353,5 +353,7 @@
   "Reversed words aren't much harder to guess": "",
   "Predictable substitutions like '@' instead of 'a' don't help very much": "",
   "Account creation was not successful.": "",
-  "Sub-account creation was not successful.": ""
+  "Sub-account creation was not successful.": "",
+  "The JSON has been exported from the Aleph Zero Signer.": "",
+  "Uncheck only if the JSON has NOT been exported from the Aleph Zero Signer.\n                             Unchecking turns off some additional safety measures that the Aleph Zero Signer\n                             introduces and is only available for compatibility with other extensions.": ""
 }

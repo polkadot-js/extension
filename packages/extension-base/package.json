@@ -34,6 +34,7 @@
     "@polkadot/ui-settings": "^2.9.15",
     "@polkadot/util": "^10.2.3",
     "@polkadot/util-crypto": "^10.2.3",
+    "canonicalize": "^2.0.0",
     "eventemitter3": "^4.0.7",
     "rxjs": "^7.8.0"
   },

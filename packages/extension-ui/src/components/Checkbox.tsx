@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useEffect } from 'react';
+import React, { ReactNode, useCallback, useEffect} from 'react';
 import styled from 'styled-components';
 
 import Checkmark from '../assets/checkmark.svg';
@@ -13,7 +13,7 @@ interface Props {
   checked: boolean;
   indeterminate?: boolean;
   className?: string;
-  label: string;
+  label: ReactNode;
   onChange?: (checked: boolean) => void;
   onClick?: () => void;
 }
@@ -55,7 +55,7 @@ function Checkbox({ checked, className, indeterminate, label, onChange, onClick 
           type='checkbox'
         />
         <span
-          className={`${indeterminate ? 'indeterminate' : ''}`}
+          className={`checkbox-ui ${indeterminate ? 'indeterminate' : ''}`}
           onKeyPress={_onKeyPress}
           tabIndex={0}
         />
@@ -92,7 +92,7 @@ export default styled(Checkbox)(
       width: 0;
     }
 
-    & span {
+    & .checkbox-ui {
       position: absolute;
       top: 2px;
       left: 0;
@@ -122,18 +122,18 @@ export default styled(Checkbox)(
       }
     }
 
-    input:checked ~ span:after {
+    input:checked ~ .checkbox-ui:after {
       display: block;
       background: ${theme.boxBackground};
     }
 
-    input:checked ~ span {
+    input:checked ~ .checkbox-ui {
       background: ${theme.primaryColor};
       border: 1px solid black;
       border-radius: 4px;
     }
 
-    input:indeterminate ~ span {
+    input:indeterminate ~ .checkbox-ui {
       background: ${theme.primaryColor};
       &:after {
         content: '';
@@ -150,7 +150,7 @@ export default styled(Checkbox)(
   }
 
   &:hover {
-    label span {
+    label .checkbox-ui {
       outline-color:  ${theme.primaryColor};
     }
   }

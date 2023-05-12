@@ -1014,7 +1014,7 @@ export default class KoniExtension {
 
   private async updateAssetSetting (params: AssetSettingUpdateReq) {
     try {
-      await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting);
+      await this.#koniState.chainService.updateAssetSetting(params.tokenSlug, params.assetSetting, params.autoEnableNativeToken);
 
       this.#koniState.eventService.emit('asset.updateState', params.tokenSlug);
 

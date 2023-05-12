@@ -1760,8 +1760,9 @@ export interface RequestSigningApprovePasswordV2 {
 }
 
 export interface AssetSettingUpdateReq {
-  tokenSlug: string,
-  assetSetting: AssetSetting
+  tokenSlug: string;
+  assetSetting: AssetSetting;
+  autoEnableNativeToken?: boolean;
 }
 
 export interface RequestGetTransaction {

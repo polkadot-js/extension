@@ -84,7 +84,6 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     this.status = ServiceStatus.INITIALIZED;
 
     this.eventService.on('asset.updateState', eventHandler);
-    this.eventService.on('asset.updateState', eventHandler);
   }
 
   async loadData (): Promise<void> {

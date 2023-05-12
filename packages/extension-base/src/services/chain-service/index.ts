@@ -617,40 +617,41 @@ export class ChainService {
   }
 
   private async fetchLatestData (src: string, defaultValue: unknown) {
-    try {
-      const timeout = new Promise((resolve) => {
-        const id = setTimeout(() => {
-          clearTimeout(id);
-          resolve(null);
-        }, 1500);
-      });
-      let result = defaultValue;
-      const resp = await Promise.race([
-        timeout,
-        fetch(src)
-      ]) as Response || null;
-
-      if (!resp) {
-        console.warn('Error fetching latest data', src);
-
-        return result;
-      }
-
-      if (resp.ok) {
-        try {
-          result = await resp.json();
-          console.log('Fetched latest data', src);
-        } catch (err) {
-          console.warn('Error parsing latest data', src, err);
-        }
-      }
-
-      return result;
-    } catch (e) {
-      console.warn('Error fetching latest data', src, e);
-
-      return defaultValue;
-    }
+    return Promise.resolve(defaultValue);
+    // try {
+    //   const timeout = new Promise((resolve) => {
+    //     const id = setTimeout(() => {
+    //       clearTimeout(id);
+    //       resolve(null);
+    //     }, 1500);
+    //   });
+    //   let result = defaultValue;
+    //   const resp = await Promise.race([
+    //     timeout,
+    //     fetch(src)
+    //   ]) as Response || null;
+    //
+    //   if (!resp) {
+    //     console.warn('Error fetching latest data', src);
+    //
+    //     return result;
+    //   }
+    //
+    //   if (resp.ok) {
+    //     try {
+    //       result = await resp.json();
+    //       console.log('Fetched latest data', src);
+    //     } catch (err) {
+    //       console.warn('Error parsing latest data', src, err);
+    //     }
+    //   }
+    //
+    //   return result;
+    // } catch (e) {
+    //   console.warn('Error fetching latest data', src, e);
+    //
+    //   return defaultValue;
+    // }
   }
 
   private async initChains () {

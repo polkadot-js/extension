@@ -171,6 +171,10 @@ export async function subscribeSettings (data: RequestSubscribeBalancesVisibilit
   return sendMessage('pri(settings.subscribe)', data, callback);
 }
 
+export async function saveEnableChainPatrol (value: boolean): Promise<boolean> {
+  return sendMessage('pri(settings.saveEnableChainPatrol)', { enable: value });
+}
+
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {
   return sendMessage('pri(accounts.tie)', { address, genesisHash });
 }

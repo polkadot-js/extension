@@ -5,7 +5,7 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { saveCameraSetting, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { saveCameraSetting, saveEnableChainPatrol, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
@@ -24,6 +24,7 @@ enum SecurityType {
   WALLET_PASSWORD = 'wallet-password',
   WEBSITE_ACCESS = 'website-access',
   CAMERA_ACCESS = 'camera-access',
+  CHAIN_PATROL_SERVICE = 'chain-patrol-service',
 }
 
 interface SecurityItem {
@@ -59,11 +60,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const isPopup = useIsPopup();
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
-  const { camera } = useSelector((state: RootState) => state.settings);
+  const { camera, enableChainPatrol } = useSelector((state: RootState) => state.settings);
 
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
 
-  const [loading, setLoading] = useState(false);
+  const [loadingCamera, setLoadingCamera] = useState(false);
+  const [loadingChainPatrol, setLoadingChainPatrol] = useState(false);
 
   const onBack = useCallback(() => {
     if (canGoBack) {
@@ -79,7 +81,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const updateCamera = useCallback((currentValue: boolean) => {
     return () => {
-      setLoading(true);
+      setLoadingCamera(true);
 
       let openNewTab = false;
 
@@ -100,10 +102,22 @@ const Component: React.FC<Props> = (props: Props) => {
         })
         .catch(console.error)
         .finally(() => {
-          setLoading(false);
+          setLoadingCamera(false);
         });
     };
   }, [isPopup]);
+
+  const updateChainPatrolEnable = useCallback((currentValue: boolean) => {
+    return () => {
+      setLoadingChainPatrol(true);
+
+      saveEnableChainPatrol(!currentValue)
+        .catch(console.error)
+        .finally(() => {
+          setLoadingChainPatrol(false);
+        });
+    };
+  }, []);
 
   const onClickItem = useCallback((url: string) => {
     return () => {
@@ -185,8 +199,33 @@ const Component: React.FC<Props> = (props: Props) => {
               rightItem={(
                 <Switch
                   checked={camera}
-                  loading={loading}
+                  loading={loadingCamera}
                   onClick={updateCamera(camera)}
+                />
+              )}
+            />
+          </div>
+          <div className='camera-access-container'>
+            <div className='label'>
+              {t('Phishing detect')}
+            </div>
+            <SettingItem
+              className={CN('security-item', `security-type-${SecurityType.CAMERA_ACCESS}`)}
+              leftItemIcon={(
+                <BackgroundIcon
+                  backgroundColor={'var(--icon-bg-color)'}
+                  phosphorIcon={Camera}
+                  size='sm'
+                  type='phosphor'
+                  weight='fill'
+                />
+              )}
+              name={t('ChainPatrol service')}
+              rightItem={(
+                <Switch
+                  checked={enableChainPatrol}
+                  loading={loadingChainPatrol}
+                  onClick={updateChainPatrolEnable(enableChainPatrol)}
                 />
               )}
             />
@@ -226,6 +265,14 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     [`.security-type-${SecurityType.CAMERA_ACCESS}`]: {
+      '--icon-bg-color': token['green-6'],
+
+      '&:hover': {
+        '--icon-bg-color': token['green-7']
+      }
+    },
+
+    [`.security-type-${SecurityType.CHAIN_PATROL_SERVICE}`]: {
       '--icon-bg-color': token['green-6'],
 
       '&:hover': {

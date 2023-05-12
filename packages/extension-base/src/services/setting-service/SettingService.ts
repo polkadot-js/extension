@@ -5,7 +5,7 @@ import { RequestSettingsType } from '@subwallet/extension-base/background/KoniTy
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { Subject } from 'rxjs';
 
-import { DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from './constants';
+import { DEFAULT_CHAIN_PATROL_ENABLE, DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from './constants';
 
 export default class SettingService {
   private readonly settingsStore = new SettingsStore();
@@ -25,7 +25,8 @@ export default class SettingService {
             isShowBalance: false,
             accountAllLogo: '',
             theme: DEFAULT_THEME,
-            camera: false
+            camera: false,
+            enableChainPatrol: DEFAULT_CHAIN_PATROL_ENABLE
           }
         );
       } else {

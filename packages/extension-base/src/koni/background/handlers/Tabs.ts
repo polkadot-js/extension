@@ -8,7 +8,7 @@ import { EvmProviderError } from '@subwallet/extension-base/background/errors/Ev
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, RequestEvmProviderSend, RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
 import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesSign';
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
@@ -16,6 +16,7 @@ import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-b
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/setting-service/constants';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { KeyringPair } from '@subwallet/keyring/types';
@@ -100,9 +101,19 @@ export const chainPatrolCheckUrl = async (url: string) => {
 export default class KoniTabs {
   readonly #koniState: KoniState;
   private evmEventEmitterMap: Record<string, Record<string, (eventName: EvmEventType, payload: any) => void>> = {};
+  #chainPatrolService: boolean = DEFAULT_CHAIN_PATROL_ENABLE;
 
   constructor (koniState: KoniState) {
     this.#koniState = koniState;
+
+    const updateChainPatrolService = (rs: RequestSettingsType) => {
+      this.#chainPatrolService = rs.enableChainPatrol;
+    };
+
+    this.#koniState.settingService.getSettings(updateChainPatrolService);
+    this.#koniState.settingService.getSubject().subscribe({
+      next: updateChainPatrolService
+    });
   }
 
   /// Clone from Polkadot.js
@@ -206,12 +217,14 @@ export default class KoniTabs {
       return true;
     }
 
-    const isInChainPatrolDenyList = await chainPatrolCheckUrl(url);
+    if (this.#chainPatrolService) {
+      const isInChainPatrolDenyList = await chainPatrolCheckUrl(url);
 
-    if (isInChainPatrolDenyList) {
-      this.redirectPhishingLanding(url);
+      if (isInChainPatrolDenyList) {
+        this.redirectPhishingLanding(url);
 
-      return true;
+        return true;
+      }
     }
 
     return false;

@@ -400,11 +400,14 @@ export interface UiSettings {
   accountAllLogo: string;
   theme: ThemeNames;
   camera: boolean;
+  enableChainPatrol: boolean;
 }
 
 export type RequestSettingsType = UiSettings;
 
 export type RequestCameraSettings = { camera: boolean };
+
+export type RequestChangeEnableChainPatrol = { enable: boolean };
 
 export interface RandomTestRequest {
   start: number;
@@ -1921,6 +1924,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
   'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
+  'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
   'pri(settings.getLogoMaps)': [null, AllLogoMap];
 
   // Subscription

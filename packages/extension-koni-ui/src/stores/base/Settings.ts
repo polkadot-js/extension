@@ -4,13 +4,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
-import { DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from '@subwallet/extension-base/services/setting-service/constants';
+import { DEFAULT_CHAIN_PATROL_ENABLE, DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from '@subwallet/extension-base/services/setting-service/constants';
 import { AppSettings, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 import settings from '@polkadot/ui-settings';
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
-const initialState = {
+const initialState: AppSettings = {
   // Polkadot settings
   ...settings.get(),
 
@@ -22,6 +22,7 @@ const initialState = {
   language: 'en',
   browserConfirmationType: DEFAULT_NOTIFICATION_TYPE,
   camera: false,
+  enableChainPatrol: DEFAULT_CHAIN_PATROL_ENABLE,
 
   // AuthUrls
   authUrls: {},
@@ -34,7 +35,7 @@ const initialState = {
     chainLogoMap: {},
     assetLogoMap: {}
   }
-} as AppSettings;
+};
 
 const settingsSlice = createSlice({
   initialState,
@@ -42,14 +43,11 @@ const settingsSlice = createSlice({
   reducers: {
     updateUiSettings (state, action: PayloadAction<UiSettings>) {
       const payload = action.payload;
+      const { theme, ...newState } = payload;
 
       return {
         ...state,
-        // todo: will save language, theme, isShowZeroBalance, camera in background
-        browserConfirmationType: payload.browserConfirmationType,
-        isShowBalance: payload.isShowBalance,
-        accountAllLogo: payload.accountAllLogo,
-        camera: payload.camera,
+        ...newState,
         reduxStatus: ReduxStatus.READY
       };
     },

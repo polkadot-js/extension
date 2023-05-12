@@ -164,6 +164,13 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     this.status = ServiceStatus.INITIALIZED;
   }
 
+  async getProcessingHistory () {
+    const histories = await this.dbService.getHistories();
+    const processingHistories = histories.filter((history) => {
+      return history.status === 'processing';
+    });
+  }
+
   async start (): Promise<void> {
     try {
       console.debug('Start history service');

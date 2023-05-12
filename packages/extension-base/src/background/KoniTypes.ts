@@ -1455,7 +1455,8 @@ export enum StakingStatus {
   EARNING_REWARD = 'EARNING_REWARD',
   PARTIALLY_EARNING = 'PARTIALLY_EARNING',
   NOT_EARNING = 'NOT_EARNING',
-  WAITING = 'WAITING'
+  WAITING = 'WAITING',
+  NOT_STAKING = 'NOT_STAKING'
 }
 
 export interface NominatorMetadata {

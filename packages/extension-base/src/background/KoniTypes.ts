@@ -1649,26 +1649,6 @@ export type RequestCreateCompoundStakeExternal = InternalRequestSign<TuringStake
 
 export type RequestCancelCompoundStakeExternal = InternalRequestSign<TuringCancelStakeCompoundParams>;
 
-/// Keyring state
-
-export interface KeyringState {
-  isReady: boolean;
-  hasMasterPassword: boolean;
-  isLocked: boolean;
-}
-
-export interface AddressBookState {
-  contacts: AddressJson[];
-  recent: AddressJson[];
-}
-
-export interface RequestChangeMasterPassword {
-  oldPassword?: string;
-  newPassword: string;
-
-  createNew: boolean;
-}
-
 export enum ChainEditStandard {
   EVM = 'EVM',
   SUBSTRATE = 'SUBSTRATE',
@@ -1704,10 +1684,33 @@ export interface ChainSpecInfo {
   decimals: number
 }
 
+/// Keyring state
+
+export interface KeyringState {
+  isReady: boolean;
+  hasMasterPassword: boolean;
+  isLocked: boolean;
+}
+
+export interface AddressBookState {
+  contacts: AddressJson[];
+  recent: AddressJson[];
+}
+
+// Change master password
+export interface RequestChangeMasterPassword {
+  oldPassword?: string;
+  newPassword: string;
+
+  createNew: boolean;
+}
+
 export interface ResponseChangeMasterPassword {
   status: boolean;
   errors: string[];
 }
+
+// Migrate password
 
 export interface RequestMigratePassword {
   address: string;
@@ -1719,6 +1722,8 @@ export interface ResponseMigratePassword {
   errors: string[];
 }
 
+// Unlock
+
 export interface RequestUnlockKeyring {
   password: string;
 }
@@ -1728,6 +1733,8 @@ export interface ResponseUnlockKeyring {
   errors: string[];
 }
 
+// Export mnemonic
+
 export interface RequestKeyringExportMnemonic {
   address: string;
   password: string;
@@ -1735,6 +1742,17 @@ export interface RequestKeyringExportMnemonic {
 
 export interface ResponseKeyringExportMnemonic {
   result: string;
+}
+
+// Reset wallet
+
+export interface RequestResetWallet {
+  resetAll: boolean;
+}
+
+export interface ResponseResetWallet {
+  status: boolean;
+  errors: string[];
 }
 
 /// Signing
@@ -1979,6 +1997,7 @@ export interface KoniRequestSignatures {
   'pri(keyring.unlock)': [RequestUnlockKeyring, ResponseUnlockKeyring];
   'pri(keyring.lock)': [null, void];
   'pri(keyring.export.mnemonic)': [RequestKeyringExportMnemonic, ResponseKeyringExportMnemonic];
+  'pri(keyring.reset)': [RequestResetWallet, ResponseResetWallet];
 
   // Signing
   'pri(signing.approve.passwordV2)': [RequestSigningApprovePasswordV2, boolean];

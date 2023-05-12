@@ -9,7 +9,7 @@ import { EvmChainHandler } from '@subwallet/extension-base/services/chain-servic
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isAssetSmartContractNft, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -1465,5 +1465,42 @@ export class ChainService {
 
   public async getAssetLogoMap (): Promise<Record<string, string>> {
     return await this.fetchLatestData(_ASSET_LOGO_MAP_SRC, AssetLogoMap) as Record<string, string>;
+  }
+
+  public resetWallet (resetAll: boolean) {
+    if (resetAll) {
+      this.setAssetSettings({});
+
+      // Disconnect chain
+      const activeChains = this.getActiveChainInfos();
+
+      for (const chain of Object.keys(activeChains)) {
+        if (!_DEFAULT_ACTIVE_CHAINS.includes(chain)) {
+          this.disableChain(chain);
+        }
+      }
+
+      // Remove custom chain
+      const allChains = this.getChainInfoMap();
+
+      for (const chain of Object.keys(allChains)) {
+        if (_isCustomChain(chain)) {
+          this.removeCustomChain(chain);
+        }
+      }
+
+      // Remove custom asset
+      const assetSettings = this.getAssetSettings();
+
+      const customToken: string[] = [];
+
+      for (const asset of Object.keys(assetSettings)) {
+        if (_isCustomAsset(asset)) {
+          customToken.push(asset);
+        }
+      }
+
+      this.deleteCustomAssets(customToken);
+    }
   }
 }

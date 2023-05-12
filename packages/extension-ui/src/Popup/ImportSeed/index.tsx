@@ -6,7 +6,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import useToast from "@polkadot/extension-ui/hooks/useToast";
 
 import { AccountContext, ActionContext, ScrollWrapper } from '../../components';
-import AccounCreationSuccess from "../../components/AccounCreationSuccess";
+import AccounCreationSuccess from "../../components/AccountCreationSuccess";
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useMetadata from '../../hooks/useMetadata';

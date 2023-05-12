@@ -41,6 +41,7 @@ const Container = styled.div`
   align-items: start;
   line-height: 16px;
   font-size: ${({theme}) => theme.labelFontSize};
+  letter-spacing: 0.035em;
 `;
 
 export default styled(Message)<Props>`
@@ -48,7 +49,7 @@ export default styled(Message)<Props>`
     {messageType, theme}) => ({
         critical: theme.errorColor,
         warning: theme.warningColor,
-        info: theme.textColor,
+        info: theme.textColorSuggestion,
         success: theme.primaryColor
     })[messageType]
   };

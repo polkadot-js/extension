@@ -66,7 +66,7 @@ function ValidatedInput<T extends Record<string, unknown>>({
   }, [value, validator, onValidatedChange]);
 
   return (
-    <div className={className}>
+    <Container className={className}>
       <Input
         {...(props as unknown as T)}
         isError={Result.isError(validationResult)}
@@ -87,13 +87,18 @@ function ValidatedInput<T extends Record<string, unknown>>({
           {t('CapsLock is ON')}
         </StyledMessage>
       )}
-    </div>
+    </Container>
   );
 }
 
+const Container = styled.div`
+  & > :not(:last-child) {
+    margin-bottom: 8px;
+  }
+`;
+
 const StyledMessage = styled(Message)`
   margin-left: 16px;
-  margin-bottom: 8px;
 `;
 
 export default styled(ValidatedInput)``;

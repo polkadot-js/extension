@@ -36,6 +36,7 @@ import {
 } from '../messaging';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AddAccountMenu from './Accounts/AddAccountMenu';
+import ChangePassword from './Accounts/ChangePassword';
 import EditAccountMenu from './Accounts/EditAccountMenu';
 import EditName from './Accounts/EditName';
 import EditNetwork from './Accounts/EditNetwork';
@@ -198,6 +199,9 @@ export default function Popup(): React.ReactElement {
                             </Route>
                             <Route path='/account/edit-name/:address'>
                               {wrapWithErrorBoundary(<EditName />, 'edit-name')}
+                            </Route>
+                            <Route path='/account/change-password/:address'>
+                              {wrapWithErrorBoundary(<ChangePassword />, 'change-password')}
                             </Route>
                             <Route path='/account/edit-network/:address'>
                               {wrapWithErrorBoundary(<EditNetwork />, 'edit-network')}

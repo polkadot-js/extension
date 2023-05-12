@@ -299,11 +299,8 @@ export default styled(Address)(
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
   border-radius: 8px;
-  margin-bottom: 8px;
   position: relative;
   transition: background 0.2s ease;
-
-
 
   :hover {
     background: ${withExport || actions ? theme.menuBackground : 'transparent'};

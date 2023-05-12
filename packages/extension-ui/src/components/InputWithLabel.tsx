@@ -24,7 +24,6 @@ interface Props extends ThemeProps {
   placeholder?: string;
   type?: 'text' | 'password';
   value?: string;
-  withoutMargin?: boolean;
 }
 
 function InputWithLabel({
@@ -41,7 +40,6 @@ function InputWithLabel({
   placeholder,
   type = 'text',
   value,
-  withoutMargin
 }: Props): React.ReactElement<Props> {
   const _onChange = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
@@ -71,8 +69,8 @@ function InputWithLabel({
 
   return (
     <Label
-      active={focused || (value && value?.length > 0)}
-      className={`${className || ''} ${withoutMargin ? 'withoutMargin' : ''}`}
+      $active={focused || (!!value && value?.length > 0)}
+      className={className}
       label={label}
     >
       <Input
@@ -114,17 +112,7 @@ const IconButton = styled.button`
 `;
 
 export default styled(InputWithLabel)`
-  margin-bottom: 16px;
- 
   > ${Input} {
     padding-top: ${({ label }) => !label.trim() ? '0px' : '11px'};
  }
-
-  &.withoutMargin {
-    margin-bottom: 0px;
-
-   + .danger {
-      margin-top: 6px;
-    }
-  }
 `;

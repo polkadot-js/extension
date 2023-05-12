@@ -10,10 +10,9 @@ interface Props extends ThemeProps {
   children: React.ReactNode;
   className?: string;
   label: string;
-  active?: boolean | '';
 }
 
-function Label({ active = false, children, className, label }: Props): React.ReactElement<Props> {
+function Label({ children, className, label }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <label>{label}</label>
@@ -22,20 +21,20 @@ function Label({ active = false, children, className, label }: Props): React.Rea
   );
 }
 
-export default styled(Label)(
-  ({ active, theme }: Props) => `
+export default styled(Label)<{$active?: boolean}>(
+  ({ $active = false, theme }) => `
   color: ${theme.labelColor};
   display: inline-block;
   position: relative;
   width: 100%;
 
   label {
-    font-size: ${active ? theme.inputLabelFontSize : '16px'};
+    font-size: ${$active ? theme.inputLabelFontSize : '16px'};
     line-height: 14px;
     letter-spacing: 0.04em;
     margin-bottom: 8px;
     position: absolute;
-    top: ${active ? '9px' : '22px'};
+    top: ${$active ? '9px' : '22px'};
     left: 16px;
     transition: all 0.2s ease;
     pointer-events: none;

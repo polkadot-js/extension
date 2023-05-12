@@ -104,8 +104,15 @@ function EditAccountMenu({
           description={chain?.name.replace(' Relay Chain', '') || t<string>('Any chain')}
           extra='chevron'
           onClick={goTo(`/account/edit-network/${address}`)}
-          position='bottom'
+          position='middle'
           title={t<string>('Network')}
+        />
+        <EditMenuCard
+          description=''
+          extra='chevron'
+          onClick={goTo(`/account/change-password/${address}`)}
+          position='bottom'
+          title={t<string>('Change password')}
         />
         {!!master && isExternal === 'false' && canDerive(type) && (
           <EditMenuCard

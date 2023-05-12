@@ -34,16 +34,10 @@ export default React.memo(
   flex-direction: row;
   color: ${theme.textColorDanger};
   margin-left: 16px;
-  margin-top: 6px;
 
   &.belowInput {
     font-size: ${theme.labelFontSize};
     line-height: ${theme.labelLineHeight};
-
-    &.danger {
-      margin-top: -12px;
-      margin-bottom: 4px;
-    }
   }
 
   &.danger {
@@ -56,7 +50,7 @@ export default React.memo(
   }
 
   .warningImage {
-    margin: 5px 4px 5px 0;
+    margin-right: 4px;
     color: ${isDanger ? theme.iconDangerColor : theme.iconWarningColor};
   }
 `

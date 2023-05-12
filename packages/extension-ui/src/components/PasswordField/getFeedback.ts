@@ -11,11 +11,22 @@ export type ValidationResult = {
 
 const LOWEST_ACCEPTED_PASSWORD_SCORE = 3;
 
-export function isPasswordTooWeak(feedback: ValidationResult): boolean {
-  return feedback.score < LOWEST_ACCEPTED_PASSWORD_SCORE;
-}
+const APP_RELATED_INPUTS = ['aleph', 'zero', 'aleph zero', 'signer'];
 
-export default function zxcvbnResultAdapter(password: string, userInputs?: string[]): ValidationResult {
+export const getUserInputs = (name?: string | null) => {
+  const nameRelatedInputs = name ? [name, ...name.split(/[^a-zA-Z]+/)] : [];
+
+  return [
+    ...APP_RELATED_INPUTS,
+    ...nameRelatedInputs,
+  ];
+};
+
+export const isPasswordTooWeak = (feedback: ValidationResult) =>  {
+  return feedback.score < LOWEST_ACCEPTED_PASSWORD_SCORE;
+};
+
+const zxcvbnResultAdapter = (password: string, userInputs?: string[]): ValidationResult => {
   const {feedback: {suggestions, warning}, score} = zxcvbn(password, userInputs);
 
   return {
@@ -23,4 +34,6 @@ export default function zxcvbnResultAdapter(password: string, userInputs?: strin
     warning,
     suggestions,
   };
-}
+};
+
+export default zxcvbnResultAdapter;

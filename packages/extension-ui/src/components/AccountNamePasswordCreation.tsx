@@ -13,11 +13,10 @@ import useGenesisHashOptions from '../hooks/useGenesisHashOptions';
 import useTranslation from '../hooks/useTranslation';
 import { LINKS } from '../links';
 import { Name, Password } from '../partials';
-import { ThemeProps } from '../types';
+import { getUserInputs } from './PasswordField/getFeedback';
 import { AccountContext } from './contexts';
 import HelperFooter from './HelperFooter';
 
-const APP_RELATED_INPUTS = ['aleph', 'zero', 'aleph zero', 'signer'];
 
 interface Props {
   address: string | null;
@@ -53,10 +52,6 @@ const CustomFooter = styled(HelperFooter)`
     display: flex;
     gap: 4px;
   }
-`;
-
-const StyledAddress = styled(Address)`
-  margin-bottom: 16px;
 `;
 
 const StyledButtonArea = styled(ButtonArea)`
@@ -123,22 +118,16 @@ function AccountNamePasswordCreation({
     </CustomFooter>
   );
 
-  const nameRelatedInputs = name ? [name, ...name.split(/[^a-zA-Z]+/)] : [];
-  const validationUserInput = [
-    ...APP_RELATED_INPUTS,
-    ...nameRelatedInputs,
-  ];
-
   return (
     <>
-      <div className={className}>
+      <Container className={className}>
         <div className='text'>
           <span className='heading'>{t<string>('Visibility & security')}</span>
           <span className='subtitle'>
             {t<string>('Choose how your new account is displayed and protected it in Aleph Zero Signer.')}
           </span>
         </div>
-        <StyledAddress
+        <Address
           address={address}
           genesisHash={genesisHash}
           name={name}
@@ -151,7 +140,7 @@ function AccountNamePasswordCreation({
         <Password
           label={isDeriving ? t<string>('Set sub-account password') : undefined}
           onChange={_onPasswordChange}
-          validationUserInput={validationUserInput}
+          validationUserInput={getUserInputs(name)}
         />
         {!isDeriving && (
           <Dropdown
@@ -163,7 +152,7 @@ function AccountNamePasswordCreation({
           />
         )}
         {!isDeriving && footer}
-      </div>
+      </Container>
       {onBackClick && buttonLabel && (
         <StyledButtonArea>
           {master && isDeriving ? (
@@ -190,6 +179,12 @@ function AccountNamePasswordCreation({
   );
 }
 
+const Container = styled.div`
+  & > :not(:last-child):not(:first-child) {
+    margin-bottom: 24px;
+  }
+`;
+
 export default React.memo(styled(AccountNamePasswordCreation)`
   margin-right: 8px;
 
@@ -197,32 +192,32 @@ export default React.memo(styled(AccountNamePasswordCreation)`
     height: 16px;
   }
 
-.text {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 32px;
-  margin-bottom: 32px;
-  gap: 8px;
-  
-  .heading {
-    font-family: ${({ theme }: ThemeProps): string => theme.secondaryFontFamily};
-    color: ${({ theme }: ThemeProps): string => theme.textColor};
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 125%;
-    text-align: center;
-    letter-spacing: 0.06em;
+  .text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 32px;
+    margin-bottom: 32px;
+    gap: 8px;
+
+    .heading {
+      font-family: ${({ theme }) => theme.secondaryFontFamily};
+      color: ${({ theme }) => theme.textColor};
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 125%;
+      text-align: center;
+      letter-spacing: 0.06em;
+    }
+
+    .subtitle {
+      color: ${({ theme }) => theme.subTextColor};
+      font-size: 14px;
+      line-height: 145%;
+      text-align: center;
+      letter-spacing: 0.07em;
+      white-space: pre-line;
+    }
   }
-    
-  .subtitle {
-    color: ${({ theme }: ThemeProps): string => theme.subTextColor};
-    font-size: 14px;
-    line-height: 145%;
-    text-align: center;
-    letter-spacing: 0.07em;
-    white-space: pre-line;
-  }
-}
 `);

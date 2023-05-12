@@ -20,7 +20,7 @@ function PasswordFeedback({
   className,
   feedback: {score, suggestions, warning},
   feedback,
-  isCapsLockOn,
+  isCapsLockOn = false,
 }: Props): React.ReactElement {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -29,13 +29,14 @@ function PasswordFeedback({
   };
 
   const isTooWeak = isPasswordTooWeak(feedback);
+
   const defaultCriticalMessage = isTooWeak ? t('Password is too weak.') : '';
   const criticalMessage = warning || defaultCriticalMessage;
   const duration = 500;
 
   return (
     <div className={className}>
-      <StyleProgressBar
+      <ProgressBar
         activeColor={scoreToColor[score]}
         activeStepsCount={score + 1}
         inactiveColor={theme.progressBarInactive}
@@ -65,7 +66,7 @@ function PasswordFeedback({
         messageType='warning'
         text={t('CapsLock is ON')}
       />
-      <TransitionGroup>
+      <TransitionGroup component={null}>
         {suggestions.map((suggestion, index) => (
           <StyledTransitionMessage
             duration={duration}
@@ -81,12 +82,11 @@ function PasswordFeedback({
 }
 
 const StyledTransitionMessage = styled(TransitionMessage)`
-  margin: 0 15px;
+  margin-inline: 15px;
 `;
 
-const StyleProgressBar = styled(ProgressBar)`
-  margin-bottom: 8px;
+export default styled(PasswordFeedback)`
+  & > :not(:last-child) {
+    margin-bottom: 8px;
+  }
 `;
-
-
-export default PasswordFeedback;

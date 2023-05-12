@@ -13,6 +13,7 @@ import PasswordFeedback from './PasswordFeedback';
 type Props = {
   className?: string;
   label: string;
+  onNonValidatedChange: (value: string) => void;
   onValidatedChange: (value: string) => void;
   validationUserInput?: Array<string>;
 }
@@ -20,6 +21,7 @@ type Props = {
 const PasswordField = ({
   className,
   label,
+  onNonValidatedChange,
   onValidatedChange,
   validationUserInput,
 }: Props) => {
@@ -31,6 +33,7 @@ const PasswordField = ({
   const onChange = useCallback((value: string): void => {
     setValue(value);
     setIsTouched(true);
+    onNonValidatedChange(value);
 
     const feedback = getFeedback(value, validationUserInput);
 
@@ -39,10 +42,10 @@ const PasswordField = ({
     if (!isPasswordTooWeak(feedback)) {
       onValidatedChange(value);
     }
-  }, [onValidatedChange, validationUserInput]);
+  }, [onNonValidatedChange, onValidatedChange, validationUserInput]);
 
   return (
-    <div className={className}>
+    <Container className={className}>
       <InputWithLabel
         data-input-password
         isError={isTouched && isPasswordTooWeak(passwordFeedback)}
@@ -53,18 +56,19 @@ const PasswordField = ({
         value={value}
       />
       {isTouched && (
-        <StyledPasswordFeedback
+        <PasswordFeedback
           feedback={passwordFeedback}
           isCapsLockOn={isCapsLockOn}
         />
       )}
-    </div>
+    </Container>
   );
 };
 
-export const StyledPasswordFeedback = styled(PasswordFeedback)`
-  margin-top: -8px;
-  margin-bottom: 16px;
+const Container = styled.div`
+  & > :not(:last-child) {
+    margin-bottom: 8px;
+  }
 `;
 
 export default PasswordField;

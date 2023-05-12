@@ -57,7 +57,7 @@ function Dropdown({
   return (
     <div className={className}>
       <Label
-        active
+        $active
         className={`label ${isLocked ? 'select-disabled' : ''}`}
         label={label}
       >

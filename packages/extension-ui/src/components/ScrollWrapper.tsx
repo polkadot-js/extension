@@ -5,7 +5,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '../types';
-import { StyledPasswordFeedback } from './PasswordField/PasswordField';
+import PasswordFeedback from './PasswordField/PasswordFeedback';
 import Address from './Address';
 import Label from './Label';
 
@@ -40,7 +40,8 @@ export default styled(ScrollWrapper)(
     width: 8px;
   }
 
-  ${Label}:not(.label), ${Address}, ${StyledPasswordFeedback} {
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  ${Label}:not(.label), ${Address}, ${PasswordFeedback} {
     width: calc(100% + 8px);
   }
 

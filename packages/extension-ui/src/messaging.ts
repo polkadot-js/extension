@@ -103,6 +103,10 @@ export async function editAccount(address: string, name: string): Promise<boolea
   return sendMessage('pri(accounts.edit)', { address, name });
 }
 
+export function changePassword(address: string, oldPass: string, newPass: string): Promise<boolean> {
+  return sendMessage('pri(accounts.changePassword)', {address, oldPass, newPass});
+}
+
 export async function showAccount(address: string, isShowing: boolean): Promise<boolean> {
   return sendMessage('pri(accounts.show)', { address, isShowing });
 }

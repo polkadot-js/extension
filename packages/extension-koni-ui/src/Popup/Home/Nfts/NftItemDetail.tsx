@@ -14,7 +14,17 @@ import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/uti
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
-import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';
+import {
+  BackgroundIcon,
+  Button,
+  ButtonProps,
+  Field,
+  Icon,
+  Image,
+  Logo,
+  ModalContext,
+  SwModal
+} from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
@@ -104,14 +114,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const originChainLogo = useCallback(() => {
     return (
-      <Image
-        height={token.fontSizeXL}
+      <Logo
+        network={originChainInfo.slug}
         shape={'circle'}
-        src={originChainInfo.icon}
-        width={token.fontSizeXL}
+        size={token.fontSizeXL}
       />
     );
-  }, [originChainInfo.icon, token.fontSizeXL]);
+  }, [originChainInfo.slug, token.fontSizeXL]);
 
   const ownerInfo = useCallback(() => {
     return (

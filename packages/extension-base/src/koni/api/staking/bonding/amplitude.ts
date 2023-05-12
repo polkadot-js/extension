@@ -82,8 +82,6 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
   const delegatorState = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
   const unstakingInfo = _unstakingInfo.toPrimitive() as unknown as Record<string, number>;
 
-  console.log('unstakingInfo ampe', unstakingInfo, !!unstakingInfo);
-
   if (!delegatorState && !unstakingInfo) {
     return;
   }

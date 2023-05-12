@@ -7,8 +7,17 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { Vec } from '@polkadot/types';
 import { EventRecord } from '@polkadot/types/interfaces';
 
-const substrateCheck = async (history: TransactionHistoryItem, chainService: ChainService): Promise<boolean | undefined> => {
-  const { blockNumber, chain, extrinsicHash } = history;
+export enum HistoryRecoverStatus {
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  API_INACTIVE = 'API_INACTIVE',
+  LACK_INFO = 'LACK_INFO',
+  FAIL_DETECT = 'FAIL_DETECT',
+  UNKNOWN = 'UNKNOWN'
+}
+
+const substrateRecover = async (history: TransactionHistoryItem, chainService: ChainService): Promise<HistoryRecoverStatus> => {
+  const { blockHash, chain, extrinsicHash } = history;
 
   try {
     const substrateApi = chainService.getSubstrateApi(chain);
@@ -16,7 +25,13 @@ const substrateCheck = async (history: TransactionHistoryItem, chainService: Cha
     if (substrateApi) {
       const _api = await substrateApi.isReady;
       const api = _api.api;
-      const blockHash = await api.rpc.chain.getBlockHash(blockNumber);
+
+      if (!blockHash) {
+        console.log(`Fail to find extrinsic ${extrinsicHash} on ${chain}: No block hash`);
+
+        return HistoryRecoverStatus.LACK_INFO;
+      }
+
       const block = await api.rpc.chain.getBlock(blockHash);
       const allEvents: Vec<EventRecord> = await api.query.system.events.at(blockHash);
 
@@ -32,7 +47,7 @@ const substrateCheck = async (history: TransactionHistoryItem, chainService: Cha
       if (index === undefined) {
         console.log(`Fail to find extrinsic ${extrinsicHash} on ${chain}`);
 
-        return undefined;
+        return HistoryRecoverStatus.FAIL_DETECT;
       }
 
       const events = allEvents
@@ -43,26 +58,26 @@ const substrateCheck = async (history: TransactionHistoryItem, chainService: Cha
 
       for (const { event } of events) {
         if (api.events.system.ExtrinsicSuccess.is(event)) {
-          return true;
+          return HistoryRecoverStatus.SUCCESS;
         } else if (api.events.system.ExtrinsicFailed.is(event)) {
-          return false;
+          return HistoryRecoverStatus.FAILED;
         }
       }
 
-      return undefined;
+      return HistoryRecoverStatus.FAIL_DETECT;
     } else {
-      console.error(`Fail to update history ${chain}-${extrinsicHash}:`, 'Api not active');
+      console.error(`Fail to update history ${chain}-${extrinsicHash}: Api not active`);
 
-      return undefined;
+      return HistoryRecoverStatus.API_INACTIVE;
     }
   } catch (e) {
     console.error(`Fail to update history ${chain}-${extrinsicHash}:`, (e as Error).message);
 
-    return undefined;
+    return HistoryRecoverStatus.UNKNOWN;
   }
 };
 
-const evmCheck = async (history: TransactionHistoryItem, chainService: ChainService): Promise<boolean | undefined> => {
+const evmRecover = async (history: TransactionHistoryItem, chainService: ChainService): Promise<HistoryRecoverStatus> => {
   const { chain, extrinsicHash } = history;
 
   try {
@@ -73,30 +88,30 @@ const evmCheck = async (history: TransactionHistoryItem, chainService: ChainServ
       const api = _api.api;
       const block = await api.eth.getTransactionReceipt(extrinsicHash);
 
-      return block.status;
+      return block.status ? HistoryRecoverStatus.SUCCESS : HistoryRecoverStatus.FAILED;
     } else {
-      console.error(`Fail to update history ${chain}-${extrinsicHash}:`, 'Api not active');
+      console.error(`Fail to update history ${chain}-${extrinsicHash}: Api not active`);
 
-      return undefined;
+      return HistoryRecoverStatus.API_INACTIVE;
     }
   } catch (e) {
     console.error(`Fail to update history ${chain}-${extrinsicHash}:`, (e as Error).message);
 
-    return undefined;
+    return HistoryRecoverStatus.UNKNOWN;
   }
 };
 
 // undefined: Cannot check status
 // true: Transaction success
 // false: Transaction failed
-export const historyCheck = async (history: TransactionHistoryItem, chainService: ChainService): Promise<boolean | undefined> => {
+export const historyRecover = async (history: TransactionHistoryItem, chainService: ChainService): Promise<HistoryRecoverStatus> => {
   const { chainType } = history;
 
   if (chainType) {
-    const checkFunction = chainType === 'substrate' ? substrateCheck : evmCheck;
+    const checkFunction = chainType === 'substrate' ? substrateRecover : evmRecover;
 
     return await checkFunction(history, chainService);
   } else {
-    return undefined;
+    return HistoryRecoverStatus.LACK_INFO;
   }
 };

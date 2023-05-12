@@ -499,11 +499,13 @@ export default class TransactionService {
     console.log(`Transaction "${id}" is sent`);
   }
 
-  private onHasTransactionHash ({ extrinsicHash, id }: TransactionEventResponse) {
+  private onHasTransactionHash ({ blockHash, extrinsicHash, id }: TransactionEventResponse) {
     // Write processing transaction history
-    const updateData = { extrinsicHash, status: ExtrinsicStatus.PROCESSING };
+    const updateData = { extrinsicHash, status: ExtrinsicStatus.PROCESSING, blockHash: blockHash || '' };
 
     this.updateTransaction(id, updateData);
+
+    console.log(updateData);
 
     // In this case transaction id is the same as extrinsic hash and will change after below update
     this.historyService.updateHistoryByExtrinsicHash(id, updateData).catch(console.error);
@@ -801,6 +803,7 @@ export default class TransactionService {
 
           if (!eventData.extrinsicHash || eventData.extrinsicHash === '') {
             eventData.extrinsicHash = txState.txHash.toHex();
+            eventData.blockHash = txState.status.asInBlock.toHex();
             emitter.emit('extrinsicHash', eventData);
           }
         }

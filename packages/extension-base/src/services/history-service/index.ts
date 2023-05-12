@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
-import { CRON_REFRESH_HISTORY_INTERVAL } from '@subwallet/extension-base/constants';
+import { ExtrinsicStatus, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { CRON_RECOVER_HISTORY_INTERVAL, CRON_REFRESH_HISTORY_INTERVAL } from '@subwallet/extension-base/constants';
 import { CronServiceInterface, PersistDataServiceInterface, ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
+import { historyRecover, HistoryRecoverStatus } from '@subwallet/extension-base/services/history-service/helpers/recoverHistoryStatus';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
@@ -16,6 +17,7 @@ import { fetchMultiChainHistories } from './subsquid-multi-chain-history';
 
 export class HistoryService implements StoppableServiceInterface, PersistDataServiceInterface, CronServiceInterface {
   private historySubject: BehaviorSubject<TransactionHistoryItem[]> = new BehaviorSubject([] as TransactionHistoryItem[]);
+  #processingHistories: Record<string, TransactionHistoryItem> = {};
 
   constructor (private dbService: DatabaseService, private chainService: ChainService, private eventService: EventService, private keyringService: KeyringService) {
     this.init().catch(console.error);
@@ -23,6 +25,8 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
 
   private fetchPromise: Promise<void> | null = null;
   private interval: NodeJS.Timer | undefined = undefined;
+  private recoverInterval: NodeJS.Timer | undefined = undefined;
+
   private async fetchAndLoadHistories (addresses: string[]): Promise<TransactionHistoryItem[]> {
     if (!addresses || addresses.length === 0) {
       return [];
@@ -143,6 +147,60 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     return Promise.resolve();
   }
 
+  async startRecoverHistories (): Promise<void> {
+    await this.recoverHistories();
+
+    this.recoverInterval = setInterval(() => {
+      this.recoverHistories().catch(console.error);
+    }, CRON_RECOVER_HISTORY_INTERVAL);
+  }
+
+  stopRecoverHistories (): Promise<void> {
+    clearInterval(this.recoverInterval);
+
+    return Promise.resolve();
+  }
+
+  async recoverHistories (): Promise<void> {
+    const list: TransactionHistoryItem[] = [];
+
+    for (const processingHistory of Object.values(this.#processingHistories)) {
+      const chainState = this.chainService.getChainStateByKey(processingHistory.chain);
+
+      if (chainState.active) {
+        list.push(processingHistory);
+      }
+
+      if (list.length >= 10) {
+        break;
+      }
+    }
+
+    const promises = list.map((history) => historyRecover(history, this.chainService));
+
+    const result = await Promise.all(promises);
+
+    result.forEach((status, index) => {
+      const extrinsicHash = list[index].extrinsicHash;
+
+      switch (status) {
+        case HistoryRecoverStatus.API_INACTIVE:
+          break;
+        case HistoryRecoverStatus.FAILED:
+        case HistoryRecoverStatus.SUCCESS:
+          this.updateHistoryByExtrinsicHash(extrinsicHash, { status: status === HistoryRecoverStatus.SUCCESS ? ExtrinsicStatus.SUCCESS : ExtrinsicStatus.FAIL }).catch(console.error);
+          delete this.#processingHistories[extrinsicHash];
+          break;
+        default:
+          delete this.#processingHistories[extrinsicHash];
+      }
+    });
+
+    if (!Object.keys(this.#processingHistories).length) {
+      await this.stopRecoverHistories();
+    }
+  }
+
   startPromiseHandler = createPromiseHandler<void>();
 
   async init (): Promise<void> {
@@ -150,6 +208,7 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     await this.loadData();
     Promise.all([this.eventService.waitKeyringReady, this.eventService.waitChainReady]).then(() => {
       this.getHistories().catch(console.log);
+      this.getProcessingHistory().catch(console.log);
 
       this.eventService.on('account.add', () => {
         (async () => {
@@ -166,9 +225,16 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
 
   async getProcessingHistory () {
     const histories = await this.dbService.getHistories();
-    const processingHistories = histories.filter((history) => {
+
+    this.#processingHistories = {};
+
+    histories.filter((history) => {
       return history.status === 'processing';
+    }).forEach((history) => {
+      this.#processingHistories[history.extrinsicHash] = history;
     });
+
+    this.startRecoverHistories().catch(console.error);
   }
 
   async start (): Promise<void> {
@@ -177,6 +243,7 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
       this.startPromiseHandler = createPromiseHandler<void>();
       this.status = ServiceStatus.STARTING;
       await this.startCron();
+      await this.startRecoverHistories();
       this.status = ServiceStatus.STARTED;
       this.startPromiseHandler.resolve();
     } catch (e) {
@@ -189,6 +256,7 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
   }
 
   stopPromiseHandler = createPromiseHandler<void>();
+
   async stop (): Promise<void> {
     console.debug('Stop history service');
 
@@ -197,6 +265,7 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
       this.status = ServiceStatus.STOPPING;
       await this.persistData();
       await this.stopCron();
+      await this.stopRecoverHistories();
       this.stopPromiseHandler.resolve();
       this.status = ServiceStatus.STOPPED;
     } catch (e) {

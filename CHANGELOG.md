@@ -1,11 +1,14 @@
 # CHANGELOG
 
-## master
+## 0.46.3 May 13, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
 
 Changes:
 
+- Add `module` to `package.json` export map (ESM-only)
 - Upgrade to `@polkadot/api` 10.6.1
-- Bump to `@polkadot/util` 12.1.2
+- Bump to `@polkadot/util` 12.1.1
 
 
 ## 0.46.2 Apr 30, 2023

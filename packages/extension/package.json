@@ -15,15 +15,15 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.46.3-0-x",
+  "version": "0.46.3",
   "dependencies": {
-    "@polkadot/extension-base": "0.46.3-0-x",
-    "@polkadot/extension-inject": "0.46.3-0-x",
-    "@polkadot/extension-ui": "0.46.3-0-x",
+    "@polkadot/extension-base": "0.46.3",
+    "@polkadot/extension-inject": "0.46.3",
+    "@polkadot/extension-ui": "0.46.3",
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.73.16",
+    "@polkadot/dev": "^0.73.17",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^11.0.0",

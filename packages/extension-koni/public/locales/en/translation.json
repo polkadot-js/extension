@@ -1056,5 +1056,11 @@
   "Bond reward after claim": "",
   "This feature is not available for Ledger account": "",
   "Amount cannot exceed your balance": "",
-  "Choose how you'd like to set up your wallet": ""
+  "Choose how you'd like to set up your wallet": "",
+  "Contact name must be unique": "",
+  "Forgot password ?": "",
+  "We do not keep a copy of your password. If you’re having trouble unlocking your account, you will need to reset your wallet using the Secret Recovery Phrase": "",
+  "Reset account": "",
+  "Erase all": "",
+  "Forgot password?": ""
 }

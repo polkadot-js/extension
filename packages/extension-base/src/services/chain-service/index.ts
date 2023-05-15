@@ -9,7 +9,7 @@ import { EvmChainHandler } from '@subwallet/extension-base/services/chain-servic
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isAssetSmartContractNft, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -617,37 +617,41 @@ export class ChainService {
   }
 
   private async fetchLatestData (src: string, defaultValue: unknown) {
-    try {
-      const timeout = await new Promise((resolve) => {
-        const id = setTimeout(() => {
-          clearTimeout(id);
-          resolve(null);
-        }, 1000);
-      });
-      let result = defaultValue;
-      const resp = await Promise.race([
-        timeout,
-        fetch(src)
-      ]) as Response || null;
-
-      if (!resp) {
-        return result;
-      }
-
-      if (resp.ok) {
-        try {
-          result = await resp.json();
-        } catch (err) {
-          console.warn('Error parsing latest data', src, err);
-        }
-      }
-
-      return result;
-    } catch (e) {
-      console.warn('Error fetching latest data', src, e);
-
-      return defaultValue;
-    }
+    return Promise.resolve(defaultValue);
+    // try {
+    //   const timeout = new Promise((resolve) => {
+    //     const id = setTimeout(() => {
+    //       clearTimeout(id);
+    //       resolve(null);
+    //     }, 1500);
+    //   });
+    //   let result = defaultValue;
+    //   const resp = await Promise.race([
+    //     timeout,
+    //     fetch(src)
+    //   ]) as Response || null;
+    //
+    //   if (!resp) {
+    //     console.warn('Error fetching latest data', src);
+    //
+    //     return result;
+    //   }
+    //
+    //   if (resp.ok) {
+    //     try {
+    //       result = await resp.json();
+    //       console.log('Fetched latest data', src);
+    //     } catch (err) {
+    //       console.warn('Error parsing latest data', src, err);
+    //     }
+    //   }
+    //
+    //   return result;
+    // } catch (e) {
+    //   console.warn('Error fetching latest data', src, e);
+    //
+    //   return defaultValue;
+    // }
   }
 
   private async initChains () {
@@ -1410,14 +1414,13 @@ export class ChainService {
     return this.assetSettingSubject.value;
   }
 
-  public async updateAssetSetting (assetSlug: string, assetSetting: AssetSetting): Promise<boolean | undefined> {
+  public async updateAssetSetting (assetSlug: string, assetSetting: AssetSetting, autoEnableNativeToken?: boolean): Promise<boolean | undefined> {
     const currentAssetSettings = await this.getAssetSettings();
 
     let needUpdateSubject: boolean | undefined;
 
     // Update settings
     currentAssetSettings[assetSlug] = assetSetting;
-    this.setAssetSettings(currentAssetSettings);
 
     if (assetSetting.visible) {
       const assetInfo = this.getAssetBySlug(assetSlug);
@@ -1427,8 +1430,16 @@ export class ChainService {
       if (chainState && !chainState.active) {
         this.enableChain(chainState.slug);
         needUpdateSubject = true;
+
+        if (autoEnableNativeToken) {
+          const nativeAsset = this.getNativeTokenInfo(assetInfo.originChain);
+
+          currentAssetSettings[nativeAsset.slug] = { visible: true };
+        }
       }
     }
+
+    this.setAssetSettings(currentAssetSettings);
 
     return needUpdateSubject;
   }
@@ -1455,5 +1466,42 @@ export class ChainService {
 
   public async getAssetLogoMap (): Promise<Record<string, string>> {
     return await this.fetchLatestData(_ASSET_LOGO_MAP_SRC, AssetLogoMap) as Record<string, string>;
+  }
+
+  public resetWallet (resetAll: boolean) {
+    if (resetAll) {
+      this.setAssetSettings({});
+
+      // Disconnect chain
+      const activeChains = this.getActiveChainInfos();
+
+      for (const chain of Object.keys(activeChains)) {
+        if (!_DEFAULT_ACTIVE_CHAINS.includes(chain)) {
+          this.disableChain(chain);
+        }
+      }
+
+      // Remove custom chain
+      const allChains = this.getChainInfoMap();
+
+      for (const chain of Object.keys(allChains)) {
+        if (_isCustomChain(chain)) {
+          this.removeCustomChain(chain);
+        }
+      }
+
+      // Remove custom asset
+      const assetSettings = this.getAssetSettings();
+
+      const customToken: string[] = [];
+
+      for (const asset of Object.keys(assetSettings)) {
+        if (_isCustomAsset(asset)) {
+          customToken.push(asset);
+        }
+      }
+
+      this.deleteCustomAssets(customToken);
+    }
   }
 }

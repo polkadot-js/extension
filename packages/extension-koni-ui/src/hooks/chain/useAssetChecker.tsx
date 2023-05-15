@@ -44,7 +44,7 @@ export default function useAssetChecker () {
       const message = t('{{name}} on {{chainName}} is not ready to use, do you want to turn it on?', { replace: { name: assetInfo?.symbol, chainName: chainInfo?.name } });
 
       const _onEnabled = () => {
-        updateAssetSetting({ tokenSlug: assetSlug, assetSetting: { visible: true } }).then(() => {
+        updateAssetSetting({ tokenSlug: assetSlug, assetSetting: { visible: true }, autoEnableNativeToken: true }).then(() => {
           setEnablingAsset(assetSlug);
           notify({ message: t('{{name}} is turning on.', { replace: { name: assetInfo?.symbol } }), duration: 1.5 });
         }).catch(console.error);

@@ -19,7 +19,7 @@ import DatabaseService from '@subwallet/extension-base/services/storage-service/
 import { parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
 import { getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEmitter, TransactionEventMap, TransactionEventResponse, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
-import { getTransactionLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
+import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { parseTxAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
@@ -324,7 +324,7 @@ export default class TransactionService {
     const transaction = this.getTransaction(id);
     const chainInfo = this.chainService.getChainInfoByKey(transaction.chain);
 
-    return getTransactionLink(chainInfo, transaction.extrinsicHash);
+    return getExplorerLink(chainInfo, transaction.extrinsicHash, 'tx');
   }
 
   private transactionToHistories (id: string, eventLogs?: EventRecord[]): TransactionHistoryItem[] {
@@ -830,5 +830,9 @@ export default class TransactionService {
     });
 
     return emitter;
+  }
+
+  public resetWallet (): void {
+    this.transactionSubject.next({});
   }
 }

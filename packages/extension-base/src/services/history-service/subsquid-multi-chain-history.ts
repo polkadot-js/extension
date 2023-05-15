@@ -235,7 +235,7 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
       const transaction = (data as EthereumTransactionData).call.data.args.transaction.value;
 
       to = autoFormatAddress(parsedArgs.to);
-      from = autoFormatAddress(parsedArgs.from);
+      from = autoFormatAddress(parsedArgs.from || address);
       extrinsicHash = parsedArgs.transactionHash || extrinsic.hash;
       amount = transaction.value || '0';
       fee = (parseInt(transaction.gasPrice) * parseInt(transaction.gasLimit)).toString();

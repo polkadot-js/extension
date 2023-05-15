@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { ChainStakingMetadata } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { subscribeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
@@ -121,25 +120,7 @@ export class KoniSubscription {
   }
 
   init () {
-    this.state.getAuthorize((value) => {
-      const authString = localStorage.getItem('authUrls') || '{}';
-      const previousAuth = JSON.parse(authString) as AuthUrls;
-
-      if (previousAuth && Object.keys(previousAuth).length) {
-        Object.keys(previousAuth).forEach((url) => {
-          if (previousAuth[url].isAllowed) {
-            previousAuth[url].isAllowedMap = this.state.getAddressList(true);
-          } else {
-            previousAuth[url].isAllowedMap = this.state.getAddressList();
-          }
-        });
-      }
-
-      const migrateValue = { ...previousAuth, ...value };
-
-      this.state.setAuthorize(migrateValue);
-      localStorage.setItem('authUrls', '{}');
-    });
+    this.logger.log('Initializing subscription');
   }
 
   subscribeBalancesAndCrowdloans (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, web3ApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {

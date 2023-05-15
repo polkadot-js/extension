@@ -23,8 +23,6 @@ import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
 import { Header } from '../partials';
 
-const MIN_LENGTH = 0;
-
 interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
 }
@@ -90,14 +88,6 @@ function Export({
             type='password'
             value={pass}
           />
-          {pass.length < MIN_LENGTH && pass !== '' && (
-            <Warning
-              isBelowInput
-              isDanger
-            >
-              {t<string>('Password is too short')}
-            </Warning>
-          )}
           {error && (
             <Warning
               isBelowInput
@@ -120,7 +110,7 @@ function Export({
           className='export-button'
           data-export-button
           isBusy={isBusy}
-          isDisabled={pass.length < MIN_LENGTH || pass === '' || !!error}
+          isDisabled={!pass || !!error}
           onClick={_onExportButtonClick}
         >
           {t<string>('Export')}

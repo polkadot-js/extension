@@ -48,7 +48,7 @@ function WebsiteEntry({
     <div
       className={className}
       onClick={_goTo(`/url/manage?url=${encodeURIComponent(url)}`)}
-      onKeyPress={_goTo(`/url/manage?url=${encodeURIComponent(url)}`)}
+      onKeyDown={_goTo(`/url/manage?url=${encodeURIComponent(url)}`)}
       tabIndex={tabIndex}
     >
       <div className='url-group'>

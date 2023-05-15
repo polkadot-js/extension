@@ -56,7 +56,7 @@ function Checkbox({ checked, className, indeterminate, label, onChange, onClick 
         />
         <span
           className={`checkbox-ui ${indeterminate ? 'indeterminate' : ''}`}
-          onKeyPress={_onKeyPress}
+          onKeyDown={_onKeyPress}
           tabIndex={0}
         />
       </label>

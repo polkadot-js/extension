@@ -29,7 +29,7 @@ function MenuCard({
     <div
       className={className}
       onClick={onClick}
-      onKeyPress={onClick}
+      onKeyDown={onClick}
       tabIndex={tabIndex}
     >
       <div

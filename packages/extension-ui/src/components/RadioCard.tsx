@@ -53,7 +53,7 @@ function RadioCard({ className, onChange, option, selectedValue, tabIndex = 0 }:
       <label
         htmlFor={option.text}
         onClick={handleClick}
-        onKeyPress={_onKeyPress}
+        onKeyDown={_onKeyPress}
         tabIndex={tabIndex}
       >
         <span>{option.text}</span>

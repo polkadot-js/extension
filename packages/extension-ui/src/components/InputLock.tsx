@@ -33,7 +33,7 @@ const InputLock: React.FC<InputLockProps> = ({ className, isLocked, onClick }) =
     <div
       className={className}
       onClick={handleClick}
-      onKeyPress={_onKeyPress}
+      onKeyDown={_onKeyPress}
       tabIndex={0}
     >
       <Svg

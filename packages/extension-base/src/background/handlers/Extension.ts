@@ -388,7 +388,11 @@ export default class Extension {
     }
 
     if (pair.isLocked) {
-      pair.decodePkcs8(password);
+      try {
+        pair.decodePkcs8(password);
+      } catch (e) {
+        throw new Error('invalid password');
+      }
     }
 
     // construct a new registry (avoiding pollution), between requests

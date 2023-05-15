@@ -24,7 +24,13 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
   const { show } = useToast();
   const seedArray = seed.split(' ');
 
-  const _onCopy = useCallback(() => show(t('Secret phrase copied to clipboard'), 'success'), [show, t]);
+  const _onCopy = useCallback((test: string, success: boolean) => {
+    if (success) {
+      show(t('Secret phrase copied to clipboard'), 'success');
+    } else {
+      show(t('Failed copying to clipboard'), 'critical');
+    }
+  }, [show, t]);
 
   return (
     <>
@@ -47,10 +53,12 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
             />
           ))}
         </div>
-        <CopyToClipboard text={seed}>
+        <CopyToClipboard
+          onCopy={_onCopy}
+          text={seed}
+        >
           <Button
             className='copy-button'
-            onClick={_onCopy}
             tertiary
           >
             <div className='copy-to-clipboard'>

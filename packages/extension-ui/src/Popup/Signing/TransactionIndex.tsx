@@ -23,8 +23,9 @@ function TransactionIndex({
   index,
   onNextClick,
   onPreviousClick,
-  totalItems
+  totalItems: unsanitizedTotalItems
 }: Props): React.ReactElement<Props> {
+  const totalItems = unsanitizedTotalItems < 0 ? 0 : unsanitizedTotalItems;
   const { t } = useTranslation();
   const previousClickActive = index !== 0;
   const nextClickActive = index < totalItems - 1;

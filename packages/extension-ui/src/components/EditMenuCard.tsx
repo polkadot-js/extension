@@ -83,7 +83,7 @@ function EditMenuCard({
       <div
         className={className}
         onClick={onClick}
-        onKeyPress={onClick}
+        onKeyDown={onClick}
         tabIndex={tabIndex}
       >
         <div className='flex-container'>

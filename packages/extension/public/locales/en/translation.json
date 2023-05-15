@@ -362,5 +362,6 @@
   "Account password changed successfully": "",
   "The current password is invalid": "",
   "The JSON has been exported from the Aleph Zero Signer.": "",
-  "Uncheck only if the JSON has NOT been exported from the Aleph Zero Signer.\n                             Unchecking turns off some additional safety measures that the Aleph Zero Signer\n                             introduces and is only available for compatibility with other extensions.": ""
+  "Uncheck only if the JSON has NOT been exported from the Aleph Zero Signer.\n                             Unchecking turns off some additional safety measures that the Aleph Zero Signer\n                             introduces and is only available for compatibility with other extensions.": "",
+  "Failed copying to clipboard": ""
 }

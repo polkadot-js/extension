@@ -76,7 +76,7 @@ function Header({
               <div
                 className='arrow-container'
                 onClick={goToFnOverride || _onBackArrowClick}
-                onKeyPress={goToFnOverride || _onBackArrowClick}
+                onKeyDown={goToFnOverride || _onBackArrowClick}
                 tabIndex={0}
               >
                 <Svg

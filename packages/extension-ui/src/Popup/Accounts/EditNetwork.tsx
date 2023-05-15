@@ -120,7 +120,7 @@ function EditNetwork({
         <div className={className}>
           <div
             className='checkbox-container'
-            onKeyPress={toggleChecked}
+            onKeyDown={toggleChecked}
             tabIndex={0}
           >
             <Checkbox

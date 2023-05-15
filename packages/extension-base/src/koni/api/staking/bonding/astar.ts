@@ -313,11 +313,11 @@ export function getAstarWithdrawable (nominatorMetadata: NominatorMetadata): Uns
     waitingTime: 0
   };
 
-  const bnWithdrawable = BN_ZERO;
+  let bnWithdrawable = BN_ZERO;
 
   for (const unstaking of nominatorMetadata.unstakings) {
     if (unstaking.status === UnstakingStatus.CLAIMABLE) {
-      bnWithdrawable.add(new BN(unstaking.claimable));
+      bnWithdrawable = bnWithdrawable.add(new BN(unstaking.claimable));
     }
   }
 

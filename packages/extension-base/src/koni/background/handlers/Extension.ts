@@ -1790,23 +1790,40 @@ export default class KoniExtension {
           }
         }
       } else {
-        const [mockTx] = await createTransferExtrinsic({
-          from: address,
-          networkKey,
-          substrateApi,
-          to: address,
-          tokenInfo,
-          transferAll: true,
-          value: '0'
-        });
+        const chainInfo = this.#koniState.chainService.getChainInfoByKey(networkKey);
 
-        try {
-          const paymentInfo = await mockTx?.paymentInfo(address);
+        if (_isChainEvmCompatible(chainInfo)) {
+          const web3 = this.#koniState.chainService.getEvmApi(networkKey);
 
-          estimatedFee = paymentInfo?.partialFee?.toString() || '0';
-        } catch (e) {
-          estimatedFee = '0';
-          console.warn('Error estimating fee', e);
+          const transaction: TransactionConfig = {
+            value: 1,
+            to: address,
+            from: address
+          };
+
+          const gasPrice = await web3.api.eth.getGasPrice();
+          const gasLimit = await web3.api.eth.estimateGas(transaction);
+
+          estimatedFee = (gasLimit * parseInt(gasPrice)).toString();
+        } else {
+          const [mockTx] = await createTransferExtrinsic({
+            from: address,
+            networkKey,
+            substrateApi,
+            to: address,
+            tokenInfo,
+            transferAll: true,
+            value: '0'
+          });
+
+          try {
+            const paymentInfo = await mockTx?.paymentInfo(address);
+
+            estimatedFee = paymentInfo?.partialFee?.toString() || '0';
+          } catch (e) {
+            estimatedFee = '0';
+            console.warn('Error estimating fee', e);
+          }
         }
       }
 

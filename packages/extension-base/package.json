@@ -79,8 +79,8 @@
     "@subwallet/extension-chains": "^1.0.3-0",
     "@subwallet/extension-dapp": "^1.0.3-0",
     "@subwallet/extension-inject": "^1.0.3-0",
-    "@subwallet/keyring": "^0.0.5",
-    "@subwallet/ui-keyring": "^0.0.3",
+    "@subwallet/keyring": "^0.0.7",
+    "@subwallet/ui-keyring": "^0.0.7",
     "@unique-nft/types": "^0.6.0-4",
     "@zeitgeistpm/type-defs": "^0.10.0",
     "@zeroio/type-definitions": "^0.0.14",
@@ -110,11 +110,11 @@
     "protobufjs": "^7.1.2",
     "rlp": "^3.0.0",
     "rxjs": "^7.8.0",
-    "web3": "^1.9.0",
-    "web3-core": "^1.9.0",
-    "web3-core-helpers": "^1.9.0",
-    "web3-eth-contract": "^1.9.0",
-    "web3-utils": "^1.9.0"
+    "web3": "^1.10.0",
+    "web3-core": "^1.10.0",
+    "web3-core-helpers": "^1.10.0",
+    "web3-eth-contract": "^1.10.0",
+    "web3-utils": "^1.10.0"
   },
   "devDependencies": {
     "@subwallet/extension-mocks": "^1.0.3-0"

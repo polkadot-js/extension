@@ -327,4 +327,13 @@ export default class AuthRequestHandler {
       });
     });
   }
+
+  public resetWallet () {
+    for (const request of Object.values(this.#authRequestsV2)) {
+      request.reject(new Error('Reset wallet'));
+    }
+
+    this.authSubjectV2.next([]);
+    this.setAuthorize({});
+  }
 }

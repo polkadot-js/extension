@@ -5,7 +5,7 @@ import { RequestSettingsType } from '@subwallet/extension-base/background/KoniTy
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
 import { Subject } from 'rxjs';
 
-import { DEFAULT_AUTO_LOCK_TIME, DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from './constants';
+import { DEFAULT_SETTING } from './constants';
 
 export default class SettingService {
   private readonly settingsStore = new SettingsStore();
@@ -17,18 +17,7 @@ export default class SettingService {
   public getSettings (update: (value: RequestSettingsType) => void): void {
     this.settingsStore.get('Settings', (value) => {
       if (!value) {
-        update(
-          {
-          // language: 'en',
-            browserConfirmationType: DEFAULT_NOTIFICATION_TYPE,
-            // isShowZeroBalance: true,
-            isShowBalance: false,
-            accountAllLogo: '',
-            theme: DEFAULT_THEME,
-            camera: false,
-            timeAutoLock: DEFAULT_AUTO_LOCK_TIME
-          }
-        );
+        update(DEFAULT_SETTING);
       } else {
         update(value);
       }
@@ -37,5 +26,9 @@ export default class SettingService {
 
   public setSettings (data: RequestSettingsType, callback?: () => void): void {
     this.settingsStore.set('Settings', data, callback);
+  }
+
+  public resetWallet () {
+    this.settingsStore.set('Settings', DEFAULT_SETTING);
   }
 }

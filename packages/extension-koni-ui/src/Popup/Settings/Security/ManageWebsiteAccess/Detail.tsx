@@ -207,7 +207,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
             onClick: onOpenActionModal
           }
         ]}
-        title={siteName}
+        title={siteName || authInfo.id}
       >
         <SwList.Section
           displayRow

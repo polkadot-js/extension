@@ -320,7 +320,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         options={sortingOptions}
       />
 
-      {viewDetailItem && <ValidatorDetailModal validatorItem={viewDetailItem} />}
+      {viewDetailItem && (
+        <ValidatorDetailModal
+          chain={chain}
+          validatorItem={viewDetailItem}
+        />
+      )}
     </>
   );
 };

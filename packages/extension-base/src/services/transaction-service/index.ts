@@ -506,8 +506,6 @@ export default class TransactionService {
 
     this.updateTransaction(id, updateData);
 
-    console.log(updateData);
-
     // In this case transaction id is the same as extrinsic hash and will change after below update
     this.historyService.updateHistoryByExtrinsicHash(id, updateData).catch(console.error);
 

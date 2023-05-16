@@ -18,8 +18,6 @@ function Component (
   { className = '', item, onClick }: Props) {
   const displayData = item.displayData;
 
-  console.log(displayData.typeName, item.direction, item);
-
   return (
     <Web3Block
       className={CN('history-item', className, displayData.className)}

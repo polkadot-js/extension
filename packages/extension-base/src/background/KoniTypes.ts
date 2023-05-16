@@ -400,11 +400,14 @@ export interface UiSettings {
   accountAllLogo: string;
   theme: ThemeNames;
   camera: boolean;
+  timeAutoLock: number;
 }
 
 export type RequestSettingsType = UiSettings;
 
 export type RequestCameraSettings = { camera: boolean };
+
+export type RequestChangeTimeAutoLock = { autoLockTime: number };
 
 export interface RandomTestRequest {
   start: number;
@@ -567,6 +570,7 @@ export enum BasicTxErrorType {
   SEND_TRANSACTION_FAILED = 'SEND_TRANSACTION_FAILED',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   UNSUPPORTED = 'UNSUPPORTED',
+  TIMEOUT = 'TIMEOUT',
   NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'NOT_ENOUGH_EXISTENTIAL_DEPOSIT',
 }
 
@@ -1940,6 +1944,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
   'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
+  'pri(settings.saveAutoLockTime)': [RequestChangeTimeAutoLock, boolean];
   'pri(settings.getLogoMaps)': [null, AllLogoMap];
 
   // Subscription

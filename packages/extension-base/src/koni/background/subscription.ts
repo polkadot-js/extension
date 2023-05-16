@@ -76,7 +76,8 @@ export class KoniSubscription {
     }
   }
 
-  start () {
+  async start () {
+    await Promise.all([this.state.eventService.waitKeyringReady, this.state.eventService.waitAssetReady]);
     const currentAddress = this.state.keyringService.currentAccount?.address;
 
     if (currentAddress) {

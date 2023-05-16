@@ -77,29 +77,12 @@ export class KoniCron {
     });
   };
 
-  // init = () => {
-  //   const currentAccountInfo = this.state.keyringService.currentAccount;
-  //
-  //   if (!currentAccountInfo?.address) {
-  //     return;
-  //   }
-  //
-  //   if (Object.keys(this.state.getSubstrateApiMap()).length !== 0 || Object.keys(this.state.getEvmApiMap()).length !== 0) {
-  //     this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap());
-  //     this.updateApiMapStatus();
-  //     this.refreshStakingReward(currentAccountInfo.address);
-  //     this.refreshStakingRewardFastInterval(currentAccountInfo.address);
-  //     // this.updateChainStakingMetadata(this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap());
-  //     this.updateNominatorMetadata(currentAccountInfo.address, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap());
-  //   } else {
-  //     this.setStakingRewardReady();
-  //   }
-  // };
-
-  start = () => {
+  start = async () => {
     if (this.status === 'running') {
       return;
     }
+
+    await Promise.all([this.state.eventService.waitKeyringReady, this.state.eventService.waitAssetReady]);
 
     const currentAccountInfo = this.state.keyringService.currentAccount;
 

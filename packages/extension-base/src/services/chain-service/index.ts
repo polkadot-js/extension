@@ -490,13 +490,13 @@ export class ChainService {
   private initApiForChain (chainInfo: _ChainInfo) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
-    if (chainInfo.substrateInfo !== null) {
+    if (chainInfo.substrateInfo !== null && !this.substrateChainHandler.getSubstrateApiByChain(chainInfo.slug)) {
       const chainApi = this.initApi(chainInfo.slug, endpoint, 'substrate', providerName);
 
       this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as _SubstrateApi);
     }
 
-    if (chainInfo.evmInfo !== null) {
+    if (chainInfo.evmInfo !== null && !this.evmChainHandler.getEvmApiByChain(chainInfo.slug)) {
       const chainApi = this.initApi(chainInfo.slug, endpoint, 'evm', providerName);
 
       this.evmChainHandler.setEvmApi(chainInfo.slug, chainApi as _EvmApi);

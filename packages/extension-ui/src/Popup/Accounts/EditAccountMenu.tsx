@@ -4,7 +4,7 @@
 import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 

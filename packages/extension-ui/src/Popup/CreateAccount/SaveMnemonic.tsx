@@ -4,7 +4,7 @@
 import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useState } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
 import copyIcon from '../../assets/copy.svg';

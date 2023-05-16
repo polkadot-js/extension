@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
@@ -407,6 +408,10 @@ export function getWithdrawalInfo (nominatorMetadata: NominatorMetadata) {
   const unstakings = nominatorMetadata.unstakings;
 
   let result: UnstakingInfo | undefined;
+
+  if (_STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain)) {
+    return getAstarWithdrawable(nominatorMetadata);
+  }
 
   for (const unstaking of unstakings) {
     if (unstaking.status === UnstakingStatus.CLAIMABLE) {

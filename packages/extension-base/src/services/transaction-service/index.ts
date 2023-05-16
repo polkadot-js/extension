@@ -16,6 +16,7 @@ import NotificationService from '@subwallet/extension-base/services/notification
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
+import { TRANSACTION_TIMEOUT } from '@subwallet/extension-base/services/transaction-service/constants';
 import { parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
 import { getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEmitter, TransactionEventMap, TransactionEventResponse, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
@@ -730,6 +731,7 @@ export default class TransactionService {
           emitter.emit('signed', eventData);
 
           // Send transaction
+          this.handleTransactionTimeout(emitter, eventData);
           emitter.emit('send', eventData); // This event is needed after sending transaction with queue
           signedTransaction && web3Api.eth.sendSignedTransaction(signedTransaction)
             .once('transactionHash', (hash) => {
@@ -789,7 +791,9 @@ export default class TransactionService {
       emitter.emit('signed', eventData);
 
       // Send transaction
+      this.handleTransactionTimeout(emitter, eventData);
       emitter.emit('send', eventData); // This event is needed after sending transaction with queue
+
       rs.send((txState) => {
         // handle events, logs, history
         if (!txState || !txState.status) {
@@ -830,6 +834,26 @@ export default class TransactionService {
     });
 
     return emitter;
+  }
+
+  private handleTransactionTimeout (emitter: EventEmitter<TransactionEventMap>, eventData: TransactionEventResponse): void {
+    const timeout = setTimeout(() => {
+      const transaction = this.getTransaction(eventData.id);
+
+      if (transaction.status !== ExtrinsicStatus.SUCCESS && transaction.status !== ExtrinsicStatus.FAIL) {
+        eventData.errors.push(new TransactionError(BasicTxErrorType.TIMEOUT, 'Transaction timeout'));
+        emitter.emit('error', eventData);
+        clearTimeout(timeout);
+      }
+    }, TRANSACTION_TIMEOUT);
+
+    emitter.once('success', () => {
+      clearTimeout(timeout);
+    });
+
+    emitter.once('error', () => {
+      clearTimeout(timeout);
+    });
   }
 
   public resetWallet (): void {

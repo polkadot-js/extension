@@ -79,7 +79,7 @@ export default class AuthRequestHandler {
       update(this.authorizeCached);
     } else {
       this.authorizeStore.get('authUrls', (data) => {
-        this.authorizeCached = data;
+        this.authorizeCached = data || {};
         update(this.authorizeCached);
       });
     }

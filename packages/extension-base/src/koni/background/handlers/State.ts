@@ -772,6 +772,17 @@ export default class KoniState {
     });
   }
 
+  public setAutoLockTime (value: number): void {
+    this.settingService.getSettings((settings) => {
+      const newSettings: UiSettings = {
+        ...settings,
+        timeAutoLock: value
+      };
+
+      this.settingService.setSettings(newSettings);
+    });
+  }
+
   public subscribeSettingsSubject (): Subject<RequestSettingsType> {
     return this.settingService.getSubject();
   }

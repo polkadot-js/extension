@@ -49,6 +49,7 @@ const darkTheme = {
   buttonTertiaryHoverTextColor: '#7FF4E3',
   buttonTertiaryTextColor: '#00CCAB',
   buttonTextColor: '#111B24',
+  checkboxBorderColor: '#A5B5C2',
   connectedDotColor: 'seagreen',
   connectedIndicator: '#14202A',
   connectedIndicatorHover: '#182733',

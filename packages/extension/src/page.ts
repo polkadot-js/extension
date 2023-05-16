@@ -12,7 +12,7 @@ import { packageInfo } from './packageInfo';
 
 function inject () {
   injectExtension(enable, {
-    name: 'polkadot-js',
+    name: 'aleph-zero-signer',
     version: packageInfo.version
   });
 }

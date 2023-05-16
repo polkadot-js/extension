@@ -3,12 +3,21 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
 import copyIcon from '../../assets/copy.svg';
-import { BackButton, Button, ButtonArea, MnemonicPill, Svg, VerticalSpace } from '../../components';
+import {
+  BackButton,
+  Button,
+  ButtonArea,
+  Checkbox,
+  HelperFooter,
+  MnemonicPill,
+  Svg,
+  VerticalSpace
+} from '../../components';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 
@@ -22,15 +31,32 @@ interface Props extends ThemeProps {
 function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
+
+  const [isSecretCopied, setIsSecretCopied] = useState(false);
+
   const seedArray = seed.split(' ');
 
-  const _onCopy = useCallback((test: string, success: boolean) => {
-    if (success) {
-      show(t('Secret phrase copied to clipboard'), 'success');
-    } else {
-      show(t('Failed copying to clipboard'), 'critical');
-    }
-  }, [show, t]);
+  const _onCopy = useCallback(
+    (test: string, success: boolean) => {
+      if (success) {
+        show(t('Secret phrase copied to clipboard'), 'success');
+      } else {
+        show(t('Failed copying to clipboard'), 'critical');
+      }
+    },
+    [show, t]
+  );
+
+  const footer = (
+    <HelperFooter>
+      <Checkbox
+        checked={isSecretCopied}
+        label={t('I have copied the secret phrase to a safe place')}
+        onChange={setIsSecretCopied}
+        variant='small'
+      />
+    </HelperFooter>
+  );
 
   return (
     <>
@@ -72,9 +98,14 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
         </CopyToClipboard>
       </div>
       <VerticalSpace />
-      <ButtonArea>
+      <ButtonArea footer={footer}>
         <BackButton onClick={onPreviousStep} />
-        <Button onClick={onNextStep}>{t<string>('Next')}</Button>
+        <Button
+          isDisabled={!isSecretCopied}
+          onClick={onNextStep}
+        >
+          {t<string>('Next')}
+        </Button>
       </ButtonArea>
     </>
   );

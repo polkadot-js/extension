@@ -170,7 +170,7 @@ function Address({
   const _ellipsisName = useCallback(ellipsisName, [ellipsisName]);
 
   const handleOnClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    () => {
       if (!address) {
         return;
       }

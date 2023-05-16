@@ -16,6 +16,7 @@ interface Props {
   label: ReactNode;
   onChange?: (checked: boolean) => void;
   onClick?: () => void;
+  variant?: 'default' | 'small';
 }
 
 function Checkbox({ checked, className, indeterminate, label, onChange, onClick }: Props): React.ReactElement<Props> {
@@ -64,8 +65,35 @@ function Checkbox({ checked, className, indeterminate, label, onChange, onClick 
   );
 }
 
+const variantToStyles = {
+  small: {
+    height: '11px',
+    width: '11px',
+    top: '4px',
+    left: '0px',
+    after: {
+      height: '11px',
+      width: '11px',
+      top: '0px',
+      left: '0px',
+    }
+  },
+  default: {
+    height: '16px',
+    width: '16px',
+    top: '2px',
+    left: '0px',
+    after: {
+      height: '10px',
+      width: '13px',
+      top: '2px',
+      left: '1px',
+    }
+  },
+};
+
 export default styled(Checkbox)(
-  ({ theme }: ThemeProps) => `
+  ({ theme, variant = 'default' }) => `
   margin: ${theme.boxMargin};
   box-sizing: border-box;
 
@@ -94,31 +122,31 @@ export default styled(Checkbox)(
 
     & .checkbox-ui {
       position: absolute;
-      top: 2px;
-      left: 0;
-      height: 16px;
-      width: 16px;
+      top: ${variantToStyles[variant].top};
+      left: ${variantToStyles[variant].left};
+      height: ${variantToStyles[variant].height};
+      width: ${variantToStyles[variant].width};
       border-radius: 4px;
       background-color: ${theme.inputBackground};
-      border: 1px solid ${theme.inputBackground};
-      outline: 1px solid ${theme.boxBorderColor};
+      border: 2px solid ${theme.inputBackground};
+      box-shadow: 0 0 0 1px ${theme.checkboxBorderColor};
       transition: 0.2s ease;
 
       &:after {
         content: '';
         display: none;
-        width: 13px;
-        height: 10px;
+        width: ${variantToStyles[variant].after.width};
+        height: ${variantToStyles[variant].after.height};
         position: absolute;
-        left: 1px;
-        top: 2px;
+        left: ${variantToStyles[variant].after.left};
+        top: ${variantToStyles[variant].after.top};
         mask: url(${Checkmark});
         mask-size: cover;
         background: ${theme.boxBackground};
       }
 
       &:focus {
-        outline-color:  ${theme.primaryColor};
+        box-shadow: 0 0 0 1px ${theme.primaryColor};
       }
     }
 
@@ -129,7 +157,6 @@ export default styled(Checkbox)(
 
     input:checked ~ .checkbox-ui {
       background: ${theme.primaryColor};
-      border: 1px solid black;
       border-radius: 4px;
     }
 
@@ -151,7 +178,7 @@ export default styled(Checkbox)(
 
   &:hover {
     label .checkbox-ui {
-      outline-color:  ${theme.primaryColor};
+      box-shadow: 0 0 0 1px ${theme.primaryColor};
     }
   }
 `

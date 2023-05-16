@@ -58,6 +58,8 @@ describe('Create Account', () => {
     const isPresent = <T,>(statelessComponent: FunctionComponent<T>) => expect(wrapper.find(statelessComponent).exists()).toBeTruthy();
     const isAbsent = <T,>(statelessComponent: FunctionComponent<T>) => expect(wrapper.find(statelessComponent).exists()).toBeFalsy();
 
+    const checkIsSecretCopiedCheckbox = () => wrapper.find({type: 'checkbox'}).simulate('change', {target: {checked: true}});
+
     beforeEach(async () => {
       onActionStub = jest.fn();
       jest.spyOn(messaging, 'createSeed').mockResolvedValue(exampleAccount);
@@ -106,6 +108,7 @@ describe('Create Account', () => {
 
       isPresent(SaveMnemonic);
 
+      checkIsSecretCopiedCheckbox();
       clickNext();
 
       isAbsent(SaveMnemonic);
@@ -117,6 +120,7 @@ describe('Create Account', () => {
 
     it('renders AccountNamePasswordCreation component after clicking next button on step 2', async () => {
       clickNext();
+      checkIsSecretCopiedCheckbox();
       clickNext();
 
       await act(flushAllPromises);

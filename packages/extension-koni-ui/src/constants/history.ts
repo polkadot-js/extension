@@ -3,7 +3,7 @@
 
 import { ExtrinsicStatus, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { StatusType } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
-import { CheckCircle, ProhibitInset, Spinner, StopCircle } from 'phosphor-react';
+import { CheckCircle, PaperPlaneTilt, ProhibitInset, Queue, Spinner, StopCircle } from 'phosphor-react';
 
 export const TxTypeNameMap: Record<string, string> = {
   [ExtrinsicType.TRANSFER_BALANCE]: 'Transfer',
@@ -42,15 +42,25 @@ export const HistoryStatusMap: Record<ExtrinsicStatus, StatusType> = {
     icon: ProhibitInset,
     name: 'Failed'
   },
+  [ExtrinsicStatus.QUEUED]: {
+    schema: 'light',
+    icon: Queue,
+    name: 'Queued'
+  },
+  [ExtrinsicStatus.SUBMITTING]: {
+    schema: 'gold',
+    icon: PaperPlaneTilt,
+    name: 'Submitting'
+  },
   [ExtrinsicStatus.PROCESSING]: {
     schema: 'gold',
     icon: Spinner,
     name: 'Processing'
   },
-  [ExtrinsicStatus.PENDING]: {
-    schema: 'gold',
-    icon: Spinner,
-    name: 'Pending'
+  [ExtrinsicStatus.CANCELLED]: {
+    schema: 'gray',
+    icon: StopCircle,
+    name: 'Cancelled'
   },
   [ExtrinsicStatus.UNKNOWN]: {
     schema: 'danger',

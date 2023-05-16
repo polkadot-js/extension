@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
-import { _getTokenTypesSupportedByChain, _isChainTestNet, _isCustomAsset, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
 import { AddressInput, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
@@ -101,7 +101,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       assetType: formValues.type,
       metadata: _parseMetadataForSmartContractAsset(formValues.contractAddress),
       multiChainAsset: null,
-      hasValue: _isChainTestNet(chainInfoMap[formValues.chain])
+      hasValue: _isChainTestNet(chainInfoMap[formValues.chain]),
+      icon: 'default.png'
     })
       .then((result) => {
         setLoading(false);

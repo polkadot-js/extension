@@ -3,11 +3,12 @@
 
 import type { ThemeProps } from '../types';
 
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import applyPreloadStyle from '@subwallet/extension-koni-ui/preloadStyle';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { generateTheme, SW_THEME_CONFIGS, SwThemeConfig } from '@subwallet/extension-koni-ui/themes';
 import { ConfigProvider, theme as reactUiTheme } from '@subwallet/react-ui';
-import React, { useMemo } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { createGlobalStyle, ThemeProvider as StyledComponentThemeProvider } from 'styled-components';
 
@@ -194,8 +195,30 @@ const getPopupContainer = () => document.getElementById('tooltip-container') || 
 const TooltipContainer = styled.div`z-index: 10000;`;
 
 export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactElement<ThemeProviderProps> {
+  const dataContext = useContext(DataContext);
   const themeName = useSelector((state: RootState) => state.settings.theme);
-  const themeConfig = SW_THEME_CONFIGS[themeName];
+  const logoMaps = useSelector((state: RootState) => state.settings.logoMaps);
+  const [themeReady, setThemeReady] = useState(false);
+
+  const themeConfig = useMemo(() => {
+    const config = SW_THEME_CONFIGS[themeName];
+
+    Object.assign(config.logoMap.network, logoMaps.chainLogoMap);
+    Object.assign(config.logoMap.symbol, logoMaps.assetLogoMap);
+
+    return config;
+  }, [logoMaps, themeName]);
+
+  useEffect(() => {
+    dataContext.awaitStores(['settings']).then(() => {
+      setThemeReady(true);
+    }).catch(console.error);
+  }, [dataContext]);
+
+  // Reduce number of re-rendering
+  if (!themeReady) {
+    return <></>;
+  }
 
   return (
     <ConfigProvider

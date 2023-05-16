@@ -3,6 +3,7 @@
 
 import { EmptyList } from '@subwallet/extension-koni-ui/components';
 import { TokenBalanceSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceSelectionItem';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
@@ -37,6 +38,9 @@ function getTokenBalances (
 function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalanceMap }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
+
   const tokenBalances = useMemo<TokenBalanceItemType[]>(() => {
     return getTokenBalances(tokenBalanceMap, sortedTokenSlugs);
   }, [tokenBalanceMap, sortedTokenSlugs]);
@@ -65,11 +69,14 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
 
   const searchFunc = useCallback((item: TokenBalanceItemType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
+    const chainName = chainInfoMap[item.chain || '']?.name?.toLowerCase();
+    const symbol = item.symbol.toLowerCase();
 
     return (
-      item.symbol.toLowerCase().includes(searchTextLowerCase)
+      symbol.includes(searchTextLowerCase) ||
+      chainName.includes(searchTextLowerCase)
     );
-  }, []);
+  }, [chainInfoMap]);
 
   const renderEmpty = useCallback(() => (
     <EmptyList

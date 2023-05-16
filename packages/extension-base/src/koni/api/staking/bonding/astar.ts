@@ -130,22 +130,30 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
   const unlockingChunks = ledger.unbondingInfo.unlockingChunks;
 
   if (unlockingChunks.length > 0) {
-    const nearestUnstaking = unlockingChunks[0]; // only handle 1 unstaking request at a time, might need to change
+    for (const unlockingChunk of unlockingChunks) {
+      const isClaimable = unlockingChunk.unlockEra - parseInt(currentEra) <= 0;
+      const remainingEra = unlockingChunk.unlockEra - (parseInt(currentEra) + 1);
+      const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
 
-    const isClaimable = nearestUnstaking.unlockEra - parseInt(currentEra) <= 0;
-    const remainingEra = nearestUnstaking.unlockEra - (parseInt(currentEra) + 1);
-    const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
-
-    unstakingList.push({
-      chain,
-      status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
-      claimable: nearestUnstaking.amount.toString(),
-      waitingTime: waitingTime > 0 ? waitingTime : 0
-    });
+      unstakingList.push({
+        chain,
+        status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+        claimable: unlockingChunk.amount.toString(),
+        waitingTime: waitingTime > 0 ? waitingTime : 0
+      });
+    }
   }
 
   if (nominationList.length === 0 && unstakingList.length === 0) {
-    return;
+    return {
+      chain: chainInfo.slug,
+      type: StakingType.NOMINATED,
+      address,
+      status: StakingStatus.NOT_STAKING,
+      activeStake: '0',
+      nominations: [],
+      unstakings: []
+    } as NominatorMetadata;
   }
 
   const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);
@@ -295,4 +303,25 @@ export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi,
   console.log('no of astar claim reward tx: ', transactions.length);
 
   return apiPromise.api.tx.utility.batch(transactions);
+}
+
+export function getAstarWithdrawable (nominatorMetadata: NominatorMetadata): UnstakingInfo {
+  const unstakingInfo: UnstakingInfo = {
+    chain: nominatorMetadata.chain,
+    status: UnstakingStatus.CLAIMABLE,
+    claimable: '0',
+    waitingTime: 0
+  };
+
+  let bnWithdrawable = BN_ZERO;
+
+  for (const unstaking of nominatorMetadata.unstakings) {
+    if (unstaking.status === UnstakingStatus.CLAIMABLE) {
+      bnWithdrawable = bnWithdrawable.add(new BN(unstaking.claimable));
+    }
+  }
+
+  unstakingInfo.claimable = bnWithdrawable.toString();
+
+  return unstakingInfo;
 }

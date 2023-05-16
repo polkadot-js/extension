@@ -10,8 +10,8 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, Input, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
-import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, DownloadSimple, FadersHorizontal, MagnifyingGlass, Rocket, Spinner } from 'phosphor-react';
+import { Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
+import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -118,8 +118,8 @@ enum FilterValue {
   FAILED = 'failed',
 }
 
-function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'address' | 'extrinsicHash'>) {
-  return `${item.chain}-${item.address}-${item.extrinsicHash}`;
+function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'address' | 'extrinsicHash' | 'transactionId'>) {
+  return `${item.chain}-${item.address}-${item.transactionId || item.extrinsicHash}`;
 }
 
 const modalId = HISTORY_DETAIL_MODAL;
@@ -132,6 +132,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { accounts, currentAccount } = useSelector((root) => root.accountState);
   const { historyList: rawHistoryList } = useSelector((root) => root.transactionHistory);
   const [searchInput, setSearchInput] = useState<string>('')
+  const { chainInfoMap } = useSelector((root) => root.chainStore);
 
   const isActive = checkActive(modalId);
 
@@ -346,11 +347,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const searchFunc = useCallback((item: TransactionHistoryItem, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
+    const fromName = item.fromName?.toLowerCase();
+    const toName = item.toName?.toLowerCase();
+    const symbol = (item.amount?.symbol || item.fee?.symbol || item.tip?.symbol)?.toLowerCase();
+    const network = chainInfoMap[item.chain]?.name?.toLowerCase();
 
     return (
-      (!!item.fromName && item.fromName.toLowerCase().includes(searchTextLowerCase))
+      fromName?.includes(searchTextLowerCase) ||
+      toName?.includes(searchTextLowerCase) ||
+      symbol?.includes(searchTextLowerCase) ||
+      network?.includes(searchTextLowerCase)
     );
-  }, []);
+  }, [chainInfoMap]);
 
   const groupBy = useCallback((item: TransactionHistoryItem) => {
     return customFormatDate(item.time, '#MMM# #DD#, #YYYY#');

@@ -3,7 +3,7 @@
 
 import { ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import defaultImagePlaceholder from '@subwallet/extension-koni-ui/assets/default-image-placeholder.png';
-import ChainLogoMap, { IconMap, TokenLogoMap } from '@subwallet/extension-koni-ui/assets/logo';
+import { IconMap } from '@subwallet/extension-koni-ui/assets/logo';
 import subWalletLogo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import SwLogosMap from '@subwallet/extension-koni-ui/assets/subwallet';
 import { theme as SwReactUI } from '@subwallet/react-ui';
@@ -60,13 +60,11 @@ const defaultLogoMap: Web3LogoMap = {
   ...logoMap,
   network: {
     ...IconMap,
-    ...SwLogosMap,
-    ...ChainLogoMap
+    ...SwLogosMap
   },
   symbol: {
     ...IconMap,
-    ...SwLogosMap,
-    ...TokenLogoMap
+    ...SwLogosMap
   },
   default: SwLogosMap.default
 };

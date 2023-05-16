@@ -2,17 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import LoginBg from '@subwallet/extension-koni-ui/assets/LoginBg.png';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
 import SocialGroup from '@subwallet/extension-koni-ui/components/SocialGroup';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
-import { Button, Form, Input } from '@subwallet/react-ui';
+import { Button, Form, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
@@ -31,6 +32,7 @@ const passwordInputId = 'login-password';
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
+  const { activeModal } = useContext(ModalContext);
 
   const [form] = Form.useForm<LoginFormState>();
   const { isWebUI } = useContext(ScreenContext)
@@ -69,68 +71,75 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }, 500);
   }, [onError]);
 
+  const onReset = useCallback(() => {
+    activeModal(RESET_WALLET_MODAL);
+  }, [activeModal]);
+
   useFocusById(passwordInputId);
 
   return (
     <PageWrapper className={CN(className)}>
       <Layout.Base className='login-container'>
         <div className='bg-gradient' />
-        {!isWebUI && <div className='bg-image' />}
-        <div className={CN('body-container', {
-          '__web-ui': isWebUI
-        })}>
-          <div className='main-wrapper'>
-            <div className='logo-container'>
-              <Logo3D />
-            </div>
-            <div className='title'>
-              {t('Welcome back!')}
-            </div>
-            <div className='sub-title'>
-              {t('Enter your password to unlock account')}
-            </div>
-            <Form
-              form={form}
-              initialValues={{ [FormFieldName.PASSWORD]: '' }}
-              onFieldsChange={onUpdate}
-              onFinish={onSubmit}
-            >
-              <Form.Item
-                name={FormFieldName.PASSWORD}
-                rules={[
-                  {
-                    message: 'Password is required',
-                    required: true
-                  }
-                ]}
-                statusHelpAsTooltip={true}
+          {!isWebUI && <div className='bg-image' />}
+          <div className={CN('body-container', {
+            '__web-ui': isWebUI
+          })}>
+            <div className='main-wrapper'>
+              <div className='logo-container'>
+                <Logo3D />
+              </div>
+              <div className='title'>
+                {t('Welcome back!')}
+              </div>
+              <div className='sub-title'>
+                {t('Enter your password to unlock account')}
+              </div>
+              <Form
+                form={form}
+                initialValues={{ [FormFieldName.PASSWORD]: '' }}
+                onFieldsChange={onUpdate}
+                onFinish={onSubmit}
               >
-                <Input.Password
-                  containerClassName='password-input'
-                  id={passwordInputId}
-                  placeholder={t('Password')}
-                />
-              </Form.Item>
-              <Form.Item>
-                <Button
-                  block={true}
-                  disabled={isDisable}
-                  htmlType='submit'
-                  loading={loading}
+                <Form.Item
+                  name={FormFieldName.PASSWORD}
+                  rules={[
+                    {
+                      message: 'Password is required',
+                      required: true
+                    }
+                  ]}
+                  statusHelpAsTooltip={true}
                 >
+                  <Input.Password
+                    containerClassName='password-input'
+                    id={passwordInputId}
+                    placeholder={t('Password')}
+                  />
+                </Form.Item>
+                <Form.Item>
+                  <Button
+                    block={true}
+                    disabled={isDisable}
+                    htmlType='submit'
+                    loading={loading}
+                  >
                   {t('Unlock')}
                 </Button>
               </Form.Item>
               <Form.Item>
-                <div className='forgot-password'>
-                  {t('Forgot password')}
+                <div
+                  className='forgot-password'
+                  onClick={onReset}
+                >
+                  {t('Forgot password?')}
                 </div>
               </Form.Item>
             </Form>
-
+            <ResetWalletModal />
           </div>
-          <SocialGroup />
         </div>
+        <SocialGroup />
       </Layout.Base>
     </PageWrapper>
   );

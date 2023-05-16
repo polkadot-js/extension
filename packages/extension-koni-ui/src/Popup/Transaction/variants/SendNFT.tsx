@@ -253,6 +253,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({
             <AddressInput
               addressPrefix={addressPrefix}
               label={t('Send to account')}
+              saveAddress={true}
               showAddressBook={true}
               showScanner={true}
             />

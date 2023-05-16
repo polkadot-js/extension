@@ -137,7 +137,8 @@ function Component ({ className = '', modalContent }: Props): React.ReactElement
         assetType: type,
         metadata: _parseMetadataForSmartContractAsset(contractAddress),
         multiChainAsset: null,
-        hasValue: _isChainTestNet(chainInfoMap[chain])
+        hasValue: _isChainTestNet(chainInfoMap[chain]),
+        icon: ''
       })
         .then((result) => {
           if (result) {
@@ -164,7 +165,9 @@ function Component ({ className = '', modalContent }: Props): React.ReactElement
 
   const collectionNameValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      if (value.length >= 3) {
+      const parsedValue = value.replaceAll(' ', '');
+
+      if (parsedValue.length >= 3) {
         resolve();
       } else {
         reject(new Error(t('Collection name must have at least 3 characters')));

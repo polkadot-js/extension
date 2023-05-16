@@ -400,11 +400,14 @@ export interface UiSettings {
   accountAllLogo: string;
   theme: ThemeNames;
   camera: boolean;
+  timeAutoLock: number;
 }
 
 export type RequestSettingsType = UiSettings;
 
 export type RequestCameraSettings = { camera: boolean };
+
+export type RequestChangeTimeAutoLock = { autoLockTime: number };
 
 export interface RandomTestRequest {
   start: number;
@@ -457,15 +460,17 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: RequestTuringCancelStakeCompound,
   [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: RequestStakeCancelWithdrawal,
   [ExtrinsicType.STAKING_POOL_WITHDRAW]: any,
-  [ExtrinsicType.EVM_EXECUTE]: any,
+  [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.UNKNOWN]: any
 }
 
 export enum ExtrinsicStatus {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  SUCCESS = 'success',
-  FAIL = 'fail',
+  QUEUED = 'queued', // Transaction in queue
+  SUBMITTING = 'submitting', // Transaction in queue
+  PROCESSING = 'processing', // Transaction is sending
+  SUCCESS = 'success', // Send successfully
+  FAIL = 'fail', // Send failed
+  CANCELLED = 'cancelled', // Is remove before sending
   UNKNOWN = 'unknown'
 }
 
@@ -528,6 +533,7 @@ export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType
   toName?: string,
   address: string,
   status: ExtrinsicStatus,
+  transactionId?: string, // Available for transaction history
   extrinsicHash: string,
   time: number,
   data?: string,
@@ -564,6 +570,7 @@ export enum BasicTxErrorType {
   SEND_TRANSACTION_FAILED = 'SEND_TRANSACTION_FAILED',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   UNSUPPORTED = 'UNSUPPORTED',
+  TIMEOUT = 'TIMEOUT',
   NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'NOT_ENOUGH_EXISTENTIAL_DEPOSIT',
 }
 
@@ -1452,7 +1459,8 @@ export enum StakingStatus {
   EARNING_REWARD = 'EARNING_REWARD',
   PARTIALLY_EARNING = 'PARTIALLY_EARNING',
   NOT_EARNING = 'NOT_EARNING',
-  WAITING = 'WAITING'
+  WAITING = 'WAITING',
+  NOT_STAKING = 'NOT_STAKING'
 }
 
 export interface NominatorMetadata {
@@ -1645,26 +1653,6 @@ export type RequestCreateCompoundStakeExternal = InternalRequestSign<TuringStake
 
 export type RequestCancelCompoundStakeExternal = InternalRequestSign<TuringCancelStakeCompoundParams>;
 
-/// Keyring state
-
-export interface KeyringState {
-  isReady: boolean;
-  hasMasterPassword: boolean;
-  isLocked: boolean;
-}
-
-export interface AddressBookState {
-  contacts: AddressJson[];
-  recent: AddressJson[];
-}
-
-export interface RequestChangeMasterPassword {
-  oldPassword?: string;
-  newPassword: string;
-
-  createNew: boolean;
-}
-
 export enum ChainEditStandard {
   EVM = 'EVM',
   SUBSTRATE = 'SUBSTRATE',
@@ -1700,10 +1688,33 @@ export interface ChainSpecInfo {
   decimals: number
 }
 
+/// Keyring state
+
+export interface KeyringState {
+  isReady: boolean;
+  hasMasterPassword: boolean;
+  isLocked: boolean;
+}
+
+export interface AddressBookState {
+  contacts: AddressJson[];
+  recent: AddressJson[];
+}
+
+// Change master password
+export interface RequestChangeMasterPassword {
+  oldPassword?: string;
+  newPassword: string;
+
+  createNew: boolean;
+}
+
 export interface ResponseChangeMasterPassword {
   status: boolean;
   errors: string[];
 }
+
+// Migrate password
 
 export interface RequestMigratePassword {
   address: string;
@@ -1715,6 +1726,8 @@ export interface ResponseMigratePassword {
   errors: string[];
 }
 
+// Unlock
+
 export interface RequestUnlockKeyring {
   password: string;
 }
@@ -1723,6 +1736,8 @@ export interface ResponseUnlockKeyring {
   status: boolean;
   errors: string[];
 }
+
+// Export mnemonic
 
 export interface RequestKeyringExportMnemonic {
   address: string;
@@ -1733,14 +1748,26 @@ export interface ResponseKeyringExportMnemonic {
   result: string;
 }
 
+// Reset wallet
+
+export interface RequestResetWallet {
+  resetAll: boolean;
+}
+
+export interface ResponseResetWallet {
+  status: boolean;
+  errors: string[];
+}
+
 /// Signing
 export interface RequestSigningApprovePasswordV2 {
   id: string;
 }
 
 export interface AssetSettingUpdateReq {
-  tokenSlug: string,
-  assetSetting: AssetSetting
+  tokenSlug: string;
+  assetSetting: AssetSetting;
+  autoEnableNativeToken?: boolean;
 }
 
 export interface RequestGetTransaction {
@@ -1801,6 +1828,11 @@ export type NotificationParams = Omit<Notification, 'id'>;
 
 export interface CronReloadRequest {
   data: 'nft' | 'staking'
+}
+
+export interface AllLogoMap {
+  chainLogoMap: Record<string, string>
+  assetLogoMap: Record<string, string>
 }
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value
@@ -1912,6 +1944,8 @@ export interface KoniRequestSignatures {
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
   'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
+  'pri(settings.saveAutoLockTime)': [RequestChangeTimeAutoLock, boolean];
+  'pri(settings.getLogoMaps)': [null, AllLogoMap];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];
@@ -1968,6 +2002,7 @@ export interface KoniRequestSignatures {
   'pri(keyring.unlock)': [RequestUnlockKeyring, ResponseUnlockKeyring];
   'pri(keyring.lock)': [null, void];
   'pri(keyring.export.mnemonic)': [RequestKeyringExportMnemonic, ResponseKeyringExportMnemonic];
+  'pri(keyring.reset)': [RequestResetWallet, ResponseResetWallet];
 
   // Signing
   'pri(signing.approve.passwordV2)': [RequestSigningApprovePasswordV2, boolean];

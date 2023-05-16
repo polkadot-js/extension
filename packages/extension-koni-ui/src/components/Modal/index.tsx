@@ -3,6 +3,7 @@
 
 export { default as RequestCameraAccessModal } from './RequestCameraAccessModal';
 export { default as RequestCreatePasswordModal } from './RequestCreatePasswordModal';
+export { default as ResetWalletModal } from './ResetWalletModal';
 export { SortingModal } from './SortingModal';
 
 export * from './Account';

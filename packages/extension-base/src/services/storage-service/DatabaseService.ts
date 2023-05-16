@@ -5,6 +5,7 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
+import BaseStore from '@subwallet/extension-base/services/storage-service/db-stores/BaseStore';
 import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
@@ -150,6 +151,17 @@ export default class DatabaseService {
     return this.stores.transaction.bulkUpsert(cleanedHistory);
   }
 
+  async updateHistoryByNewExtrinsicHash (extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
+    // this.logger.log('Updating transaction histories');
+    const canUpdate = updateData && extrinsicHash;
+
+    if (!canUpdate) {
+      return;
+    }
+
+    return this.stores.transaction.updateWithQuery({ extrinsicHash }, updateData);
+  }
+
   // NFT Collection
   async addNftCollection (collection: NftCollection) {
     // this.logger.log(`Updating NFT collection for [${collection.chain}]`);
@@ -278,5 +290,33 @@ export default class DatabaseService {
 
   async getNominatorMetadata () {
     return this.stores.nominatorMetadata.getAll();
+  }
+
+  async resetWallet (resetAll: boolean): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const stores: BaseStore<unknown>[] = [
+        this.stores.balance,
+        this.stores.nft,
+        this.stores.nftCollection,
+        this.stores.crowdloan,
+        this.stores.staking,
+        this.stores.transaction,
+        this.stores.nominatorMetadata
+      ];
+
+      if (resetAll) {
+        stores.push(this.stores.chain, this.stores.asset);
+      }
+
+      const promises = stores.map((store) => store.clear());
+
+      Promise.all(promises)
+        .then(() => {
+          resolve();
+        })
+        .catch((e) => {
+          reject(e);
+        });
+    });
   }
 }

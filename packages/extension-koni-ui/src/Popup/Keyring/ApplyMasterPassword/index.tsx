@@ -13,7 +13,7 @@ import { Button, ButtonProps, Field, Form, Icon, Input } from '@subwallet/react-
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle, Trash } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -76,6 +76,10 @@ const selectPassword = () => {
   }, 10);
 };
 
+const intersectionArray = (array1: AccountJson[], array2: AccountJson[]): AccountJson[] => {
+  return array1.filter((account) => array2.find((acc) => acc.address === account.address));
+};
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { t } = useTranslation();
@@ -94,12 +98,17 @@ const Component: React.FC<Props> = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const migrated = useMemo(
-    () => accounts
-      .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && acc.isMasterPassword)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    , []
-  );
+  const migratedRef = useRef<AccountJson[]>(accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && acc.isMasterPassword));
+
+  const migrated = useMemo(() => {
+    const oldVal = migratedRef.current;
+    const newVal = accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && acc.isMasterPassword);
+    const result = intersectionArray(oldVal, newVal);
+
+    migratedRef.current = result;
+
+    return result;
+  }, [accounts]);
 
   const canMigrate = useMemo(
     () => accounts

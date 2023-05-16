@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
+import { ChainStakingMetadata } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { subscribeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
@@ -16,6 +16,7 @@ import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/s
 import { _isChainEnabled, _isChainEvmCompatible, _isChainSupportSubstrateStaking, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { COMMON_RELOAD_EVENTS, EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
+import axios from 'axios';
 
 import { logger as createLogger } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
@@ -119,25 +120,7 @@ export class KoniSubscription {
   }
 
   init () {
-    this.state.getAuthorize((value) => {
-      const authString = localStorage.getItem('authUrls') || '{}';
-      const previousAuth = JSON.parse(authString) as AuthUrls;
-
-      if (previousAuth && Object.keys(previousAuth).length) {
-        Object.keys(previousAuth).forEach((url) => {
-          if (previousAuth[url].isAllowed) {
-            previousAuth[url].isAllowedMap = this.state.getAddressList(true);
-          } else {
-            previousAuth[url].isAllowedMap = this.state.getAddressList();
-          }
-        });
-      }
-
-      const migrateValue = { ...previousAuth, ...value };
-
-      this.state.setAuthorize(migrateValue);
-      localStorage.setItem('authUrls', '{}');
-    });
+    this.logger.log('Initializing subscription');
   }
 
   subscribeBalancesAndCrowdloans (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, web3ApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
@@ -311,6 +294,20 @@ export class KoniSubscription {
     this.state.updateStakingReward(result, 'fastInterval');
   }
 
+  async fetchingStakingFromApi (): Promise<Record<string, ChainStakingMetadata>> {
+    try {
+      const response = await axios.get('https://staking-data.subwallet.app/api/staking/get');
+
+      if (response.status === 200) {
+        return response.data as Record<string, ChainStakingMetadata>;
+      }
+    } catch (e) {
+      this.logger.error(e);
+    }
+
+    return {};
+  }
+
   async fetchChainStakingMetadata (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
     const filteredChainInfoMap: Record<string, _ChainInfo> = {};
 
@@ -326,10 +323,19 @@ export class KoniSubscription {
       return;
     }
 
-    await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
-      const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
+    // Fetch data from helper API
+    const dataFromApi = await this.fetchingStakingFromApi();
 
-      this.state.updateChainStakingMetadata(chainStakingMetadata);
+    await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
+      // Use fetch API data if available
+      if (dataFromApi[chainInfo.slug]) {
+        this.state.updateChainStakingMetadata(dataFromApi[chainInfo.slug]);
+      } else {
+        console.warn('Not found staking data from api', chainInfo.slug);
+        const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
+
+        this.state.updateChainStakingMetadata(chainStakingMetadata);
+      }
     }));
   }
 

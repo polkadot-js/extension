@@ -11,19 +11,39 @@ export function parseTransactionData<T extends ExtrinsicType> (data: unknown): E
   return data as ExtrinsicDataTypeMap[T];
 }
 
-export function getTransactionLink (chainInfo: _ChainInfo, extrinsicHash: string): string | undefined {
+function getBlockExplorerAccountRoute (explorerLink: string) {
+  if (explorerLink.includes('explorer.subspace.network')) {
+    return 'accounts';
+  }
+
+  if (explorerLink.includes('subscan.io')) {
+    return 'account';
+  }
+
+  return 'address';
+}
+
+function getBlockExplorerTxRoute (chainInfo: _ChainInfo) {
+  if (_isPureEvmChain(chainInfo)) {
+    return 'tx';
+  }
+
+  return 'extrinsic';
+}
+
+export function getExplorerLink (chainInfo: _ChainInfo, value: string, type: 'account' | 'tx'): string | undefined {
   const explorerLink = _getBlockExplorerFromChain(chainInfo);
 
-  if (_isPureEvmChain(chainInfo)) {
-    if (explorerLink) {
-      return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}tx/${extrinsicHash}`);
-    }
-  } else {
-    const explorerLink = _getBlockExplorerFromChain(chainInfo);
+  if (explorerLink && type === 'account') {
+    const route = getBlockExplorerAccountRoute(explorerLink);
 
-    if (explorerLink) {
-      return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}extrinsic/${extrinsicHash}`);
-    }
+    return `${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}${route}/${value}`;
+  }
+
+  if (explorerLink && value.startsWith('0x')) {
+    const route = getBlockExplorerTxRoute(chainInfo);
+
+    return (`${explorerLink}${explorerLink.endsWith('/') ? '' : '/'}${route}/${value}`);
   }
 
   return undefined;

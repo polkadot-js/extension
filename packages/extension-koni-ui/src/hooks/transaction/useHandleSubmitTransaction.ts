@@ -10,7 +10,7 @@ const useHandleSubmitTransaction = (onDone: (extrinsicHash: string) => void, set
   const notify = useNotification();
 
   const onSuccess = useCallback((rs: SWTransactionResponse) => {
-    const { errors, extrinsicHash, warnings } = rs;
+    const { errors, id, warnings } = rs;
 
     if (errors.length || warnings.length) {
       if (errors[0]?.message !== 'User reject request') {
@@ -23,8 +23,8 @@ const useHandleSubmitTransaction = (onDone: (extrinsicHash: string) => void, set
       if (!errors.length) {
         warnings[0] && setIgnoreWarnings?.(true);
       }
-    } else if (extrinsicHash) {
-      onDone(extrinsicHash);
+    } else if (id) {
+      onDone(id);
     }
   }, [notify, onDone, setIgnoreWarnings]);
 

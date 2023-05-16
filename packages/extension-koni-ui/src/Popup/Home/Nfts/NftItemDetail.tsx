@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CustomModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useNavigateOnChangeAccount } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -9,12 +10,11 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import useGetChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import useGetAccountInfoByAddress from '@subwallet/extension-koni-ui/hooks/screen/common/useGetAccountInfoByAddress';
-import useScanExplorerAddressUrl from '@subwallet/extension-koni-ui/hooks/screen/home/useScanExplorerAddressUrl';
 import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
-import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, Logo, ModalContext, SwModal } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
@@ -26,7 +26,6 @@ import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import ChainLogoMap from '../../../assets/logo';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import Transaction from '../../Transaction/Transaction';
 import SendNFT from '../../Transaction/variants/SendNFT';
@@ -67,7 +66,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const originChainInfo = useGetChainInfo(nftItem.chain);
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem.owner || '');
-  const accountExternalUrl = useScanExplorerAddressUrl(nftItem.chain, nftItem.owner);
+  const accountExternalUrl = getExplorerLink(originChainInfo, nftItem.owner, 'account');
 
   useNavigateOnChangeAccount('/home/nfts/collections');
 
@@ -119,14 +118,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const originChainLogo = useCallback(() => {
     return (
-      <Image
-        height={token.fontSizeXL}
+      <Logo
+        network={originChainInfo.slug}
         shape={'circle'}
-        src={ChainLogoMap[nftItem.chain]}
-        width={token.fontSizeXL}
+        size={token.fontSizeXL}
       />
     );
-  }, [nftItem.chain, token.fontSizeXL]);
+  }, [originChainInfo.slug, token.fontSizeXL]);
 
   const ownerInfo = useCallback(() => {
     return (

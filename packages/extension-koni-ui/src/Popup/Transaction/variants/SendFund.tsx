@@ -630,6 +630,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               label={t('Send to account')}
+              saveAddress={true}
               showAddressBook={true}
               showScanner={true}
             />

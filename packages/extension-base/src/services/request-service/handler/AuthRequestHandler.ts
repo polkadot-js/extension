@@ -79,7 +79,7 @@ export default class AuthRequestHandler {
       update(this.authorizeCached);
     } else {
       this.authorizeStore.get('authUrls', (data) => {
-        this.authorizeCached = data;
+        this.authorizeCached = data || {};
         update(this.authorizeCached);
       });
     }
@@ -326,5 +326,14 @@ export default class AuthRequestHandler {
         resolve(true);
       });
     });
+  }
+
+  public resetWallet () {
+    for (const request of Object.values(this.#authRequestsV2)) {
+      request.reject(new Error('Reset wallet'));
+    }
+
+    this.authSubjectV2.next([]);
+    this.setAuthorize({});
   }
 }

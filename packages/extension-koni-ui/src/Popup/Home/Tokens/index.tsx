@@ -52,7 +52,7 @@ const Component = (): React.ReactElement => {
           const containerProps = containerRef.current.getBoundingClientRect();
 
           topBlockRef.current.style.position = 'fixed';
-          topBlockRef.current.style.top = `${containerProps.top}px`;
+          topBlockRef.current.style.top = `${Math.floor(containerProps.top)}px`;
           topBlockRef.current.style.left = `${containerProps.left}px`;
           topBlockRef.current.style.right = `${containerProps.right}px`;
           topBlockRef.current.style.width = `${containerProps.width}px`;
@@ -100,7 +100,7 @@ const Component = (): React.ReactElement => {
       if (topBlockRef.current && containerRef.current) {
         const containerProps = containerRef.current.getBoundingClientRect();
 
-        topBlockRef.current.style.top = `${containerProps.top}px`;
+        topBlockRef.current.style.top = `${Math.floor(containerProps.top)}px`;
         topBlockRef.current.style.left = `${containerProps.left}px`;
         topBlockRef.current.style.right = `${containerProps.right}px`;
         topBlockRef.current.style.width = `${containerProps.width}px`;

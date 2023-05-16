@@ -127,6 +127,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount } = useSelector((root) => root.accountState);
   const { historyList: rawHistoryList } = useSelector((root) => root.transactionHistory);
+  const { chainInfoMap } = useSelector((root) => root.chainStore);
 
   const isActive = checkActive(modalId);
 
@@ -341,11 +342,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const searchFunc = useCallback((item: TransactionHistoryItem, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
+    const fromName = item.fromName?.toLowerCase();
+    const toName = item.toName?.toLowerCase();
+    const symbol = (item.amount?.symbol || item.fee?.symbol || item.tip?.symbol)?.toLowerCase();
+    const network = chainInfoMap[item.chain]?.name?.toLowerCase();
 
     return (
-      (!!item.fromName && item.fromName.toLowerCase().includes(searchTextLowerCase))
+      fromName?.includes(searchTextLowerCase) ||
+      toName?.includes(searchTextLowerCase) ||
+      symbol?.includes(searchTextLowerCase) ||
+      network?.includes(searchTextLowerCase)
     );
-  }, []);
+  }, [chainInfoMap]);
 
   const groupBy = useCallback((item: TransactionHistoryItem) => {
     return customFormatDate(item.time, '#MMM# #DD#, #YYYY#');

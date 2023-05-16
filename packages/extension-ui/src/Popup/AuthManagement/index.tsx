@@ -10,8 +10,7 @@ import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handl
 
 import animTrusted from '../../assets/anim_trusted.svg';
 import helpIcon from '../../assets/help.svg';
-import { AnimatedSvg, ButtonArea, LearnMore, ScrollWrapper, Svg, VerticalSpace } from '../../components';
-import HelperFooter from '../../components/HelperFooter';
+import { AnimatedSvg, ButtonArea, HelperFooter, LearnMore, ScrollWrapper, Svg, VerticalSpace } from '../../components';
 import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';

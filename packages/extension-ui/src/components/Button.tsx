@@ -18,7 +18,7 @@ interface Props extends ThemeProps {
   isSuccess?: boolean;
   secondary?: boolean;
   tertiary?: boolean;
-  onClick?: () => void | Promise<void | boolean>;
+  onClick?: () => void;
   to?: string;
 }
 
@@ -29,9 +29,8 @@ function Button({ children, className = '', isBusy, isDisabled, onClick, to }: P
       return;
     }
 
-    // TODO: check why is it giving errors
     if (onClick) {
-      onClick()?.catch(console.error);
+      onClick();
     }
 
     if (to) {

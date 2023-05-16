@@ -26,7 +26,7 @@ interface Props {
   setGenesis: (newGenesisHash: string) => void;
   isBusy: boolean;
   onBackClick?: () => void;
-  onCreate: (name: string, password: string) => void | Promise<void | boolean>;
+  onCreate: (name: string, password: string) => void;
   onNameChange: (name: string) => void;
   onPasswordChange?: (password: string) => void;
   isDeriving?: boolean;
@@ -77,9 +77,9 @@ function AccountNamePasswordCreation({
   const options = useGenesisHashOptions();
   const { master } = useContext(AccountContext);
 
-  const _onCreate = useCallback(async () => {
+  const _onCreate = useCallback(() => {
     if (name && password) {
-      await onCreate(name, password);
+      onCreate(name, password);
     }
   }, [name, password, onCreate]);
 

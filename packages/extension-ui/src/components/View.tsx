@@ -6,8 +6,10 @@ import type { ThemeProps } from '../types';
 import React, { useCallback, useState } from 'react';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
-// FIXME We should not import from index when this one is imported there as well
-import { AvailableThemes, chooseTheme, Main, themes, ThemeSwitchContext } from '.';
+import { ThemeSwitchContext } from './contexts';
+import Main from './Main';
+import { AvailableThemes, chooseTheme, themes } from './themes';
+
 
 interface Props {
   children: React.ReactNode;

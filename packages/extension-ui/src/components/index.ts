@@ -47,8 +47,7 @@ export { MnemonicPill, MnemonicInput } from './Mnemonic';
 export { default as SplashHandler } from './SplashHandler';
 export { default as Video } from './Video';
 export { default as EditMenuCard } from './EditMenuCard';
-// TODO: Debug problems with importing this component
-// export { default as HelperFooter } from './HelperFooter';
+export { default as HelperFooter } from './HelperFooter';
 export { default as ScrollWrapper } from './ScrollWrapper';
 export { default as BottomWrapper } from './BottomWrapper';
 export { default as WarningBox } from './WarningBox';

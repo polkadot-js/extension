@@ -16,11 +16,11 @@ import {
   AnimatedSvg,
   Button,
   ButtonArea,
+  HelperFooter,
   LearnMore,
   Svg,
   VerticalSpace
 } from '../components';
-import HelperFooter from '../components/HelperFooter';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { LINKS } from '../links';

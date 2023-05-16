@@ -239,7 +239,6 @@ export default class Extension {
     return { list: this.#state.authUrls };
   }
 
-  // FIXME This looks very much like what we have in accounts
   private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(authorize.requests)'>(id, port);
     const subscription = this.#state.authSubject.subscribe((requests: AuthorizeRequest[]): void => cb(requests));
@@ -480,7 +479,6 @@ export default class Extension {
     };
   }
 
-  // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(signing.requests)'>(id, port);
     const subscription = this.#state.signSubject.subscribe((requests: SigningRequest[]): void => cb(requests));

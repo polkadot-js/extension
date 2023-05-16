@@ -8,8 +8,16 @@ import React, { useCallback, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
 import helpIcon from '../../assets/help.svg';
-import { AccountContext, ActionContext, BottomWrapper, Button, ButtonArea, LearnMore, Svg } from '../../components';
-import HelperFooter from '../../components/HelperFooter';
+import {
+  AccountContext,
+  ActionContext,
+  BottomWrapper,
+  Button,
+  ButtonArea,
+  HelperFooter,
+  LearnMore,
+  Svg,
+} from '../../components';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';

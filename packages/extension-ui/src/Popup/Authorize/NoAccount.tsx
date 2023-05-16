@@ -12,8 +12,7 @@ import { deleteAuthRequest } from '@polkadot/extension-ui/messaging';
 import animatedWarning from '../../assets/anim_warning.svg';
 import border from '../../assets/border.svg';
 import helpIcon from '../../assets/help.svg';
-import { AnimatedSvg, Button, ButtonArea, LearnMore, Link, Svg, VerticalSpace } from '../../components';
-import HelperFooter from '../../components/HelperFooter';
+import { AnimatedSvg, Button, ButtonArea, HelperFooter, LearnMore, Link, Svg, VerticalSpace } from '../../components';
 import { LINKS } from '../../links';
 import { Z_INDEX } from '../../zindex';
 

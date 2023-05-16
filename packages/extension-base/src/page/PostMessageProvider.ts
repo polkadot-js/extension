@@ -65,7 +65,6 @@ export default class PostMessageProvider implements InjectedProvider {
    */
   // eslint-disable-next-line @typescript-eslint/require-await
   public async connect (): Promise<void> {
-    // FIXME This should see if the extension's state's provider can disconnect
     console.error('PostMessageProvider.disconnect() is not implemented.');
   }
 
@@ -74,7 +73,6 @@ export default class PostMessageProvider implements InjectedProvider {
    */
   // eslint-disable-next-line @typescript-eslint/require-await
   public async disconnect (): Promise<void> {
-    // FIXME This should see if the extension's state's provider can disconnect
     console.error('PostMessageProvider.disconnect() is not implemented.');
   }
 
@@ -82,7 +80,7 @@ export default class PostMessageProvider implements InjectedProvider {
    * @summary `true` when this provider supports subscriptions
    */
   public get hasSubscriptions (): boolean {
-    // FIXME This should see if the extension's state's provider has subscriptions
+    // Our state provider (packages/extension-base/src/background/handlers/State.ts) supports subscriptions
     return true;
   }
 
@@ -165,10 +163,6 @@ export default class PostMessageProvider implements InjectedProvider {
   public async unsubscribe (type: string, method: string, id: number): Promise<boolean> {
     const subscription = `${type}::${id}`;
 
-    // FIXME This now could happen with re-subscriptions. The issue is that with a re-sub
-    // the assigned id now does not match what the API user originally received. It has
-    // a slight complication in solving - since we cannot rely on the send id, but rather
-    // need to find the actual subscription id to map it
     if (isUndefined(this.#subscriptions[subscription])) {
       l.debug((): string => `Unable to find active subscription=${subscription}`);
 

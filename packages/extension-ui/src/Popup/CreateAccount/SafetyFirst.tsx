@@ -8,8 +8,7 @@ import styled from 'styled-components';
 
 import animatedLockIcon from '../../assets/anim_locked.svg';
 import helpIcon from '../../assets/help.svg';
-import { AnimatedSvg, Button, ButtonArea, LearnMore, Svg, VerticalSpace } from '../../components';
-import HelperFooter from '../../components/HelperFooter';
+import { AnimatedSvg, Button, ButtonArea, HelperFooter, LearnMore, Svg, VerticalSpace } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';
 

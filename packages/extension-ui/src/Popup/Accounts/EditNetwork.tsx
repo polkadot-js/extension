@@ -16,13 +16,13 @@ import {
   Button,
   ButtonArea,
   Checkbox,
+  HelperFooter,
   LearnMore,
   RadioGroup,
   ScrollWrapper,
   Svg,
   VerticalSpace
 } from '../../components';
-import HelperFooter from '../../components/HelperFooter';
 import { ALEPH_ZERO_TESTNET_GENESIS_HASH } from '../../constants';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';

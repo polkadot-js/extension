@@ -15,6 +15,7 @@ import {
   Address,
   Button,
   ButtonArea,
+  HelperFooter,
   InputWithLabel,
   Label,
   LearnMore,
@@ -23,7 +24,6 @@ import {
   VerticalSpace,
   Warning
 } from '../../components';
-import HelperFooter from '../../components/HelperFooter';
 import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';

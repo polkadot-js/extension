@@ -4,7 +4,7 @@
 import Common from '@ethereumjs/common';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { ConfirmationDefinitions, ConfirmationsQueue, ConfirmationsQueueItemOptions, ConfirmationType, EvmProviderErrorType, RequestConfirmationComplete } from '@subwallet/extension-base/background/KoniTypes';
-import { Resolver } from '@subwallet/extension-base/background/types';
+import { ConfirmationRequestBase, Resolver } from '@subwallet/extension-base/background/types';
 import RequestService from '@subwallet/extension-base/services/request-service';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
 import { isInternalRequest } from '@subwallet/extension-base/utils/request';
@@ -223,5 +223,27 @@ export default class EvmRequestHandler {
     }
 
     return true;
+  }
+
+  public resetWallet () {
+    const confirmations = this.confirmationsQueueSubject.getValue();
+
+    for (const [type, requests] of Object.entries(confirmations)) {
+      for (const confirmation of Object.values(requests)) {
+        const { id } = confirmation as ConfirmationRequestBase;
+        const { resolver } = this.confirmationsPromiseMap[id];
+
+        if (!resolver || !confirmation) {
+          console.error('Not found confirmation', type, id);
+        } else {
+          resolver.reject(new Error('Reset wallet'));
+        }
+
+        delete this.confirmationsPromiseMap[id];
+        delete confirmations[type as ConfirmationType][id];
+      }
+    }
+
+    this.confirmationsQueueSubject.next(confirmations);
   }
 }

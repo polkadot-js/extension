@@ -66,7 +66,7 @@ export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount
   const bnCollatorMinStake = new BN(selectedCollator.minBond || '0');
   const bnMinStake = bnCollatorMinStake > bnChainMinStake ? bnCollatorMinStake : bnChainMinStake;
 
-  if (!nominatorMetadata) {
+  if (!nominatorMetadata || nominatorMetadata.status === StakingStatus.NOT_STAKING) {
     if (!bnTotalStake.gte(bnMinStake)) {
       errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
     }
@@ -181,7 +181,15 @@ export async function getParaChainNominatorMetadata (chainInfo: _ChainInfo, addr
   const delegatorState = _delegatorState.toPrimitive() as unknown as PalletParachainStakingDelegator;
 
   if (!delegatorState) {
-    return;
+    return {
+      chain: chainInfo.slug,
+      type: StakingType.NOMINATED,
+      address,
+      status: StakingStatus.NOT_STAKING,
+      activeStake: '0',
+      nominations: [],
+      unstakings: []
+    } as NominatorMetadata;
   }
 
   let bnTotalActiveStake = BN_ZERO;

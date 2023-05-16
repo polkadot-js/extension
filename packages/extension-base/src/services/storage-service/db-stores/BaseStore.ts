@@ -29,4 +29,8 @@ export default class BaseStore<T> {
   public remove (record: T): Promise<void> {
     return this.table.delete(record);
   }
+
+  public clear (): Promise<void> {
+    return this.table.clear();
+  }
 }

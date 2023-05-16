@@ -67,7 +67,7 @@ export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: str
 
     bnTotalStake = bnTotalStake.add(bnCurrentActiveStake);
 
-    if (!bnCurrentActiveStake.gt(BN_ZERO)) {
+    if (nominatorMetadata.unstakings.length > 0) {
       errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));
     }
   }
@@ -84,7 +84,7 @@ export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: st
   let bnTotalStake = new BN(amount);
   const bnMinStake = new BN(chainStakingMetadata.minStake);
 
-  if (!nominatorMetadata) {
+  if (!nominatorMetadata || nominatorMetadata.status === StakingStatus.NOT_STAKING) {
     if (!bnTotalStake.gte(bnMinStake)) {
       errors.push(new TransactionError(StakingTxErrorType.NOT_ENOUGH_MIN_STAKE));
     }
@@ -218,7 +218,16 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
   const bonded = _bonded.toHuman();
 
   if (!ledger) {
-    return;
+    return {
+      chain,
+      type: StakingType.NOMINATED,
+      status: StakingStatus.NOT_STAKING,
+      address: address,
+      activeStake: '0',
+
+      nominations: [],
+      unstakings: []
+    } as NominatorMetadata;
   }
 
   const activeStake = ledger.active.toString();
@@ -316,7 +325,15 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
   const currentEra = _currentEra.toString();
 
   if (!poolMemberInfo) {
-    return;
+    return {
+      chain: chainInfo.slug,
+      type: StakingType.POOLED,
+      address,
+      status: StakingStatus.NOT_STAKING,
+      activeStake: '0',
+      nominations: [], // can only join 1 pool at a time
+      unstakings: []
+    } as NominatorMetadata;
   }
 
   let stakingStatus = StakingStatus.NOT_EARNING;

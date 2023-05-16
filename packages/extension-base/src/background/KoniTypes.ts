@@ -400,12 +400,15 @@ export interface UiSettings {
   accountAllLogo: string;
   theme: ThemeNames;
   camera: boolean;
+  timeAutoLock: number;
   enableChainPatrol: boolean;
 }
 
 export type RequestSettingsType = UiSettings;
 
 export type RequestCameraSettings = { camera: boolean };
+
+export type RequestChangeTimeAutoLock = { autoLockTime: number };
 
 export type RequestChangeEnableChainPatrol = { enable: boolean };
 
@@ -570,6 +573,7 @@ export enum BasicTxErrorType {
   SEND_TRANSACTION_FAILED = 'SEND_TRANSACTION_FAILED',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   UNSUPPORTED = 'UNSUPPORTED',
+  TIMEOUT = 'TIMEOUT',
   NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'NOT_ENOUGH_EXISTENTIAL_DEPOSIT',
 }
 
@@ -1458,7 +1462,8 @@ export enum StakingStatus {
   EARNING_REWARD = 'EARNING_REWARD',
   PARTIALLY_EARNING = 'PARTIALLY_EARNING',
   NOT_EARNING = 'NOT_EARNING',
-  WAITING = 'WAITING'
+  WAITING = 'WAITING',
+  NOT_STAKING = 'NOT_STAKING'
 }
 
 export interface NominatorMetadata {
@@ -1651,26 +1656,6 @@ export type RequestCreateCompoundStakeExternal = InternalRequestSign<TuringStake
 
 export type RequestCancelCompoundStakeExternal = InternalRequestSign<TuringCancelStakeCompoundParams>;
 
-/// Keyring state
-
-export interface KeyringState {
-  isReady: boolean;
-  hasMasterPassword: boolean;
-  isLocked: boolean;
-}
-
-export interface AddressBookState {
-  contacts: AddressJson[];
-  recent: AddressJson[];
-}
-
-export interface RequestChangeMasterPassword {
-  oldPassword?: string;
-  newPassword: string;
-
-  createNew: boolean;
-}
-
 export enum ChainEditStandard {
   EVM = 'EVM',
   SUBSTRATE = 'SUBSTRATE',
@@ -1706,10 +1691,33 @@ export interface ChainSpecInfo {
   decimals: number
 }
 
+/// Keyring state
+
+export interface KeyringState {
+  isReady: boolean;
+  hasMasterPassword: boolean;
+  isLocked: boolean;
+}
+
+export interface AddressBookState {
+  contacts: AddressJson[];
+  recent: AddressJson[];
+}
+
+// Change master password
+export interface RequestChangeMasterPassword {
+  oldPassword?: string;
+  newPassword: string;
+
+  createNew: boolean;
+}
+
 export interface ResponseChangeMasterPassword {
   status: boolean;
   errors: string[];
 }
+
+// Migrate password
 
 export interface RequestMigratePassword {
   address: string;
@@ -1721,6 +1729,8 @@ export interface ResponseMigratePassword {
   errors: string[];
 }
 
+// Unlock
+
 export interface RequestUnlockKeyring {
   password: string;
 }
@@ -1730,6 +1740,8 @@ export interface ResponseUnlockKeyring {
   errors: string[];
 }
 
+// Export mnemonic
+
 export interface RequestKeyringExportMnemonic {
   address: string;
   password: string;
@@ -1737,6 +1749,17 @@ export interface RequestKeyringExportMnemonic {
 
 export interface ResponseKeyringExportMnemonic {
   result: string;
+}
+
+// Reset wallet
+
+export interface RequestResetWallet {
+  resetAll: boolean;
+}
+
+export interface ResponseResetWallet {
+  status: boolean;
+  errors: string[];
 }
 
 /// Signing
@@ -1924,6 +1947,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
   'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
+  'pri(settings.saveAutoLockTime)': [RequestChangeTimeAutoLock, boolean];
   'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
   'pri(settings.getLogoMaps)': [null, AllLogoMap];
 
@@ -1982,6 +2006,7 @@ export interface KoniRequestSignatures {
   'pri(keyring.unlock)': [RequestUnlockKeyring, ResponseUnlockKeyring];
   'pri(keyring.lock)': [null, void];
   'pri(keyring.export.mnemonic)': [RequestKeyringExportMnemonic, ResponseKeyringExportMnemonic];
+  'pri(keyring.reset)': [RequestResetWallet, ResponseResetWallet];
 
   // Signing
   'pri(signing.approve.passwordV2)': [RequestSigningApprovePasswordV2, boolean];

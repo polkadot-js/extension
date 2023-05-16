@@ -49,9 +49,10 @@ export const usePredefinedModal = () => {
 };
 
 export const WalletModalContext = ({ children }: Props) => {
-  const { activeModal, hasActiveModal, inactiveModals } = useContext(ModalContext);
+  const { activeModal, hasActiveModal, inactiveAll, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
+  const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
   useExcludeModal('confirmations');
 
@@ -73,6 +74,12 @@ export const WalletModalContext = ({ children }: Props) => {
       return prev;
     });
   }, [setSearchParams]);
+
+  useEffect(() => {
+    if (hasMasterPassword && isLocked) {
+      inactiveAll();
+    }
+  }, [hasMasterPassword, inactiveAll, isLocked]);
 
   return <>
     <div

@@ -83,7 +83,15 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
   const unstakingInfo = _unstakingInfo.toPrimitive() as unknown as Record<string, number>;
 
   if (!delegatorState && !unstakingInfo) {
-    return;
+    return {
+      chain: chainInfo.slug,
+      type: StakingType.NOMINATED,
+      address,
+      status: StakingStatus.NOT_STAKING,
+      activeStake: '0',
+      nominations: [],
+      unstakings: []
+    } as NominatorMetadata;
   }
 
   let activeStake = '0';

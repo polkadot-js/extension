@@ -13,7 +13,7 @@ import { noop } from '@subwallet/extension-koni-ui/utils';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, LockLaminated } from 'phosphor-react';
+import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, LockLaminated, ShieldStar } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -35,27 +35,13 @@ interface SecurityItem {
   key: SecurityType;
   title: string;
   url: string;
+  disabled: boolean;
 }
 
 interface AutoLockOption {
   label: string;
   value: number;
 }
-
-const items: SecurityItem[] = [
-  {
-    icon: Key,
-    key: SecurityType.WALLET_PASSWORD,
-    title: 'Change wallet password',
-    url: '/keyring/change-password'
-  },
-  {
-    icon: GlobeHemisphereEast,
-    key: SecurityType.WEBSITE_ACCESS,
-    title: 'Manage website access',
-    url: '/settings/dapp-access'
-  }
-];
 
 const modalId = EDIT_AUTO_LOCK_TIME_MODAL;
 
@@ -82,6 +68,31 @@ const Component: React.FC<Props> = (props: Props) => {
     value: value,
     label: t('{{time}} minutes', { replace: { time: value } })
   })), [t]);
+
+  const items = useMemo((): SecurityItem[] => [
+    {
+      icon: Key,
+      key: SecurityType.WALLET_PASSWORD,
+      title: t('Change wallet password'),
+      url: '/keyring/change-password',
+      disabled: noAccount
+    },
+    {
+      icon: LockLaminated,
+      key: SecurityType.AUTO_LOCK,
+      title: t('Extension auto lock'),
+      url: '',
+      disabled: false
+    }
+  ], [noAccount, t]);
+
+  const websiteAccessItem = useMemo((): SecurityItem => ({
+    icon: GlobeHemisphereEast,
+    key: SecurityType.WEBSITE_ACCESS,
+    title: t('Manage website access'),
+    url: '/settings/dapp-access',
+    disabled: noAccount
+  }), [noAccount, t]);
 
   const [loadingCamera, setLoadingCamera] = useState(false);
   const [loadingChainPatrol, setLoadingChainPatrol] = useState(false);
@@ -138,12 +149,6 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, []);
 
-  const onClickItem = useCallback((item: SecurityItem) => {
-    return () => {
-      navigate(item.url);
-    };
-  }, [navigate]);
-
   const onOpenModal = useCallback(() => {
     activeModal(modalId);
   }, [activeModal]);
@@ -152,12 +157,58 @@ const Component: React.FC<Props> = (props: Props) => {
     inactiveModal(modalId);
   }, [inactiveModal]);
 
+  const onClickItem = useCallback((item: SecurityItem) => {
+    return () => {
+      switch (item.key) {
+        case SecurityType.AUTO_LOCK:
+          onOpenModal();
+          break;
+        default:
+          navigate(item.url);
+      }
+    };
+  }, [navigate, onOpenModal]);
+
   const onSelectTime = useCallback((item: AutoLockOption) => {
     return () => {
       inactiveModal(modalId);
       saveAutoLockTime(item.value).finally(noop);
     };
   }, [inactiveModal]);
+
+  const onRenderItem = useCallback((item: SecurityItem) => {
+    return (
+      <SettingItem
+        className={CN(
+          'security-item',
+          `security-type-${item.key}`,
+          {
+            disabled: item.disabled
+          }
+        )}
+        key={item.key}
+        leftItemIcon={(
+          <BackgroundIcon
+            backgroundColor={'var(--icon-bg-color)'}
+            phosphorIcon={item.icon}
+            size='sm'
+            type='phosphor'
+            weight='fill'
+          />
+        )}
+        name={item.title}
+        onPressItem={item.disabled ? undefined : onClickItem(item)}
+        rightItem={(
+          <Icon
+            className='security-item-right-icon'
+            phosphorIcon={CaretRight}
+            size='sm'
+            type='phosphor'
+          />
+        )}
+      />
+    );
+  }, [onClickItem]);
 
   useEffect(() => {
     if (camera) {
@@ -180,39 +231,35 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <div className='body-container'>
           <div className='items-container'>
-            {
-              items.map((item) => (
-                <SettingItem
-                  className={CN(
-                    'security-item',
-                    `security-type-${item.key}`,
-                    {
-                      disabled: noAccount
-                    }
-                  )}
-                  key={item.key}
-                  leftItemIcon={(
-                    <BackgroundIcon
-                      backgroundColor={'var(--icon-bg-color)'}
-                      phosphorIcon={item.icon}
-                      size='sm'
-                      type='phosphor'
-                      weight='fill'
-                    />
-                  )}
-                  name={t(item.title)}
-                  onPressItem={noAccount ? undefined : onClickItem(item)}
-                  rightItem={(
-                    <Icon
-                      className='security-item-right-icon'
-                      phosphorIcon={CaretRight}
-                      size='sm'
-                      type='phosphor'
-                    />
-                  )}
-                />
-              ))
-            }
+            {items.map(onRenderItem)}
+          </div>
+          <div className='setting-config-container'>
+            <div className='label'>
+              {t('Website access')}
+            </div>
+            <div className='items-container'>
+              {onRenderItem(websiteAccessItem)}
+              <SettingItem
+                className={CN('security-item', `security-type-${SecurityType.CHAIN_PATROL_SERVICE}`)}
+                leftItemIcon={(
+                  <BackgroundIcon
+                    backgroundColor={'var(--icon-bg-color)'}
+                    phosphorIcon={ShieldStar}
+                    size='sm'
+                    type='phosphor'
+                    weight='fill'
+                  />
+                )}
+                name={t('Advanced phishing detection')}
+                rightItem={(
+                  <Switch
+                    checked={enableChainPatrol}
+                    loading={loadingChainPatrol}
+                    onClick={updateChainPatrolEnable(enableChainPatrol)}
+                  />
+                )}
+              />
+            </div>
           </div>
           <div className='setting-config-container'>
             <div className='label'>
@@ -235,58 +282,6 @@ const Component: React.FC<Props> = (props: Props) => {
                   checked={camera}
                   loading={loadingCamera}
                   onClick={updateCamera(camera)}
-                />
-              )}
-            />
-          </div>
-          <div className='setting-config-container'>
-            <div className='label'>
-              {t('Phishing detect')}
-            </div>
-            <SettingItem
-              className={CN('security-item', `security-type-${SecurityType.CAMERA_ACCESS}`)}
-              leftItemIcon={(
-                <BackgroundIcon
-                  backgroundColor={'var(--icon-bg-color)'}
-                  phosphorIcon={Camera}
-                  size='sm'
-                  type='phosphor'
-                  weight='fill'
-                />
-              )}
-              name={t('ChainPatrol service')}
-              rightItem={(
-                <Switch
-                  checked={enableChainPatrol}
-                  loading={loadingChainPatrol}
-                  onClick={updateChainPatrolEnable(enableChainPatrol)}
-                />
-              )}
-            />
-          </div>
-          <div className='setting-config-container'>
-            <div className='label'>
-              {t('Auto lock')}
-            </div>
-            <SettingItem
-              className={CN('security-item', `security-type-${SecurityType.AUTO_LOCK}`)}
-              leftItemIcon={(
-                <BackgroundIcon
-                  backgroundColor={'var(--icon-bg-color)'}
-                  phosphorIcon={LockLaminated}
-                  size='sm'
-                  type='phosphor'
-                  weight='fill'
-                />
-              )}
-              name={t('Extension auto lock')}
-              onPressItem={onOpenModal}
-              rightItem={(
-                <Icon
-                  className='security-item-right-icon'
-                  phosphorIcon={CaretRight}
-                  size='sm'
-                  type='phosphor'
                 />
               )}
             />
@@ -371,18 +366,18 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     [`.security-type-${SecurityType.CHAIN_PATROL_SERVICE}`]: {
-      '--icon-bg-color': token['green-6'],
+      '--icon-bg-color': token['magenta-6'],
 
       '&:hover': {
-        '--icon-bg-color': token['green-7']
+        '--icon-bg-color': token['magenta-7']
       }
     },
 
     [`.security-type-${SecurityType.AUTO_LOCK}`]: {
-      '--icon-bg-color': token['geekblue-6'],
+      '--icon-bg-color': token['green-6'],
 
       '&:hover': {
-        '--icon-bg-color': token['geekblue-7']
+        '--icon-bg-color': token['green-7']
       }
     },
 
@@ -408,7 +403,7 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.setting-config-container': {
-      marginTop: token.marginLG,
+      marginTop: token.margin,
       display: 'flex',
       flexDirection: 'column',
       gap: token.size,

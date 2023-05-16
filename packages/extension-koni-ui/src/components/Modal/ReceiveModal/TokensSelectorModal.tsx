@@ -4,6 +4,7 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { TokenSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenSelectionItem';
 import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
@@ -27,17 +28,22 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
 
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
+
   const isActive = checkActive(modalId);
 
   const sectionRef = useRef<SwListSectionRef>(null);
 
   const searchFunction = useCallback((item: _ChainAsset, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
+    const chainName = chainInfoMap[item.originChain]?.name?.toLowerCase();
+    const symbol = item.symbol.toLowerCase();
 
     return (
-      item.symbol.toLowerCase().includes(searchTextLowerCase)
+      symbol.includes(searchTextLowerCase) ||
+      chainName.includes(searchTextLowerCase)
     );
-  }, []);
+  }, [chainInfoMap]);
 
   const onCancel = useCallback(() => {
     inactiveModal(modalId);

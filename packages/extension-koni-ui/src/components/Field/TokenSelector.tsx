@@ -85,11 +85,14 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
   const searchFunction = useCallback((item: TokenItemType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
+    const chainName = chainInfoMap[item.originChain]?.name?.toLowerCase();
+    const symbol = item.symbol.toLowerCase();
 
     return (
-      item.symbol.toLowerCase().includes(searchTextLowerCase)
+      symbol.includes(searchTextLowerCase) ||
+      chainName.includes(searchTextLowerCase)
     );
-  }, []);
+  }, [chainInfoMap]);
 
   const renderItem = useCallback((item: TokenItemType, selected: boolean) => {
     return (

@@ -276,7 +276,6 @@ export default class KoniState {
     this.onReady();
     this.onAccountAdd();
     this.onAccountRemove();
-    this.logger.log('Done init state');
   }
 
   private startSubscription () {

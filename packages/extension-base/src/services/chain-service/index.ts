@@ -477,7 +477,6 @@ export class ChainService {
 
     this.initApis();
     await this.initAssetSettings();
-    this.logger.log('Initiated chains, assets and APIs');
   }
 
   private initApis () { // TODO: this might be async
@@ -1349,7 +1348,6 @@ export class ChainService {
     await Promise.all(promiseList);
 
     if (update) {
-      console.log('Update chain connection state');
       this.chainStateMapSubject.next(chainStateMap);
     }
   }

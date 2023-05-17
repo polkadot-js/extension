@@ -111,8 +111,8 @@ export function useLedger (slug?: string, active = true): Result {
             : null;
 
           const errorMessage = e.message.includes('App does not seem to be open')
-            ? t<string>('App "{{network}}" does not seem to be open', { replace: { network: displayName.replaceAll(' network', '') } })
-            : t('Failed to connect, click here to retry');
+            ? t<string>('Can\'t connect. Please open "{{network}}" on Ledger', { replace: { network: displayName.replaceAll(' network', '') } })
+            : t('Fail to connect. Click to retry');
 
           setIsLocked(true);
           setWarning(warningMessage);

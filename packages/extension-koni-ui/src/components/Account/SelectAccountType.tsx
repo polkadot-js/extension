@@ -54,16 +54,16 @@ const Component: React.FC<SelectAccountTypeProps> = (props: SelectAccountTypePro
     {
       icon: 'polkadot',
       key: SUBSTRATE_ACCOUNT_TYPE,
-      label: 'Substrate account',
+      label: t('Substrate'),
       onClick: onClickItem(SUBSTRATE_ACCOUNT_TYPE)
     },
     {
       icon: 'ethereum',
       key: EVM_ACCOUNT_TYPE,
-      label: 'Ethereum account',
+      label: t('Ethereum'),
       onClick: onClickItem(EVM_ACCOUNT_TYPE)
     }
-  ]), [onClickItem]);
+  ]), [t, onClickItem]);
 
   return (
     <div className={className}>
@@ -90,7 +90,7 @@ const Component: React.FC<SelectAccountTypeProps> = (props: SelectAccountTypePro
                     size={28}
                   />
                 )}
-                name={t<string>(item.label)}
+                name={item.label}
                 rightItem={(
                   <Icon
                     className={'__selected-icon'}

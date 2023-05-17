@@ -123,7 +123,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       id={modalId}
       maskClosable={false}
       onCancel={selected ? undefined : onBack}
-      title={t('Select Account')}
+      title={t('Select account')}
     >
       <SwList.Section
         displayRow={true}

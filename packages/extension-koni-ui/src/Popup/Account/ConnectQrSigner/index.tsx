@@ -35,7 +35,7 @@ const FooterIcon = (
 interface Props extends ThemeProps {
   title: string;
   subTitle: string;
-  description: string;
+  deviceName: string;
   instructionUrl: string;
   logoUrl: string;
 }
@@ -45,7 +45,7 @@ const modalId = 'attach-qr-signer-scanner-modal';
 const Component: React.FC<Props> = (props: Props) => {
   useAutoNavigateToCreatePassword();
 
-  const { className, description, instructionUrl, logoUrl, subTitle, title } = props;
+  const { className, deviceName, instructionUrl, logoUrl, subTitle, title } = props;
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
 
@@ -143,7 +143,8 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </div>
           <div className='instruction'>
-            <span>{t('Follow')}&nbsp;</span>
+            <span>{deviceName}</span>
+            <span>&nbsp;{t('will provide you with a QR code to scan. Read')}&nbsp;</span>
             <a
               className='link'
               href={instructionUrl}
@@ -151,7 +152,7 @@ const Component: React.FC<Props> = (props: Props) => {
               {t('this instructions')}
             </a>
             <span>,&nbsp;</span>
-            <span>{description}</span>
+            <span>{t('for more details.')}</span>
           </div>
           <Form.Item
             help={validateState.message}

@@ -246,7 +246,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <div className={CN('container')}>
           <div className='sub-title'>
-            {t('Connect and unlock your Ledger, then open the DApps on your Ledger.')}
+            {t('Connect and unlock your Ledger, then open the selected network on your Ledger.')}
           </div>
           {
             firstStep && (
@@ -275,6 +275,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   items={networks}
                   label={t('Select network')}
                   onChange={onChainChange}
+                  placeholder={t('Select network')}
                   value={chain}
                 />
                 <Button
@@ -295,12 +296,12 @@ const Component: React.FC<Props> = (props: Props) => {
                   <div className='ledger-button-content'>
                     <span className='ledger-info-text'>
                       {t(isConnected
-                        ? 'Connected ledger'
+                        ? 'Device found'
                         : warning
                           ? 'Please unlock your Ledger'
                           : error || (
                             ledger
-                              ? 'Waiting'
+                              ? 'Loading'
                               : 'Searching Ledger device'
                           )
                       )}

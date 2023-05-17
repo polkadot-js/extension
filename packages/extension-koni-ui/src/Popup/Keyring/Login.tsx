@@ -86,7 +86,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             {t('Welcome back!')}
           </div>
           <div className='sub-title'>
-            {t('Enter your password to unlock account')}
+            {t('Enter your password to unlock wallet')}
           </div>
           <Form
             form={form}
@@ -125,7 +125,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 className='forgot-password'
                 onClick={onReset}
               >
-                {t('Forgot password?')}
+                {t('Don’t remember your password?')}
               </div>
             </Form.Item>
           </Form>

@@ -18,7 +18,7 @@ const useDeleteAccount = () => {
       content: t('You will no longer be able to access this account via this extension'),
       id: modalId,
       okText: t('Remove'),
-      subTitle: t('You are about to remove the account'),
+      subTitle: t('Remove this account?'),
       title: t('Confirmation'),
       type: 'error'
     };

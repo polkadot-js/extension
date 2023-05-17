@@ -264,7 +264,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <Layout.WithSubHeaderOnly
         onBack={onBack}
         rightFooterButton={{
-          children: t('Import from Json'),
+          children: t('Import from Polkadot.{js}'),
           icon: FooterIcon,
           onClick: form.submit,
           disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
@@ -276,11 +276,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onClick: goHome
           }
         ]}
-        title={t<string>('Import from Json')}
+        title={t<string>('Import by JSON file')}
       >
         <div className={CN('container')}>
           <div className='description'>
-            {t('Please drag an drop the .json file you exported from Polkadot.js')}
+            {t('Drag and drop the JSON file you exported from Polkadot.{js}')}
           </div>
           <Form
             className='form-container'
@@ -295,10 +295,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 accept={'application/json'}
                 className='file-selector'
                 disabled={validating}
-                hint={t('Please drag an drop the .json file you exported from Polkadot.js')}
+                hint={t('Drag and drop the JSON file you exported from Polkadot.{js}')}
                 onChange={onChange}
                 statusHelp={fileValidateState.message}
-                title={t('Import from Polkadot.js')}
+                title={t('Import by JSON file')}
               />
             </Form.Item>
             {
@@ -337,12 +337,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   validateStatus={submitValidateState.status}
                 >
                   <div className='input-label'>
-                    {t('Please enter the password you set when creating your polkadot.js account')}
+                    {t('Please enter the password you have used when creating your Polkadot.{js} account')}
                   </div>
                   <Input
                     id={`${formName}_${passwordField}`}
                     onChange={onChangePassword}
-                    placeholder={t('Current password')}
+                    placeholder={t('Password')}
                     statusHelp={submitValidateState.message}
                     type='password'
                     value={password}
@@ -355,7 +355,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             className={className}
             id={modalId}
             onCancel={closeModal}
-            title={t('Import list')}
+            title={t('Accounts')}
           >
             <SwList.Section
               displayRow={true}

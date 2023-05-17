@@ -131,7 +131,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (changed) {
           setValidateState({
             status: 'error',
-            message: 'Seed phrase is required'
+            message: 'Private key is required'
           });
         }
       }
@@ -159,11 +159,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onClick: goHome
           }
         ]}
-        title={t<string>('Import via Private Key')}
+        title={t<string>('Import by private key')}
       >
         <div className='container'>
           <div className='description'>
-            {t('To import an existing wallet, please enter the private key here')}
+            {t('To import an existing wallet, please enter private key')}
           </div>
           <Form
             className='form-container'
@@ -177,7 +177,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               <Input.TextArea
                 className='private-key-input'
                 onChange={onChange}
-                placeholder={t('Enter or paste private key')}
+                placeholder={t('Enter private key')}
                 statusHelp={validateState.message}
                 value={autoCorrect || privateKey || ''}
               />

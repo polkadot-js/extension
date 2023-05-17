@@ -15,11 +15,11 @@ const Component: React.FC<ThemeProps> = () => {
 
   return (
     <ConnectQrSigner
-      description={t('Parity Signer will provide you QR code to scan')}
-      instructionUrl={t('Connect your QR wallet')}
+      description={t('Parity Signer')}
+      instructionUrl={''}
       logoUrl={LogosMap.parity}
-      subTitle={t('Open Parity Signer application on your smartphone to connect wallet')}
-      title={t('Connect your QR wallet')}
+      subTitle={t('Open Parity Signer on your phone to connect wallet')}
+      title={t('Connect Parity Signer')}
     />
   );
 };

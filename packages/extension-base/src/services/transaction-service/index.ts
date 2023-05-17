@@ -500,9 +500,9 @@ export default class TransactionService {
     console.log(`Transaction "${id}" is sent`);
   }
 
-  private onHasTransactionHash ({ extrinsicHash, id }: TransactionEventResponse) {
+  private onHasTransactionHash ({ blockHash, extrinsicHash, id }: TransactionEventResponse) {
     // Write processing transaction history
-    const updateData = { extrinsicHash, status: ExtrinsicStatus.PROCESSING };
+    const updateData = { extrinsicHash, status: ExtrinsicStatus.PROCESSING, blockHash: blockHash || '' };
 
     this.updateTransaction(id, updateData);
 
@@ -805,6 +805,7 @@ export default class TransactionService {
 
           if (!eventData.extrinsicHash || eventData.extrinsicHash === '') {
             eventData.extrinsicHash = txState.txHash.toHex();
+            eventData.blockHash = txState.status.asInBlock.toHex();
             emitter.emit('extrinsicHash', eventData);
           }
         }

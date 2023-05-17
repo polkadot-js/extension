@@ -33,7 +33,7 @@ const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
 };
 
 function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
-  if (item.status === ExtrinsicStatus.PROCESSING) {
+  if (item.status === ExtrinsicStatus.PROCESSING || item.status === ExtrinsicStatus.SUBMITTING) {
     return IconMap.processing;
   }
 
@@ -92,11 +92,14 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
     };
   }
 
-  const isProcessing = item.status === ExtrinsicStatus.PROCESSING;
-
-  if (isProcessing) {
+  if (item.status === ExtrinsicStatus.PROCESSING) {
     displayData.className = '-processing';
     displayData.typeName = nameMap.processing;
+  }
+
+  if (item.status === ExtrinsicStatus.SUBMITTING) {
+    displayData.className = '-processing';
+    displayData.typeName = nameMap.submitting;
   }
 
   return displayData;
@@ -202,6 +205,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const typeNameMap: Record<string, string> = useMemo(() => ({
     default: t('Transaction'),
+    submitting: t('Submitting...'),
     processing: t('Processing...'),
     send: t('Send'),
     received: t('Receive'),

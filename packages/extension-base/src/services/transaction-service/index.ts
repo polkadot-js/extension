@@ -328,7 +328,7 @@ export default class TransactionService {
     return getExplorerLink(chainInfo, transaction.extrinsicHash, 'tx');
   }
 
-  private transactionToHistories (id: string, eventLogs?: EventRecord[]): TransactionHistoryItem[] {
+  private transactionToHistories (id: string, startBlock?: number, nonce?: number, eventLogs?: EventRecord[]): TransactionHistoryItem[] {
     const transaction = this.getTransaction(id);
     const historyItem: TransactionHistoryItem = {
       origin: 'app',
@@ -345,8 +345,12 @@ export default class TransactionService {
       time: transaction.createdAt.getTime(),
       fee: transaction.estimateFee,
       blockNumber: 0, // Will be added in next step
-      blockHash: '' // Will be added in next step
+      blockHash: '', // Will be added in next step
+      nonce: nonce || 0,
+      startBlock: startBlock || 0
     };
+
+    console.log('historyItem', historyItem);
 
     const chainInfo = this.chainService.getChainInfoByKey(transaction.chain);
     const nativeAsset = _getChainNativeTokenBasicInfo(chainInfo);
@@ -490,12 +494,12 @@ export default class TransactionService {
     console.log(`Transaction "${id}" is signed`);
   }
 
-  private onSend ({ id }: TransactionEventResponse) {
+  private onSend ({ id, nonce, startBlock }: TransactionEventResponse) {
     // Update transaction status
     this.updateTransaction(id, { status: ExtrinsicStatus.SUBMITTING });
 
     // Create Input History Transaction History
-    this.historyService.insertHistories(this.transactionToHistories(id)).catch(console.error);
+    this.historyService.insertHistories(this.transactionToHistories(id, startBlock, nonce)).catch(console.error);
 
     console.log(`Transaction "${id}" is sent`);
   }
@@ -706,7 +710,7 @@ export default class TransactionService {
     };
 
     this.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
-      .then(({ isApproved, payload }) => {
+      .then(async ({ isApproved, payload }) => {
         if (isApproved) {
           let signedTransaction: string | undefined;
 
@@ -735,6 +739,10 @@ export default class TransactionService {
 
           // Send transaction
           this.handleTransactionTimeout(emitter, eventData);
+
+          // Add start info
+          eventData.nonce = txObject.nonce;
+          eventData.startBlock = await web3Api.eth.getBlockNumber();
           emitter.emit('send', eventData); // This event is needed after sending transaction with queue
           signedTransaction && web3Api.eth.sendSignedTransaction(signedTransaction)
             .once('transactionHash', (hash) => {
@@ -771,7 +779,7 @@ export default class TransactionService {
     return emitter;
   }
 
-  private signAndSendSubstrateTransaction ({ address, id, transaction, url }: SWTransaction): TransactionEmitter {
+  private signAndSendSubstrateTransaction ({ address, chain, id, transaction, url }: SWTransaction): TransactionEmitter {
     const emitter = new EventEmitter<TransactionEventMap>();
     const eventData: TransactionEventResponse = {
       id,
@@ -779,10 +787,15 @@ export default class TransactionService {
       warnings: []
     };
 
+    let startBlock = 0;
+
     (transaction as SubmittableExtrinsic).signAsync(address, {
       signer: {
         signPayload: async (payload: SignerPayloadJSON) => {
           const signing = await this.requestService.signInternalTransaction(id, address, url || EXTENSION_REQUEST_URL, payload);
+          const api = this.chainService.getSubstrateApi(chain);
+
+          startBlock = (await api.api.query.system.number()).toPrimitive() as number;
 
           return {
             id: (new Date()).getTime(),
@@ -795,6 +808,8 @@ export default class TransactionService {
       emitter.emit('signed', eventData);
 
       // Send transaction
+      eventData.nonce = rs.nonce.toNumber();
+      eventData.startBlock = startBlock;
       this.handleTransactionTimeout(emitter, eventData);
       emitter.emit('send', eventData); // This event is needed after sending transaction with queue
 

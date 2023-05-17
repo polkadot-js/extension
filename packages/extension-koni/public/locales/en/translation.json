@@ -1062,5 +1062,8 @@
   "We do not keep a copy of your password. If you’re having trouble unlocking your account, you will need to reset your wallet using the Secret Recovery Phrase": "",
   "Reset account": "",
   "Erase all": "",
-  "Forgot password?": ""
+  "Forgot password?": "",
+  "{{time}} minutes": "",
+  "Auto lock": "",
+  "Extension auto lock": ""
 }

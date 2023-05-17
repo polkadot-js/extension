@@ -1393,7 +1393,7 @@ export default class KoniExtension {
 
     if (isPasswordValidated) {
       try {
-        this._saveCurrentAccountAddress(addressList[0], () => {
+        this._saveCurrentAccountAddress(ALL_ACCOUNT_KEY, () => {
           keyring.restoreAccounts(file, password);
           this._addAddressesToAuthList(addressList, isAllowed);
         });

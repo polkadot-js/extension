@@ -184,7 +184,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             </Form.Item>
             <Form.Item>
               <AlertBox
-                description={t('Requires at least 8 characters. Uppercase letters, numbers, and special characters are recommended.')}
+                description={t('8 characters at least. Uppercase, numbers, and special characters are recommended.')}
                 title={t('Always choose a strong password!')}
                 type='warning'
               />

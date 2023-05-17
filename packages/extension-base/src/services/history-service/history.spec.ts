@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { isSameAddress } from '@subwallet/extension-base/utils';
 import Web3 from 'web3';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { Vec } from '@polkadot/types';
 import { EventRecord } from '@polkadot/types/interfaces';
-import { isSameAddress } from '@subwallet/extension-base/utils';
 
 jest.setTimeout(50000);
 describe('TestFetchMultiChainHistories', () => {

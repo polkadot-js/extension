@@ -150,7 +150,9 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
     balances.forEach((balance: AccountInfo) => {
       total = total.add(balance.data?.free?.toBn() || new BN(0)); // reserved is seperated
       reserved = reserved.add(balance.data?.reserved?.toBn() || new BN(0));
-      miscFrozen = miscFrozen.add(balance.data?.miscFrozen?.toBn() || new BN(0));
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      miscFrozen = miscFrozen.add(balance.data?.miscFrozen?.toBn() || balance?.data?.frozen?.toBn() || new BN(0)); // TODO: update frozen
       feeFrozen = feeFrozen.add(balance.data?.feeFrozen?.toBn() || new BN(0));
     });
 

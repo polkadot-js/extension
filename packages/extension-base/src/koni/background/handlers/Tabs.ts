@@ -120,7 +120,7 @@ export default class KoniTabs {
     return this.#koniState.rpcListProviders();
   }
 
-  private rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
+  private rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse<unknown>> {
     return this.#koniState.rpcSend(request, port);
   }
 

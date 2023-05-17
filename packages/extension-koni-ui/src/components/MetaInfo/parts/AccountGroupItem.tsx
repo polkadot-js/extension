@@ -16,10 +16,13 @@ export interface AccountGroupInfoItem extends InfoItemBase {
 }
 
 const Component: React.FC<AccountGroupInfoItem> = (props: AccountGroupInfoItem) => {
-  const { accounts, className, content, label, valueColorSchema = 'default', onClick } = props;
+  const { accounts, className, content, label, onClick, valueColorSchema = 'default' } = props;
 
   return (
-    <div className={CN(className, '__row -type-account')} onClick={onClick}>
+    <div
+      className={CN(className, '__row -type-account')}
+      onClick={onClick}
+    >
       {!!label && <div className={'__col'}>
         <div className={'__label'}>
           {label}

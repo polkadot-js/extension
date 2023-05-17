@@ -3,8 +3,8 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { useGetChainSlugsByAccountType } from '@subwallet/extension-koni-ui/hooks/screen/home/useGetChainSlugsByAccountType';
 import useTokenGroup from '@subwallet/extension-koni-ui/hooks/screen/home/useTokenGroup';
@@ -13,6 +13,7 @@ import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import styled from 'styled-components';
+
 import Porfolio from '../Porfolio';
 
 type Props = ThemeProps;
@@ -38,18 +39,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     const pathEls = pathname.split('/').filter((i: string) => !!i);
+
     if (pathEls.length <= 1) {
-      navigate('/home/tokens')
+      navigate('/home/tokens');
     }
-  }, [pathname])
+  }, [pathname]);
 
   const pathEls = useMemo(() => pathname.split('/').filter((i: string) => !!i), [pathname]);
   const homeContent = useMemo(() => {
     if (isWebUI && ['tokens', 'nfts'].includes(pathEls[1])) {
-      return <Porfolio />
+      return <Porfolio />;
     }
-    return <Outlet />
-  }, [isWebUI, pathname])
+
+    return <Outlet />;
+  }, [isWebUI, pathname]);
 
   return (
     <>

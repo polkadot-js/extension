@@ -3,8 +3,10 @@
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem } from '@subwallet/extension-koni-ui/components';
+import Search from '@subwallet/extension-koni-ui/components/Search';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useGetStakingList, useNotification, usePreCheckReadOnly, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -16,8 +18,6 @@ import styled from 'styled-components';
 
 import MoreActionModal, { MORE_ACTION_MODAL } from './MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from './StakingDetailModal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import Search from '@subwallet/extension-koni-ui/components/Search';
 
 type Props = ThemeProps
 
@@ -48,7 +48,7 @@ const reloadIcon = <Icon
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [searchInput, setSearchInput] = useState<string>('')
+  const [searchInput, setSearchInput] = useState<string>('');
 
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
@@ -180,17 +180,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return (
         <div className='web-list'>
           <Search
-            searchValue={searchInput}
-            placeholder={"Token name"}
-            onSearch={(value: string) => setSearchInput(value)}
-            onClickActionBtn={onClickActionBtn}
-            actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} size='sm'/>}
-            showActionBtn
-            showExtraButton
+            actionBtnIcon={<Icon
+              phosphorIcon={FadersHorizontal}
+              size='sm'
+                           />}
             extraButton={
               <>
                 <Button
-                  type="ghost"
+                  icon={<Icon
+                    phosphorIcon={ArrowClockwise}
+                    size='sm'
+                  />}
                   onClick={
                     () => {
                       setLoading(true);
@@ -209,49 +209,58 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                         .catch(console.error);
                     }
                   }
-                  icon={<Icon phosphorIcon={ArrowClockwise} size="sm" />}
+                  type='ghost'
                 />
                 <Button
-                  type="ghost"
+                  icon={<Icon
+                    phosphorIcon={Plus}
+                    size='sm'
+                  />}
                   onClick={preCheckReadOnly(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`))}
-                  icon={<Icon phosphorIcon={Plus} size="sm" />}
+                  type='ghost'
                 />
               </>
             }
+            onClickActionBtn={onClickActionBtn}
+            onSearch={(value: string) => setSearchInput(value)}
+            placeholder={'Token name'}
+            searchValue={searchInput}
+            showActionBtn
+            showExtraButton
           />
           <SwList
             filterBy={filterFunction}
             list={stakingItems}
-            searchBy={searchFunction}
-            searchTerm={searchInput}
             renderItem={renderItem}
             renderWhenEmpty={emptyStakingList}
+            searchBy={searchFunction}
+            searchTerm={searchInput}
           />
         </div>
-      )
+      );
     }
 
     return (
-        <SwList.Section
-          actionBtnIcon={(
-            <Icon
-              phosphorIcon={FadersHorizontal}
-              size='sm'
-            />
-          )}
-          enableSearchInput={true}
-          filterBy={filterFunction}
-          list={stakingItems}
-          onClickActionBtn={onClickActionBtn}
-          renderItem={renderItem}
-          renderWhenEmpty={emptyStakingList}
-          searchFunction={searchFunction}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search token')}
-          showActionBtn
-        />
-    )
-  }, [isWebUI, searchInput, selectedFilters])
+      <SwList.Section
+        actionBtnIcon={(
+          <Icon
+            phosphorIcon={FadersHorizontal}
+            size='sm'
+          />
+        )}
+        enableSearchInput={true}
+        filterBy={filterFunction}
+        list={stakingItems}
+        onClickActionBtn={onClickActionBtn}
+        renderItem={renderItem}
+        renderWhenEmpty={emptyStakingList}
+        searchFunction={searchFunction}
+        searchMinCharactersCount={2}
+        searchPlaceholder={t<string>('Search token')}
+        showActionBtn
+      />
+    );
+  }, [isWebUI, searchInput, selectedFilters]);
 
   return (
     <PageWrapper
@@ -261,11 +270,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Layout.Base
         {...!isWebUI && {
           title: t('Staking'),
-          subHeaderBackground:'transparent',
-          subHeaderCenter:false,
-          subHeaderIcons:subHeaderButton,
-          subHeaderPaddingVertical:true,
-          showSubHeader:true,
+          subHeaderBackground: 'transparent',
+          subHeaderCenter: false,
+          subHeaderIcons: subHeaderButton,
+          subHeaderPaddingVertical: true,
+          showSubHeader: true
         }}
       >
 
@@ -316,7 +325,7 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
       width: '100%',
 
       '.container': {
-        marginBottom: 12,
+        marginBottom: 12
       }
     },
 

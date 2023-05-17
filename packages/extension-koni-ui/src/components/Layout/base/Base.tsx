@@ -1,19 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SwScreenLayoutProps } from '@subwallet/react-ui';
-
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { SwScreenLayout } from '@subwallet/react-ui';
+import { SwScreenLayout, SwScreenLayoutProps } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import { Aperture, Clock, Database, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+
 import Footer from '../parts/Footer';
-import SelectAccount from '../parts/SelectAccount';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import BaseWeb from './BaseWeb';
 import Headers, { CompoundedHeader } from '../parts/Header';
+import SelectAccount from '../parts/SelectAccount';
+import BaseWeb from './BaseWeb';
 
 export interface LayoutBaseProps extends Omit<
 SwScreenLayoutProps,
@@ -83,23 +82,21 @@ export const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }>
 ];
 
 const Base = (props: LayoutBaseProps) => {
-  const {
-    children,
+  const { children,
+    className,
     headerIcons,
+    headerList,
     onBack,
     showFooter,
-    className,
-    headerList,
-    withSideMenu = false,
-    withController,
     showWebHeader = false,
     withBackground = false,
-    ...rest
-  } = props;
+    withController,
+    withSideMenu = false,
+    ...rest } = props;
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
   const { pathname } = useLocation();
-  const { isWebUI } = useContext(ScreenContext)
+  const { isWebUI } = useContext(ScreenContext);
 
   const selectedTab = useMemo((): string => {
     const isHomePath = pathname.includes('/home');
@@ -128,42 +125,48 @@ const Base = (props: LayoutBaseProps) => {
   const renderHeader = useCallback((name: keyof CompoundedHeader, key?: number) => {
     const CurComponent = Headers[name];
 
-    return <CurComponent title={props.title} key={key} onBack={onBack} />
+    return <CurComponent
+      key={key}
+      onBack={onBack}
+      title={props.title}
+    />;
   }, [props.title]);
 
-  const isWebBase = useMemo(() => isWebUI && withSideMenu, [isWebUI, withSideMenu])
+  const isWebBase = useMemo(() => isWebUI && withSideMenu, [isWebUI, withSideMenu]);
 
-  return isWebBase ? (
-    <BaseWeb
-      {...{
-        onBack,
-        title: props.title,
-      }}
-      headerList={headerList}
-      withBackground={withBackground}
-    >
-      {children}
-    </BaseWeb>
-  ) : (
-    <SwScreenLayout
-      className={className}
-      {...rest}
-      footer={showFooter && <Footer />}
-      headerContent={props.showHeader && <SelectAccount />}
-      headerIcons={headerIcons}
-      onBack={onBack || defaultOnBack}
-      selectedTabBarItem={selectedTab}
-      tabBarItems={TabBarItems.map((item) => ({
-        ...item,
-        onClick: onSelectTab(item.url)
-      }))}
-    >
-      {showWebHeader && headerList?.map((name: keyof CompoundedHeader, index: number) =>
-        renderHeader(name, index)
-      )}
-      {children}
-    </SwScreenLayout>
-  )
+  return isWebBase
+    ? (
+      <BaseWeb
+        {...{
+          onBack,
+          title: props.title
+        }}
+        headerList={headerList}
+        withBackground={withBackground}
+      >
+        {children}
+      </BaseWeb>
+    )
+    : (
+      <SwScreenLayout
+        className={className}
+        {...rest}
+        footer={showFooter && <Footer />}
+        headerContent={props.showHeader && <SelectAccount />}
+        headerIcons={headerIcons}
+        onBack={onBack || defaultOnBack}
+        selectedTabBarItem={selectedTab}
+        tabBarItems={TabBarItems.map((item) => ({
+          ...item,
+          onClick: onSelectTab(item.url)
+        }))}
+      >
+        {showWebHeader && headerList?.map((name: keyof CompoundedHeader, index: number) =>
+          renderHeader(name, index)
+        )}
+        {children}
+      </SwScreenLayout>
+    );
 };
 
 export default Base;

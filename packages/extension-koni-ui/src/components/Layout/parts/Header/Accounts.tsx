@@ -1,21 +1,26 @@
-import { AccountJson, CurrentAccountInfo } from "@subwallet/extension-base/background/types";
-import EmptyList from "@subwallet/extension-koni-ui/components/EmptyList";
-import { MetaInfo } from "@subwallet/extension-koni-ui/components/MetaInfo";
-import { RootState } from "@subwallet/extension-koni-ui/stores";
-import { ThemeProps } from "@subwallet/extension-koni-ui/types";
-import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from "@subwallet/extension-koni-ui/utils";
-import { Divider, Logo, Popover, SwList } from "@subwallet/react-ui";
-import { ListChecks } from "phosphor-react";
-import { LegacyRef, forwardRef, useCallback, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
-import styled from "styled-components";
-import SelectAccountFooter from "../SelectAccount/Footer";
-import { isEthereumAddress } from "@polkadot/util-crypto";
-import { AccountItemWithName, AccountCardSelection } from "@subwallet/extension-koni-ui/components/Account";
-import { saveCurrentAccountAddress } from "@subwallet/extension-koni-ui/messaging";
-import { useNavigate } from "react-router-dom";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
+import { AccountCardSelection, AccountItemWithName } from '@subwallet/extension-koni-ui/components/Account';
+import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
+import { MetaInfo } from '@subwallet/extension-koni-ui/components/MetaInfo';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
+import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
+import { Divider, Logo, Popover, SwList } from '@subwallet/react-ui';
+import { ListChecks } from 'phosphor-react';
+import { forwardRef, LegacyRef, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
+import SelectAccountFooter from '../SelectAccount/Footer';
 
 const StyledSection = styled(SwList.Section)<ThemeProps>(({ theme: { token } }: ThemeProps) => {
   return {
@@ -47,13 +52,14 @@ const StyledActions = styled.div<ThemeProps>(({ theme: { token } }: ThemeProps) 
     alignItems: 'center',
 
     '& > div': {
-      display: "flex",
-      justifyContent: "space-around",
-      alignItems: "center",
-      gap: "8px",
+      display: 'flex',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      gap: '8px'
     }
   };
 });
+
 const Component: React.FC = () => {
   const { t } = useTranslation();
   const { accounts: _accounts } = useSelector((state: RootState) => state.accountState);
@@ -71,7 +77,6 @@ const Component: React.FC = () => {
       }, 100);
     };
   }, [navigate]);
-
 
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));
@@ -120,37 +125,36 @@ const Component: React.FC = () => {
     if (currentAccountIsAll) {
       return (
         <AccountItemWithName
+          accountName={item.name}
           address={item.address}
-          key={item.address}
+          avatarSize={24}
           className='all-account-selection'
           isSelected={_selected}
-          accountName={item.name}
-          avatarSize={24}
+          key={item.address}
         />
-      )
+      );
     }
 
     return (
       <div onClick={() => _onSelect(item.address)}>
         <AccountCardSelection
-        accountName={item.name || ''}
-        address={item.address}
-        genesisHash={item.genesisHash}
-        isSelected={_selected}
-        isShowSubIcon
-        onPressMoreBtn={onClickDetailAccount(item.address)}
-        subIcon={(
-          <Logo
-            network={isEthereumAddress(item.address) ? 'ethereum' : 'polkadot'}
-            shape={'circle'}
-            size={16}
-          />
-        )}
-      />
+          accountName={item.name || ''}
+          address={item.address}
+          genesisHash={item.genesisHash}
+          isSelected={_selected}
+          isShowSubIcon
+          onPressMoreBtn={onClickDetailAccount(item.address)}
+          subIcon={(
+            <Logo
+              network={isEthereumAddress(item.address) ? 'ethereum' : 'polkadot'}
+              shape={'circle'}
+              size={16}
+            />
+          )}
+        />
       </div>
     );
   }, [onClickDetailAccount, isEthereumAddress]);
-
 
   const emptyTokenList = useCallback(() => {
     return (
@@ -164,14 +168,17 @@ const Component: React.FC = () => {
 
   // Remove ref error
   const TriggerComponent = forwardRef((props, ref) => (
-    <div {...props} ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}>
+    <div
+      {...props}
+      ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}
+    >
       <MetaInfo.AccountGroup
-        className="ava-group"
         accounts={accounts}
+        className='ava-group'
         content={`${accounts.length} accounts`}
       />
     </div>
-  ))
+  ));
 
   const popOverContent = useMemo(() => {
     return (
@@ -192,23 +199,23 @@ const Component: React.FC = () => {
           <SelectAccountFooter />
         </StyledActions>
       </>
-    )
-  }, [])
+    );
+  }, []);
 
   return (
     <Popover
       content={popOverContent}
-      trigger="click"
-      showArrow={false}
-      placement="bottomRight"
       overlayInnerStyle={{
-        padding: '16px 0',
+        padding: '16px 0'
       }}
+      placement='bottomRight'
+      showArrow={false}
+      trigger='click'
     >
       <TriggerComponent />
     </Popover>
-  )
-}
+  );
+};
 
 const Accounts = styled(Component)<ThemeProps>(({ theme: { token } }: ThemeProps) => {
   return {

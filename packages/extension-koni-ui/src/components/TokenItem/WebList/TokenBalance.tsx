@@ -3,10 +3,10 @@
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BalanceItemProps, Number } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import classNames from 'classnames';
 import React from 'react';
 import styled from 'styled-components';
-import BigN from 'bignumber.js';
 
 type Props = ThemeProps & {
   onPressItem?: BalanceItemProps['onPressItem'],
@@ -16,12 +16,10 @@ type Props = ThemeProps & {
 };
 
 function Component (
-  {
-    className = '',
-    value,
+  { className = '',
     convertedValue,
-    symbol
-  }: Props) {
+    symbol,
+    value }: Props) {
   // todo: Update BalanceItem in react-ui lib
   // - loading
   // - auto detect logo, only use logoKey
@@ -34,8 +32,8 @@ function Component (
           className={'__value'}
           decimal={0}
           decimalOpacity={0.45}
-          value={value}
           suffix={symbol}
+          value={value}
         />
         <Number
           className={'__converted-value'}
@@ -57,7 +55,7 @@ export const TokenBalance = styled(Component)<Props>(({ theme: { token } }: Prop
     '.ant-number': {
       fontSize: 'inherit !important',
       lineHeight: 'inherit',
-      textAlign: 'end',
+      textAlign: 'end'
     },
 
     '.__value': {
@@ -68,6 +66,6 @@ export const TokenBalance = styled(Component)<Props>(({ theme: { token } }: Prop
     '.__converted-value': {
       lineHeight: token.lineHeightSM,
       fontSize: token.fontSizeSM
-    },
+    }
   });
 });

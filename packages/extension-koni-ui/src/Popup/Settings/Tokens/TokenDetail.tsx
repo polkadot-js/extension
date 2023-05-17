@@ -5,6 +5,7 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getContractAddressOfToken, _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/modal/useConfirmModal';
@@ -15,14 +16,13 @@ import { deleteCustomAssets, upsertCustomToken } from '@subwallet/extension-koni
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ButtonProps, Col, Field, Icon, Input, Logo, Row, SwSubHeader, Tooltip } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
+import CN from 'classnames';
 import { CheckCircle, Copy, Trash } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
-import CN from 'classnames';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps
 
@@ -30,7 +30,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
-  const { isWebUI } = useContext(ScreenContext)
+  const { isWebUI } = useContext(ScreenContext);
   const { token } = useTheme() as Theme;
   const goBack = useDefaultNavigate().goBack;
   const location = useLocation();
@@ -57,8 +57,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     maskClosable: true,
     closable: true,
     type: 'error',
-    subTitle: isWebUI ?  t<string>('If you need to use this token you would need to manually import it again') : t<string>('You are about to delete this token'),
-    content: isWebUI ?  t<string>('Are you sure to remove this token?'):t<string>('Confirm delete this token'),
+    subTitle: isWebUI ? t<string>('If you need to use this token you would need to manually import it again') : t<string>('You are about to delete this token'),
+    content: isWebUI ? t<string>('Are you sure to remove this token?') : t<string>('Confirm delete this token'),
     okText: t<string>('Remove')
   });
 
@@ -229,21 +229,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         withSideMenu
       >
         {isWebUI && <SwSubHeader
-          title={t<string>('Token detail')}
           background='transparent'
           center={false}
           onBack={() => navigate(-1)}
           showBackButton={true}
-        />}
+          title={t<string>('Token detail')}
+                    />}
         <div className={CN('token_detail__container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <div className={'token_detail__header_container'}>
             <div className={'token_detail__header_icon_wrapper'}>
               <Logo
+                shape={isWebUI ? 'circle' : 'squircle'}
                 size={112}
                 token={tokenInfo.symbol.toLowerCase()}
-                shape={isWebUI ? 'circle' : 'squircle'}
               />
             </div>
 
@@ -322,11 +323,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             </Tooltip>
 
             {isWebUI && <Button
-              schema='danger'
-              icon={<Icon phosphorIcon={Trash} size='sm' weight='fill'/>}
-              onClick={handleDeleteToken}
               disabled={!(_isCustomAsset(tokenInfo.slug) && _isSmartContractToken(tokenInfo))}
-            >
+              icon={<Icon
+                phosphorIcon={Trash}
+                size='sm'
+                weight='fill'
+                    />}
+              onClick={handleDeleteToken}
+              schema='danger'
+                        >
               {t<string>('Delete token')}
             </Button>}
           </div>

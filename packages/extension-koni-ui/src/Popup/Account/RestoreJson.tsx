@@ -5,7 +5,9 @@ import { ResponseJsonGetAccountInfo } from '@subwallet/extension-base/background
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
+import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -26,8 +28,6 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { u8aToString } from '@polkadot/util';
-import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps;
 
@@ -66,23 +66,23 @@ const selectPassword = () => {
 const instructionContent: InstructionContentType[] = [
   {
     title: 'What is a JSON?',
-    description: "The JSON backup file stores your account's information encrypted with the account's password. It's a second recovery method additionally to the mnemonic phrase. ",
+    description: "The JSON backup file stores your account's information encrypted with the account's password. It's a second recovery method additionally to the mnemonic phrase. "
   },
   {
     title: 'What is a JSON?',
     description: (
       <span>
         When you create your account directly on Polkadot-JS UI the JSON file is automatically downloaded to your Downloads folder.
-        <br/>
+        <br />
         If you create your account in the Polkadot extension, you need to manually export the JSON file.
-        <br/>
+        <br />
         In <a href='#'>this article</a> you will learn how to manually export your JSON backup file in the Polkadot extension and Polkadot-JS UI.
       </span>
-    ),
-  },
-]
+    )
+  }
+];
 
-function Component({ className }: Props): JSX.Element {
+function Component ({ className }: Props): JSX.Element {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
@@ -91,7 +91,7 @@ function Component({ className }: Props): JSX.Element {
   const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
   const { goHome } = useDefaultNavigate();
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext)
+  const { isWebUI } = useContext(ScreenContext);
 
   const [form] = Form.useForm();
 
@@ -255,7 +255,8 @@ function Component({ className }: Props): JSX.Element {
         avatarIdentPrefix={42}
         avatarTheme={account.type === 'ethereum' ? 'ethereum' : 'polkadot'}
         className='account-item'
-        key={account.address} />
+        key={account.address}
+      />
     );
   }, []);
 
@@ -286,23 +287,25 @@ function Component({ className }: Props): JSX.Element {
     onClick: form.submit,
     disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
     loading: validating || loading
-  }
+  };
 
   return (
     <PageWrapper className={CN(className)}>
       <Layout.Base
         onBack={onBack}
-        {...(!isWebUI ? {
+        {...(!isWebUI
+          ? {
             rightFooterButton: buttonProps,
             showBackButton: true,
             subHeaderPaddingVertical: true,
             showSubHeader: true,
             subHeaderCenter: true,
             subHeaderBackground: 'transparent'
-        }: {
-          headerList: ['Simple'],
-          showWebHeader: true
-        })}
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -313,7 +316,8 @@ function Component({ className }: Props): JSX.Element {
       >
         <div className={CN('container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <div className={CN('import-container')}>
             <div className='description'>
               {t('Please drag an drop the .json file you exported from Polkadot.js')}
@@ -334,7 +338,8 @@ function Component({ className }: Props): JSX.Element {
                   hint={t('Please drag an drop the .json file you exported from Polkadot.js')}
                   onChange={onChange}
                   statusHelp={fileValidateState.message}
-                  title={t('Import from Polkadot.js')} />
+                  title={t('Import from Polkadot.js')}
+                />
               </Form.Item>
               {!!accountsInfo.length && (
                 <Form.Item>
@@ -348,14 +353,17 @@ function Component({ className }: Props): JSX.Element {
                         rightItem={(
                           <Icon
                             phosphorIcon={DotsThree}
-                            size='sm' />
-                        )} />
+                            size='sm'
+                          />
+                        )}
+                      />
                     )
                     : (
                       <SettingItem
                         className='account-list-item'
                         leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
-                        name={accountsInfo[0].name} />
+                        name={accountsInfo[0].name}
+                      />
                     )}
                 </Form.Item>
               )}
@@ -373,12 +381,15 @@ function Component({ className }: Props): JSX.Element {
                       placeholder={t('Current password')}
                       statusHelp={submitValidateState.message}
                       type='password'
-                      value={password} />
-
+                      value={password}
+                    />
 
                   </Form.Item>
                   {isWebUI && (
-                    <Button {...buttonProps} className='action'/>
+                    <Button
+                      {...buttonProps}
+                      className='action'
+                    />
                   )}
                 </>
               )}
@@ -393,12 +404,13 @@ function Component({ className }: Props): JSX.Element {
                 displayRow={true}
                 list={accountsInfo}
                 renderItem={renderItem}
-                rowGap='var(--row-gap)' />
+                rowGap='var(--row-gap)'
+              />
             </SwModal>
           </div>
 
           {isWebUI && (
-            <InstructionContainer contents={instructionContent}/>
+            <InstructionContainer contents={instructionContent} />
           )}
         </div>
       </Layout.Base>
@@ -410,13 +422,13 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '--row-gap': token.sizeXS,
 
-    ".container": {
+    '.container': {
 
-      "&.__web-ui": {
+      '&.__web-ui': {
         display: 'flex',
         justifyContent: 'center',
         maxWidth: '60%',
-        margin: '0 auto',
+        margin: '0 auto'
       },
 
       '.import-container': {
@@ -429,7 +441,7 @@ const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
         }
       },
 
-      ".instruction-container": {
+      '.instruction-container': {
         flex: 1
       },
 

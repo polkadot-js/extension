@@ -1,13 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { DISCORD_URL, TELEGRAM_URL, TWITTER_URL } from '@subwallet/extension-koni-ui/constants/common';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowCircleRight, CheckCircle, DiscordLogo, PaperPlaneTilt, TwitterLogo, X } from 'phosphor-react';
+import { ArrowCircleRight, CheckCircle, X } from 'phosphor-react';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -24,30 +22,6 @@ enum SocialType {
   TELEGRAM = 'telegram',
 }
 
-interface SocialItem {
-  icon: PhosphorIcon;
-  type: SocialType;
-  url: string;
-}
-
-const items: SocialItem[] = [
-  {
-    icon: TwitterLogo,
-    type: SocialType.TWITTER,
-    url: TWITTER_URL
-  },
-  {
-    icon: DiscordLogo,
-    type: SocialType.DISCORD,
-    url: DISCORD_URL
-  },
-  {
-    icon: PaperPlaneTilt,
-    type: SocialType.TELEGRAM,
-    url: TELEGRAM_URL
-  }
-];
-
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
@@ -58,24 +32,28 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <Layout.Base
-      {...(!isWebUI ? {
-        rightFooterButton: {
-          children: t('Go to home'),
-          onClick: goHome,
-          icon: <Icon
-            phosphorIcon={ArrowCircleRight}
-            weight={'fill'}
-          />
-        },
-        showBackButton: true,
-        subHeaderPaddingVertical: true,
-        showSubHeader: true,
-        subHeaderCenter: true,
-        subHeaderBackground: 'transparent'
-    }: {
-        headerList: ['Simple'],
-        showWebHeader: true
-    })}
+      {...(!isWebUI
+        ? {
+          rightFooterButton: {
+            children: t('Go to home'),
+            onClick: goHome,
+            icon: (
+              <Icon
+                phosphorIcon={ArrowCircleRight}
+                weight={'fill'}
+              />
+            )
+          },
+          showBackButton: true,
+          subHeaderPaddingVertical: true,
+          showSubHeader: true,
+          subHeaderCenter: true,
+          subHeaderBackground: 'transparent'
+        }
+        : {
+          headerList: ['Simple'],
+          showWebHeader: true
+        })}
       showBackButton={true}
       subHeaderLeft={(
         <Icon
@@ -87,7 +65,8 @@ const Component: React.FC<Props> = (props: Props) => {
     >
       <div className={CN(className, {
         '__web-ui': isWebUI
-      })}>
+      })}
+      >
         <div className='page-icon'>
           <PageIcon
             color='var(--page-icon-color)'
@@ -106,11 +85,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
         {isWebUI && (
           <Button
+            icon={(
+              <Icon
+                phosphorIcon={ArrowCircleRight}
+                weight={'fill'}
+              />
+            )}
             onClick={goHome}
-            icon={<Icon
-              phosphorIcon={ArrowCircleRight}
-              weight={'fill'}
-            />}
             style={{
               width: '100%',
               marginBottom: 80
@@ -131,7 +112,7 @@ const CreatePasswordDone = styled(Component)<Props>(({ theme: { token } }: Props
 
     '&.__web-ui': {
       maxWidth: '50%',
-      margin: '0 auto',
+      margin: '0 auto'
     },
 
     '.page-icon': {

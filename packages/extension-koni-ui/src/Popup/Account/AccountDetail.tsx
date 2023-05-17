@@ -17,13 +17,14 @@ import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { copyToClipboard } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/utils/form/form';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, QRCode, ModalContext } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, QRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, Swatches, TrashSimple, User } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+
 import NftImport from '../Home/Nfts/NftImport';
 import AccountExport from './AccountExport';
 
@@ -47,16 +48,16 @@ const EXPORT_ACCOUNT_MODAL = 'export_account_modal';
 
 const instructionContents: InstructionContentType[] = [
   {
-    title: "Why do I need to enter a password?",
-    description: "For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it.",
+    title: 'Why do I need to enter a password?',
+    description: 'For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it.',
     type: 'warning'
   },
   {
-    title: "Can I recover a password?",
-    description: "The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!",
+    title: 'Can I recover a password?',
+    description: 'The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!',
     type: 'warning'
   }
-]
+];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -67,7 +68,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const notify = useNotification();
   const { token } = useTheme() as Theme;
   const { accountAddress } = useParams();
-  const { activeModal, inactiveModal } = useContext(ModalContext)
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const [form] = Form.useForm<DetailFormState>();
 
@@ -169,7 +170,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const onExport = useCallback(() => {
     if (account?.address) {
       if (isWebUI) {
-        activeModal(EXPORT_ACCOUNT_MODAL)
+        activeModal(EXPORT_ACCOUNT_MODAL);
       } else {
         navigate(`/accounts/export/${account.address}`);
       }
@@ -239,10 +240,10 @@ const Component: React.FC<Props> = (props: Props) => {
         {...!isWebUI && {
           showBackButton: true,
           showSubHeader: true,
-          subHeaderBackground:'transparent',
+          subHeaderBackground: 'transparent',
           subHeaderCenter: true,
           subHeaderPaddingVertical: true,
-          showHeader: false,
+          showHeader: false
         }}
         subHeaderIcons={[
           {
@@ -255,8 +256,9 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <div className={CN('body-container', {
           '__web-ui': isWebUI
-        })}>
-          <div className="main-content">
+        })}
+        >
+          <div className='main-content'>
             {!isWebUI && (
               <div className='account-qr'>
                 <QRCode
@@ -397,17 +399,20 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
 
           {isWebUI &&
-            <InstructionContainer contents={instructionContents}/>
+            <InstructionContainer contents={instructionContents} />
           }
         </div>
 
         {isWebUI && (
-           <CustomModal
+          <CustomModal
             id={EXPORT_ACCOUNT_MODAL}
             onCancel={() => inactiveModal(EXPORT_ACCOUNT_MODAL)}
-            title={t("Export account")}
+            title={t('Export account')}
           >
-            <AccountExport accountAddress={account?.address} modalContent/>
+            <AccountExport
+              accountAddress={account?.address}
+              modalContent
+            />
           </CustomModal>
         )}
       </Layout.Base>
@@ -419,21 +424,21 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
   return {
     '.body-container': {
       '&.__web-ui': {
-        display: "flex",
-        justifyContent: "center",
+        display: 'flex',
+        justifyContent: 'center',
         gap: 16,
         width: '60%',
         margin: '0 auto',
 
-        "& > *": {
-          flex: 1,
+        '& > *': {
+          flex: 1
         },
 
-        ".form-container": {
-          ".ant-btn": {
-            width: "100%",
-          },
-        },
+        '.form-container': {
+          '.ant-btn': {
+            width: '100%'
+          }
+        }
       },
 
       padding: `0 ${token.padding}px`,

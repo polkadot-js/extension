@@ -1,4 +1,5 @@
-
+//[object Object]
+// SPDX-License-Identifier: Apache-2.0
 
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
@@ -183,10 +184,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Layout.Base
         {...!isWebUI && {
           title: t<string>('Crowdloans'),
-          subHeaderBackground:'transparent',
-          subHeaderCenter:false,
-          subHeaderPaddingVertical:true,
-          showSubHeader:true,
+          subHeaderBackground: 'transparent',
+          subHeaderCenter: false,
+          subHeaderPaddingVertical: true,
+          showSubHeader: true
         }}
       >
         <SwList.Section

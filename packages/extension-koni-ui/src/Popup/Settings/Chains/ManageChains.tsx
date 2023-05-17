@@ -7,17 +7,17 @@ import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import NetworkToggleItem from '@subwallet/extension-koni-ui/components/NetworkToggleItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { FadersHorizontal, ListChecks, Plus } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import CN from 'classnames'
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps
 
@@ -151,22 +151,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         withSideMenu
       >
         {isWebUI && <SwSubHeader
-          title={t<string>('Manage chains')}
           background='transparent'
           center={false}
           onBack={() => navigate(-1)}
-          showBackButton={true}
           rightButtons={subHeaderButton}
-        />}
+          showBackButton={true}
+          title={t<string>('Manage chains')} />}
         <div className={CN('container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <SwList.Section
-            actionBtnIcon={<Icon
-              phosphorIcon={FadersHorizontal}
-              size='sm'
-              weight={'fill'}
-            />}
+            actionBtnIcon={(
+              <Icon
+                phosphorIcon={FadersHorizontal}
+                size='sm'
+                weight={'fill'}
+              />
+            )}
             className={'manage_chains__container'}
             enableSearchInput
             filterBy={filterFunction}
@@ -210,7 +212,7 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
         '.ant-sw-list-wrapper': {
           flex: '1 1 auto'
         }
-      },
+      }
     },
 
     '.ant-sw-list-wrapper.ant-sw-list-wrapper:before': {

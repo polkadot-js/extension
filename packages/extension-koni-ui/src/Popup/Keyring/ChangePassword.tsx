@@ -32,11 +32,12 @@ interface ChangePasswordFormState {
 const newPasswordRules = renderBasePasswordRules('New password');
 const confirmPasswordRules = renderBaseConfirmPasswordRules(FormFieldName.PASSWORD);
 const formName = 'change-password-form';
+
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
-  const { isWebUI } = useContext(ScreenContext)
+  const { isWebUI } = useContext(ScreenContext);
   const [form] = Form.useForm<ChangePasswordFormState>();
   const [isDisabled, setIsDisable] = useState(true);
   const [submitError, setSubmitError] = useState('');
@@ -45,16 +46,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const instructionContents: InstructionContentType[] = [
     {
-      title: "Why do I need to enter a password?",
-      description: "For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it.",
+      title: 'Why do I need to enter a password?',
+      description: 'For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it.',
       type: 'warning'
     },
     {
-      title: "Can I recover a password?",
-      description: "The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!",
+      title: 'Can I recover a password?',
+      description: 'The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!',
       type: 'warning'
-    },
-]
+    }
+  ];
 
   const goBack = useCallback(() => {
     navigate('/settings/security');
@@ -115,7 +116,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             />
           )
         }}
-        withSideMenu
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -123,17 +123,19 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           }
         ]}
         title={t('Change password')}
+        withSideMenu
       >
         {isWebUI && <SwSubHeader
-          title={t('Change password')}
           background='transparent'
           center={false}
           onBack={() => navigate(-1)}
           showBackButton={true}
-        />}
-        <div className={CN('body-container',{
+          title={t('Change password')}
+                    />}
+        <div className={CN('body-container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           {!isWebUI && (
             <div>
               <div className='page-icon'>
@@ -152,9 +154,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           )}
           <div className='form-container'>
             <AlertBox
+              description={t('Recommended security practice')}
               title={t('Always choose a strong password!')}
-              description={t("Recommended security practice")}
-              type="warning"
+              type='warning'
             />
             <Form
               form={form}
@@ -207,16 +209,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 />
               </Form.Item>
               {submitError && (
-              <Form.Item
-                help={submitError}
-                validateStatus={submitError && 'error'}
-              />
+                <Form.Item
+                  help={submitError}
+                  validateStatus={submitError && 'error'}
+                />
 
               )}
               {isWebUI && (
                 <Button
-                  onClick={form.submit}
-                  loading={loading}
                   disabled={isDisabled}
                   icon={
                     <Icon
@@ -224,8 +224,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                       weight='fill'
                     />
                   }
+                  loading={loading}
+                  onClick={form.submit}
                 >
-                  {t("Save")}
+                  {t('Save')}
                 </Button>
               )}
             </Form>
@@ -259,11 +261,11 @@ const ChangePassword = styled(Component)<Props>(({ theme: { token } }: Props) =>
           flexDirection: 'column',
           gap: 16,
           '.ant-btn': {
-            width: "100%"
-          },
+            width: '100%'
+          }
         },
         '& > *': {
-          flex: 1,
+          flex: 1
         }
       },
 

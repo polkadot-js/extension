@@ -5,8 +5,8 @@ import LoginBg from '@subwallet/extension-koni-ui/assets/LoginBg.png';
 import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
 import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
 import SocialGroup from '@subwallet/extension-koni-ui/components/SocialGroup';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
@@ -35,7 +35,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { activeModal } = useContext(ModalContext);
 
   const [form] = Form.useForm<LoginFormState>();
-  const { isWebUI } = useContext(ScreenContext)
+  const { isWebUI } = useContext(ScreenContext);
 
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
@@ -81,49 +81,50 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     <PageWrapper className={CN(className)}>
       <Layout.Base className='login-container'>
         <div className='bg-gradient' />
-          {!isWebUI && <div className='bg-image' />}
-          <div className={CN('body-container', {
-            '__web-ui': isWebUI
-          })}>
-            <div className='main-wrapper'>
-              <div className='logo-container'>
-                <Logo3D />
-              </div>
-              <div className='title'>
-                {t('Welcome back!')}
-              </div>
-              <div className='sub-title'>
-                {t('Enter your password to unlock account')}
-              </div>
-              <Form
-                form={form}
-                initialValues={{ [FormFieldName.PASSWORD]: '' }}
-                onFieldsChange={onUpdate}
-                onFinish={onSubmit}
+        {!isWebUI && <div className='bg-image' />}
+        <div className={CN('body-container', {
+          '__web-ui': isWebUI
+        })}
+        >
+          <div className='main-wrapper'>
+            <div className='logo-container'>
+              <Logo3D />
+            </div>
+            <div className='title'>
+              {t('Welcome back!')}
+            </div>
+            <div className='sub-title'>
+              {t('Enter your password to unlock account')}
+            </div>
+            <Form
+              form={form}
+              initialValues={{ [FormFieldName.PASSWORD]: '' }}
+              onFieldsChange={onUpdate}
+              onFinish={onSubmit}
+            >
+              <Form.Item
+                name={FormFieldName.PASSWORD}
+                rules={[
+                  {
+                    message: 'Password is required',
+                    required: true
+                  }
+                ]}
+                statusHelpAsTooltip={true}
               >
-                <Form.Item
-                  name={FormFieldName.PASSWORD}
-                  rules={[
-                    {
-                      message: 'Password is required',
-                      required: true
-                    }
-                  ]}
-                  statusHelpAsTooltip={true}
+                <Input.Password
+                  containerClassName='password-input'
+                  id={passwordInputId}
+                  placeholder={t('Password')}
+                />
+              </Form.Item>
+              <Form.Item>
+                <Button
+                  block={true}
+                  disabled={isDisable}
+                  htmlType='submit'
+                  loading={loading}
                 >
-                  <Input.Password
-                    containerClassName='password-input'
-                    id={passwordInputId}
-                    placeholder={t('Password')}
-                  />
-                </Form.Item>
-                <Form.Item>
-                  <Button
-                    block={true}
-                    disabled={isDisable}
-                    htmlType='submit'
-                    loading={loading}
-                  >
                   {t('Unlock')}
                 </Button>
               </Form.Item>
@@ -138,7 +139,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             </Form>
             <ResetWalletModal />
           </div>
-        <SocialGroup />
+          <SocialGroup />
         </div>
       </Layout.Base>
     </PageWrapper>
@@ -153,23 +154,23 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
 
     '.ant-sw-screen-layout-body': {
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: 'column'
     },
 
     '.__web-ui': {
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
 
       '.main-wrapper': {
         flex: 1,
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
         justifyContent: 'center',
         padding: '0 20%',
 
         '.logo-container': {
-          margin: 0,
+          margin: 0
         }
       }
     },

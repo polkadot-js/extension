@@ -23,6 +23,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import { useSelector } from 'react-redux';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
+
 import DetailTable from './DetailTable';
 
 type Props = ThemeProps;
@@ -40,11 +41,11 @@ const Component = (): React.ReactElement => {
   const outletContext: {
     searchInput: string,
     setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
-  } = useOutletContext()
+  } = useOutletContext();
 
   useEffect(() => {
-    outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Token name')
-  }, [outletContext?.setSearchPlaceholder])
+    outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Token name');
+  }, [outletContext, outletContext?.setSearchPlaceholder]);
 
   const notify = useNotification();
   const { accountSelectorItems,
@@ -162,15 +163,15 @@ const Component = (): React.ReactElement => {
 
   const tokenGroupBalanceItems = useMemo<TokenBalanceItemType[]>(() => {
     const result: TokenBalanceItemType[] = [];
-      const searchTextLowerCase = outletContext?.searchInput?.toLowerCase() || '';
+    const searchTextLowerCase = outletContext?.searchInput?.toLowerCase() || '';
 
-      sortedTokenGroups.forEach((tokenGroupSlug) => {
-        if (tokenGroupBalanceMap[tokenGroupSlug]) {
-          result.push(tokenGroupBalanceMap[tokenGroupSlug]);
-        }
-      })
+    sortedTokenGroups.forEach((tokenGroupSlug) => {
+      if (tokenGroupBalanceMap[tokenGroupSlug]) {
+        result.push(tokenGroupBalanceMap[tokenGroupSlug]);
+      }
+    });
 
-      return result.filter((item) => item.symbol.toLowerCase().includes(searchTextLowerCase));
+    return result.filter((item) => item.symbol.toLowerCase().includes(searchTextLowerCase));
   }, [sortedTokenGroups, tokenGroupBalanceMap, outletContext?.searchInput]);
 
   useEffect(() => {
@@ -181,63 +182,79 @@ const Component = (): React.ReactElement => {
     };
   }, [handleResize]);
 
+  if (isWebUI) {
+    return (
+      <>
+        <DetailTable
+          columns={[
+            {
+              title: 'Token name',
+              dataIndex: 'name',
+              key: 'name',
+              render: (_, row) => {
+                return <TokenItem
+                  chain={row.chain}
+                  chainDisplayName={row.chainDisplayName || ''}
+                  logoKey={row.logoKey}
+                  slug={row.slug}
+                  symbol={row.symbol}
+                 />;
+              }
+            },
+            {
+              title: 'Portfolio %',
+              dataIndex: 'percentage',
+              key: 'percentage',
+              render: () => <>85%</>
+            },
+            {
+              title: 'Price',
+              dataIndex: 'price',
+              key: 'price',
+              render: (_, row) => {
+                return (
+                  <TokenPrice
+                    pastValue={row.price24hValue}
+                    priceChangeStatus={row.priceChangeStatus}
+                    value={row.priceValue}
+                  />
+                );
+              }
+            },
+            {
+              title: 'Balance',
+              dataIndex: 'balance',
+              key: 'balance',
+              render: (_, row) => {
+                return (
+                  <TokenBalance
+                    convertedValue={row.total.convertedValue}
+                    symbol={row.symbol}
+                    value={row.total.value}
+                  />
+                );
+              }
+            }
+          ]}
+          dataSource={tokenGroupBalanceItems}
+          onClick={onClickItem}
+        />
 
-  if (isWebUI) return (
-    <DetailTable
-      columns={[
-        {
-          title: 'Token name',
-          dataIndex: 'name',
-          key: 'name',
-          render: (_, row) => {
-            return <TokenItem
-              logoKey={row.logoKey}
-              symbol={row.symbol}
-              chainDisplayName={row.chainDisplayName || ''}
-              chain={row.chain}
-              slug={row.slug}
+        <Button
+          block
+          children={t('Manage token list')}
+          icon={(
+            <Icon
+              phosphorIcon={SlidersHorizontal}
+              size='xs'
             />
-          }
-        },
-        {
-          title: 'Portfolio %',
-          dataIndex: 'percentage',
-          key: 'percentage',
-          render: () => <>85%</>
-        },
-        {
-          title: 'Price',
-          dataIndex: 'price',
-          key: 'price',
-          render: (_, row) => {
-            return (
-              <TokenPrice
-                value={row.priceValue}
-                priceChangeStatus={row.priceChangeStatus}
-                pastValue={row.price24hValue}
-              />
-            )
-          }
-        },
-        {
-          title: 'Balance',
-          dataIndex: 'balance',
-          key: 'balance',
-          render: (_, row) => {
-            return (
-              <TokenBalance
-                value={row.total.value}
-                convertedValue={row.total.convertedValue}
-                symbol={row.symbol}
-              />
-            )
-          }
-        }
-      ]}
-      dataSource={tokenGroupBalanceItems}
-      onClick={onClickItem}
-    />
-  )
+          )}
+          onClick={onClickManageToken}
+          type='ghost'
+        />
+      </>
+    );
+  }
 
   return (
     <div
@@ -332,13 +349,6 @@ const WrapperComponent = ({ className = '', searchInput }: WrapperProps): React.
       resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance'])}
     >
       <Component />
-      <Button
-        type='ghost'
-        icon={<Icon phosphorIcon={SlidersHorizontal} size='xs' />}
-        onClick={() => {}}
-        children={t("Import ")}
-        block
-      />
     </PageWrapper>
   );
 };

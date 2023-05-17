@@ -70,7 +70,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const location = useLocation();
   const canGoBack = !!location.state;
   const isPopup = useIsPopup();
-  const { isWebUI } = useContext(ScreenContext)
+  const { isWebUI } = useContext(ScreenContext);
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
@@ -163,20 +163,21 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.Base
-        withSideMenu
         onBack={onBack}
         title={t('Security settings')}
+        withSideMenu
       >
         {isWebUI && <SwSubHeader
-          title={t('Security settings')}
           background='transparent'
           center={false}
           onBack={() => navigate(-1)}
           showBackButton={true}
-        />}
+          title={t('Security settings')}
+                    />}
         <div className={CN('body-container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <div className='items-container'>
             {
               items.map((item) => (
@@ -315,7 +316,7 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '&.__web-ui': {
         padding: `${token.padding + 24}px ${token.padding}px ${token.padding}px`,
         maxWidth: '70%',
-        margin: '0 auto',
+        margin: '0 auto'
       }
     },
 

@@ -20,7 +20,7 @@ type Props = ThemeProps;
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext)
+  const { isWebUI } = useContext(ScreenContext);
   const { token } = useTheme() as Theme;
   const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
 
@@ -64,11 +64,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
       </div>
       {!isWebUI && (
-      <>
-        <div className={'__group-label'}>{t('Chains')}</div>
+        <>
+          <div className={'__group-label'}>{t('Chains')}</div>
 
-        <CustomizeModalContent />
-      </>)}
+          <CustomizeModalContent />
+        </>)}
     </SwModal>
   );
 }

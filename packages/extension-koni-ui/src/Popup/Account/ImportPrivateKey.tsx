@@ -42,8 +42,8 @@ const instructionContents: InstructionContentType[] = [
   {
     title: 'Is it safe to enter it into SubWallet?',
     description: 'Yes. It will be stored locally and never leave your device without your explicit permission.'
-  },
-]
+  }
+];
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
@@ -52,7 +52,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { goHome } = useDefaultNavigate();
   const onComplete = useCompleteCreateAccount();
   const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
-  const { isWebUI } = useContext(ScreenContext)
+  const { isWebUI } = useContext(ScreenContext);
 
   const timeOutRef = useRef<NodeJS.Timer>();
 
@@ -162,23 +162,25 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     onClick: onSubmit,
     disabled: !privateKey || !!validateState.status,
     loading: validating || loading
-  }
+  };
 
   return (
     <PageWrapper className={CN(className)}>
       <Layout.Base
         onBack={onBack}
-        {...(!isWebUI ? {
-          rightFooterButton: buttonProps,
-          showBackButton: true,
-          subHeaderPaddingVertical: true,
-          showSubHeader: true,
-          subHeaderCenter: true,
-          subHeaderBackground: 'transparent'
-      }: {
-        headerList: ['Simple'],
-        showWebHeader: true
-      })}
+        {...(!isWebUI
+          ? {
+            rightFooterButton: buttonProps,
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -189,7 +191,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       >
         <div className={CN('container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <div className='import-container'>
             <div className='description'>
               {t('To import an existing wallet, please enter the private key here')}
@@ -213,13 +216,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               </Form.Item>
 
               {isWebUI && (
-                <Button {...buttonProps} className='action'/>
+                <Button
+                  {...buttonProps}
+                  className='action'
+                />
               )}
             </Form>
           </div>
 
           {isWebUI && (
-            <InstructionContainer contents={instructionContents}/>
+            <InstructionContainer contents={instructionContents} />
           )}
         </div>
       </Layout.Base>
@@ -230,7 +236,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const ImportPrivateKey = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      "&.__web-ui": {
+      '&.__web-ui': {
         display: 'flex',
         justifyContent: 'center',
         maxWidth: '60%',

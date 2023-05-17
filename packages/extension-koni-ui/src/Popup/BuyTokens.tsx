@@ -210,8 +210,9 @@ function Component ({ className, modalContent }: Props) {
   }, [fixedTokenKey]);
 
   return (
-      <PageWrapper className={CN(className, 'transaction-wrapper')}>
-        {!modalContent && <SwSubHeader
+    <PageWrapper className={CN(className, 'transaction-wrapper')}>
+      {!modalContent && (
+        <SwSubHeader
           background={'transparent'}
           center
           className={'transaction-header'}
@@ -219,77 +220,81 @@ function Component ({ className, modalContent }: Props) {
           paddingVertical
           showBackButton
           title={t('Buy tokens')}
-        />}
-        <div className={'__scroll-container'}>
-          <div className='__buy-icon-wrapper'>
-            <Icon
-              className={'__buy-icon'}
-              phosphorIcon={ShoppingCartSimple}
-              weight={'fill'}
-            />
-          </div>
+        />
+      )}
+      <div className={'__scroll-container'}>
+        <div className='__buy-icon-wrapper'>
+          <Icon
+            className={'__buy-icon'}
+            phosphorIcon={ShoppingCartSimple}
+            weight={'fill'}
+          />
+        </div>
 
-          <Form
-            className='__form-container form-space-sm'
-            form={form}
-            initialValues={formDefault}
+        <Form
+          className='__form-container form-space-sm'
+          form={form}
+          initialValues={formDefault}
+        >
+          <Form.Item
+            className={CN({
+              hidden: !isAllAccount
+            })}
+            name={'address'}
           >
-            <Form.Item
-              className={CN({
-                hidden: !isAllAccount
-              })}
-              name={'address'}
-            >
-              <AccountSelector
-                disabled={!isAllAccount}
-                filter={accountsFilter}
-                label={t('Select account')}
+            <AccountSelector
+              disabled={!isAllAccount}
+              filter={accountsFilter}
+              label={t('Select account')}
+            />
+          </Form.Item>
+
+          <div className='form-row'>
+            <Form.Item name={'tokenKey'}>
+              <TokenSelector
+                disabled={!!fixedTokenKey || !tokenItems.length}
+                items={tokenItems}
+                showChainInSelected={false}
               />
             </Form.Item>
 
-            <div className='form-row'>
-              <Form.Item name={'tokenKey'}>
-                <TokenSelector
-                  disabled={!!fixedTokenKey || !tokenItems.length}
-                  items={tokenItems}
-                  showChainInSelected={false}
-                />
-              </Form.Item>
-
-              <Form.Item name={'service'}>
-                <ServiceSelector />
-              </Form.Item>
-            </div>
-          </Form>
-
-          <div className={'common-text __note'}>
-            {t('You will be taken to independent provider to complete this transaction')}
+            <Form.Item name={'service'}>
+              <ServiceSelector />
+            </Form.Item>
           </div>
-        </div>
+        </Form>
 
-        <div className={'__layout-footer'}>
-          <Button
-            disabled={!isSupportBuyTokens}
-            icon={ (
-              <Icon
-                phosphorIcon={ShoppingCartSimple}
-                weight={'fill'}
-              />
-            )}
-            onClick={onClickNext}
-          >
-            {t('Buy now')}
-          </Button>
+        <div className={'common-text __note'}>
+          {t('You will be taken to independent provider to complete this transaction')}
         </div>
-      </PageWrapper>
+      </div>
+
+      <div className={'__layout-footer'}>
+        <Button
+          disabled={!isSupportBuyTokens}
+          icon={ (
+            <Icon
+              phosphorIcon={ShoppingCartSimple}
+              weight={'fill'}
+            />
+          )}
+          onClick={onClickNext}
+        >
+          {t('Buy now')}
+        </Button>
+      </div>
+    </PageWrapper>
   );
 }
 
-function Wrapper({ modalContent, ...rest }: Props) {
+function Wrapper ({ modalContent, ...rest }: Props) {
   if (modalContent) {
     return <>
-      <Component modalContent={modalContent} {...rest} />
-    </>
+      <Component
+        modalContent={modalContent}
+        {...rest}
+      />
+    </>;
   }
 
   return (
@@ -297,9 +302,12 @@ function Wrapper({ modalContent, ...rest }: Props) {
       showFilterIcon
       showTabBar={false}
     >
-      <Component modalContent={modalContent} {...rest} />
+      <Component
+        modalContent={modalContent}
+        {...rest}
+      />
     </Layout.Home>
-  )
+  );
 }
 
 const BuyTokens = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {

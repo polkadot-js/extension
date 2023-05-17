@@ -16,7 +16,7 @@ interface Props extends ThemeProps {
 }
 
 function Component (props: Props): React.ReactElement<Props> {
-  const { className = '', closeIcon, id, onCancel, title, footer, children } = props;
+  const { children, className = '', closeIcon, footer, id, onCancel, title } = props;
 
   return (
     <SwModal
@@ -36,11 +36,11 @@ export const CustomModal = styled(Component)<Props>(({ theme: { token } }: Props
   return ({
 
     '.ant-sw-modal-content': {
-      maxHeight: 'unset',
+      maxHeight: 'unset'
     },
 
     '.ant-sw-modal-body': {
-      paddingBottom: token.paddingXS,
+      paddingBottom: token.paddingXS
     },
 
     '.ant-sw-modal-footer': {
@@ -50,7 +50,6 @@ export const CustomModal = styled(Component)<Props>(({ theme: { token } }: Props
     '.__option-item': {
       display: 'flex'
     },
-
 
     '.ant-checkbox-wrapper': {
       display: 'flex',

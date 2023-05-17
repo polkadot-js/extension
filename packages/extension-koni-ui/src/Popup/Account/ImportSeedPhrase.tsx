@@ -4,8 +4,10 @@
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
+import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
@@ -22,8 +24,6 @@ import React, { ChangeEventHandler, useCallback, useContext, useEffect, useRef, 
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
 
 type Props = ThemeProps;
 
@@ -41,14 +41,14 @@ const instructionContent: InstructionContentType[] = [
   {
     title: 'What is a seed phrase?',
     description: 'Seed phrase is a 12- or 24-word phrase that can be used to restore your wallet.',
-    type: 'warning',
+    type: 'warning'
   },
   {
     title: 'Is it safe to enter it into SubWallet?',
     description: 'Yes. It will be stored locally and never leave your device without your explicit permission.',
-    type: 'warning',
-  },
-]
+    type: 'warning'
+  }
+];
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
@@ -169,23 +169,25 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     onClick: onSubmit,
     disabled: !seedPhrase || !!validateState.status || !keyTypes.length,
     loading: validating || submitting
-  }
+  };
 
   return (
     <PageWrapper className={CN(className)}>
       <Layout.Base
         onBack={onBack}
-        {...(!isWebUI ? {
-          rightFooterButton: buttonProps,
-          showBackButton: true,
-          subHeaderPaddingVertical: true,
-          showSubHeader: true,
-          subHeaderCenter: true,
-          subHeaderBackground: 'transparent'
-        } : {
-          headerList: ['Simple'],
-          showWebHeader: true
-        })}
+        {...(!isWebUI
+          ? {
+            rightFooterButton: buttonProps,
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -197,7 +199,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
         <div className={CN('container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <div className='secret-phrase-container'>
             <div className='description'>
               {t('To import an existing Polkdot wallet, please enter the recovery seed phrase here:')}
@@ -234,14 +237,17 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                       <span className={'__option-label'}>Import multiple accounts from this seed phrase</span>
                     </Checkbox>
                   </Form.Item>
-                  <Button {...buttonProps} className='action'/>
+                  <Button
+                    {...buttonProps}
+                    className='action'
+                  />
                 </>
               )}
             </Form>
           </div>
 
           {isWebUI && (
-            <InstructionContainer contents={instructionContent}/>
+            <InstructionContainer contents={instructionContent} />
           )}
         </div>
       </Layout.Base>

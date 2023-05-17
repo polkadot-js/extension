@@ -43,7 +43,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
 
     '.main-page-container': {
       border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`,
-      boxSizing: 'border-box',
+      boxSizing: 'border-box'
     },
 
     '.ant-sw-modal .ant-sw-modal-header': {

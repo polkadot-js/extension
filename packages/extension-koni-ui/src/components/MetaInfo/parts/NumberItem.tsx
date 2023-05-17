@@ -1,63 +1,61 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Number } from "@subwallet/react-ui"
-import BigN from "bignumber.js"
-import CN from "classnames"
-import React from "react"
-import styled from "styled-components"
+import { Number } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
+import CN from 'classnames';
+import React from 'react';
+import styled from 'styled-components';
 
-import { InfoItemBase } from "./types"
+import { InfoItemBase } from './types';
 
-export interface NumberInfoItem extends Omit<InfoItemBase, "valueColorSchema"> {
+export interface NumberInfoItem extends Omit<InfoItemBase, 'valueColorSchema'> {
   value: string | number | BigN
   suffix?: string
   decimals?: number
-  valueColorSchema?: InfoItemBase["valueColorSchema"] | "even-odd"
+  valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd'
   decimalOpacity?: number
   size?: number
   subFloatNumber?: boolean
 }
 
 const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
-  const {
-    className,
+  const { className,
+    decimalOpacity = 1,
     decimals = 0,
     label,
-    suffix,
-    value,
-    valueColorSchema = "default",
-    decimalOpacity = 1,
     size = 30,
     subFloatNumber = false,
-  } = props
+    suffix,
+    value,
+    valueColorSchema = 'default' } = props;
 
   return (
-    <div className={CN(className, "__row -type-number")}>
-      <div className={"__col"}>
-        <div className={"__label"}>{label}</div>
+    <div className={CN(className, '__row -type-number')}>
+      <div className={'__col'}>
+        <div className={'__label'}>{label}</div>
       </div>
-      <div className={"__col -to-right"}>
+      <div className={'__col -to-right'}>
         <Number
           className={`__number-item __value -schema-${valueColorSchema}`}
           decimal={decimals}
           decimalOpacity={decimalOpacity}
           intOpacity={1}
+          size={size}
+          subFloatNumber={subFloatNumber}
           suffix={suffix}
           unitOpacity={1}
           value={value}
-          size={size}
-          subFloatNumber={subFloatNumber}
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
 const NumberItem = styled(Component)<NumberInfoItem>(
   ({ theme: { token } }: NumberInfoItem) => {
-    return {}
+    return {};
   }
-)
+);
 
-export default NumberItem
+export default NumberItem;

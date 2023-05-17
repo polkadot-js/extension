@@ -5,8 +5,10 @@ import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistor
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
 import { EmptyList, FilterModal, HistoryItem, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import Search from '@subwallet/extension-koni-ui/components/Search';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
@@ -18,9 +20,6 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { HistoryDetailModal } from './Detail';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import Search from '@subwallet/extension-koni-ui/components/Search';
-
 
 type Props = ThemeProps
 
@@ -131,7 +130,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount } = useSelector((root) => root.accountState);
   const { historyList: rawHistoryList } = useSelector((root) => root.transactionHistory);
-  const [searchInput, setSearchInput] = useState<string>('')
+  const [searchInput, setSearchInput] = useState<string>('');
   const { chainInfoMap } = useSelector((root) => root.chainStore);
 
   const isActive = checkActive(modalId);
@@ -375,11 +374,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return (
         <div className='web-list'>
           <Search
-            searchValue={searchInput}
-            placeholder={"Chain, Address, Type,..."}
-            onSearch={(value: string) => setSearchInput(value)}
-            onClickActionBtn={onClickActionBtn}
             actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+            onClickActionBtn={onClickActionBtn}
+            onSearch={setSearchInput}
+            placeholder={'Chain, Address, Type,...'}
+            searchValue={searchInput}
             showActionBtn
             showExtraButton
           />
@@ -388,32 +387,33 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             groupBy={groupBy}
             groupSeparator={groupSeparator}
             list={historyList}
-            searchBy={searchFunc}
-            searchTerm={searchInput}
             renderItem={renderItem}
             renderWhenEmpty={emptyList}
+            searchBy={searchFunc}
+            searchTerm={searchInput}
           />
         </div>
-      )
+      );
     }
+
     return (
-        <SwList.Section
-          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-          enableSearchInput
-          filterBy={filterFunction}
-          groupBy={groupBy}
-          groupSeparator={groupSeparator}
-          list={historyList}
-          onClickActionBtn={onClickActionBtn}
-          renderItem={renderItem}
-          renderWhenEmpty={emptyList}
-          searchFunction={searchFunc}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search history')}
-          showActionBtn
-        />
-    )
-  }, [isWebUI, searchInput, selectedFilters])
+      <SwList.Section
+        actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+        enableSearchInput
+        filterBy={filterFunction}
+        groupBy={groupBy}
+        groupSeparator={groupSeparator}
+        list={historyList}
+        onClickActionBtn={onClickActionBtn}
+        renderItem={renderItem}
+        renderWhenEmpty={emptyList}
+        searchFunction={searchFunc}
+        searchMinCharactersCount={2}
+        searchPlaceholder={t<string>('Search history')}
+        showActionBtn
+      />
+    );
+  }, [emptyList, filterFunction, groupBy, groupSeparator, historyList, isWebUI, onClickActionBtn, renderItem, searchFunc, searchInput, t]);
 
   return (
     <>
@@ -422,7 +422,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         resolve={dataContext.awaitStores(['transactionHistory'])}
       >
         {!isWebUI && (
-           <SwSubHeader
+          <SwSubHeader
             background={'transparent'}
             center={false}
             className={'history-header'}
@@ -443,7 +443,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             title={t('History')}
           />
         )}
-
 
         {listSection}
       </PageWrapper>

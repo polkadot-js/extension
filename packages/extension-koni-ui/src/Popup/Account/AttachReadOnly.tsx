@@ -32,11 +32,14 @@ interface ReadOnlyAccountInput {
   address?: string;
 }
 
-const FooterIcon = <Icon phosphorIcon={Eye} weight="fill" />;
+const FooterIcon = <Icon
+  phosphorIcon={Eye}
+  weight='fill'
+/>;
 
-const modalId = "attach-read-only-scanner-modal";
-const formName = "attach-read-only-form";
-const fieldName = "address";
+const modalId = 'attach-read-only-scanner-modal';
+const formName = 'attach-read-only-form';
+const fieldName = 'address';
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
@@ -54,7 +57,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const [form] = Form.useForm<ReadOnlyAccountInput>();
 
-  const [reformatAddress, setReformatAddress] = useState("");
+  const [reformatAddress, setReformatAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [isEthereum, setIsEthereum] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
@@ -68,7 +71,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, []);
 
-  const onFieldsChange: Callbacks<ReadOnlyAccountInput>["onFieldsChange"] =
+  const onFieldsChange: Callbacks<ReadOnlyAccountInput>['onFieldsChange'] =
     useCallback(
       (changes: FieldData[], allFields: FieldData[]) => {
         const { empty, error } = simpleCheckForm(allFields);
@@ -92,16 +95,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         // For each account, check if the address already exists return promise reject
         for (const account of accounts) {
           if (account.address === result.content) {
-            setReformatAddress("");
+            setReformatAddress('');
 
-            return Promise.reject(t("Account already exists"));
+            return Promise.reject(t('Account already exists'));
           }
         }
       } else {
-        setReformatAddress("");
+        setReformatAddress('');
 
-        if (value !== "") {
-          return Promise.reject(t("Invalid address"));
+        if (value !== '') {
+          return Promise.reject(t('Invalid address'));
         }
       }
 
@@ -117,15 +120,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       createAccountExternalV2({
         name: accountName,
         address: reformatAddress,
-        genesisHash: "",
+        genesisHash: '',
         isEthereum: isEthereum,
         isAllowed: false,
-        isReadOnly: true,
+        isReadOnly: true
       })
         .then((errors) => {
           if (errors.length) {
             form.setFields([
-              { name: fieldName, errors: errors.map((e) => e.message) },
+              { name: fieldName, errors: errors.map((e) => e.message) }
             ]);
           } else {
             onComplete();
@@ -145,56 +148,59 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   useFocusById(modalId);
 
   const buttonProps = {
-    children: t("Attach read-only account"),
+    children: t('Attach read-only account'),
     icon: FooterIcon,
     disabled: isDisable,
     onClick: onSubmit,
-    loading: loading,
-  }
+    loading: loading
+  };
 
   return (
     <PageWrapper className={CN(className)}>
       <Layout.Base
         onBack={onBack}
-        {...(!isWebUI ? {
-          rightFooterButton: buttonProps,
-          showBackButton: true,
-          subHeaderPaddingVertical: true,
-          showSubHeader: true,
-          subHeaderCenter: true,
-          subHeaderBackground: 'transparent'
-        }: {
-          headerList: ['Simple'],
-          showWebHeader: true
-        })}
+        {...(!isWebUI
+          ? {
+            rightFooterButton: buttonProps,
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
-            onClick: goHome,
-          },
+            onClick: goHome
+          }
         ]}
-        title={t<string>("Attach watch-only account")}
+        title={t<string>('Attach watch-only account')}
       >
-        <div className={CN("container", {
+        <div className={CN('container', {
           '__web-ui': isWebUI
-        })}>
-          <div className="description">
+        })}
+        >
+          <div className='description'>
             {t(
-              "Track the activity of any wallet without injecting your private key to SubWallet"
+              'Track the activity of any wallet without injecting your private key to SubWallet'
             )}
           </div>
-          <div className="page-icon">
+          <div className='page-icon'>
             <PageIcon
-              color="var(--page-icon-color)"
+              color='var(--page-icon-color)'
               iconProps={{
-                weight: "fill",
-                phosphorIcon: Eye,
+                weight: 'fill',
+                phosphorIcon: Eye
               }}
             />
           </div>
           <Form
             form={form}
-            initialValues={{ address: "" }}
+            initialValues={{ address: '' }}
             name={formName}
             onFieldsChange={onFieldsChange}
             onFinish={onSubmit}
@@ -203,24 +209,27 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               name={fieldName}
               rules={[
                 {
-                  message: t("Account address is required"),
-                  required: true,
+                  message: t('Account address is required'),
+                  required: true
                 },
                 {
-                  validator: accountAddressValidator,
-                },
+                  validator: accountAddressValidator
+                }
               ]}
               statusHelpAsTooltip={true}
             >
               <AddressInput
                 id={modalId}
-                placeholder={t("Please type or paste account address")}
+                placeholder={t('Please type or paste account address')}
                 showScanner={true}
               />
             </Form.Item>
 
             {isWebUI && (
-              <Button {...buttonProps} className='submit-button'/>
+              <Button
+                {...buttonProps}
+                className='submit-button'
+              />
             )}
           </Form>
         </div>
@@ -234,9 +243,9 @@ const AttachReadOnly = styled(Component)<Props>(
     return {
       '.__web-ui': {
         maxWidth: '60%',
-        margin: '0 auto',
+        margin: '0 auto'
       },
-      ".container": {
+      '.container': {
         padding: token.padding,
 
         '& .submit-button': {
@@ -245,21 +254,21 @@ const AttachReadOnly = styled(Component)<Props>(
         }
       },
 
-      ".description": {
+      '.description': {
         padding: `0 ${token.padding}px`,
         fontSize: token.fontSizeHeading6,
         lineHeight: token.lineHeightHeading6,
         color: token.colorTextDescription,
-        textAlign: "center",
+        textAlign: 'center'
       },
 
-      ".page-icon": {
-        display: "flex",
-        justifyContent: "center",
+      '.page-icon': {
+        display: 'flex',
+        justifyContent: 'center',
         marginTop: token.controlHeightLG,
         marginBottom: token.sizeXXL,
-        "--page-icon-color": token.colorSecondary,
-      },
+        '--page-icon-color': token.colorSecondary
+      }
     };
   }
 );

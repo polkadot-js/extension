@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
+import { CompoundedHeader } from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
 import { FadersHorizontal, MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CompoundedHeader } from '@subwallet/extension-koni-ui/components/Layout/parts/Header'
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = {
   children?: React.ReactNode;
@@ -20,7 +20,7 @@ type Props = {
   withBackground?: boolean
 };
 
-const Home = ({ children, onClickFilterIcon, onClickSearchIcon, withBackground, showFilterIcon, showSearchIcon, showTabBar }: Props) => {
+const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, showSearchIcon, showTabBar, withBackground }: Props) => {
   const navigate = useNavigate();
   const { activeModal } = useContext(ModalContext);
   const { pathname } = useLocation();
@@ -60,18 +60,18 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, withBackground, 
   }, [onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon]);
 
   const SCREEN_HEADERS: Record<keyof CompoundedHeader, string[]> = {
-    'Controller': [
+    Controller: [
       'porfolio',
       'crowdloans',
       'history',
       'dapps',
       'staking'
     ],
-    'Balance': [
+    Balance: [
       'porfolio'
     ],
-    'Simple': []
-  }
+    Simple: []
+  };
 
   const onClickListIcon = useCallback(() => {
     navigate('/settings/list');
@@ -79,32 +79,34 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, withBackground, 
 
   const currentRoute = useMemo(() => {
     const pathEls = pathname.split('/').filter((i: string) => !!i);
+
     return pathEls[pathEls.length - 1];
-  }, [pathname])
+  }, [pathname]);
 
   const pageHeaders: (keyof CompoundedHeader)[] = useMemo(() => {
     const headerKeys = Object.keys(SCREEN_HEADERS).map((i: string) => i as keyof CompoundedHeader);
 
     return headerKeys.filter((v: string) => {
       const key = v as keyof CompoundedHeader;
-      return SCREEN_HEADERS[key].includes(currentRoute)
+
+      return SCREEN_HEADERS[key].includes(currentRoute);
     });
-  }, [currentRoute])
+  }, [currentRoute]);
 
   return (
     <Layout.Base
       headerCenter={false}
       headerIcons={headerIcons}
       headerLeft={'default'}
+      headerList={pageHeaders}
       headerOnClickLeft={onClickListIcon}
       headerPaddingVertical={true}
       showHeader={true}
       showLeftButton={true}
       showTabBar={showTabBar ?? true}
-      withSideMenu
-      headerList={pageHeaders}
       title={currentRoute[0].toUpperCase() + currentRoute.slice(1)}
       withBackground={withBackground}
+      withSideMenu
     >
       {children}
     </Layout.Base>

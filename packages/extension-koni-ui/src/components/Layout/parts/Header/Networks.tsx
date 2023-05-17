@@ -1,13 +1,16 @@
-import EmptyList from "@subwallet/extension-koni-ui/components/EmptyList";
-import { MetaInfo } from "@subwallet/extension-koni-ui/components/MetaInfo";
-import NetworkToggleItem from "@subwallet/extension-koni-ui/components/NetworkToggleItem";
-import useChainInfoWithState, { ChainInfoWithState } from "@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState";
-import { ThemeProps } from "@subwallet/extension-koni-ui/types";
-import { Button, Divider, Icon, Popover, SwList } from "@subwallet/react-ui";
-import { ListChecks, SlidersHorizontal } from "phosphor-react";
-import { LegacyRef, forwardRef, useCallback, useMemo } from "react";
-import { useTranslation } from "react-i18next";
-import styled from "styled-components";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
+import { MetaInfo } from '@subwallet/extension-koni-ui/components/MetaInfo';
+import NetworkToggleItem from '@subwallet/extension-koni-ui/components/NetworkToggleItem';
+import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Button, Divider, Icon, Popover, SwList } from '@subwallet/react-ui';
+import { ListChecks, SlidersHorizontal } from 'phosphor-react';
+import { forwardRef, LegacyRef, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 const StyledSection = styled(SwList.Section)<ThemeProps>(({ theme: { token } }: ThemeProps) => {
   return {
@@ -81,43 +84,50 @@ const Component: React.FC = () => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center'
-        }}>
+        }}
+        >
           <Button
-            type="ghost"
-            icon={<Icon phosphorIcon={SlidersHorizontal} size={"sm"} />}
+            icon={<Icon
+              phosphorIcon={SlidersHorizontal}
+              size={'sm'}
+            />}
+            type='ghost'
           >
-            {t<string>("Manage networks")}
+            {t<string>('Manage networks')}
           </Button>
         </div>
       </>
-    )
-  }, [])
+    );
+  }, []);
 
   // Remove ref error
   const TriggerComponent = forwardRef((props, ref) => (
-    <div {...props} ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}>
+    <div
+      {...props}
+      ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}
+    >
       <MetaInfo.AccountGroup
-        className="ava-group"
         accounts={[]}
+        className='ava-group'
         content={`${chainInfoList.length} networks`}
       />
     </div>
-  ))
+  ));
 
   return (
     <Popover
       content={popOverContent}
-      trigger="click"
-      showArrow={false}
-      placement="bottomRight"
       overlayInnerStyle={{
-        padding: '16px 0',
+        padding: '16px 0'
       }}
+      placement='bottomRight'
+      showArrow={false}
+      trigger='click'
     >
       <TriggerComponent />
     </Popover>
-  )
-}
+  );
+};
 
 const Networks = styled(Component)<ThemeProps>(({ theme: { token } }: ThemeProps) => {
   return {

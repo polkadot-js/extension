@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { SwModalFuncProps } from '@subwallet/react-ui';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useConfirmModal } from '../modal';
@@ -11,18 +12,18 @@ const modalId = 'delete-account-modal';
 
 const useDeleteAccount = () => {
   const { t } = useTranslation();
-
+  const { isWebUI } = useContext(ScreenContext);
   const modalProps: SwModalFuncProps = useMemo(() => {
     return {
       closable: true,
-      content: t('You will no longer be able to access this account via this extension'),
+      content: isWebUI ? t('If you ever want to use this account again, you would need to import it again with seedphrase, private key, or JSON file') : t('You will no longer be able to access this account via this extension'),
       id: modalId,
-      okText: t('Remove'),
-      subTitle: t('You are about to remove the account'),
-      title: t('Confirmation'),
+      okText: isWebUI ? t('Delete') : t('Remove'),
+      subTitle: isWebUI ? t('Delete this account') : t('You are about to remove the account'),
+      title: isWebUI ? t('Remove account') : t('Confirmation'),
       type: 'error'
     };
-  }, [t]);
+  }, [isWebUI, t]);
 
   const { handleSimpleConfirmModal } = useConfirmModal(modalProps);
 

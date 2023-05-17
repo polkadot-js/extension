@@ -1,5 +1,9 @@
-import { Table } from "@subwallet/react-ui";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
 import type { ColumnsType } from '@subwallet/react-ui/es/table';
+
+import { Table } from '@subwallet/react-ui';
 
 type Props<T> = {
   className?: string
@@ -8,26 +12,24 @@ type Props<T> = {
   onClick?: (item: T) => void
 }
 
-const Component = <T extends object>({
-  columns,
+const Component = <T extends object>({ columns,
   dataSource,
-  onClick
-}: Props<T & { slug: string}>): React.ReactElement<Props<T & { slug: string}>> => {
+  onClick }: Props<T & { slug: string}>): React.ReactElement<Props<T & { slug: string}>> => {
   return (
     <Table
-      rowKey={(record) => record.slug}
-      dataSource={dataSource}
       columns={columns}
-      pagination={false}
+      dataSource={dataSource}
       onRow={(record, rowIndex) => {
         return {
           onClick: () => {
-            onClick && onClick(record)
-          },
+            onClick && onClick(record);
+          }
         };
       }}
+      pagination={false}
+      rowKey={(record) => record.slug}
     />
-  )
-}
+  );
+};
 
 export default Component;

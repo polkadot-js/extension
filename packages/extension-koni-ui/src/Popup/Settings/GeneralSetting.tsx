@@ -95,7 +95,7 @@ type LoadingMap = {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { isWebUI } = useContext(ScreenContext)
+  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
@@ -211,20 +211,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     <PageWrapper className={`general-setting ${className}`}>
       <Layout.WithSubHeaderOnly
         onBack={goBack}
+        subHeaderCenter={!isWebUI}
         title={t('General settings')}
         withSideMenu
-        subHeaderCenter={!isWebUI}
       >
-         {isWebUI && <SwSubHeader
-          title={t('General settings')}
+        {isWebUI && <SwSubHeader
           background='transparent'
           center={false}
           onBack={() => navigate(-1)}
           showBackButton={true}
-        />}
+          title={t('General settings')}
+                    />}
         <div className={CN('__scroll-container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <SelectModal
             background={'default'}
             className={CN(`__modal ${className}`, {
@@ -354,17 +355,17 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
         '&.__web-ui': {
           maxWidth: '70%',
           margin: '0 auto',
-          paddingTop: token.padding + 24,
-       }
+          paddingTop: token.padding + 24
+        }
       }
     },
 
     '&.__modal': {
       '&.__web-ui': {
 
-          '.ant-sw-list-wrapper': {
-            flex: '1 1 auto !important',
-          }
+        '.ant-sw-list-wrapper': {
+          flex: '1 1 auto !important'
+        }
 
       },
       '.__selection-item .ant-web3-block-right-item': {

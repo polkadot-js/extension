@@ -1,18 +1,19 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import React, { useCallback, useContext, useMemo } from 'react';
-import styled, { useTheme } from 'styled-components';
-import CN from 'classnames';
-import { MetaInfo } from '../MetaInfo';
-import { useTranslation } from 'react-i18next';
-import { BackgroundIcon, Number } from '@subwallet/react-ui';
-import { Info } from 'phosphor-react';
-import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
-import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
+import { TransactionContext } from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { BackgroundIcon, Number } from '@subwallet/react-ui';
+import CN from 'classnames';
+import { Info } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import styled, { useTheme } from 'styled-components';
+
+import { MetaInfo } from '../MetaInfo';
 
 interface Props extends ThemeProps {
   stakeStype?: StakingType
@@ -22,7 +23,7 @@ function Component (props: Props): React.ReactElement<Props> {
   const { className = '', stakeStype } = props;
   const { t } = useTranslation();
   const { chain } = useContext(TransactionContext);
-  const { token } = useTheme() as Theme
+  const { token } = useTheme() as Theme;
 
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
@@ -127,11 +128,11 @@ const NetworkInformation = styled(Component)<Props>(({ theme: { token } }: Props
       justifyContent: 'start',
       alignItems: 'center',
       gap: token.marginXS,
-      marginBottom: token.marginMD + 4,
+      marginBottom: token.marginMD + 4
     },
     '.__current-nominator-count, .__total-nominator-count': {
       display: 'inline-flex'
-    },
+    }
   });
 });
 

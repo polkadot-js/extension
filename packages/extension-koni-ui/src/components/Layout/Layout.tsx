@@ -14,7 +14,7 @@ export type CompoundedComponent = {
 const Layout: CompoundedComponent = {
   Home: Home,
   Base: Base,
-  WithSubHeaderOnly: WithSubHeaderOnly,
+  WithSubHeaderOnly: WithSubHeaderOnly
 };
 
 export default Layout;

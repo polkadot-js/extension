@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext } from 'react';
-import CN from 'classnames'
-import styled from 'styled-components';
-import SideMenu from '../parts/SideMenu';
-import Headers, { CompoundedHeader } from '../parts/Header';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import CN from 'classnames';
+import React, { useCallback, useContext } from 'react';
+import styled from 'styled-components';
 
-export interface LayoutBaseWebProps  {
+import Headers, { CompoundedHeader } from '../parts/Header';
+import SideMenu from '../parts/SideMenu';
+
+export interface LayoutBaseWebProps {
   children: React.ReactNode | React.ReactNode[];
   className?: string;
   withSideMenu?: boolean;
@@ -18,7 +19,7 @@ export interface LayoutBaseWebProps  {
   withBackground?: boolean
 }
 
-const StyledLayout = styled('div')(({ theme: { extendToken }}) => {
+const StyledLayout = styled('div')(({ theme: { extendToken } }) => {
   return {
     display: 'flex',
     flex: 'auto',
@@ -29,7 +30,7 @@ const StyledLayout = styled('div')(({ theme: { extendToken }}) => {
       top: 0,
       height: '100vh',
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: 'column'
     },
 
     '.layout-content': {
@@ -39,18 +40,18 @@ const StyledLayout = styled('div')(({ theme: { extendToken }}) => {
       background: '#0C0C0C',
       maxHeight: '100vh',
       flex: 1,
-      position: "relative",
-      ".background": {
+      position: 'relative',
+      '.background': {
         backgroundImage: extendToken.tokensScreenSuccessBackgroundColor,
-        position: "absolute",
+        position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         height: 300,
-        "&.-decrease": {
+        '&.-decrease': {
           backgroundImage: extendToken.tokensScreenDangerBackgroundColor
-       },
-    },
+        }
+      },
       '.layout-header': {
 
       },
@@ -59,24 +60,26 @@ const StyledLayout = styled('div')(({ theme: { extendToken }}) => {
 
       }
     }
-  }
+  };
 });
 
-const BaseWeb = ({
+const BaseWeb = ({ children,
   className,
   headerList,
-  title,
   onBack,
-  children,
+  title,
   withBackground,
-  ...props
-}: LayoutBaseWebProps) => {
-  const { accountBalance: { totalBalanceInfo }} = useContext(HomeContext);
+  ...props }: LayoutBaseWebProps) => {
+  const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
   const isTotalBalanceDecrease = totalBalanceInfo.change.status === 'decrease';
   const renderHeader = useCallback((name: keyof CompoundedHeader, key: number) => {
     const CurComponent = Headers[name];
 
-    return <CurComponent title={title} key={key} onBack={onBack}/>
+    return <CurComponent
+      key={key}
+      onBack={onBack}
+      title={title}
+    />;
   }, [title]);
 
   return (
@@ -88,16 +91,17 @@ const BaseWeb = ({
       <div className='layout-content'>
         {withBackground && <div className={CN('background', {
           '-decrease': isTotalBalanceDecrease
-        })} />}
-          {(headerList && !!headerList.length) && (
-            <div className="layout-header">
-              {headerList.map((name: keyof CompoundedHeader, index: number) =>
-                renderHeader(name, index)
-              )}
-            </div>
-          )}
+        })}
+        />}
+        {(headerList && !!headerList.length) && (
+          <div className='layout-header'>
+            {headerList.map((name: keyof CompoundedHeader, index: number) =>
+              renderHeader(name, index)
+            )}
+          </div>
+        )}
 
-        <div className="layout-content-main">
+        <div className='layout-content-main'>
           {children}
         </div>
       </div>

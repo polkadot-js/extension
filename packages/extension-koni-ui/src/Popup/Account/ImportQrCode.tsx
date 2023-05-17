@@ -123,23 +123,25 @@ const Component: React.FC<Props> = (props: Props) => {
     icon: FooterIcon,
     onClick: openCamera,
     loading: loading
-  }
+  };
 
   return (
     <PageWrapper className={CN(className)}>
       <Layout.Base
         onBack={onBack}
-        {...(!isWebUI ? {
-          rightFooterButton: buttonProps,
-          showBackButton: true,
-          subHeaderPaddingVertical: true,
-          showSubHeader: true,
-          subHeaderCenter: true,
-          subHeaderBackground: 'transparent'
-        }: {
-          headerList: ['Simple'],
-          showWebHeader: true
-        })}
+        {...(!isWebUI
+          ? {
+            rightFooterButton: buttonProps,
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -150,7 +152,8 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <div className={CN('container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <div className='sub-title'>
             {t('Please make sure that you have granted SubWallet the access to your device\'s camera.')}
           </div>
@@ -207,7 +210,10 @@ const Component: React.FC<Props> = (props: Props) => {
             overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
           />
           {isWebUI && (
-            <Button {...buttonProps} className='action'/>
+            <Button
+              {...buttonProps}
+              className='action'
+            />
           )}
         </div>
       </Layout.Base>
@@ -219,7 +225,7 @@ const ImportQrCode = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.__web-ui': {
       maxWidth: '60%',
-      margin: '0 auto',
+      margin: '0 auto'
     },
     '.container': {
       padding: token.padding,

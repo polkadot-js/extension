@@ -7,20 +7,20 @@ import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
 import { AddressInput, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useChainChecker, useDefaultNavigate, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Col, Field, Form, Icon, Image, Input, NetworkItem, Row, SelectModal, SettingItem, SwSubHeader } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
+import CN from 'classnames';
 import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import CN from 'classnames';
 
 type Props = ThemeProps
 
@@ -322,7 +322,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['nft'])}
     >
       <Layout.Base
-        withSideMenu
         onBack={goBack}
         rightFooterButton={{
           block: true,
@@ -338,17 +337,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           children: t('Import')
         }}
         title={t<string>('Import token')}
+        withSideMenu
       >
         <SwSubHeader
           background='transparent'
+          center={!isWebUI}
           onBack={goBack}
           showBackButton={true}
           title={t<string>('Import token')}
-          center={!isWebUI}
         />
         <div className={CN('import_token__container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <Form
             initialValues={{
               contractAddress: '',
@@ -451,17 +452,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             />
           </Form>
           {isWebUI && (
-              <div className='action-wrapper'>
+            <div className='action-wrapper'>
               <Button
                 block={true}
+                children={t('Save')}
                 disabled={isSubmitDisabled()}
-                icon={<Icon phosphorIcon={PlusCircle} weight='fill' />}
+                icon={<Icon
+                  phosphorIcon={PlusCircle}
+                  weight='fill'
+                />}
                 loading={loading}
                 onSubmit={onSubmit}
-                children={t('Save')}
               />
-              </div>
-            )}
+            </div>
+          )}
         </div>
       </Layout.Base>
     </PageWrapper>

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 // import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -12,12 +13,11 @@ import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging'
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
-import CN from 'classnames';
-import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 
 type Props = ThemeProps
 
@@ -255,7 +255,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Layout.Base
         withSideMenu
       >
-        {!isWebUI ?  (
+        {!isWebUI ? (
           <SwHeader
             left='logo'
             onClickLeft={goHome}
@@ -265,11 +265,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             {/*  // todo: i18n Settings */}
             Settings
           </SwHeader>
-        ) : <Headers.Controller title="Settings"/>}
+        ) : <Headers.Controller title='Settings' />}
         <div className={CN({
           '__scroll-container': !isWebUI,
-          '__web-container': isWebUI,
-        })}>
+          '__web-container': isWebUI
+        })}
+        >
           {
             SettingGroupItemType.map((group) => {
               return (
@@ -348,7 +349,7 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
 
     '.__web-container': {
       width: '70%',
-      margin: '0 auto',
+      margin: '0 auto'
     },
 
     '.__scroll-container': {

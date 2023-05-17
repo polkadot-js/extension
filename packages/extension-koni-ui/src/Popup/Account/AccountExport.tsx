@@ -82,14 +82,14 @@ const FinishIcon = (
 const formName = 'account-export-form';
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, modalContent, accountAddress } = props;
+  const { accountAddress, className, modalContent } = props;
 
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
   const { accountAddress: address } = useParams();
 
-  const currentAddress = useMemo(() => accountAddress && modalContent ? accountAddress : address, [accountAddress, address, modalContent])
+  const currentAddress = useMemo(() => accountAddress && modalContent ? accountAddress : address, [accountAddress, address, modalContent]);
 
   const account = useGetAccountByAddress(currentAddress);
 
@@ -332,6 +332,13 @@ const Component: React.FC<Props> = (props: Props) => {
           className={'transaction-header'}
           onBack={onBack}
           paddingVertical
+          rightButtons={[
+            {
+              icon: <CloseIcon />,
+              onClick: goHome,
+              disabled: loading
+            }
+          ]}
           showBackButton
           title={
             firstStep
@@ -340,14 +347,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 ? t('Export successful')
                 : t(titleMap[exportTypes[0]])
           }
-          rightButtons={[
-            {
-              icon: <CloseIcon />,
-              onClick: goHome,
-              disabled: loading
-            }
-          ]}
-        />}
+                          />}
         <div className='body-container'>
           <div className={CN('notice', { 'mb-large': !firstStep })}>
             <AlertBox

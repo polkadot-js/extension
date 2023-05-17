@@ -14,7 +14,7 @@ export type CompoundedHeader = {
 const Headers: CompoundedHeader = {
   Controller: Controller,
   Balance: Balance,
-  Simple: Simple,
+  Simple: Simple
 };
 
 export default Headers;

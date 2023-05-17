@@ -1,26 +1,22 @@
-import { PhosphorIcon, ThemeProps } from "@subwallet/extension-koni-ui/types"
-import { Button, Icon, Typography, Number, Tag, Divider, ModalContext } from "@subwallet/react-ui"
-import CN from "classnames"
-import {
-  EyeClosed,
-  Eye,
-  ArrowFatLineDown,
-  PaperPlaneTilt,
-  ShoppingCartSimple,
-} from "phosphor-react"
-import { useContext, useState } from "react"
-import styled from "styled-components"
-import { useCallback } from "react"
-import { useNavigate } from "react-router"
-import { useNotification, useReceiveQR, useTranslation } from "@subwallet/extension-koni-ui/hooks"
-import { useSelector } from 'react-redux';
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { CustomModal, ReceiveQrModal, TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal';
+import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
+import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import { useNotification, useReceiveQR, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import BuyTokens from '@subwallet/extension-koni-ui/Popup/BuyTokens';
+import Transaction from '@subwallet/extension-koni-ui/Popup/Transaction/Transaction';
+import SendFund from '@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { HomeContext } from "@subwallet/extension-koni-ui/contexts/screen/HomeContext"
-import { CustomModal, ReceiveQrModal, TokensSelectorModal } from "@subwallet/extension-koni-ui/components/Modal"
-import SendFund from "@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund"
-import Transaction from "@subwallet/extension-koni-ui/Popup/Transaction/Transaction"
-import BuyTokens from "@subwallet/extension-koni-ui/Popup/BuyTokens"
-import { AccountSelectorModal } from "@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal"
+import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Button, Divider, Icon, ModalContext, Number, Tag, Typography } from '@subwallet/react-ui';
+import CN from 'classnames';
+import { ArrowFatLineDown, Eye, EyeClosed, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import React, { useCallback, useContext, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
+import styled from 'styled-components';
 
 const TRANSFER_FUND_MODAL = 'transfer-fund-modal';
 const BUY_TOKEN_MODAL = 'buy-token-modal';
@@ -36,38 +32,36 @@ type Action = {
 
 const actions: Action[] = [
   {
-    label: "Receive",
-    type: "receive",
-    icon: ArrowFatLineDown,
+    label: 'Receive',
+    type: 'receive',
+    icon: ArrowFatLineDown
   },
   {
-    label: "Send",
-    type: "send",
-    icon: PaperPlaneTilt,
+    label: 'Send',
+    type: 'send',
+    icon: PaperPlaneTilt
   },
   {
-    label: "Buy",
-    type: "buys",
-    icon: ShoppingCartSimple,
-  },
-]
+    label: 'Buy',
+    type: 'buys',
+    icon: ShoppingCartSimple
+  }
+];
 
-function Component({ className }: Props): React.ReactElement<Props> {
-  const [displayBalance, setDisplayBalance] = useState<boolean>(false)
+function Component ({ className }: Props): React.ReactElement<Props> {
+  const [displayBalance, setDisplayBalance] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const {
+  const { accountSelectorItems,
     onOpenReceive,
-    accountSelectorItems,
     openSelectAccount,
     openSelectToken,
     selectedAccount,
     selectedNetwork,
-    tokenSelectorItems
-  } = useReceiveQR();
+    tokenSelectorItems } = useReceiveQR();
 
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const notify = useNotification();
@@ -78,7 +72,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
   const totalValue = totalBalanceInfo.convertedValue;
 
   const onOpenBuyTokens = useCallback(() => {
-    activeModal(BUY_TOKEN_MODAL)
+    activeModal(BUY_TOKEN_MODAL);
   }, [activeModal]);
 
   const onOpenSendFund = useCallback(() => {
@@ -92,125 +86,167 @@ function Component({ className }: Props): React.ReactElement<Props> {
       return;
     }
 
-    activeModal(TRANSFER_FUND_MODAL)
+    activeModal(TRANSFER_FUND_MODAL);
   },
-  [currentAccount, navigate, notify, t, activeModal]
+  [currentAccount, notify, t, activeModal]
   );
 
   const handleClick = useCallback((type: string) => {
     switch (type) {
-      case 'buys': return onOpenBuyTokens()
-      case 'send': return onOpenSendFund()
-      case 'receive': return onOpenReceive()
-      default: return;
+      case 'buys': return onOpenBuyTokens();
+      case 'send': return onOpenSendFund();
+      case 'receive': return onOpenReceive();
+      default:
     }
   }, [
     onOpenSendFund,
     onOpenBuyTokens,
     onOpenReceive
-  ])
+  ]);
 
   return (
-    <div className={CN(className, "flex-row")}>
-      <div className="balance-item">
-        <div className="flex-row">
-          <Typography.Text className="balance-title">
+    <div className={CN(className, 'flex-row')}>
+      <div className='balance-item'>
+        <div className='flex-row'>
+          <Typography.Text className='balance-title'>
             Total balance
           </Typography.Text>
           <Button
-            type="ghost"
-            className="toggle-show-balance"
+            className='toggle-show-balance'
             icon={
-              <Icon phosphorIcon={displayBalance ? Eye : EyeClosed} size="sm" />
+              <Icon
+                phosphorIcon={displayBalance ? Eye : EyeClosed}
+                size='sm'
+              />
             }
             onClick={() => setDisplayBalance(!displayBalance)}
+            type='ghost'
           />
         </div>
-        <Number
-          className={'balance-value'}
-          decimal={0}
-          decimalOpacity={0.45}
-          suffix='$'
-          size={30}
-          subFloatNumber
-          value={totalValue}
-        />
-        <div className={'__balance-change-container'}>
-          <Number
-            className={'__balance-change-value'}
-            decimal={0}
-            decimalOpacity={1}
-            prefix={isTotalBalanceDecrease ? '- $' : '+ $'}
-            value={totalChangeValue}
-            size={10}
-          />
-          <Tag
-            className={`__balance-change-percent ${isTotalBalanceDecrease ? '-decrease' : ''}`}
-            shape={'round'}
-          >
-            <Number
-              decimal={0}
-              decimalOpacity={1}
-              prefix={isTotalBalanceDecrease ? '-' : '+'}
-              suffix={'%'}
-              value={totalChangePercent}
-              weight={700}
-              size={10}
-            />
-          </Tag>
-        </div>
+        {displayBalance
+          ? (
+            <>
+              <Number
+                className={'balance-value'}
+                decimal={0}
+                decimalOpacity={0.45}
+                size={30}
+                subFloatNumber
+                suffix='$'
+                value={totalValue}
+              />
+
+              <div className={'__balance-change-container'}>
+                <Number
+                  className={'__balance-change-value'}
+                  decimal={0}
+                  decimalOpacity={1}
+                  prefix={isTotalBalanceDecrease ? '- $' : '+ $'}
+                  size={10}
+                  value={totalChangeValue}
+                />
+                <Tag
+                  className={`__balance-change-percent ${isTotalBalanceDecrease ? '-decrease' : ''}`}
+                  shape={'round'}
+                >
+                  <Number
+                    decimal={0}
+                    decimalOpacity={1}
+                    prefix={isTotalBalanceDecrease ? '-' : '+'}
+                    size={10}
+                    suffix={'%'}
+                    value={totalChangePercent}
+                    weight={700}
+                  />
+                </Tag>
+              </div>
+            </>
+          )
+          : (
+            <Typography.Text className='hidden-balance'>*******</Typography.Text>
+          )}
       </div>
 
-      <Divider className="divider" type="vertical" />
+      <Divider
+        className='divider'
+        type='vertical'
+      />
 
-      <div className="balance-item">
-        <Typography.Text className="balance-title">
+      <div className='balance-item'>
+        <Typography.Text className='balance-title'>
           Transferable balance
         </Typography.Text>
 
-        <Number
-          className="balance-value"
-          decimalOpacity={0.45}
-          size={30}
-          value={totalValue}
-          suffix="$"
-          decimal={0}
-          subFloatNumber
-        />
+        {
+          displayBalance
+            ? (
+              <Number
+                className='balance-value'
+                decimal={0}
+                decimalOpacity={0.45}
+                size={30}
+                subFloatNumber
+                suffix='$'
+                value={totalValue}
+              />
+            )
+            : (
+              <Typography.Text className='hidden-balance'>*******</Typography.Text>
+            )
+        }
       </div>
 
-      <Divider className="divider" type="vertical" />
+      <Divider
+        className='divider'
+        type='vertical'
+      />
 
-      <div className="balance-item">
-        <Typography.Text className="balance-title">
+      <div className='balance-item'>
+        <Typography.Text className='balance-title'>
           Locked balance
         </Typography.Text>
-
-        <Number
-          className="balance-value"
-          decimalOpacity={0.45}
-          size={30}
-          value={totalValue}
-          suffix="$"
-          decimal={0}
-          subFloatNumber
-        />
+        {
+          displayBalance
+            ? (
+              <Number
+                className='balance-value'
+                decimal={0}
+                decimalOpacity={0.45}
+                size={30}
+                subFloatNumber
+                suffix='$'
+                value={totalValue}
+              />
+            )
+            : (
+              <Typography.Text className='hidden-balance'>*******</Typography.Text>
+            )
+        }
       </div>
 
-      <Divider className="divider" type="vertical" />
+      <Divider
+        className='divider'
+        type='vertical'
+      />
 
-      <div className={CN("balance-item", "action-wrapper")}>
-        <Typography.Text className="balance-title">Actions</Typography.Text>
+      <div className={CN('balance-item', 'action-wrapper')}>
+        <Typography.Text className='balance-title'>Actions</Typography.Text>
 
-        <div className="actions">
+        <div className='actions'>
           {actions.map((item) => (
-            <div key={item.type} className="action-button">
+            <div
+              className='action-button'
+              key={item.type}
+            >
               <Button
                 className={CN(`type-${item.type}`)}
-                icon={<Icon phosphorIcon={item.icon} weight="bold" />}
-                shape="squircle"
-                size="sm"
+                icon={<Icon
+                  phosphorIcon={item.icon}
+                  weight='bold'
+                      />}
                 onClick={() => handleClick(item.type)}
+                shape='squircle'
+                size='sm'
               />
               <Typography.Text>{item.label}</Typography.Text>
             </div>
@@ -221,7 +257,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
       <CustomModal
         id={TRANSFER_FUND_MODAL}
         onCancel={() => inactiveModal(TRANSFER_FUND_MODAL)}
-        title={t("Transfer")}
+        title={t('Transfer')}
       >
         <Transaction modalContent>
           <SendFund modalContent />
@@ -231,7 +267,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
       <CustomModal
         id={BUY_TOKEN_MODAL}
         onCancel={() => inactiveModal(BUY_TOKEN_MODAL)}
-        title={t("Buy token")}
+        title={t('Buy token')}
       >
         <BuyTokens modalContent />
       </CustomModal>
@@ -252,49 +288,49 @@ function Component({ className }: Props): React.ReactElement<Props> {
         selectedNetwork={selectedNetwork}
       />
     </div>
-  )
+  );
 }
 
 const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "stretch",
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'stretch',
   marginBottom: 62,
 
-  ".divider": {
-    alignSelf: "stretch",
-    height: "unset",
+  '.divider': {
+    alignSelf: 'stretch',
+    height: 'unset'
   },
 
-  ".flex-row": {
-    display: "flex",
+  '.flex-row': {
+    display: 'flex'
   },
 
-  ".toggle-show-balance": {
-    height: "fit-content",
+  '.toggle-show-balance': {
+    height: 'fit-content'
   },
 
-  ".balance-item": {
-    display: "flex",
-    flexDirection: "column",
+  '.balance-item': {
+    display: 'flex',
+    flexDirection: 'column',
     flex: 1,
 
-    "&:not(:first-child)": {
-      alignItems: 'center',
+    '&:not(:first-child)': {
+      alignItems: 'center'
     },
 
-    ".balance-title": {
-      marginBottom: 5,
+    '.balance-title': {
+      marginBottom: 5
     },
-    "&:not(:first-child) > .balance-title": {
-      textAlign: "center",
-      display: "block",
-      width: "100%",
+    '&:not(:first-child) > .balance-title': {
+      textAlign: 'center',
+      display: 'block',
+      width: '100%'
     },
 
-    ".balance-value": {
-      margin: "12px 0",
-    },
+    '.balance-value': {
+      margin: '12px 0'
+    }
   },
 
   '.__balance-change-container': {
@@ -305,7 +341,7 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
     '.ant-typography': {
       lineHeight: 'inherit',
       // todo: may update number component to clear this !important
-      color: 'inherit !important',
+      color: 'inherit !important'
     }
   },
 
@@ -329,22 +365,25 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       fontSize: token.fontSizeXS
     }
   },
+  '.hidden-balance': {
+    margin: '20px 0'
+  },
 
-  ".action-wrapper": {
-    justifyContent: "space-between",
-    ".actions": {
-      display: "flex",
+  '.action-wrapper': {
+    justifyContent: 'space-between',
+    '.actions': {
+      display: 'flex',
       gap: 12,
 
-      ".action-button": {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+      '.action-button': {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
         gap: 8,
-        marginTop: 20,
-      },
-    },
-  },
-}))
+        marginTop: 20
+      }
+    }
+  }
+}));
 
-export default Balance
+export default Balance;

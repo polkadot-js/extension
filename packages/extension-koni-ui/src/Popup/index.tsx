@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import './main.scss';
+
 import { DataContextProvider } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { InternalRequestContextProvider } from '@subwallet/extension-koni-ui/contexts/InternalRequestContext';
 import { QRContextProvider } from '@subwallet/extension-koni-ui/contexts/QrSignerContext';
@@ -13,9 +15,8 @@ import React from 'react';
 import { RouterProvider } from 'react-router';
 
 import LoadingScreen from '../components/LoadingScreen';
-import { router } from './router';
 import { ScreenContextProvider } from '../contexts/ScreenContext';
-import './main.scss'
+import { router } from './router';
 
 export default function Popup (): React.ReactElement {
   return (

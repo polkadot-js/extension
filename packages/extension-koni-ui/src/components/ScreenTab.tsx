@@ -21,22 +21,20 @@ type Props = ThemeProps & {
 }
 
 const SwTabPanel = ({ children, label }: ChildProps) => {
-  return children
-}
+  return children;
+};
 
 const Component = (props: Props) => {
-  const {
-    children,
+  const { children,
     className,
     defaultIndex = 0,
     hideTabList = false,
     onSelectTab,
-    rightSection,
-  } = props
+    rightSection } = props;
 
   const tabLabelList = React.Children.map(children, (child) => {
-    return child.props.label
-  })
+    return child.props.label;
+  });
 
   return (
     <Tabs
@@ -44,11 +42,11 @@ const Component = (props: Props) => {
       defaultIndex={defaultIndex}
       onSelect={onSelectTab}
     >
-      <div className="tab-bar">
+      <div className='tab-bar'>
         <TabList
-          className={CN("react-tabs__tab-list", {
-            "__hide-tab-list": hideTabList,
-            "__with-search": rightSection,
+          className={CN('react-tabs__tab-list', {
+            '__hide-tab-list': hideTabList,
+            '__with-search': rightSection
           })}
         >
           {tabLabelList.map((label) => (
@@ -62,90 +60,90 @@ const Component = (props: Props) => {
         <TabPanel>{child}</TabPanel>
       ))}
     </Tabs>
-  )
-}
+  );
+};
 
 const _ScreenTab = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    ".react-tabs__tab-list": {
-      display: "flex",
+    '.react-tabs__tab-list': {
+      display: 'flex',
       padding: 4,
       borderRadius: token.borderRadiusLG,
       margin: `0 ${token.padding}px ${token.padding}px`,
-      background: "#1A1A1A",
+      background: '#1A1A1A',
 
-      "&.__with-search": {
+      '&.__with-search': {
         margin: 0,
         display: 'flex',
         justifyContent: 'start',
         alignItems: 'center',
 
         '& > li': {
-          paddingBottom: '8px !important',
+          paddingBottom: '8px !important'
         }
-      },
+      }
     },
 
-    ".__hide-tab-list": {
-      display: "none",
+    '.__hide-tab-list': {
+      display: 'none'
     },
 
-    ".tab-bar": {
-      display: "flex",
-      justifyContent: "space-between",
+    '.tab-bar': {
+      display: 'flex',
+      justifyContent: 'space-between',
 
-      ".__with-search": {
+      '.__with-search': {
         flex: 1,
-        background: "transparent",
+        background: 'transparent',
 
-        ".react-tabs__tab": {
-          cursor: "pointer",
-          flex: "unset",
+        '.react-tabs__tab': {
+          cursor: 'pointer',
+          flex: 'unset',
           borderRadius: 0,
-          color: "#FFFFFF",
+          color: '#FFFFFF',
           opacity: 0.45,
           padding: 0,
-          margin: "0px 8px",
+          margin: '0px 8px',
 
-          "&--selected": {
-            background: "transparent",
-            borderBottom: "2px solid #D9D9D9",
-            opacity: 1,
-          },
-        },
+          '&--selected': {
+            background: 'transparent',
+            borderBottom: '2px solid #D9D9D9',
+            opacity: 1
+          }
+        }
       },
 
-      ".react-tabs__tab": {
-        cursor: "pointer",
+      '.react-tabs__tab': {
+        cursor: 'pointer',
         flex: 1,
-        textAlign: "center",
-        borderRadius: "8px",
-        display: "inline-block",
-        border: "none",
-        outline: "none",
-        position: "relative",
-        listStyle: "none",
-        padding: "5px 8px",
+        textAlign: 'center',
+        borderRadius: '8px',
+        display: 'inline-block',
+        border: 'none',
+        outline: 'none',
+        position: 'relative',
+        listStyle: 'none',
+        padding: '5px 8px',
         fontSize: token.fontSize,
         lineHeight: token.lineHeight,
-        fontWeight: token.fontWeightStrong,
+        fontWeight: token.fontWeightStrong
       },
 
-      ".react-tabs__tab--selected": {
-        background: "#252525",
-      },
-    },
-  }
-})
+      '.react-tabs__tab--selected': {
+        background: '#252525'
+      }
+    }
+  };
+});
 
 type CompoundedComponent = React.ForwardRefExoticComponent<
-  Omit<Props, "theme">
+Omit<Props, 'theme'>
 > & {
   SwTabPanel: typeof SwTabPanel
 }
 
-const ScreenTab = _ScreenTab as unknown as CompoundedComponent
+const ScreenTab = _ScreenTab as unknown as CompoundedComponent;
 
-ScreenTab.SwTabPanel = SwTabPanel
+ScreenTab.SwTabPanel = SwTabPanel;
 
-export default ScreenTab
+export default ScreenTab;

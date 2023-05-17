@@ -10,9 +10,10 @@ import CN from 'classnames';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
-import { ScreenContext } from './ScreenContext';
-import styled from 'styled-components'
+import styled from 'styled-components';
+
 import { ThemeProps } from '../types';
+import { ScreenContext } from './ScreenContext';
 
 interface Props {
   children: React.ReactNode;
@@ -51,36 +52,34 @@ export const usePredefinedModal = () => {
   return { openPModal, isOpenPModal };
 };
 
-
 const ModalWrapper = styled.div<ThemeProps>(
   () => {
     return {
-      height: "100%",
+      height: '100%',
 
-      ".ant-sw-modal-wrap": {
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+      '.ant-sw-modal-wrap': {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
 
-        ".ant-sw-modal": {
-          position: "relative",
+        '.ant-sw-modal': {
+          position: 'relative',
 
-          ".ant-sw-modal-content": {
+          '.ant-sw-modal-content': {
             borderRadius: 8,
-            paddingBottom: 0,
-          },
-        },
-      },
-    }
+            paddingBottom: 0
+          }
+        }
+      }
+    };
   }
-)
-
+);
 
 export const WalletModalContext = ({ children }: Props) => {
   const { activeModal, hasActiveModal, inactiveAll, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
-  const { isWebUI } = useContext(ScreenContext)
+  const { isWebUI } = useContext(ScreenContext);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
   useExcludeModal('confirmations');
@@ -112,11 +111,11 @@ export const WalletModalContext = ({ children }: Props) => {
 
   return <ModalWrapper>
     <div
+      className={CN({
+        'desktop-modal': isWebUI
+      })}
       id='popup-container'
       style={{ zIndex: hasActiveModal ? undefined : -1 }}
-      className={CN({
-        "desktop-modal": isWebUI,
-      })}
     />
     {children}
     <SwModal

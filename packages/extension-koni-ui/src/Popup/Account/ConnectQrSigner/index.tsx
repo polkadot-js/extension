@@ -6,6 +6,7 @@ import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
 import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
@@ -24,7 +25,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import ChainLogoMap from '../../../assets/logo';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 const FooterIcon = (
   <Icon
@@ -107,23 +107,25 @@ const Component: React.FC<Props> = (props: Props) => {
     icon: FooterIcon,
     onClick: openCamera,
     loading: loading
-  }
+  };
 
   return (
     <PageWrapper className={CN(className)}>
       <Layout.Base
         onBack={onBack}
-        {...(!isWebUI ? {
-          rightFooterButton: buttonProps,
-          showBackButton: true,
-          subHeaderPaddingVertical: true,
-          showSubHeader: true,
-          subHeaderCenter: true,
-          subHeaderBackground: 'transparent'
-        }: {
-          headerList: ['Simple'],
-          showWebHeader: true
-        })}
+        {...(!isWebUI
+          ? {
+            rightFooterButton: buttonProps,
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -134,7 +136,8 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <div className={CN('container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <div className='sub-title'>
             {subTitle}
           </div>
@@ -184,7 +187,10 @@ const Component: React.FC<Props> = (props: Props) => {
           />
 
           {isWebUI && (
-            <Button {...buttonProps} className='action'/>
+            <Button
+              {...buttonProps}
+              className='action'
+            />
           )}
         </div>
       </Layout.Base>
@@ -196,7 +202,7 @@ const ConnectQrSigner = styled(Component)<Props>(({ theme: { token } }: Props) =
   return {
     '.__web-ui': {
       maxWidth: '50%',
-      margin: '0 auto',
+      margin: '0 auto'
     },
     '.container': {
       padding: token.padding,

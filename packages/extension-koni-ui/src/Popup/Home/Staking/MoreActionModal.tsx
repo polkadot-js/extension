@@ -42,17 +42,14 @@ type ActionListProps = {
 }
 
 export const ActionList: React.FC<ActionListProps> = (props) => {
-  const {
-    setSelected,
-    selected,
-    chainStakingMetadata,
+  const { chainStakingMetadata,
     nominatorMetadata,
-    reward
-  } = props
+    reward,
+    selected,
+    setSelected } = props;
 
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
-
 
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
 
@@ -65,10 +62,12 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
   const { onError, onSuccess } = useHandleSubmitTransaction(onDoneTransaction);
 
   const modalSelect = useCallback((action: StakingAction | undefined) => {
-    if (setSelected) setSelected(action)
+    if (setSelected) {
+      setSelected(action);
+    }
   }, [
     setSelected
-  ])
+  ]);
 
   const handleWithdrawalAction = useCallback(() => {
     if (!nominatorMetadata) {
@@ -152,7 +151,6 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
     };
   }, [navigate]);
 
-
   const onPreCheck = usePreCheckReadOnly(currentAccount?.address);
   const onClickItem = useCallback((action: StakingAction, onClick: () => void) => {
     const _onClick = () => {
@@ -165,7 +163,7 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
     };
   }, [onPreCheck]);
 
-   const actionList: ActionListType[] = useMemo((): ActionListType[] => {
+  const actionList: ActionListType[] = useMemo((): ActionListType[] => {
     if (!chainStakingMetadata) {
       return [];
     }
@@ -254,8 +252,8 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
         />
       );
     })}
-  </>
-}
+  </>;
+};
 
 const Component: React.FC<Props> = (props: Props) => {
   const [selected, setSelected] = useState<StakingAction | undefined>();
@@ -281,11 +279,11 @@ const Component: React.FC<Props> = (props: Props) => {
       title={t('Actions')}
     >
       <ActionList
-        selected={selected}
-        setSelected={setSelected}
         chainStakingMetadata={chainStakingMetadata}
         nominatorMetadata={nominatorMetadata}
         reward={reward}
+        selected={selected}
+        setSelected={setSelected}
       />
     </SwModal>
   );

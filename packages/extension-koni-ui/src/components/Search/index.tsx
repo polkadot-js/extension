@@ -1,9 +1,12 @@
-import { ThemeProps } from "@subwallet/extension-koni-ui/types"
-import { Button, Input, Icon } from "@subwallet/react-ui"
-import CN from 'classnames'
-import { DownloadSimple, MagnifyingGlass } from "phosphor-react"
-import { ChangeEventHandler, useMemo } from "react"
-import styled from "styled-components"
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Button, Icon, Input } from '@subwallet/react-ui';
+import CN from 'classnames';
+import { DownloadSimple, MagnifyingGlass } from 'phosphor-react';
+import { ChangeEventHandler, useMemo } from 'react';
+import styled from 'styled-components';
 
 type Props = ThemeProps & {
   placeholder: string
@@ -17,17 +20,15 @@ type Props = ThemeProps & {
   showExtraButton?: boolean
 }
 
-const Component: React.FC<Props> = ({
+const Component: React.FC<Props> = ({ actionBtnIcon,
   className,
+  extraButton,
+  onClickActionBtn,
+  onSearch,
   placeholder,
   searchValue,
-  onSearch,
-  onClickActionBtn,
-  actionBtnIcon,
   showActionBtn,
-  extraButton,
-  showExtraButton = false
-}) => {
+  showExtraButton = false }) => {
   // CONTROLLED STATE
   // const [value, setValue] = useState<string>(searchValue)
 
@@ -35,7 +36,7 @@ const Component: React.FC<Props> = ({
   //   if (e.key === 'Enter' && value) {
   //     onSearch(value)
   //   }
-// }, [value])
+  // }, [value])
 
   // const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
   //   const value = e?.target?.value;
@@ -45,43 +46,47 @@ const Component: React.FC<Props> = ({
   // UNCONTROLLED STATE
   const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     const value = e?.target?.value;
-    onSearch(value)
-  }
 
-  const button = useMemo(() => extraButton ? extraButton : (
+    onSearch(value);
+  };
+
+  const button = useMemo(() => extraButton || (
     <Button
-      type="ghost"
-      icon={<Icon phosphorIcon={DownloadSimple} size="sm" />}
+      icon={<Icon
+        phosphorIcon={DownloadSimple}
+        size='sm'
+      />}
+      type='ghost'
     />
-  ), [])
+  ), []);
 
   return (
     <div className={CN('container', className)}>
-      <div className="right-section">
+      <div className='right-section'>
         {showExtraButton && button}
         <Input.Search
           className="search-input"
-          size="md"
+          onChange={handleInputChange}
           placeholder={placeholder}
           prefix={<Icon phosphorIcon={MagnifyingGlass} />}
+          size="md"
           value={searchValue}
-          onChange={handleInputChange}
-           suffix={
-              showActionBtn && (
-                <Button
-                  onClick={onClickActionBtn}
-                  size="xs"
-                  type="ghost"
-                  icon={actionBtnIcon}
-                />
-              )
-            }
+          suffix={
+            showActionBtn && (
+              <Button
+                icon={actionBtnIcon}
+                onClick={onClickActionBtn}
+                size='xs'
+                type='ghost'
+              />
+            )
+          }
           // onKeyDown={handleKeyDown}
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
 const Search = styled(Component)<Props>(({ }: Props) => {
   return {
@@ -96,7 +101,7 @@ const Search = styled(Component)<Props>(({ }: Props) => {
         height: 50
       }
     }
-  }
-})
+  };
+});
 
 export default Search;

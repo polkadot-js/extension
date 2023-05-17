@@ -4,17 +4,17 @@
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
+import { ActionList } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
-import { Button, Icon, Popover, StakingItem, Tag } from '@subwallet/react-ui';
+import { Button, Icon, Number as NumberItem, Popover, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
+import CN from 'classnames';
 import { DotsThree, User, Users } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-import CN from 'classnames';
+
 import { TokenItem } from '../TokenItem';
-import {Number as NumberItem} from '@subwallet/react-ui';
-import { ActionList } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 
 interface Props extends ThemeProps {
   stakingData: StakingDataType,
@@ -56,7 +56,7 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
 
   const _onPressItem = useCallback(() => onClickItem(stakingData), [onClickItem, stakingData]);
 
-  if (!isWebUI)
+  if (!isWebUI) {
     return (
       <StakingItem
         className={className}
@@ -70,31 +70,29 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
         stakingValue={balanceValue}
       />
     );
+  }
 
-  const {
-    staking: {
-      name,
-      chain,
-      nativeToken
-    }
-  } = stakingData;
+  const { staking: { chain,
+    name,
+    nativeToken } } = stakingData;
 
-  const { token } = useContext(ThemeContext)
+  const { token } = useContext(ThemeContext);
 
   const rightIcon = useMemo(() => {
     if (!isWebUI) {
       <Button
-        type='ghost'
         icon={<Icon
           className={'right-icon'}
-          type="phosphor"
           phosphorIcon={DotsThree}
-          size="xs"
-        />}
+          size='xs'
+          type='phosphor'
+              />}
         onClick={_onClickRightIcon}
         size='sm'
-      />
+        type='ghost'
+      />;
     }
+
     return <Popover
       content={
         <ActionList
@@ -103,39 +101,42 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
           reward={stakingData.reward}
         />
       }
-      trigger="click"
-      showArrow={false}
-      placement="bottomRight"
       overlayInnerStyle={{
         padding: '0',
         background: '#1A1A1A'
       }}
+      placement='bottomRight'
+      showArrow={false}
+      trigger='click'
     >
       <Button
-        onClick={e => e.stopPropagation()}
-        type='ghost'
         icon={<Icon
           className={'right-icon'}
-          type="phosphor"
           phosphorIcon={DotsThree}
-          size="xs"
-        />}
+          size='xs'
+          type='phosphor'
+              />}
+        onClick={(e) => e.stopPropagation()}
         size='sm'
+        type='ghost'
       />
-    </Popover>
-  }, [isWebUI])
+    </Popover>;
+  }, [isWebUI]);
 
   // TODO: update priceChangeStatus
-  let priceChangeStatus = 'increase'
-  const marginColor = priceChangeStatus === 'increase' ? token.colorSuccess : token.colorError
+  const priceChangeStatus = 'increase';
+  const marginColor = priceChangeStatus === 'increase' ? token.colorSuccess : token.colorError;
 
   return (
-    <div className={CN(className, '__web-ui')} onClick={_onPressItem}>
+    <div
+      className={CN(className, '__web-ui')}
+      onClick={_onPressItem}
+    >
       <TokenItem
-        networkKey={chain}
-        logoKey={nativeToken}
-        symbol={nativeToken}
         chainDisplayName={name || ''}
+        logoKey={nativeToken}
+        networkKey={chain}
+        symbol={nativeToken}
       />
 
       <div className='type-wrapper'>
@@ -144,21 +145,21 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
 
       <div className={CN('price-wrapper', className)}>
         <NumberItem
-          value={10}
-          prefix={'$'}
           decimal={0}
           decimalOpacity={0.45}
+          prefix={'$'}
+          value={10}
         />
         <NumberItem
-          value={10}
-          suffix='%'
-          prefix={'decrease' === 'decrease' ? '-' : '+'}
           className='margin-percentage'
           decimal={0}
-          size={12}
-          unitColor={marginColor}
-          intColor={marginColor}
           decimalColor={marginColor}
+          intColor={marginColor}
+          prefix={'decrease' === 'decrease' ? '-' : '+'}
+          size={12}
+          suffix='%'
+          unitColor={marginColor}
+          value={10}
         />
       </div>
 
@@ -168,8 +169,8 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
             className={'__value'}
             decimal={0}
             decimalOpacity={0.45}
-            value={11}
             suffix={staking.unit}
+            value={11}
           />
           <NumberItem
             className={'__converted-value'}
@@ -185,7 +186,7 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
         {rightIcon}
       </div>
     </div>
-  )
+  );
 };
 
 const SwStakingItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
@@ -233,20 +234,20 @@ const SwStakingItem = styled(Component)<Props>(({ theme: { token } }: Props) => 
       cursor: 'pointer',
 
       '.type-wrapper': {
-        alignSelf: 'start',
+        alignSelf: 'start'
       },
 
       '.funds-wrapper': {
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'center'
       },
 
       '.price-wrapper, .funds': {
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'end',
-      },
+        alignItems: 'end'
+      }
     }
   };
 });

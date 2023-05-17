@@ -101,10 +101,10 @@ export function Example () {
     <div style={{ padding: 16 }}>{location.pathname}</div>
   </PageWrapper>;
 }
-export function NestedOutlet () {
-  return <Outlet context={useOutletContext()}/>
-}
 
+export function NestedOutlet () {
+  return <Outlet context={useOutletContext()} />;
+}
 
 export const router = createBrowserRouter([
   {

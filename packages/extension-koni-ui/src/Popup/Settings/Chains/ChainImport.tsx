@@ -13,12 +13,12 @@ import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFo
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Button, Col, Form, Icon, Input, Row, SwSubHeader } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { FloppyDiskBack, Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
-import CN from 'classnames';
 
 type Props = ThemeProps
 
@@ -276,7 +276,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const backBtnProps = useMemo(() => ({
     onClick: onBack,
     children: 'Cancel'
-  }), [onBack])
+  }), [onBack]);
 
   const submitBtnProps = useMemo(() => ({
     block: true,
@@ -291,29 +291,31 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     loading: loading,
     onClick: onSubmit,
     children: 'Save'
-  }), [isSubmitDisabled, onSubmit, isWebUI])
+  }), [isSubmitDisabled, onSubmit, isWebUI]);
 
-  const subHeaderProps = useMemo(() => isWebUI ? {
-    title:t('Add network'),
-    center: false
-  } : {
-    title:t<string>('Import chain'),
-    center: true,
-    rightButtons: [
-      {
-        icon: <InfoIcon />,
-        onClick: handleClickSubheaderButton
-      }
-    ]
-  }, [isWebUI, handleClickSubheaderButton])
+  const subHeaderProps = useMemo(() => isWebUI
+    ? {
+      title: t('Add network'),
+      center: false
+    }
+    : {
+      title: t<string>('Import chain'),
+      center: true,
+      rightButtons: [
+        {
+          icon: <InfoIcon />,
+          onClick: handleClickSubheaderButton
+        }
+      ]
+    }, [isWebUI, handleClickSubheaderButton]);
 
   return (
     <PageWrapper className={`chain_import ${className}`}>
       <Layout.Base
         leftFooterButton={backBtnProps}
-        withSideMenu
         onBack={onBack}
         rightFooterButton={submitBtnProps}
+        withSideMenu
       >
         <SwSubHeader
           background='transparent'
@@ -323,7 +325,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
         <div className={CN('chain_import__container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <div className={'chain_import__header_info'}>
             {t('Currently support WSS provider for Substrate networks and HTTP provider for EVM network')}
           </div>
@@ -435,7 +438,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             </div>
             {isWebUI && (
               <div className='action-wrapper'>
-                <Button {...backBtnProps} schema='secondary' />
+                <Button
+                  {...backBtnProps}
+                  schema='secondary'
+                />
                 <Button {...submitBtnProps} />
               </div>
             )}
@@ -467,9 +473,9 @@ const ChainImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
         margin: '0 auto',
         width: '60%',
 
-        ".chain_import__header_info": {
+        '.chain_import__header_info': {
           margin: `${token.margin}px auto`,
-          maxWidth: '50%',
+          maxWidth: '50%'
         },
 
         '.action-wrapper': {

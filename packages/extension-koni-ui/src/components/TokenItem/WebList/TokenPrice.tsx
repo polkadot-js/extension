@@ -16,18 +16,17 @@ type Props = ThemeProps & {
 
 function Component (
   { className = '',
-    priceChangeStatus,
-    value,
     pastValue,
-  }: Props) {
+    priceChangeStatus,
+    value }: Props) {
   // todo: Update BalanceItem in react-ui lib
   // - loading
   // - auto detect logo, only use logoKey
   // - price change status
 
-  const { token } = useContext(ThemeContext)
+  const { token } = useContext(ThemeContext);
 
-  const marginColor = priceChangeStatus === 'increase' ? token.colorSuccess : token.colorError
+  const marginColor = priceChangeStatus === 'increase' ? token.colorSuccess : token.colorError;
   const margin = !pastValue || !value ? 0 : Math.abs(pastValue - value) / pastValue * 100;
 
   return (
@@ -36,21 +35,21 @@ function Component (
     })}
     >
       <Number
-        value={value}
-        prefix={'$'}
         decimal={0}
         decimalOpacity={0.45}
+        prefix={'$'}
+        value={value}
       />
       <Number
-        value={margin}
-        suffix='%'
-        prefix={priceChangeStatus === 'decrease' ? '-' : '+'}
         className='margin-percentage'
         decimal={0}
-        size={12}
-        unitColor={marginColor}
-        intColor={marginColor}
         decimalColor={marginColor}
+        intColor={marginColor}
+        prefix={priceChangeStatus === 'decrease' ? '-' : '+'}
+        size={12}
+        suffix='%'
+        unitColor={marginColor}
+        value={margin}
       />
     </div>
   );
@@ -61,11 +60,11 @@ export const TokenPrice = styled(Component)<Props>(({ theme: { token } }: Props)
     '.ant-number': {
       fontSize: 'inherit !important',
       lineHeight: 'inherit',
-      textAlign: 'end',
+      textAlign: 'end'
     },
 
     '.margin-percentage': {
-      fontSize: token.fontSizeSM,
-    },
+      fontSize: token.fontSizeSM
+    }
   });
 });

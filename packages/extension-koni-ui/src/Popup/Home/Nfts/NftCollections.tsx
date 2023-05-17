@@ -10,13 +10,13 @@ import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
 import { INftCollectionDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, ButtonProps, Icon, SwList, Button, ModalContext } from '@subwallet/react-ui';
-import { PlusCircle } from 'phosphor-react';
+import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowClockwise, Image, Plus } from 'phosphor-react';
+import { ArrowClockwise, Image, Plus, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
+
 import NftImport from './NftImport';
 
 type Props = ThemeProps
@@ -41,7 +41,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const outletContext: {
     searchInput: string,
     setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
-  } = useOutletContext()
+  } = useOutletContext();
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
   const { nftCollections, nftItems } = useGetNftByAccount();
@@ -49,9 +49,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const notify = useNotification();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
+
   useEffect(() => {
-    outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Collectible name')
-  }, [outletContext?.setSearchPlaceholder])
+    outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Collectible name');
+  }, [outletContext?.setSearchPlaceholder]);
 
   const subHeaderButton: ButtonProps[] = [
     {
@@ -144,35 +145,38 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [t]);
 
   const listSection = useMemo(() => {
-    if (!isWebUI) return (
-      <SwList.Section
-        className={CN('nft_collection_list__container')}
-        displayGrid={true}
-        enableSearchInput={true}
-        gridGap={'14px'}
-        list={nftCollections}
-        minColumnWidth={'160px'}
-        renderItem={renderNftCollection}
-        renderOnScroll={true}
-        renderWhenEmpty={emptyNft}
-        searchFunction={searchCollection}
-        searchMinCharactersCount={2}
-        searchPlaceholder={t<string>('Search collection name')}
-      />
-    )
+    if (!isWebUI) {
+      return (
+        <SwList.Section
+          className={CN('nft_collection_list__container')}
+          displayGrid={true}
+          enableSearchInput={true}
+          gridGap={'14px'}
+          list={nftCollections}
+          minColumnWidth={'160px'}
+          renderItem={renderNftCollection}
+          renderOnScroll={true}
+          renderWhenEmpty={emptyNft}
+          searchFunction={searchCollection}
+          searchMinCharactersCount={2}
+          searchPlaceholder={t<string>('Search collection name')}
+        />
+      );
+    }
+
     return (
       <SwList
+        displayGrid={true}
+        gridGap={'14px'}
         list={nftCollections}
+        minColumnWidth={'160px'}
+        renderItem={renderNftCollection}
+        renderOnScroll={true}
+        renderWhenEmpty={emptyNft}
         searchBy={searchCollection}
         searchTerm={outletContext?.searchInput}
-        renderItem={renderNftCollection}
-        renderWhenEmpty={emptyNft}
-        gridGap={'14px'}
-        minColumnWidth={'160px'}
-        displayGrid={true}
-        renderOnScroll={true}
       />
-    )
+    );
   }, [
     nftCollections,
     renderNftCollection,
@@ -180,7 +184,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     isWebUI,
     outletContext?.searchInput,
     emptyNft
-  ])
+  ]);
 
   return (
     <PageWrapper
@@ -189,30 +193,33 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     >
       <Layout.Base
         {...!isWebUI && {
-          showSubHeader:true,
-          subHeaderBackground:'transparent',
-          subHeaderCenter:false,
-          subHeaderIcons:subHeaderButton,
-          subHeaderPaddingVertical:true,
-          title:t<string>('Collectibles'),
+          showSubHeader: true,
+          subHeaderBackground: 'transparent',
+          subHeaderCenter: false,
+          subHeaderIcons: subHeaderButton,
+          subHeaderPaddingVertical: true,
+          title: t<string>('Collectibles')
         }}
       >
         {listSection}
         <Button
-          type='ghost'
-          icon={<Icon phosphorIcon={PlusCircle} size='xs' />}
-          onClick={() => activeModal(IMPORT_NFT_MODAL)}
-          children={t("Import collectible")}
           block
+          children={t('Import collectible')}
+          icon={<Icon
+            phosphorIcon={PlusCircle}
+            size='xs'
+          />}
+          onClick={() => activeModal(IMPORT_NFT_MODAL)}
+          type='ghost'
         />
       </Layout.Base>
 
-       <CustomModal
+      <CustomModal
         id={IMPORT_NFT_MODAL}
         onCancel={() => inactiveModal(IMPORT_NFT_MODAL)}
-        title={t("Import NFT")}
+        title={t('Import NFT')}
       >
-        <NftImport modalContent/>
+        <NftImport modalContent />
       </CustomModal>
     </PageWrapper>
   );

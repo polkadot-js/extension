@@ -8,6 +8,7 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainAssetInfo';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
@@ -26,7 +27,6 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 import { accountFilterFunc, fetchChainValidators } from '../helper';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 import { TransactionContext, TransactionFormBaseProps } from '../Transaction';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 
 type Props = ThemeProps
 
@@ -98,8 +98,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const stakingType = Form.useWatch(FormFieldName.TYPE, form);
 
   useEffect(() => {
-    setStakingType && setStakingType(stakingType)
-  }, [stakingType])
+    setStakingType && setStakingType(stakingType);
+  }, [stakingType]);
 
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
   const nominatorMetadataList = useGetNominatorInfo(chain, stakingType, from);

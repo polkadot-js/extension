@@ -15,12 +15,12 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { Coin, FadersHorizontal, Plus } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import CN from 'classnames'
 
 type Props = ThemeProps;
 
@@ -153,42 +153,43 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         withSideMenu
       >
         {isWebUI && <SwSubHeader
-          title={t<string>('Manage tokens')}
           background='transparent'
           center={false}
           onBack={() => navigate(-1)}
-          showBackButton={true}
           rightButtons={subHeaderButton}
-        />}
+          showBackButton={true}
+          title={t<string>('Manage tokens')}
+                    />}
 
         <div className={CN('container', {
           '__web-ui': isWebUI
-        })}>
+        })}
+        >
           <SwList.Section
-          actionBtnIcon={(
-            <Icon
-              customSize={'20px'}
-              phosphorIcon={FadersHorizontal}
-              size='sm'
-              type='phosphor'
-              weight={'fill'}
-            />
-          )}
-          className={'manage_tokens__container'}
-          enableSearchInput={true}
-          filterBy={filterFunction}
-          gridGap={'14px'}
-          list={assetItems}
-          minColumnWidth={'172px'}
-          mode={'boxed'}
-          onClickActionBtn={openFilterModal}
-          renderItem={renderTokenItem}
-          renderWhenEmpty={emptyTokenList}
-          searchFunction={searchToken}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search token')}
-          showActionBtn={true}
-        />
+            actionBtnIcon={(
+              <Icon
+                customSize={'20px'}
+                phosphorIcon={FadersHorizontal}
+                size='sm'
+                type='phosphor'
+                weight={'fill'}
+              />
+            )}
+            className={'manage_tokens__container'}
+            enableSearchInput={true}
+            filterBy={filterFunction}
+            gridGap={'14px'}
+            list={assetItems}
+            minColumnWidth={'172px'}
+            mode={'boxed'}
+            onClickActionBtn={openFilterModal}
+            renderItem={renderTokenItem}
+            renderWhenEmpty={emptyTokenList}
+            searchFunction={searchToken}
+            searchMinCharactersCount={2}
+            searchPlaceholder={t<string>('Search token')}
+            showActionBtn={true}
+          />
 
         </div>
         <FilterModal
@@ -210,14 +211,13 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
       display: 'flex'
     },
 
-
     '.container': {
       width: '100%',
       '&.__web-ui': {
         padding: `${token.padding + 24}px ${token.padding}px ${token.padding}px`,
         maxWidth: '70%',
-        margin: '0 auto',
-      },
+        margin: '0 auto'
+      }
     },
 
     '.ant-sw-list-wrapper.ant-sw-list-wrapper:before': {

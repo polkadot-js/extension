@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainLogoMap, TokenLogoMap } from '@subwallet/extension-koni-ui/assets/logo';
+import { AssetLogoMap, ChainLogoMap } from '@subwallet/chain-list';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Logo, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -22,7 +22,7 @@ const logoList = Object.entries(ChainLogoMap).map(([key, value]) => {
     type: 'network',
     isNew: value?.startsWith('./images/projects')
   } as LogoItem;
-}).concat(Object.entries(TokenLogoMap).map(([key, value]) => {
+}).concat(Object.entries(AssetLogoMap).map(([key, value]) => {
   return {
     key,
     value,

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import ChainLogoMap, { IconMap } from '@subwallet/extension-koni-ui/assets/logo';
+import DefaultLogosMap, { IconMap } from '@subwallet/extension-koni-ui/assets/logo';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
@@ -144,7 +144,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 <Image
                   height={56}
                   shape='squircle'
-                  src={ChainLogoMap.subwallet}
+                  src={DefaultLogosMap.subwallet}
                   width={56}
                 />
               )}

@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import LogosMap from '../../assets/logo';
+import DefaultLogosMap from '../../assets/logo';
 
 type Props = ThemeProps;
 
@@ -257,7 +257,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       <Image
                         height={56}
                         shape='squircle'
-                        src={LogosMap.subwallet}
+                        src={DefaultLogosMap.subwallet}
                         width={56}
                       />
                     )}
@@ -265,7 +265,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       <Image
                         height={56}
                         shape='squircle'
-                        src={LogosMap.ledger}
+                        src={DefaultLogosMap.ledger}
                         width={56}
                       />
                     )}

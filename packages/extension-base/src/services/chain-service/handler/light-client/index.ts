@@ -1,14 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import * as Sc from '@substrate/connect';
+import { WellKnownChain } from '@substrate/connect';
+
 import { ScProvider } from '@polkadot/rpc-provider';
 import { ProviderInterface, ProviderInterfaceCallback, ProviderInterfaceEmitCb, ProviderInterfaceEmitted } from '@polkadot/rpc-provider/types';
 
 export const relayChainSpecs: Record<string, string> = {
-  kusama: ScProvider.WellKnownChain.ksmcc3,
-  polkadot: ScProvider.WellKnownChain.polkadot,
-  rococo: ScProvider.WellKnownChain.rococo_v2_2,
-  westend: ScProvider.WellKnownChain.westend2
+  kusama: WellKnownChain.ksmcc3,
+  polkadot: WellKnownChain.polkadot,
+  rococo: WellKnownChain.rococo_v2_2,
+  westend: WellKnownChain.westend2
 };
 
 // Direct get spec data from @polkadot/react-api repository
@@ -123,7 +126,7 @@ export function getSubstrateConnectProvider (specLink: string): ProviderInterfac
   const [relayName, paraName] = specLink.split('/');
   const relaySpec: string = relayChainSpecs[relayName];
 
-  const relayProvider = new ScProvider(relaySpec);
+  const relayProvider = new ScProvider(Sc, relaySpec);
 
   if (!paraName) {
     return relayProvider;
@@ -132,7 +135,7 @@ export function getSubstrateConnectProvider (specLink: string): ProviderInterfac
   const paraChainData = paraChainSpecs[specLink];
   let scProvider: ScProvider | undefined;
   const scPromise = fetch(paraChainData).then((rs) => rs.text()).then((spec) => {
-    scProvider = new ScProvider(spec, relayProvider);
+    scProvider = new ScProvider(Sc, spec);
 
     return scProvider;
   }).catch(console.error) as Promise<ScProvider>;

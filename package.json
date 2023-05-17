@@ -21,7 +21,7 @@
   },
   "scripts": {
     "build": "koni-dev-build-ts && yarn build:zip && yarn build:rollup",
-    "build:extra": "yarn build:i18n && yarn build:ui && yarn web-runner:build",
+    "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
     "build:koni-dev": "koni-ci-build-dev",
     "build:release": "koni-ci-ghact-build",

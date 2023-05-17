@@ -10,6 +10,7 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
+  "stableVersion": "1.0.5-0",
   "version": "1.0.5-1",
   "workspaces": [
     "packages/*"
@@ -79,6 +80,5 @@
     "rxjs": "^7.8.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.8.4"
-  },
-  "stableVersion": "1.0.5-0"
+  }
 }

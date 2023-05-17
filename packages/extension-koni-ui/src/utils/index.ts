@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ChainLogoMap } from '@subwallet/chain-list';
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@subwallet/extension-base/background/types';
@@ -14,7 +15,6 @@ import { decodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { findAccountByAddress } from './account/account';
-import { ChainLogoMap } from '@subwallet/chain-list';
 
 // todo: Refactor this file
 

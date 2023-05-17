@@ -162,7 +162,7 @@ export class AcalaNftApi extends BaseNftApi {
 
       params.cleanUpNfts(this.chain, address, collectionIds, nftIds);
     } catch (e) {
-      console.error('Failed to fetch acala nft', e);
+      console.error(`${this.chain}`, e);
     }
   }
 

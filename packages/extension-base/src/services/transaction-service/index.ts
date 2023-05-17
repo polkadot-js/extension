@@ -547,7 +547,6 @@ export default class TransactionService {
     const transaction = this.getTransaction(id);
 
     this.updateTransaction(id, { status: ExtrinsicStatus.SUCCESS });
-    console.log('Transaction completed', id, transaction.extrinsicHash);
 
     // Write success transaction history
     this.historyService.updateHistories(transaction.chain, transaction.extrinsicHash, {
@@ -573,7 +572,6 @@ export default class TransactionService {
 
     if (transaction) {
       this.updateTransaction(id, { status: nextStatus, errors });
-      console.log('Transaction failed', id, transaction.extrinsicHash);
 
       // Write failed transaction history
       this.historyService.updateHistories(transaction.chain, transaction.extrinsicHash, {
@@ -592,8 +590,6 @@ export default class TransactionService {
     }
 
     this.eventService.emit('transaction.failed', transaction);
-    // Log transaction errors
-    console.error(errors);
   }
 
   public generateHashPayload (chain: string, transaction: TransactionConfig): HexString {

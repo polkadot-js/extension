@@ -16,7 +16,7 @@ export function acalaGetExtrinsic (substrateApi: _SubstrateApi, senderAddress: s
 
     return substrateApi.api.tx.nft.transfer(recipientAddress, [collectionId, itemId]);
   } catch (e) {
-    console.error('error handling acala transfer nft', e);
+    console.error(e);
 
     return null;
   }
@@ -37,7 +37,7 @@ export function rmrkGetExtrinsic (substrateApi: _SubstrateApi, senderAddress: st
 
     return substrateApi.api.tx.system.remark(parsedRemark);
   } catch (e) {
-    console.error('error handling rmrk transfer nft', e);
+    console.error(e);
 
     return null;
   }
@@ -50,7 +50,7 @@ export function uniqueGetExtrinsic (substrateApi: _SubstrateApi, senderAddress: 
 
     return substrateApi.api.tx.nft.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1);
   } catch (e) {
-    console.error('error handling unique transfer nft', e);
+    console.error(e);
 
     return null;
   }
@@ -63,7 +63,7 @@ export function quartzGetExtrinsic (substrateApi: _SubstrateApi, senderAddress: 
 
     return substrateApi.api.tx.unique.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1);
   } catch (e) {
-    console.error('error handling quartz transfer nft', e);
+    console.error(e);
 
     return null;
   }
@@ -76,7 +76,7 @@ export function statemineGetExtrinsic (substrateApi: _SubstrateApi, senderAddres
 
     return substrateApi.api.tx.uniques.transfer(collectionId, itemId, recipientAddress);
   } catch (e) {
-    console.error('error handling statemine transfer nft', e);
+    console.error(e);
 
     return null;
   }

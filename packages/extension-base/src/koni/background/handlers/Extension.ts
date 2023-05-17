@@ -337,8 +337,6 @@ export default class KoniExtension {
     const url = `${chrome.extension.getURL('index.html')}#${path}`;
 
     if (!ALLOWED_PATH.includes(path)) {
-      console.error('Not allowed to open the url:', url);
-
       return false;
     }
 
@@ -787,8 +785,6 @@ export default class KoniExtension {
       if (this.isAddressValidWithAuthType(address, value[url].accountAuthType)) {
         value[url].isAllowedMap[address] = connectValue;
 
-        console.log('Devbu: ', value);
-
         this.#koniState.setAuthorize(value, () => {
           callBack && callBack(value);
         });
@@ -804,8 +800,6 @@ export default class KoniExtension {
 
       value[id].isAllowed = connectValue;
 
-      console.log('Devbu: ', value);
-
       this.#koniState.setAuthorize(value);
     });
   }
@@ -815,8 +809,6 @@ export default class KoniExtension {
       assert(value, 'The source is not known');
 
       value[id].isAllowedMap = values;
-
-      console.log('Devbu: ', value);
 
       this.#koniState.setAuthorize(value);
     });
@@ -1042,7 +1034,7 @@ export default class KoniExtension {
 
       return true;
     } catch (e) {
-      console.error('Error updating asset setting', e);
+      console.error(e);
 
       return false;
     }
@@ -1731,7 +1723,7 @@ export default class KoniExtension {
     try {
       return this.#koniState.refreshSubstrateApi(networkKey);
     } catch (e) {
-      console.error('error recovering substrate api', e);
+      console.error(e);
 
       return false;
     }
@@ -1743,7 +1735,7 @@ export default class KoniExtension {
 
       return true;
     } catch (e) {
-      console.error('Error insert/update custom token', e);
+      console.error(e);
 
       return false;
     }
@@ -1808,7 +1800,7 @@ export default class KoniExtension {
             estimatedFee = paymentInfo?.partialFee?.toString() || '0';
           } catch (e) {
             estimatedFee = '0';
-            console.warn('Error estimating fee', e);
+            console.warn(e);
           }
         }
       } else {
@@ -2409,8 +2401,6 @@ export default class KoniExtension {
   private async getNominationPoolOptions (chain: string): Promise<NominationPoolInfo[]> {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
 
-    console.log('chain', chain);
-
     return await getNominationPoolsInfo(chain, substrateApi);
   }
 
@@ -2433,8 +2423,6 @@ export default class KoniExtension {
 
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getBondingExtrinsic(chainInfo, amount, selectedValidators, substrateApi, address, nominatorMetadata);
-
-    console.log('Bonding extrinsic: ', chain, extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address,
@@ -2466,8 +2454,6 @@ export default class KoniExtension {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getUnbondingExtrinsic(nominatorMetadata, amount, chain, substrateApi, validatorAddress);
 
-    console.log('Unbonding extrinsic: ', extrinsic.toHex());
-
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
       chain: chain,
@@ -2487,8 +2473,6 @@ export default class KoniExtension {
 
     const dotSamaApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getWithdrawalExtrinsic(dotSamaApi, chain, nominatorMetadata, validatorAddress);
-
-    console.log('Stake withdrawal extrinsic: ', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
@@ -2510,8 +2494,6 @@ export default class KoniExtension {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getClaimRewardExtrinsic(substrateApi, chain, address, stakingType, bondReward);
 
-    console.log('Staking claim reward extrinsic: ', extrinsic.toHex());
-
     return await this.#koniState.transactionService.handleTransaction({
       address,
       chain: chain,
@@ -2531,8 +2513,6 @@ export default class KoniExtension {
 
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getCancelWithdrawalExtrinsic(substrateApi, chain, selectedUnstaking);
-
-    console.log('Cancel stake withdrawal extrinsic', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address,
@@ -2565,8 +2545,6 @@ export default class KoniExtension {
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getPoolingBondingExtrinsic(substrateApi, amount, selectedPool.id, nominatorMetadata);
 
-    console.log('Join nomination pool extrinsic', extrinsic.toHex());
-
     return await this.#koniState.transactionService.handleTransaction({
       address,
       chain,
@@ -2596,8 +2574,6 @@ export default class KoniExtension {
 
     const substrateApi = this.#koniState.getSubstrateApi(chain);
     const extrinsic = await getPoolingUnbondingExtrinsic(substrateApi, amount, nominatorMetadata);
-
-    console.log('Nomination pool unbond extrinsic', extrinsic.toHex());
 
     return await this.#koniState.transactionService.handleTransaction({
       address: nominatorMetadata.address,
@@ -2919,7 +2895,7 @@ export default class KoniExtension {
         this._addAddressToAuthList(address, isAllowed);
         result.push(childPair);
       } catch (e) {
-        console.log(`Fail to derive from ${parentAddress} with path ${item.suri}`, e);
+        console.log(e);
       }
     }
 

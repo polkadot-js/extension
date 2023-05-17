@@ -732,8 +732,6 @@ export default class KoniTabs {
   private async handleEvmRequest (id: string, url: string, request: RequestArguments): Promise<unknown> {
     const { method } = request;
 
-    console.log('method: ' + method);
-
     try {
       switch (method) {
         case 'eth_chainId':

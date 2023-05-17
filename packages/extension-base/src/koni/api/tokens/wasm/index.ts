@@ -28,8 +28,6 @@ export async function getPSP34TransferExtrinsic (networkKey: string, substrateAp
     // @ts-ignore
     return contractPromise.tx['psp34::transfer']({ gasLimit }, recipientAddress, onChainOption, {});
   } catch (e) {
-    console.error('Error getting WASM NFT transfer extrinsic', e);
-
     return null;
   }
 }

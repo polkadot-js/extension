@@ -31,7 +31,7 @@ export default class NotificationService {
       type: 'basic',
       title,
       message,
-      iconUrl: 'https://subwallet.app/assets/images/favicon/favicon-192x192.png',
+      iconUrl: './images/icon-128.png',
       priority: 2,
       isClickable: !!link
     }, (notificationId: string) => {

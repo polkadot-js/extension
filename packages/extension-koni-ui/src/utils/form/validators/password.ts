@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { FormRule } from '@subwallet/extension-koni-ui/types';
+import { TFunction } from 'react-i18next';
 
 export const MinPasswordLength = 8;
 
@@ -13,27 +14,27 @@ export const MinPasswordLength = 8;
 
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[~!@#$%^&*])[A-Za-z\d~!@#$%^&*]{8,}$/;
 
-export const renderBasePasswordRules = (fieldName: string): FormRule[] => {
+export const renderBasePasswordRules = (fieldName: string, t: TFunction): FormRule[] => {
   return [
     {
-      message: `${fieldName} is too short`,
+      message: t('{{fieldName}} must be at least {{minLen}} characters in length', { replace: { minLen: MinPasswordLength, fieldName: fieldName } }),
       min: MinPasswordLength
     },
     {
-      message: `${fieldName} is required`,
+      message: t('{{fieldName}} is required', { replace: { fieldName: fieldName } }),
       required: true
     },
     {
-      message: `${fieldName} should be at least 1 uppercase letter, 1 number, and 1 special character`,
+      message: t('{{fieldName}} should be at least 1 uppercase letter, 1 number, and 1 special character', { replace: { fieldName: fieldName } }),
       pattern: passwordRegex,
       warningOnly: true
     }
   ];
 };
 
-export const renderBaseConfirmPasswordRules = (passwordFieldName: string): FormRule[] => {
+export const renderBaseConfirmPasswordRules = (passwordFieldName: string, t: TFunction): FormRule[] => {
   return [
-    ...renderBasePasswordRules('Confirm password'),
+    ...renderBasePasswordRules(t('Confirm password'), t),
     ({ getFieldValue }) => ({
       validator: (_, value) => {
         const password = getFieldValue(passwordFieldName) as string;
@@ -42,7 +43,7 @@ export const renderBaseConfirmPasswordRules = (passwordFieldName: string): FormR
           return Promise.resolve();
         }
 
-        return Promise.reject(new Error('Confirm password do not match!'));
+        return Promise.reject(new Error(t('Confirm password do not match!')));
       }
     })
   ];

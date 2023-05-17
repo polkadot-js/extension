@@ -45,7 +45,11 @@ export const renderBaseConfirmPasswordRules = (passwordFieldName: string): FormR
       }
     }),
     {
-      message: `${passwordFieldName} should be at least 1 uppercase letter, 1 number, and 1 special character`,
+      message: 'Confirm password is too short',
+      min: MinPasswordLength
+    },
+    {
+      message: 'Confirm password should be at least 1 uppercase letter, 1 number, and 1 special character',
       pattern: passwordRegex,
       warningOnly: true
     }

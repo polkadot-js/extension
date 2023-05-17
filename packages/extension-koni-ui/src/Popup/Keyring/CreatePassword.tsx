@@ -101,7 +101,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, []);
 
   const onChangePassword = useCallback(() => {
-    form.setFields([{ name: FormFieldName.CONFIRM_PASSWORD, value: '', errors: [] }]);
+    form.resetFields([FormFieldName.CONFIRM_PASSWORD]);
   }, [form]);
 
   const openModal = useCallback(() => {
@@ -251,6 +251,10 @@ const CreatePassword = styled(Component)<Props>(({ theme: { token } }: Props) =>
         lineHeight: token.lineHeightHeading3,
         color: token.colorTextBase
       }
+    },
+
+    '.ant-form-item:last-child': {
+      marginBottom: 0
     },
 
     '.instruction-container': {

@@ -150,7 +150,7 @@ export default class DatabaseService {
     return this.stores.transaction.bulkUpsert(cleanedHistory);
   }
 
-  async updateHistoryByNewExtrinsicHash (extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
+  async updateHistoryByExtrinsicHash (extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
     // this.logger.log('Updating transaction histories');
     const canUpdate = updateData && extrinsicHash;
 

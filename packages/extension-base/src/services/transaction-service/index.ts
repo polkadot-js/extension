@@ -543,14 +543,16 @@ export default class TransactionService {
     }
   }
 
-  private onSuccess ({ blockHash, blockNumber, id }: TransactionEventResponse) {
+  private onSuccess ({ blockHash, blockNumber, extrinsicHash, id }: TransactionEventResponse) {
     const transaction = this.getTransaction(id);
 
-    this.updateTransaction(id, { status: ExtrinsicStatus.SUCCESS });
+    this.updateTransaction(id, { status: ExtrinsicStatus.SUCCESS, extrinsicHash });
     console.log('Transaction completed', id, transaction.extrinsicHash);
+    console.log('New transaction hash', extrinsicHash);
 
     // Write success transaction history
-    this.historyService.updateHistories(transaction.chain, transaction.extrinsicHash, {
+    this.historyService.updateHistoryByExtrinsicHash(transaction.extrinsicHash, {
+      extrinsicHash,
       status: ExtrinsicStatus.SUCCESS,
       blockNumber: blockNumber || 0,
       blockHash: blockHash || ''
@@ -567,16 +569,17 @@ export default class TransactionService {
     this.eventService.emit('transaction.done', transaction);
   }
 
-  private onFailed ({ blockHash, blockNumber, errors, id }: TransactionEventResponse) {
+  private onFailed ({ blockHash, blockNumber, errors, extrinsicHash, id }: TransactionEventResponse) {
     const transaction = this.getTransaction(id);
     const nextStatus = ExtrinsicStatus.FAIL;
 
     if (transaction) {
-      this.updateTransaction(id, { status: nextStatus, errors });
-      console.log('Transaction failed', id, transaction.extrinsicHash);
+      this.updateTransaction(id, { status: nextStatus, errors, extrinsicHash });
+      console.log('Transaction failed', id, extrinsicHash);
 
       // Write failed transaction history
-      this.historyService.updateHistories(transaction.chain, transaction.extrinsicHash, {
+      this.historyService.updateHistoryByExtrinsicHash(transaction.extrinsicHash, {
+        extrinsicHash: extrinsicHash || transaction.extrinsicHash,
         status: nextStatus,
         blockNumber: blockNumber || 0,
         blockHash: blockHash || ''
@@ -739,6 +742,7 @@ export default class TransactionService {
               emitter.emit('extrinsicHash', eventData);
             })
             .once('receipt', (rs) => {
+              eventData.extrinsicHash = rs.transactionHash;
               eventData.blockHash = rs.blockHash;
               eventData.blockNumber = rs.blockNumber;
               emitter.emit('success', eventData);
@@ -811,6 +815,7 @@ export default class TransactionService {
         }
 
         if (txState.status.isFinalized) {
+          eventData.extrinsicHash = txState.txHash.toHex();
           eventData.eventLogs = txState.events;
           // TODO: push block hash and block number into eventData
           txState.events

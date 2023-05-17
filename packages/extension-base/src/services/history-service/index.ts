@@ -85,7 +85,7 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
   }
 
   async updateHistoryByExtrinsicHash (extrinsicHash: string, updateData: Partial<TransactionHistoryItem>) {
-    await this.dbService.updateHistoryByNewExtrinsicHash(extrinsicHash, updateData);
+    await this.dbService.updateHistoryByExtrinsicHash(extrinsicHash, updateData);
     this.historySubject.next(await this.dbService.getHistories());
   }
 

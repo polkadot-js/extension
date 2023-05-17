@@ -178,21 +178,28 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
 
     const promises = list.map((history) => historyRecover(history, this.chainService));
 
-    const result = await Promise.all(promises);
+    const results = await Promise.all(promises);
 
-    result.forEach((status, index) => {
-      const extrinsicHash = list[index].extrinsicHash;
+    results.forEach((recoverResult, index) => {
+      const currentExtrinsicHash = list[index].extrinsicHash;
 
-      switch (status) {
+      const updateData: Partial<TransactionHistoryItem> = {
+        ...recoverResult,
+        status: ExtrinsicStatus.UNKNOWN
+      };
+
+      switch (recoverResult.status) {
         case HistoryRecoverStatus.API_INACTIVE:
           break;
         case HistoryRecoverStatus.FAILED:
         case HistoryRecoverStatus.SUCCESS:
-          this.updateHistoryByExtrinsicHash(extrinsicHash, { status: status === HistoryRecoverStatus.SUCCESS ? ExtrinsicStatus.SUCCESS : ExtrinsicStatus.FAIL }).catch(console.error);
-          delete this.#needRecoveryHistories[extrinsicHash];
+          updateData.status = recoverResult.status === HistoryRecoverStatus.SUCCESS ? ExtrinsicStatus.SUCCESS : ExtrinsicStatus.FAIL;
+          this.updateHistoryByExtrinsicHash(currentExtrinsicHash, updateData).catch(console.error);
+          delete this.#needRecoveryHistories[currentExtrinsicHash];
           break;
         default:
-          delete this.#needRecoveryHistories[extrinsicHash];
+          this.updateHistoryByExtrinsicHash(currentExtrinsicHash, updateData).catch(console.error);
+          delete this.#needRecoveryHistories[currentExtrinsicHash];
       }
     });
 
@@ -208,7 +215,7 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     await this.loadData();
     Promise.all([this.eventService.waitKeyringReady, this.eventService.waitChainReady]).then(() => {
       this.getHistories().catch(console.log);
-      this.getProcessingHistory().catch(console.log);
+      this.recoverProcessingHistory().catch(console.error);
 
       this.eventService.on('account.add', () => {
         (async () => {
@@ -223,7 +230,7 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     this.status = ServiceStatus.INITIALIZED;
   }
 
-  async getProcessingHistory () {
+  async recoverProcessingHistory () {
     const histories = await this.dbService.getHistories();
 
     this.#needRecoveryHistories = {};
@@ -234,6 +241,12 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
       this.#needRecoveryHistories[history.extrinsicHash] = history;
     });
 
+    const recoverNumber = Object.keys(this.#needRecoveryHistories).length;
+
+    if (recoverNumber > 0) {
+      console.log(`Recover ${recoverNumber} processing history`);
+    }
+
     this.startRecoverHistories().catch(console.error);
   }
 
@@ -243,7 +256,6 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
       this.startPromiseHandler = createPromiseHandler<void>();
       this.status = ServiceStatus.STARTING;
       await this.startCron();
-      await this.startRecoverHistories();
       this.status = ServiceStatus.STARTED;
       this.startPromiseHandler.resolve();
     } catch (e) {

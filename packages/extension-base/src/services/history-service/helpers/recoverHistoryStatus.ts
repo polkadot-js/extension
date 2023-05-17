@@ -17,10 +17,20 @@ export enum HistoryRecoverStatus {
   UNKNOWN = 'UNKNOWN'
 }
 
-const BLOCK_LIMIT = 10;
+export interface TransactionRecoverResult {
+  status: HistoryRecoverStatus;
+  extrinsicHash?: string;
+  blockHash?: string;
+  blockNumber?: number;
+}
 
-const substrateRecover = async (history: TransactionHistoryItem, chainService: ChainService): Promise<HistoryRecoverStatus> => {
+const BLOCK_LIMIT = 6;
+
+const substrateRecover = async (history: TransactionHistoryItem, chainService: ChainService): Promise<TransactionRecoverResult> => {
   const { address, blockHash, chain, extrinsicHash, from, nonce, startBlock } = history;
+  const result: TransactionRecoverResult = {
+    status: HistoryRecoverStatus.UNKNOWN
+  };
 
   try {
     const substrateApi = chainService.getSubstrateApi(chain);
@@ -31,9 +41,9 @@ const substrateRecover = async (history: TransactionHistoryItem, chainService: C
 
       if (!blockHash) {
         if (!nonce || !startBlock) {
-          console.log(`Fail to find extrinsic for ${address} on ${chain}: With nonce ${nonce} from block ${startBlock}`);
+          console.log(`Fail to find extrinsic for ${address} on ${chain}: With nonce ${nonce || 'undefined'} from block ${startBlock || 'undefined'}`);
 
-          return HistoryRecoverStatus.LACK_INFO;
+          return { status: HistoryRecoverStatus.LACK_INFO };
         }
 
         const currentBlock = (await api.query.system.number()).toPrimitive() as number;
@@ -49,6 +59,9 @@ const substrateRecover = async (history: TransactionHistoryItem, chainService: C
             if (extrinsic.signer && isSameAddress(from, extrinsic.signer.toString()) && nonce === extrinsic.nonce.toNumber()) {
               index = parseInt(idx);
               found = true;
+              result.extrinsicHash = extrinsic.hash.toHex();
+              result.blockHash = block.block.hash.toHex();
+              result.blockNumber = block.block.header.number.toNumber();
               break;
             }
           }
@@ -64,9 +77,9 @@ const substrateRecover = async (history: TransactionHistoryItem, chainService: C
 
             for (const { event } of events) {
               if (api.events.system.ExtrinsicSuccess.is(event)) {
-                return HistoryRecoverStatus.SUCCESS;
+                return { ...result, status: HistoryRecoverStatus.SUCCESS };
               } else if (api.events.system.ExtrinsicFailed.is(event)) {
-                return HistoryRecoverStatus.FAILED;
+                return { ...result, status: HistoryRecoverStatus.FAILED };
               }
             }
           }
@@ -88,7 +101,7 @@ const substrateRecover = async (history: TransactionHistoryItem, chainService: C
         if (index === undefined) {
           console.log(`Fail to find extrinsic ${extrinsicHash} on ${chain}`);
 
-          return HistoryRecoverStatus.FAIL_DETECT;
+          return { status: HistoryRecoverStatus.FAIL_DETECT };
         }
 
         const events = allEvents
@@ -99,28 +112,32 @@ const substrateRecover = async (history: TransactionHistoryItem, chainService: C
 
         for (const { event } of events) {
           if (api.events.system.ExtrinsicSuccess.is(event)) {
-            return HistoryRecoverStatus.SUCCESS;
+            return { ...result, status: HistoryRecoverStatus.SUCCESS };
           } else if (api.events.system.ExtrinsicFailed.is(event)) {
-            return HistoryRecoverStatus.FAILED;
+            return { ...result, status: HistoryRecoverStatus.FAILED };
           }
         }
       }
 
-      return HistoryRecoverStatus.FAIL_DETECT;
+      return { status: HistoryRecoverStatus.FAIL_DETECT };
     } else {
       console.error(`Fail to update history ${chain}-${extrinsicHash}: Api not active`);
 
-      return HistoryRecoverStatus.API_INACTIVE;
+      return { status: HistoryRecoverStatus.API_INACTIVE };
     }
   } catch (e) {
     console.error(`Fail to update history ${chain}-${extrinsicHash}:`, (e as Error).message);
 
-    return HistoryRecoverStatus.UNKNOWN;
+    return { status: HistoryRecoverStatus.UNKNOWN };
   }
 };
 
-const evmRecover = async (history: TransactionHistoryItem, chainService: ChainService): Promise<HistoryRecoverStatus> => {
+const evmRecover = async (history: TransactionHistoryItem, chainService: ChainService): Promise<TransactionRecoverResult> => {
   const { address, chain, extrinsicHash, from, nonce, startBlock } = history;
+
+  const result: TransactionRecoverResult = {
+    status: HistoryRecoverStatus.UNKNOWN
+  };
 
   try {
     const evmApi = chainService.getEvmApi(chain);
@@ -132,56 +149,54 @@ const evmRecover = async (history: TransactionHistoryItem, chainService: ChainSe
       if (extrinsicHash) {
         const transactionReceipt = await api.eth.getTransactionReceipt(extrinsicHash);
 
-        return transactionReceipt.status ? HistoryRecoverStatus.SUCCESS : HistoryRecoverStatus.FAILED;
+        return { ...result, status: transactionReceipt.status ? HistoryRecoverStatus.SUCCESS : HistoryRecoverStatus.FAILED };
       } else {
         if (!nonce || !startBlock) {
-          console.log(`Fail to find extrinsic for ${address} on ${chain}: With nonce ${nonce} from block ${startBlock}`);
+          console.log(`Fail to find extrinsic for ${address} on ${chain}: With nonce ${nonce || 'undefined'} from block ${startBlock || 'undefined'}`);
 
-          return HistoryRecoverStatus.LACK_INFO;
+          return { ...result, status: HistoryRecoverStatus.LACK_INFO };
         }
 
         const currentBlock = await api.eth.getBlockNumber();
 
-        console.log(address, chain, from, nonce, startBlock);
-
         for (let i = 1, found = false; i < BLOCK_LIMIT && !found && startBlock + i <= currentBlock; i++) {
           const block = await api.eth.getBlock(startBlock + i, true);
 
-          let transactionHash = '';
-
           for (const transaction of block.transactions) {
             if (isSameAddress(transaction.from, from) && nonce === transaction.nonce) {
-              transactionHash = transaction.hash;
+              result.extrinsicHash = transaction.hash;
+              result.blockHash = block.hash;
+              result.blockNumber = block.number;
               found = true;
               break;
             }
           }
 
-          if (transactionHash) {
-            const transactionReceipt = await api.eth.getTransactionReceipt(transactionHash);
+          if (result.extrinsicHash) {
+            const transactionReceipt = await api.eth.getTransactionReceipt(result.extrinsicHash);
 
-            return transactionReceipt.status ? HistoryRecoverStatus.SUCCESS : HistoryRecoverStatus.FAILED;
+            return { ...result, status: transactionReceipt.status ? HistoryRecoverStatus.SUCCESS : HistoryRecoverStatus.FAILED };
           }
         }
       }
 
-      return HistoryRecoverStatus.FAIL_DETECT;
+      return { status: HistoryRecoverStatus.FAIL_DETECT };
     } else {
       console.error(`Fail to update history ${chain}-${extrinsicHash}: Api not active`);
 
-      return HistoryRecoverStatus.API_INACTIVE;
+      return { status: HistoryRecoverStatus.API_INACTIVE };
     }
   } catch (e) {
     console.error(`Fail to update history ${chain}-${extrinsicHash}:`, (e as Error).message);
 
-    return HistoryRecoverStatus.UNKNOWN;
+    return { status: HistoryRecoverStatus.UNKNOWN };
   }
 };
 
 // undefined: Cannot check status
 // true: Transaction success
 // false: Transaction failed
-export const historyRecover = async (history: TransactionHistoryItem, chainService: ChainService): Promise<HistoryRecoverStatus> => {
+export const historyRecover = async (history: TransactionHistoryItem, chainService: ChainService): Promise<TransactionRecoverResult> => {
   const { chainType } = history;
 
   if (chainType) {
@@ -189,6 +204,6 @@ export const historyRecover = async (history: TransactionHistoryItem, chainServi
 
     return await checkFunction(history, chainService);
   } else {
-    return HistoryRecoverStatus.LACK_INFO;
+    return { status: HistoryRecoverStatus.LACK_INFO };
   }
 };

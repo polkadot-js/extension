@@ -17,9 +17,10 @@ type Props = {
   onClickFilterIcon?: () => void;
   onClickSearchIcon?: () => void;
   showTabBar?: boolean
+  withBackground?: boolean
 };
 
-const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, showSearchIcon, showTabBar }: Props) => {
+const Home = ({ children, onClickFilterIcon, onClickSearchIcon, withBackground, showFilterIcon, showSearchIcon, showTabBar }: Props) => {
   const navigate = useNavigate();
   const { activeModal } = useContext(ModalContext);
   const { pathname } = useLocation();
@@ -103,6 +104,7 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
       withSideMenu
       headerList={pageHeaders}
       title={currentRoute[0].toUpperCase() + currentRoute.slice(1)}
+      withBackground={withBackground}
     >
       {children}
     </Layout.Base>

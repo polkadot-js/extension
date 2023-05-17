@@ -9,7 +9,6 @@ import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import { Aperture, Clock, Database, Rocket, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
 import Footer from '../parts/Footer';
 import SelectAccount from '../parts/SelectAccount';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -27,6 +26,7 @@ SwScreenLayoutProps,
   withSideMenu?: boolean,
   withController?: boolean,
   showWebHeader?: boolean,
+  withBackground?: boolean
 }
 
 export const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
@@ -93,6 +93,7 @@ const Base = (props: LayoutBaseProps) => {
     withSideMenu = false,
     withController,
     showWebHeader = false,
+    withBackground = false,
     ...rest
   } = props;
   const navigate = useNavigate();
@@ -139,6 +140,7 @@ const Base = (props: LayoutBaseProps) => {
         title: props.title,
       }}
       headerList={headerList}
+      withBackground={withBackground}
     >
       {children}
     </BaseWeb>

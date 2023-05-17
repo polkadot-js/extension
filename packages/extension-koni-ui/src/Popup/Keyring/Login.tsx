@@ -138,8 +138,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             </Form>
             <ResetWalletModal />
           </div>
-        </div>
         <SocialGroup />
+        </div>
       </Layout.Base>
     </PageWrapper>
   );
@@ -187,7 +187,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       backgroundImage: `url(${LoginBg})`,
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'top',
-      backgroundSize: 'contain',
+      backgroundSize: 'cover',
       height: '100%',
       position: 'absolute',
       width: '100%',

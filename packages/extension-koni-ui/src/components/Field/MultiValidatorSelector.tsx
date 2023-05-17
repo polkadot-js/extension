@@ -9,6 +9,7 @@ import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/Sort
 import { ValidatorDetailModal } from '@subwallet/extension-koni-ui/components/Modal/Staking/ValidatorDetailModal';
 import StakingValidatorItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingValidatorItem';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import { useSelectValidators } from '@subwallet/extension-koni-ui/hooks/modal/useSelectValidators';
 import useGetChainStakingMetadata from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetChainStakingMetadata';
@@ -77,7 +78,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', from, id = defaultModalId, isSingleSelect: _isSingleSelect = false, onChange, value, loading } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
-
+  const { isWebUI } = useContext(ScreenContext)
   useExcludeModal(id);
   const isActive = checkActive(id);
 
@@ -251,7 +252,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         value={value || ''}
       />
       <SwModal
-        className={`${className} modal-full`}
+        className={`${className} ${!isWebUI && 'modal-full'}`}
         closeIcon={(
           <Icon
             phosphorIcon={CaretLeft}

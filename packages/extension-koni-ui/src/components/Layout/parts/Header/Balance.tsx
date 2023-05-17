@@ -69,7 +69,6 @@ function Component({ className }: Props): React.ReactElement<Props> {
     tokenSelectorItems
   } = useReceiveQR();
 
-
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const notify = useNotification();
 

@@ -8,7 +8,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useGetStakingList, useNotification, usePreCheckReadOnly, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { ArrowClockwise, FadersHorizontal, Plus, Trophy } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -186,6 +186,38 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             onClickActionBtn={onClickActionBtn}
             actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} size='sm'/>}
             showActionBtn
+            showExtraButton
+            extraButton={
+              <>
+                <Button
+                  type="ghost"
+                  onClick={
+                    () => {
+                      setLoading(true);
+                      notify({
+                        icon: <ActivityIndicator size={32} />,
+                        style: { top: 210 },
+                        direction: 'vertical',
+                        duration: 1.8,
+                        message: t('Reloading')
+                      });
+
+                      reloadCron({ data: 'staking' })
+                        .then(() => {
+                          setLoading(false);
+                        })
+                        .catch(console.error);
+                    }
+                  }
+                  icon={<Icon phosphorIcon={ArrowClockwise} size="sm" />}
+                />
+                <Button
+                  type="ghost"
+                  onClick={preCheckReadOnly(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`))}
+                  icon={<Icon phosphorIcon={Plus} size="sm" />}
+                />
+              </>
+            }
           />
           <SwList
             filterBy={filterFunction}

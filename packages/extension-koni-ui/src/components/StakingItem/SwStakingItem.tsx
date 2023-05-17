@@ -6,7 +6,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
-import { Button, Icon, StakingItem, Tag } from '@subwallet/react-ui';
+import { Button, Icon, Popover, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { DotsThree, User, Users } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
@@ -14,6 +14,7 @@ import styled, { ThemeContext } from 'styled-components';
 import CN from 'classnames';
 import { TokenItem } from '../TokenItem';
 import {Number as NumberItem} from '@subwallet/react-ui';
+import { ActionList } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 
 interface Props extends ThemeProps {
   stakingData: StakingDataType,
@@ -80,6 +81,50 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
 
   const { token } = useContext(ThemeContext)
 
+  const rightIcon = useMemo(() => {
+    if (!isWebUI) {
+      <Button
+        type='ghost'
+        icon={<Icon
+          className={'right-icon'}
+          type="phosphor"
+          phosphorIcon={DotsThree}
+          size="xs"
+        />}
+        onClick={_onClickRightIcon}
+        size='sm'
+      />
+    }
+    return <Popover
+      content={
+        <ActionList
+          chainStakingMetadata={stakingData.chainStakingMetadata}
+          nominatorMetadata={stakingData.nominatorMetadata}
+          reward={stakingData.reward}
+        />
+      }
+      trigger="click"
+      showArrow={false}
+      placement="bottomRight"
+      overlayInnerStyle={{
+        padding: '0',
+        background: '#1A1A1A'
+      }}
+    >
+      <Button
+        onClick={e => e.stopPropagation()}
+        type='ghost'
+        icon={<Icon
+          className={'right-icon'}
+          type="phosphor"
+          phosphorIcon={DotsThree}
+          size="xs"
+        />}
+        size='sm'
+      />
+    </Popover>
+  }, [isWebUI])
+
   // TODO: update priceChangeStatus
   let priceChangeStatus = 'increase'
   const marginColor = priceChangeStatus === 'increase' ? token.colorSuccess : token.colorError
@@ -137,17 +182,7 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
             value={11122}
           />
         </div>
-        <Button
-          type='ghost'
-          icon={<Icon
-            className={'right-icon'}
-            type="phosphor"
-            phosphorIcon={DotsThree}
-            size="xs"
-          />}
-          onClick={_onClickRightIcon}
-          size='sm'
-        />
+        {rightIcon}
       </div>
     </div>
   )

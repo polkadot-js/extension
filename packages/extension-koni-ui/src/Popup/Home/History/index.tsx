@@ -381,6 +381,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             onClickActionBtn={onClickActionBtn}
             actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
             showActionBtn
+            showExtraButton
           />
           <SwList
             filterBy={filterFunction}

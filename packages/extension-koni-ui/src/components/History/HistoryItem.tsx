@@ -1,20 +1,19 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicStatus, TransactionDirection } from '@subwallet/extension-base/background/KoniTypes';
-import { getTransactionLink } from '@subwallet/extension-base/services/transaction-service/utils';
-import { StatusType } from '@subwallet/extension-koni-ui/Popup/Home/History/Detail';
+import { TransactionDirection } from '@subwallet/extension-base/background/KoniTypes';
+import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
+import { HistoryStatusMap } from '@subwallet/extension-koni-ui/constants';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab, toShort } from '@subwallet/extension-koni-ui/utils';
-import { Icon, Logo, Number, Typography, Web3Block, Tag, Button } from '@subwallet/react-ui';
+import { Button, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
-import { t } from 'i18next';
 import moment from 'moment';
-import { ArrowSquareOut, CaretRight, CheckCircle, ProhibitInset, Spinner, StopCircle } from 'phosphor-react';
-import React, { useContext, useMemo } from 'react';
+import { ArrowSquareOut, CaretRight } from 'phosphor-react';
+import React, { SyntheticEvent, useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -26,104 +25,85 @@ type Props = ThemeProps & {
 function Component (
   { className = '', item, onClick }: Props) {
   const displayData = item.displayData;
-  const { isWebUI } = useContext(ScreenContext)
-
-  if (!isWebUI) return (
-    <Web3Block
-      className={CN('history-item', className, displayData.className)}
-      leftItem={(
-        <>
-          <div className={'__main-icon-wrapper'}>
-            <Icon
-              className={'__main-icon'}
-              phosphorIcon={displayData.icon}
-              size={'md'}
-            />
-            <Logo
-              className={'__chain-logo'}
-              network={item.chain}
-              size={16}
-            />
-          </div>
-        </>
-      )}
-      middleItem={(
-        <>
-          <div className={'__account-name'}>{item.direction === TransactionDirection.SEND ? (item.fromName || item.from || '') : (item.toName || item.to || '')}</div>
-          <div className={'__meta'}>{displayData.typeName}</div>
-        </>
-      )}
-      onClick={onClick}
-      rightItem={(
-        <>
-          <div className={'__value-wrapper'}>
-            <Number
-              className={'__value'}
-              decimal={item?.amount?.decimals || 0}
-              decimalOpacity={0.45}
-              suffix={item?.amount?.symbol}
-              value={item?.amount?.value || '0'}
-            />
-            <Number
-              className={'__fee'}
-              decimal={item?.fee?.decimals || 0}
-              decimalOpacity={0.45}
-              intOpacity={0.45}
-              suffix={item.fee?.symbol}
-              unitOpacity={0.45}
-              value={item.fee?.value || '0'}
-            />
-          </div>
-          <div className={'__arrow-icon'}>
-            <Icon
-              phosphorIcon={CaretRight}
-              size='sm'
-            />
-          </div>
-        </>
-      )}
-    />
-  );
-
-  const statusMap = useMemo<Record<string, StatusType>>(
-    () => ({
-      [ExtrinsicStatus.SUCCESS]: {
-        schema: "success",
-        icon: CheckCircle,
-        name: t("Completed"),
-      },
-      [ExtrinsicStatus.FAIL]: {
-        schema: "danger",
-        icon: ProhibitInset,
-        name: t("Failed"),
-      },
-      [ExtrinsicStatus.PROCESSING]: {
-        schema: "gold",
-        icon: Spinner,
-        name: t("Processing"),
-      },
-      [ExtrinsicStatus.PENDING]: {
-        schema: "gold",
-        icon: Spinner,
-        name: t("Pending"),
-      },
-      [ExtrinsicStatus.UNKNOWN]: {
-        schema: "danger",
-        icon: StopCircle,
-        name: t("Unknown"),
-      },
-    }),
-    [t]
-  );
+  const { isWebUI } = useContext(ScreenContext);
 
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
 
   const chainInfo = chainInfoMap[item.chain];
-  const time = moment(item.time).format('hh:mm A')
-  const link = !!item.extrinsicHash && getTransactionLink(chainInfo, item.extrinsicHash);
+  const time = moment(item.time).format('hh:mm A');
+  const link = !!item.extrinsicHash && getExplorerLink(chainInfo, item.extrinsicHash, 'tx');
+
+  const handleOnClick = useCallback(
+    (e?: SyntheticEvent) => {
+      e && e.stopPropagation();
+      link && openInNewTab(link)();
+    },
+    [link]);
+
+  if (!isWebUI) {
+    return (
+      <Web3Block
+        className={CN('history-item', className, displayData.className)}
+        leftItem={(
+          <>
+            <div className={'__main-icon-wrapper'}>
+              <Icon
+                className={'__main-icon'}
+                phosphorIcon={displayData.icon}
+                size={'md'}
+              />
+              <Logo
+                className={'__chain-logo'}
+                network={item.chain}
+                size={16}
+              />
+            </div>
+          </>
+        )}
+        middleItem={(
+          <>
+            <div className={'__account-name'}>{item.direction === TransactionDirection.SEND ? (item.fromName || item.from || '') : (item.toName || item.to || '')}</div>
+            <div className={'__meta'}>{displayData.typeName}</div>
+          </>
+        )}
+        onClick={onClick}
+        rightItem={(
+          <>
+            <div className={'__value-wrapper'}>
+              <Number
+                className={'__value'}
+                decimal={item?.amount?.decimals || 0}
+                decimalOpacity={0.45}
+                suffix={item?.amount?.symbol}
+                value={item?.amount?.value || '0'}
+              />
+              <Number
+                className={'__fee'}
+                decimal={item?.fee?.decimals || 0}
+                decimalOpacity={0.45}
+                intOpacity={0.45}
+                suffix={item.fee?.symbol}
+                unitOpacity={0.45}
+                value={item.fee?.value || '0'}
+              />
+            </div>
+            <div className={'__arrow-icon'}>
+              <Icon
+                phosphorIcon={CaretRight}
+                size='sm'
+              />
+            </div>
+          </>
+        )}
+      />
+    );
+  }
 
   return (
-    <div className={CN(className, displayData.className, '__web-ui')} onClick={onClick}>
+    <div
+      className={CN(className, displayData.className, '__web-ui')}
+      onClick={onClick}
+    >
       <div className='account-wrapper'>
         <SwAvatar
           size={30}
@@ -135,13 +115,13 @@ function Component (
         </div>
       </div>
 
-      <div className="status-wrapper">
+      <div className='status-wrapper'>
         <div className={'__main-icon-wrapper'}>
           <Icon
             className={'__main-icon'}
+            iconColor='success'
             phosphorIcon={displayData.icon}
             size={'md'}
-            iconColor='success'
           />
           <Logo
             className={'__chain-logo'}
@@ -160,8 +140,8 @@ function Component (
           className={'__value'}
           decimal={0}
           decimalOpacity={0.45}
-          value={11}
           suffix={item.amount?.symbol}
+          value={11}
         />
         <Number
           className={'__converted-value'}
@@ -175,25 +155,25 @@ function Component (
         />
       </div>
 
-      <div className="status-tag">
+      <div className='status-tag'>
         <Tag
           className='tag'
-          color={statusMap[item.status].schema}
+          color={HistoryStatusMap[item.status].schema}
         >
-          {statusMap[item.status].name}
+          {HistoryStatusMap[item.status].name}
         </Tag>
 
         <Button
+          icon={<Icon
+            phosphorIcon={ArrowSquareOut}
+            size='sm'
+          />}
+          onClick={handleOnClick}
           type='ghost'
-          onClick={(e) => {
-            e.stopPropagation()
-            link && openInNewTab(link)()
-          }}
-          icon={<Icon phosphorIcon={ArrowSquareOut} size="sm" />}
         />
       </div>
     </div>
-  )
+  );
 }
 
 export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
@@ -326,11 +306,11 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
         fontWeight: 500
       },
 
-      "&:hover": {
+      '&:hover': {
 
       },
 
-      ".status-wrapper": {
+      '.status-wrapper': {
         display: 'flex',
         justifyContent: 'center',
         '.__main-icon-wrapper': {
@@ -338,12 +318,12 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
         }
       },
 
-      ".account-wrapper": {
+      '.account-wrapper': {
         display: 'inline-flex',
         alignItems: 'center',
 
-        ".account-info": {
-          display: "flex",
+        '.account-info': {
+          display: 'flex',
           flexDirection: 'column',
           marginLeft: 8,
 
@@ -351,21 +331,21 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
             color: 'rgba(255, 255, 255, 0.45)',
             fontSize: '12px',
             lineHeight: '20px',
-            fontWeight: 500,
-          },
-        },
+            fontWeight: 500
+          }
+        }
       },
 
-      ".status-tag": {
-        display:'flex',
+      '.status-tag': {
+        display: 'flex',
         alignItems: 'center',
         justifyContent: 'flex-end'
       },
 
-      ".value-wrapper": {
-        textAlign: 'right',
-      },
-    },
+      '.value-wrapper': {
+        textAlign: 'right'
+      }
+    }
 
   });
 });

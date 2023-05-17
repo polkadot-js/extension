@@ -2,7 +2,7 @@ import { ThemeProps } from "@subwallet/extension-koni-ui/types"
 import { Button, Input, Icon } from "@subwallet/react-ui"
 import CN from 'classnames'
 import { DownloadSimple, MagnifyingGlass } from "phosphor-react"
-import { ChangeEventHandler } from "react"
+import { ChangeEventHandler, useMemo } from "react"
 import styled from "styled-components"
 
 type Props = ThemeProps & {
@@ -12,7 +12,9 @@ type Props = ThemeProps & {
   onSearch: (value: string) => void;
   onClickActionBtn?: () => void;
   actionBtnIcon?: JSX.Element;
-  showActionBtn?: boolean
+  showActionBtn?: boolean;
+  extraButton?: JSX.Element
+  showExtraButton?: boolean
 }
 
 const Component: React.FC<Props> = ({
@@ -22,7 +24,9 @@ const Component: React.FC<Props> = ({
   onSearch,
   onClickActionBtn,
   actionBtnIcon,
-  showActionBtn
+  showActionBtn,
+  extraButton,
+  showExtraButton = false
 }) => {
   // CONTROLLED STATE
   // const [value, setValue] = useState<string>(searchValue)
@@ -31,7 +35,7 @@ const Component: React.FC<Props> = ({
   //   if (e.key === 'Enter' && value) {
   //     onSearch(value)
   //   }
-  // }, [value])
+// }, [value])
 
   // const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
   //   const value = e?.target?.value;
@@ -44,13 +48,17 @@ const Component: React.FC<Props> = ({
     onSearch(value)
   }
 
+  const button = useMemo(() => extraButton ? extraButton : (
+    <Button
+      type="ghost"
+      icon={<Icon phosphorIcon={DownloadSimple} size="sm" />}
+    />
+  ), [])
+
   return (
     <div className={CN('container', className)}>
       <div className="right-section">
-        <Button
-          type="ghost"
-          icon={<Icon phosphorIcon={DownloadSimple} size="sm" />}
-        />
+        {showExtraButton && button}
         <Input.Search
           className="search-input"
           size="md"

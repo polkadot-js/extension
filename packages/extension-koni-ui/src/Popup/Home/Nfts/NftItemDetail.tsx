@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
+import { CustomModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useNavigateOnChangeAccount } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -26,7 +27,6 @@ import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import Transaction from '../../Transaction/Transaction';
 import SendNFT from '../../Transaction/variants/SendNFT';
 
@@ -35,12 +35,13 @@ type Props = ThemeProps
 const NFT_DESCRIPTION_MAX_LENGTH = 70;
 const TRANSFER_NFT_MODAL = 'transfer-nft-modal';
 
-const modalCloseButton = <Icon
-  customSize={'24px'}
-  phosphorIcon={CaretLeft}
-  type='phosphor'
-  weight={'light'}
-/>;
+const modalCloseButton =
+  <Icon
+    customSize={'24px'}
+    phosphorIcon={CaretLeft}
+    type='phosphor'
+    weight={'light'}
+  />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const location = useLocation();
@@ -48,7 +49,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const outletContext: {
     searchInput: string,
     setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
-  } = useOutletContext()
+  } = useOutletContext();
 
   const { isWebUI } = useContext(ScreenContext);
 
@@ -85,8 +86,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         return;
       }
     }
+
     if (isWebUI) {
-      activeModal(TRANSFER_NFT_MODAL)
+      activeModal(TRANSFER_NFT_MODAL);
     } else {
       navigate(`/transaction/send-nft/${nftItem.owner}/${nftItem.chain}/${nftItem.collectionId}/${nftItem.id}`);
     }
@@ -188,7 +190,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     outletContext?.setDetailTitle(nftItem.name || nftItem.id);
-  }, [nftItem, outletContext])
+  }, [nftItem, outletContext]);
+
+  const handleCancelModal = useCallback(() => inactiveModal(TRANSFER_NFT_MODAL), [inactiveModal]);
 
   return (
     <PageWrapper
@@ -204,12 +208,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           subHeaderCenter: false,
           subHeaderIcons: subHeaderRightButton,
           subHeaderPaddingVertical: true,
-          title: nftItem.name || nftItem.id,
+          title: nftItem.name || nftItem.id
         }}
       >
         <div className={CN('nft_item_detail__container', {
-          '__web-ui': isWebUI,
-        })}>
+          '__web-ui': isWebUI
+        })}
+        >
           <div className={'nft_item_detail__nft_image'}>
             <Image
               className={CN({ clickable: nftItem.externalUrl })}
@@ -316,7 +321,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           </div>
 
           {!isWebUI && (
-             <Button
+            <Button
               block
               icon={<Icon
                 phosphorIcon={PaperPlaneTilt}
@@ -327,16 +332,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             >
               <span className={'nft_item_detail__send_text'}>Send</span>
             </Button>
-         )}
+          )}
         </div>
 
         <CustomModal
           id={TRANSFER_NFT_MODAL}
-          onCancel={() => inactiveModal(TRANSFER_NFT_MODAL)}
-          title={t("Transfer")}
+          onCancel={handleCancelModal}
+          title={t('Transfer')}
         >
           <Transaction modalContent>
-            <SendNFT modalContent nftDetail={nftItem} />
+            <SendNFT
+              modalContent
+              nftDetail={nftItem}
+            />
           </Transaction>
         </CustomModal>
 
@@ -380,11 +388,10 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       paddingLeft: token.margin,
       paddingBottom: token.margin,
 
-
       '.nft_item_detail__info_field_container': {
         gap: 8,
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'column'
       },
 
       '&.__web-ui': {
@@ -400,7 +407,7 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
           justifyContent: 'stretch',
           maxWidth: 358,
 
-          'img': {
+          img: {
             aspectRatio: '1',
             objectFit: 'cover'
           }
@@ -426,7 +433,7 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
             }
           }
         }
-      },
+      }
     },
 
     '.clickable': {

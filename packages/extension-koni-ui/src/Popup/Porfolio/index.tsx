@@ -110,7 +110,7 @@ function Component({ className }: Props): React.ReactElement<Props> {
   )
 }
 
-const Porfolio = styled(Component)<Props>(({ theme: { token }}) => {
+const Porfolio = styled(Component)<Props>(({ theme: { extendToken, token }}) => {
   return {
     height: '100%',
 

@@ -18,7 +18,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { Button, Icon } from '@subwallet/react-ui';
 import classNames from 'classnames';
-import { Coins, FadersHorizontal } from 'phosphor-react';
+import { Coins, FadersHorizontal, SlidersHorizontal } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useOutletContext } from 'react-router-dom';
@@ -324,6 +324,7 @@ type WrapperProps = ThemeProps & {
 
 const WrapperComponent = ({ className = '', searchInput }: WrapperProps): React.ReactElement<Props> => {
   const dataContext = useContext(DataContext);
+  const { t } = useTranslation();
 
   return (
     <PageWrapper
@@ -331,6 +332,13 @@ const WrapperComponent = ({ className = '', searchInput }: WrapperProps): React.
       resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance'])}
     >
       <Component />
+      <Button
+        type='ghost'
+        icon={<Icon phosphorIcon={SlidersHorizontal} size='xs' />}
+        onClick={() => {}}
+        children={t("Import ")}
+        block
+      />
     </PageWrapper>
   );
 };

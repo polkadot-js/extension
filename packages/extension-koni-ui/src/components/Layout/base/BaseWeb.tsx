@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback } from 'react';
-
+import React, { useCallback, useContext } from 'react';
+import CN from 'classnames'
 import styled from 'styled-components';
 import SideMenu from '../parts/SideMenu';
 import Headers, { CompoundedHeader } from '../parts/Header';
+import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 
 export interface LayoutBaseWebProps  {
   children: React.ReactNode | React.ReactNode[];
@@ -14,10 +15,10 @@ export interface LayoutBaseWebProps  {
   headerList?: (keyof CompoundedHeader)[];
   onBack?: () => void;
   title?: string | React.ReactNode;
-
+  withBackground?: boolean
 }
 
-const StyledLayout = styled('div')(({ }) => {
+const StyledLayout = styled('div')(({ theme: { extendToken }}) => {
   return {
     display: 'flex',
     flex: 'auto',
@@ -38,7 +39,18 @@ const StyledLayout = styled('div')(({ }) => {
       background: '#0C0C0C',
       maxHeight: '100vh',
       flex: 1,
-
+      position: "relative",
+      ".background": {
+        backgroundImage: extendToken.tokensScreenSuccessBackgroundColor,
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 300,
+        "&.-decrease": {
+          backgroundImage: extendToken.tokensScreenDangerBackgroundColor
+       },
+    },
       '.layout-header': {
 
       },
@@ -56,8 +68,11 @@ const BaseWeb = ({
   title,
   onBack,
   children,
+  withBackground,
   ...props
 }: LayoutBaseWebProps) => {
+  const { accountBalance: { totalBalanceInfo }} = useContext(HomeContext);
+  const isTotalBalanceDecrease = totalBalanceInfo.change.status === 'decrease';
   const renderHeader = useCallback((name: keyof CompoundedHeader, key: number) => {
     const CurComponent = Headers[name];
 
@@ -71,13 +86,16 @@ const BaseWeb = ({
       </div>
 
       <div className='layout-content'>
-        <div className="layout-header">
+        {withBackground && <div className={CN('background', {
+          '-decrease': isTotalBalanceDecrease
+        })} />}
           {(headerList && !!headerList.length) && (
-              headerList.map((name: keyof CompoundedHeader, index: number) =>
+            <div className="layout-header">
+              {headerList.map((name: keyof CompoundedHeader, index: number) =>
                 renderHeader(name, index)
-              )
+              )}
+            </div>
           )}
-        </div>
 
         <div className="layout-content-main">
           {children}
@@ -88,4 +106,3 @@ const BaseWeb = ({
 };
 
 export default BaseWeb;
-

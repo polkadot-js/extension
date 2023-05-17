@@ -43,8 +43,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [pathname])
 
+  const pathEls = useMemo(() => pathname.split('/').filter((i: string) => !!i), [pathname]);
   const homeContent = useMemo(() => {
-    const pathEls = pathname.split('/').filter((i: string) => !!i);
     if (isWebUI && ['tokens', 'nfts'].includes(pathEls[1])) {
       return <Porfolio />
     }
@@ -63,6 +63,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             onClickSearchIcon={onOpenGlobalSearchToken}
             showFilterIcon
             showSearchIcon
+            withBackground={['tokens', 'nfts'].includes(pathEls[1])}
           >
             {homeContent}
           </Layout.Home>

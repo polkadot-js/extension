@@ -57,8 +57,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     maskClosable: true,
     closable: true,
     type: 'error',
-    subTitle: t<string>('You are about to delete this token'),
-    content: t<string>('Confirm delete this token'),
+    subTitle: isWebUI ?  t<string>('If you need to use this token you would need to manually import it again') : t<string>('You are about to delete this token'),
+    content: isWebUI ?  t<string>('Are you sure to remove this token?'):t<string>('Confirm delete this token'),
     okText: t<string>('Remove')
   });
 

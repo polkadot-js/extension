@@ -33,6 +33,7 @@ export const renderBasePasswordRules = (fieldName: string): FormRule[] => {
 
 export const renderBaseConfirmPasswordRules = (passwordFieldName: string): FormRule[] => {
   return [
+    ...renderBasePasswordRules('Confirm password'),
     ({ getFieldValue }) => ({
       validator: (_, value) => {
         const password = getFieldValue(passwordFieldName) as string;
@@ -41,17 +42,8 @@ export const renderBaseConfirmPasswordRules = (passwordFieldName: string): FormR
           return Promise.resolve();
         }
 
-        return Promise.reject(new Error('Passwords do not match!'));
+        return Promise.reject(new Error('Confirm password do not match!'));
       }
-    }),
-    {
-      message: 'Confirm password is too short',
-      min: MinPasswordLength
-    },
-    {
-      message: 'Confirm password should be at least 1 uppercase letter, 1 number, and 1 special character',
-      pattern: passwordRegex,
-      warningOnly: true
-    }
+    })
   ];
 };

@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _getBlockExplorerFromChain, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
+import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { RECEIVE_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -40,21 +41,9 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
       return address || '';
     }
   }, [address, chainInfo]);
+
   const scanExplorerAddressUrl = useMemo(() => {
-    let route = '';
-    const blockExplorer = selectedNetwork && _getBlockExplorerFromChain(chainInfo);
-
-    if (blockExplorer && blockExplorer.includes('subscan.io')) {
-      route = 'account';
-    } else {
-      route = 'address';
-    }
-
-    if (blockExplorer) {
-      return `${blockExplorer}${route}/${formattedAddress}`;
-    } else {
-      return getScanExplorerAddressInfoUrl(selectedNetwork || '', formattedAddress);
-    }
+    return getExplorerLink(chainInfo, formattedAddress, 'account') || getScanExplorerAddressInfoUrl(selectedNetwork || '', formattedAddress);
   }, [selectedNetwork, formattedAddress, chainInfo]);
 
   const handleClickViewOnExplorer = useCallback(() => {

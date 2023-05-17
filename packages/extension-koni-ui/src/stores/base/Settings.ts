@@ -4,7 +4,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
-import { DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from '@subwallet/extension-base/services/setting-service/constants';
+import { DEFAULT_AUTO_LOCK_TIME, DEFAULT_NOTIFICATION_TYPE, DEFAULT_THEME } from '@subwallet/extension-base/services/setting-service/constants';
 import { AppSettings, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 import settings from '@polkadot/ui-settings';
@@ -22,6 +22,7 @@ const initialState = {
   language: 'en',
   browserConfirmationType: DEFAULT_NOTIFICATION_TYPE,
   camera: false,
+  timeAutoLock: DEFAULT_AUTO_LOCK_TIME,
 
   // AuthUrls
   authUrls: {},
@@ -42,14 +43,11 @@ const settingsSlice = createSlice({
   reducers: {
     updateUiSettings (state, action: PayloadAction<UiSettings>) {
       const payload = action.payload;
+      const { theme, ...newState } = payload;
 
       return {
         ...state,
-        // todo: will save language, theme, isShowZeroBalance, camera in background
-        browserConfirmationType: payload.browserConfirmationType,
-        isShowBalance: payload.isShowBalance,
-        accountAllLogo: payload.accountAllLogo,
-        camera: payload.camera,
+        ...newState,
         reduxStatus: ReduxStatus.READY
       };
     },

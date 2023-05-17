@@ -339,6 +339,10 @@ export function _getAssetDecimals (assetInfo: _ChainAsset): number {
 export function _getBlockExplorerFromChain (chainInfo: _ChainInfo): string | undefined {
   let blockExplorer;
 
+  if (!chainInfo) {
+    return;
+  }
+
   if (_isPureEvmChain(chainInfo)) {
     blockExplorer = chainInfo?.evmInfo?.blockExplorer;
   } else {

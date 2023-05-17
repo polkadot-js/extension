@@ -268,9 +268,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [curAdr] = useState(currentAccount?.address);
 
   // Handle detail modal
-  const { chain, extrinsicHash } = useParams();
+  const { chain, extrinsicHashOrId } = useParams();
   const [selectedItem, setSelectedItem] = useState<TransactionHistoryDisplayItem | null>(null);
-  const [openDetailLink, setOpenDetailLink] = useState<boolean>(!!chain && !!extrinsicHash);
+  const [openDetailLink, setOpenDetailLink] = useState<boolean>(!!chain && !!extrinsicHashOrId);
 
   const onOpenDetail = useCallback((item: TransactionHistoryDisplayItem) => {
     return () => {
@@ -290,15 +290,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   useEffect(() => {
-    if (extrinsicHash && chain && openDetailLink) {
-      const existed = historyList.find((item) => item.chain === chain && item.extrinsicHash === extrinsicHash);
+    if (extrinsicHashOrId && chain && openDetailLink) {
+      const existed = historyList.find((item) => item.chain === chain && (item.transactionId === extrinsicHashOrId || item.extrinsicHash === extrinsicHashOrId));
 
       if (existed) {
         setSelectedItem(existed);
         activeModal(modalId);
       }
     }
-  }, [activeModal, chain, extrinsicHash, openDetailLink, historyList]);
+  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyList]);
 
   useEffect(() => {
     if (isActive) {

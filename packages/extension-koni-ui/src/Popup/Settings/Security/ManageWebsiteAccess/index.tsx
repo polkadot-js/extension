@@ -238,7 +238,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         actions={actions}
         id={ACTION_MODAL_ID}
         onCancel={onCloseActionModal}
-        title={t('Website access config')}
+        title={t('Website access')}
       />
 
       <FilterModal

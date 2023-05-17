@@ -215,7 +215,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   weight='fill'
                 />
               )}
-              name={t('Allow QR camera access')}
+              name={t('Camera access for QR')}
               rightItem={(
                 <Switch
                   checked={camera}
@@ -227,7 +227,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           <div className='setting-config-container'>
             <div className='label'>
-              {t('Auto lock')}
+              {t('Wallet auto-lock')}
             </div>
             <SettingItem
               className={CN('security-item', `security-type-${SecurityType.AUTO_LOCK}`)}
@@ -240,7 +240,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   weight='fill'
                 />
               )}
-              name={t('Extension auto lock')}
+              name={t('Wallet auto-lock')}
               onPressItem={onOpenModal}
               rightItem={(
                 <Icon
@@ -257,7 +257,7 @@ const Component: React.FC<Props> = (props: Props) => {
           className={className}
           id={modalId}
           onCancel={onCloseModal}
-          title={t('Auto lock')}
+          title={t('Wallet auto-lock')}
         >
           <div className='modal-body-container'>
             {

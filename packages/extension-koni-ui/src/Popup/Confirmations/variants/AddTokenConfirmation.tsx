@@ -68,7 +68,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <ConfirmationGeneralInfo request={request} />
         <Field
           content={chainInfoMap[originChain].name}
-          label={t<string>('Chain')}
+          label={t<string>('Network')}
           prefix={(
             <Image
               height={token.fontSizeXL}

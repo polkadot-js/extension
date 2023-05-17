@@ -18,14 +18,14 @@ import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, Ev
 type Props = ThemeProps
 
 const titleMap: Record<ConfirmationType, string> = {
-  addNetworkRequest: 'Add Network Request',
-  addTokenRequest: 'Add Token Request',
-  authorizeRequest: 'Connect to SubWallet',
-  evmSendTransactionRequest: 'Transaction Request',
+  addNetworkRequest: 'Add network request',
+  addTokenRequest: 'Add token request',
+  authorizeRequest: 'Connect with SubWallet',
+  evmSendTransactionRequest: 'Transaction request',
   evmSignatureRequest: 'Signature request',
-  metadataRequest: 'Update Metadata',
+  metadataRequest: 'Update metadata',
   signingRequest: 'Signature request',
-  switchNetworkRequest: 'Add Network Request'
+  switchNetworkRequest: 'Add network request'
 } as Record<ConfirmationType, string>;
 
 const Component = function ({ className }: Props) {

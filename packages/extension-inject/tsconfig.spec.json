@@ -3,14 +3,14 @@
   "compilerOptions": {
     "baseUrl": "..",
     "outDir": "./build",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "emitDeclarationOnly": false,
+    "noEmit": true
   },
-  "exclude": [
+  "include": [
     "**/*.spec.ts"
   ],
   "references": [
-    { "path": "../extension-chains/tsconfig.build.json" },
-    { "path": "../extension-dapp/tsconfig.build.json" },
     { "path": "../extension-inject/tsconfig.build.json" }
   ]
 }

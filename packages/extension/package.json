@@ -17,13 +17,14 @@
   "type": "module",
   "version": "0.46.3",
   "dependencies": {
+    "@polkadot/api": "^10.7.1",
     "@polkadot/extension-base": "0.46.3",
     "@polkadot/extension-inject": "0.46.3",
     "@polkadot/extension-ui": "0.46.3",
-    "tslib": "^2.5.0"
+    "tslib": "^2.5.1"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.73.17",
+    "@polkadot/dev": "^0.74.1",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^11.0.0",
@@ -37,5 +38,9 @@
     "ts-loader": "^9.4.2",
     "url-loader": "^4.1.1",
     "webpack-extension-manifest-plugin": "^0.8.0"
+  },
+  "peerDependencies": {
+    "typescript": "*",
+    "webpack": "*"
   }
 }

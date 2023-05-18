@@ -22,6 +22,7 @@
     "@fortawesome/free-regular-svg-icons": "^6.4.0",
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@polkadot/api": "^10.7.1",
     "@polkadot/extension-base": "0.46.3",
     "@polkadot/extension-chains": "0.46.3",
     "@polkadot/extension-dapp": "0.46.3",
@@ -47,7 +48,7 @@
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
     "styled-components": "^5.3.10",
-    "tslib": "^2.5.0"
+    "tslib": "^2.5.1"
   },
   "devDependencies": {
     "@polkadot/extension-mocks": "0.46.3",

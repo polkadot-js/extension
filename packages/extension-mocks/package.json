@@ -19,6 +19,6 @@
   "main": "index.js",
   "dependencies": {
     "sinon-chrome": "^3.0.1",
-    "tslib": "^2.5.0"
+    "tslib": "^2.5.1"
   }
 }

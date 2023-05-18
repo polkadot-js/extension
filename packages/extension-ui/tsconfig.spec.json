@@ -3,15 +3,14 @@
   "compilerOptions": {
     "baseUrl": "..",
     "outDir": "./build",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "emitDeclarationOnly": false,
+    "noEmit": true
   },
-  "exclude": [
-    "**/build/*",
-    "webpack.*.cjs"
+  "include": [
+    "**/*.spec.ts"
   ],
   "references": [
-    { "path": "../extension-base/tsconfig.build.json" },
-    { "path": "../extension-inject/tsconfig.build.json" },
     { "path": "../extension-ui/tsconfig.build.json" }
   ]
 }

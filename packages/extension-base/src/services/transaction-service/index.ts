@@ -782,15 +782,10 @@ export default class TransactionService {
       warnings: []
     };
 
-    let startBlock = 0;
-
     (transaction as SubmittableExtrinsic).signAsync(address, {
       signer: {
         signPayload: async (payload: SignerPayloadJSON) => {
           const signing = await this.requestService.signInternalTransaction(id, address, url || EXTENSION_REQUEST_URL, payload);
-          const api = this.chainService.getSubstrateApi(chain);
-
-          startBlock = (await api.api.query.system.number()).toPrimitive() as number;
 
           return {
             id: (new Date()).getTime(),
@@ -798,13 +793,15 @@ export default class TransactionService {
           } as SignerResult;
         }
       } as Signer
-    }).then((rs) => {
+    }).then(async (rs) => {
       // Emit signed event
       emitter.emit('signed', eventData);
 
       // Send transaction
+      const api = this.chainService.getSubstrateApi(chain);
+
       eventData.nonce = rs.nonce.toNumber();
-      eventData.startBlock = startBlock;
+      eventData.startBlock = (await api.api.query.system.number()).toPrimitive() as number;
       this.handleTransactionTimeout(emitter, eventData);
       emitter.emit('send', eventData); // This event is needed after sending transaction with queue
 

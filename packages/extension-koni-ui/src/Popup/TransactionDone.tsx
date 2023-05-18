@@ -63,7 +63,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {t('All done!')}
           </div>
           <div className='description'>
-            {t('Your request has been sent. You can track its progress on the Transaction History page.')}
+            {t('Your request has been sent. You can track its progress in History tab.')}
           </div>
         </div>
       </Layout.WithSubHeaderOnly>

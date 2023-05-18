@@ -139,7 +139,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderCenter={false}
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
-        title={t<string>('Collectibles')}
+        title={t<string>('Your collections')}
       >
         <SwList.Section
           className={CN('nft_collection_list__container')}

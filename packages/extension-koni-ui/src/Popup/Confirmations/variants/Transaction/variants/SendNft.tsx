@@ -27,13 +27,13 @@ const Component: React.FC<Props> = (props: Props) => {
       <MetaInfo hasBackgroundWrapper>
         <MetaInfo.Account
           address={data.senderAddress}
-          label={t('Sender')}
+          label={t('Send from')}
           networkPrefix={networkPrefix}
         />
 
         <MetaInfo.Account
           address={data.recipientAddress}
-          label={t('Recipient')}
+          label={t('Send to')}
         />
 
         <MetaInfo.Chain

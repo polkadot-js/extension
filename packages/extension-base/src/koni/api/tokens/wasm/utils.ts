@@ -20,8 +20,6 @@ const toContractAbiMessage = (contractPromise: ContractPromise, message: string)
 
     const error = `"${message}" not found in metadata.spec.messages: [${messages}]`;
 
-    console.error(error);
-
     return { ok: false, error };
   }
 

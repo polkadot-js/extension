@@ -25,8 +25,6 @@ export function isSubscriptionRunning (id: string): boolean {
 // clear a previous subscriber
 export function unsubscribe (id: string): void {
   if (subscriptions[id]) {
-    console.log(`Unsubscribing from ${id}`);
-
     delete subscriptions[id];
   } else {
     console.error(`Unable to unsubscribe from ${id}`);

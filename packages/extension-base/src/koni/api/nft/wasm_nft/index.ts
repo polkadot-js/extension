@@ -249,8 +249,6 @@ export class WasmNftApi extends BaseNftApi {
       }
 
       if (!itemDetail) {
-        console.warn(`Cannot fetch NFT metadata [${tokenId}] from PSP-34 contract.`);
-
         return nftItem;
       }
 
@@ -349,7 +347,7 @@ export class WasmNftApi extends BaseNftApi {
 
         nftOwnerMap[address] = nftIds;
       } catch (e) {
-        console.error(`error parsing item for ${this.chain} nft`, e);
+        console.error(`${this.chain}`, e);
       }
     }));
 

@@ -49,8 +49,6 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
 
   public refreshPriceData (priceIds?: Set<string>) {
     clearTimeout(this.refreshTimeout);
-    console.log('Refresh Price Data');
-
     this.priceIds = priceIds || this.getPriceIds();
 
     // Update for tokens price
@@ -98,8 +96,6 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
 
   startPromiseHandler = createPromiseHandler<void>();
   async start (): Promise<void> {
-    console.debug('Start price service');
-
     try {
       this.startPromiseHandler = createPromiseHandler<void>();
       this.status = ServiceStatus.STARTING;
@@ -119,8 +115,6 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
 
   stopPromiseHandler = createPromiseHandler<void>();
   async stop (): Promise<void> {
-    console.debug('Stop price service');
-
     try {
       this.status = ServiceStatus.STOPPING;
       this.stopPromiseHandler = createPromiseHandler<void>();

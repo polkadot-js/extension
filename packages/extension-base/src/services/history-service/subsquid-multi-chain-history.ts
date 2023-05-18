@@ -377,7 +377,7 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
     const chainInfo = chainMap[chainId];
 
     if (chainInfo === undefined) {
-      console.warn(`Not found chain info for chain id: ${chainId}`);
+      console.warn(`Not found chain info for chain id: ${chainId}`); // TODO: resolve conflicting chainId
 
       return;
     }

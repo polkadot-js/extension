@@ -848,26 +848,19 @@ export default class KoniExtension {
     });
   }
 
-  private toggleBalancesVisibility (id: string, port: chrome.runtime.Port) {
-    const cb = createSubscription<'pri(settings.changeBalancesVisibility)'>(id, port);
+  private async toggleBalancesVisibility (): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.#koniState.getSettings((value) => {
+        const updateValue = {
+          ...value,
+          isShowBalance: !value.isShowBalance
+        };
 
-    this.#koniState.getSettings((value) => {
-      const updateValue = {
-        ...value,
-        isShowBalance: !value.isShowBalance
-      };
-
-      this.#koniState.setSettings(updateValue, () => {
-        // eslint-disable-next-line node/no-callback-literal
-        cb(updateValue);
+        this.#koniState.setSettings(updateValue, () => {
+          resolve(!value.isShowBalance);
+        });
       });
     });
-
-    port.onDisconnect.addListener((): void => {
-      this.cancelSubscription(id);
-    });
-
-    return true;
   }
 
   private saveAccountAllLogo (data: string, id: string, port: chrome.runtime.Port) {
@@ -3292,7 +3285,7 @@ export default class KoniExtension {
       case 'pri(authorize.toggle)':
         return this.toggleAuthorization2(request as string);
       case 'pri(settings.changeBalancesVisibility)':
-        return this.toggleBalancesVisibility(id, port);
+        return await this.toggleBalancesVisibility();
 
       // Settings
       case 'pri(settings.subscribe)':

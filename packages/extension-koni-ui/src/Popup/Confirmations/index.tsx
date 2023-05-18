@@ -137,9 +137,8 @@ const Component = function ({ className }: Props) {
         case ExtrinsicType.TRANSFER_BALANCE:
         case ExtrinsicType.TRANSFER_TOKEN:
         case ExtrinsicType.TRANSFER_XCM:
-          return t('Transfer confirm');
         case ExtrinsicType.SEND_NFT:
-          return t('NFT transfer confirm');
+          return t('Transfer confirmation');
         case ExtrinsicType.STAKING_JOIN_POOL:
         case ExtrinsicType.STAKING_BOND:
           return t('Add to bond confirm');

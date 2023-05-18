@@ -273,7 +273,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 className={className}
                 disabled={!selectedChain}
                 items={nftTypeOptions}
-                label={t<string>('NFT type')}
+                label={t<string>('Type')}
                 placeholder={t('Select NFT type')}
                 title={t('Select NFT type')}
               />
@@ -286,7 +286,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             >
               <AddressInput
                 disabled={!selectedNftType}
-                label={t<string>('NFT contract address')}
+                label={t<string>('Contract address')}
+                placeholder={t('Enter or paste an address')}
                 showScanner={true}
               />
             </Form.Item>

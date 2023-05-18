@@ -367,6 +367,7 @@ export const ProjectLogos: Record<string, string> = {
   'polkadot-insider': './images/projects/polkadot-insider.png',
   'polkadot-name-system': './images/projects/polkadot-name-system.png',
   'polkadot-space': './images/projects/polkadot-space.png',
+  'polkadot-vault': './images/projects/polkadot-vault.png',
   'polkadot-{.js}': './images/projects/polkadot-{.js}.png',
   'polkadot-{.js}-plus': './images/projects/polkadot-{.js}-plus.png',
   polkadotters: './images/projects/polkadotters.png',
@@ -806,7 +807,8 @@ export const ChainLogoMap: Record<string, string> = {
   optimism: ProjectLogos.optimism,
   polygon: ProjectLogos.polygon,
   tomochain: ProjectLogos.tomochain,
-  zksync: ProjectLogos.zksync
+  zksync: ProjectLogos.zksync,
+  polkadot_vault: ProjectLogos['polkadot-vault']
 };
 
 export const TokenLogoMap: Record<string, string> = {

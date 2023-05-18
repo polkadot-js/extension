@@ -77,7 +77,7 @@ const Component: React.FC<Props> = (props: Props) => {
       rowGap={'8px'}
       searchFunction={chainSearchFunc}
       searchMinCharactersCount={2}
-      searchPlaceholder={t<string>('Chain name')}
+      searchPlaceholder={t<string>('Network name')}
     />
   );
 };

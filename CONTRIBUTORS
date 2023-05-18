@@ -1,4 +1,4 @@
-     615	Jaco                          	0.46.3 (#1257)
+     616	Jaco                          	Adjust tsconfig usage (w/ latest dev) (#1258)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

@@ -173,7 +173,7 @@ function Component ({ className, request }: Props) {
         >
           {
             visibleAccounts.length === 0
-              ? t('No available account')
+              ? t('No compatible accounts')
               : t('Choose the account(s) you’d like to connect')
           }
         </div>
@@ -212,7 +212,7 @@ function Component ({ className, request }: Props) {
         <div className='description'>
           {
             visibleAccounts.length === 0
-              ? t("You don't have any accounts to connect. Please create a new account")
+              ? t("You don't have a compatible account for this site. Please create a new account of a compatible type (EVM or Substrate)")
               : t('Make sure you trust this site before connecting')
           }
         </div>

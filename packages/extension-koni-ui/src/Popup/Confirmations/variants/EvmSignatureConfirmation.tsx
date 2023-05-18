@@ -49,7 +49,7 @@ function Component ({ className, request, type }: Props) {
             size='xs'
             type='ghost'
           >
-            {t('View detail')}
+            {t('View details')}
           </Button>
         </div>
       </div>

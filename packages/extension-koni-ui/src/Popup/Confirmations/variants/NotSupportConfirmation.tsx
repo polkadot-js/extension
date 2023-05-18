@@ -70,7 +70,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <div className={CN('confirmation-content', className)}>
         <ConfirmationGeneralInfo request={request} />
         <div className='title'>
-          { isMessage ? t('Signature request') : t('Approve request')}
+          { isMessage ? t('Signature required') : t('Transaction request')}
         </div>
         <div className='description'>
           <span>{t('This feature is not available for')}</span>

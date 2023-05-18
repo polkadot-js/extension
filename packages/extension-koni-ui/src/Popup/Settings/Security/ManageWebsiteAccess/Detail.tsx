@@ -82,7 +82,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
         key: 'forget-site',
         icon: X,
         iconBackgroundColor: token.colorWarning,
-        title: t('Forget site'),
+        title: t('Forget this site'),
         onClick: () => {
           forgetSite(origin, updateAuthUrls).catch(console.error);
           onCloseActionModal();
@@ -96,7 +96,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
           key: 'disconnect-all',
           icon: Plugs,
           iconBackgroundColor: token['gray-3'],
-          title: t('Disconnect all'),
+          title: t('Disconnect all accounts'),
           onClick: () => {
             changeAuthorization(false, origin, updateAuthUrls).catch(console.error);
             onCloseActionModal();
@@ -106,7 +106,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
           key: 'connect-all',
           icon: PlugsConnected,
           iconBackgroundColor: token['green-6'],
-          title: t('Connect all'),
+          title: t('Connect all accounts'),
           onClick: () => {
             changeAuthorization(true, origin, updateAuthUrls).catch(console.error);
             onCloseActionModal();
@@ -226,7 +226,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
           className={`${className} action-modal`}
           id={ActionModalId}
           onCancel={onCloseActionModal}
-          title={t('Website access config')}
+          title={t('dApp configuration')}
         />
       </Layout.WithSubHeaderOnly>
     </PageWrapper>

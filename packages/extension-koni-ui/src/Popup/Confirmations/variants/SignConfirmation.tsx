@@ -38,7 +38,7 @@ function Component ({ className, request }: Props) {
           {t('Signature request')}
         </div>
         <div className='description'>
-          {t('You are approving a request with account')}
+          {t('You are approving a request with the following account')}
         </div>
         <AccountItemWithName
           accountName={account.name}
@@ -54,7 +54,7 @@ function Component ({ className, request }: Props) {
             size='xs'
             type='ghost'
           >
-            {t('View detail')}
+            {t('View details')}
           </Button>
         </div>
       </div>

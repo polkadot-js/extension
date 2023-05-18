@@ -783,6 +783,17 @@ export default class KoniState {
     });
   }
 
+  public setEnableChainPatrol (value: boolean): void {
+    this.settingService.getSettings((settings) => {
+      const newSettings: UiSettings = {
+        ...settings,
+        enableChainPatrol: value
+      };
+
+      this.settingService.setSettings(newSettings);
+    });
+  }
+
   public subscribeSettingsSubject (): Subject<RequestSettingsType> {
     return this.settingService.getSubject();
   }

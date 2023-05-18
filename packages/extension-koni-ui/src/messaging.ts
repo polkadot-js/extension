@@ -177,6 +177,10 @@ export async function saveAutoLockTime (value: number): Promise<boolean> {
   return sendMessage('pri(settings.saveAutoLockTime)', { autoLockTime: value });
 }
 
+export async function saveEnableChainPatrol (value: boolean): Promise<boolean> {
+  return sendMessage('pri(settings.saveEnableChainPatrol)', { enable: value });
+}
+
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {
   return sendMessage('pri(accounts.tie)', { address, genesisHash });
 }

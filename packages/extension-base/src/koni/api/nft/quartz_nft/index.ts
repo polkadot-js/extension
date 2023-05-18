@@ -218,7 +218,7 @@ export default class QuartzNftApi extends BaseNftApi {
         }
       }));
     } catch (e) {
-      console.error('Failed to fetch quartz nft', e);
+      console.error(`${this.chain}`, e);
     }
   }
 

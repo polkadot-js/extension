@@ -487,7 +487,7 @@ export default class TransactionService {
   }
 
   private onSigned ({ id }: TransactionEventResponse) {
-    console.log(`Transaction "${id}" is signed`);
+    console.debug(`Transaction "${id}" is signed`);
   }
 
   private onSend ({ id }: TransactionEventResponse) {
@@ -497,7 +497,7 @@ export default class TransactionService {
     // Create Input History Transaction History
     this.historyService.insertHistories(this.transactionToHistories(id)).catch(console.error);
 
-    console.log(`Transaction "${id}" is sent`);
+    console.debug(`Transaction "${id}" is sent`);
   }
 
   private onHasTransactionHash ({ blockHash, extrinsicHash, id }: TransactionEventResponse) {
@@ -509,7 +509,7 @@ export default class TransactionService {
     // In this case transaction id is the same as extrinsic hash and will change after below update
     this.historyService.updateHistoryByExtrinsicHash(id, updateData).catch(console.error);
 
-    console.log(`Transaction "${id}" is submitted with hash ${extrinsicHash || ''}`);
+    console.debug(`Transaction "${id}" is submitted with hash ${extrinsicHash || ''}`);
   }
 
   private handlePostProcessing (id: string) { // must be done after success/failure to make sure the transaction is finalized
@@ -547,7 +547,6 @@ export default class TransactionService {
     const transaction = this.getTransaction(id);
 
     this.updateTransaction(id, { status: ExtrinsicStatus.SUCCESS });
-    console.log('Transaction completed', id, transaction.extrinsicHash);
 
     // Write success transaction history
     this.historyService.updateHistories(transaction.chain, transaction.extrinsicHash, {
@@ -573,7 +572,6 @@ export default class TransactionService {
 
     if (transaction) {
       this.updateTransaction(id, { status: nextStatus, errors });
-      console.log('Transaction failed', id, transaction.extrinsicHash);
 
       // Write failed transaction history
       this.historyService.updateHistories(transaction.chain, transaction.extrinsicHash, {
@@ -592,8 +590,6 @@ export default class TransactionService {
     }
 
     this.eventService.emit('transaction.failed', transaction);
-    // Log transaction errors
-    console.error(errors);
   }
 
   public generateHashPayload (chain: string, transaction: TransactionConfig): HexString {

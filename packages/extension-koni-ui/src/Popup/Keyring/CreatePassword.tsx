@@ -17,7 +17,7 @@ import { Form, Icon, Input, ModalContext, PageIcon, SwModal } from '@subwallet/r
 import CN from 'classnames';
 import { CaretLeft, CheckCircle, ShieldPlus } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -41,9 +41,6 @@ const FooterIcon = (
   />
 );
 
-const passwordRules = renderBasePasswordRules('Password');
-const confirmPasswordRules = renderBaseConfirmPasswordRules(FormFieldName.PASSWORD);
-
 const modalId = 'create-password-instruction-modal';
 const formName = 'create-password-form';
 
@@ -56,6 +53,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
   const [noAccount] = useState(isNoAccount(accounts));
+
+  const passwordRules = useMemo(() => renderBasePasswordRules(t('Password'), t), [t]);
+  const confirmPasswordRules = useMemo(() => renderBaseConfirmPasswordRules(FormFieldName.PASSWORD, t), [t]);
 
   const [form] = Form.useForm<CreatePasswordFormState>();
   const [isDisabled, setIsDisable] = useState(true);
@@ -101,7 +101,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, []);
 
   const onChangePassword = useCallback(() => {
-    form.setFields([{ name: FormFieldName.CONFIRM_PASSWORD, value: '', errors: [] }]);
+    form.resetFields([FormFieldName.CONFIRM_PASSWORD]);
   }, [form]);
 
   const openModal = useCallback(() => {
@@ -184,7 +184,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             </Form.Item>
             <Form.Item>
               <AlertBox
-                description={t('Recommended security practice')}
+                description={t('8 characters at least. Uppercase, numbers, and special characters are recommended.')}
                 title={t('Always choose a strong password!')}
                 type='warning'
               />
@@ -251,6 +251,10 @@ const CreatePassword = styled(Component)<Props>(({ theme: { token } }: Props) =>
         lineHeight: token.lineHeightHeading3,
         color: token.colorTextBase
       }
+    },
+
+    '.ant-form-item:last-child': {
+      marginBottom: 0
     },
 
     '.instruction-container': {

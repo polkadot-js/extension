@@ -133,7 +133,6 @@ export class KoniCron {
         return;
       }
 
-      this.logger.log('ServiceInfo updated, Cron restarting...', eventTypes);
       const address = serviceInfo.currentAccountInfo?.address;
 
       if (!address) {
@@ -181,8 +180,6 @@ export class KoniCron {
       return;
     }
 
-    this.logger.log('Starting cron jobs');
-
     if (Object.keys(this.state.getSubstrateApiMap()).length !== 0 || Object.keys(this.state.getEvmApiMap()).length !== 0) {
       this.resetNft(currentAccountInfo.address);
       this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
@@ -215,7 +212,6 @@ export class KoniCron {
       this.serviceSubscription = undefined;
     }
 
-    this.logger.log('Stopping cron jobs');
     this.removeAllCrons();
 
     this.status = 'stopped';
@@ -223,40 +219,6 @@ export class KoniCron {
 
   updateApiMapStatus = () => {
     this.state.chainService.updateApiMapStatus().catch(console.error);
-    // const apiMap = this.state.getApiMap();
-    // const networkMap = this.state.getChainStateMap();
-    //
-    // for (const [key, substrateApi] of Object.entries(apiMap.substrate)) {
-    //   let status: _ChainConnectionStatus = _ChainConnectionStatus.CONNECTING;
-    //
-    //   if (substrateApi.isApiConnected) {
-    //     status = _ChainConnectionStatus.CONNECTED;
-    //   }
-    //
-    //   if (!networkMap[key].connectionStatus) {
-    //     this.state.updateChainConnectionStatus(key, status);
-    //   } else if (networkMap[key].connectionStatus && networkMap[key].connectionStatus !== status) {
-    //     this.state.updateChainConnectionStatus(key, status);
-    //   }
-    // }
-    //
-    // for (const [key, evmApi] of Object.entries(apiMap.evm)) {
-    //   evmApi.api.eth.net.isListening()
-    //     .then(() => {
-    //       if (!networkMap[key].connectionStatus) {
-    //         this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTED);
-    //       } else if (networkMap[key].connectionStatus && networkMap[key].connectionStatus !== _ChainConnectionStatus.CONNECTED) {
-    //         this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTED);
-    //       }
-    //     })
-    //     .catch(() => {
-    //       if (!networkMap[key].connectionStatus) {
-    //         this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTING);
-    //       } else if (networkMap[key].connectionStatus && networkMap[key].connectionStatus !== _ChainConnectionStatus.CONNECTING) {
-    //         this.state.updateChainConnectionStatus(key, _ChainConnectionStatus.CONNECTING);
-    //       }
-    //     });
-    // }
   };
 
   recoverApiMap = () => {
@@ -282,7 +244,6 @@ export class KoniCron {
 
   refreshNft = (address: string, apiMap: ApiMap, smartContractNfts: _ChainAsset[], chainInfoMap: Record<string, _ChainInfo>) => {
     return () => {
-      console.debug('Refresh NFT state');
       this.subscriptions.subscribeNft(address, apiMap.substrate, apiMap.evm, smartContractNfts, chainInfoMap);
     };
   };
@@ -297,7 +258,6 @@ export class KoniCron {
 
   refreshStakingReward = (address: string) => {
     return () => {
-      console.debug('Refresh staking reward state');
       this.subscriptions.subscribeStakingReward(address)
         .catch(this.logger.error);
     };
@@ -305,7 +265,6 @@ export class KoniCron {
 
   refreshStakingRewardFastInterval = (address: string) => {
     return () => {
-      console.debug('Refresh staking reward data with fast interval');
       this.subscriptions.subscribeStakingRewardFastInterval(address)
         .catch(this.logger.error);
     };
@@ -321,8 +280,6 @@ export class KoniCron {
 
   updateChainStakingMetadata = (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) => {
     return () => {
-      console.debug('Fetching chain staking metadata');
-
       this.subscriptions.fetchChainStakingMetadata(chainInfoMap, chainStateMap, substrateApiMap)
         .catch(this.logger.error);
     };
@@ -330,8 +287,6 @@ export class KoniCron {
 
   updateNominatorMetadata = (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) => {
     return () => {
-      console.debug('Fetching nominator data for', address);
-
       this.subscriptions.fetchNominatorMetadata(address, chainInfoMap, chainStateMap, substrateApiMap)
         .catch(this.logger.error);
     };
@@ -340,8 +295,6 @@ export class KoniCron {
   public async reloadNft () {
     const address = this.state.keyringService.currentAccount.address;
     const serviceInfo = this.state.getServiceInfo();
-
-    console.debug('Hard refresh NFT for', address);
 
     this.resetNft(address);
     this.removeCron('refreshNft');
@@ -354,8 +307,6 @@ export class KoniCron {
 
   public async reloadStaking () {
     const address = this.state.keyringService.currentAccount.address;
-
-    console.debug('Hard refresh staking meta for', address);
 
     this.resetStakingReward();
     this.removeCron('refreshStakingReward');

@@ -1941,7 +1941,7 @@ export interface KoniRequestSignatures {
   'pri(accounts.deleteContact)': [RequestDeleteContactAccount, boolean];
 
   // Settings
-  'pri(settings.changeBalancesVisibility)': [null, boolean, UiSettings];
+  'pri(settings.changeBalancesVisibility)': [null, boolean];
   'pri(settings.subscribe)': [null, UiSettings, UiSettings];
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];

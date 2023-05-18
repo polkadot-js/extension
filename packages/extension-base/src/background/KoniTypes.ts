@@ -546,7 +546,9 @@ export interface TransactionHistoryItem<ET extends ExtrinsicType = ExtrinsicType
   tip?: AmountData,
   fee?: AmountData,
   explorerUrl?: string,
-  additionalInfo?: TransactionAdditionalInfo<ET>
+  additionalInfo?: TransactionAdditionalInfo<ET>,
+  startBlock?: number,
+  nonce?: number,
 }
 
 export interface SWError extends Error {

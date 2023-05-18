@@ -50,7 +50,9 @@ export interface TransactionEventResponse extends ValidateTransactionResponse {
   extrinsicHash?: string,
   blockHash?: string
   blockNumber?: number,
-  eventLogs?: EventRecord[]
+  eventLogs?: EventRecord[],
+  nonce?: number,
+  startBlock?: number,
 }
 export interface TransactionEventMap {
   send: (response: TransactionEventResponse) => void;

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -26,7 +27,6 @@ import styled from 'styled-components';
 
 import GeneralEmptyList from '../GeneralEmptyList';
 import SelectValidatorInput from '../SelectValidatorInput';
-import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { StakingNominationItem } from '@subwallet/extension-koni-ui/components';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
@@ -17,7 +18,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import GeneralEmptyList from '../GeneralEmptyList';
-import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   nominators: NominationInfo[];
@@ -37,7 +37,7 @@ const renderItem = (item: NominationInfo, isSelected: boolean) => (
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className, chain = '', disabled, id = 'nomination-selector', label, nominators, placeholder, statusHelp, value } = props;
+  const { chain = '', className, disabled, id = 'nomination-selector', label, nominators, placeholder, statusHelp, value } = props;
   const { activeModal } = useContext(ModalContext);
 
   const filteredItems = useMemo(() => {

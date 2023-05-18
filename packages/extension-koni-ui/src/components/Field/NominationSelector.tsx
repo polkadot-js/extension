@@ -17,9 +17,11 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import GeneralEmptyList from '../GeneralEmptyList';
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   nominators: NominationInfo[];
+  chain: string
 }
 
 const SORTING_MODAL_ID = 'nominated-sorting-modal';
@@ -35,7 +37,7 @@ const renderItem = (item: NominationInfo, isSelected: boolean) => (
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className = '', disabled, id = 'nomination-selector', label, nominators, placeholder, statusHelp, value } = props;
+  const { className, chain = '', disabled, id = 'nomination-selector', label, nominators, placeholder, statusHelp, value } = props;
   const { activeModal } = useContext(ModalContext);
 
   const filteredItems = useMemo(() => {
@@ -110,7 +112,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         }}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
-        searchPlaceholder={t<string>('Search validator')}
+        searchPlaceholder={t<string>(`Search ${getValidatorLabel(chain)}`)}
         selected={value || ''}
         statusHelp={statusHelp}
         title={label || placeholder || t('Select validator')}

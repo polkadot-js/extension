@@ -100,7 +100,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         renderWhenEmpty={renderEmpty}
         selected={value || ''}
         statusHelp={statusHelp}
-        title={t('Unstake request')}
+        title={t('Select request')}
       />
     </>
   );

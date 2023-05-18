@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 
 type Props = ThemeProps & {
   label: string;
@@ -20,10 +21,11 @@ type Props = ThemeProps & {
   onClick: () => void;
   disabled?: boolean;
   loading?: boolean;
+  chain: string;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, disabled, label, loading, onClick, placeholder, value } = props;
+  const { className, chain, disabled, label, loading, onClick, placeholder, value } = props;
   const { t } = useTranslation();
 
   const addressList = useMemo(() => {
@@ -46,13 +48,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const renderContent = () => {
     if (!value) {
-      return placeholder || t('Selected validator');
+      return placeholder || t(`Select ${getValidatorLabel(chain).toLowerCase()}`);
     }
 
     const valueList = value.split(',');
 
     if (valueList.length > 1) {
-      return t(`Selected ${valueList.length} validator`);
+      return t(`Selected ${valueList.length} ${getValidatorLabel(chain).toLowerCase()}`);
     }
 
     return valueList[0].split('___')[1] || toShort(valueList[0].split('___')[0]);

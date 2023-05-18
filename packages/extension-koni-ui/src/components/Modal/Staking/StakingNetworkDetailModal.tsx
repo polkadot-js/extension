@@ -63,7 +63,7 @@ function Component ({ activeNominators,
               />
 
               {
-                activeNominators &&
+                !!activeNominators &&
                 (
                   <MetaInfo.Default label={t('Total nominators')}>
                     <div className={'__active-nominators-value'}>

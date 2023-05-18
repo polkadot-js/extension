@@ -137,19 +137,19 @@ const Component = function ({ className }: Props) {
         case ExtrinsicType.TRANSFER_BALANCE:
         case ExtrinsicType.TRANSFER_TOKEN:
         case ExtrinsicType.TRANSFER_XCM:
-          return t('Transfer confirmation');
+          return t('Transfer confirm');
         case ExtrinsicType.SEND_NFT:
-          return t('NFT Transfer confirmation');
+          return t('NFT transfer confirm');
         case ExtrinsicType.STAKING_JOIN_POOL:
         case ExtrinsicType.STAKING_BOND:
           return t('Add to bond confirm');
         case ExtrinsicType.STAKING_LEAVE_POOL:
         case ExtrinsicType.STAKING_UNBOND:
-          return t('Unbond confirmation');
+          return t('Unbond confirm');
         case ExtrinsicType.STAKING_WITHDRAW:
-          return t('Withdraw confirm');
+          return t('Withdrawal confirm');
         case ExtrinsicType.STAKING_CLAIM_REWARD:
-          return t('Claim reward confirm');
+          return t('Claim rewards confirm');
         case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
           return t('Cancel unstake confirm');
         default:

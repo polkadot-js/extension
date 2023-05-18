@@ -26,6 +26,7 @@ import styled from 'styled-components';
 
 import GeneralEmptyList from '../GeneralEmptyList';
 import SelectValidatorInput from '../SelectValidatorInput';
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   chain: string;
@@ -244,8 +245,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   return (
     <>
       <SelectValidatorInput
+        chain={chain}
         disabled={!chain || !from}
-        label={t('Select validator')}
+        label={t(`Select ${getValidatorLabel(chain).toLowerCase()}`)}
         loading={loading}
         onClick={onActiveValidatorSelector}
         value={value || ''}
@@ -270,7 +272,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             )}
             onClick={onApplyChangeValidators}
           >
-            {t(`Apply ${changeValidators.length} validators`)}
+            {t(`Apply ${changeValidators.length} ${getValidatorLabel(chain)}`)}
           </Button>
         )}
         id={id}
@@ -285,7 +287,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             activeModal(SORTING_MODAL_ID);
           }
         }}
-        title={t('Select validator')}
+        title={t(`Select ${getValidatorLabel(chain)}`)}
       >
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
@@ -298,7 +300,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           renderWhenEmpty={renderEmpty}
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search validator')}
+          searchPlaceholder={t<string>(`Search ${getValidatorLabel(chain)}`)}
           // showActionBtn
         />
       </SwModal>

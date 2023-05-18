@@ -181,7 +181,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   unstakingInfo && (
                     <MetaInfo.Number
                       decimals={decimals}
-                      label={t('Withdraw amount')}
+                      label={t('Amount')}
                       suffix={symbol}
                       value={unstakingInfo.claimable}
                     />

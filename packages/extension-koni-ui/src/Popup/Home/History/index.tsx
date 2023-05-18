@@ -320,8 +320,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const emptyList = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('Your transactions history will appear here!')}
-        emptyTitle={t('No transactions yet')}
+        emptyMessage={t('Your transaction history will appear here!')}
+        emptyTitle={t('No transaction found')}
         phosphorIcon={Clock}
       />
     );

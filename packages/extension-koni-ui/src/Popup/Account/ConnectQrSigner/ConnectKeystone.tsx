@@ -15,7 +15,7 @@ const Component: React.FC<ThemeProps> = () => {
 
   return (
     <ConnectQrSigner
-      description={t('Keystone')}
+      deviceName={t('Keystone')}
       instructionUrl={''}
       logoUrl={LogosMap.keystone}
       subTitle={t('Open "Software Wallet" section on your Keystone and choose SubWallet')}

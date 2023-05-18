@@ -7,6 +7,7 @@ import { ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
 import { FadersHorizontal, MagnifyingGlass } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   children?: React.ReactNode;
@@ -19,6 +20,7 @@ type Props = {
 
 const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, showSearchIcon, showTabBar }: Props) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { activeModal } = useContext(ModalContext);
 
   const onOpenCustomizeModal = useCallback(() => {
@@ -36,7 +38,9 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
             size='md'
           />
         ),
-        onClick: onClickFilterIcon || onOpenCustomizeModal
+        onClick: onClickFilterIcon || onOpenCustomizeModal,
+        tooltip: t('Customize your asset display'),
+        tooltipPlacement: 'bottomRight'
       });
     }
 
@@ -48,7 +52,9 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
             size='md'
           />
         ),
-        onClick: onClickSearchIcon
+        onClick: onClickSearchIcon,
+        tooltip: t('Search a token'),
+        tooltipPlacement: 'bottomRight'
       });
     }
 

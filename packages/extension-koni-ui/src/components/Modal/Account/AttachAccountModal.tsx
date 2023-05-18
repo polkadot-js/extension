@@ -89,9 +89,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     {
       backgroundColor: token['magenta-7'],
       icon: QrCode,
-      key: 'connect-parity-signer',
-      label: t('Connect a Parity Signer account'),
-      onClick: onClickItem('accounts/connect-parity-signer')
+      key: 'connect-polkadot-vault',
+      label: t('Connect a Polkadot Vault account'),
+      onClick: onClickItem('accounts/connect-polkadot-vault')
     },
     {
       backgroundColor: token['blue-7'],

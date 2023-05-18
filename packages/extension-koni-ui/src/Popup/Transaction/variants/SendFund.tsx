@@ -552,7 +552,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     <>
       <TransactionContent className={CN(`${className} -transaction-content`)}>
         <div className={'__brief common-text text-light-4 text-center'}>
-          {t('You are doing a token transfer with the following information')}
+          {t('Transfer token with the following details')}
         </div>
 
         <Form
@@ -570,7 +570,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               addressPrefix={fromChainNetworkPrefix}
               disabled={!isAllAccount}
               filter={onFilterAccountFunc}
-              label={t('Send from account')}
+              label={t('Send from')}
             />
           </Form.Item>
 
@@ -581,7 +581,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
                 items={tokenItems}
                 placeholder={t('Select token')}
                 showChainInSelected
-                tooltip={t('Token')}
+                tooltip={t('Select token')}
               />
             </Form.Item>
 
@@ -627,7 +627,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           >
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
-              label={t('Send to account')}
+              label={t('Send to')}
+              placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}
               showScanner={true}
@@ -639,7 +640,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               disabled={!destChainItems.length}
               items={destChainItems}
               title={t('Select destination chain')}
-              tooltip={t('Destination chain')}
+              tooltip={t('Select destination chain')}
             />
           </Form.Item>
         </Form>
@@ -668,7 +669,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           onClick={preCheckReadOnly(form.submit)}
           schema={isTransferAll ? 'warning' : undefined}
         >
-          {isTransferAll ? t('Transfer the full account balance') : t('Transfer')}
+          {isTransferAll ? t('Transfer all') : t('Transfer')}
         </Button>
       </TransactionFooter>
     </>

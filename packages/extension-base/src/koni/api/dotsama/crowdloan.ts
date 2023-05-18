@@ -53,10 +53,6 @@ export const subscribeAcalaContributeInterval = (polkadotAddresses: string[], pa
       let contribute = new BN(0);
 
       resList.forEach((res) => {
-        if (res.status !== 200) {
-          console.warn('Failed to get Acala, Karura crowdloan contribute');
-        }
-
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
         contribute = contribute.add(new BN(res.data.data?.acala?.[0]?.totalDOTLocked || '0'));
       });

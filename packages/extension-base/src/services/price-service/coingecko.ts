@@ -54,7 +54,7 @@ export const getTokenPrice = async (priceIds: Set<string>, currency = 'usd'): Pr
       price24hMap
     } as PriceJson;
   } catch (err) {
-    console.error('Failed to get token price', err);
+    console.error(err);
     throw err;
   }
 };

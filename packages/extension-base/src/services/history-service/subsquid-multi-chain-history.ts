@@ -235,7 +235,7 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
       const transaction = (data as EthereumTransactionData).call.data.args.transaction.value;
 
       to = autoFormatAddress(parsedArgs.to);
-      from = autoFormatAddress(parsedArgs.from);
+      from = autoFormatAddress(parsedArgs.from || address);
       extrinsicHash = parsedArgs.transactionHash || extrinsic.hash;
       amount = transaction.value || '0';
       fee = (parseInt(transaction.gasPrice) * parseInt(transaction.gasLimit)).toString();
@@ -377,7 +377,7 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
     const chainInfo = chainMap[chainId];
 
     if (chainInfo === undefined) {
-      console.warn(`Not found chain info for chain id: ${chainId}`);
+      console.warn(`Not found chain info for chain id: ${chainId}`); // TODO: resolve conflicting chainId
 
       return;
     }

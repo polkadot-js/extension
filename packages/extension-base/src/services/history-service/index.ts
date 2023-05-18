@@ -106,8 +106,6 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
     const updateRecords = historyItems.filter((item) => {
       const key = `${item.chain}-${item.extrinsicHash}`;
 
-      // !excludeKeys.includes(key) && console.log('Cancel update', key);
-
       return item.origin === 'app' || !excludeKeys.includes(key);
     });
 
@@ -252,7 +250,6 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
 
   async start (): Promise<void> {
     try {
-      console.debug('Start history service');
       this.startPromiseHandler = createPromiseHandler<void>();
       this.status = ServiceStatus.STARTING;
       await this.startCron();
@@ -270,8 +267,6 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
   stopPromiseHandler = createPromiseHandler<void>();
 
   async stop (): Promise<void> {
-    console.debug('Stop history service');
-
     try {
       this.stopPromiseHandler = createPromiseHandler<void>();
       this.status = ServiceStatus.STOPPING;

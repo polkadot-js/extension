@@ -245,8 +245,6 @@ export class RmrkNftApi extends BaseNftApi {
             return {};
           }
         } catch (e) {
-          console.error('error fetching collection info', url);
-
           return {};
         }
       }));
@@ -272,7 +270,7 @@ export class RmrkNftApi extends BaseNftApi {
             allCollectionMeta[item?.id as string] = { ...data };
           }
         } catch (e) {
-          console.error('error parsing JSON for RMRK ', item.url, e);
+          console.error(item.url, e);
         }
       }));
 
@@ -304,7 +302,7 @@ export class RmrkNftApi extends BaseNftApi {
 
       params.cleanUpNfts(this.chain, address, allCollectionIds, allNftIds);
     } catch (e) {
-      console.error('Failed to fetch rmrk nft', e);
+      console.error(`${this.chain}`, e);
     }
   }
 

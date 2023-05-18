@@ -13,7 +13,7 @@ import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wa
 import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { _BALANCE_CHAIN_GROUP, _PURE_EVM_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isPureEvmChain, _isSmartContractToken, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isPureEvmChain, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses, sumBN } from '@subwallet/extension-base/utils';
 import { Contract } from 'web3-eth-contract';
 
@@ -209,7 +209,7 @@ function subscribeERC20Interval (addresses: string[], chain: string, evmApiMap: 
           state: APIItemState.READY
         } as BalanceItem);
       } catch (err) {
-        console.log('There is a problem fetching ' + tokenInfo.slug + ' token balance', err);
+        console.log(tokenInfo.slug, err);
       }
     });
   };
@@ -255,7 +255,7 @@ function subscribePSP22Balance (addresses: string[], chain: string, api: ApiProm
           state: APIItemState.READY
         } as BalanceItem);
       } catch (err) {
-        console.warn('Problem fetching ' + tokenInfo.slug + ' PSP-22 token balance', err); // TODO: error createType
+        console.warn(tokenInfo.slug, err); // TODO: error createType
       }
     });
   };

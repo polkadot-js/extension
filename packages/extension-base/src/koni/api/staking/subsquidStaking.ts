@@ -98,8 +98,6 @@ const getSubsquidStaking = async (accounts: string[], chain: string, chainInfoMa
 
     return result;
   } catch (e) {
-    console.error(`error getting ${chain} staking reward from subsquid`, e);
-
     return [];
   }
 };
@@ -122,8 +120,6 @@ export const getAllSubsquidStaking = async (accounts: string[], chainInfoMap: Re
       rewardList = rewardList.concat(rewardItems);
     }));
   } catch (e) {
-    console.error('Error fetching staking reward from SubSquid', e);
-
     return rewardList;
   }
 

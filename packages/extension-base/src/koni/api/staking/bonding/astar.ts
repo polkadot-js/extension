@@ -300,8 +300,6 @@ export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi,
     }
   }
 
-  console.log('no of astar claim reward tx: ', transactions.length);
-
   return apiPromise.api.tx.utility.batch(transactions);
 }
 

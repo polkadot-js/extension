@@ -162,7 +162,7 @@ export class EvmChainHandler {
         contractError
       };
     } catch (e) {
-      this.logger.error('Error response while validating EVM contract', e);
+      this.logger.error(e);
 
       return {
         name,

@@ -401,6 +401,7 @@ export interface UiSettings {
   theme: ThemeNames;
   camera: boolean;
   timeAutoLock: number;
+  enableChainPatrol: boolean;
 }
 
 export type RequestSettingsType = UiSettings;
@@ -408,6 +409,8 @@ export type RequestSettingsType = UiSettings;
 export type RequestCameraSettings = { camera: boolean };
 
 export type RequestChangeTimeAutoLock = { autoLockTime: number };
+
+export type RequestChangeEnableChainPatrol = { enable: boolean };
 
 export interface RandomTestRequest {
   start: number;
@@ -1940,13 +1943,14 @@ export interface KoniRequestSignatures {
   'pri(accounts.deleteContact)': [RequestDeleteContactAccount, boolean];
 
   // Settings
-  'pri(settings.changeBalancesVisibility)': [null, boolean, UiSettings];
+  'pri(settings.changeBalancesVisibility)': [null, boolean];
   'pri(settings.subscribe)': [null, UiSettings, UiSettings];
   'pri(settings.saveAccountAllLogo)': [string, boolean, UiSettings];
   'pri(settings.saveTheme)': [ThemeNames, boolean, UiSettings];
   'pri(settings.saveBrowserConfirmationType)': [BrowserConfirmationType, boolean, UiSettings];
   'pri(settings.saveCamera)': [RequestCameraSettings, boolean];
   'pri(settings.saveAutoLockTime)': [RequestChangeTimeAutoLock, boolean];
+  'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
   'pri(settings.getLogoMaps)': [null, AllLogoMap];
 
   // Subscription

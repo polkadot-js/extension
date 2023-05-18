@@ -1066,5 +1066,13 @@
   "{{time}} minutes": "",
   "Auto lock": "",
   "Extension auto lock": "",
-  "Submitting...": ""
+  "Submitting...": "",
+  "8 characters at least. Uppercase, numbers, and special characters are recommended.": "",
+  "Change wallet password": "",
+  "Website access": "",
+  "Advanced phishing detection": "",
+  "{{fieldName}} must be at least {{minLen}} characters in length": "",
+  "{{fieldName}} is required": "",
+  "{{fieldName}} should be at least 1 uppercase letter, 1 number, and 1 special character": "",
+  "Confirm password do not match!": ""
 }

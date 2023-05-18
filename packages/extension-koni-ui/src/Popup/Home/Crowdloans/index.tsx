@@ -201,12 +201,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         />
 
         <FilterModal
+          applyFilterButtonTitle={t('Apply filter')}
           id={FILTER_MODAL_ID}
           onApplyFilter={onApplyFilter}
           onCancel={onCloseFilterModal}
           onChangeOption={onChangeFilterOption}
           optionSelectionMap={filterSelectionMap}
           options={filterOptions}
+          title={t('Filter')}
         />
       </Layout.Base>
     </PageWrapper>

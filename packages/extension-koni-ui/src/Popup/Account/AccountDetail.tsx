@@ -15,7 +15,7 @@ import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { copyToClipboard } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/utils/form/form';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, QRCode } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, SwQRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, Swatches, TrashSimple, User } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -219,10 +219,10 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <div className='body-container'>
           <div className='account-qr'>
-            <QRCode
+            <SwQRCode
               errorLevel='M'
               icon=''
-              iconSize={token.sizeLG * 1.5}
+              // iconSize={token.sizeLG * 1.5}
               size={token.sizeXL * 3.5}
               value={account.address}
             />

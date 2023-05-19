@@ -187,8 +187,6 @@ export async function getNominationPoolReward (addresses: string[], chainInfoMap
       }));
     }));
   } catch (e) {
-    console.error('Error fetching unclaimed reward for nomination pool', e);
-
     return rewardList;
   }
 

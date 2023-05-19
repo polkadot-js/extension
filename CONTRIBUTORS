@@ -1,6 +1,6 @@
-    1603	Nam Phạm                      	
-    1231	AnhMTV                        	Release version 1.0.3
-     742	S2kael                        	resolve conflict
+    1644	Nam Phạm                      	
+    1276	AnhMTV                        	Update pri(settings.changeBalancesVisibility) from subscription to normal call
+     804	S2kael                        	[Issue-1369] Update UI lib
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	
@@ -14,6 +14,7 @@
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
+       9	S2kael                        	
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

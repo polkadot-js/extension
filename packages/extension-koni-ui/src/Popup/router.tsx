@@ -133,7 +133,7 @@ export const router = createBrowserRouter([
           Crowdloans.generateRouterObject('crowdloans'),
           Staking.generateRouterObject('staking'),
           History.generateRouterObject('history'),
-          History.generateRouterObject('history/:chain/:extrinsicHash'),
+          History.generateRouterObject('history/:chain/:extrinsicHashOrId'),
           {
             path: 'dapps',
             element: <Outlet />
@@ -157,7 +157,7 @@ export const router = createBrowserRouter([
         ]
       },
       {
-        ...TransactionDone.generateRouterObject('transaction-done/:chainType/:chain/:extrinsicHash')
+        ...TransactionDone.generateRouterObject('transaction-done/:chainType/:chain/:transactionId')
       },
       {
         path: '/keyring',

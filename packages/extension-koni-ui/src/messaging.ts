@@ -190,8 +190,8 @@ export async function saveCurrentAccountAddress (data: RequestCurrentAccountAddr
 
 // Settings
 
-export async function toggleBalancesVisibility (callback: (data: RequestSettingsType) => void): Promise<boolean> {
-  return sendMessage('pri(settings.changeBalancesVisibility)', null, callback);
+export async function toggleBalancesVisibility (): Promise<boolean> {
+  return sendMessage('pri(settings.changeBalancesVisibility)', null);
 }
 
 export async function saveAccountAllLogo (accountAllLogo: string, callback: (data: RequestSettingsType) => void): Promise<boolean> {
@@ -216,6 +216,10 @@ export async function subscribeSettings (data: RequestSubscribeBalancesVisibilit
 
 export async function saveAutoLockTime (value: number): Promise<boolean> {
   return sendMessage('pri(settings.saveAutoLockTime)', { autoLockTime: value });
+}
+
+export async function saveEnableChainPatrol (value: boolean): Promise<boolean> {
+  return sendMessage('pri(settings.saveEnableChainPatrol)', { enable: value });
 }
 
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {

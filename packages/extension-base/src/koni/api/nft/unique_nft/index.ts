@@ -217,7 +217,7 @@ export default class UniqueNftApi extends BaseNftApi {
 
       params.cleanUpNfts(this.chain, address, collectionIds, allNftIds);
     } catch (e) {
-      console.error('Failed to fetch unique nft', e);
+      console.error(`${this.chain}`, e);
     }
   }
 

@@ -11,7 +11,7 @@ import { renderBaseConfirmPasswordRules, renderBasePasswordRules, simpleCheckFor
 import { Button, Form, Icon, Input, PageIcon, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FloppyDiskBack, ShieldCheck } from 'phosphor-react';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -29,8 +29,6 @@ interface ChangePasswordFormState {
   [FormFieldName.CONFIRM_PASSWORD]: string;
 }
 
-const newPasswordRules = renderBasePasswordRules('New password');
-const confirmPasswordRules = renderBaseConfirmPasswordRules(FormFieldName.PASSWORD);
 const formName = 'change-password-form';
 
 const Component: React.FC<Props> = ({ className }: Props) => {
@@ -56,6 +54,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       type: 'warning'
     }
   ];
+
+  const newPasswordRules = useMemo(() => renderBasePasswordRules(t('New password'), t), [t]);
+  const confirmPasswordRules = useMemo(() => renderBaseConfirmPasswordRules(FormFieldName.PASSWORD, t), [t]);
 
   const goBack = useCallback(() => {
     navigate('/settings/security');

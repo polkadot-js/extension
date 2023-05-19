@@ -134,8 +134,6 @@ export class EvmNftApi extends BaseNftApi {
               const itemDetail = (resp && resp.ok && await resp.json() as Record<string, any>);
 
               if (!itemDetail) {
-                console.warn(resp?.statusText || `Cannot fetch NFT id [${nftId}] from Web3.`);
-
                 return;
               }
 
@@ -156,14 +154,14 @@ export class EvmNftApi extends BaseNftApi {
                 ownItem = true;
               }
             } catch (e) {
-              console.error(`error parsing item for ${this.chain} nft`, e);
+              console.error(`${this.chain}`, e);
             }
           }
         }));
 
         nftOwnerMap[address] = nftIds;
       } catch (e) {
-        console.error('EVM NFT error', e);
+        console.error(`${this.chain}`, e);
       }
     }));
 

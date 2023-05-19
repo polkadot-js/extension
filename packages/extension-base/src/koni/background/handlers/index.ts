@@ -48,7 +48,7 @@ export default function handlers<TMessageType extends MessageTypes> ({ id, messa
     : (sender.tab && sender.tab.url) || sender.url || '<unknown>';
   const source = `${from}: ${id}: ${message}`;
 
-  console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);
+  // console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);
 
   const promise = isMobile
     ? mobile.handle(id, message, request, port)
@@ -58,7 +58,7 @@ export default function handlers<TMessageType extends MessageTypes> ({ id, messa
 
   promise
     .then((response): void => {
-      console.log(`[out] ${source}`); // :: ${JSON.stringify(response)}`);
+      // console.log(`[out] ${source}`); // :: ${JSON.stringify(response)}`);
 
       // between the start and the end of the promise, the user may have closed
       // the tab, in which case port will be undefined

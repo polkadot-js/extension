@@ -57,8 +57,6 @@ export class UniqueNftApiV2 extends BaseNftApi {
 
         allNfts = allNfts.concat(nfts);
       }));
-
-      console.log('allNfts', allNfts);
     } catch (e) {
       console.error(`Failed to fetch ${this.chain} nft`, e);
     }

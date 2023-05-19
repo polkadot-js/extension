@@ -328,7 +328,7 @@ export default class TransactionService {
     return getExplorerLink(chainInfo, transaction.extrinsicHash, 'tx');
   }
 
-  private transactionToHistories (id: string, eventLogs?: EventRecord[]): TransactionHistoryItem[] {
+  private transactionToHistories (id: string, startBlock?: number, nonce?: number, eventLogs?: EventRecord[]): TransactionHistoryItem[] {
     const transaction = this.getTransaction(id);
     const historyItem: TransactionHistoryItem = {
       origin: 'app',
@@ -345,8 +345,12 @@ export default class TransactionService {
       time: transaction.createdAt.getTime(),
       fee: transaction.estimateFee,
       blockNumber: 0, // Will be added in next step
-      blockHash: '' // Will be added in next step
+      blockHash: '', // Will be added in next step
+      nonce: nonce || 0,
+      startBlock: startBlock || 0
     };
+
+    console.log('historyItem', historyItem);
 
     const chainInfo = this.chainService.getChainInfoByKey(transaction.chain);
     const nativeAsset = _getChainNativeTokenBasicInfo(chainInfo);
@@ -487,29 +491,29 @@ export default class TransactionService {
   }
 
   private onSigned ({ id }: TransactionEventResponse) {
-    console.log(`Transaction "${id}" is signed`);
+    console.debug(`Transaction "${id}" is signed`);
   }
 
-  private onSend ({ id }: TransactionEventResponse) {
+  private onSend ({ id, nonce, startBlock }: TransactionEventResponse) {
     // Update transaction status
     this.updateTransaction(id, { status: ExtrinsicStatus.SUBMITTING });
 
     // Create Input History Transaction History
-    this.historyService.insertHistories(this.transactionToHistories(id)).catch(console.error);
+    this.historyService.insertHistories(this.transactionToHistories(id, startBlock, nonce)).catch(console.error);
 
-    console.log(`Transaction "${id}" is sent`);
+    console.debug(`Transaction "${id}" is sent`);
   }
 
-  private onHasTransactionHash ({ extrinsicHash, id }: TransactionEventResponse) {
+  private onHasTransactionHash ({ blockHash, extrinsicHash, id }: TransactionEventResponse) {
     // Write processing transaction history
-    const updateData = { extrinsicHash, status: ExtrinsicStatus.PROCESSING };
+    const updateData = { extrinsicHash, status: ExtrinsicStatus.PROCESSING, blockHash: blockHash || '' };
 
     this.updateTransaction(id, updateData);
 
     // In this case transaction id is the same as extrinsic hash and will change after below update
     this.historyService.updateHistoryByExtrinsicHash(id, updateData).catch(console.error);
 
-    console.log(`Transaction "${id}" is submitted with hash ${extrinsicHash || ''}`);
+    console.debug(`Transaction "${id}" is submitted with hash ${extrinsicHash || ''}`);
   }
 
   private handlePostProcessing (id: string) { // must be done after success/failure to make sure the transaction is finalized
@@ -543,14 +547,14 @@ export default class TransactionService {
     }
   }
 
-  private onSuccess ({ blockHash, blockNumber, id }: TransactionEventResponse) {
+  private onSuccess ({ blockHash, blockNumber, extrinsicHash, id }: TransactionEventResponse) {
     const transaction = this.getTransaction(id);
 
-    this.updateTransaction(id, { status: ExtrinsicStatus.SUCCESS });
-    console.log('Transaction completed', id, transaction.extrinsicHash);
+    this.updateTransaction(id, { status: ExtrinsicStatus.SUCCESS, extrinsicHash });
 
     // Write success transaction history
-    this.historyService.updateHistories(transaction.chain, transaction.extrinsicHash, {
+    this.historyService.updateHistoryByExtrinsicHash(transaction.extrinsicHash, {
+      extrinsicHash,
       status: ExtrinsicStatus.SUCCESS,
       blockNumber: blockNumber || 0,
       blockHash: blockHash || ''
@@ -567,16 +571,16 @@ export default class TransactionService {
     this.eventService.emit('transaction.done', transaction);
   }
 
-  private onFailed ({ blockHash, blockNumber, errors, id }: TransactionEventResponse) {
+  private onFailed ({ blockHash, blockNumber, errors, extrinsicHash, id }: TransactionEventResponse) {
     const transaction = this.getTransaction(id);
     const nextStatus = ExtrinsicStatus.FAIL;
 
     if (transaction) {
-      this.updateTransaction(id, { status: nextStatus, errors });
-      console.log('Transaction failed', id, transaction.extrinsicHash);
+      this.updateTransaction(id, { status: nextStatus, errors, extrinsicHash });
 
       // Write failed transaction history
-      this.historyService.updateHistories(transaction.chain, transaction.extrinsicHash, {
+      this.historyService.updateHistoryByExtrinsicHash(transaction.extrinsicHash, {
+        extrinsicHash: extrinsicHash || transaction.extrinsicHash,
         status: nextStatus,
         blockNumber: blockNumber || 0,
         blockHash: blockHash || ''
@@ -592,8 +596,6 @@ export default class TransactionService {
     }
 
     this.eventService.emit('transaction.failed', transaction);
-    // Log transaction errors
-    console.error(errors);
   }
 
   public generateHashPayload (chain: string, transaction: TransactionConfig): HexString {
@@ -703,7 +705,7 @@ export default class TransactionService {
     };
 
     this.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
-      .then(({ isApproved, payload }) => {
+      .then(async ({ isApproved, payload }) => {
         if (isApproved) {
           let signedTransaction: string | undefined;
 
@@ -732,6 +734,10 @@ export default class TransactionService {
 
           // Send transaction
           this.handleTransactionTimeout(emitter, eventData);
+
+          // Add start info
+          eventData.nonce = txObject.nonce;
+          eventData.startBlock = await web3Api.eth.getBlockNumber();
           emitter.emit('send', eventData); // This event is needed after sending transaction with queue
           signedTransaction && web3Api.eth.sendSignedTransaction(signedTransaction)
             .once('transactionHash', (hash) => {
@@ -739,6 +745,7 @@ export default class TransactionService {
               emitter.emit('extrinsicHash', eventData);
             })
             .once('receipt', (rs) => {
+              eventData.extrinsicHash = rs.transactionHash;
               eventData.blockHash = rs.blockHash;
               eventData.blockNumber = rs.blockNumber;
               emitter.emit('success', eventData);
@@ -767,7 +774,7 @@ export default class TransactionService {
     return emitter;
   }
 
-  private signAndSendSubstrateTransaction ({ address, id, transaction, url }: SWTransaction): TransactionEmitter {
+  private signAndSendSubstrateTransaction ({ address, chain, id, transaction, url }: SWTransaction): TransactionEmitter {
     const emitter = new EventEmitter<TransactionEventMap>();
     const eventData: TransactionEventResponse = {
       id,
@@ -786,11 +793,15 @@ export default class TransactionService {
           } as SignerResult;
         }
       } as Signer
-    }).then((rs) => {
+    }).then(async (rs) => {
       // Emit signed event
       emitter.emit('signed', eventData);
 
       // Send transaction
+      const api = this.chainService.getSubstrateApi(chain);
+
+      eventData.nonce = rs.nonce.toNumber();
+      eventData.startBlock = (await api.api.query.system.number()).toPrimitive() as number;
       this.handleTransactionTimeout(emitter, eventData);
       emitter.emit('send', eventData); // This event is needed after sending transaction with queue
 
@@ -805,11 +816,13 @@ export default class TransactionService {
 
           if (!eventData.extrinsicHash || eventData.extrinsicHash === '') {
             eventData.extrinsicHash = txState.txHash.toHex();
+            eventData.blockHash = txState.status.asInBlock.toHex();
             emitter.emit('extrinsicHash', eventData);
           }
         }
 
         if (txState.status.isFinalized) {
+          eventData.extrinsicHash = txState.txHash.toHex();
           eventData.eventLogs = txState.events;
           // TODO: push block hash and block number into eventData
           txState.events

@@ -46,7 +46,6 @@ export class KeyringService {
 
         // Remove account
         removedAddresses.forEach((address) => {
-          console.log('account.remove', address);
           this.eventService.emit('account.remove', address);
         });
       } else if (beforeAddresses.length < afterAddresses.length) {
@@ -54,7 +53,6 @@ export class KeyringService {
 
         // Add account
         addedAddresses.forEach((address) => {
-          console.log('account.add', address);
           this.eventService.emit('account.add', address);
         });
       } else {

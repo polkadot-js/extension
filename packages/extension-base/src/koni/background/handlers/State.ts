@@ -174,7 +174,7 @@ export default class KoniState {
     }, {} as ResponseRpcListProviders));
   }
 
-  public rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
+  public rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse<unknown>> {
     const provider = this.injectedProviders.get(port);
 
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
@@ -276,7 +276,6 @@ export default class KoniState {
     this.onReady();
     this.onAccountAdd();
     this.onAccountRemove();
-    this.logger.log('Done init state');
   }
 
   private startSubscription () {
@@ -296,8 +295,6 @@ export default class KoniState {
     this.priceService.start().catch(console.error);
 
     this.ready = true;
-
-    this.logger.log('State is ready');
   }
 
   public isReady () {
@@ -766,8 +763,6 @@ export default class KoniState {
         camera: value
       };
 
-      console.log(newSettings, value);
-
       this.settingService.setSettings(newSettings);
     });
   }
@@ -777,6 +772,17 @@ export default class KoniState {
       const newSettings: UiSettings = {
         ...settings,
         timeAutoLock: value
+      };
+
+      this.settingService.setSettings(newSettings);
+    });
+  }
+
+  public setEnableChainPatrol (value: boolean): void {
+    this.settingService.getSettings((settings) => {
+      const newSettings: UiSettings = {
+        ...settings,
+        enableChainPatrol: value
       };
 
       this.settingService.setSettings(newSettings);

@@ -47,7 +47,7 @@ function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
         iconProps={{ phosphorIcon: ShieldSlash, weight: 'fill' }}
       />
       <div className='title h3-text text-danger'>{t('Phishing detection')}</div>
-      <div className='h4-text text-danger'>{decodedWebsite}</div>
+      <div className='h4-text text-danger website-url'>{decodedWebsite}</div>
       <div className='phishing-detection-message'>
         <span>{t('This domain has been reported as a known phishing site on a community maintained list: ')}</span>
         <Typography.Link size='lg'>
@@ -100,6 +100,13 @@ const PhishingDetected = styled(_PhishingDetected)<Props>(({ theme }) => {
       alignItems: 'center',
       transaction: '0.1s height',
       backgroundImage: extendToken.tokensScreenDangerBackgroundColor
+    },
+
+    '.website-url': {
+      textAlign: 'center',
+      paddingLeft: token.paddingXL,
+      paddingRight: token.paddingXL,
+      wordBreak: 'break-all'
     }
   });
 });

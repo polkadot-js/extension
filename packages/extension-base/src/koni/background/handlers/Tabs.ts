@@ -8,7 +8,7 @@ import { EvmProviderError } from '@subwallet/extension-base/background/errors/Ev
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, RequestEvmProviderSend } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, RequestEvmProviderSend, RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
 import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesSign';
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
@@ -16,6 +16,7 @@ import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-b
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/setting-service/constants';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { KeyringPair } from '@subwallet/keyring/types';
@@ -73,12 +74,46 @@ function transformAccountsV2 (accounts: SubjectInfo, anyType = false, authInfo?:
     }));
 }
 
+interface ChainPatrolResponse {
+  reason: string;
+  reports: Array<{ createdAt: string, id: number }>;
+  status: 'UNKNOWN' | 'ALLOWED' | 'BLOCKED';
+}
+
+// check if a URL is blocked
+export const chainPatrolCheckUrl = async (url: string) => {
+  const response = await fetch(
+    'https://app.chainpatrol.io/api/v2/asset/check',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-KEY': 'e5e88cd0-7994-4667-9071-bab849c2ba71'
+      },
+      body: JSON.stringify({ type: 'URL', content: url })
+    }
+  );
+  const data = await response.json() as ChainPatrolResponse;
+
+  return data.status === 'BLOCKED';
+};
+
 export default class KoniTabs {
   readonly #koniState: KoniState;
   private evmEventEmitterMap: Record<string, Record<string, (eventName: EvmEventType, payload: any) => void>> = {};
+  #chainPatrolService: boolean = DEFAULT_CHAIN_PATROL_ENABLE;
 
   constructor (koniState: KoniState) {
     this.#koniState = koniState;
+
+    const updateChainPatrolService = (rs: RequestSettingsType) => {
+      this.#chainPatrolService = rs.enableChainPatrol;
+    };
+
+    this.#koniState.settingService.getSettings(updateChainPatrolService);
+    this.#koniState.settingService.getSubject().subscribe({
+      next: updateChainPatrolService
+    });
   }
 
   /// Clone from Polkadot.js
@@ -120,7 +155,7 @@ export default class KoniTabs {
     return this.#koniState.rpcListProviders();
   }
 
-  private rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
+  private rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse<unknown>> {
     return this.#koniState.rpcSend(request, port);
   }
 
@@ -180,6 +215,16 @@ export default class KoniTabs {
       this.redirectPhishingLanding(url);
 
       return true;
+    }
+
+    if (this.#chainPatrolService) {
+      const isInChainPatrolDenyList = await chainPatrolCheckUrl(url);
+
+      if (isInChainPatrolDenyList) {
+        this.redirectPhishingLanding(url);
+
+        return true;
+      }
     }
 
     return false;
@@ -731,8 +776,6 @@ export default class KoniTabs {
 
   private async handleEvmRequest (id: string, url: string, request: RequestArguments): Promise<unknown> {
     const { method } = request;
-
-    console.log('method: ' + method);
 
     try {
       switch (method) {

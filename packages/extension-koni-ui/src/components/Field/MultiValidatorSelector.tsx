@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
@@ -93,6 +94,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const nominations = useMemo(() => nominatorMetadata[0]?.nominations, [nominatorMetadata]);
   const isSingleSelect = useMemo(() => _isSingleSelect || !isRelayChain, [_isSingleSelect, isRelayChain]);
   const hasReturn = useMemo(() => items[0]?.expectedReturn !== undefined, [items]);
+  const validatorLabel = useMemo(() => `${getValidatorLabel(chain).charAt(0).toLowerCase() + getValidatorLabel(chain).substr(1)}`, [chain]);
 
   const sortingOptions: SortOption[] = useMemo(() => {
     const result: SortOption[] = [
@@ -106,14 +108,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     if (hasReturn) {
       result.push({
         desc: true,
-        label: t('Highest return'),
+        label: t('Highest annual return'),
         value: SortKey.RETURN
       });
     }
 
     result.push({
       desc: false,
-      label: t('Lowest min stake'),
+      label: t('Lowest min active stake'),
       value: SortKey.MIN_STAKE
     });
 
@@ -244,8 +246,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   return (
     <>
       <SelectValidatorInput
+        chain={chain}
         disabled={!chain || !from}
-        label={t('Select validator')}
+        label={t('Select') + ' ' + t(validatorLabel)}
         loading={loading}
         onClick={onActiveValidatorSelector}
         value={value || ''}
@@ -270,7 +273,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             )}
             onClick={onApplyChangeValidators}
           >
-            {t(`Apply ${changeValidators.length} validators`)}
+            {t('Apply')}&nbsp;{changeValidators.length}&nbsp;{t(validatorLabel)}
           </Button>
         )}
         id={id}
@@ -285,7 +288,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             activeModal(SORTING_MODAL_ID);
           }
         }}
-        title={t('Select validator')}
+        title={t('Select') + ' ' + t(validatorLabel)}
       >
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
@@ -298,7 +301,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           renderWhenEmpty={renderEmpty}
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search validator')}
+          searchPlaceholder={t<string>(`Search ${getValidatorLabel(chain)}`)}
           // showActionBtn
         />
       </SwModal>

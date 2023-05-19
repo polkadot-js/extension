@@ -155,11 +155,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onClick: goHome
           }
         ]}
-        title={t<string>('Attach watch-only account')}
+        title={t<string>('Attach read-only account')}
       >
         <div className={CN('container')}>
           <div className='description'>
-            {t('Track the activity of any wallet without injecting your private key to SubWallet')}
+            {t('Track the activity of any wallet without a private key')}
           </div>
           <div className='page-icon'>
             <PageIcon

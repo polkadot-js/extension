@@ -294,13 +294,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
             <Tooltip
               placement={'topLeft'}
-              title={t('Price Id')}
+              title={t('Price ID')}
             >
               <div>
                 <Input
                   disabled={!_isCustomAsset(tokenInfo.slug)}
                   onChange={onChangePriceId}
-                  placeholder={t('Price Id')}
+                  placeholder={t('Price ID')}
                   value={priceId}
                 />
               </div>

@@ -168,7 +168,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       >
         <div className='container'>
           <div className='description'>
-            {t('To import an existing Polkadot wallet, please enter the recovery seed phrase here:')}
+            {t('To import an existing account, please enter seed phrase')}
           </div>
           <Form
             className='form-container'
@@ -182,12 +182,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               <Input.TextArea
                 className='seed-phrase-input'
                 onChange={onChange}
-                placeholder={t('Secret phrase')}
+                placeholder={t('Seed phrase')}
                 statusHelp={validateState.message}
               />
             </Form.Item>
             <Form.Item>
               <SelectAccountType
+                label={t('Select account type')}
                 selectedItems={keyTypes}
                 setSelectedItems={setKeyTypes}
                 withLabel={true}

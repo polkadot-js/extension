@@ -446,3 +446,13 @@ export function getStakingStatusByNominations (bnTotalActiveStake: BN, nominatio
 
   return stakingStatus;
 }
+
+export function getValidatorLabel (chain: string) {
+  if (_STAKING_CHAIN_GROUP.astar.includes(chain)) {
+    return 'dApp';
+  } else if (_STAKING_CHAIN_GROUP.relay.includes(chain)) {
+    return 'Validator';
+  }
+
+  return 'Collator';
+}

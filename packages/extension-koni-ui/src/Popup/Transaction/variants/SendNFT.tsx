@@ -216,7 +216,8 @@ const Component: React.FC = () => {
           >
             <AddressInput
               addressPrefix={addressPrefix}
-              label={t('Send to account')}
+              label={t('Send to')}
+              placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}
               showScanner={true}
@@ -236,6 +237,7 @@ const Component: React.FC = () => {
         <FreeBalance
           address={from}
           chain={chain}
+          label={t('Sender transferable balance') + ':'}
           onBalanceReady={setIsBalanceReady}
         />
       </TransactionContent>

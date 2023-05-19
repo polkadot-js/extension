@@ -36,29 +36,44 @@ const Component: React.FC<Props> = ({ transaction }: Props) => {
       <MetaInfo hasBackgroundWrapper>
         <MetaInfo.Account
           address={data.from}
-          label={t('Sender')}
+          label={t('Send from')}
           networkPrefix={senderPrefix}
         />
 
-        {transaction.extrinsicType === ExtrinsicType.TRANSFER_XCM && chainInfo && <MetaInfo.Chain
-          chain={chainInfo.slug}
-          label={t('Sender Network')}
-        />}
+        {
+          transaction.extrinsicType === ExtrinsicType.TRANSFER_XCM && chainInfo &&
+          (
+            <MetaInfo.Chain
+              chain={chainInfo.slug}
+              label={t('Sender network')}
+            />
+          )
+        }
 
         <MetaInfo.Account
           address={data.to}
-          label={t('Recipient')}
+          label={t('Send to')}
         />
 
-        {transaction.extrinsicType === ExtrinsicType.TRANSFER_XCM && chainInfo && <MetaInfo.Chain
-          chain={xcmData.destinationNetworkKey}
-          label={t('Recipient Network')}
-        />}
+        {
+          transaction.extrinsicType === ExtrinsicType.TRANSFER_XCM && chainInfo &&
+          (
+            <MetaInfo.Chain
+              chain={xcmData.destinationNetworkKey}
+              label={t('Destination network')}
+            />
+          )
+        }
 
-        {transaction.extrinsicType !== ExtrinsicType.TRANSFER_XCM && chainInfo && <MetaInfo.Chain
-          chain={chainInfo.slug}
-          label={t('Network')}
-        />}
+        {
+          transaction.extrinsicType !== ExtrinsicType.TRANSFER_XCM && chainInfo &&
+          (
+            <MetaInfo.Chain
+              chain={chainInfo.slug}
+              label={t('Network')}
+            />
+          )
+        }
       </MetaInfo>
 
       <MetaInfo hasBackgroundWrapper>

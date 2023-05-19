@@ -224,7 +224,7 @@ const Component = (): React.ReactElement => {
             size={'xs'}
             type={'ghost'}
           >
-            {t('Manage token list')}
+            {t('Manage tokens')}
           </Button>
         </div>
       </div>

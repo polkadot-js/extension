@@ -33,7 +33,7 @@ const Component: React.FC<Props> = (props: Props) => {
         {
           data.unclaimedReward && <MetaInfo.Number
             decimals={decimals}
-            label={t('Unclaimed reward')}
+            label={t('Available rewards')}
             suffix={symbol}
             value={data.unclaimedReward}
           />
@@ -41,7 +41,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
         <MetaInfo.Number
           decimals={decimals}
-          label={t('Transaction fee')}
+          label={t('Estimated fee')}
           suffix={symbol}
           value={transaction.estimateFee?.value || 0}
         />
@@ -50,8 +50,8 @@ const Component: React.FC<Props> = (props: Props) => {
       <span className={CN('text-light-4')}>
         {
           data.bondReward
-            ? t('Your rewards will be bonded back into the pool')
-            : t('Claimed rewards would be immediately added to your account as transferable balance')
+            ? t('Your rewards will be bonded back into the pool after claiming')
+            : t('Your rewards will be added to your transferable balance after claiming')
         }
       </span>
     </div>

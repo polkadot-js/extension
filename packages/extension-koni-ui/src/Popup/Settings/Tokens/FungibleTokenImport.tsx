@@ -171,7 +171,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             setLoading(false);
             setContractValidation({
               status: 'error',
-              message: t('Error validating this NFT')
+              message: t('Error validating this token')
             });
             resolve();
           });
@@ -316,7 +316,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   return (
     <PageWrapper
       className={`import_token ${className}`}
-      resolve={dataContext.awaitStores(['nft'])}
+      resolve={dataContext.awaitStores(['assetRegistry'])}
     >
       <Layout.WithSubHeaderOnly
         onBack={goBack}
@@ -331,7 +331,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           ),
           loading,
           onClick: onSubmit,
-          children: t('Import')
+          children: t('Import token')
         }}
         title={t<string>('Import token')}
       >
@@ -362,7 +362,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 renderWhenEmpty={renderEmpty}
                 searchFunction={searchChain}
                 searchMinCharactersCount={2}
-                searchPlaceholder={'Search chain'}
+                searchPlaceholder={'Search network'}
                 selected={selectedChain}
                 title={t('Select network')}
               />
@@ -428,8 +428,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             >
               <Input
                 disabled={selectedTokenType === ''}
-                placeholder={t('Price Id')}
-                tooltip={t('Price Id')}
+                placeholder={t('Price ID')}
+                tooltip={t('Price ID')}
               />
             </Form.Item>
             <Form.Item

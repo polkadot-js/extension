@@ -40,7 +40,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
   const [allowedMap, setAllowedMap] = useState<Record<string, boolean>>(authInfo?.isAllowedMap || {});
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
-  const [oldConnected, setOldConnected] = useState(0);
+  // const [oldConnected, setOldConnected] = useState(0);
   const [isSubmit, setIsSubmit] = useState(false);
   const { token } = useTheme() as Theme;
   const _isNotConnected = isNotConnected || !authInfo;
@@ -80,7 +80,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
 
   useEffect(() => {
     if (!!authInfo?.isAllowedMap && !!authInfo?.accountAuthType) {
-      const connected = Object.values(authInfo.isAllowedMap).filter((s) => s).length;
+      // const connected = Object.values(authInfo.isAllowedMap).filter((s) => s).length;
 
       const type = authInfo.accountAuthType;
       const allowedMap = authInfo.isAllowedMap;
@@ -104,9 +104,9 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
         });
 
       setAllowedMap(result);
-      setOldConnected(connected);
+      // setOldConnected(connected);
     } else {
-      setOldConnected(0);
+      // setOldConnected(0);
       setAllowedMap({});
     }
   }, [authInfo?.accountAuthType, authInfo?.isAllowedMap]);
@@ -229,9 +229,9 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
     if (_isNotConnected) {
       return (
         <>
-          <div className={'__content-heading'}>{t('This is not a Web3 application')}</div>
+          <div className={'__content-heading'}>{t('Not connected to this site')}</div>
           <div className={'text-tertiary __content-text'}>
-            {t('SubWallet is not connected to this site. To connect to a web3 site, find and click the connect button.')}
+            {t('SubWallet is not connected to this site. Please find and click in the website the "Connect Wallet" button to connect. ')}
           </div>
         </>
       );
@@ -242,7 +242,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
         <>
           <div className={'__content-heading'}>{t('This site has been blocked')}</div>
           <div className={'text-tertiary __content-text'}>
-            t{('This website has previously been blocked. Do you wish to unblock and grant access to it?')}
+            t{('This site has been previously blocked. Do you wish to unblock and grant access to it?')}
           </div>
         </>
       );
@@ -263,7 +263,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
     return (
       <>
         <div className={CN('__number-of-select-text')}>
-          {t('You have {{oldConnected}} accounts connected to this site', { replace: { oldConnected } })}
+          {t('Your following account(s) are connected to this site')}
         </div>
 
         <div className={'__account-item-container'}>

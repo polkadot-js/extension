@@ -44,7 +44,7 @@ function Component ({ className, request, type }: Props) {
       <div className={CN('confirmation-content', className)}>
         <ConfirmationGeneralInfo request={request} />
         <div className='title'>
-          {t('Approve request')}
+          {t('Transaction request')}
         </div>
         <MetaInfo>
           {
@@ -83,7 +83,7 @@ function Component ({ className, request, type }: Props) {
             size='xs'
             type='ghost'
           >
-            {t('View detail')}
+            {t('View details')}
           </Button>
         </div>
       </div>

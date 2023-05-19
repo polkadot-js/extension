@@ -215,7 +215,7 @@ const Component: React.FC<Props> = (props: Props) => {
             disabled: deriving
           }
         ]}
-        title={t('Account detail')}
+        title={t('Account details')}
       >
         <div className='body-container'>
           <div className='account-qr'>
@@ -314,7 +314,7 @@ const Component: React.FC<Props> = (props: Props) => {
             onClick={onDerive}
             schema='secondary'
           >
-            {t('Derive account')}
+            {t('Derive an account')}
           </Button>
           <Button
             block={true}
@@ -332,7 +332,7 @@ const Component: React.FC<Props> = (props: Props) => {
             onClick={onExport}
             schema='secondary'
           >
-            {t('Export account')}
+            {t('Export this account')}
           </Button>
           <Button
             block={true}
@@ -351,7 +351,7 @@ const Component: React.FC<Props> = (props: Props) => {
             onClick={onDelete}
             schema='secondary'
           >
-            {t('Remove account')}
+            {t('Remove this account')}
           </Button>
         </div>
       </Layout.WithSubHeaderOnly>

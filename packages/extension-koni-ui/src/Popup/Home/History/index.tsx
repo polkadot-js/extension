@@ -184,14 +184,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const filterOptions = useMemo(() => {
     return [
-      { label: t('Send token transaction'), value: FilterValue.SEND },
-      { label: t('Receive token transaction'), value: FilterValue.RECEIVED },
+      { label: t('Send token'), value: FilterValue.SEND },
+      { label: t('Receive token'), value: FilterValue.RECEIVED },
       { label: t('NFT transaction'), value: FilterValue.NFT },
       { label: t('Stake transaction'), value: FilterValue.STAKE },
-      { label: t('Claim reward transaction'), value: FilterValue.CLAIM },
+      { label: t('Claim staking reward'), value: FilterValue.CLAIM },
       // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
-      { label: t('Successful transaction'), value: FilterValue.SUCCESSFUL },
-      { label: t('Failed transaction'), value: FilterValue.FAILED }
+      { label: t('Successful'), value: FilterValue.SUCCESSFUL },
+      { label: t('Failed'), value: FilterValue.FAILED }
     ];
   }, [t]);
 
@@ -223,8 +223,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const typeTitleMap: Record<string, string> = useMemo(() => ({
     default: t('Transaction'),
-    send: t('Send transaction'),
-    received: t('Receive transaction'),
+    send: t('Send token'),
+    received: t('Receive token'),
     [ExtrinsicType.SEND_NFT]: t('NFT transaction'),
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan transaction'),
     [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake transaction'),
@@ -324,8 +324,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const emptyList = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t('Your transactions history will appear here!')}
-        emptyTitle={t('No transactions yet')}
+        emptyMessage={t('Your transaction history will appear here!')}
+        emptyTitle={t('No transaction found')}
         phosphorIcon={Clock}
       />
     );

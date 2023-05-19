@@ -34,7 +34,7 @@ const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
 
 const baseAccountPath = '/accounts';
-const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-parity-signer', 'connect-keystone', 'connect-ledger'];
+const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
 

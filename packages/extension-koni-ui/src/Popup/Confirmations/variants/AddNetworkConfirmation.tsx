@@ -80,12 +80,12 @@ const Component: React.FC<Props> = (props: Props) => {
           <Col span={16}>
             <Tooltip
               placement='topLeft'
-              title={t<string>('Chain name')}
+              title={t<string>('Network name')}
             >
               <div>
                 <Field
                   content={chainEditInfo.name || ''}
-                  placeholder={t('Chain name')}
+                  placeholder={t('Network name')}
                   prefix={(
                     <Icon
                       customSize={'24px'}
@@ -143,12 +143,12 @@ const Component: React.FC<Props> = (props: Props) => {
         </Row>
         <Tooltip
           placement='topLeft'
-          title={t<string>('Chain type')}
+          title={t<string>('Network type')}
         >
           <div>
             <Field
               content={chainEditInfo.chainType}
-              placeholder={t('Chain type')}
+              placeholder={t('Network type')}
             />
           </div>
         </Tooltip>

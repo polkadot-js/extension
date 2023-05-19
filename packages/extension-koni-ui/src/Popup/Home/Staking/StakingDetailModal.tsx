@@ -3,7 +3,7 @@
 
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getValidatorLabel, isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
@@ -137,7 +137,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
       >
         <MetaInfo.Account
           address={item.validatorAddress}
-          label={t('Validator')}
+          label={t(getValidatorLabel(item.chain))}
           name={item.validatorIdentity || toShort(item.validatorAddress)}
           networkPrefix={networkPrefix}
         />
@@ -154,7 +154,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         <MetaInfo.Number
           decimals={decimals}
           key={item.validatorAddress}
-          label={t('Min stake')}
+          label={t('Minimum staked')}
           suffix={staking.nativeToken}
           value={item.validatorMinStake || '0'}
           valueColorSchema={'gray'}
@@ -216,7 +216,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           typeName={stakingTypeNameMap[staking.type]}
         />
         <MetaInfo.Status
-          label={type === StakingType.NOMINATED ? t('Nomination status') : t('Pooled status')}
+          label={t('Staking status')}
           statusIcon={getStakingStatus(nominatorMetadata.status).icon}
           statusName={getStakingStatus(nominatorMetadata.status).name}
           valueColorSchema={getStakingStatus(nominatorMetadata.status).schema}
@@ -234,7 +234,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         {!!rewardItem?.unclaimedReward && parseFloat(rewardItem?.unclaimedReward) > 0 && (
           <MetaInfo.Number
             decimals={decimals}
-            label={t('Unclaimed reward')}
+            label={t('Unclaimed rewards')}
             suffix={staking.nativeToken}
             value={rewardItem?.unclaimedReward || '0'}
           />
@@ -290,7 +290,8 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         >
           {!!expectedReturn &&
             <MetaInfo.Number
-              label={t('Estimated earning')}
+              className={'expected-return'}
+              label={t('Estimated annual earnings')}
               suffix={'%'}
               value={expectedReturn}
               valueColorSchema={'even-odd'}
@@ -413,6 +414,10 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
 
 const StakingDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.expected-return div:first-child': {
+      flex: 2
+    },
+
     '.staking-detail-modal-footer': {
       display: 'flex',
       alignItems: 'center'

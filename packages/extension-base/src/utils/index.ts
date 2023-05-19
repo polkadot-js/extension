@@ -21,6 +21,10 @@ export function isAccountAll (address?: string): boolean {
 
 export function reformatAddress (address: string, networkPrefix = 42, isEthereum = false): string {
   try {
+    if (!address || address === '') {
+      return '';
+    }
+
     if (isEthereumAddress(address)) {
       return address;
     }

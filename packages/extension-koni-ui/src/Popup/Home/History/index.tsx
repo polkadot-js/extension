@@ -33,7 +33,7 @@ const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
 };
 
 function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
-  if (item.status === ExtrinsicStatus.PROCESSING) {
+  if (item.status === ExtrinsicStatus.PROCESSING || item.status === ExtrinsicStatus.SUBMITTING) {
     return IconMap.processing;
   }
 
@@ -92,11 +92,14 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
     };
   }
 
-  const isProcessing = item.status === ExtrinsicStatus.PROCESSING;
-
-  if (isProcessing) {
+  if (item.status === ExtrinsicStatus.PROCESSING) {
     displayData.className = '-processing';
     displayData.typeName = nameMap.processing;
+  }
+
+  if (item.status === ExtrinsicStatus.SUBMITTING) {
+    displayData.className = '-processing';
+    displayData.typeName = nameMap.submitting;
   }
 
   return displayData;
@@ -202,6 +205,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const typeNameMap: Record<string, string> = useMemo(() => ({
     default: t('Transaction'),
+    submitting: t('Submitting...'),
     processing: t('Processing...'),
     send: t('Send'),
     received: t('Receive'),
@@ -264,9 +268,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const [curAdr] = useState(currentAccount?.address);
 
   // Handle detail modal
-  const { chain, extrinsicHash } = useParams();
+  const { chain, extrinsicHashOrId } = useParams();
   const [selectedItem, setSelectedItem] = useState<TransactionHistoryDisplayItem | null>(null);
-  const [openDetailLink, setOpenDetailLink] = useState<boolean>(!!chain && !!extrinsicHash);
+  const [openDetailLink, setOpenDetailLink] = useState<boolean>(!!chain && !!extrinsicHashOrId);
 
   const onOpenDetail = useCallback((item: TransactionHistoryDisplayItem) => {
     return () => {
@@ -286,15 +290,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   useEffect(() => {
-    if (extrinsicHash && chain && openDetailLink) {
-      const existed = historyList.find((item) => item.chain === chain && item.extrinsicHash === extrinsicHash);
+    if (extrinsicHashOrId && chain && openDetailLink) {
+      const existed = historyList.find((item) => item.chain === chain && (item.transactionId === extrinsicHashOrId || item.extrinsicHash === extrinsicHashOrId));
 
       if (existed) {
         setSelectedItem(existed);
         activeModal(modalId);
       }
     }
-  }, [activeModal, chain, extrinsicHash, openDetailLink, historyList]);
+  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyList]);
 
   useEffect(() => {
     if (isActive) {

@@ -1,6 +1,6 @@
-    1637	Nam Phạm                      	[Issue 1310] fix bug showing staking withdrawal amount on Astar
-    1267	AnhMTV                        	Apply some small update with package version after merge
-     782	S2kael                        	
+    1645	Nam Phạm                      	
+    1288	AnhMTV                        	
+     805	S2kael                        	[Issue-1369] Update UI lib
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	
@@ -14,9 +14,9 @@
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
+       9	S2kael                        	
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code
-       5	S2kael                        	
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        4	Quangdm-cdm                   	

@@ -871,6 +871,12 @@ export class ChainService {
       }
     }
 
+    if (targetChainInfo.evmInfo) {
+      if (params.chainEditInfo.blockExplorer !== undefined) {
+        targetChainInfo.evmInfo.blockExplorer = params.chainEditInfo.blockExplorer;
+      }
+    }
+
     this.updateChainInfoMapSubscription();
 
     this.dbService.updateChainStore({

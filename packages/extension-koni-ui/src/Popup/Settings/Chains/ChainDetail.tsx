@@ -416,17 +416,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   tooltipPlacement={'topLeft'}
                 />
               </Form.Item>
-              <Form.Item
-                name={'crowdloanUrl'}
-                rules={[{ validator: crowdloanUrlValidator }]}
-                statusHelpAsTooltip={true}
-              >
-                <Input
-                  placeholder={t('Crowdloan URL')}
-                  tooltip={t('Crowdloan URL')}
-                  tooltipPlacement={'topLeft'}
-                />
-              </Form.Item>
+
+              {
+                !_isPureEvmChain(chainInfo) && <Form.Item
+                  name={'crowdloanUrl'}
+                  rules={[{ validator: crowdloanUrlValidator }]}
+                  statusHelpAsTooltip={true}
+                >
+                  <Input
+                    placeholder={t('Crowdloan URL')}
+                    tooltip={t('Crowdloan URL')}
+                    tooltipPlacement={'topLeft'}
+                  />
+                </Form.Item>
+              }
             </div>
           </Form>
         </div>

@@ -205,7 +205,7 @@ export const _DEFAULT_ACTIVE_CHAINS = [
 ];
 
 // TODO: review
-const TARGET_BRANCH = process.env.NODE_ENV !== 'production' ? 'koni/dev/issue-34' : 'master';
+const TARGET_BRANCH = process.env.NODE_ENV !== 'production' ? 'koni-dev' : 'master';
 
 export const _CHAIN_INFO_SRC = `https://raw.githubusercontent.com/Koniverse/SubWallet-Chain/${TARGET_BRANCH}/packages/chain-list/src/data/ChainInfo.json`;
 export const _CHAIN_ASSET_SRC = `https://raw.githubusercontent.com/Koniverse/SubWallet-Chain/${TARGET_BRANCH}/packages/chain-list/src/data/ChainAsset.json`;

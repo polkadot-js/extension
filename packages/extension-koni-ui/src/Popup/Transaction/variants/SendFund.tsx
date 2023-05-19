@@ -325,7 +325,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       return Promise.reject(t('Amount is required'));
     }
 
-    // TODO: enable this when release
     if ((new BigN(amount)).eq(new BigN(0))) {
       return Promise.reject(t('Amount must be greater than 0'));
     }

@@ -70,7 +70,7 @@
     "@sora-substrate/type-definitions": "^1.17.7",
     "@subsocial/types": "^0.6.8",
     "@substrate/connect": "^0.7.26",
-    "@subwallet/chain-list": "^0.1.4",
+    "@subwallet/chain-list": "^0.1.5",
     "@subwallet/extension-base": "^1.0.5-2",
     "@subwallet/extension-chains": "^1.0.5-2",
     "@subwallet/extension-dapp": "^1.0.5-2",

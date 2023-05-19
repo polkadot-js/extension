@@ -46,15 +46,17 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [value]);
 
+  const validatorLabel = useMemo(() => `${getValidatorLabel(chain).charAt(0).toLowerCase() + getValidatorLabel(chain).substr(1)}`, [chain]);
+
   const renderContent = () => {
     if (!value) {
-      return placeholder || t(`Select ${getValidatorLabel(chain).toLowerCase()}`);
+      return placeholder || (t('Select') + ' ' + t(validatorLabel));
     }
 
     const valueList = value.split(',');
 
     if (valueList.length > 1) {
-      return t(`Selected ${valueList.length} ${getValidatorLabel(chain).toLowerCase()}`);
+      return t('Select') + ` ${valueList.length} ` + t(validatorLabel);
     }
 
     return valueList[0].split('___')[1] || toShort(valueList[0].split('___')[0]);

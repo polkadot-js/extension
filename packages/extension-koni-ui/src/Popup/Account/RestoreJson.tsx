@@ -264,7 +264,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <Layout.WithSubHeaderOnly
         onBack={onBack}
         rightFooterButton={{
-          children: t('Import from Polkadot.{js}'),
+          children: t('Import by JSON file'),
           icon: FooterIcon,
           onClick: form.submit,
           disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
@@ -276,7 +276,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onClick: goHome
           }
         ]}
-        title={t<string>('Import by JSON file')}
+        title={t<string>('Import from Polkadot.{js}')}
       >
         <div className={CN('container')}>
           <div className='description'>

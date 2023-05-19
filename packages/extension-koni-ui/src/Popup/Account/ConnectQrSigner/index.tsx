@@ -105,7 +105,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <Layout.WithSubHeaderOnly
         onBack={onBack}
         rightFooterButton={{
-          children: loading ? t('Creating') : t('Scan the QR code'),
+          children: loading ? t('Creating') : t('Scan QR code'),
           icon: FooterIcon,
           onClick: openCamera,
           loading: loading

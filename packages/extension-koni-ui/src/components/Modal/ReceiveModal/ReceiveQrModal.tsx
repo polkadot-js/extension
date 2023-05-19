@@ -77,7 +77,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
       rightIconProps={{
         icon: <InfoIcon />
       }}
-      title={t<string>('Your QR code')}
+      title={t<string>('Your address')}
     >
       <>
         <div className='receive-qr-code-wrapper'>
@@ -113,6 +113,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
                   }
                   onClick={onClickCopyBtn}
                   size='xs'
+                  tooltip={t('Copy address')}
                   type='ghost'
                 />
               </CopyToClipboard>
@@ -133,7 +134,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
             />
           }
           onClick={handleClickViewOnExplorer}
-        >{t('View on explorer')}</Button>
+        >{t('View account on explorer')}</Button>
       </>
     </SwModal>
   );

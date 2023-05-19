@@ -121,7 +121,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <Layout.WithSubHeaderOnly
         onBack={onBack}
         rightFooterButton={{
-          children: loading ? t('Creating') : t('Scan the QR code'),
+          children: loading ? t('Creating') : t('Scan QR'),
           icon: FooterIcon,
           onClick: openCamera,
           loading: loading
@@ -132,11 +132,11 @@ const Component: React.FC<Props> = (props: Props) => {
             onClick: goHome
           }
         ]}
-        title={t('Import your wallet by QR')}
+        title={t('Import by QR code')}
       >
         <div className={CN('container')}>
           <div className='sub-title'>
-            {t('Please make sure that you have granted SubWallet the access to your device\'s camera.')}
+            {t("Please make sure that you have granted SubWallet the access to your device's camera.")}
           </div>
           <div className='logo'>
             <DualLogo
@@ -166,12 +166,12 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           <div className='instruction'>
             <div className='instruction'>
-              <span>{t('Click the "Scan the QR code" button, or read ')}&nbsp;</span>
+              <span>{t('Click the "Scan QR" button, or read ')}&nbsp;</span>
               <a
                 className='link'
                 href='#'
               >
-                {t('this instructions')}
+                {t('this instruction')}
               </a>
               <span>,&nbsp;</span>
               <span>{t('for more details.')}</span>
@@ -189,6 +189,7 @@ const Component: React.FC<Props> = (props: Props) => {
             onError={onError}
             onSuccess={onSuccess}
             overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
+            title={t('Scan QR')}
           />
         </div>
       </Layout.WithSubHeaderOnly>

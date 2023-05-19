@@ -28,7 +28,7 @@ function Component ({ className, decimals, onCancel, selectedNominationPool, sta
       className={className}
       id={PoolDetailModalId}
       onCancel={onCancel}
-      title={t('Pooled details')}
+      title={t('Pool details')}
     >
       <MetaInfo
         hasBackgroundWrapper
@@ -65,7 +65,7 @@ function Component ({ className, decimals, onCancel, selectedNominationPool, sta
 
         <MetaInfo.Number
           decimals={decimals}
-          label={t('Total pooled')}
+          label={t('Total bonded')}
           suffix={symbol}
           value={bondedAmount || '0'}
           valueColorSchema={'even-odd'}

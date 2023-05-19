@@ -220,7 +220,7 @@ function Component ({ className }: Props) {
           onBack={goBack}
           paddingVertical
           showBackButton
-          title={t('Buy tokens')}
+          title={t('Buy token')}
         />
         <div className={'__scroll-container'}>
           <div className='__buy-icon-wrapper'>
@@ -259,13 +259,16 @@ function Component ({ className }: Props) {
               </Form.Item>
 
               <Form.Item name={'service'}>
-                <ServiceSelector />
+                <ServiceSelector
+                  placeholder={t('Select supplier')}
+                  title={t('Select supplier')}
+                />
               </Form.Item>
             </div>
           </Form>
 
           <div className={'common-text __note'}>
-            {t('You will be taken to independent provider to complete this transaction')}
+            {t('You will be directed to the chosen supplier to complete this transaction')}
           </div>
         </div>
 

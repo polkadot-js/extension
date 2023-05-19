@@ -15,19 +15,19 @@ const Component: React.FC<ThemeProps> = () => {
 
   return (
     <ConnectQrSigner
-      description={t('Parity Signer will provide you QR code to scan')}
-      instructionUrl={t('Connect your QR wallet')}
-      logoUrl={LogosMap.parity}
-      subTitle={t('Open Parity Signer application on your smartphone to connect wallet')}
-      title={t('Connect your QR wallet')}
+      deviceName={t('Polkadot Vault')}
+      instructionUrl={''}
+      logoUrl={LogosMap.polkadot_vault}
+      subTitle={t('Open Polkadot Vault on your phone to connect wallet')}
+      title={t('Connect Polkadot Vault')}
     />
   );
 };
 
-const ConnectParitySigner = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ConnectPolkadotVault = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
 
   };
 });
 
-export default ConnectParitySigner;
+export default ConnectPolkadotVault;

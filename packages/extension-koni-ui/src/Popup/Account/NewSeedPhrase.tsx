@@ -115,7 +115,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <Layout.WithSubHeaderOnly
         onBack={onBack}
         rightFooterButton={{
-          children: t('I have saved it somewhere safe'),
+          children: t('I have kept it somewhere safe'),
           icon: FooterIcon,
           onClick: _onCreate,
           disabled: !seedPhrase,
@@ -127,11 +127,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onClick: goHome
           }
         ]}
-        title={t<string>('Your recovery phrase')}
+        title={t('Your seed phrase')}
       >
         <div className={'container'}>
           <div className='description'>
-            {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
+            {t('Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.')}
           </div>
           <WordPhrase seedPhrase={seedPhrase} />
         </div>

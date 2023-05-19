@@ -75,7 +75,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       disabled: false,
       icon: Leaf,
       key: 'new-seed-phrase',
-      label: 'Create with new Seed Phrase',
+      label: t('Create with new seed phrase'),
       onClick: () => {
         inactiveModal(modalId);
         activeModal(NEW_ACCOUNT_MODAL);
@@ -86,13 +86,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       disabled: disableDerive,
       icon: ShareNetwork,
       key: 'derive-account',
-      label: 'Create with existing Seed Phrase',
+      label: t('Derive from an existing account'),
       onClick: () => {
         inactiveModal(modalId);
         activeModal(DERIVE_ACCOUNT_MODAL);
       }
     }
-  ]), [activeModal, inactiveModal, disableDerive, token]);
+  ]), [activeModal, inactiveModal, disableDerive, t, token]);
 
   return (
     <SwModal
@@ -105,7 +105,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         icon: <CloseIcon />,
         onClick: onCancel
       }}
-      title={t<string>('Create new account')}
+      title={t<string>('Create a new account ')}
     >
       <div className='items-container'>
         {items.map((item) => {
@@ -116,7 +116,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               onClick={item.disabled ? undefined : item.onClick}
             >
               <SettingItemSelection
-                label={t<string>(item.label)}
+                label={item.label}
                 leftItemIcon={renderIcon(item)}
               />
             </div>

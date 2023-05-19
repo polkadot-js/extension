@@ -85,7 +85,6 @@ function renderModalTrigger (item: SelectionItemType) {
   );
 }
 
-// todo: may update loading for theme
 type LoadingMap = {
   language: boolean;
   browserConfirmationType: boolean;
@@ -119,7 +118,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         key: ThemeNames.LIGHT,
         leftIcon: Sun,
         leftIconBgColor: token.colorPrimary,
-        title: t('Light theme (coming soon)'),
+        title: t('Light theme'),
         disabled: true
       }
     ];
@@ -238,7 +237,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               key: 'languages-trigger',
               leftIcon: GlobeHemisphereEast,
               leftIconBgColor: token['green-6'],
-              title: t('Languages')
+              title: t('Language')
             })}
             disabled={loadingMap.language}
             id='languages-select-modal'
@@ -250,7 +249,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             selected={language}
             shape='round'
             size='small'
-            title={t('Languages')}
+            title={t('Language')}
           />
 
           <SelectModal
@@ -260,7 +259,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               key: 'browser-confirmation-type-trigger',
               leftIcon: BellSimpleRinging,
               leftIconBgColor: token['volcano-6'],
-              title: t('Browser confirmation type')
+              title: t('Browser notification type')
             })}
             disabled={loadingMap.browserConfirmationType}
             id='browser-confirmation-type-select-modal'
@@ -272,7 +271,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             selected={browserConfirmationType}
             shape='round'
             size='small'
-            title={t('Browser confirmation type')}
+            title={t('Browser notification type')}
           />
         </div>
       </Layout.WithSubHeaderOnly>

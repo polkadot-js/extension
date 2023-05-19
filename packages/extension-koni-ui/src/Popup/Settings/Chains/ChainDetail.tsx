@@ -38,12 +38,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const showNotification = useNotification();
   const [form] = Form.useForm<ChainDetailForm>();
   const { handleSimpleConfirmModal } = useConfirmModal({
-    title: t<string>('Delete chain'),
+    title: t<string>('Delete network'),
     maskClosable: true,
     closable: true,
     type: 'error',
-    subTitle: t<string>('You are about to delete this chain'),
-    content: t<string>('Confirm delete this chain'),
+    subTitle: t<string>('You are about to delete this network'),
+    content: t<string>('Confirm delete this network'),
     okText: t<string>('Remove')
   });
 
@@ -99,7 +99,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             if (result) {
               navigate(-1);
               showNotification({
-                message: t('Deleted chain successfully')
+                message: t('Deleted network successfully')
               });
             } else {
               showNotification({
@@ -194,7 +194,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
         if (result) {
           showNotification({
-            message: t('Updated chain successfully')
+            message: t('Updated network successfully')
           });
           navigate(-1);
         } else {
@@ -288,7 +288,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderCenter={true}
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
-        title={t<string>('Chain detail')}
+        title={t<string>('Network detail')}
       >
         <div className={'chain_detail__container'}>
           <Form
@@ -328,7 +328,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <Col span={16}>
                   <Field
                     content={chainInfo.name}
-                    placeholder={t('Chain name')}
+                    placeholder={t('Network name')}
                     prefix={<Icon
                       customSize={'24px'}
                       iconColor={token['gray-4']}
@@ -336,7 +336,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       type={'phosphor'}
                       weight={'bold'}
                     />}
-                    tooltip={t('Chain name')}
+                    tooltip={t('Network name')}
                     tooltipPlacement={'topLeft'}
                   />
                 </Col>
@@ -398,8 +398,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <Col span={!isPureEvmChain ? 12 : 24}>
                   <Field
                     content={chainTypeString()}
-                    placeholder={t('Chain type')}
-                    tooltip={t('Chain type')}
+                    placeholder={t('Network type')}
+                    tooltip={t('Network type')}
                     tooltipPlacement={'topLeft'}
                   />
                 </Col>

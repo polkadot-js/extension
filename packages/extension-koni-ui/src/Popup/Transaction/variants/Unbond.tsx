@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NominationInfo, NominatorMetadata, RequestStakePoolingUnbonding, RequestUnbondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { getValidatorLabel, isActionFromValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { AccountSelector, AmountInput, NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
@@ -264,8 +264,9 @@ const Component: React.FC<Props> = (props: Props) => {
                     name={FormFieldName.VALIDATOR}
                   >
                     <NominationSelector
+                      chain={chain}
                       disabled={!from}
-                      label={t('Select collator')}
+                      label={t(`Select ${getValidatorLabel(chain)}`)}
                       nominators={ from ? nominatorMetadata?.nominations || [] : []}
                     />
                   </Form.Item>
@@ -294,7 +295,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <div className={CN('text-light-4', { mt: mustChooseValidator })}>
               {
                 t(
-                  'Once unbonded, your funds would be available after {{time}}.',
+                  'Once unbonded, your funds would be available for withdrawal after {{time}}.',
                   {
                     replace:
                       {
@@ -322,7 +323,7 @@ const Component: React.FC<Props> = (props: Props) => {
           loading={loading}
           onClick={onPreCheckReadOnly(form.submit)}
         >
-          {t('Submit')}
+          {t('Unbond')}
         </Button>
       </TransactionFooter>
     </>

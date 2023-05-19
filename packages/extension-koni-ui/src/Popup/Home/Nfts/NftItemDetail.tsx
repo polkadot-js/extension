@@ -198,7 +198,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           </div>
 
           <div className={'nft_item_detail__info_container'}>
-            <div className={'nft_item_detail__section_title'}>{t<string>('NFT information')}</div>
+            <div className={'nft_item_detail__section_title'}>{t<string>('NFT details')}</div>
             {
               nftItem.description && (
                 <div
@@ -237,7 +237,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
             <Field
               content={originChainInfo.name}
-              label={t<string>('Chain')}
+              label={t<string>('Network')}
               prefix={originChainLogo()}
             />
           </div>
@@ -275,7 +275,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             />}
             onClick={onClickSend}
           >
-            <span className={'nft_item_detail__send_text'}>Send</span>
+            <span className={'nft_item_detail__send_text'}>{t('Send')}</span>
           </Button>
         </div>
 

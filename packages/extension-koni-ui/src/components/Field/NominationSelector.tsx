@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NominationInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { StakingNominationItem } from '@subwallet/extension-koni-ui/components';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
@@ -20,6 +21,7 @@ import GeneralEmptyList from '../GeneralEmptyList';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   nominators: NominationInfo[];
+  chain: string
 }
 
 const SORTING_MODAL_ID = 'nominated-sorting-modal';
@@ -35,7 +37,7 @@ const renderItem = (item: NominationInfo, isSelected: boolean) => (
 
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className = '', disabled, id = 'nomination-selector', label, nominators, placeholder, statusHelp, value } = props;
+  const { chain = '', className, disabled, id = 'nomination-selector', label, nominators, placeholder, statusHelp, value } = props;
   const { activeModal } = useContext(ModalContext);
 
   const filteredItems = useMemo(() => {
@@ -110,7 +112,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         }}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
-        searchPlaceholder={t<string>('Search validator')}
+        searchPlaceholder={t<string>(`Search ${getValidatorLabel(chain)}`)}
         selected={value || ''}
         statusHelp={statusHelp}
         title={label || placeholder || t('Select validator')}

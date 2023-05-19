@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import AvatarGroup, { BaseAccountInfo } from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
@@ -20,10 +21,11 @@ type Props = ThemeProps & {
   onClick: () => void;
   disabled?: boolean;
   loading?: boolean;
+  chain: string;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, disabled, label, loading, onClick, placeholder, value } = props;
+  const { chain, className, disabled, label, loading, onClick, placeholder, value } = props;
   const { t } = useTranslation();
 
   const addressList = useMemo(() => {
@@ -44,15 +46,17 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [value]);
 
+  const validatorLabel = useMemo(() => `${getValidatorLabel(chain).charAt(0).toLowerCase() + getValidatorLabel(chain).substr(1)}`, [chain]);
+
   const renderContent = () => {
     if (!value) {
-      return placeholder || t('Selected validator');
+      return placeholder || (t('Select') + ' ' + t(validatorLabel));
     }
 
     const valueList = value.split(',');
 
     if (valueList.length > 1) {
-      return t(`Selected ${valueList.length} validator`);
+      return t('Select') + ` ${valueList.length} ` + t(validatorLabel);
     }
 
     return valueList[0].split('___')[1] || toShort(valueList[0].split('___')[0]);

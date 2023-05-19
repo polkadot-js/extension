@@ -70,12 +70,12 @@ const Component: React.FC<Props> = (props: Props) => {
       <div className={CN('confirmation-content', className)}>
         <ConfirmationGeneralInfo request={request} />
         <div className='title'>
-          { isMessage ? t('Signature request') : t('Approve request')}
+          { isMessage ? t('Signature required') : t('Transaction request')}
         </div>
         <div className='description'>
           <span>{t('This feature is not available for')}</span>
           <span className='highlight'>&nbsp;{accountTitle}</span>
-          <span>.&nbsp;{t('Please click choose another account.')}</span>
+          <span>.&nbsp;{t('Please change to another account type.')}</span>
         </div>
         <AccountItemWithName
           accountName={account?.name}

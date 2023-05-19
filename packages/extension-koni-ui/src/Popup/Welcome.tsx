@@ -11,7 +11,7 @@ import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -25,34 +25,34 @@ interface WelcomeButtonItem {
   description: string;
 }
 
-const items: WelcomeButtonItem[] = [
-  {
-    description: 'Create a new account with SubWallet',
-    icon: PlusCircle,
-    id: CREATE_ACCOUNT_MODAL,
-    schema: 'primary',
-    title: 'Create a new account'
-  },
-  {
-    description: 'Import an existing account',
-    icon: FileArrowDown,
-    id: IMPORT_ACCOUNT_MODAL,
-    schema: 'secondary',
-    title: 'Import an account'
-  },
-  {
-    description: 'Attach an account from external wallet',
-    icon: Swatches,
-    id: ATTACH_ACCOUNT_MODAL,
-    schema: 'secondary',
-    title: 'Attach an account'
-  }
-];
-
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
+
+  const items = useMemo((): WelcomeButtonItem[] => [
+    {
+      description: t('Create a new account with SubWallet'),
+      icon: PlusCircle,
+      id: CREATE_ACCOUNT_MODAL,
+      schema: 'primary',
+      title: t('Create a new account')
+    },
+    {
+      description: t('Import an existing account'),
+      icon: FileArrowDown,
+      id: IMPORT_ACCOUNT_MODAL,
+      schema: 'secondary',
+      title: t('Import an account')
+    },
+    {
+      description: t('Attach an account without private key'),
+      icon: Swatches,
+      id: ATTACH_ACCOUNT_MODAL,
+      schema: 'secondary',
+      title: t('Attach an account')
+    }
+  ], [t]);
 
   const openModal = useCallback((id: string) => {
     return () => {
@@ -103,8 +103,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 schema={item.schema}
               >
                 <div className='welcome-import-button-content'>
-                  <div className='welcome-import-button-title'>{t(item.title)}</div>
-                  <div className='welcome-import-button-description'>{t(item.description)}</div>
+                  <div className='welcome-import-button-title'>{item.title}</div>
+                  <div className='welcome-import-button-description'>{item.description}</div>
                 </div>
               </Button>
             ))

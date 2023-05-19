@@ -23,7 +23,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import ChainLogoMap from '../../../assets/logo';
+import DefaultLogosMap from '../../../assets/logo';
 
 const FooterIcon = (
   <Icon
@@ -128,7 +128,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 <Image
                   height={56}
                   shape='squircle'
-                  src={ChainLogoMap.subwallet}
+                  src={DefaultLogosMap.subwallet}
                   width={56}
                 />
               )}

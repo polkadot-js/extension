@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ProjectLogos } from '@subwallet/extension-koni-ui/assets/logo';
+import { DefaultLogosMap } from '@subwallet/extension-koni-ui/assets/logo';
 
 const SwLogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -30,10 +30,10 @@ const SwLogosMap: Record<string, string> = {
   subwallet: require('./256.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   avatar_placeholder: require('./avatar_placeholder.png'),
-  default: ProjectLogos.default,
-  transak: ProjectLogos.transak,
-  onramper: ProjectLogos.onramper,
-  moonpay: ProjectLogos.moonpay
+  default: DefaultLogosMap.default,
+  transak: DefaultLogosMap.transak,
+  onramper: DefaultLogosMap.onramper,
+  moonpay: DefaultLogosMap.moonpay
 };
 
 export default SwLogosMap;

@@ -470,6 +470,7 @@ export default class KoniTabs {
         const [existedNetworkSlug, existedChainInfo] = this.#koniState.findNetworkKeyByChainId(chainIdNum);
 
         if (existedNetworkSlug && existedChainInfo && existedChainInfo?.evmInfo) {
+          const rs = await this.switchEvmChain(id, url, { method: 'wallet_switchEthereumChain', params: [{ chainId }] });
           const evmInfo = existedChainInfo.evmInfo;
           const substrateInfo = existedChainInfo.substrateInfo;
           const chainState = this.#koniState.getChainStateByKey(existedNetworkSlug);
@@ -495,7 +496,7 @@ export default class KoniTabs {
             }
           });
 
-          return await this.switchEvmChain(id, url, { method: 'wallet_switchEthereumChain', params: [{ chainId }] });
+          return rs;
         } else if (rpcUrls && chainName) {
           const filteredUrls = rpcUrls.filter((targetString) => {
             let url;

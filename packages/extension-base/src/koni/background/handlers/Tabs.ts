@@ -470,33 +470,31 @@ export default class KoniTabs {
         const [existedNetworkSlug, existedChainInfo] = this.#koniState.findNetworkKeyByChainId(chainIdNum);
 
         if (existedNetworkSlug && existedChainInfo && existedChainInfo?.evmInfo) {
-          const rs = await this.switchEvmChain(id, url, { method: 'wallet_switchEthereumChain', params: [{ chainId }] });
-          const evmInfo = existedChainInfo.evmInfo;
-          const substrateInfo = existedChainInfo.substrateInfo;
-          const chainState = this.#koniState.getChainStateByKey(existedNetworkSlug);
-
-          await this.#koniState.addNetworkConfirm(id, url, {
-            mode: 'update',
-            chainSpec: {
-              evmChainId: evmInfo.evmChainId,
-              decimals: evmInfo.decimals,
-              existentialDeposit: evmInfo.existentialDeposit,
-              genesisHash: substrateInfo?.genesisHash || '',
-              paraId: substrateInfo?.paraId || null,
-              addressPrefix: substrateInfo?.addressPrefix || 0
-            },
-            chainEditInfo: {
-              blockExplorer: blockExplorerUrls?.[0],
-              slug: existedNetworkSlug,
-              currentProvider: chainState.currentProvider,
-              providers: existedChainInfo.providers,
-              symbol: evmInfo.symbol,
-              chainType: 'EVM',
-              name: existedChainInfo.name
-            }
-          });
-
-          return rs;
+          return await this.switchEvmChain(id, url, { method: 'wallet_switchEthereumChain', params: [{ chainId }] });
+          // const evmInfo = existedChainInfo.evmInfo;
+          // const substrateInfo = existedChainInfo.substrateInfo;
+          // const chainState = this.#koniState.getChainStateByKey(existedNetworkSlug);
+          //
+          // return await this.#koniState.addNetworkConfirm(id, url, {
+          //   mode: 'update',
+          //   chainSpec: {
+          //     evmChainId: evmInfo.evmChainId,
+          //     decimals: evmInfo.decimals,
+          //     existentialDeposit: evmInfo.existentialDeposit,
+          //     genesisHash: substrateInfo?.genesisHash || '',
+          //     paraId: substrateInfo?.paraId || null,
+          //     addressPrefix: substrateInfo?.addressPrefix || 0
+          //   },
+          //   chainEditInfo: {
+          //     blockExplorer: blockExplorerUrls?.[0],
+          //     slug: existedNetworkSlug,
+          //     currentProvider: chainState.currentProvider,
+          //     providers: existedChainInfo.providers,
+          //     symbol: evmInfo.symbol,
+          //     chainType: 'EVM',
+          //     name: existedChainInfo.name
+          //   }
+          // });
         } else if (rpcUrls && chainName) {
           const filteredUrls = rpcUrls.filter((targetString) => {
             let url;

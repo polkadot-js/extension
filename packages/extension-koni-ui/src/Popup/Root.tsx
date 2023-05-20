@@ -32,6 +32,7 @@ const tokenUrl = '/home/tokens';
 const loginUrl = '/keyring/login';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
+const sercurityUrl = '/settings/security';
 
 const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
@@ -106,14 +107,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       }
     } else if (!hasMasterPassword) {
       if (isNoAccount(accounts)) {
-        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl].includes(pathName)) {
+        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
           navigate(welcomeUrl);
         }
       } else {
         navigate(createPasswordUrl);
       }
     } else if (isNoAccount(accounts)) {
-      if (![...allowImportAccountUrls, welcomeUrl].includes(pathName)) {
+      if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
         navigate(welcomeUrl);
       }
     } else if (pathName === DEFAULT_ROUTER_PATH) {

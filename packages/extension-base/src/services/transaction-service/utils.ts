@@ -28,6 +28,10 @@ function getBlockExplorerTxRoute (chainInfo: _ChainInfo) {
     return 'tx';
   }
 
+  if (['aventus'].includes(chainInfo.slug)) {
+    return 'transaction';
+  }
+
   return 'extrinsic';
 }
 

@@ -1222,5 +1222,6 @@
   "Your request has been sent. You can track its progress in History tab.": "",
   "Create a new account with SubWallet": "",
   "Import an existing account": "",
-  "Attach an account without private key": ""
+  "Attach an account without private key": "",
+  "Your camera is not available": ""
 }

@@ -1,6 +1,6 @@
-    1645	Nam Phạm                      	
-    1288	AnhMTV                        	
-     805	S2kael                        	[Issue-1369] Update UI lib
+    1655	Nam Phạm                      	[Issue 1396] fix bug showing minimum join pool amount
+    1306	AnhMTV                        	
+     824	S2kael                        	[issue-1401] [Router] Allow securityUrl when no accounts
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	
@@ -11,10 +11,10 @@
       69	dominhquang                   	Fix bug UI for Staking feature
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
+      10	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
-       9	S2kael                        	
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

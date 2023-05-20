@@ -94,7 +94,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const nominations = useMemo(() => nominatorMetadata[0]?.nominations, [nominatorMetadata]);
   const isSingleSelect = useMemo(() => _isSingleSelect || !isRelayChain, [_isSingleSelect, isRelayChain]);
   const hasReturn = useMemo(() => items[0]?.expectedReturn !== undefined, [items]);
-  const validatorLabel = useMemo(() => `${getValidatorLabel(chain).charAt(0).toLowerCase() + getValidatorLabel(chain).substr(1)}`, [chain]);
 
   const sortingOptions: SortOption[] = useMemo(() => {
     const result: SortOption[] = [
@@ -159,6 +158,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [selectedFilters]);
 
   const { changeValidators, onApplyChangeValidators, onCancelSelectValidator, onChangeSelectedValidator, onInitValidators } = useSelectValidators(id, maxCount, onChange, isSingleSelect);
+  const validatorLabel = useMemo(() => `${getValidatorLabel(chain).charAt(0).toLowerCase() + getValidatorLabel(chain).substr(1)}${changeValidators.length > 1 ? 's' : ''}`, [chain, changeValidators]);
 
   const onResetSort = useCallback(() => {
     setSortSelection(SortKey.DEFAULT);
@@ -248,7 +248,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       <SelectValidatorInput
         chain={chain}
         disabled={!chain || !from}
-        label={t('Select') + ' ' + t(validatorLabel)}
+        label={t('Select') + ' ' + t(getValidatorLabel(chain).toLowerCase())}
         loading={loading}
         onClick={onActiveValidatorSelector}
         value={value || ''}
@@ -288,7 +288,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             activeModal(SORTING_MODAL_ID);
           }
         }}
-        title={t('Select') + ' ' + t(validatorLabel)}
+        title={t('Select') + ' ' + t(getValidatorLabel(chain).toLowerCase())}
       >
         <SwList.Section
           actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
@@ -301,7 +301,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           renderWhenEmpty={renderEmpty}
           searchFunction={searchFunction}
           searchMinCharactersCount={2}
-          searchPlaceholder={t<string>(`Search ${getValidatorLabel(chain)}`)}
+          searchPlaceholder={t<string>(`Search ${getValidatorLabel(chain).toLowerCase()}`)}
           // showActionBtn
         />
       </SwModal>

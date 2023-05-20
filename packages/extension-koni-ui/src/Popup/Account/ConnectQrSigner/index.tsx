@@ -149,7 +149,7 @@ const Component: React.FC<Props> = (props: Props) => {
               className='link'
               href={instructionUrl}
             >
-              {t('this instructions')}
+              {t('this instruction')}
             </a>
             <span>,&nbsp;</span>
             <span>{t('for more details.')}</span>

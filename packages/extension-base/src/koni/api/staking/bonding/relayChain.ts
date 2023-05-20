@@ -38,7 +38,7 @@ export function validateRelayUnbondingCondition (amount: string, chainStakingMet
   const bnActiveStake = new BN(nominatorMetadata.activeStake);
   const bnRemainingStake = bnActiveStake.sub(new BN(amount));
 
-  const minStake = new BN(chainStakingMetadata.minPoolBonding || '0');
+  const minStake = new BN(chainStakingMetadata.minJoinNominationPool || '0');
 
   if (!(bnRemainingStake.isZero() || bnRemainingStake.gte(minStake))) {
     errors.push(new TransactionError(StakingTxErrorType.INVALID_ACTIVE_STAKE));
@@ -56,7 +56,7 @@ export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: str
   // amount >= min stake
   const errors: TransactionError[] = [];
   let bnTotalStake = new BN(amount);
-  const bnMinStake = new BN(chainStakingMetadata.minPoolBonding || '0');
+  const bnMinStake = new BN(chainStakingMetadata.minJoinNominationPool || '0');
 
   if (selectedPool.state !== 'Open') {
     errors.push(new TransactionError(StakingTxErrorType.INACTIVE_NOMINATION_POOL));
@@ -113,7 +113,6 @@ export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: st
 
 export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   const chain = chainInfo.slug;
-  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
   const chainApi = await substrateApi.isReady;
   const _era = await chainApi.api.query.staking.currentEra();
   const currentEra = _era.toString();
@@ -175,7 +174,6 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
     expectedReturn, // in %, annually
     inflation,
     minStake: minStake.toString(),
-    minPoolBonding: (10 ** decimals).toString(), // default is 1
     maxValidatorPerNominator: parseInt(maxNominations),
     maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
     allowCancelUnstaking: true,

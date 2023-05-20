@@ -48,7 +48,7 @@ const Component: React.FC<Props> = (props: Props) => {
             size='sm'
           />
           <div className='title'>
-            {t('Your Camera is not available')}
+            {t('Your camera is not available')}
           </div>
         </div>
         <div className='description'>

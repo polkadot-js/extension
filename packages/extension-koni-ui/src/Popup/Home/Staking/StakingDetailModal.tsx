@@ -37,7 +37,7 @@ export const getUnstakingInfo = (unstakings: UnstakingInfo[], address: string) =
 };
 
 const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominatorMetadata, rewardItem, staking }: Props) => {
-  const { expectedReturn, minPoolBonding, minStake, unstakingPeriod } = chainStakingMetadata;
+  const { expectedReturn, minJoinNominationPool, minStake, unstakingPeriod } = chainStakingMetadata;
   const { activeStake, address, chain, nominations, type, unstakings } = nominatorMetadata;
   const showingOption = isShowNominationByValidator(chain);
   const isRelayChain = _STAKING_CHAIN_GROUP.relay.includes(chain);
@@ -302,7 +302,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
             decimals={decimals}
             label={t('Minimum active')}
             suffix={staking.nativeToken}
-            value={nominatorMetadata.type === StakingType.NOMINATED ? minStake : (minPoolBonding || '0')}
+            value={nominatorMetadata.type === StakingType.NOMINATED ? minStake : (minJoinNominationPool || '0')}
             valueColorSchema={'gray'}
           />
 

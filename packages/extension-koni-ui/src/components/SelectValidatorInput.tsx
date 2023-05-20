@@ -46,7 +46,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [value]);
 
-  const validatorLabel = useMemo(() => `${getValidatorLabel(chain).charAt(0).toLowerCase() + getValidatorLabel(chain).substr(1)}`, [chain]);
+  const validatorLabel = useMemo(() => `${getValidatorLabel(chain).charAt(0).toLowerCase() + getValidatorLabel(chain).substr(1)}${addressList.length > 1 ? 's' : ''}`, [addressList, chain]);
 
   const renderContent = () => {
     if (!value) {

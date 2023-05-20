@@ -1,5 +1,44 @@
 # CHANGELOG
 
+## 1.0.5
+Build date: May 20, 2023.
+
+Features & Update:
+- Detect phishing page with ChainPatrol (#1226)
+- Add policy for a master password (#1369)
+- Improve auto-lock wallet (#1731)
+- Add more search criteria (#1361)
+- Handler transaction last status when stop extension and transaction in submitting phase (#1362, #1370)
+- Update Parity Signer logo & name (#1351)
+- Spelling update (#1384)
+- Update the style of the QR code (#1389)
+- Remove some logs (#1373)
+- Update URL explorer for Subspace networks (#1348)
+- Handle case access camera setting when have no account on the wallet (#1401)
+
+Update chain list:
+- Update Tinkernet (#1)
+- Add URL and update logo for Subspace network (#10)
+- Integrate Vara network (#11)
+- Integrate Snow EVM network (#12)
+- Integrate Darwinia 2 (#19)
+- Update RPC endpoint for Mangata (#27)
+- Update Zeitgeist and Subsocial integration (#29)
+
+Bug fixed:
+- Fixed bug get balance when import multi-account (#1353)
+- UI bug when scrolling (#1336)
+- Fixed bug get balance (#1360)
+- Fixed bug get transaction’s fee (#1361)
+- Fixed bug show the WND balance (#1355)
+- Re-check staking data on Shibuya network (#1310)
+- Fixed bug the address validator auto detect to Substrate address (#1346)
+- Add support view on browser for some chain (#1381)
+- Fixed bug on Firefox browser (#1394, #1393)
+- Fixed bug import private key (#1395)
+- Fixed bug showing min pooled amount (#1396)
+
+
 ## 1.0.4
 Build date: May 12, 2023.
 

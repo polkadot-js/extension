@@ -155,7 +155,7 @@ export default class TransactionService {
       validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'Can\'t find account'));
     } else {
       if (pair.meta?.isReadOnly) {
-        validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'This is read-only account'));
+        validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'This is watch-only account'));
       }
     }
 

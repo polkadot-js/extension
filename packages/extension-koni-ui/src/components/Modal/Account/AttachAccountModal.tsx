@@ -104,7 +104,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       backgroundColor: token['green-7'],
       icon: Eye,
       key: 'attach-read-only',
-      label: t('Attach a read-only account'),
+      label: t('Attach a watch-only account'),
       onClick: onClickItem('accounts/attach-read-only')
     }
   ]), [t, token, onClickItem, onClickLedger]);

@@ -143,7 +143,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <Layout.WithSubHeaderOnly
         onBack={onBack}
         rightFooterButton={{
-          children: t('Attach read-only account'),
+          children: t('Attach watch-only account'),
           icon: FooterIcon,
           disabled: isDisable,
           onClick: onSubmit,
@@ -155,7 +155,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onClick: goHome
           }
         ]}
-        title={t<string>('Attach read-only account')}
+        title={t<string>('Attach watch-only account')}
       >
         <div className={CN('container')}>
           <div className='description'>

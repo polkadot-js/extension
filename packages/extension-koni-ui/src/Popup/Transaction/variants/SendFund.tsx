@@ -220,7 +220,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
-  const preCheckReadOnly = usePreCheckReadOnly(from, 'The account you are using is read-only, you cannot send assets with it');
+  const preCheckReadOnly = usePreCheckReadOnly(from, 'The account you are using is watch-only, you cannot send assets with it');
 
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);

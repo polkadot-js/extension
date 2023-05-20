@@ -247,6 +247,10 @@ export default class TransactionService {
     const stopByWarnings = validatedTransaction.warnings.length > 0 && !validatedTransaction.ignoreWarnings;
 
     if (stopByErrors || stopByWarnings) {
+      // @ts-ignore
+      'transaction' in validatedTransaction && delete validatedTransaction.transaction;
+      'additionalValidator' in validatedTransaction && delete validatedTransaction.additionalValidator;
+
       return validatedTransaction;
     }
 

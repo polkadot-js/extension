@@ -1,6 +1,8 @@
 // Copyright 2019-2023 @polkadot/extension-bg authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+/* global chrome */
+
 import type { MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 import type { AccountJson, AuthorizeRequest, AuthUrlInfo, AuthUrls, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types.js';

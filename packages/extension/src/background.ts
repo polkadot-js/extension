@@ -3,6 +3,8 @@
 
 // Runs in the extension background, handling all keyring access
 
+/* global chrome */
+
 import '@polkadot/extension-inject/crossenv';
 
 import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';

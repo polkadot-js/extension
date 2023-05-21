@@ -1,6 +1,8 @@
 // Copyright 2019-2023 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+/* global chrome */
+
 import type { MessageTypes, TransportRequestMessage } from '../types.js';
 
 import { assert } from '@polkadot/util';

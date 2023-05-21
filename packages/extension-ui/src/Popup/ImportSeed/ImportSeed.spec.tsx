@@ -57,6 +57,7 @@ const typeDerivationPath = async (wrapper: ReactWrapper, value: string) => {
 };
 
 // FIXME hanging
+// eslint-disable-next-line jest/no-disabled-tests
 describe.skip('ImportSeed', () => {
   let wrapper: ReactWrapper;
   const onActionStub = jest.fn();

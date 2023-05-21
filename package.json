@@ -13,6 +13,7 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
+  "type": "module",
   "version": "0.46.4-0-x",
   "versions": {
     "git": "0.46.4-0-x",
@@ -24,7 +25,7 @@
   "scripts": {
     "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
     "build:before": "yarn build:i18n",
-    "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
+    "build:i18n": "i18next-scanner --config i18next-scanner.config.cjs",
     "build:release": "polkadot-ci-ghact-build",
     "build:rollup": "polkadot-exec-rollup --config",
     "build:zip": "yarn build:zip:dst && yarn build:zip:src",
@@ -39,7 +40,7 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.74.1",
+    "@polkadot/dev": "^0.75.4",
     "@types/node": "^20.2.0",
     "i18next-scanner": "^4.2.0",
     "sinon-chrome": "^3.0.1"

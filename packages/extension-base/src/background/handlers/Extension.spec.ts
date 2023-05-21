@@ -3,15 +3,16 @@
 
 /// <reference types="@polkadot/dev-test/globals" />
 
+/* global chrome */
+
 import '@polkadot/extension-mocks/chrome';
 
-import type { ResponseSigning } from '@polkadot/extension-base/background/types';
+import type { AuthUrls, ResponseSigning } from '@polkadot/extension-base/background/types';
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
 import type { SignerPayloadJSON } from '@polkadot/types/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { AuthUrls } from '../types.js';
 
 import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
@@ -221,8 +222,10 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
+      // eslint-disable-next-line jest/valid-expect-in-promise
       tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
@@ -269,8 +272,10 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', ethPayload, { version: ethPayload.version }).sign(ethPair);
 
+      // eslint-disable-next-line jest/valid-expect-in-promise
       tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', ethPayload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
@@ -333,8 +338,10 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
+      // eslint-disable-next-line jest/valid-expect-in-promise
       tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
@@ -391,8 +398,10 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
+      // eslint-disable-next-line jest/valid-expect-in-promise
       tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
@@ -460,8 +469,10 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
+      // eslint-disable-next-line jest/valid-expect-in-promise
       tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 

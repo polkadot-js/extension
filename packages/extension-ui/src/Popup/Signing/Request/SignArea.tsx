@@ -21,7 +21,7 @@ interface Props {
   signId: string;
 }
 
-function SignArea ({ buttonText, className, error, isExternal, isFirst, setError, signId }: Props): JSX.Element {
+function SignArea ({ buttonText, className, error, isExternal, isFirst, setError, signId }: Props): React.ReactElement {
   const [savePass, setSavePass] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [password, setPassword] = useState('');
@@ -31,7 +31,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
 
   useEffect(() => {
     setIsLocked(null);
-    let timeout: NodeJS.Timeout;
+    let timeout: ReturnType<typeof setTimeout>;
 
     !isExternal && isSignLocked(signId)
       .then(({ isLocked, remainingTime }) => {

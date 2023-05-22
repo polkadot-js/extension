@@ -15,6 +15,7 @@ import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscr
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/setting-service/constants';
@@ -433,29 +434,46 @@ export default class KoniTabs {
 
     const tokenType = _tokenType === 'erc20' ? _AssetType.ERC20 : _AssetType.ERC721;
 
-    const validate = await this.#koniState.validateCustomAsset({
+    const tokenInfo: AddTokenRequestExternal = {
+      slug: '',
+      type: tokenType,
+      name: input?.options?.symbol || '',
+      contractAddress: input.options.address,
+      symbol: input?.options?.symbol || '',
+      decimals: input?.options?.decimals || 0,
+      originChain: chain,
+      contractError: false,
+      validated: false
+    };
+
+    this.#koniState.validateCustomAsset({
       type: tokenType,
       contractAddress: input.options.address,
       originChain: chain
-    });
+    })
+      .then((validate) => {
+        if (validate.contractError) {
+          tokenInfo.contractError = true;
+        } else {
+          tokenInfo.slug = validate?.existedSlug;
+          tokenInfo.name = validate.name;
+          tokenInfo.symbol = validate.symbol;
+          tokenInfo.decimals = validate.decimals;
+        }
+      })
+      .catch(() => {
+        tokenInfo.contractError = true;
+      })
+      .finally(() => {
+        tokenInfo.validated = true;
+
+        this.#koniState.requestService.updateConfirmation(id, 'addTokenRequest', tokenInfo);
+      });
 
     // Below code is comment because we will handle exited token in the ui-view
     // if (validate.isExist) {
     //   throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current token is existed');
     // } else
-    if (validate.contractError) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Contract address is invalid');
-    }
-
-    const tokenInfo: AddTokenRequestExternal = {
-      slug: validate?.existedSlug,
-      type: tokenType,
-      name: validate.name,
-      contractAddress: input.options.address,
-      symbol: validate.symbol,
-      decimals: validate.decimals,
-      originChain: chain
-    };
 
     return await this.#koniState.addTokenConfirm(id, url, tokenInfo);
   }
@@ -553,25 +571,25 @@ export default class KoniTabs {
 
           this.#koniState.validateCustomChain(provider).then((res) => {
             if (!res.success) {
-              throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid provider');
+              networkData.providerError = res.error;
+            } else {
+              networkData.chainSpec = {
+                evmChainId: res.evmChainId,
+                decimals: res.decimals,
+                existentialDeposit: res.existentialDeposit,
+                genesisHash: res.genesisHash,
+                paraId: res.paraId,
+                addressPrefix: res.addressPrefix ? parseInt(res.addressPrefix) : 0
+              };
+
+              networkData.chainEditInfo.symbol = res.symbol;
+              networkData.chainEditInfo.name = res.name;
             }
-
-            networkData.chainSpec = {
-              evmChainId: res.evmChainId,
-              decimals: res.decimals,
-              existentialDeposit: res.existentialDeposit,
-              genesisHash: res.genesisHash,
-              paraId: res.paraId,
-              addressPrefix: res.addressPrefix ? parseInt(res.addressPrefix) : 0
-            };
-
-            networkData.chainEditInfo.symbol = res.symbol;
-            networkData.chainEditInfo.name = res.name;
+          }).catch(() => {
+            networkData.providerError = _CHAIN_VALIDATION_ERROR.NONE;
+          }).finally(() => {
             networkData.unconfirmed = false;
-
             this.#koniState.requestService.updateConfirmation(id, 'addNetworkRequest', networkData);
-          }).catch((e) => {
-            throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid provider', (e as Error).message);
           });
 
           return await this.#koniState.addNetworkConfirm(id, url, networkData);

@@ -9,11 +9,11 @@ import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { detectThemeAvatar, toShort } from '@subwallet/extension-koni-ui/utils';
-import { Button, Col, Field, Icon, Image, Row, Tooltip } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, Col, Field, Icon, Image, Row } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import { CheckCircle, CopySimple, XCircle } from 'phosphor-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -32,7 +32,7 @@ const handleCancel = async ({ id }: ConfirmationDefinitions['addTokenRequest'][0
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, request } = props;
-  const { payload: { contractAddress, decimals, originChain, slug, symbol, type } } = request;
+  const { payload: { contractAddress, contractError, decimals, originChain, slug, symbol, type, validated } } = request;
 
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
@@ -61,6 +61,27 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [request]);
 
   const onCopy = useCopy(contractAddress);
+
+  const contractSuffix = useMemo(() => {
+    if (!validated) {
+      return <ActivityIndicator size={token.sizeMD} />;
+    }
+
+    return (
+      <Button
+        className='copy-btn'
+        icon={(
+          <Icon
+            phosphorIcon={CopySimple}
+            type='phosphor'
+          />
+        )}
+        onClick={onCopy}
+        size='xs'
+        type='ghost'
+      />
+    );
+  }, [validated, onCopy, token]);
 
   return (
     <>
@@ -93,61 +114,41 @@ const Component: React.FC<Props> = (props: Props) => {
               value={contractAddress}
             />
           }
-          suffix={(
-            <Button
-              className='copy-btn'
-              icon={(
-                <Icon
-                  phosphorIcon={CopySimple}
-                  type='phosphor'
-                />
-              )}
-              onClick={onCopy}
-              size='xs'
-              type='ghost'
-            />
-          )}
+          suffix={contractSuffix}
         />
         <Row gutter={token.margin}>
           <Col span={12}>
-            <Tooltip
-              placement='topLeft'
-              title={t<string>('Symbol')}
-            >
-              <div>
-                <Field
-                  content={symbol}
-                  placeholder={t<string>('Symbol')}
-                  prefix={
-                    <SwAvatar
-                      identPrefix={42}
-                      size={token.fontSizeXL}
-                      theme={detectThemeAvatar(contractAddress)}
-                      value={contractAddress}
-                    />
-                  }
+            <Field
+              content={symbol}
+              placeholder={t<string>('Symbol')}
+              prefix={
+                <SwAvatar
+                  identPrefix={42}
+                  size={token.fontSizeXL}
+                  theme={detectThemeAvatar(contractAddress)}
+                  value={contractAddress}
                 />
-              </div>
-            </Tooltip>
+              }
+              tooltip={t<string>('Symbol')}
+              tooltipPlacement='topLeft'
+            />
           </Col>
           <Col span={12}>
-            <Tooltip
-              placement='topLeft'
-              title={t<string>('Decimals')}
-            >
-              <div>
-                <Field
-                  content={decimals === -1 ? '' : decimals}
-                  placeholder={t<string>('Decimals')}
-                />
-              </div>
-            </Tooltip>
+            <Field
+              content={decimals === -1 ? '' : decimals}
+              placeholder={t<string>('Decimals')}
+              tooltip={t<string>('Decimals')}
+              tooltipPlacement='topLeft'
+            />
           </Col>
         </Row>
       </div>
       <div className='confirmation-footer'>
         {slug && (<div className='warning-message'>
           {t<string>('The token already exists.')}
+        </div>)}
+        {contractError && (<div className='error-message'>
+          {t<string>('The token contract is invalid.')}
         </div>)}
         <Button
           disabled={loading}
@@ -163,7 +164,7 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Cancel')}
         </Button>
         <Button
-          disabled={!!slug}
+          disabled={!!slug || !validated || contractError}
           icon={(
             <Icon
               phosphorIcon={CheckCircle}

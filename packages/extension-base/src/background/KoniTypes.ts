@@ -1197,6 +1197,8 @@ export interface AddTokenRequestExternal {
   name: string;
   symbol: string;
   decimals: number;
+  validated: boolean;
+  contractError: boolean;
 }
 
 export interface ConfirmationDefinitions {

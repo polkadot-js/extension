@@ -10,6 +10,7 @@ import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
+import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 
 export interface _DataMap {
   chainInfoMap: Record<string, _ChainInfo>,
@@ -115,6 +116,7 @@ export type _NetworkUpsertParams = {
     decimals: number
   },
   unconfirmed?: boolean;
+  providerError?: _CHAIN_VALIDATION_ERROR;
 }
 
 export const _CUSTOM_PREFIX = 'custom-';

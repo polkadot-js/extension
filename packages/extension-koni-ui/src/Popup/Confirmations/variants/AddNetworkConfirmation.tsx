@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ConfirmationDefinitions, ConfirmationResult } from '@subwallet/extension-base/background/KoniTypes';
+import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { ConfirmationGeneralInfo } from '@subwallet/extension-koni-ui/components';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Button, Col, Field, Icon, Row } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, Globe, ShareNetwork, XCircle } from 'phosphor-react';
-import React, { useCallback, useState } from 'react';
+import { CheckCircle, Globe, ShareNetwork, WifiHigh, WifiSlash, XCircle } from 'phosphor-react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
 
@@ -26,13 +27,26 @@ const handleCancel = async ({ id }: ConfirmationDefinitions['addNetworkRequest']
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, request } = props;
-  const { payload: { chainEditInfo, chainSpec, mode, unconfirmed } } = request;
+  const { payload: { chainEditInfo, chainSpec, mode, providerError, unconfirmed } } = request;
 
   const { t } = useTranslation();
 
   const { token } = useTheme() as Theme;
 
   const [loading, setLoading] = useState(false);
+
+  const handleErrorMessage = useCallback((errorCode: _CHAIN_VALIDATION_ERROR) => {
+    switch (errorCode) {
+      case _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE:
+        return t('Cannot connect to this provider');
+      case _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER:
+        return t('This chain has already been added');
+      case _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN:
+        return t('This chain has already been added');
+      default:
+        return t('Error validating this provider');
+    }
+  }, [t]);
 
   const onCancel = useCallback(() => {
     setLoading(true);
@@ -52,6 +66,32 @@ const Component: React.FC<Props> = (props: Props) => {
     }, 300);
   }, [request]);
 
+  const providerSuffix = useMemo(() => {
+    if (unconfirmed) {
+      return <ActivityIndicator size={token.sizeMD} />;
+    }
+
+    if (providerError) {
+      return (
+        <Icon
+          iconColor={token.colorError}
+          phosphorIcon={WifiSlash}
+          size='sm'
+          weight='bold'
+        />
+      );
+    }
+
+    return (
+      <Icon
+        iconColor={token.colorSuccess}
+        phosphorIcon={WifiHigh}
+        size='sm'
+        weight='bold'
+      />
+    );
+  }, [token, providerError, unconfirmed]);
+
   return (
     <>
       <div className={CN(className, 'confirmation-content')}>
@@ -68,8 +108,8 @@ const Component: React.FC<Props> = (props: Props) => {
               weight={'bold'}
             />
           )}
-          suffix={unconfirmed && <ActivityIndicator size={'20px'} />}
-          tooltip={t<string>('Provider URL')}
+          suffix={providerSuffix}
+          tooltip={ providerError ? handleErrorMessage(providerError) : t<string>('Provider URL')}
           tooltipPlacement='topLeft'
         />
         <Row gutter={token.paddingSM}>
@@ -154,7 +194,7 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Cancel')}
         </Button>
         <Button
-          disabled={mode === 'update' || unconfirmed}
+          disabled={mode === 'update' || unconfirmed || !!providerError}
           icon={(
             <Icon
               phosphorIcon={CheckCircle}

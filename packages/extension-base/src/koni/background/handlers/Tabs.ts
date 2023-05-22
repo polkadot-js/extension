@@ -8,13 +8,14 @@ import { EvmProviderError } from '@subwallet/extension-base/background/errors/Ev
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, RequestEvmProviderSend, RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, RequestEvmProviderSend, RequestSettingsType, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesSign';
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/setting-service/constants';
 import { canDerive } from '@subwallet/extension-base/utils';
@@ -463,7 +464,7 @@ export default class KoniTabs {
     const input = params as AddNetworkRequestExternal[];
 
     if (input && input.length > 0) {
-      const { blockExplorerUrls, chainId, chainName, rpcUrls } = input[0];
+      const { blockExplorerUrls, chainId, chainName, nativeCurrency: { decimals, symbol }, rpcUrls } = input[0];
 
       if (chainId) {
         const chainIdNum = parseInt(chainId, 16);
@@ -514,15 +515,21 @@ export default class KoniTabs {
 
           const provider = filteredUrls[0];
 
-          const chainInfo = await this.#koniState.validateCustomChain(provider);
-
-          if (!chainInfo.success) {
-            throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid provider');
-          }
+          const chainInfo: ValidateNetworkResponse = {
+            existentialDeposit: '0',
+            genesisHash: '',
+            success: true,
+            addressPrefix: '',
+            evmChainId: chainIdNum,
+            decimals: decimals,
+            symbol: symbol,
+            paraId: null,
+            name: chainName
+          };
 
           const newProviderKey = _generateCustomProviderKey(0);
 
-          return await this.#koniState.addNetworkConfirm(id, url, {
+          const networkData: _NetworkUpsertParams = {
             mode: 'insert',
             chainSpec: {
               evmChainId: chainInfo.evmChainId,
@@ -540,8 +547,34 @@ export default class KoniTabs {
               symbol: chainInfo.symbol,
               chainType: 'EVM',
               name: chainInfo.name
+            },
+            unconfirmed: true
+          };
+
+          this.#koniState.validateCustomChain(provider).then((res) => {
+            if (!res.success) {
+              throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid provider');
             }
+
+            networkData.chainSpec = {
+              evmChainId: res.evmChainId,
+              decimals: res.decimals,
+              existentialDeposit: res.existentialDeposit,
+              genesisHash: res.genesisHash,
+              paraId: res.paraId,
+              addressPrefix: res.addressPrefix ? parseInt(res.addressPrefix) : 0
+            };
+
+            networkData.chainEditInfo.symbol = res.symbol;
+            networkData.chainEditInfo.name = res.name;
+            networkData.unconfirmed = false;
+
+            this.#koniState.requestService.updateConfirmation(id, 'addNetworkRequest', networkData);
+          }).catch((e) => {
+            throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid provider', (e as Error).message);
           });
+
+          return await this.#koniState.addNetworkConfirm(id, url, networkData);
         } else {
           throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid provider');
         }

@@ -113,7 +113,8 @@ export type _NetworkUpsertParams = {
     // Common
     existentialDeposit: string,
     decimals: number
-  }
+  },
+  unconfirmed?: boolean;
 }
 
 export const _CUSTOM_PREFIX = 'custom-';

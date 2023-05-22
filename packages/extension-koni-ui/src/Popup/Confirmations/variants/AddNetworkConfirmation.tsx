@@ -5,7 +5,7 @@ import { ConfirmationDefinitions, ConfirmationResult } from '@subwallet/extensio
 import { ConfirmationGeneralInfo } from '@subwallet/extension-koni-ui/components';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Col, Field, Icon, Row, Tooltip } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, Col, Field, Icon, Row } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, Globe, ShareNetwork, XCircle } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
@@ -26,7 +26,7 @@ const handleCancel = async ({ id }: ConfirmationDefinitions['addNetworkRequest']
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, request } = props;
-  const { payload: { chainEditInfo, chainSpec, mode } } = request;
+  const { payload: { chainEditInfo, chainSpec, mode, unconfirmed } } = request;
 
   const { t } = useTranslation();
 
@@ -56,124 +56,85 @@ const Component: React.FC<Props> = (props: Props) => {
     <>
       <div className={CN(className, 'confirmation-content')}>
         <ConfirmationGeneralInfo request={request} />
-        <Tooltip
-          placement='topLeft'
-          title={t<string>('Provider URL')}
-        >
-          <div>
+        <Field
+          content={chainEditInfo.providers[chainEditInfo.currentProvider]}
+          placeholder={t<string>('Provider URL')}
+          prefix={(
+            <Icon
+              customSize={'24px'}
+              iconColor={token['gray-4']}
+              phosphorIcon={ShareNetwork}
+              type={'phosphor'}
+              weight={'bold'}
+            />
+          )}
+          suffix={unconfirmed && <ActivityIndicator size={'20px'} />}
+          tooltip={t<string>('Provider URL')}
+          tooltipPlacement='topLeft'
+        />
+        <Row gutter={token.paddingSM}>
+          <Col span={16}>
             <Field
-              content={chainEditInfo.providers[chainEditInfo.currentProvider]}
-              placeholder={t<string>('Provider URL')}
+              content={chainEditInfo.name || ''}
+              placeholder={t('Network name')}
               prefix={(
                 <Icon
                   customSize={'24px'}
                   iconColor={token['gray-4']}
-                  phosphorIcon={ShareNetwork}
+                  phosphorIcon={Globe}
                   type={'phosphor'}
                   weight={'bold'}
                 />
               )}
+              tooltip={t<string>('Network name')}
+              tooltipPlacement='topLeft'
             />
-          </div>
-        </Tooltip>
-        <Row gutter={token.paddingSM}>
-          <Col span={16}>
-            <Tooltip
-              placement='topLeft'
-              title={t<string>('Network name')}
-            >
-              <div>
-                <Field
-                  content={chainEditInfo.name || ''}
-                  placeholder={t('Network name')}
-                  prefix={(
-                    <Icon
-                      customSize={'24px'}
-                      iconColor={token['gray-4']}
-                      phosphorIcon={Globe}
-                      type={'phosphor'}
-                      weight={'bold'}
-                    />
-                  )}
-                />
-              </div>
-            </Tooltip>
           </Col>
           <Col span={8}>
-            <Tooltip
-              placement='topLeft'
-              title={t<string>('Symbol')}
-            >
-              <div>
-                <Field
-                  content={chainEditInfo.symbol || ''}
-                  placeholder={t('Symbol')}
-                />
-              </div>
-            </Tooltip>
+            <Field
+              content={chainEditInfo.symbol || ''}
+              placeholder={t('Symbol')}
+              tooltip={t<string>('Symbol')}
+              tooltipPlacement='topLeft'
+            />
           </Col>
         </Row>
         <Row gutter={token.paddingSM}>
           <Col span={12}>
-            <Tooltip
-              placement='topLeft'
-              title={t<string>('Decimals')}
-            >
-              <div>
-                <Field
-                  content={chainSpec?.decimals || 0}
-                  placeholder={t('Decimals')}
-                />
-              </div>
-            </Tooltip>
+            <Field
+              content={chainSpec?.decimals || 0}
+              placeholder={t('Decimals')}
+              tooltip={t<string>('Decimals')}
+              tooltipPlacement='topLeft'
+            />
           </Col>
           <Col span={12}>
-            <Tooltip
-              placement='topLeft'
-              title={t<string>('Chain ID')}
-            >
-              <div>
-                <Field
-                  content={chainSpec?.evmChainId || 0}
-                  placeholder={t('Chain ID')}
-                />
-              </div>
-            </Tooltip>
+            <Field
+              content={chainSpec?.evmChainId || 0}
+              placeholder={t('Chain ID')}
+              tooltip={t<string>('Chain ID')}
+              tooltipPlacement='topLeft'
+            />
           </Col>
         </Row>
-        <Tooltip
-          placement='topLeft'
-          title={t<string>('Network type')}
-        >
-          <div>
-            <Field
-              content={chainEditInfo.chainType}
-              placeholder={t('Network type')}
-            />
-          </div>
-        </Tooltip>
-        <Tooltip
-          placement='topLeft'
-          title={t<string>('Block explorer')}
-        >
-          <div>
-            <Field
-              content={chainEditInfo.blockExplorer}
-              placeholder={t('Block explorer')}
-            />
-          </div>
-        </Tooltip>
-        <Tooltip
-          placement='topLeft'
-          title={t<string>('Crowdloan URL')}
-        >
-          <div>
-            <Field
-              content={chainEditInfo.crowdloanUrl}
-              placeholder={t('Crowdloan URL')}
-            />
-          </div>
-        </Tooltip>
+        <Field
+          content={chainEditInfo.chainType}
+          placeholder={t('Network type')}
+          tooltip={t<string>('Network type')}
+          tooltipPlacement='topLeft'
+        />
+        <Field
+          content={chainEditInfo.blockExplorer}
+          placeholder={t('Block explorer')}
+          tooltip={t<string>('Block explorer')}
+          tooltipPlacement='topLeft'
+        />
+        <Field
+          content={chainEditInfo.crowdloanUrl}
+          placeholder={t('Crowdloan URL')}
+          tooltip={t<string>('Crowdloan URL')}
+          tooltipPlacement='topLeft'
+        />
       </div>
       <div className='confirmation-footer'>
         {mode === 'update' && (<div className={'warning-message'}>
@@ -193,7 +154,7 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Cancel')}
         </Button>
         <Button
-          disabled={mode === 'update'}
+          disabled={mode === 'update' || unconfirmed}
           icon={(
             <Icon
               phosphorIcon={CheckCircle}

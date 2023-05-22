@@ -194,6 +194,16 @@ export default class RequestService {
     return await this.#evmRequestHandler.completeConfirmation(request);
   }
 
+  public updateConfirmation<CT extends ConfirmationType> (
+    id: string,
+    type: CT,
+    payload: ConfirmationDefinitions[CT][0]['payload'],
+    options: ConfirmationsQueueItemOptions = {},
+    validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined
+  ) {
+    return this.#evmRequestHandler.updateConfirmation(id, type, payload, options, validator);
+  }
+
   // General methods
   public get numRequests (): number {
     return this.numMetaRequests + this.numAuthRequests + this.numSubstrateRequests + this.numEvmRequests;

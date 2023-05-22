@@ -328,11 +328,11 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
   };
 }
 
-export async function fetchMultiChainHistories (addresses: string[], chainMap: Record<string, _ChainInfo>, maxPage = 25) {
+export async function fetchMultiChainHistories (addresses: string[], chainMap: Record<string, _ChainInfo>, maxPage = 25, countMap: Record<string, number> = {}, _lastId?: string) {
   const responseData: MultiHistoryData[] = [];
 
   let currentPage = 0;
-  let lastId: string | undefined;
+  let lastId: string | undefined = _lastId;
 
   while (true) {
     try {
@@ -364,6 +364,10 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
   const histories = [] as TransactionHistoryItem[];
   const lowerAddresses = addresses.map((a) => a.toLowerCase());
 
+  for (const lowerAddress of lowerAddresses) {
+    countMap[lowerAddress] = countMap[lowerAddress] || 0;
+  }
+
   responseData.forEach((historyItem) => {
     const { _data, args, chainId, name, relatedAddresses } = historyItem;
 
@@ -383,6 +387,12 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
     }
 
     usedAddresses.forEach((address) => {
+      const adr = address.toLowerCase();
+
+      countMap[adr] = (countMap[adr] || 0) + 1;
+    });
+
+    usedAddresses.forEach((address) => {
       try {
         const transactionData = parseSubsquidTransactionData(address, name as SubsquidTransactionType, historyItem, chainInfo, parseData(args), parseData(_data));
 
@@ -392,6 +402,22 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
       }
     });
   });
+
+  if (currentPage > 1) {
+    const retryAddresses: string[] = [];
+
+    for (const [address, number] of Object.entries(countMap)) {
+      if (number < 30) {
+        retryAddresses.push(address);
+      }
+    }
+
+    const _addresses = addresses.filter((add) => retryAddresses.includes(add.toLowerCase()));
+
+    const retryHistories = await fetchMultiChainHistories(_addresses, chainMap, maxPage, countMap, lastId);
+
+    histories.push(...retryHistories);
+  }
 
   return histories;
 }

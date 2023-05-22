@@ -96,6 +96,7 @@ function Component (
             onClick={onOpenReceive}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
+            tooltip={t('Get address')}
           />
           <div className={'__button-space'} />
           <Button
@@ -109,6 +110,7 @@ function Component (
             onClick={onOpenSendFund}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
+            tooltip={t('Send tokens')}
           />
           <div className={'__button-space'} />
           <Button
@@ -123,6 +125,7 @@ function Component (
             onClick={onOpenBuyTokens}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}
+            tooltip={t('Buy token')}
           />
         </div>
       </div>

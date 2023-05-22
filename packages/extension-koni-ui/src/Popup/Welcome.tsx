@@ -30,37 +30,6 @@ interface WelcomeButtonItem {
   description: string;
 }
 
-const items: WelcomeButtonItem[] = [
-  {
-    description: 'Create a new account with SubWallet',
-    icon: PlusCircle,
-    id: CREATE_ACCOUNT_MODAL,
-    schema: 'secondary',
-    title: 'Create a new account'
-  },
-  {
-    description: 'Import an existing account',
-    icon: FileArrowDown,
-    id: IMPORT_ACCOUNT_MODAL,
-    schema: 'secondary',
-    title: 'Import an account'
-  },
-  {
-    description: 'Attach an account from external wallet',
-    icon: Swatches,
-    id: ATTACH_ACCOUNT_MODAL,
-    schema: 'secondary',
-    title: 'Attach an account'
-  },
-  {
-    description: 'For management of your account keys',
-    icon: PuzzlePiece,
-    id: DOWNLOAD_EXTENSION,
-    schema: 'secondary',
-    title: 'Download SubWallet extension'
-  }
-];
-
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -68,30 +37,54 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
   const navigate = useNavigate();
 
+  const items = useMemo((): WelcomeButtonItem[] => [
+    {
+      description: t('Create a new account with SubWallet'),
+      icon: PlusCircle,
+      id: CREATE_ACCOUNT_MODAL,
+      schema: 'primary',
+      title: t('Create a new account')
+    },
+    {
+      description: t('Import an existing account'),
+      icon: FileArrowDown,
+      id: IMPORT_ACCOUNT_MODAL,
+      schema: 'secondary',
+      title: t('Import an account')
+    },
+    {
+      description: t('Attach an account without private key'),
+      icon: Swatches,
+      id: ATTACH_ACCOUNT_MODAL,
+      schema: 'secondary',
+      title: t('Attach an account')
+    },
+    {
+      description: 'For management of your account keys',
+      icon: PuzzlePiece,
+      id: DOWNLOAD_EXTENSION,
+      schema: 'secondary',
+      title: 'Download SubWallet extension'
+    }
+  ], [t]);
+
   const buttonList = useMemo(() => isWebUI ? items : items.slice(0, 3), [isWebUI]);
 
-  const openModal = useCallback(
-    (id: string) => {
-      return () => {
-        if (id === CREATE_ACCOUNT_MODAL) {
-          navigate('/accounts/new-seed-phrase', {
-            state: { accountTypes: [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE] }
-          });
+  const openModal = useCallback((id: string) => {
+    return () => {
+      if (id === DOWNLOAD_EXTENSION) {
+        openInNewTab(EXTENSION_URL)();
 
-          return;
-        }
-
-        if (id === DOWNLOAD_EXTENSION) {
-          openInNewTab(EXTENSION_URL)();
-
-          return;
-        }
-
+        return;
+      }
+      if (id === CREATE_ACCOUNT_MODAL) {
+        navigate('/accounts/new-seed-phrase', { state: { accountTypes: [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE] } });
+      } else {
         inactiveModal(SELECT_ACCOUNT_MODAL);
         activeModal(id);
       };
-    },
-    [activeModal, inactiveModal, navigate]
+    };
+    }, [activeModal, inactiveModal, navigate]
   );
 
   return (

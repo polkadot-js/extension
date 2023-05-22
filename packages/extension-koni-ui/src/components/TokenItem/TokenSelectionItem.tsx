@@ -74,6 +74,7 @@ function Component (
                   }
                   onClick={_onCLickCopyBtn}
                   size='xs'
+                  tooltip={t('Copy address')}
                   type='ghost'
                 />
               </CopyToClipboard>
@@ -86,6 +87,7 @@ function Component (
                 }
                 onClick={onClickQrBtn}
                 size='xs'
+                tooltip={t('Show QR code')}
                 type='ghost'
               />
             </>

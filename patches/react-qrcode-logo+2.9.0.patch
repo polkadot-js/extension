@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-qrcode-logo/dist/index.js b/node_modules/react-qrcode-logo/dist/index.js
+index cfca6de..f3f7c87 100644
+--- a/node_modules/react-qrcode-logo/dist/index.js
++++ b/node_modules/react-qrcode-logo/dist/index.js
+@@ -168,7 +168,7 @@ var QRCode = /** @class */ (function (_super) {
+         var logoHeight = this.props.logoHeight ? +this.props.logoHeight : 0;
+         var logoPadding = this.props.logoPadding ? +this.props.logoPadding : 0;
+         var qrCode = qrGenerator(0, ecLevel);
+-        qrCode.addData(QRCode.utf16to8(value));
++        qrCode.addData(qrGenerator.stringToBytesFuncs['default'](QRCode.utf16to8(value)));
+         qrCode.make();
+         var canvas = ReactDOM.findDOMNode(this.canvas.current);
+         var ctx = canvas.getContext('2d');

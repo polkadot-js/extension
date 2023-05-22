@@ -30,7 +30,7 @@ export const _BALANCE_CHAIN_GROUP = {
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
   bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry'],
-  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain'],
+  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2'],
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'] // perhaps there are some runtime updates
 };
 
@@ -179,7 +179,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
   crab: ['crab', 'pangolin'],
   bitcountry: ['pioneer', 'bitcountry'],
-  statemine: ['statemint', 'statemine']
+  statemine: ['statemint', 'statemine', 'darwinia2']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {

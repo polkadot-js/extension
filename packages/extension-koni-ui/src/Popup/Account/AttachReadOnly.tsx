@@ -185,9 +185,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         })}
         >
           <div className='description'>
-            {t(
-              'Track the activity of any wallet without injecting your private key to SubWallet'
-            )}
+            {t('Track the activity of any wallet without a private key')}
           </div>
           <div className='page-icon'>
             <PageIcon

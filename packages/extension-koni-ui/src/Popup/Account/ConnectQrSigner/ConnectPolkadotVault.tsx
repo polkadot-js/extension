@@ -15,19 +15,19 @@ const Component: React.FC<ThemeProps> = () => {
 
   return (
     <ConnectQrSigner
-      deviceName={t('Keystone')}
+      deviceName={t('Polkadot Vault')}
       instructionUrl={''}
-      logoUrl={DefaultLogosMap.keystone}
-      subTitle={t('Open "Software Wallet" section on your Keystone and choose SubWallet')}
-      title={t('Connect Keystone device')}
+      logoUrl={DefaultLogosMap.polkadot_vault}
+      subTitle={t('Open Polkadot Vault on your phone to connect wallet')}
+      title={t('Connect Polkadot Vault')}
     />
   );
 };
 
-const ConnectKeystone = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ConnectPolkadotVault = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
 
   };
 });
 
-export default ConnectKeystone;
+export default ConnectPolkadotVault;

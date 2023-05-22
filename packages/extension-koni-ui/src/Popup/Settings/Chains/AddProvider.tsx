@@ -164,7 +164,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       case _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER:
         return t('This provider has already been added');
       case _CHAIN_VALIDATION_ERROR.PROVIDER_NOT_SAME_CHAIN:
-        return t('This provider is not for this chain');
+        return t('This provider is not for this network');
       default:
         return t('Error validating this provider');
     }
@@ -306,7 +306,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Form.Item name={'name'}>
                     <Input
                       disabled={true}
-                      placeholder={t('Chain name')}
+                      placeholder={t('Network name')}
                       prefix={(
                         <Icon
                           customSize={'24px'}
@@ -316,7 +316,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                           weight={'bold'}
                         />
                       )}
-                      tooltip={t('Chain name')}
+                      tooltip={t('Network name')}
                       tooltipPlacement='topLeft'
                       value={chainInfo.name}
                     />
@@ -341,8 +341,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Form.Item name={'chainType'}>
                 <Input
                   disabled={true}
-                  placeholder={t('Chain type')}
-                  tooltip={t('Chain type')}
+                  placeholder={t('Network type')}
+                  tooltip={t('Network type')}
                   tooltipPlacement='topLeft'
                   value={chainInfo.slug}
                 />

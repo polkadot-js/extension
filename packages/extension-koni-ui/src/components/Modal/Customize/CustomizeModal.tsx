@@ -38,7 +38,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       destroyOnClose={true}
       id={CUSTOMIZE_MODAL}
       onCancel={onCancel}
-      title={t('Customization')}
+      title={t('Customize asset display')}
     >
       <div className={'__group-label'}>{t('Balance')}</div>
       <div className={'__group-content'}>
@@ -54,7 +54,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               weight='fill'
             />
           }
-          name={t('Show zero balance')}
+          name={t('Show tokens with zero balance')}
           rightItem={
             <Switch
               checked={isShowZeroBalance}

@@ -312,7 +312,7 @@ function Component ({ className }: Props): JSX.Element {
             onClick: goHome
           }
         ]}
-        title={t<string>('Import from Json')}
+        title={t<string>('Import from Polkadot.{js}')}
       >
         <div className={CN('container', {
           '__web-ui': isWebUI

@@ -86,10 +86,10 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       renderWhenEmpty={renderEmpty}
       searchFunction={searchFunction}
       searchMinCharactersCount={2}
-      searchPlaceholder={t<string>('Search chain')}
+      searchPlaceholder={t<string>('Network name')}
       selected={value || ''}
       statusHelp={statusHelp}
-      title={title || label || placeholder || t('Select chain')}
+      title={title || label || placeholder || t('Select network')}
       tooltip={tooltip}
     />
   );

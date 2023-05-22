@@ -18,7 +18,7 @@ const usePreCheckReadOnly = (address?: string, message?: string): ((onClick: Voi
     return () => {
       if (isReadOnlyAccount) {
         notify({
-          message: t(message ?? 'The account you are using is read-only, you cannot use this feature with it'),
+          message: t(message ?? 'The account you are using is watch-only, you cannot use this feature with it'),
           type: 'info',
           duration: 1.5
         });

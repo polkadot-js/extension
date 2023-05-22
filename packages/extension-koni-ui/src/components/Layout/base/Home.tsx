@@ -4,10 +4,10 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { CompoundedHeader } from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
 import { FadersHorizontal, MagnifyingGlass } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 type Props = {
@@ -22,6 +22,7 @@ type Props = {
 
 const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, showSearchIcon, showTabBar, withBackground }: Props) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { activeModal } = useContext(ModalContext);
   const { pathname } = useLocation();
 
@@ -40,7 +41,9 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
             size='md'
           />
         ),
-        onClick: onClickFilterIcon || onOpenCustomizeModal
+        onClick: onClickFilterIcon || onOpenCustomizeModal,
+        tooltip: t('Customize your asset display'),
+        tooltipPlacement: 'bottomRight'
       });
     }
 
@@ -52,12 +55,14 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
             size='md'
           />
         ),
-        onClick: onClickSearchIcon
+        onClick: onClickSearchIcon,
+        tooltip: t('Search a token'),
+        tooltipPlacement: 'bottomRight'
       });
     }
 
     return icons;
-  }, [onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon]);
+  }, [onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon, t]);
 
   const SCREEN_HEADERS: Record<keyof CompoundedHeader, string[]> = {
     Controller: [

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import ChainLogoMap, { IconMap } from '@subwallet/extension-koni-ui/assets/logo';
+import DefaultLogosMap, { IconMap } from '@subwallet/extension-koni-ui/assets/logo';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
@@ -148,14 +148,14 @@ const Component: React.FC<Props> = (props: Props) => {
             onClick: goHome
           }
         ]}
-        title={t('Import your wallet by QR')}
+        title={t('Import by QR code')}
       >
         <div className={CN('container', {
           '__web-ui': isWebUI
         })}
         >
           <div className='sub-title'>
-            {t('Please make sure that you have granted SubWallet the access to your device\'s camera.')}
+            {t("Please make sure that you have granted SubWallet the access to your device's camera.")}
           </div>
           <div className='logo'>
             <DualLogo
@@ -163,7 +163,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 <Image
                   height={56}
                   shape='squircle'
-                  src={ChainLogoMap.subwallet}
+                  src={DefaultLogosMap.subwallet}
                   width={56}
                 />
               )}
@@ -185,12 +185,12 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           <div className='instruction'>
             <div className='instruction'>
-              <span>{t('Click the "Scan the QR code" button, or read ')}&nbsp;</span>
+              <span>{t('Click the "Scan QR" button, or read ')}&nbsp;</span>
               <a
                 className='link'
                 href='#'
               >
-                {t('this instructions')}
+                {t('this instruction')}
               </a>
               <span>,&nbsp;</span>
               <span>{t('for more details.')}</span>
@@ -208,6 +208,7 @@ const Component: React.FC<Props> = (props: Props) => {
             onError={onError}
             onSuccess={onSuccess}
             overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
+            title={t('Scan QR')}
           />
           {isWebUI && (
             <Button

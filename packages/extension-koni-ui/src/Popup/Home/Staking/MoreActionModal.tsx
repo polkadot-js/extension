@@ -176,7 +176,7 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
           action: StakingAction.UNSTAKE,
           backgroundIconColor: 'magenta-6',
           icon: MinusCircle,
-          label: 'Unstake funds',
+          label: 'Unstake',
           onClick: onNavigate(`/transaction/unstake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
         };
       } else if (action === StakingAction.WITHDRAW) {
@@ -184,7 +184,7 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
           action: StakingAction.WITHDRAW,
           backgroundIconColor: 'geekblue-6',
           icon: ArrowCircleDown,
-          label: 'Withdraw',
+          label: 'Withdraw unstaked funds',
           onClick: handleWithdrawalAction
         };
       } else if (action === StakingAction.CLAIM_REWARD) {
@@ -200,7 +200,7 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
           action: StakingAction.CANCEL_UNSTAKE,
           backgroundIconColor: 'purple-8',
           icon: ArrowArcLeft,
-          label: 'Cancel unstake',
+          label: 'Cancel unstaking',
           onClick: onNavigate(`/transaction/cancel-unstake/${chainStakingMetadata.type || ALL_KEY}/${chainStakingMetadata.chain || ALL_KEY}`)
         };
       }

@@ -212,7 +212,7 @@ function Component ({ className, request }: Props) {
         <div className='description'>
           {
             visibleAccounts.length === 0
-              ? t("You don't have any accounts to connect. Please create a new account")
+              ? t("You don't have any accounts to connect. Please create or import an account.")
               : t('Make sure you trust this site before connecting')
           }
         </div>

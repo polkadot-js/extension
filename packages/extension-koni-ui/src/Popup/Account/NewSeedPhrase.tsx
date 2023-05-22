@@ -158,7 +158,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             onClick: goHome
           }
         ]}
-        title={t<string>('Your recovery phrase')}
+        title={t('Your seed phrase')}
       >
         <div className={CN('container', {
           '__web-ui': isWebUI

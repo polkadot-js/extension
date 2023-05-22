@@ -25,7 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
-import NftImport from '../Home/Nfts/NftImport';
+// import NftImport from '../Home/Nfts/NftImport';
 import AccountExport from './AccountExport';
 
 type Props = ThemeProps;
@@ -252,7 +252,7 @@ const Component: React.FC<Props> = (props: Props) => {
             disabled: deriving
           }
         ]}
-        title={t('Account detail')}
+        title={t('Account details')}
       >
         <div className={CN('body-container', {
           '__web-ui': isWebUI

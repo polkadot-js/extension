@@ -4,12 +4,12 @@
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
-import ChainLogoMap from '@subwallet/extension-koni-ui/assets/logo';
 import { AddressInput, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useChainChecker, useDefaultNavigate, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Col, Field, Form, Icon, Image, Input, NetworkItem, Row, SelectModal, SettingItem, SwSubHeader } from '@subwallet/react-ui';
 import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
@@ -18,6 +18,7 @@ import CN from 'classnames';
 import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -65,6 +66,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { goBack } = useDefaultNavigate();
   const dataContext = useContext(DataContext);
+  const logosMaps = useSelector((state: RootState) => state.settings.logoMaps.chainLogoMap);
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
   const { isWebUI } = useContext(ScreenContext);
@@ -174,7 +176,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             setLoading(false);
             setContractValidation({
               status: 'error',
-              message: t('Error validating this NFT')
+              message: t('Error validating this token')
             });
             resolve();
           });
@@ -192,11 +194,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Image
         height={token.fontSizeXL}
         shape={'circle'}
-        src={ChainLogoMap[selectedChain]}
+        src={logosMaps[selectedChain]}
         width={token.fontSizeXL}
       />
     );
-  }, [selectedChain, token.fontSizeXL]);
+  }, [logosMaps, selectedChain, token.fontSizeXL]);
 
   const onChangeChain = useCallback((value: string) => {
     formRef.current?.setFieldValue('chain', value);
@@ -319,7 +321,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   return (
     <PageWrapper
       className={`import_token ${className}`}
-      resolve={dataContext.awaitStores(['nft'])}
+      resolve={dataContext.awaitStores(['assetRegistry'])}
     >
       <Layout.Base
         onBack={goBack}
@@ -334,7 +336,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           ),
           loading,
           onClick: onSubmit,
-          children: t('Import')
+          children: t('Import token')
         }}
         title={t<string>('Import token')}
         withSideMenu
@@ -376,7 +378,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 renderWhenEmpty={renderEmpty}
                 searchFunction={searchChain}
                 searchMinCharactersCount={2}
-                searchPlaceholder={'Search chain'}
+                searchPlaceholder={'Search network'}
                 selected={selectedChain}
                 title={t('Select network')}
               />
@@ -442,8 +444,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             >
               <Input
                 disabled={selectedTokenType === ''}
-                placeholder={t('Price Id')}
-                tooltip={t('Price Id')}
+                placeholder={t('Price ID')}
+                tooltip={t('Price ID')}
               />
             </Form.Item>
             <Form.Item

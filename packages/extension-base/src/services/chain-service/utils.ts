@@ -78,6 +78,10 @@ export function _getContractAddressOfToken (tokenInfo: _ChainAsset) {
   return tokenInfo.metadata?.contractAddress as string || '';
 }
 
+export function _isTokenTransferredByEvm (tokenInfo: _ChainAsset) {
+  return !!tokenInfo.metadata?.contractAddress || _isNativeToken(tokenInfo);
+}
+
 export function _checkSmartContractSupportByChain (chainInfo: _ChainInfo, contractType: _AssetType) {
   // EVM chains support smart contract by default so just checking Substrate chains
   if (chainInfo.substrateInfo === null || (chainInfo.substrateInfo && chainInfo.substrateInfo.supportSmartContract === null)) {

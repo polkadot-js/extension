@@ -73,7 +73,17 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const isPopup = useIsPopup();
 
   const accounts = useMemo((): AccountJson[] => {
-    return [..._accounts].sort(funcSortByName);
+    const result = [..._accounts].sort(funcSortByName);
+    const all = result.find((acc) => isAccountAll(acc.address));
+
+    if (all) {
+      const index = result.indexOf(all);
+
+      result.splice(index, 1);
+      result.unshift(all);
+    }
+
+    return result;
   }, [_accounts]);
 
   const noAllAccounts = useMemo(() => {

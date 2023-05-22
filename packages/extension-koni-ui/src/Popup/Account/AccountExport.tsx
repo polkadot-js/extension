@@ -45,13 +45,6 @@ interface ExportItem {
   type: ExportType;
 }
 
-const titleMap: Record<ExportType, string> = {
-  [ExportType.JSON_FILE]: 'Successful',
-  [ExportType.QR_CODE]: 'Your QR code',
-  [ExportType.PRIVATE_KEY]: 'Your private key',
-  [ExportType.SEED_PHRASE]: 'Your recovery phrase'
-};
-
 enum FormFieldName {
   PASSWORD = 'password',
   TYPES = 'types',
@@ -107,6 +100,13 @@ const Component: React.FC<Props> = (props: Props) => {
   const [publicKey, setPublicKey] = useState<string>('');
   const [jsonData, setJsonData] = useState<null | KeyringPair$Json>(null);
   const [seedPhrase, setSeedPhrase] = useState<string>('');
+
+  const titleMap = useMemo((): Record<ExportType, string> => ({
+    [ExportType.JSON_FILE]: t('Successful'),
+    [ExportType.QR_CODE]: t('Your QR code'),
+    [ExportType.PRIVATE_KEY]: t('Your private key'),
+    [ExportType.SEED_PHRASE]: t('Your seed phrase')
+  }), [t]);
 
   const qrData = useMemo((): string => {
     const prefix = 'secret';
@@ -246,32 +246,32 @@ const Component: React.FC<Props> = (props: Props) => {
         disable: !account || account.isExternal || !account.isMasterAccount,
         hidden: false,
         icon: Leaf,
-        label: 'Export Seed Phrase',
+        label: t('Export seed phrase'),
         type: ExportType.SEED_PHRASE
       },
       {
         disable: !account || !!account.isExternal,
         hidden: false,
         icon: FileJs,
-        label: 'Export JSON file',
+        label: t('Export JSON file'),
         type: ExportType.JSON_FILE
       },
       {
         disable: !account || account.isExternal || !isEthereumAddress(account.address),
         hidden: !isEthereumAddress(account?.address || ''),
         icon: Wallet,
-        label: 'Export Private key',
+        label: t('Export private key'),
         type: ExportType.PRIVATE_KEY
       },
       {
         disable: !account || !!account?.isExternal,
         hidden: false,
         icon: QrCode,
-        label: 'Export QR Code',
+        label: t('Export QR Code'),
         type: ExportType.QR_CODE
       }
     ];
-  }, [account]);
+  }, [account, t]);
 
   const onBack = useCallback(() => {
     if (currentAddress) {
@@ -323,7 +323,7 @@ const Component: React.FC<Props> = (props: Props) => {
             ? t('Export account')
             : !exportSingle
               ? t('Export successful')
-              : t(titleMap[exportTypes[0]])
+              : titleMap[exportTypes[0]]
         }
       >
         {!modalContent && <SwSubHeader
@@ -351,7 +351,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className='body-container'>
           <div className={CN('notice', { 'mb-large': !firstStep })}>
             <AlertBox
-              description={t('Anyone with your  keys can steal any assets held in your account.')}
+              description={t('Anyone with your key can use any assets held in your account.')}
               title={t('Warning: Never disclose this key')}
               type='warning'
             />
@@ -380,7 +380,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 >
                   <Input
                     disabled={loading}
-                    placeholder={t('Type your SubWallet password')}
+                    placeholder={t('Type your Subwallet password')}
                     suffix={<span />}
                     type='password'
                   />
@@ -417,7 +417,7 @@ const Component: React.FC<Props> = (props: Props) => {
                                 weight='fill'
                               />
                             )}
-                            name={t<string>(item.label)}
+                            name={item.label}
                             onPressItem={(item.disable || loading) ? undefined : onPressType(item.type)}
                             rightItem={(
                               <Icon
@@ -448,7 +448,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 {
                   exportTypes.includes(ExportType.PRIVATE_KEY) && (
                     <div className='result-content'>
-                      <div className='result-title'>{t(titleMap[ExportType.PRIVATE_KEY])}</div>
+                      <div className='result-title'>{titleMap[ExportType.PRIVATE_KEY]}</div>
                       <Field
                         className='private-key-field'
                         content={privateKey}
@@ -469,7 +469,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 {
                   exportTypes.includes(ExportType.SEED_PHRASE) && (
                     <div className='result-content'>
-                      <div className='result-title'>{t(titleMap[ExportType.SEED_PHRASE])}</div>
+                      <div className='result-title'>{titleMap[ExportType.SEED_PHRASE]}</div>
                       <WordPhrase seedPhrase={seedPhrase} />
                     </div>
                   )
@@ -477,10 +477,11 @@ const Component: React.FC<Props> = (props: Props) => {
                 {
                   exportTypes.includes(ExportType.QR_CODE) && (
                     <div className='result-content'>
-                      <div className='result-title'>{t(titleMap[ExportType.QR_CODE])}</div>
+                      <div className='result-title'>{titleMap[ExportType.QR_CODE]}</div>
                       <div className='qr-area'>
                         <QRCode
                           errorLevel='Q'
+                          // logoPadding={!isEthereumAddress(account.address) ? 4 : 3}
                           size={264}
                           value={qrData}
                         />
@@ -508,7 +509,7 @@ const Component: React.FC<Props> = (props: Props) => {
                               {t('Success!')}
                             </div>
                             <div className='json-done-description'>
-                              {t('You have successfully export JSON file for your accounts')}
+                              {t('You have successfully exported JSON file for this account')}
                             </div>
                           </>
                         )

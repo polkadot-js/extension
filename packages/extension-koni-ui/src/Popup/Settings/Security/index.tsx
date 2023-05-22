@@ -82,7 +82,7 @@ const Component: React.FC<Props> = (props: Props) => {
     {
       icon: LockLaminated,
       key: SecurityType.AUTO_LOCK,
-      title: t('Extension auto lock'),
+      title: t('Wallet auto-lock'),
       url: '',
       disabled: false
     }
@@ -289,7 +289,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   weight='fill'
                 />
               )}
-              name={t('Allow QR camera access')}
+              name={t('Camera access for QR')}
               rightItem={(
                 <Switch
                   checked={camera}
@@ -304,7 +304,7 @@ const Component: React.FC<Props> = (props: Props) => {
           className={className}
           id={modalId}
           onCancel={onCloseModal}
-          title={t('Auto lock')}
+          title={t('Wallet auto-lock')}
         >
           <div className='modal-body-container'>
             {

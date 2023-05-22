@@ -30,10 +30,10 @@ function Component ({ className, request, type }: Props) {
       <div className={CN('confirmation-content', className)}>
         <ConfirmationGeneralInfo request={request} />
         <div className='title'>
-          {t('Signature request')}
+          {t('Signature required')}
         </div>
         <div className='description'>
-          {t('You are approving a request with account')}
+          {t('You are approving a request with the following account')}
         </div>
         <AccountItemWithName
           accountName={account.name}
@@ -49,7 +49,7 @@ function Component ({ className, request, type }: Props) {
             size='xs'
             type='ghost'
           >
-            {t('View detail')}
+            {t('View details')}
           </Button>
         </div>
       </div>

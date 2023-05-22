@@ -11,7 +11,7 @@ import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getScanExplorerAddressInfoUrl } from '@subwallet/extension-koni-ui/utils';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
-import { Button, Icon, Logo, ModalContext, QRCode, SwModal } from '@subwallet/react-ui';
+import { Button, Icon, Logo, ModalContext, SwModal, SwQRCode } from '@subwallet/react-ui';
 import AccountItem from '@subwallet/react-ui/es/web3-block/account-item';
 import CN from 'classnames';
 import { CaretLeft, CopySimple, GlobeHemisphereWest } from 'phosphor-react';
@@ -31,6 +31,15 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
   const { inactiveModal } = useContext(ModalContext);
   const notify = useNotification();
   const chainInfo = useFetchChainInfo(selectedNetwork || '');
+
+  const isEvmChain = useMemo(() => {
+    if (chainInfo) {
+      return !!chainInfo.evmInfo;
+    } else {
+      return false;
+    }
+  }, [chainInfo]);
+
   const formattedAddress = useMemo(() => {
     if (chainInfo) {
       const isEvmChain = !!chainInfo.evmInfo;
@@ -77,12 +86,14 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
       rightIconProps={{
         icon: <InfoIcon />
       }}
-      title={t<string>('Your QR code')}
+      title={t<string>('Your address')}
     >
       <>
         <div className='receive-qr-code-wrapper'>
-          <QRCode
+          <SwQRCode
+            color='#000'
             errorLevel='H'
+            logoPadding={isEvmChain ? 6 : 7 }
             size={264}
             value={formattedAddress}
           />
@@ -113,6 +124,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
                   }
                   onClick={onClickCopyBtn}
                   size='xs'
+                  tooltip={t('Copy address')}
                   type='ghost'
                 />
               </CopyToClipboard>
@@ -133,7 +145,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
             />
           }
           onClick={handleClickViewOnExplorer}
-        >{t('View on explorer')}</Button>
+        >{t('View account on explorer')}</Button>
       </>
     </SwModal>
   );

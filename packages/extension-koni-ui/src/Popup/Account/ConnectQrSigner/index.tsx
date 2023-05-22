@@ -24,7 +24,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import ChainLogoMap from '../../../assets/logo';
+import DefaultLogosMap from '../../../assets/logo';
 
 const FooterIcon = (
   <Icon
@@ -36,7 +36,7 @@ const FooterIcon = (
 interface Props extends ThemeProps {
   title: string;
   subTitle: string;
-  description: string;
+  deviceName: string;
   instructionUrl: string;
   logoUrl: string;
 }
@@ -46,7 +46,7 @@ const modalId = 'attach-qr-signer-scanner-modal';
 const Component: React.FC<Props> = (props: Props) => {
   useAutoNavigateToCreatePassword();
 
-  const { className, description, instructionUrl, logoUrl, subTitle, title } = props;
+  const { className, deviceName, instructionUrl, logoUrl, subTitle, title } = props;
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
 
@@ -147,7 +147,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 <Image
                   height={56}
                   shape='squircle'
-                  src={ChainLogoMap.subwallet}
+                  src={DefaultLogosMap.subwallet}
                   width={56}
                 />
               )}
@@ -162,15 +162,16 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </div>
           <div className='instruction'>
-            <span>{t('Follow')}&nbsp;</span>
+            <span>{deviceName}</span>
+            <span>&nbsp;{t('will provide you with a QR code to scan. Read')}&nbsp;</span>
             <a
               className='link'
               href={instructionUrl}
             >
-              {t('this instructions')}
+              {t('this instruction')}
             </a>
             <span>,&nbsp;</span>
-            <span>{description}</span>
+            <span>{t('for more details.')}</span>
           </div>
           <Form.Item
             help={validateState.message}

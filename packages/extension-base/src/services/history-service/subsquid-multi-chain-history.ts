@@ -377,7 +377,7 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
     const chainInfo = chainMap[chainId];
 
     if (chainInfo === undefined) {
-      console.warn(`Not found chain info for chain id: ${chainId}`); // TODO: resolve conflicting chainId
+      console.debug(`Not found chain info for chain id: ${chainId}`); // TODO: resolve conflicting chainId
 
       return;
     }
@@ -388,7 +388,7 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
 
         histories.push(transactionData);
       } catch (e) {
-        console.warn('Parse transaction data failed', address, e);
+        console.debug('Parse transaction data failed', address, e);
       }
     });
   });

@@ -19,15 +19,15 @@ export interface SWTransaction extends ValidateTransactionResponse, Partial<Pick
   status: ExtrinsicStatus;
   extrinsicHash: string;
   extrinsicType: ExtrinsicType;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: number;
+  updatedAt: number;
   estimateFee?: AmountData,
   transaction: SubmittableExtrinsic | TransactionConfig;
   additionalValidator?: (inputTransaction: SWTransactionResponse) => Promise<void>;
   eventsHandler?: (eventEmitter: TransactionEmitter) => void;
 }
 
-export type SWTransactionResult = Omit<SWTransaction, 'transaction'>
+export type SWTransactionResult = Omit<SWTransaction, 'transaction' | 'additionalValidator'>
 
 type SwInputBase = Pick<SWTransaction, 'address' | 'url' | 'data' | 'extrinsicType' | 'chain' | 'chainType' | 'ignoreWarnings' | 'transferNativeAmount'>
 & Partial<Pick<SWTransaction, 'additionalValidator'>>;

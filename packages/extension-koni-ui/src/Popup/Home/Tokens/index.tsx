@@ -142,7 +142,7 @@ const Component = (): React.ReactElement => {
   const onOpenSendFund = useCallback(() => {
     if (currentAccount && currentAccount.isReadOnly) {
       notify({
-        message: t('The account you are using is read-only, you cannot send assets with it'),
+        message: t('The account you are using is watch-only, you cannot send assets with it'),
         type: 'info',
         duration: 3
       });
@@ -311,7 +311,7 @@ const Component = (): React.ReactElement => {
             size={'xs'}
             type={'ghost'}
           >
-            {t('Manage token list')}
+            {t('Manage tokens')}
           </Button>
         </div>
       </div>

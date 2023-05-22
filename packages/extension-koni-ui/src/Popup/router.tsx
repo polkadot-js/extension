@@ -69,7 +69,7 @@ const ImportPrivateKey = new LazyLoader(() => import('@subwallet/extension-koni-
 const RestoreJson = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/RestoreJson'));
 const ImportQrCode = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ImportQrCode'));
 const AttachReadOnly = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/AttachReadOnly'));
-const ConnectParitySigner = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectParitySigner'));
+const ConnectPolkadotVault = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectPolkadotVault'));
 const ConnectKeystone = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
 const ConnectLedger = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Account/ConnectLedger'));
 
@@ -210,7 +210,7 @@ export const router = createBrowserRouter([
           RestoreJson.generateRouterObject('restore-json'),
           ImportQrCode.generateRouterObject('import-by-qr'),
           AttachReadOnly.generateRouterObject('attach-read-only'),
-          ConnectParitySigner.generateRouterObject('connect-parity-signer'),
+          ConnectPolkadotVault.generateRouterObject('connect-polkadot-vault'),
           ConnectKeystone.generateRouterObject('connect-keystone'),
           ConnectLedger.generateRouterObject('connect-ledger'),
           AccountDetail.generateRouterObject('detail/:accountAddress'),

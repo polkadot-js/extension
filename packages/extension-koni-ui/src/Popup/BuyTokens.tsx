@@ -219,7 +219,7 @@ function Component ({ className, modalContent }: Props) {
           onBack={goBack}
           paddingVertical
           showBackButton
-          title={t('Buy tokens')}
+          title={t('Buy token')}
         />
       )}
       <div className={'__scroll-container'}>
@@ -259,10 +259,17 @@ function Component ({ className, modalContent }: Props) {
             </Form.Item>
 
             <Form.Item name={'service'}>
-              <ServiceSelector />
+              <ServiceSelector
+                placeholder={t('Select supplier')}
+                title={t('Select supplier')}
+              />
             </Form.Item>
           </div>
         </Form>
+
+        <div className={'common-text __note'}>
+          {t('You will be directed to the chosen supplier to complete this transaction')}
+        </div>
 
         <div className={'common-text __note'}>
           {t('You will be taken to independent provider to complete this transaction')}

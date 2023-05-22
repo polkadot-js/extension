@@ -153,7 +153,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <CancelUnstakeSelector
                 chain={chain}
                 disabled={!from}
-                label={t('Select unstake request')}
+                label={t('Select an unstake request')}
                 nominators={from ? nominatorMetadata?.unstakings || [] : []}
               />
             </Form.Item>
@@ -189,7 +189,7 @@ const Component: React.FC<Props> = (props: Props) => {
           loading={loading}
           onClick={onPreCheckReadOnly(form.submit)}
         >
-          {t('Continue')}
+          {t('Approve')}
         </Button>
       </TransactionFooter>
     </>

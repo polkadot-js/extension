@@ -155,7 +155,7 @@ export default class TransactionService {
       validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'Can\'t find account'));
     } else {
       if (pair.meta?.isReadOnly) {
-        validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'This is read-only account'));
+        validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'This is watch-only account'));
       }
     }
 
@@ -202,8 +202,8 @@ export default class TransactionService {
 
     return {
       ...transaction,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().getTime(),
+      updatedAt: new Date().getTime(),
       errors: transaction.errors || [],
       warnings: transaction.warnings || [],
       url: transaction.url || EXTENSION_REQUEST_URL,
@@ -247,6 +247,10 @@ export default class TransactionService {
     const stopByWarnings = validatedTransaction.warnings.length > 0 && !validatedTransaction.ignoreWarnings;
 
     if (stopByErrors || stopByWarnings) {
+      // @ts-ignore
+      'transaction' in validatedTransaction && delete validatedTransaction.transaction;
+      'additionalValidator' in validatedTransaction && delete validatedTransaction.additionalValidator;
+
       return validatedTransaction;
     }
 
@@ -268,6 +272,10 @@ export default class TransactionService {
         }
       });
     });
+
+    // @ts-ignore
+    'transaction' in validatedTransaction && delete validatedTransaction.transaction;
+    'additionalValidator' in validatedTransaction && delete validatedTransaction.additionalValidator;
 
     return validatedTransaction;
   }
@@ -342,15 +350,13 @@ export default class TransactionService {
       status: transaction.status,
       transactionId: transaction.id,
       extrinsicHash: transaction.extrinsicHash,
-      time: transaction.createdAt.getTime(),
+      time: transaction.createdAt,
       fee: transaction.estimateFee,
       blockNumber: 0, // Will be added in next step
       blockHash: '', // Will be added in next step
       nonce: nonce || 0,
       startBlock: startBlock || 0
     };
-
-    console.log('historyItem', historyItem);
 
     const chainInfo = this.chainService.getChainInfoByKey(transaction.chain);
     const nativeAsset = _getChainNativeTokenBasicInfo(chainInfo);

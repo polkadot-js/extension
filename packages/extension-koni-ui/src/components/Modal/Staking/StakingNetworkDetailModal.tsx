@@ -63,7 +63,7 @@ function Component ({ activeNominators,
               />
 
               {
-                activeNominators &&
+                !!activeNominators &&
                 (
                   <MetaInfo.Default label={t('Total nominators')}>
                     <div className={'__active-nominators-value'}>
@@ -85,7 +85,7 @@ function Component ({ activeNominators,
 
         {!!estimatedEarning && !!inflation &&
           <MetaInfo.Default
-            label={t('Estimated earning')}
+            label={t('Estimated earnings')}
             labelAlign={'top'}
           >
             <div className={'__active-nominators-value'}>

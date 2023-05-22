@@ -222,7 +222,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
-  const preCheckReadOnly = usePreCheckReadOnly(from, 'The account you are using is read-only, you cannot send assets with it');
+  const preCheckReadOnly = usePreCheckReadOnly(from, 'The account you are using is watch-only, you cannot send assets with it');
 
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
@@ -327,7 +327,6 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       return Promise.reject(t('Amount is required'));
     }
 
-    // TODO: enable this when release
     if ((new BigN(amount)).eq(new BigN(0))) {
       return Promise.reject(t('Amount must be greater than 0'));
     }
@@ -554,7 +553,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
     <>
       <TransactionContent className={CN(`${className} -transaction-content`)}>
         <div className={'__brief common-text text-light-4 text-center'}>
-          {t('You are doing a token transfer with the following information')}
+          {t('Transfer token with the following details')}
         </div>
 
         <Form
@@ -572,7 +571,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
               addressPrefix={fromChainNetworkPrefix}
               disabled={!isAllAccount}
               filter={onFilterAccountFunc}
-              label={t('Send from account')}
+              label={t('Send from')}
             />
           </Form.Item>
 
@@ -583,7 +582,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
                 items={tokenItems}
                 placeholder={t('Select token')}
                 showChainInSelected
-                tooltip={t('Token')}
+                tooltip={t('Select token')}
               />
             </Form.Item>
 
@@ -629,7 +628,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
           >
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
-              label={t('Send to account')}
+              label={t('Send to')}
+              placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}
               showScanner={true}
@@ -641,7 +641,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
               disabled={!destChainItems.length}
               items={destChainItems}
               title={t('Select destination chain')}
-              tooltip={t('Destination chain')}
+              tooltip={t('Select destination chain')}
             />
           </Form.Item>
         </Form>
@@ -672,7 +672,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
           onClick={preCheckReadOnly(form.submit)}
           schema={isTransferAll ? 'warning' : undefined}
         >
-          {isTransferAll ? t('Transfer the full account balance') : t('Transfer')}
+          {isTransferAll ? t('Transfer all') : t('Transfer')}
         </Button>
       </TransactionFooter>
     </>

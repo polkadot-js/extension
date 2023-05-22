@@ -163,7 +163,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       renderWhenEmpty={renderEmpty}
       searchFunction={searchFunction}
       searchMinCharactersCount={2}
-      searchPlaceholder={t<string>('Search token')}
+      searchPlaceholder={t<string>('Enter token name or network name')}
       selected={value || ''}
       statusHelp={statusHelp}
       title={label || placeholder || t('Select token')}

@@ -86,12 +86,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return [
       {
         desc: false,
-        label: t('Lowest member'),
+        label: t('Lowest total member'),
         value: SortKey.MEMBER
       },
       {
         desc: true,
-        label: t('Highest total pooled'),
+        label: t('Highest total bonded'),
         value: SortKey.TOTAL_POOLED
       }
     ];
@@ -99,7 +99,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const filterOptions: FilterOption[] = useMemo(() => ([
     {
-      label: t('Active validator'),
+      label: t('Active'),
       value: 'Open'
     },
     {

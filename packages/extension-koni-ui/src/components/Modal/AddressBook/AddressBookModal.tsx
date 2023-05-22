@@ -78,11 +78,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const filterOptions: FilterOption[] = useMemo(() => ([
     {
-      label: t('My wallet'),
+      label: t('Your wallet'),
       value: AccountGroup.WALLET
     },
     {
-      label: t('My contacts'),
+      label: t('Saved contacts'),
       value: AccountGroup.CONTACT
     },
     {
@@ -162,10 +162,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
     switch (_group) {
       case AccountGroup.WALLET:
-        groupLabel = t('My wallets');
+        groupLabel = t('Your wallet');
         break;
       case AccountGroup.CONTACT:
-        groupLabel = t('My contacts');
+        groupLabel = t('Saved contacts');
         break;
       case AccountGroup.RECENT:
         groupLabel = t('Recent');

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
@@ -46,7 +47,7 @@ function Component (props: Props): React.ReactElement<Props> {
       className={className}
       id={VALIDATOR_DETAIL_MODAL}
       onCancel={_onCancel}
-      title={t('Validator details')}
+      title={t(`${getValidatorLabel(chain)} details`)}
     >
       <MetaInfo
         hasBackgroundWrapper
@@ -55,7 +56,7 @@ function Component (props: Props): React.ReactElement<Props> {
       >
         <MetaInfo.Account
           address={validatorAddress}
-          label={t('Validator')}
+          label={t(getValidatorLabel(chain))}
           name={validatorName}
           networkPrefix={networkPrefix}
         />
@@ -69,7 +70,7 @@ function Component (props: Props): React.ReactElement<Props> {
 
         <MetaInfo.Number
           decimals={decimals}
-          label={t('Min stake')}
+          label={t('Minimum stake required')}
           suffix={symbol}
           value={minStake}
           valueColorSchema={'even-odd'}
@@ -98,7 +99,7 @@ function Component (props: Props): React.ReactElement<Props> {
         {
           otherStake !== '0' && <MetaInfo.Number
             decimals={decimals}
-            label={t('Other stake')}
+            label={t('Stake from others')}
             suffix={symbol}
             value={otherStake}
             valueColorSchema={'even-odd'}
@@ -107,7 +108,7 @@ function Component (props: Props): React.ReactElement<Props> {
 
         {
           earningEstimated > 0 && earningEstimated !== '' && <MetaInfo.Number
-            label={t('Earning estimated')}
+            label={t('Estimated APY')}
             suffix={'%'}
             value={earningEstimated}
             valueColorSchema={'even-odd'}

@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import LogosMap from '../../assets/logo';
+import DefaultLogosMap from '../../assets/logo';
 
 type Props = ThemeProps;
 
@@ -264,7 +264,7 @@ const Component: React.FC<Props> = (props: Props) => {
         })}
         >
           <div className='sub-title'>
-            {t('Connect and unlock your Ledger, then open the DApps on your Ledger.')}
+            {t('Connect and unlock your Ledger, then open the selected network on your Ledger.')}
           </div>
           {
             firstStep && (
@@ -275,7 +275,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       <Image
                         height={56}
                         shape='squircle'
-                        src={LogosMap.subwallet}
+                        src={DefaultLogosMap.subwallet}
                         width={56}
                       />
                     )}
@@ -283,7 +283,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       <Image
                         height={56}
                         shape='squircle'
-                        src={LogosMap.ledger}
+                        src={DefaultLogosMap.ledger}
                         width={56}
                       />
                     )}
@@ -293,6 +293,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   items={networks}
                   label={t('Select network')}
                   onChange={onChainChange}
+                  placeholder={t('Select network')}
                   value={chain}
                 />
                 <Button
@@ -313,12 +314,12 @@ const Component: React.FC<Props> = (props: Props) => {
                   <div className='ledger-button-content'>
                     <span className='ledger-info-text'>
                       {t(isConnected
-                        ? 'Connected ledger'
+                        ? 'Device found'
                         : warning
                           ? 'Please unlock your Ledger'
                           : error || (
                             ledger
-                              ? 'Waiting'
+                              ? 'Loading'
                               : 'Searching Ledger device'
                           )
                       )}

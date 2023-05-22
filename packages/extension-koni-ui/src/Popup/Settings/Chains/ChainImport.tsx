@@ -364,7 +364,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Form.Item name={'name'}>
                     <Input
                       disabled={true}
-                      placeholder={t('Chain name')}
+                      placeholder={t('Network name')}
                       prefix={<Icon
                         customSize={'24px'}
                         iconColor={token['gray-4']}
@@ -372,7 +372,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                         type={'phosphor'}
                         weight={'bold'}
                       />}
-                      tooltip={t('Chain name')}
+                      tooltip={t('Network name')}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>
@@ -393,8 +393,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 <Col span={12}>
                   <Form.Item name={'priceId'}>
                     <Input
-                      placeholder={t('Price Id')}
-                      tooltip={t('Price Id')}
+                      placeholder={t('Price ID')}
+                      tooltip={t('Price ID')}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>
@@ -404,8 +404,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Form.Item name={'type'}>
                     <Input
                       disabled={true}
-                      placeholder={t('Chain type')}
-                      tooltip={t('Chain type')}
+                      placeholder={t('Network type')}
+                      tooltip={t('Network type')}
                       tooltipPlacement={'topLeft'}
                     />
                   </Form.Item>

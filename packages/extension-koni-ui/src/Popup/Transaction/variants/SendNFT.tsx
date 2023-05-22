@@ -250,7 +250,8 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
           >
             <AddressInput
               addressPrefix={addressPrefix}
-              label={t('Send to account')}
+              label={t('Send to')}
+              placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}
               showScanner={true}
@@ -270,6 +271,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
         <FreeBalance
           address={from}
           chain={chain}
+          label={t('Sender transferable balance') + ':'}
           onBalanceReady={setIsBalanceReady}
         />
       </TransactionContent>

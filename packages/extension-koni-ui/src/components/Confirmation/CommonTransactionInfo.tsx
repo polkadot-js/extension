@@ -30,7 +30,7 @@ const Component: React.FC<Props> = (props: Props) => {
     >
       <MetaInfo.Account
         address={account?.address || address}
-        label={t('Wallet name')}
+        label={t('Account name')}
         name={account?.name}
         networkPrefix={networkPrefix}
       />

@@ -78,7 +78,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       if (owner?.isReadOnly) {
         notify({
-          message: t('The NFT owner is a read-only account, you cannot send the NFT with it'),
+          message: t('The NFT owner is a watch-only account, you cannot send the NFT with it'),
           type: 'info',
           duration: 3
         });

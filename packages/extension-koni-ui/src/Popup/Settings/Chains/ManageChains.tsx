@@ -15,7 +15,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, ListChecks, Plus } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -32,11 +32,11 @@ enum FilterValue {
 }
 
 const FILTER_OPTIONS = [
-  { label: 'EVM chains', value: FilterValue.EVM },
-  { label: 'Substrate chains', value: FilterValue.SUBSTRATE },
-  { label: 'Custom chains', value: FilterValue.CUSTOM },
-  { label: 'Enabled chains', value: FilterValue.ENABLED },
-  { label: 'Disabled chains', value: FilterValue.DISABLED }
+  { label: 'EVM networks', value: FilterValue.EVM },
+  { label: 'Substrate networks', value: FilterValue.SUBSTRATE },
+  { label: 'Custom networks', value: FilterValue.CUSTOM },
+  { label: 'Enabled networks', value: FilterValue.ENABLED },
+  { label: 'Disabled networks', value: FilterValue.DISABLED }
 ];
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
@@ -101,8 +101,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const emptyTokenList = useCallback(() => {
     return (
       <EmptyList
-        emptyMessage={t<string>('Your chain will appear here.')}
-        emptyTitle={t<string>('No chain found')}
+        emptyMessage={t<string>('Your network will appear here.')}
+        emptyTitle={t<string>('No network found')}
         phosphorIcon={ListChecks}
       />
     );

@@ -23,7 +23,7 @@ import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/to
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isNativeToken, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_AUTO_LOCK_TIME } from '@subwallet/extension-base/services/setting-service/constants';
@@ -1560,7 +1560,7 @@ export default class KoniExtension {
     // Get native token amount
     const freeBalance = await this.#koniState.balanceService.getTokenFreeBalance(from, networkKey, tokenSlug);
 
-    if (isEthereumAddress(from) && isEthereumAddress(to)) {
+    if (isEthereumAddress(from) && isEthereumAddress(to) && _isTokenTransferredByEvm(tokenInfo)) { // TODO: review this
       chainType = ChainType.EVM;
       const txVal: string = transferAll ? freeBalance.value : (value || '0');
 
@@ -3121,7 +3121,7 @@ export default class KoniExtension {
 
     function convertRs (rs: Record<string, SWTransaction>): Record<string, SWTransactionResult> {
       return Object.fromEntries(Object.entries(rs).map(([key, value]) => {
-        const { transaction, ...transactionResult } = value;
+        const { additionalValidator, transaction, ...transactionResult } = value;
 
         return [key, transactionResult];
       }));

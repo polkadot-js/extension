@@ -94,7 +94,9 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
     const allDapps = await allDappsReq as PalletDappsStakingDappInfo[];
 
     allDapps.forEach((dappInfo) => {
-      dAppInfoMap[dappInfo.address.toLowerCase()] = dappInfo;
+      const address = isEthereumAddress(dappInfo.address) ? dappInfo.address.toLowerCase() : dappInfo.address;
+
+      dAppInfoMap[address] = dappInfo;
     });
 
     for (const item of _stakerInfo) {
@@ -103,7 +105,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
       const stakeData = item[1].toPrimitive() as Record<string, Record<string, string>[]>;
       const stakeList = stakeData.stakes;
 
-      const dappAddress = stakedDapp.Evm.toLowerCase();
+      const dappAddress = isEthereumAddress(stakedDapp.Evm) ? stakedDapp.Evm.toLowerCase() : stakedDapp.Evm;
       const currentStake = stakeList.slice(-1)[0].staked.toString() || '0';
 
       const bnCurrentStake = new BN(currentStake);
@@ -117,7 +119,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
         nominationList.push({
           status: dappStakingStatus,
           chain,
-          validatorAddress: dappAddress.toLowerCase(),
+          validatorAddress: dappAddress,
           activeStake: currentStake,
           validatorMinStake: '0',
           validatorIdentity: dappInfo?.name,
@@ -211,7 +213,7 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
     allDappsInfo.push({
       commission: 0,
       expectedReturn: 0,
-      address: dappAddress.toLowerCase(),
+      address: isEthereumAddress(dappAddress) ? dappAddress.toLowerCase() : dappAddress,
       totalStake: totalStake,
       ownStake: '0',
       otherStake: totalStake.toString(),
@@ -269,7 +271,7 @@ export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi,
     const stakedDapp = data[1] as Record<string, string>;
     const stakeData = item[1].toHuman() as Record<string, Record<string, string>[]>;
     const stakes = stakeData.stakes;
-    const dappAddress = stakedDapp.Evm.toLowerCase();
+    const dappAddress = isEthereumAddress(stakedDapp.Evm) ? stakedDapp.Evm.toLowerCase() : stakedDapp.Evm;
 
     let numberOfUnclaimedEra = 0;
     const maxTx = 50;

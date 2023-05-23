@@ -287,6 +287,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <AmountInput
                 decimals={decimals}
                 maxValue={bondedValue}
+                showMaxButton={true}
               />
             </Form.Item>
 

@@ -15,7 +15,7 @@ import CN from 'classnames';
 import { ArrowFatLineDown, Eye, EyeClosed, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router';
+// import { useNavigate } from 'react-router';
 import styled from 'styled-components';
 
 const TRANSFER_FUND_MODAL = 'transfer-fund-modal';
@@ -51,7 +51,6 @@ const actions: Action[] = [
 function Component ({ className }: Props): React.ReactElement<Props> {
   const [displayBalance, setDisplayBalance] = useState<boolean>(false);
 
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);

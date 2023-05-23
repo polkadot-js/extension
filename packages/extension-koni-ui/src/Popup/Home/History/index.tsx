@@ -5,6 +5,7 @@ import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistor
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
 import { EmptyList, FilterModal, HistoryItem, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -386,16 +387,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             showActionBtn
             showExtraButton
           />
-          <SwList
-            filterBy={filterFunction}
-            groupBy={groupBy}
-            groupSeparator={groupSeparator}
-            list={historyList}
-            renderItem={renderItem}
-            renderWhenEmpty={emptyList}
-            searchBy={searchFunc}
-            searchTerm={searchInput}
-          />
+          {historyList.length <= 0
+            ? (
+              <NoContent pageType={PAGE_TYPE.HISTORY} />
+            )
+            : (
+              <SwList
+                filterBy={filterFunction}
+                groupBy={groupBy}
+                groupSeparator={groupSeparator}
+                list={historyList}
+                renderItem={renderItem}
+                renderWhenEmpty={emptyList}
+                searchBy={searchFunc}
+                searchTerm={searchInput}
+              />
+            )}
         </div>
       );
     }

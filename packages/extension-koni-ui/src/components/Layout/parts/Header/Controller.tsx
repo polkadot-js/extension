@@ -1,4 +1,4 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants';
@@ -6,7 +6,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, ModalContext, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CaretLeft, FadersHorizontal } from 'phosphor-react';
-import { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
 import Accounts from './Accounts';
@@ -51,10 +51,12 @@ function Component ({ className, onBack, showBackButton, title = 'Porfolio' }: P
         </div>
         <div className='action-group'>
           <Button
-            icon={<Icon
-              phosphorIcon={FadersHorizontal}
-              size={'sm'}
-            />}
+            icon={(
+              <Icon
+                phosphorIcon={FadersHorizontal}
+                size={'sm'}
+              />
+            )}
             onClick={onOpenCustomizeModal}
             size={'xs'}
             type={'ghost'}
@@ -67,7 +69,7 @@ function Component ({ className, onBack, showBackButton, title = 'Porfolio' }: P
   );
 }
 
-const Controller = styled(Component)<Props>(({ }: Props) => ({
+const Controller = styled(Component)<Props>(({ theme }: Props) => ({
   '.common-header': {
     paddingBottom: 40,
     display: 'flex',

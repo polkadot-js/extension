@@ -180,17 +180,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return (
         <div className='web-list'>
           <Search
-            actionBtnIcon={<Icon
-              phosphorIcon={FadersHorizontal}
-              size='sm'
-                           />}
+            actionBtnIcon={(
+              <Icon
+                phosphorIcon={FadersHorizontal}
+                size='sm'
+              />
+            )}
             extraButton={
               <>
                 <Button
-                  icon={<Icon
-                    phosphorIcon={ArrowClockwise}
-                    size='sm'
-                  />}
+                  icon={(
+                    <Icon
+                      phosphorIcon={ArrowClockwise}
+                      size='sm'
+                    />
+                  )}
                   onClick={
                     () => {
                       setLoading(true);
@@ -260,7 +264,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [isWebUI, searchInput, selectedFilters]);
+  }, [emptyStakingList, filterFunction, isWebUI, navigate, notify, onClickActionBtn, preCheckReadOnly, renderItem, searchFunction, searchInput, stakingItems, t]);
 
   return (
     <PageWrapper
@@ -323,7 +327,6 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
     '.web-list': {
       width: '100%',
-
       '.container': {
         marginBottom: 12
       }

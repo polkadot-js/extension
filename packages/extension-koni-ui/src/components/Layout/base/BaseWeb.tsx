@@ -25,6 +25,11 @@ const StyledLayout = styled('div')(({ theme: { extendToken } }) => {
     flex: 'auto',
     position: 'relative',
 
+    '.layout-container': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
     '.layout-sider': {
       position: 'sticky',
       top: 0,
@@ -36,7 +41,7 @@ const StyledLayout = styled('div')(({ theme: { extendToken } }) => {
     '.layout-content': {
       overflow: 'auto',
       width: '100%',
-      padding: '20px 36px 80px 44px',
+      padding: '40px 36px 80px 44px',
       background: '#0C0C0C',
       maxHeight: '100vh',
       flex: 1,
@@ -53,34 +58,33 @@ const StyledLayout = styled('div')(({ theme: { extendToken } }) => {
         }
       },
       '.layout-header': {
-
       },
 
       '.layout-content-main': {
-
+        height: '100%'
       }
     }
   };
 });
 
 const BaseWeb = ({ children,
-  className,
   headerList,
   onBack,
   title,
-  withBackground,
-  ...props }: LayoutBaseWebProps) => {
+  withBackground }: LayoutBaseWebProps) => {
   const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
   const isTotalBalanceDecrease = totalBalanceInfo.change.status === 'decrease';
   const renderHeader = useCallback((name: keyof CompoundedHeader, key: number) => {
     const CurComponent = Headers[name];
 
-    return <CurComponent
-      key={key}
-      onBack={onBack}
-      title={title}
-    />;
-  }, [title]);
+    return (
+      <CurComponent
+        key={key}
+        onBack={onBack}
+        title={title}
+      />
+    );
+  }, [onBack, title]);
 
   return (
     <StyledLayout className='layout-container'>
@@ -89,10 +93,13 @@ const BaseWeb = ({ children,
       </div>
 
       <div className='layout-content'>
-        {withBackground && <div className={CN('background', {
-          '-decrease': isTotalBalanceDecrease
-        })}
-        />}
+        {withBackground && (
+          <div className={CN('background', {
+            '-decrease': isTotalBalanceDecrease
+          })}
+          />
+        )}
+
         {(headerList && !!headerList.length) && (
           <div className='layout-header'>
             {headerList.map((name: keyof CompoundedHeader, index: number) =>

@@ -257,72 +257,77 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <Layout.Base
         withSideMenu
       >
-        {!isWebUI ? (
-          <SwHeader
-            left='logo'
-            onClickLeft={goHome}
-            rightButtons={headerIcons}
-            showLeftButton={true}
-          >
-            {/*  // todo: i18n Settings */}
-            Settings
-          </SwHeader>
-        ) : <Headers.Controller title='Settings' />}
         <div className={CN({
-          '__scroll-container': !isWebUI,
-          '__web-container': isWebUI
+          'web-wrapper': isWebUI
         })}
         >
-          {
-            SettingGroupItemType.map((group) => {
-              return (
-                <div
-                  className={'__group-container'}
-                  key={group.key}
-                >
-                  {!!group.label && (<div className='__group-label'>{group.label}</div>)}
-
-                  <div className={'__group-content'}>
-                    {group.items.map((item) => item.isHidden
-                      ? null
-                      : (
-                        <SettingItem
-                          className={'__setting-item'}
-                          key={item.key}
-                          leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
-                          name={t(item.title)}
-                          onPressItem={item.onClick}
-                          rightItem={generateRightIcon(item.rightIcon)}
-                        />
-                      ))}
-                  </div>
-                </div>
-              );
-            })
-          }
-
-          <Button
-            block
-            icon={
-              <Icon
-                phosphorIcon={Lock}
-                type='phosphor'
-                weight={'fill'}
-              />
-            }
-            loading={locking}
-            onClick={onLock}
-            schema={'secondary'}
+          {!isWebUI ? (
+            <SwHeader
+              left='logo'
+              onClickLeft={goHome}
+              rightButtons={headerIcons}
+              showLeftButton={true}
+            >
+              {/*  // todo: i18n Settings */}
+              Settings
+            </SwHeader>
+          ) : <Headers.Controller title='Settings' />}
+          <div className={CN({
+            '__scroll-container': !isWebUI,
+            '__web-container': isWebUI
+          })}
           >
-            {t('Lock')}
-          </Button>
+            {
+              SettingGroupItemType.map((group) => {
+                return (
+                  <div
+                    className={'__group-container'}
+                    key={group.key}
+                  >
+                    {!!group.label && (<div className='__group-label'>{group.label}</div>)}
 
-          <div className={'__version'}>
-          SubWallet v {EXTENSION_VERSION}
+                    <div className={'__group-content'}>
+                      {group.items.map((item) => item.isHidden
+                        ? null
+                        : (
+                          <SettingItem
+                            className={'__setting-item'}
+                            key={item.key}
+                            leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
+                            name={t(item.title)}
+                            onPressItem={item.onClick}
+                            rightItem={generateRightIcon(item.rightIcon)}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                );
+              })
+            }
+
+            <Button
+              block
+              icon={
+                <Icon
+                  phosphorIcon={Lock}
+                  type='phosphor'
+                  weight={'fill'}
+                />
+              }
+              loading={locking}
+              onClick={onLock}
+              schema={'secondary'}
+            >
+              {t('Lock')}
+            </Button>
+
+            <div className={'__version'}>
+            SubWallet v {EXTENSION_VERSION}
+            </div>
           </div>
-        </div>
 
-        <Outlet />
+          <Outlet />
+        </div>
       </Layout.Base>
     </PageWrapper>
   );

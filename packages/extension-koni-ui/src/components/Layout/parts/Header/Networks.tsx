@@ -1,14 +1,15 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components/MetaInfo';
+import NetworkGroupItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/NetworkGroupItem';
 import NetworkToggleItem from '@subwallet/extension-koni-ui/components/NetworkToggleItem';
 import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Divider, Icon, Popover, SwList } from '@subwallet/react-ui';
 import { ListChecks, SlidersHorizontal } from 'phosphor-react';
-import { forwardRef, LegacyRef, useCallback, useMemo } from 'react';
+import React, { forwardRef, LegacyRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -87,10 +88,12 @@ const Component: React.FC = () => {
         }}
         >
           <Button
-            icon={<Icon
-              phosphorIcon={SlidersHorizontal}
-              size={'sm'}
-            />}
+            icon={(
+              <Icon
+                phosphorIcon={SlidersHorizontal}
+                size={'sm'}
+              />
+            )}
             type='ghost'
           >
             {t<string>('Manage networks')}
@@ -98,16 +101,22 @@ const Component: React.FC = () => {
         </div>
       </>
     );
-  }, []);
+  }, [chainInfoList, emptyTokenList, renderChainItem, searchToken, t]);
 
   // Remove ref error
+  // eslint-disable-next-line react/display-name
   const TriggerComponent = forwardRef((props, ref) => (
     <div
       {...props}
       ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}
     >
-      <MetaInfo.AccountGroup
-        accounts={[]}
+      {/* <MetaInfo.AccountGroup */}
+      {/*   accounts={[]} */}
+      {/*   className='ava-group' */}
+      {/*   content={`${chainInfoList.length} networks`} */}
+      {/* /> */}
+      <NetworkGroupItem
+        chains={chainInfoList}
         className='ava-group'
         content={`${chainInfoList.length} networks`}
       />

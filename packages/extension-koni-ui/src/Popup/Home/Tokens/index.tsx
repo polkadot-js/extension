@@ -5,6 +5,7 @@ import { EmptyList, PageWrapper, TokenBalance, TokenItem, TokenPrice } from '@su
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenGroupBalanceItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
@@ -184,62 +185,70 @@ const Component = (): React.ReactElement => {
 
   if (isWebUI) {
     return (
-      <>
-        <DetailTable
-          columns={[
-            {
-              title: 'Token name',
-              dataIndex: 'name',
-              key: 'name',
-              render: (_, row) => {
-                return <TokenItem
-                  chain={row.chain}
-                  chainDisplayName={row.chainDisplayName || ''}
-                  logoKey={row.logoKey}
-                  slug={row.slug}
-                  symbol={row.symbol}
-                 />;
-              }
-            },
-            {
-              title: 'Portfolio %',
-              dataIndex: 'percentage',
-              key: 'percentage',
-              render: () => <>85%</>
-            },
-            {
-              title: 'Price',
-              dataIndex: 'price',
-              key: 'price',
-              render: (_, row) => {
-                return (
-                  <TokenPrice
-                    pastValue={row.price24hValue}
-                    priceChangeStatus={row.priceChangeStatus}
-                    value={row.priceValue}
-                  />
-                );
-              }
-            },
-            {
-              title: 'Balance',
-              dataIndex: 'balance',
-              key: 'balance',
-              render: (_, row) => {
-                return (
-                  <TokenBalance
-                    convertedValue={row.total.convertedValue}
-                    symbol={row.symbol}
-                    value={row.total.value}
-                  />
-                );
-              }
-            }
-          ]}
-          dataSource={tokenGroupBalanceItems}
-          onClick={onClickItem}
-        />
+      <div className='token-table'>
+        {tokenGroupBalanceItems.length <= 0
+          ? (
+            <NoContent pageType={PAGE_TYPE.TOKEN} />
+          )
+          : (
+            <DetailTable
+              columns={[
+                {
+                  title: 'Token name',
+                  dataIndex: 'name',
+                  key: 'name',
+                  render: (_, row) => {
+                    return (
+                      <TokenItem
+                        chain={row.chain}
+                        chainDisplayName={row.chainDisplayName || ''}
+                        logoKey={row.logoKey}
+                        slug={row.slug}
+                        symbol={row.symbol}
+                      />
+                    );
+                  }
+                },
+                {
+                  title: 'Portfolio %',
+                  dataIndex: 'percentage',
+                  key: 'percentage',
+                  render: () => <>85%</>
+                },
+                {
+                  title: 'Price',
+                  dataIndex: 'price',
+                  key: 'price',
+                  render: (_, row) => {
+                    return (
+                      <TokenPrice
+                        pastValue={row.price24hValue}
+                        priceChangeStatus={row.priceChangeStatus}
+                        value={row.priceValue}
+                      />
+                    );
+                  }
+                },
+                {
+                  title: 'Balance',
+                  dataIndex: 'balance',
+                  key: 'balance',
+                  render: (_, row) => {
+                    return (
+                      <TokenBalance
+                        convertedValue={row.total.convertedValue}
+                        symbol={row.symbol}
+                        value={row.total.value}
+                      />
+                    );
+                  }
+                }
+              ]}
+              dataSource={tokenGroupBalanceItems}
+              onClick={onClickItem}
+            />
 
+          )}
         <Button
           block
           children={t('Manage token list')}
@@ -252,7 +261,7 @@ const Component = (): React.ReactElement => {
           onClick={onClickManageToken}
           type='ghost'
         />
-      </>
+      </div>
     );
   }
 
@@ -341,7 +350,6 @@ type WrapperProps = ThemeProps & {
 
 const WrapperComponent = ({ className = '', searchInput }: WrapperProps): React.ReactElement<Props> => {
   const dataContext = useContext(DataContext);
-  const { t } = useTranslation();
 
   return (
     <PageWrapper
@@ -357,6 +365,9 @@ const Tokens = styled(WrapperComponent)<WrapperProps>(({ theme: { extendToken, t
   return ({
     overflow: 'hidden',
 
+    'token-table': {
+
+    },
     '.__empty-list': {
       marginTop: token.marginSM,
       marginBottom: token.marginSM

@@ -96,7 +96,7 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
 
       return SCREEN_HEADERS[key].includes(currentRoute);
     });
-  }, [currentRoute]);
+  }, [SCREEN_HEADERS, currentRoute]);
 
   return (
     <Layout.Base

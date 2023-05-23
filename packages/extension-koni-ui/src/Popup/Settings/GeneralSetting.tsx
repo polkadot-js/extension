@@ -214,13 +214,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t('General settings')}
         withSideMenu
       >
-        {isWebUI && <SwSubHeader
-          background='transparent'
-          center={false}
-          onBack={() => navigate(-1)}
-          showBackButton={true}
-          title={t('General settings')}
-                    />}
+        {isWebUI && (
+          <SwSubHeader
+            background='transparent'
+            center={false}
+            className='web-header'
+            onBack={() => navigate(-1)}
+            showBackButton={true}
+            title={t('General settings')}
+          />
+        )}
         <div className={CN('__scroll-container', {
           '__web-ui': isWebUI
         })}

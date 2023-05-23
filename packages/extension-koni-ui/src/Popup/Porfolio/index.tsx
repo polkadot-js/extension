@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+// import { Layout } from '@subwallet/extension-koni-ui/components';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Input, SwSubHeader } from '@subwallet/react-ui';
@@ -50,71 +50,66 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const isDetail = useMemo(() => pathname.includes('detail'), [pathname]);
 
   return (
-    <Layout.Base
-      headerList={['Controller', 'Balance']}
-      showWebHeader
+    <div className={CN('home', 'home-container', className, {
+      '__web-ui': isWebUI
+    })}
     >
-      <div className={CN('home', 'home-container', className, {
-        '__web-ui': isWebUI
-      })}
-      >
-        <div className='menu-bar'>
-          {
-            !isDetail
-              ? (
-                <>
-                  <Tabs
-                    className={className}
-                    onSelect={handleSelectTab}
-                    selectedIndex={activeTabIndex}
+      <div className='menu-bar'>
+        {
+          !isDetail
+            ? (
+              <>
+                <Tabs
+                  className={className}
+                  onSelect={handleSelectTab}
+                  selectedIndex={activeTabIndex}
+                >
+                  <TabList
+                    className={CN('react-tabs__tab-list')}
                   >
-                    <TabList
-                      className={CN('react-tabs__tab-list')}
-                    >
-                      {TAB_LIST.map((label) => (
-                        <Tab key={label}>{label}</Tab>
-                      ))}
-                    </TabList>
+                    {TAB_LIST.map((label) => (
+                      <Tab key={label}>{label}</Tab>
+                    ))}
+                  </TabList>
 
-                    {/* fake tabpane to remove error logs */}
-                    <div style={{ display: 'none' }}>
-                      <TabPanel></TabPanel>
-                      <TabPanel></TabPanel>
-                    </div>
-                  </Tabs>
-                </>
-              )
-              : (
-                <SwSubHeader
-                  background='transparent'
-                  center={false}
-                  className='web-header'
-                  onBack={() => navigate(-1)}
-                  showBackButton
-                  title={detailTitle}
-                />
-              )
-          }
-          <div className='right-section'>
-            <Input.Search
-              className='search-input'
-              onChange={handleInputChange}
-              placeholder={searchPlaceholder}
-              size='md'
-              value={searchInput}
-            />
-          </div>
+                  {/* fake tabpane to remove error logs */}
+                  <div style={{ display: 'none' }}>
+                    <TabPanel></TabPanel>
+                    <TabPanel></TabPanel>
+                  </div>
+                </Tabs>
+              </>
+            )
+            : (
+              <SwSubHeader
+                background='transparent'
+                center={false}
+                className='web-header'
+                onBack={() => navigate(-1)}
+                showBackButton
+                title={detailTitle}
+              />
+            )
+        }
+        <div className='right-section'>
+          <Input.Search
+            className='search-input'
+            onChange={handleInputChange}
+            placeholder={searchPlaceholder}
+            size='md'
+            value={searchInput}
+          />
         </div>
-
-        <Outlet
-          context={{
-            searchInput,
-            setDetailTitle,
-            setSearchPlaceholder
-          }}
-        />
       </div>
-    </Layout.Base>
+
+      <Outlet
+        context={{
+          searchInput,
+          setDetailTitle,
+          setSearchPlaceholder
+        }}
+      />
+    </div>
   );
 }
 

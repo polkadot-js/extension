@@ -1,10 +1,11 @@
-// [object Object]
+// Copyright 2019-2022 @subwallet/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
 import { AccountCardSelection, AccountItemWithName } from '@subwallet/extension-koni-ui/components/Account';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components/MetaInfo';
+// import { useGetCurrentAuth } from '@subwallet/extension-koni-ui/hooks';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -12,7 +13,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
 import { Divider, Logo, Popover, SwList } from '@subwallet/react-ui';
 import { ListChecks } from 'phosphor-react';
-import { forwardRef, LegacyRef, useCallback, useMemo } from 'react';
+import React, { forwardRef, LegacyRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -62,13 +63,16 @@ const StyledActions = styled.div<ThemeProps>(({ theme: { token } }: ThemeProps) 
 
 const Component: React.FC = () => {
   const { t } = useTranslation();
-  const { accounts: _accounts } = useSelector((state: RootState) => state.accountState);
+  const { accounts: _accounts, currentAccount } = useSelector((state: RootState) => state.accountState);
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
-
+  // const currentAuth = useGetCurrentAuth();
   const accounts = useMemo((): AccountJson[] => {
     return [..._accounts].sort(funcSortByName);
   }, [_accounts]);
+  const noAllAccounts = useMemo(() => {
+    return accounts.filter(({ address }) => !isAccountAll(address));
+  }, [accounts]);
 
   const onClickDetailAccount = useCallback((address: string) => {
     return () => {
@@ -77,10 +81,6 @@ const Component: React.FC = () => {
       }, 100);
     };
   }, [navigate]);
-
-  const noAllAccounts = useMemo(() => {
-    return accounts.filter(({ address }) => !isAccountAll(address));
-  }, [accounts]);
 
   const _onSelect = useCallback((address: string) => {
     if (address) {
@@ -117,31 +117,31 @@ const Component: React.FC = () => {
         console.error('There is a problem when change account');
       }
     }
-  }, [accounts, location.pathname, navigate, goHome]);
+  }, [accounts, navigate, goHome]);
 
-  const renderItem = useCallback((item: AccountJson, _selected: boolean) => {
+  const renderItem = useCallback((item: AccountJson) => {
     const currentAccountIsAll = isAccountAll(item.address);
+    const selectedAccount = currentAccount?.address || '';
 
     if (currentAccountIsAll) {
       return (
-        <AccountItemWithName
-          accountName={item.name}
-          address={item.address}
-          avatarSize={24}
-          className='all-account-selection'
-          isSelected={_selected}
-          key={item.address}
-        />
+        <div key={item.address} onClick={() => _onSelect(item.address)}>
+          <AccountItemWithName
+            address={item.address}
+            className='all-account-selection'
+            isSelected={item.address === selectedAccount}
+          />
+        </div>
       );
     }
 
     return (
-      <div onClick={() => _onSelect(item.address)}>
+      <div key={item.address} onClick={() => _onSelect(item.address)}>
         <AccountCardSelection
           accountName={item.name || ''}
           address={item.address}
           genesisHash={item.genesisHash}
-          isSelected={_selected}
+          isSelected={item.address === selectedAccount}
           isShowSubIcon
           onPressMoreBtn={onClickDetailAccount(item.address)}
           subIcon={(
@@ -154,7 +154,7 @@ const Component: React.FC = () => {
         />
       </div>
     );
-  }, [onClickDetailAccount, isEthereumAddress]);
+  }, [currentAccount?.address, onClickDetailAccount, _onSelect]);
 
   const emptyTokenList = useCallback(() => {
     return (
@@ -167,6 +167,7 @@ const Component: React.FC = () => {
   }, [t]);
 
   // Remove ref error
+  // eslint-disable-next-line react/display-name
   const TriggerComponent = forwardRef((props, ref) => (
     <div
       {...props}
@@ -175,7 +176,7 @@ const Component: React.FC = () => {
       <MetaInfo.AccountGroup
         accounts={accounts}
         className='ava-group'
-        content={`${accounts.length} accounts`}
+        content={`${noAllAccounts.length} accounts`}
       />
     </div>
   ));
@@ -186,7 +187,7 @@ const Component: React.FC = () => {
         <StyledSection
           className={'manage_chains__container'}
           enableSearchInput
-          list={noAllAccounts}
+          list={noAllAccounts.length <= 1 ? noAllAccounts : accounts}
           mode={'boxed'}
           renderItem={renderItem}
           renderWhenEmpty={emptyTokenList}
@@ -200,7 +201,7 @@ const Component: React.FC = () => {
         </StyledActions>
       </>
     );
-  }, []);
+  }, [accounts, emptyTokenList, noAllAccounts, renderItem, t]);
 
   return (
     <Popover

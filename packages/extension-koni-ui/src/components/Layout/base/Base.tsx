@@ -90,7 +90,6 @@ const Base = (props: LayoutBaseProps) => {
     showFooter,
     showWebHeader = false,
     withBackground = false,
-    withController,
     withSideMenu = false,
     ...rest } = props;
   const navigate = useNavigate();
@@ -125,12 +124,14 @@ const Base = (props: LayoutBaseProps) => {
   const renderHeader = useCallback((name: keyof CompoundedHeader, key?: number) => {
     const CurComponent = Headers[name];
 
-    return <CurComponent
-      key={key}
-      onBack={onBack}
-      title={props.title}
-    />;
-  }, [props.title]);
+    return (
+      <CurComponent
+        key={key}
+        onBack={onBack}
+        title={props.title}
+      />
+    );
+  }, [onBack, props.title]);
 
   const isWebBase = useMemo(() => isWebUI && withSideMenu, [isWebUI, withSideMenu]);
 
@@ -161,8 +162,10 @@ const Base = (props: LayoutBaseProps) => {
           onClick: onSelectTab(item.url)
         }))}
       >
-        {showWebHeader && headerList?.map((name: keyof CompoundedHeader, index: number) =>
-          renderHeader(name, index)
+        {showWebHeader && (
+          headerList?.map((name: keyof CompoundedHeader, index: number) =>
+            renderHeader(name, index)
+          )
         )}
         {children}
       </SwScreenLayout>

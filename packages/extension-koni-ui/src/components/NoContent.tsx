@@ -37,19 +37,11 @@ const pageContents: Record<string, PageContent> = {
     icon: Image,
     title: 'No collectible found',
     content: 'Your collectibles will appear here',
-    button: {
-      label: 'Import collectible',
-      icon: PlusCircle
-    }
   },
   [PAGE_TYPE.TOKEN]: {
     icon: Coin,
     title: 'No token found',
     content: 'Your token will appear here',
-    button: {
-      label: 'Manage token list',
-      icon: SlidersHorizontal
-    }
   },
   [PAGE_TYPE.SEARCH]: {
     icon: MagnifyingGlass,
@@ -73,11 +65,11 @@ const pageContents: Record<string, PageContent> = {
 };
 
 const Component: React.FC<Props> = ({ className, pageType }: Props) => {
-  const { button, content, icon, title } = pageContents[pageType];
+  const { content, icon, title } = pageContents[pageType];
 
   return (
-    <div className={CN(className, 'flex-col')}>
-      <div className={CN('flex-col', 'message-wrapper')}>
+    <div className={CN(className)}>
+      <div className={CN('message-wrapper')}>
         <div className='message-icon'>
           <Icon
             iconColor='#737373'
@@ -94,16 +86,6 @@ const Component: React.FC<Props> = ({ className, pageType }: Props) => {
           )}
         </div>
       </div>
-
-      {button && (
-        <Button
-          className='action-button'
-          icon={<Icon phosphorIcon={button.icon} />}
-          type='ghost'
-        >
-          {button.label}
-        </Button>
-      )}
     </div>
   );
 };
@@ -111,12 +93,14 @@ const Component: React.FC<Props> = ({ className, pageType }: Props) => {
 const NoContent = styled(Component)<Props>(() => {
   return {
     height: '100%',
-    justifyContent: 'space-between',
 
     '.message-wrapper': {
       flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
+      padding: '50px 0 40px',
 
       '.message-icon': {
         display: 'flex',
@@ -144,6 +128,8 @@ const NoContent = styled(Component)<Props>(() => {
         marginTop: 16,
         justifyContent: 'center',
         alignItems: 'center',
+        display: 'flex',
+        flexDirection: 'column',
 
         '& > *': {
           margin: 0

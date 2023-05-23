@@ -43,16 +43,34 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     if (pathEls.length <= 1) {
       navigate('/home/tokens');
     }
-  }, [pathname]);
+  }, [navigate, pathname]);
 
   const pathEls = useMemo(() => pathname.split('/').filter((i: string) => !!i), [pathname]);
   const homeContent = useMemo(() => {
     if (isWebUI && ['tokens', 'nfts'].includes(pathEls[1])) {
-      return <Porfolio />;
+      return (
+        <Layout.Base
+          headerList={['Controller', 'Balance']}
+          showWebHeader
+          withSideMenu
+        withBackground={['tokens', 'nfts'].includes(pathEls[1])}
+        >
+          <Porfolio />
+        </Layout.Base>
+
+      );
     }
 
-    return <Outlet />;
-  }, [isWebUI, pathname]);
+    return (
+      <Layout.Home
+        onClickSearchIcon={onOpenGlobalSearchToken}
+        showFilterIcon
+        showSearchIcon
+      >
+        <Outlet />
+      </Layout.Home>
+    );
+  }, [isWebUI, onOpenGlobalSearchToken, pathEls]);
 
   return (
     <>
@@ -62,14 +80,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }}
       >
         <div className={`home home-container ${className}`}>
-          <Layout.Home
-            onClickSearchIcon={onOpenGlobalSearchToken}
-            showFilterIcon
-            showSearchIcon
-            withBackground={['tokens', 'nfts'].includes(pathEls[1])}
-          >
-            {homeContent}
-          </Layout.Home>
+          {homeContent}
         </div>
       </HomeContext.Provider>
 

@@ -3,6 +3,7 @@
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { CustomModal, EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetNftByAccount, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -21,17 +22,21 @@ import NftImport from './NftImport';
 
 type Props = ThemeProps
 
-const reloadIcon = <Icon
-  phosphorIcon={ArrowClockwise}
-  size='sm'
-  type='phosphor'
-/>;
+const reloadIcon = (
+  <Icon
+    phosphorIcon={ArrowClockwise}
+    size='sm'
+    type='phosphor'
+  />
+);
 
-const rightIcon = <Icon
-  phosphorIcon={Plus}
-  size='sm'
-  type='phosphor'
-/>;
+const rightIcon = (
+  <Icon
+    phosphorIcon={Plus}
+    size='sm'
+    type='phosphor'
+  />
+);
 
 const IMPORT_NFT_MODAL = 'import-nft-modal';
 
@@ -52,7 +57,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Collectible name');
-  }, [outletContext?.setSearchPlaceholder]);
+  }, [outletContext, outletContext?.setSearchPlaceholder]);
 
   const subHeaderButton: ButtonProps[] = [
     {
@@ -123,15 +128,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     const state: INftCollectionDetail = { collectionInfo: nftCollection, nftList };
 
-    return (<NftGalleryWrapper
-      fallbackImage={fallbackImage}
-      handleOnClick={handleOnClickCollection}
-      image={nftCollection.image}
-      itemCount={nftList.length}
-      key={`${nftCollection.collectionId}_${nftCollection.chain}`}
-      routingParams={state}
-      title={nftCollection.collectionName || nftCollection.collectionId}
-    />);
+    return (
+      <NftGalleryWrapper
+        fallbackImage={fallbackImage}
+        handleOnClick={handleOnClickCollection}
+        image={nftCollection.image}
+        itemCount={nftList.length}
+        key={`${nftCollection.collectionId}_${nftCollection.chain}`}
+        routingParams={state}
+        title={nftCollection.collectionName || nftCollection.collectionId}
+      />
+    );
   }, [getNftsByCollection, handleOnClickCollection]);
 
   const emptyNft = useCallback(() => {
@@ -164,27 +171,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       );
     }
 
-    return (
-      <SwList
-        displayGrid={true}
-        gridGap={'14px'}
-        list={nftCollections}
-        minColumnWidth={'160px'}
-        renderItem={renderNftCollection}
-        renderOnScroll={true}
-        renderWhenEmpty={emptyNft}
-        searchBy={searchCollection}
-        searchTerm={outletContext?.searchInput}
-      />
-    );
-  }, [
-    nftCollections,
-    renderNftCollection,
-    searchCollection,
-    isWebUI,
-    outletContext?.searchInput,
-    emptyNft
-  ]);
+    if (nftCollections.length > 0) {
+      return (
+        <SwList
+          displayGrid={true}
+          gridGap={'14px'}
+          list={nftCollections}
+          minColumnWidth={'160px'}
+          renderItem={renderNftCollection}
+          renderOnScroll={true}
+          renderWhenEmpty={emptyNft}
+          searchBy={searchCollection}
+          searchTerm={outletContext?.searchInput}
+        />
+      );
+    }
+
+    return <NoContent pageType={PAGE_TYPE.NFT} />;
+  }, [isWebUI, nftCollections, renderNftCollection, emptyNft, searchCollection, outletContext?.searchInput, t]);
 
   return (
     <PageWrapper
@@ -205,10 +209,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <Button
           block
           children={t('Import collectible')}
-          icon={<Icon
-            phosphorIcon={PlusCircle}
-            size='xs'
-          />}
+          icon={(
+            <Icon
+              phosphorIcon={PlusCircle}
+              size='xs'
+            />
+          )}
           onClick={() => activeModal(IMPORT_NFT_MODAL)}
           type='ghost'
         />

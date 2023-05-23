@@ -206,20 +206,24 @@ function Component ({ children, className, modalContent = false }: Props) {
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
             {!isWebUI
-              ? <SwSubHeader
-                background={'transparent'}
-                center
-                className={'transaction-header'}
-                onBack={goBack}
-                rightButtons={subHeaderButton}
-                showBackButton
-                title={titleMap[transactionType]}
-              />
-              : <Controller
-                onBack={goBack}
-                showBackButton
-                title={titleMap[transactionType]}
-              />}
+              ? (
+                <SwSubHeader
+                  background={'transparent'}
+                  center
+                  className={'transaction-header'}
+                  onBack={goBack}
+                  rightButtons={subHeaderButton}
+                  showBackButton
+                  title={titleMap[transactionType]}
+                />
+              )
+              : (
+                <Controller
+                  onBack={goBack}
+                  showBackButton
+                  title={titleMap[transactionType]}
+                />
+              )}
             <div className={CN('content', {
               '__web-ui': isWebUI
             })}

@@ -16,7 +16,7 @@
   },
   "content_scripts": [{
     "js": ["content.js"],
-    "matches": ["http://*/*", "https://*/*"],
+    "matches": ["https://*/*"],
     "run_at": "document_start"
   }],
   "icons": {

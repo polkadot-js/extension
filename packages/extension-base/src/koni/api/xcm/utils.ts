@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _getSubstrateParaId, _getXcmAssetMultilocation, _isChainEvmCompatible, _isNativeToken, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 
@@ -12,7 +12,7 @@ export const FOUR_INSTRUCTIONS_LIMITED_WEIGHT = { Limited: 5000000000 };
 
 // get multilocation for destination chain from a parachain
 
-export function getReceiverLocation (originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, toAddress: string): Record<string, any> {
+export function getReceiverLocation (destinationChainInfo: _ChainInfo, toAddress: string): Record<string, any> {
   if (destinationChainInfo.slug === COMMON_CHAIN_SLUGS.ASTAR_EVM) {
     const ss58Address = evmToAddress(toAddress, 2006); // TODO: shouldn't pass addressPrefix directly
 
@@ -26,8 +26,8 @@ export function getReceiverLocation (originChainInfo: _ChainInfo, destinationCha
   return { AccountId32: { network: 'Any', id: decodeAddress(toAddress) } };
 }
 
-export function getBeneficiary (originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, version = 'V1') {
-  const receiverLocation: Record<string, any> = getReceiverLocation(originChainInfo, destinationChainInfo, recipientAddress);
+export function getBeneficiary (destinationChainInfo: _ChainInfo, recipientAddress: string, version = 'V1') {
+  const receiverLocation: Record<string, any> = getReceiverLocation(destinationChainInfo, recipientAddress);
 
   return {
     [version]: {
@@ -41,8 +41,77 @@ export function getBeneficiary (originChainInfo: _ChainInfo, destinationChainInf
 
 export function getDestWeight () {
   return 'Unlimited';
-  // return api.tx.xTokens.transfer.meta.args[3].type.toString() ===
-  // 'XcmV2WeightLimit'
-  //   ? 'Unlimited'
-  //   : FOUR_INSTRUCTIONS_WEIGHT;
+}
+
+export function getTokenLocation (tokenInfo: _ChainAsset, sendingValue: string, version = 'V1') {
+  if (!_isNativeToken(tokenInfo)) {
+    const multilocation = _getXcmAssetMultilocation(tokenInfo);
+
+    return {
+      [version]: [
+        {
+          id: multilocation,
+          fun: { Fungible: sendingValue }
+        }
+      ]
+    };
+  }
+
+  return {
+    [version]: [
+      {
+        id: { Concrete: { parents: 0, interior: 'Here' } },
+        fun: { Fungible: sendingValue }
+      }
+    ]
+  };
+}
+
+export function getDestMultilocation (destinationChainInfo: _ChainInfo, recipient: string, version = 'V1') {
+  const receiverLocation = getReceiverLocation(destinationChainInfo, recipient);
+
+  if (_isSubstrateParaChain(destinationChainInfo)) {
+    const interior = {
+      X2: [
+        { Parachain: _getSubstrateParaId(destinationChainInfo) },
+        receiverLocation
+      ]
+    };
+
+    return {
+      [version]: {
+        parents: 1,
+        interior
+      }
+    };
+  }
+
+  return {
+    [version]: {
+      parents: 1,
+      interior: {
+        X1: receiverLocation
+      }
+    }
+  };
+}
+
+export function getDestinationChainLocation (destinationChainInfo: _ChainInfo, version = 'V1') {
+  if (_isSubstrateParaChain(destinationChainInfo)) {
+    return {
+      [version]: {
+        parents: 0,
+        interior: {
+          X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
+        }
+      }
+    };
+  }
+
+  return {
+    [version]: {
+      parents: 1,
+      interior: 'Here'
+    }
+  };
 }

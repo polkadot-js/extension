@@ -13,7 +13,7 @@ import { BalanceService } from '@subwallet/extension-base/services/balance-servi
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParachain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParaChain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
@@ -67,7 +67,7 @@ const generateDefaultCrowdloanMap = (): Record<string, CrowdloanItem> => {
   const crowdloanMap: Record<string, CrowdloanItem> = {};
 
   Object.entries(ChainInfoMap).forEach(([networkKey, chainInfo]) => {
-    if (_isSubstrateParachain(chainInfo)) {
+    if (_isSubstrateParaChain(chainInfo)) {
       crowdloanMap[networkKey] = {
         state: APIItemState.PENDING,
         contribute: '0'

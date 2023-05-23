@@ -148,10 +148,6 @@ export function _isChainEnabled (chainState: _ChainState) {
   return chainState.active;
 }
 
-export function _isSubstrateParachain (chainInfo: _ChainInfo) {
-  return chainInfo.substrateInfo !== null && chainInfo.substrateInfo.paraId !== null;
-}
-
 export function _getChainSubstrateAddressPrefix (chainInfo: _ChainInfo) {
   return chainInfo?.substrateInfo?.addressPrefix ?? -1;
 }
@@ -297,7 +293,7 @@ export function _isSubstrateRelayChain (chainInfo: _ChainInfo) {
 }
 
 export function _isSubstrateParaChain (chainInfo: _ChainInfo) {
-  return chainInfo.substrateInfo?.chainType === _SubstrateChainType.PARACHAIN;
+  return chainInfo.substrateInfo !== null && chainInfo.substrateInfo.paraId !== null && chainInfo.substrateInfo?.chainType === _SubstrateChainType.PARACHAIN;
 }
 
 export function _getEvmAbiExplorer (chainInfo: _ChainInfo) {

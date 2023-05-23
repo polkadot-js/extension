@@ -56,7 +56,6 @@
   "Forget account": "ลบบัญชีออกจากโปรแกรม",
   "You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.": "คุณกำลังลบบัญชีนี้ หมายความว่าคุณจะไม่สามารถใช้งานบัญชีนี้ผ่านโปรแกรมนี้ได้อีกต่อไป ถ้าคุณต้องการกู้คืนบัญชี คุณจะต้องใช้seed",
   "I want to forget this account": "ฉันอยากจะลบบัญชีนี้ออก",
-  "Scan Address Qr": "แสกนที่อยู่ Qr",
   "Add the account with identified address": "เพิ่มบัญชีด้วยที่อยู่แอดเดรสที่ระบุ",
   "Import account": "นำเข้าบัญชี",
   "existing 12 or 24-word mnemonic seed": "mnemonic seed ขนาด 12คำ หรือ24คำ",

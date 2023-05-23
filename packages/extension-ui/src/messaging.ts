@@ -119,13 +119,6 @@ export async function exportAccount(address: string, password: string): Promise<
   return sendMessage('pri(accounts.export)', { address, password });
 }
 
-export async function exportAccounts(
-  addresses: string[],
-  password: string
-): Promise<{ exportedJson: KeyringPairs$Json }> {
-  return sendMessage('pri(accounts.batchExport)', { addresses, password });
-}
-
 export async function validateAccount(address: string, password: string): Promise<boolean> {
   return sendMessage('pri(accounts.validate)', { address, password });
 }
@@ -156,10 +149,6 @@ export async function approveSignPassword(id: string, savePass: boolean, passwor
 
 export async function approveSignSignature(id: string, signature: HexString): Promise<boolean> {
   return sendMessage('pri(signing.approve.signature)', { id, signature });
-}
-
-export async function createAccountExternal(name: string, address: string, genesisHash: string): Promise<boolean> {
-  return sendMessage('pri(accounts.create.external)', { address, genesisHash, name });
 }
 
 export async function createAccountHardware(

@@ -18,7 +18,6 @@ import * as MetadataCache from '../../MetadataCache';
 import { flushAllPromises } from '../../testHelpers';
 import Extrinsic from './Extrinsic';
 import { westendMetadata } from './metadataMock';
-import Qr from './Qr';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
 import Signing from '.';
@@ -192,53 +191,6 @@ describe('Signing requests', () => {
 
       expect(wrapper.find(TransactionIndex).text()).toBe('1\xa0more\xa0Transaction1/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
-    });
-  });
-
-  describe('External account', () => {
-    it('shows Qr scanner for external accounts', async () => {
-      signRequests = [
-        {
-          account: {
-            address: '5Cf1CGZas62RWwce3d2EPqUvSoi1txaXKd9M5w9bEFSsQtRe',
-            genesisHash: null,
-            isExternal: true,
-            isHidden: false,
-            name: 'Dave account on Signer ',
-            whenCreated: 1602085704296
-          },
-          id: '1607357806151.5',
-          request: {
-            payload: {
-              address: '5Cf1CGZas62RWwce3d2EPqUvSoi1txaXKd9M5w9bEFSsQtRe',
-              blockHash: '0xd2f2dfb56c16af1d0faf5b454153d3199aeb6647537f4161c26a34541c591ec8',
-              blockNumber: '0x00340171',
-              era: '0x1503',
-              genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
-              method: '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
-              nonce: '0x00000000',
-              signedExtensions: [
-                'CheckSpecVersion',
-                'CheckTxVersion',
-                'CheckGenesis',
-                'CheckMortality',
-                'CheckNonce',
-                'CheckWeight',
-                'ChargeTransactionPayment'
-              ],
-              specVersion: '0x0000002d',
-              tip: '0x00000000000000000000000000000000',
-              transactionVersion: '0x00000003',
-              version: 4
-            },
-            sign: jest.fn()
-          },
-          url: 'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts'
-        }
-      ];
-      await mountComponent();
-      expect(wrapper.find(Extrinsic)).toHaveLength(0);
-      expect(wrapper.find(Qr)).toHaveLength(1);
     });
   });
 

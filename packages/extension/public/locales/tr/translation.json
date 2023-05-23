@@ -56,7 +56,6 @@
   "Forget account": "Hesabı unut",
   "You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.": "Hesabı kaldırmak üzeresiniz. Bu, artık bu uzantı yoluyla ona erişemeyeceğiniz anlamına gelir. Hesabı kurtarmak isterseniz, anımsatıcı kullanmanız gerekir.",
   "I want to forget this account": "Bu hesabı unutmak istiyorum",
-  "Scan Address Qr": "Tarama Adresi Qr ile",
   "Add the account with identified address": "Tanımlanmış adrese sahip hesabı ekle",
   "Import account": "Hesabı içe aktar",
   "existing 12 or 24-word mnemonic seed": "mevcut 12 veya 24 kelimelik anımsatıcı ",

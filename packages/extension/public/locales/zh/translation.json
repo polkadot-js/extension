@@ -56,7 +56,6 @@
   "Forget account": "忘记账户",
   "You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.": "您将删除该帐户。这意味着您将不能再通过此扩展程序访问它。如果您希望恢复它，您将需要使用助记词种子。",
   "I want to forget this account": "我想忘记这个账户",
-  "Scan Address Qr": "扫描地址二维码",
   "Add the account with identified address": "添加指定地址的帐户",
   "Import account": "导入账户",
   "existing 12 or 24-word mnemonic seed": "现有 12 或 24 字符的助记词种子",

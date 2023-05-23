@@ -52,10 +52,8 @@ import Authorize from './Authorize';
 import CreateAccount from './CreateAccount';
 import Derive from './Derive';
 import Export from './Export';
-// import ExportAll from './ExportAll';
 import Forget from './Forget';
 // import ImportLedger from './ImportLedger';
-// import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
 import Metadata from './Metadata';
 import PhishingDetected from './PhishingDetected';
@@ -213,15 +211,9 @@ export default function Popup(): React.ReactElement {
                               {wrapWithErrorBoundary(<Export />, 'export-address')}
                             </Route>
                             {/* NOT USED */}
-                            {/* <Route path='/account/export-all'>
-                              {wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}
-                            </Route> */}
-                            {/* NOT USED */}
                             {/* <Route path='/account/import-ledger'>
                               {wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}
                             </Route> */}
-                            {/* NOT USED */}
-                            {/* <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route> */}
                             <Route path='/account/import-seed'>
                               {wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}
                             </Route>

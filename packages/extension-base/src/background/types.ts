@@ -80,12 +80,10 @@ type Timeout = number
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
 export interface RequestSignatures {
   // private/internal requests, i.e. from a popup
-  'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
-  'pri(accounts.batchExport)': [RequestAccountBatchExport, ResponseAccountsExport]
   'pri(accounts.forget)': [RequestAccountForget, boolean];
   'pri(accounts.list)': [RequestAccountList, InjectedAccount[]];
   'pri(accounts.show)': [RequestAccountShow, boolean];
@@ -185,12 +183,6 @@ export interface RequestMetadataReject {
 
 export type RequestMetadataSubscribe = null;
 
-export interface RequestAccountCreateExternal {
-  address: string;
-  genesisHash?: string | null;
-  name: string;
-}
-
 export interface RequestAccountCreateSuri {
   name: string;
   genesisHash?: string | null;
@@ -256,11 +248,6 @@ export interface RequestDeriveValidate {
 
 export interface RequestAccountExport {
   address: string;
-  password: string;
-}
-
-export interface RequestAccountBatchExport {
-  addresses: string[];
   password: string;
 }
 
@@ -380,10 +367,6 @@ export interface ResponseSeedValidate {
 
 export interface ResponseAccountExport {
   exportedJson: KeyringPair$Json;
-}
-
-export interface ResponseAccountsExport {
-  exportedJson: KeyringPairs$Json;
 }
 
 export type ResponseRpcListProviders = ProviderList;

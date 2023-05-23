@@ -56,7 +56,6 @@
   "Forget account": "Oublier le compte",
   "You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.": "Vous êtes sur le point de supprimer le compte. Cela signifie que vous ne pourrez plus y accéder via cette extension. Si vous souhaitez le récupérer, vous devrez utiliser la phrase mnémotechnique.",
   "I want to forget this account": "Je veux oublier ce compte",
-  "Scan Address Qr": "Scanner ce code QR",
   "Add the account with identified address": "Ajouter le compte avec l'adresse identifiée",
   "Import account": "Importer un compte",
   "existing 12 or 24-word mnemonic seed": "phrase mnémotechnique existante de 12 ou 24 mots",

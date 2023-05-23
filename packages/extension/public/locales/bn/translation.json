@@ -56,7 +56,6 @@
   "Forget account": "অ্যাকাউন্ট ত্যাগ করুন",
   "You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.": "আপনি অ্যাকাউন্টটি সরাতে চলেছেন। অর্থাৎ আপনি আর এই এক্সটেনশনের মাধ্যমে এটি অ্যাক্সেস করতে পারবেন না। আপনি যদি এটি পুনরুদ্ধার করতে চান, তবে আপনাকে সীডটি ব্যবহার করতে হবে।",
   "I want to forget this account": "আমি এই অ্যাকাউন্ট ত্যাগ করতে চাই।",
-  "Scan Address Qr": "ঠিকানার QR স্ক্যান করুন",
   "Add the account with identified address": "চিহ্নিত ঠিকানা সহ অ্যাকাউন্ট যোগ করুন",
   "Import account": "অ্যাকাউন্ট ইম্পোর্ট করুন",
   "existing 12 or 24-word mnemonic seed": "বিদ্যমান ১২ বা ২৪-শব্দের নেমোনিক সীড",

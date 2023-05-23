@@ -6,7 +6,7 @@ import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/
 import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import { isJsonAuthentic, signJson } from '@polkadot/extension-base/utils/accountJsonIntegrity';
@@ -66,12 +66,6 @@ export default class Extension {
     );
   }
 
-  private accountsCreateExternal ({ address, genesisHash, name }: RequestAccountCreateExternal): boolean {
-    keyring.addExternal(address, { genesisHash, name });
-
-    return true;
-  }
-
   private accountsCreateHardware ({ accountIndex, address, addressOffset, genesisHash, hardwareType, name }: RequestAccountCreateHardware): boolean {
     keyring.addHardware(address, hardwareType, { accountIndex, addressOffset, genesisHash, name });
 
@@ -118,15 +112,6 @@ export default class Extension {
     return {
       exportedJson: await signJson(
         keyring.backupAccount(keyring.getPair(address), password),
-        password
-      )
-    };
-  }
-
-  private async accountsBatchExport ({ addresses, password }: RequestAccountBatchExport): Promise<ResponseAccountsExport> {
-    return {
-      exportedJson: await signJson(
-        await keyring.backupAccounts(addresses, password),
         password
       )
     };
@@ -591,9 +576,6 @@ export default class Extension {
       case 'pri(authorizeDate.update)':
         return this.authorizeDateUpdate(request as string);
 
-      case 'pri(accounts.create.external)':
-        return this.accountsCreateExternal(request as RequestAccountCreateExternal);
-
       case 'pri(accounts.create.hardware)':
         return this.accountsCreateHardware(request as RequestAccountCreateHardware);
 
@@ -608,9 +590,6 @@ export default class Extension {
 
       case 'pri(accounts.export)':
         return this.accountsExport(request as RequestAccountExport);
-
-      case 'pri(accounts.batchExport)':
-        return this.accountsBatchExport(request as RequestAccountBatchExport);
 
       case 'pri(accounts.forget)':
         return this.accountsForget(request as RequestAccountForget);

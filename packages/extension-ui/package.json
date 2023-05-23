@@ -30,7 +30,6 @@
     "@polkadot/keyring": "^12.1.2",
     "@polkadot/networks": "^10.2.3",
     "@polkadot/react-identicon": "^2.9.15",
-    "@polkadot/react-qr": "^2.9.15",
     "@polkadot/types": "^9.11.1",
     "@polkadot/types-augment": "^9.11.1",
     "@polkadot/ui-keyring": "^2.9.15",

@@ -17,7 +17,6 @@ import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';
 import LedgerSign from '../LedgerSign';
-import Qr from '../Qr';
 import SignArea from './SignArea';
 
 interface Props {
@@ -113,21 +112,11 @@ export default function Request({
 
     return (
       <>
-        {isExternal && !isHardware ? (
-          <Qr
-            address={json.address}
-            cmd={CMD_MORTAL}
-            genesisHash={json.genesisHash}
-            onSignature={_onSignature}
-            payload={payload}
-          />
-        ) : (
-          <Extrinsic
-            payload={payload}
-            request={json}
-            url={url}
-          />
-        )}
+        <Extrinsic
+          payload={payload}
+          request={json}
+          url={url}
+        />
         {isHardware && (
           <LedgerSign
             accountIndex={(accountIndex as number) || 0}
@@ -163,20 +152,10 @@ export default function Request({
 
     return (
       <>
-        {isExternal && !isHardware && genesisHash ? (
-          <Qr
-            address={address}
-            cmd={CMD_SIGN_MESSAGE}
-            genesisHash={genesisHash}
-            onSignature={_onSignature}
-            payload={data}
-          />
-        ) : (
-          <Bytes
-            bytes={data}
-            url={url}
-          />
-        )}
+        <Bytes
+          bytes={data}
+          url={url}
+        />
         {isExternal && !isHardware && !genesisHash && (
           <>
             <Warning isDanger>

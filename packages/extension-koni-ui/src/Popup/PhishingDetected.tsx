@@ -38,8 +38,7 @@ function _PhishingDetected ({ className }: Props): React.ReactElement<Props> {
   const onTrustSite = useCallback(() => {
     passPhishingPage(decodedWebsite)
       .then(() => {
-        window.open(decodedWebsite);
-        window.close();
+        location.replace(decodedWebsite);
       })
       .catch(noop);
   }, [decodedWebsite]);

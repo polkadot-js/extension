@@ -315,21 +315,17 @@ export class KoniSubscription {
     }
 
     // Fetch data from helper API
-    // const dataFromApi = await this.fetchingStakingFromApi();
+    const dataFromApi = await this.fetchingStakingFromApi();
 
     await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
-      const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
-
-      this.state.updateChainStakingMetadata(chainStakingMetadata);
-
       // Use fetch API data if available
-      // if (dataFromApi[chainInfo.slug]) {
-      //   this.state.updateChainStakingMetadata(dataFromApi[chainInfo.slug]);
-      // } else {
-      //   const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
-      //
-      //   this.state.updateChainStakingMetadata(chainStakingMetadata);
-      // }
+      if (dataFromApi[chainInfo.slug]) {
+        this.state.updateChainStakingMetadata(dataFromApi[chainInfo.slug]);
+      } else {
+        const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
+
+        this.state.updateChainStakingMetadata(chainStakingMetadata);
+      }
     }));
   }
 

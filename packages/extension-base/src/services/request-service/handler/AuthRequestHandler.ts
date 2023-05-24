@@ -35,7 +35,7 @@ export default class AuthRequestHandler {
     this.#chainService = chainService;
   }
 
-  private stripUrl (url: string): string {
+  public stripUrl (url: string): string {
     assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
 
     const parts = url.split('/');

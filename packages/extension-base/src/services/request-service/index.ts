@@ -49,6 +49,10 @@ export default class RequestService {
     this.#popupHandler.updateIconV2(shouldClose);
   }
 
+  public stripUrl (url: string): string {
+    return this.#authRequestHandler.stripUrl(url);
+  }
+
   getAddressList (value = false): Record<string, boolean> {
     const addressList = Object.keys(this.keyringService.accounts);
 

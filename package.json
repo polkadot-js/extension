@@ -1,4 +1,5 @@
 {
+  "//": "There is a conflict between storybook webpack version and @polkadot/dev webpack version which causes DefinePlugin to crash.",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "bugs": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension/issues",
   "homepage": "https://github.com/Cardinal-Cryptography/aleph-zero-wallet-extension#readme",
@@ -20,6 +21,7 @@
   ],
   "scripts": {
     "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
+    "build-storybook": "storybook build",
     "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
     "build:release": "polkadot-ci-ghact-build",
@@ -32,6 +34,7 @@
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only",
     "start": "yarn watch",
+    "storybook": "storybook dev -p 6006",
     "test": "EXTENSION_PREFIX='test' polkadot-dev-run-test --detectOpenHandles",
     "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --detectOpenHandles",
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
@@ -42,12 +45,19 @@
   "devDependencies": {
     "@babel/core": "^7.20.12",
     "@polkadot/dev": "^0.67.177",
+    "@storybook/addon-essentials": "^7.0.12",
+    "@storybook/addon-styling": "^1.0.8",
+    "@storybook/react": "^7.0.12",
+    "@storybook/react-webpack5": "^7.0.12",
+    "@storybook/testing-library": "^0.0.14-next.2",
     "@types/jest": "^29.2.5",
     "@types/zxcvbn": "^4.4.1",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-storybook": "^0.6.12",
     "i18next-scanner": "^4.1.0",
-    "sinon-chrome": "^3.0.1"
+    "sinon-chrome": "^3.0.1",
+    "storybook": "^7.0.12"
   },
   "resolutions": {
     "@polkadot/api": "^10.5.1",
@@ -59,6 +69,7 @@
     "@polkadot/x-fetch": "^12.1.2",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.4",
+    "webpack": "<5.79"
   }
 }

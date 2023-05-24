@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const base = require('@polkadot/dev/config/eslint.cjs');
-
 module.exports = {
   ...base,
   ignorePatterns: [...base.ignorePatterns, 'jest/**/*', 'i18next-scanner.config.js'],
@@ -15,13 +14,11 @@ module.exports = {
     // this seems very broken atm, false positives
     '@typescript-eslint/unbound-method': 'off'
   },
-  overrides: [
-    ...base.overrides,
-    {
-      files: ['**/*.test.*', '**/*.stories.*'],
-      rules: {
-        '@typescript-eslint/ban-ts-comment': 'off',
-      },
-    },
-  ],
+  overrides: [...base.overrides, {
+    files: ['**/*.test.*', '**/*.stories.*'],
+    rules: {
+      '@typescript-eslint/ban-ts-comment': 'off'
+    }
+  }],
+  extends: [...base.extends, 'plugin:storybook/recommended']
 };

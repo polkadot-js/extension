@@ -29,6 +29,7 @@ import {
 } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';
+import { EMPTY_SEED_WORDS, SEED_WORDS_LENGTH } from './consts';
 
 interface Props {
   className?: string;
@@ -77,16 +78,7 @@ const StyledInputWithLabel = styled(InputWithLabel)`
 }
 `;
 
-const SEED_WORDS_LENGTH = 12;
-const EMPTY_SEED_WORDS: string[] = new Array<string>(SEED_WORDS_LENGTH).fill('');
-
-function SeedAndPath({
-  className,
-  genesis,
-  onAccountChange,
-  onNextStep,
-  type
-}: Props): React.ReactElement {
+function SeedAndPath({ className, genesis, onAccountChange, onNextStep, type }: Props): React.ReactElement {
   const { t } = useTranslation();
 
   const [seedWords, setSeedWords] = useState<string[]>(EMPTY_SEED_WORDS);
@@ -101,9 +93,7 @@ function SeedAndPath({
 
   const onSeedWordsChange = (nextSeedWords: string[]) => {
     setError('');
-    setSeedWords(
-      [...nextSeedWords, ...EMPTY_SEED_WORDS].slice(0, SEED_WORDS_LENGTH)
-    );
+    setSeedWords([...nextSeedWords, ...EMPTY_SEED_WORDS].slice(0, SEED_WORDS_LENGTH));
   };
 
   const hasSomeSeedWords = seedWords.some((word) => word);

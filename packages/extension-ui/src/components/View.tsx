@@ -10,7 +10,6 @@ import { ThemeSwitchContext } from './contexts';
 import Main from './Main';
 import { AvailableThemes, chooseTheme, themes } from './themes';
 
-
 interface Props {
   children: React.ReactNode;
   className?: string;
@@ -36,7 +35,7 @@ function View({ children, className }: Props): React.ReactElement<Props> {
   );
 }
 
-const BodyTheme = createGlobalStyle<ThemeProps>`
+export const BodyTheme = createGlobalStyle<ThemeProps>`
   body {
     background-color: ${({ theme }: ThemeProps): string => theme.background};
     font-family: ${({ theme }: ThemeProps): string => theme.primaryFontFamily};

@@ -13,12 +13,7 @@ type Props = {
   onChange: (seedWords: string[]) => void;
 };
 
-const MnemonicInput = ({
-  className,
-  onChange,
-  seedWords,
-  showError,
-}: Props) => {
+const MnemonicInput = ({ className, onChange, seedWords, showError }: Props) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handlePaste = (event: React.ClipboardEvent) => {

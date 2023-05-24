@@ -371,9 +371,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       }
 
       if (part.destChain) {
-        if (part.destChain !== values.chain && assetRegistry[values.asset]?.assetType === _AssetType.NATIVE) {
-          setIsTransferAll(false);
-        }
+        setIsTransferAll(false);
 
         if (values.to) {
           validateField.push('to');

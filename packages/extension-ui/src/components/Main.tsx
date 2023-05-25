@@ -17,11 +17,9 @@ function Main({ children, className }: Props): React.ReactElement<Props> {
 
 export default styled(Main)(
   ({ theme }: ThemeProps) => `
-  background: ${theme.background};
   color: ${theme.textColor};
   font-size: ${theme.fontSize};
   line-height: ${theme.lineHeight};
-  border: 1px solid ${theme.inputBorderColor};
   height: 100%;
 `
 );

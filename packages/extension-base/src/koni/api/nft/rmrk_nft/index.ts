@@ -6,7 +6,7 @@ import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/
 import { isUrl, reformatAddress } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
-import { getRandomIpfsGateway, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT } from '../config';
+import { getRandomIpfsGateway, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT } from '../config';
 
 enum RMRK_SOURCE {
   BIRD_KANARIA = 'bird_kanaria',
@@ -83,7 +83,6 @@ export class RmrkNftApi extends BaseNftApi {
 
   private async getAllByAccount (account: string) {
     const fetchUrls = [
-      { url: SINGULAR_V1_ENDPOINT + account, source: RMRK_SOURCE.SINGULAR_V1 },
       { url: SINGULAR_V2_ENDPOINT + account, source: RMRK_SOURCE.SINGULAR_V2 }
     ];
 

@@ -4,7 +4,7 @@
 import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
-import { ART_ZERO_COLLECTION_API, ART_ZERO_EXTERNAL_URL, ART_ZERO_IMAGE_API, ART_ZERO_IPFS_API, ART_ZERO_TESTNET_COLLECTION_API, ART_ZERO_TESTNET_IMAGE_API, ART_ZERO_TESTNET_IPFS_API } from '@subwallet/extension-base/koni/api/nft/wasm_nft/utils';
+import { collectionApiFromArtZero, collectionDetailApiFromArtZero, externalUrlOnArtZero, ipfsApiFromArtZero, itemImageApiFromArtZero } from '@subwallet/extension-base/koni/api/nft/wasm_nft/utils';
 import { getPSP34ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -34,7 +34,7 @@ async function isArtZeroFeaturedCollection (networkKey: string, contractAddress:
   urlencoded.append('collection_address', contractAddress);
 
   const collectionInfoPromise = new Promise(function (resolve) {
-    fetch(`${networkKey === 'alephTest' ? ART_ZERO_TESTNET_COLLECTION_API : ART_ZERO_COLLECTION_API}`, {
+    fetch(collectionApiFromArtZero(networkKey), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -96,7 +96,7 @@ export class WasmNftApi extends BaseNftApi {
       return undefined;
     }
 
-    const nftItemImageSrc = `${this.chain === 'alephTest' ? ART_ZERO_TESTNET_IMAGE_API : ART_ZERO_IMAGE_API}?input=${parsedTokenUri}&size=500`;
+    const nftItemImageSrc = `${itemImageApiFromArtZero(this.chain)}?input=${parsedTokenUri}&size=500`;
 
     const collectionImageUrl = await axios(nftItemImageSrc, {
       method: 'GET'
@@ -109,7 +109,7 @@ export class WasmNftApi extends BaseNftApi {
     const urlencoded = new URLSearchParams();
 
     urlencoded.append('collection_address', smartContract);
-    const resp = await fetch(this.chain === 'alephTest' ? ART_ZERO_TESTNET_COLLECTION_API : ART_ZERO_COLLECTION_API, {
+    const resp = await fetch(collectionDetailApiFromArtZero(this.chain), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -132,7 +132,7 @@ export class WasmNftApi extends BaseNftApi {
       return;
     }
 
-    const collectionImageSrc = `${this.chain === 'alephTest' ? ART_ZERO_TESTNET_IMAGE_API : ART_ZERO_IMAGE_API}?input=${parsedCollectionImage}&size=500`;
+    const collectionImageSrc = `${itemImageApiFromArtZero(this.chain)}?input=${parsedCollectionImage}&size=500`;
 
     const collectionImageUrl = await axios(collectionImageSrc, {
       method: 'GET'
@@ -233,7 +233,7 @@ export class WasmNftApi extends BaseNftApi {
         const parsedTokenUri = this.parseFeaturedTokenUri(tokenUri);
 
         if (parsedTokenUri) {
-          const resp = await fetch(`${this.chain === 'alephTest' ? ART_ZERO_TESTNET_IPFS_API : ART_ZERO_IPFS_API}?input=${parsedTokenUri}`);
+          const resp = await fetch(`${ipfsApiFromArtZero(this.chain)}?input=${parsedTokenUri}`);
 
           itemDetail = (resp && resp.ok && await resp.json() as Record<string, any>);
         }
@@ -260,7 +260,7 @@ export class WasmNftApi extends BaseNftApi {
 
       if (isFeatured) {
         nftItem.image = await this.parseFeaturedNftImage(rawImageSrc);
-        nftItem.externalUrl = ART_ZERO_EXTERNAL_URL;
+        nftItem.externalUrl = externalUrlOnArtZero(this.chain);
       } else {
         nftItem.image = this.parseUrl(rawImageSrc);
       }

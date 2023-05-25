@@ -8,6 +8,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, Number, SwModal, SwNumberProps } from '@subwallet/react-ui';
+import { BigNumber } from 'bignumber.js';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
@@ -106,7 +107,7 @@ function Component ({ activeNominators,
                 intOpacity={1}
                 suffix={'%'}
                 unitOpacity={1}
-                value={inflation}
+                value={new BigNumber(estimatedEarning).minus(inflation)}
               />
               <span className={'__inflation'}>{t('after inflation')}</span>
             </div>

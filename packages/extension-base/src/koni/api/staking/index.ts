@@ -8,7 +8,7 @@ import { getNominationPoolReward, getRelayPoolingOnChain, getRelayStakingOnChain
 import { getAllSubsquidStaking } from '@subwallet/extension-base/koni/api/staking/subsquidStaking';
 import { _PURE_EVM_CHAINS, _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainEvmCompatible, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainEvmCompatible, _isChainSupportSubstrateStaking, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses } from '@subwallet/extension-base/utils';
 
 interface PromiseMapping {
@@ -73,13 +73,15 @@ export async function getNominationStakingRewardData (addresses: string[], chain
 export async function getPoolingStakingRewardData (addresses: string[], networkMap: Record<string, _ChainInfo>, dotSamaApiMap: Record<string, _SubstrateApi>): Promise<StakingRewardItem[]> {
   const activeNetworks: string[] = [];
 
-  Object.keys(networkMap).forEach((key) => {
-    activeNetworks.push(key);
+  Object.entries(networkMap).forEach(([key, chainInfo]) => {
+    if (_isChainSupportSubstrateStaking(chainInfo) && _isSubstrateRelayChain(chainInfo)) {
+      activeNetworks.push(key);
+    }
   });
 
   if (activeNetworks.length === 0) {
     return [];
   }
 
-  return await getNominationPoolReward(addresses, networkMap, dotSamaApiMap);
+  return getNominationPoolReward(addresses, networkMap, dotSamaApiMap);
 }

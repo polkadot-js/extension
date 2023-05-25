@@ -171,20 +171,22 @@ export async function getNominationPoolReward (addresses: string[], chainInfoMap
     await Promise.all(targetNetworks.map(async (networkKey) => {
       const substrateApi = await substrateApiMap[networkKey].isReady;
 
-      await Promise.all(validAddresses.map(async (address) => {
-        const _unclaimedReward = await substrateApi.api.call?.nominationPoolsApi?.pendingRewards(address);
+      if (substrateApi.api.call.nominationPoolsApi) {
+        await Promise.all(validAddresses.map(async (address) => {
+          const _unclaimedReward = await substrateApi.api.call?.nominationPoolsApi?.pendingRewards(address);
 
-        if (_unclaimedReward) {
-          rewardList.push({
-            address: address,
-            chain: networkKey,
-            unclaimedReward: _unclaimedReward.toString(),
-            name: chainInfoMap[networkKey].name,
-            state: APIItemState.READY,
-            type: StakingType.POOLED
-          });
-        }
-      }));
+          if (_unclaimedReward) {
+            rewardList.push({
+              address: address,
+              chain: networkKey,
+              unclaimedReward: _unclaimedReward.toString(),
+              name: chainInfoMap[networkKey].name,
+              state: APIItemState.READY,
+              type: StakingType.POOLED
+            });
+          }
+        }));
+      }
     }));
   } catch (e) {
     return rewardList;

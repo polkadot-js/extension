@@ -17,14 +17,14 @@
   "type": "module",
   "version": "0.46.4-1-x",
   "dependencies": {
-    "@polkadot/api": "^10.7.1",
+    "@polkadot/api": "^10.7.2",
     "@polkadot/extension-base": "0.46.4-1-x",
     "@polkadot/extension-inject": "0.46.4-1-x",
     "@polkadot/extension-ui": "0.46.4-1-x",
-    "tslib": "^2.5.1"
+    "tslib": "^2.5.2"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.75.4",
+    "@polkadot/dev": "^0.75.8",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^11.0.0",
@@ -35,7 +35,7 @@
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
-    "ts-loader": "^9.4.2",
+    "ts-loader": "^9.4.3",
     "url-loader": "^4.1.1",
     "webpack-extension-manifest-plugin": "^0.8.0"
   },

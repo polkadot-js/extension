@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PREDEFINED_TRANSAK_TOKEN } from '@subwallet/extension-koni-ui/constants/transak';
+import { PREDEFINED_BUY_TOKEN } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -38,8 +38,10 @@ function Component (
   const isAllAccount = useSelector((state: RootState) => state.accountState.isAllAccount);
 
   const isSupportBuyTokens = useMemo(() => {
-    if (PREDEFINED_TRANSAK_TOKEN[symbol]) {
-      const supportType = PREDEFINED_TRANSAK_TOKEN[symbol].support;
+    const buyInfo = PREDEFINED_BUY_TOKEN[symbol];
+
+    if (buyInfo) {
+      const supportType = buyInfo.support;
 
       if (isAllAccount) {
         for (const account of accounts) {

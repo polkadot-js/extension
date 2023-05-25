@@ -4,7 +4,7 @@
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, InputRef, Logo, SelectModal, SelectModalItem, Web3Block } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
@@ -14,7 +14,7 @@ import styled from 'styled-components';
 interface Props extends ThemeProps, BasicInputWrapper {}
 
 interface ServiceItem extends SelectModalItem {
-  key: string,
+  key: SupportService,
   name: string
 }
 
@@ -22,6 +22,11 @@ const serviceItems: ServiceItem[] = [
   {
     key: 'transak',
     name: 'Transak',
+    disabled: false
+  },
+  {
+    key: 'banxa',
+    name: 'Banxa',
     disabled: false
   },
   {

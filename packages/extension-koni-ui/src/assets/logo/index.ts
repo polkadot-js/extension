@@ -10,7 +10,8 @@ export const DefaultLogosMap: Record<string, string> = {
   transak: './images/projects/transak.png',
   moonpay: './images/projects/moonpay.png',
   onramper: './images/projects/onramper.png',
-  polkadot_vault: './images/projects/polkadot-vault.png'
+  polkadot_vault: './images/projects/polkadot-vault.png',
+  banxa: './images/projects/banxa.png'
 };
 
 export const IconMap = {

@@ -23,15 +23,17 @@ const TEST_ACCOUNT_JSON = {
     whenCreated: 1683202623704
   }
 };
-const HMAC = 'N7PKhDrR3QbLhaDHDDvXdWLV5tU+CR1pHa2P1iI8Bv3gKAcGkQG7NwueQTAEgewbQHoI1g/BUPpt2ynJCTiuyg==';
 const password = 'password';
 
 test('appends a signature', async () => {
   const signedAccountJson = await signJson(TEST_ACCOUNT_JSON, password);
 
   expect(signedAccountJson).toHaveProperty(
-    'signature',
-    HMAC
+    'signatureMaterial',
+    {
+      signature: expect.any(String),
+      salt: expect.any(String)
+    }
   );
 });
 
@@ -69,7 +71,7 @@ test('verification fails if the signature is forged', async () => {
 
   const forgedAccountJson = {
     ...realSignedAccountJson,
-    signature: forgedSignedAccountJson.signature
+    signatureMaterial: forgedSignedAccountJson.signatureMaterial
   };
 
   expect(await isJsonAuthentic(forgedAccountJson, password)).toBeFalsy();

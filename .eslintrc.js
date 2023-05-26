@@ -12,12 +12,14 @@ module.exports = {
   rules: {
     ...base.rules,
     // this seems very broken atm, false positives
-    '@typescript-eslint/unbound-method': 'off'
+    '@typescript-eslint/unbound-method': 'off',
+    'sort-keys': 'off',
   },
   overrides: [...base.overrides, {
     files: ['**/*.test.*', '**/*.stories.*'],
     rules: {
-      '@typescript-eslint/ban-ts-comment': 'off'
+      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off'
     }
   }],
   extends: [...base.extends, 'plugin:storybook/recommended']

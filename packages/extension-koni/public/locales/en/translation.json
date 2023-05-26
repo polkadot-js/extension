@@ -1222,5 +1222,6 @@
   "Create a new account with SubWallet": "",
   "Import an existing account": "",
   "Attach an account without private key": "",
-  "Your camera is not available": ""
+  "Your camera is not available": "",
+  "I trust this site": ""
 }

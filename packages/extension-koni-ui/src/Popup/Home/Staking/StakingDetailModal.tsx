@@ -231,7 +231,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
           />
         )}
 
-        {!!rewardItem?.unclaimedReward && parseFloat(rewardItem?.unclaimedReward) > 0 && (
+        {!!rewardItem?.unclaimedReward && (
           <MetaInfo.Number
             decimals={decimals}
             label={t('Unclaimed rewards')}

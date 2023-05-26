@@ -805,19 +805,21 @@ export class ChainService {
         }
       });
 
-      for (const assetInfo of Object.values(parsedStoredAssetRegistry)) {
+      for (const storedAssetInfo of Object.values(parsedStoredAssetRegistry)) {
         let duplicated = false;
 
         for (const defaultChainAsset of Object.values(latestAssetRegistry)) {
           // case merge custom asset with default asset
-          if (_isEqualSmartContractAsset(assetInfo, defaultChainAsset)) {
+          if (_isEqualSmartContractAsset(storedAssetInfo, defaultChainAsset)) {
             duplicated = true;
             break;
           }
         }
 
         if (!duplicated) {
-          mergedAssetRegistry[assetInfo.slug] = assetInfo;
+          mergedAssetRegistry[storedAssetInfo.slug] = storedAssetInfo;
+        } else {
+          deprecatedAssets.push(storedAssetInfo.slug);
         }
       }
 

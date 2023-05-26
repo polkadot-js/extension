@@ -1,5 +1,5 @@
-    1662	Nam Phạm                      	
-    1315	AnhMTV                        	
+    1668	Nam Phạm                      	[Issue 1447] fix bug not validating balance on joining pool
+    1322	AnhMTV                        	
      829	S2kael                        	[Issue-1428] [SendFund] Update UX for transfer all
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly

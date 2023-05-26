@@ -17,9 +17,9 @@ import { checkPublicAndPrivateKey, createAccountWithSecret } from '@subwallet/ex
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
 import { importQrScan } from '@subwallet/extension-koni-ui/utils/scanner/attach';
-import { Icon, Image, ModalContext, SwAlert, SwQrScanner } from '@subwallet/react-ui';
+import { Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { QrCode, Scan } from 'phosphor-react';
+import { QrCode, Scan, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -179,11 +179,10 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           {
             validateState.message && (
-              <SwAlert
-                description={validateState.message}
-                title={t('Can not connect')}
-                type='danger'
-              />
+              <div className='error-container'>
+                <Icon phosphorIcon={XCircle} weight='fill' customSize='28px'/>
+                <span className='error-content'>{validateState.message}</span>
+              </div>
             )
           }
           <SwQrScanner
@@ -233,6 +232,21 @@ const ImportQrCode = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.link': {
       color: token.colorLink,
       textDecoration: 'underline'
+    },
+
+    '.error-container': {
+      color: token.colorError,
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: token.marginXXL - 2,
+      justifyContent: 'center'
+    },
+
+    '.error-content': {
+      marginLeft: token.marginXS,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
     }
   };
 });

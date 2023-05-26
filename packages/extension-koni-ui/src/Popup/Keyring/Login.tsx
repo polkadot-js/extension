@@ -1,9 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import LoginBg from '@subwallet/extension-koni-ui/assets/LoginBg.png';
 import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
-import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
@@ -11,7 +9,7 @@ import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
-import { Button, Form, Input, ModalContext } from '@subwallet/react-ui';
+import { Button, Form, Image, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
@@ -80,7 +78,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         <div className='bg-image' />
         <div className='body-container'>
           <div className='logo-container'>
-            <Logo3D />
+            <Image src='./images/subwallet/gradient-logo.svg' />
           </div>
           <div className='title'>
             {t('Welcome back!')}
@@ -111,6 +109,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               />
             </Form.Item>
             <Form.Item>
+              <div
+                className='forgot-password'
+                onClick={onReset}
+              >
+                {t('Don’t remember your password?')}
+              </div>
+            </Form.Item>
+            <Form.Item>
               <Button
                 block={true}
                 disabled={isDisable}
@@ -119,14 +125,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               >
                 {t('Unlock')}
               </Button>
-            </Form.Item>
-            <Form.Item>
-              <div
-                className='forgot-password'
-                onClick={onReset}
-              >
-                {t('Don’t remember your password?')}
-              </div>
             </Form.Item>
           </Form>
           <ResetWalletModal />
@@ -143,7 +141,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
     position: 'relative',
 
     '.bg-image': {
-      backgroundImage: `url(${LoginBg})`,
+      backgroundImage: 'url("./images/subwallet/welcome-background.png")',
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'top',
       backgroundSize: 'contain',
@@ -160,7 +158,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       opacity: 0.999,
 
       '.logo-container': {
-        marginTop: token.paddingXL * 3.25 + 2,
+        marginTop: 100,
         color: token.colorTextBase
       },
 
@@ -180,14 +178,15 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       },
 
       '.password-input': {
-        marginTop: token.marginXS * 11
+        marginTop: 62
       },
 
       '.forgot-password': {
         cursor: 'pointer',
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
-        color: token.colorTextLight4
+        color: token.colorTextLight4,
+        marginBottom: 44
       }
     }
   };

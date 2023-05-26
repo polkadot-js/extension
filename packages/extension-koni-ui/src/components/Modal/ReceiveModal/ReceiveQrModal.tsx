@@ -9,7 +9,7 @@ import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotifi
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getScanExplorerAddressInfoUrl } from '@subwallet/extension-koni-ui/utils';
+import { getScanExplorerAddressInfoUrl, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
 import { Button, Icon, Logo, ModalContext, SwModal, SwQRCode } from '@subwallet/react-ui';
 import AccountItem from '@subwallet/react-ui/es/web3-block/account-item';
@@ -57,9 +57,11 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
 
   const handleClickViewOnExplorer = useCallback(() => {
     try {
+      console.log('scanExplorerAddressUrl', scanExplorerAddressUrl);
       if (scanExplorerAddressUrl) {
         // eslint-disable-next-line no-void
-        void chrome.tabs.create({ url: scanExplorerAddressUrl, active: true }).then(() => console.log('redirecting'));
+        // void chrome.tabs.create({ url: scanExplorerAddressUrl, active: true }).then(() => console.log('redirecting'));
+        openInNewTab(scanExplorerAddressUrl)();
       }
     } catch (e) {
       console.log('error redirecting to a new tab');
@@ -131,7 +133,6 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
             }
           />
         </div>
-
         <Button
           block
           className={'__view-on-explorer'}

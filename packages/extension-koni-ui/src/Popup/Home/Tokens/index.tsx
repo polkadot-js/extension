@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _getAssetOriginChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { EmptyList, PageWrapper, TokenBalance, TokenItem, TokenPrice } from '@subwallet/extension-koni-ui/components';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
@@ -43,6 +45,9 @@ const Component = (): React.ReactElement => {
     searchInput: string,
     setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
   } = useOutletContext();
+  const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
+  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
 
   useEffect(() => {
     outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Token name');
@@ -168,12 +173,21 @@ const Component = (): React.ReactElement => {
 
     sortedTokenGroups.forEach((tokenGroupSlug) => {
       if (tokenGroupBalanceMap[tokenGroupSlug]) {
-        result.push(tokenGroupBalanceMap[tokenGroupSlug]);
+        const newItem = tokenGroupBalanceMap[tokenGroupSlug];
+        const chainAsset = multiChainAssetMap[newItem.slug] || assetRegistryMap[newItem.slug];
+
+        if (!chainAsset) {
+          console.warn('Not found chain asset for token slug: ', newItem.slug);
+          result.push({ ...newItem} );
+        } else {
+          const chainDisplayName = chainAsset.name;
+          result.push({ ...newItem, chainDisplayName} );
+        }
       }
     });
 
     return result.filter((item) => item.symbol.toLowerCase().includes(searchTextLowerCase));
-  }, [sortedTokenGroups, tokenGroupBalanceMap, outletContext?.searchInput]);
+  }, [sortedTokenGroups, tokenGroupBalanceMap, outletContext?.searchInput, chainInfoMap, assetRegistryMap]);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
@@ -198,15 +212,13 @@ const Component = (): React.ReactElement => {
                   dataIndex: 'name',
                   key: 'name',
                   render: (_, row) => {
-                    return (
-                      <TokenItem
-                        chain={row.chain}
-                        chainDisplayName={row.chainDisplayName || ''}
-                        logoKey={row.logoKey}
-                        slug={row.slug}
-                        symbol={row.symbol}
-                      />
-                    );
+                    return <TokenItem
+                      chain={row.chain}
+                      chainDisplayName={row.chainDisplayName || ''}
+                      logoKey={row.logoKey}
+                      slug={row.slug}
+                      symbol={row.symbol}
+                    />;
                   }
                 },
                 {

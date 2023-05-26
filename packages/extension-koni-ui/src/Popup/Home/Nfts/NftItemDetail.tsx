@@ -29,6 +29,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import Transaction from '../../Transaction/Transaction';
 import SendNFT from '../../Transaction/variants/SendNFT';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 
 type Props = ThemeProps
 
@@ -138,8 +139,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const handleClickExternalAccountInfo = useCallback(() => {
     try {
-      // eslint-disable-next-line no-void
-      void chrome.tabs.create({ url: accountExternalUrl, active: true }).then(() => console.log('redirecting'));
+      if (accountExternalUrl) {
+        // eslint-disable-next-line no-void
+        // void chrome.tabs.create({ url: accountExternalUrl, active: true }).then(() => console.log('redirecting'));
+        openInNewTab(accountExternalUrl)();
+      } else {
+        console.log('error redirecting to a new tab');
+      }
     } catch (e) {
       console.log('error redirecting to a new tab');
     }
@@ -147,8 +153,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const handleClickExternalCollectionInfo = useCallback(() => {
     try {
-      // eslint-disable-next-line no-void
-      void chrome.tabs.create({ url: nftItem.externalUrl, active: true }).then(() => console.log('redirecting'));
+      if (nftItem.externalUrl) {
+        // eslint-disable-next-line no-void
+        // void chrome.tabs.create({ url: nftItem.externalUrl, active: true }).then(() => console.log('redirecting'));
+        openInNewTab(nftItem.externalUrl)();
+      } else {
+        console.log('error redirecting to a new tab');
+      }
     } catch (e) {
       console.log('error redirecting to a new tab');
     }

@@ -266,7 +266,7 @@ function Component (): React.ReactElement {
 
   useEffect(() => {
     outletContext?.setDetailTitle(<div className='header-content'>{t('Token')}: {symbol}</div>);
-  }, [symbol, outletContext]);
+  }, [symbol]);
 
   return (
     <div

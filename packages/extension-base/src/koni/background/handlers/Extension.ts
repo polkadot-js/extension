@@ -2551,7 +2551,8 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.STAKING_JOIN_POOL,
-      chainType: ChainType.SUBSTRATE
+      chainType: ChainType.SUBSTRATE,
+      transferNativeAmount: amount
     });
   }
 

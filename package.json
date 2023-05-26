@@ -33,6 +33,7 @@
     "clean": "polkadot-dev-clean-build",
     "dev": "yarn watch-dev",
     "lint": "polkadot-dev-run-lint",
+    "lint:changes": "git diff --name-only | grep -E '.(js|ts|tsx)$' | xargs eslint --fix",
     "postinstall": "polkadot-dev-yarn-only && patch-package",
     "start": "yarn watch",
     "test": "polkadot-dev-run-test --detectOpenHandles --testPathIgnorePatterns='/node_modules/|.*/ignore-.*\\.(test|spec)\\..*'",

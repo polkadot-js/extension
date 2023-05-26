@@ -21,20 +21,20 @@ function Label({ children, className, label }: Props): React.ReactElement<Props>
   );
 }
 
-export default styled(Label)<{$active?: boolean}>(
-  ({ $active = false, theme }) => `
+export default styled(Label)<{ small?: boolean }>(
+  ({ small = false, theme }) => `
   color: ${theme.labelColor};
   display: inline-block;
   position: relative;
   width: 100%;
 
   label {
-    font-size: ${$active ? theme.inputLabelFontSize : '16px'};
+    font-size: ${small ? theme.inputLabelFontSize : '16px'};
     line-height: 14px;
     letter-spacing: 0.04em;
     margin-bottom: 8px;
     position: absolute;
-    top: ${$active ? '9px' : '22px'};
+    top: ${small ? '9px' : '22px'};
     left: 16px;
     transition: all 0.2s ease;
     pointer-events: none;

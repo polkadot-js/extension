@@ -7,9 +7,9 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { Z_INDEX } from '../../zindex';
+import { TOAST_TIMEOUT } from './consts';
 import * as icons from './iconsList';
 import ToastCloseIcon from './ToastCloseIcon';
-import { TOAST_TIMEOUT } from './ToastProvider';
 
 interface Props extends ThemeProps {
   content: React.ReactNode;

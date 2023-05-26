@@ -3,10 +3,10 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import useToast from "@polkadot/extension-ui/hooks/useToast";
+import useToast from '@polkadot/extension-ui/hooks/useToast';
 
 import { AccountContext, ActionContext, ScrollWrapper } from '../../components';
-import AccounCreationSuccess from "../../components/AccountCreationSuccess";
+import AccounCreationSuccess from '../../components/AccountCreationSuccess';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useMetadata from '../../hooks/useMetadata';
@@ -76,6 +76,7 @@ function ImportSeed(): React.ReactElement {
           text={t<string>('Import existing account')}
           total={2}
           withBackdrop
+          withMargin
         />
       )}
       {step === 1 && (

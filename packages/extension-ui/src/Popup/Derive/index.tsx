@@ -5,7 +5,7 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
-import useToast from "@polkadot/extension-ui/hooks/useToast";
+import useToast from '@polkadot/extension-ui/hooks/useToast';
 
 import {
   AccountContext,
@@ -42,7 +42,6 @@ interface ConfirmState {
 const StyledAccountNamePasswordCreation = styled(AccountNamePasswordCreation)`
  ~ ${BottomWrapper} ${ButtonArea} {
     margin-right: 0px;
-    padding-top: 30px;
   }
 `;
 
@@ -53,7 +52,6 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
   const { address: parentAddress } = useParams<AddressState>();
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<null | PathState>(null);
-  const [name, setName] = useState<string | null>(null);
   const [parentPassword, setParentPassword] = useState<string | null>(null);
   const [step, setStep] = useState(1);
   const { show } = useToast();
@@ -111,10 +109,11 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
         total={2}
         withBackArrow
         withBackdrop
+        withMargin
       />
       {!account && step === 1 && (
         <SelectParent
-          externalString={parentIsExternal}
+          externalString={parentIsExternal.toString()}
           isLocked={isLocked}
           onDerivationConfirmed={_onDerivationConfirmed}
           onNextStep={_onNextStep}
@@ -131,7 +130,6 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
           isDeriving
           onBackClick={goTo(`/account/edit-menu/${parentAddress}?isExternal=${parentIsExternal?.toString()}`)}
           onCreate={_onCreate}
-          onNameChange={setName}
           parentName={parentName}
         />
       )}

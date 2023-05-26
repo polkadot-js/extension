@@ -13,6 +13,7 @@ import {
   Button,
   ButtonArea,
   Checkbox,
+  Header,
   HelperFooter,
   MnemonicPill,
   Svg,
@@ -60,15 +61,18 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
 
   return (
     <>
-      <div className={className}>
-        <div className='text'>
-          <span className='heading'>{t<string>('Save your secret phrase')}</span>
-          <span className='subtitle'>
-            {t<string>('Remember to save your secret phrase\nand')}
-            <span className='bold'>{t<string>(' keep it safe!')}</span>
-          </span>
-        </div>
-        <div className='mnemonic-container'>
+      <ContentContainer className={className}>
+        <Header
+          text={
+            <>
+              {t<string>('Remember to save your secret phrase\nand')}
+              <Bond>{t<string>(' keep it safe!')}</Bond>
+            </>
+          }
+          title={t<string>('Save your secret phrase')}
+        />
+        <VerticalSpace />
+        <MnemonicContainer>
           {seedArray.map((word, index) => (
             <MnemonicPill
               className='mnemonic-pill'
@@ -78,12 +82,12 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
               word={word}
             />
           ))}
-        </div>
+        </MnemonicContainer>
         <CopyToClipboard
           onCopy={_onCopy}
           text={seed}
         >
-          <Button
+          <StyledButton
             className='copy-button'
             tertiary
           >
@@ -94,10 +98,9 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
               />
               {t<string>('Copy to clipboard')}
             </div>
-          </Button>
+          </StyledButton>
         </CopyToClipboard>
-      </div>
-      <VerticalSpace />
+      </ContentContainer>
       <ButtonArea footer={footer}>
         <BackButton onClick={onPreviousStep} />
         <Button
@@ -111,51 +114,46 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
   );
 }
 
+const ContentContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+`;
+
+const Bond = styled.span`
+  font-weight: 600;
+`;
+
+const MnemonicContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+  user-select: all;
+  margin-bottom: 32px;
+
+  .mnemonic-index {
+    user-select: none;
+  }
+`;
+
+const StyledButton = styled(Button)`
+  margin-inline: auto;
+  margin-bottom: 24px;
+
+  &:active {
+    margin-top: 0px;
+  }
+`;
+
 export default React.memo(
   styled(SaveMnemonic)(
     ({ theme }: Props) => `
-    display: flex;
-    flex-direction: column;
-    gap: 48px;
-
-
     .copyIcon {
       width: 16px;
       height: 16px;
       background: ${theme.primaryColor};
-    }
-
-    .text {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin-top: 32px;
-      gap: 8px;
-      
-      .heading {
-        font-family: ${theme.secondaryFontFamily};
-        color: ${theme.textColor};
-        font-weight: 500;
-        font-size: 16px;
-        line-height: 125%;
-        text-align: center;
-        letter-spacing: 0.06em;
-        }
-
-      .subtitle {
-        color: ${theme.subTextColor};
-        font-size: 14px;
-        line-height: 145%;
-        text-align: center;
-        letter-spacing: 0.07em;
-        white-space: pre-line;
-        
-        & .bold {
-          color: ${theme.subTextColor};
-          font-weight: 600;
-        }
-      }
     }
     
     .mnemonic-container {
@@ -192,13 +190,6 @@ export default React.memo(
         ${Svg} {
           background: ${theme.buttonBackgroundHover};
         }
-      }
-    }
-    .copy-button {
-      margin: 0 auto;
-
-      :focus {
-        margin-top: 0px;
       }
     }
 `

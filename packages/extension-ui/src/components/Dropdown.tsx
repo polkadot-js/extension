@@ -33,7 +33,6 @@ interface Props extends ThemeProps {
 
 function Dropdown({
   className,
-  defaultValue,
   isDisabled,
   isFocussed,
   label,
@@ -57,9 +56,9 @@ function Dropdown({
   return (
     <div className={className}>
       <Label
-        $active
         className={`label ${isLocked ? 'select-disabled' : ''}`}
         label={label}
+        small
       >
         <select
           autoFocus={isFocussed}

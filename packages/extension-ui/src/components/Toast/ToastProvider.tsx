@@ -6,13 +6,12 @@ import { noop } from 'rxjs';
 
 import { SnackbarTypes } from '../../types';
 import { ToastContext } from '..';
+import { TOAST_TIMEOUT } from './consts';
 import Toast from './Toast';
 
 interface ToastProviderProps {
   children?: React.ReactNode;
 }
-
-export const TOAST_TIMEOUT = 2500;
 
 const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<ToastProviderProps> => {
   const [content, setContent] = useState('');

@@ -7,7 +7,7 @@ import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
 
 import Spinner from './Spinner';
-import { Svg } from '.';
+import Svg from './Svg';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -164,9 +164,14 @@ export default styled(Button)(
     };
   }
 
-  &:active .children {
-    margin-top: 2px;
+  &:not(:active) .children {
+    padding-bottom: 2px;
   }
+
+  &:active .children {
+    padding-top: 2px;
+  }
+
   
   .busyOverlay,
   .disabledOverlay {

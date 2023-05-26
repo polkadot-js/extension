@@ -4,7 +4,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Button } from '.';
+import Button from './Button';
 
 interface ButtonWithSubtitleProps {
   title: string;
@@ -13,7 +13,12 @@ interface ButtonWithSubtitleProps {
   to: string;
 }
 
-export default function ButtonWithSubtitle ({ children, subTitle, title, to }: ButtonWithSubtitleProps): React.ReactElement<ButtonWithSubtitleProps> {
+export default function ButtonWithSubtitle({
+  children,
+  subTitle,
+  title,
+  to
+}: ButtonWithSubtitleProps): React.ReactElement<ButtonWithSubtitleProps> {
   return (
     <StyledButton to={to}>
       <p>{title}</p>

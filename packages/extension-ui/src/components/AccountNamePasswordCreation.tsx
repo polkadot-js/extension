@@ -5,58 +5,44 @@ import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 import helpIcon from '../assets/help.svg';
-import { BackButton, Button, Dropdown, LearnMore, Svg } from '../components';
-import Address from '../components/Address';
-import ButtonArea from '../components/ButtonArea';
 import { ALEPH_ZERO_GENESIS_HASH } from '../constants';
 import useGenesisHashOptions from '../hooks/useGenesisHashOptions';
 import useTranslation from '../hooks/useTranslation';
 import { LINKS } from '../links';
 import { Name, Password } from '../partials';
 import { getUserInputs } from './PasswordField/getFeedback';
+import Address from './Address';
+import BackButton from './BackButton';
+import Button from './Button';
+import ButtonArea from './ButtonArea';
 import { AccountContext } from './contexts';
+import Dropdown from './Dropdown';
+import Header from './Header';
 import HelperFooter from './HelperFooter';
+import LearnMore from './LearnMore';
+import Svg from './Svg';
 
-
-interface Props {
-  address: string | null;
+type Props = {
+  address: string | null | undefined;
   buttonLabel?: string;
   className?: string;
-  genesisHash: string;
-  setGenesis: (newGenesisHash: string) => void;
+  genesisHash: string | null;
   isBusy: boolean;
   onBackClick?: () => void;
   onCreate: (name: string, password: string) => void;
-  onNameChange: (name: string) => void;
   onPasswordChange?: (password: string) => void;
-  isDeriving?: boolean;
   isImporting?: boolean;
-  parentName?: string;
-}
-
-const CustomFooter = styled(HelperFooter)`
-  flex-direction: row;
-  display: flex;
-  gap: 8px;
-  width: auto;
-  margin-bottom: 8px;
-
-  .wrapper {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-    margin-left: -12px;
-  }
-
-  .text-container {
-    display: flex;
-    gap: 4px;
-  }
-`;
-
-const StyledButtonArea = styled(ButtonArea)`
-  margin-right: -8px;
-`;
+  parentName?: string | null;
+} & (
+  | {
+      setGenesis: (newGenesisHash: string) => void;
+      isDeriving?: false;
+    }
+  | {
+      setGenesis?: never;
+      isDeriving: true;
+    }
+);
 
 function AccountNamePasswordCreation({
   address,
@@ -69,7 +55,7 @@ function AccountNamePasswordCreation({
   onCreate,
   onPasswordChange,
   parentName,
-  setGenesis,
+  setGenesis
 }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
@@ -96,7 +82,7 @@ function AccountNamePasswordCreation({
     onBackClick && onBackClick();
   }, [onBackClick]);
 
-  const _onChangeNetwork = useCallback((newGenesisHash: string) => setGenesis(newGenesisHash), [setGenesis]);
+  const _onChangeNetwork = useCallback((newGenesisHash: string) => setGenesis?.(newGenesisHash), [setGenesis]);
 
   const footer = (
     <CustomFooter>
@@ -121,37 +107,39 @@ function AccountNamePasswordCreation({
   return (
     <>
       <Container className={className}>
-        <div className='text'>
-          <span className='heading'>{t<string>('Visibility & security')}</span>
-          <span className='subtitle'>
-            {t<string>('Choose how your new account is displayed and protected it in Aleph Zero Signer.')}
-          </span>
-        </div>
-        <Address
+        <StyledHeader
+          text={t<string>('Choose how your new account is displayed and protected it in Aleph Zero Signer.')}
+          title={t<string>('Visibility & security')}
+        />
+        <StyledAddress
           address={address}
           genesisHash={genesisHash}
           name={name}
           parentName={parentName}
         />
-        <Name
-          isFocused
-          onChange={setName}
-        />
-        <Password
-          label={isDeriving ? t<string>('Set sub-account password') : undefined}
-          onChange={_onPasswordChange}
-          validationUserInput={getUserInputs(name)}
-        />
-        {!isDeriving && (
-          <Dropdown
-            className={className}
-            label={t<string>('Show on network')}
-            onChange={_onChangeNetwork}
-            options={options}
-            value={genesisHash || ALEPH_ZERO_GENESIS_HASH}
+        <InputsWrapper>
+          <Name
+            isFocused
+            onChange={setName}
           />
+          <Password
+            label={isDeriving ? t<string>('Set sub-account password') : undefined}
+            onChange={_onPasswordChange}
+            validationUserInput={getUserInputs(name)}
+          />
+        </InputsWrapper>
+        {!isDeriving && (
+          <>
+            <StyledDropdown
+              className={className}
+              label={t<string>('Show on network')}
+              onChange={_onChangeNetwork}
+              options={options}
+              value={genesisHash || ALEPH_ZERO_GENESIS_HASH}
+            />
+            {footer}
+          </>
         )}
-        {!isDeriving && footer}
       </Container>
       {onBackClick && buttonLabel && (
         <StyledButtonArea>
@@ -180,44 +168,50 @@ function AccountNamePasswordCreation({
 }
 
 const Container = styled.div`
-  & > :not(:last-child):not(:first-child) {
-    margin-bottom: 24px;
+  margin-right: 8px;
+  margin-bottom: auto;
+`;
+
+const StyledHeader = styled(Header)`
+  margin-bottom: 32px;
+`;
+
+const StyledAddress = styled(Address)`
+  margin-bottom: 24px;
+`;
+
+const InputsWrapper = styled.div`
+  & > * {
+    margin-bottom: 16px;
   }
 `;
 
-export default React.memo(styled(AccountNamePasswordCreation)`
-  margin-right: 8px;
+const StyledDropdown = styled(Dropdown)`
+  margin-bottom: 40px;
+`;
 
-  .spacer {
-    height: 16px;
-  }
+const CustomFooter = styled(HelperFooter)`
+  flex-direction: row;
+  display: flex;
+  gap: 8px;
+  width: auto;
+  margin-bottom: 8px;
 
-  .text {
+  .wrapper {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-top: 32px;
-    margin-bottom: 32px;
+    flex-direction: row;
     gap: 8px;
-
-    .heading {
-      font-family: ${({ theme }) => theme.secondaryFontFamily};
-      color: ${({ theme }) => theme.textColor};
-      font-weight: 500;
-      font-size: 16px;
-      line-height: 125%;
-      text-align: center;
-      letter-spacing: 0.06em;
-    }
-
-    .subtitle {
-      color: ${({ theme }) => theme.subTextColor};
-      font-size: 14px;
-      line-height: 145%;
-      text-align: center;
-      letter-spacing: 0.07em;
-      white-space: pre-line;
-    }
+    margin-left: -12px;
   }
-`);
+
+  .text-container {
+    display: flex;
+    gap: 4px;
+  }
+`;
+
+const StyledButtonArea = styled(ButtonArea)`
+  margin-right: -8px;
+`;
+
+export default React.memo(AccountNamePasswordCreation);

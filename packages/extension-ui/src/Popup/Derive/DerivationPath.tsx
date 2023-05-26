@@ -27,7 +27,6 @@ const StyledInputWithLabel = styled(InputWithLabel)`
   max-width: 284px;
   gap: 4px;
   position: relative;
-  margin-bottom: 4px;
   &:disabled {
     color: ${({ theme }: StyledInputWithLabelProps) => theme.disabledTextColor};
   }

@@ -46,14 +46,14 @@ export default styled(MnemonicPill)`
   flex-direction: row;
   align-items: center;
   gap: 1px;
-  border: 1px solid ${({ showError, theme }) => showError ? theme.textColorDanger : theme.boxBorderColor};
+  border: 1px solid ${({ showError, theme }) => (showError ? theme.textColorDanger : theme.boxBorderColor)};
   background: ${({ theme }) => theme.mnemonicBackground};
   border-radius: ${({ theme }) => theme.buttonBorderRadius};
   padding: 4px;
   max-width: 106px;
 
   &:focus-within {
-    border: 1px solid ${({ showError, theme }) => showError ? theme.textColorDanger : theme.primaryColor};
+    border: 1px solid ${({ showError, theme }) => (showError ? theme.textColorDanger : theme.primaryColor)};
   }
 
   input {
@@ -66,7 +66,7 @@ export default styled(MnemonicPill)`
     color: ${({ theme }) => theme.textColor};
     flex: 1;
     text-align: left;
-    width: 70px;
+    width: 60px;
     border-radius: ${({ theme }) => theme.buttonBorderRadius};
     outline: none;
 

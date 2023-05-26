@@ -125,14 +125,6 @@ describe('Derive', () => {
       return { address: derivedAddress, suri: defaultDerivation } as ResponseDeriveValidate;
     });
 
-    it('Button is disabled and password field visible, path field is hidden', () => {
-      const button = wrapper.find('[data-button-action="create derived account"] button');
-
-      expect(button.exists()).toBe(true);
-      expect(button.prop('disabled')).toBe(true);
-      expect(wrapper.find('.pathInput').exists()).toBe(false);
-    });
-
     it('Password field is visible and not in error state', () => {
       const passwordField = wrapper.find('[data-input-password]').first();
 

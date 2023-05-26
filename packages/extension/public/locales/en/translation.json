@@ -365,5 +365,6 @@
   "Failed copying to clipboard": "",
   "I have copied the secret phrase to a safe place": "",
   "Your clipboard will be cleared on closing of this screen.": "",
-  "Your secret phrase is safe!": ""
+  "Your secret phrase is safe!": "",
+  "Derivation path is required": ""
 }

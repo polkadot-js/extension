@@ -48,7 +48,7 @@ const enterName = (name: string): Promise<void> => type(wrapper.find('input').fi
 const password = (password: string) => (): Promise<void> =>
   type(wrapper.find('input[type="password"]').first(), password);
 const repeat = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').last(), password);
-const findVisiblePasswordMessages = () => wrapper.find('PasswordFeedback').find({in: true}).find('Message');
+const findVisiblePasswordMessages = () => wrapper.find('PasswordFeedback').find({ in: true }).find('Message');
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 const mountComponent = (isBusy = false): ReactWrapper =>
@@ -56,10 +56,14 @@ const mountComponent = (isBusy = false): ReactWrapper =>
   mount(
     <ThemeProvider theme={themes.dark}>
       <AccountNamePasswordCreation
+        address={null}
         buttonLabel={buttonLabel}
+        genesisHash={null}
         isBusy={isBusy}
+        isDeriving={false}
         onBackClick={onBackClick}
         onCreate={onCreate}
+        setGenesis={console.log}
       />
     </ThemeProvider>
   );
@@ -94,7 +98,7 @@ describe('AccountNamePasswordCreation', () => {
     await enterName('Alice').then(password('Alice has a cat'));
     await capsLockOn(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input));
 
-    expect(findVisiblePasswordMessages().find({messageType: 'warning'}).text()).toBe('CapsLock is ON');
+    expect(findVisiblePasswordMessages().find({ messageType: 'warning' }).text()).toBe('CapsLock is ON');
   });
 
   it('submit button is not enabled until both passwords are equal', async () => {

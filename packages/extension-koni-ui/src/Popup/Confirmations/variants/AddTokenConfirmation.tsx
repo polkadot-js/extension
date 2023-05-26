@@ -101,7 +101,7 @@ const Component: React.FC<Props> = (props: Props) => {
         />
         <Field
           content={type}
-          label={t<string>('Token type')}
+          tooltip={t<string>('Token type')}
         />
         <Field
           content={toShort(contractAddress)}
@@ -115,6 +115,8 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           }
           suffix={contractSuffix}
+          status={contractError ? 'error' : slug ? 'warning' : ''}
+          statusHelp={contractError ? t('The token contract is invalid.') : slug ? t('The token already exists.') : ''}
         />
         <Row gutter={token.margin}>
           <Col span={12}>
@@ -144,12 +146,6 @@ const Component: React.FC<Props> = (props: Props) => {
         </Row>
       </div>
       <div className='confirmation-footer'>
-        {slug && (<div className='warning-message'>
-          {t<string>('The token already exists.')}
-        </div>)}
-        {contractError && (<div className='error-message'>
-          {t<string>('The token contract is invalid.')}
-        </div>)}
         <Button
           disabled={loading}
           icon={(

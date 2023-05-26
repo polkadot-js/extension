@@ -35,7 +35,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [loading, setLoading] = useState(false);
 
-  const handleErrorMessage = useCallback((errorCode: _CHAIN_VALIDATION_ERROR) => {
+  const handleErrorMessage = useCallback((errorCode?: _CHAIN_VALIDATION_ERROR) => {
+    if (!errorCode) {
+      return '';
+    }
+
     switch (errorCode) {
       case _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE:
         return t('Cannot connect to this provider');
@@ -108,8 +112,10 @@ const Component: React.FC<Props> = (props: Props) => {
               weight={'bold'}
             />
           )}
+          status={providerError ? 'error' : ''}
+          statusHelp={handleErrorMessage(providerError)}
           suffix={providerSuffix}
-          tooltip={ providerError ? handleErrorMessage(providerError) : t<string>('Provider URL')}
+          tooltip={t<string>('Provider URL')}
           tooltipPlacement='topLeft'
         />
         <Row gutter={token.paddingSM}>

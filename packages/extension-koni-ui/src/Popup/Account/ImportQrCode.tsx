@@ -180,7 +180,11 @@ const Component: React.FC<Props> = (props: Props) => {
           {
             validateState.message && (
               <div className='error-container'>
-                <Icon phosphorIcon={XCircle} weight='fill' customSize='28px'/>
+                <Icon
+                  customSize='28px'
+                  phosphorIcon={XCircle}
+                  weight='fill'
+                />
                 <span className='error-content'>{validateState.message}</span>
               </div>
             )
@@ -246,7 +250,7 @@ const ImportQrCode = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.error-content': {
       marginLeft: token.marginXS,
       fontSize: token.fontSizeHeading6,
-      lineHeight: token.lineHeightHeading6,
+      lineHeight: token.lineHeightHeading6
     }
   };
 });

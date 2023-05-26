@@ -114,9 +114,9 @@ const Component: React.FC<Props> = (props: Props) => {
               value={contractAddress}
             />
           }
-          suffix={contractSuffix}
           status={contractError ? 'error' : slug ? 'warning' : ''}
           statusHelp={contractError ? t('The token contract is invalid.') : slug ? t('The token already exists.') : ''}
+          suffix={contractSuffix}
         />
         <Row gutter={token.margin}>
           <Col span={12}>

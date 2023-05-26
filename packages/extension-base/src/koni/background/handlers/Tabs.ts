@@ -8,7 +8,7 @@ import { EvmProviderError } from '@subwallet/extension-base/background/errors/Ev
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, RequestEvmProviderSend, RequestSettingsType, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, PassPhishing, RequestEvmProviderSend, RequestSettingsType, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesSign';
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
@@ -104,6 +104,7 @@ export default class KoniTabs {
   readonly #koniState: KoniState;
   private evmEventEmitterMap: Record<string, Record<string, (eventName: EvmEventType, payload: any) => void>> = {};
   #chainPatrolService: boolean = DEFAULT_CHAIN_PATROL_ENABLE;
+  #passPhishing: Record<string, PassPhishing> = {};
 
   constructor (koniState: KoniState) {
     this.#koniState = koniState;
@@ -115,6 +116,15 @@ export default class KoniTabs {
     this.#koniState.settingService.getSettings(updateChainPatrolService);
     this.#koniState.settingService.getSubject().subscribe({
       next: updateChainPatrolService
+    });
+
+    const updatePassPhishing = (rs: Record<string, PassPhishing>) => {
+      this.#passPhishing = rs;
+    };
+
+    this.#koniState.settingService.getPassPhishingList(updatePassPhishing);
+    this.#koniState.settingService.passPhishingSubject().subscribe({
+      next: updatePassPhishing
     });
   }
 
@@ -210,26 +220,40 @@ export default class KoniTabs {
     });
   }
 
-  protected async redirectIfPhishing (url: string): Promise<boolean> {
+  private checkPassList (_url: string): boolean {
+    const url = stripUrl(_url);
+
+    const result = this.#passPhishing[url];
+
+    return result ? !result.pass : true;
+  }
+
+  protected async checkPhishing (url: string): Promise<boolean> {
     const isInDenyList = await checkIfDenied(url);
 
     if (isInDenyList) {
-      this.redirectPhishingLanding(url);
-
-      return true;
+      return this.checkPassList(url);
     }
 
     if (this.#chainPatrolService) {
       const isInChainPatrolDenyList = await chainPatrolCheckUrl(url);
 
       if (isInChainPatrolDenyList) {
-        this.redirectPhishingLanding(url);
-
-        return true;
+        return this.checkPassList(url);
       }
     }
 
     return false;
+  }
+
+  protected async redirectIfPhishing (url: string): Promise<boolean> {
+    const result = await this.checkPhishing(url);
+
+    if (result) {
+      this.redirectPhishingLanding(url);
+    }
+
+    return result;
   }
 
   ///

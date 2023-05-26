@@ -8,8 +8,7 @@
   "permissions": [
     "notifications",
     "storage",
-    "tabs",
-    "webRequest"
+    "tabs"
   ],
   "minimum_chrome_version": "66",
   "background": {

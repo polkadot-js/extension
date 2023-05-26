@@ -1846,6 +1846,16 @@ export interface AllLogoMap {
   assetLogoMap: Record<string, string>
 }
 
+// Phishing detect
+
+export interface PassPhishing {
+  pass: boolean;
+}
+
+export interface RequestPassPhishingPage {
+  url: string;
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1909,6 +1919,9 @@ export interface KoniRequestSignatures {
   'pri(balance.getSubscription)': [RequestSubscribeBalance, BalanceJson, BalanceJson];
   'pri(crowdloan.getCrowdloan)': [RequestCrowdloan, CrowdloanJson];
   'pri(crowdloan.getSubscription)': [RequestSubscribeCrowdloan, CrowdloanJson, CrowdloanJson];
+
+  // Phishing page
+  'pri(phishing.pass)': [RequestPassPhishingPage, boolean];
 
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];

@@ -78,7 +78,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         <div className='bg-image' />
         <div className='body-container'>
           <div className='logo-container'>
-            <Image src='./images/subwallet/gradient-logo.svg' />
+            <Image
+              src='./images/subwallet/gradient-logo.png'
+              width={80}
+            />
           </div>
           <div className='title'>
             {t('Welcome back!')}
@@ -109,14 +112,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               />
             </Form.Item>
             <Form.Item>
-              <div
-                className='forgot-password'
-                onClick={onReset}
-              >
-                {t('Don’t remember your password?')}
-              </div>
-            </Form.Item>
-            <Form.Item>
               <Button
                 block={true}
                 disabled={isDisable}
@@ -125,6 +120,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               >
                 {t('Unlock')}
               </Button>
+            </Form.Item>
+            <Form.Item>
+              <div
+                className='forgot-password'
+                onClick={onReset}
+              >
+                {t('Don’t remember your password?')}
+              </div>
             </Form.Item>
           </Form>
           <ResetWalletModal />
@@ -186,7 +189,7 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
         color: token.colorTextLight4,
-        marginBottom: 44
+        marginTop: 27
       }
     }
   };

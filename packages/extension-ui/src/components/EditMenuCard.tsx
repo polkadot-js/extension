@@ -148,13 +148,8 @@ export default styled(EditMenuCard)(
       color: ${theme.buttonBackgroundDangerHover};
     }
     
-  
     .chevron {
       background: ${theme.headerIconBackgroundHover};
-    }
-
-    .link-icon {
-      transform: translateX(4px);
     }
   }
 
@@ -257,9 +252,9 @@ export default styled(EditMenuCard)(
   }
 
   .link-icon {
-    width: 20px;
-    height: 20px;
-    background: ${theme.primaryColor};
+    width: 16px;
+    height: 16px;
+    background: ${theme.headerIconBackground};
     transition: transform 0.2s ease;
   }
 

@@ -60,6 +60,7 @@ const darkTheme = {
   errorColor: '#FF5E5C',
   fileNameBackground: '#16232E',
   fontSize: '16px',
+  headerIconBackground: '#CFDAE3',
   headerIconBackgroundHover: '#7ceedd',
   highlightedAreaBackground: '#212226',
   iconDangerColor: '#FF5E5C',

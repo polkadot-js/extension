@@ -56,12 +56,14 @@ export default styled(FaviconBox)(
   border-radius: 8px;
   transition: 0.2s ease;
   justify-content: space-evenly;
-
+  
   .favicon-box-content {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 8px;
+
+    min-width: 0; /* To enable ellipsis for flex grandchildren (https://css-tricks.com/flexbox-truncated-text/) */
   }
 
   .disconnect-element {

@@ -115,8 +115,12 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
 }
 
 export default withRouter(styled(AccountManagement)`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   overflow: hidden scroll;
   margin: 0 -16px;
+
   ::-webkit-scrollbar-thumb {
       background: ${({ theme }: ThemeProps) => theme.boxBorderColor};
       border-radius: 50px;  
@@ -143,8 +147,9 @@ export default withRouter(styled(AccountManagement)`
   }
 
   .accountSelection {
-    height: 600px;
+    flex-grow: 1;
     margin: 0px;
+    
     ${Checkbox} {
       margin-right: 16px;
     }

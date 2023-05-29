@@ -8,6 +8,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
+import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -34,6 +35,28 @@ interface CollatorInfo {
   delegators: any[],
   total: string,
   status: string | Record<string, string>
+}
+
+export function subscribeAmplitudeStakingMetadata (chain: string, substrateApi: _SubstrateApi, callback: (chain: string, rs: ChainStakingMetadata) => void) {
+  return substrateApi.api.query.parachainStaking.round((_round: Codec) => {
+    const roundObj = _round.toHuman() as Record<string, string>;
+    const round = parseRawNumber(roundObj.current);
+    const maxDelegations = substrateApi.api.consts.parachainStaking.maxDelegationsPerRound.toString();
+    const minDelegatorStake = substrateApi.api.consts.parachainStaking.minDelegatorStake.toString();
+    const unstakingDelay = substrateApi.api.consts.parachainStaking.stakeDuration.toString();
+    const unstakingPeriod = parseInt(unstakingDelay) * _STAKING_ERA_LENGTH_MAP[chain];
+
+    callback(chain, {
+      chain,
+      type: StakingType.NOMINATED,
+      era: round,
+      minStake: minDelegatorStake,
+      maxValidatorPerNominator: parseInt(maxDelegations),
+      maxWithdrawalRequestPerValidator: 1, // by default
+      allowCancelUnstaking: true,
+      unstakingPeriod
+    });
+  });
 }
 
 export async function getAmplitudeStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {

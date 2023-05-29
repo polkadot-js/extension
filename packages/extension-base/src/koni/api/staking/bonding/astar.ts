@@ -10,8 +10,30 @@ import { isUrl, parseRawNumber } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
+
+export function subscribeAstarStakingMetadata (chain: string, substrateApi: _SubstrateApi, callback: (chain: string, rs: ChainStakingMetadata) => void) {
+  return substrateApi.api.query.dappsStaking.currentEra((_currentEra: Codec) => {
+    const era = _currentEra.toString();
+    const minDelegatorStake = substrateApi.api.consts.dappsStaking.minimumStakingAmount.toString();
+    const unstakingDelay = substrateApi.api.consts.dappsStaking.unbondingPeriod.toString();
+
+    const unstakingPeriod = parseInt(unstakingDelay) * _STAKING_ERA_LENGTH_MAP[chain];
+
+    callback(chain, {
+      chain,
+      type: StakingType.NOMINATED,
+      era: parseInt(era),
+      minStake: minDelegatorStake,
+      maxValidatorPerNominator: 100, // temporary fix for Astar, there's no limit for now
+      maxWithdrawalRequestPerValidator: 1, // by default
+      allowCancelUnstaking: true,
+      unstakingPeriod
+    });
+  });
+}
 
 export async function getAstarStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   const aprPromise = new Promise(function (resolve) {

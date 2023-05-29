@@ -7,7 +7,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { subscribeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
 import { getNominationStakingRewardData, getPoolingStakingRewardData, stakingOnChainApi } from '@subwallet/extension-base/koni/api/staking';
-import { getChainStakingMetadata, getNominatorMetadata } from '@subwallet/extension-base/koni/api/staking/bonding';
+import { getChainStakingMetadata, getNominatorMetadata, subscribeEssentialChainStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding';
 import { getRelayChainPoolMemberMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { getAmplitudeUnclaimedStakingReward } from '@subwallet/extension-base/koni/api/staking/paraChain';
 import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
@@ -24,14 +24,15 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import KoniState from './handlers/State';
 
-type SubscriptionName = 'balance' | 'crowdloan' | 'stakingOnChain';
+type SubscriptionName = 'balance' | 'crowdloan' | 'stakingOnChain' | 'essentialChainStakingMetadata';
 
 export class KoniSubscription {
   private eventHandler?: (events: EventItem<EventType>[], eventTypes: EventType[]) => void;
   private subscriptionMap: Record<SubscriptionName, (() => void) | undefined> = {
     crowdloan: undefined,
     balance: undefined,
-    stakingOnChain: undefined
+    stakingOnChain: undefined,
+    essentialChainStakingMetadata: undefined
   };
 
   public dbService: DatabaseService;
@@ -136,12 +137,36 @@ export class KoniSubscription {
     }
 
     this.updateSubscription('stakingOnChain', this.initStakingOnChainSubscription(addresses, substrateApiMap, onlyRunOnFirstTime));
+    this.updateSubscription('essentialChainStakingMetadata', this.initEssentialChainStakingMetadataSubscription(substrateApiMap, onlyRunOnFirstTime)); // TODO: might not need to re-subscribe on changing account
   }
 
   initStakingOnChainSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
     const unsub = stakingOnChainApi(addresses, substrateApiMap, (networkKey, rs) => {
       this.state.setStakingItem(networkKey, rs);
     }, this.state.getActiveChainInfoMap());
+
+    if (onlyRunOnFirstTime) {
+      unsub && unsub();
+
+      return;
+    }
+
+    return () => {
+      unsub && unsub();
+    };
+  }
+
+  initEssentialChainStakingMetadataSubscription (substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
+    const unsub = subscribeEssentialChainStakingMetadata(substrateApiMap, this.state.getActiveChainInfoMap(), (networkKey, rs) => {
+      this.state.updateChainStakingMetadata(rs, {
+        era: rs.era,
+        minStake: rs.minStake,
+        maxValidatorPerNominator: rs.maxValidatorPerNominator, // temporary fix for Astar, there's no limit for now
+        maxWithdrawalRequestPerValidator: rs.maxWithdrawalRequestPerValidator, // by default
+        allowCancelUnstaking: rs.allowCancelUnstaking,
+        unstakingPeriod: rs.unstakingPeriod
+      });
+    });
 
     if (onlyRunOnFirstTime) {
       unsub && unsub();
@@ -300,6 +325,8 @@ export class KoniSubscription {
   }
 
   async fetchChainStakingMetadata (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
+    console.log('fetching chain staking metadata');
+
     const filteredChainInfoMap: Record<string, _ChainInfo> = {};
 
     Object.values(chainInfoMap).forEach((chainInfo) => {
@@ -330,6 +357,8 @@ export class KoniSubscription {
   }
 
   async fetchNominatorMetadata (currentAddress: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
+    console.log('fetching nominator metadata');
+
     const filteredChainInfoMap: Record<string, _ChainInfo> = {};
 
     Object.values(chainInfoMap).forEach((chainInfo) => {

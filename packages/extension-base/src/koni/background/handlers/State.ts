@@ -426,8 +426,8 @@ export default class KoniState {
     this.dbService.updateStaking(networkKey, item.address, item).catch((e) => this.logger.warn(e));
   }
 
-  public updateChainStakingMetadata (item: ChainStakingMetadata) {
-    this.dbService.updateChainStakingMetadata(item).catch((e) => this.logger.warn(e));
+  public updateChainStakingMetadata (item: ChainStakingMetadata, changes?: Record<string, unknown>) {
+    this.dbService.updateChainStakingMetadata(item, changes).catch((e) => this.logger.warn(e));
   }
 
   public updateStakingNominatorMetadata (item: NominatorMetadata) {

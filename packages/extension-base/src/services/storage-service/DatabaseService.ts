@@ -227,7 +227,13 @@ export default class DatabaseService {
   }
 
   // Staking
-  async updateChainStakingMetadata (item: ChainStakingMetadata) {
+  async updateChainStakingMetadata (item: ChainStakingMetadata, changes?: Record<string, unknown>) {
+    const existingRecord = await this.stores.chainStakingMetadata.getByChainAndType(item.chain, item.type);
+
+    if (existingRecord && changes) {
+      return this.stores.chainStakingMetadata.updateByChainAndType(item.chain, item.type, changes);
+    }
+
     return this.stores.chainStakingMetadata.upsert(item);
   }
 

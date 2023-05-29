@@ -3,8 +3,31 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getBondedValidators, getParaCurrentInflation, getStakingStatusByNominations, InflationConfig, isUnstakeAll, PalletIdentityRegistration, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, parseIdentity, TuringOptimalCompoundFormat } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import {
+  BasicTxErrorType,
+  ChainStakingMetadata,
+  NominationInfo,
+  NominatorMetadata,
+  StakingStatus,
+  StakingTxErrorType,
+  StakingType,
+  UnstakingInfo,
+  UnstakingStatus,
+  ValidatorInfo
+} from '@subwallet/extension-base/background/KoniTypes';
+import {
+  getBondedValidators,
+  getParaCurrentInflation,
+  getStakingStatusByNominations,
+  InflationConfig,
+  isUnstakeAll,
+  PalletIdentityRegistration,
+  PalletParachainStakingDelegationRequestsScheduledRequest,
+  PalletParachainStakingDelegator,
+  ParachainStakingCandidateMetadata,
+  parseIdentity,
+  TuringOptimalCompoundFormat
+} from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -12,6 +35,7 @@ import { isSameAddress, parseRawNumber, reformatAddress } from '@subwallet/exten
 
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import { Codec } from '@polkadot/types/types';
 
 interface CollatorExtraInfo {
   active: boolean,
@@ -112,6 +136,27 @@ export function validateParaChainBondingCondition (chainInfo: _ChainInfo, amount
   }
 
   return errors;
+}
+
+export function subscribeParaChainStakingMetadata (chain: string, substrateApi: _SubstrateApi, callback: (chain: string, rs: ChainStakingMetadata) => void) {
+  return substrateApi.api.query.parachainStaking.round((_round: Codec) => {
+    const roundObj = _round.toHuman() as Record<string, string>;
+    const round = parseRawNumber(roundObj.current);
+    const maxDelegations = substrateApi.api.consts.parachainStaking.maxDelegationsPerDelegator.toString();
+    const unstakingDelay = substrateApi.api.consts.parachainStaking.delegationBondLessDelay.toString();
+    const unstakingPeriod = parseInt(unstakingDelay) * _STAKING_ERA_LENGTH_MAP[chain];
+
+    callback(chain, {
+      chain,
+      type: StakingType.NOMINATED,
+      era: round,
+      minStake: '0',
+      maxValidatorPerNominator: parseInt(maxDelegations),
+      maxWithdrawalRequestPerValidator: 1, // by default
+      allowCancelUnstaking: true,
+      unstakingPeriod
+    });
+  });
 }
 
 export async function getParaChainStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {

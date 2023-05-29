@@ -11,6 +11,7 @@ import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/servi
 import { reformatAddress } from '@subwallet/extension-base/utils';
 
 import { Bytes } from '@polkadot/types';
+import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -109,6 +110,44 @@ export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: st
   }
 
   return errors;
+}
+
+export function subscribeRelayChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, callback: (chain: string, rs: ChainStakingMetadata) => void) {
+  return substrateApi.api.query.staking.currentEra(async (_currentEra: Codec) => {
+    const currentEra = _currentEra.toString();
+    const maxNominations = substrateApi.api.consts.staking.maxNominations.toString();
+    const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
+    const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
+
+    const [_minNominatorBond, _minPoolJoin, _minimumActiveStake] = await Promise.all([
+      substrateApi.api.query.staking.minNominatorBond(),
+      substrateApi.api.query?.nominationPools?.minJoinBond(),
+      substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake()
+    ]);
+
+    const minActiveStake = _minimumActiveStake?.toString() || '0';
+    const minNominatorBond = _minNominatorBond.toString();
+
+    const bnMinActiveStake = new BN(minActiveStake);
+    const bnMinNominatorBond = new BN(minNominatorBond);
+
+    const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
+
+    const minPoolJoin = _minPoolJoin?.toString() || undefined;
+    const unlockingPeriod = parseInt(unlockingEras) * _STAKING_ERA_LENGTH_MAP[chainInfo.slug]; // in hours
+
+    callback(chainInfo.slug, {
+      chain: chainInfo.slug,
+      type: StakingType.NOMINATED,
+      era: parseInt(currentEra),
+      minStake: minStake.toString(),
+      maxValidatorPerNominator: parseInt(maxNominations),
+      maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
+      allowCancelUnstaking: true,
+      unstakingPeriod: unlockingPeriod,
+      minJoinNominationPool: minPoolJoin
+    });
+  });
 }
 
 export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {

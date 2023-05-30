@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { APIItemState, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { subscribeAmplitudeNominatorMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/amplitude';
+import { subscribeAstarNominatorMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
+import { subscribeParaChainNominatorMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
+import { PalletDappsStakingAccountLedger, PalletParachainStakingDelegator, ParachainStakingStakeOption } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
@@ -12,109 +16,153 @@ import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-function getSingleStakingAmplitude (parentApi: _SubstrateApi, address: string, networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  return parentApi.api.queryMulti([
-    [parentApi.api.query.parachainStaking.delegatorState, address],
-    [parentApi.api.query.parachainStaking.unstaking, address]
-  ], ([_delegatorState, _unstaking]) => {
-    const _stakingData = _delegatorState.toHuman() as Record<string, string> | null;
-    const _unstakingData = _unstaking.toHuman() as Record<string, string> | null;
-    let _activeBalance = '0';
+function getSingleStakingAmplitude (substrateApi: _SubstrateApi, address: string, chainInfoMap: Record<string, _ChainInfo>, chain: string, stakingCallback: (networkKey: string, rs: StakingItem) => void, nominatorStateCallback: (nominatorMetadata: NominatorMetadata) => void) {
+  return substrateApi.api.queryMulti([
+    [substrateApi.api.query.parachainStaking.delegatorState, address],
+    [substrateApi.api.query.parachainStaking.unstaking, address]
+  ], async ([_delegatorState, _unstaking]) => {
+    const delegatorState = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
+    const unstakingInfo = _unstaking.toPrimitive() as unknown as Record<string, number>;
+    const { symbol } = _getChainNativeTokenBasicInfo(chainInfoMap[chain]);
+    const owner = reformatAddress(address, 42);
 
-    if (_stakingData !== null) {
-      _activeBalance = _stakingData.amount || _stakingData.total;
+    if (!delegatorState && !unstakingInfo) {
+      stakingCallback(chain, {
+        name: chainInfoMap[chain].name,
+        chain: chain,
+        balance: '0',
+        activeBalance: '0',
+        unlockingBalance: '0',
+        nativeToken: symbol,
+        unit: symbol,
+        state: APIItemState.READY,
+        type: StakingType.NOMINATED,
+        address: owner
+      } as StakingItem);
 
-      _activeBalance = _activeBalance.replaceAll(',', '');
-    }
+      nominatorStateCallback({
+        chain,
+        type: StakingType.NOMINATED,
+        address: owner,
+        status: StakingStatus.NOT_STAKING,
+        activeStake: '0',
+        nominations: [],
+        unstakings: []
+      } as NominatorMetadata);
+    } else {
+      const activeBalance = delegatorState ? new BN(delegatorState.amount.toString()) : BN_ZERO;
+      let unstakingBalance = BN_ZERO;
 
-    const activeBalance = new BN(_activeBalance);
-    let unstakingBalance = BN_ZERO;
+      if (unstakingInfo) {
+        Object.values(unstakingInfo).forEach((unstakingAmount) => {
+          const bnUnstakingAmount = new BN(unstakingAmount.toString());
 
-    if (_unstakingData !== null) {
-      Object.values(_unstakingData).forEach((_unstakingAmount) => {
-        const bnUnstakingAmount = new BN(_unstakingAmount.replaceAll(',', ''));
-
-        unstakingBalance = unstakingBalance.add(bnUnstakingAmount);
-      });
-    }
-
-    const totalBalance = activeBalance.add(unstakingBalance);
-    const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
-
-    const stakingItem = {
-      name: networks[chain].name,
-      chain: chain,
-      balance: totalBalance.toString(),
-      activeBalance: activeBalance.toString(),
-      unlockingBalance: unstakingBalance.toString(),
-      nativeToken: symbol,
-      unit: symbol,
-      state: APIItemState.READY,
-      type: StakingType.NOMINATED,
-      address
-    } as StakingItem;
-
-    callback(chain, stakingItem);
-  });
-}
-
-function getMultiStakingAmplitude (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: Codec[]) => {
-    if (ledgers) {
-      const _unstakingStates = await parentApi.api.query.parachainStaking.unstaking.multi(useAddresses);
-
-      for (let i = 0; i < ledgers.length; i++) {
-        const ledger = ledgers[i];
-        const _unstakingData = _unstakingStates[i].toHuman() as Record<string, string> | null;
-        const owner = reformatAddress(useAddresses[i], 42);
-        const _stakingData = ledger.toHuman() as Record<string, string> | null;
-        let _activeBalance = '0';
-
-        if (_stakingData !== null) {
-          _activeBalance = _stakingData.amount || _stakingData.total;
-
-          _activeBalance = _activeBalance.replaceAll(',', '');
-        }
-
-        const activeBalance = new BN(_activeBalance);
-        let unstakingBalance = BN_ZERO;
-
-        if (_unstakingData !== null) {
-          Object.values(_unstakingData).forEach((_unstakingAmount) => {
-            const bnUnstakingAmount = new BN(_unstakingAmount.replaceAll(',', ''));
-
-            unstakingBalance = unstakingBalance.add(bnUnstakingAmount);
-          });
-        }
-
-        const totalBalance = activeBalance.add(unstakingBalance);
-        const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
-
-        const stakingItem = {
-          name: networks[chain].name,
-          chain: chain,
-          balance: totalBalance.toString(),
-          activeBalance: activeBalance.toString(),
-          unlockingBalance: unstakingBalance.toString(),
-          nativeToken: symbol,
-          unit: symbol,
-          state: APIItemState.READY,
-          type: StakingType.NOMINATED,
-          address: owner
-        } as StakingItem;
-
-        callback(chain, stakingItem);
+          unstakingBalance = unstakingBalance.add(bnUnstakingAmount);
+        });
       }
+
+      const totalBalance = activeBalance.add(unstakingBalance);
+
+      const stakingItem = {
+        name: chainInfoMap[chain].name,
+        chain: chain,
+        balance: totalBalance.toString(),
+        activeBalance: activeBalance.toString(),
+        unlockingBalance: unstakingBalance.toString(),
+        nativeToken: symbol,
+        unit: symbol,
+        state: APIItemState.READY,
+        type: StakingType.NOMINATED,
+        address: owner
+      } as StakingItem;
+
+      stakingCallback(chain, stakingItem);
+
+      const nominatorMetadata = await subscribeAmplitudeNominatorMetadata(chainInfoMap[chain], owner, substrateApi, delegatorState, unstakingInfo);
+
+      nominatorStateCallback(nominatorMetadata);
     }
   });
 }
 
-export function getAmplitudeStakingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
+function getMultiStakingAmplitude (substrateApi: _SubstrateApi, useAddresses: string[], chainInfoMap: Record<string, _ChainInfo>, chain: string, stakingCallback: (networkKey: string, rs: StakingItem) => void, nominatorStateCallback: (nominatorMetadata: NominatorMetadata) => void) {
+  return substrateApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: Codec[]) => {
+    if (ledgers) {
+      const { symbol } = _getChainNativeTokenBasicInfo(chainInfoMap[chain]);
+      const _unstakingStates = await substrateApi.api.query.parachainStaking.unstaking.multi(useAddresses);
+
+      await Promise.all(ledgers.map(async (_delegatorState, i) => {
+        const owner = reformatAddress(useAddresses[i], 42);
+        const delegatorState = _delegatorState.toPrimitive() as unknown as ParachainStakingStakeOption;
+        const unstakingInfo = _unstakingStates[i].toPrimitive() as unknown as Record<string, number>;
+
+        if (!delegatorState && !unstakingInfo) {
+          stakingCallback(chain, {
+            name: chainInfoMap[chain].name,
+            chain: chain,
+            balance: '0',
+            activeBalance: '0',
+            unlockingBalance: '0',
+            nativeToken: symbol,
+            unit: symbol,
+            state: APIItemState.READY,
+            type: StakingType.NOMINATED,
+            address: owner
+          } as StakingItem);
+
+          nominatorStateCallback({
+            chain,
+            type: StakingType.NOMINATED,
+            address: owner,
+            status: StakingStatus.NOT_STAKING,
+            activeStake: '0',
+            nominations: [],
+            unstakings: []
+          } as NominatorMetadata);
+        } else {
+          const activeBalance = delegatorState ? new BN(delegatorState.amount.toString()) : BN_ZERO;
+          let unstakingBalance = BN_ZERO;
+
+          if (unstakingInfo) {
+            Object.values(unstakingInfo).forEach((unstakingAmount) => {
+              const bnUnstakingAmount = new BN(unstakingAmount.toString());
+
+              unstakingBalance = unstakingBalance.add(bnUnstakingAmount);
+            });
+          }
+
+          const totalBalance = activeBalance.add(unstakingBalance);
+
+          const stakingItem = {
+            name: chainInfoMap[chain].name,
+            chain: chain,
+            balance: totalBalance.toString(),
+            activeBalance: activeBalance.toString(),
+            unlockingBalance: unstakingBalance.toString(),
+            nativeToken: symbol,
+            unit: symbol,
+            state: APIItemState.READY,
+            type: StakingType.NOMINATED,
+            address: owner
+          } as StakingItem;
+
+          stakingCallback(chain, stakingItem);
+
+          const nominatorMetadata = await subscribeAmplitudeNominatorMetadata(chainInfoMap[chain], owner, substrateApi, delegatorState, unstakingInfo);
+
+          nominatorStateCallback(nominatorMetadata);
+        }
+      }));
+    }
+  });
+}
+
+export function getAmplitudeStakingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void, nominatorStateCallback: (nominatorMetadata: NominatorMetadata) => void) {
   if (useAddresses.length === 1) {
-    return getSingleStakingAmplitude(parentApi, useAddresses[0], networks, chain, callback);
+    return getSingleStakingAmplitude(parentApi, useAddresses[0], networks, chain, callback, nominatorStateCallback);
   }
 
-  return getMultiStakingAmplitude(parentApi, useAddresses, networks, chain, callback);
+  return getMultiStakingAmplitude(parentApi, useAddresses, networks, chain, callback, nominatorStateCallback);
 }
 
 export async function getAmplitudeUnclaimedStakingReward (substrateApiMap: Record<string, _SubstrateApi>, addresses: string[], networks: Record<string, _ChainInfo>, chains: string[]): Promise<StakingRewardItem[]> {
@@ -159,30 +207,26 @@ export async function getAmplitudeUnclaimedStakingReward (substrateApiMap: Recor
   return unclaimedRewardList;
 }
 
-export function getParaStakingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
+export function getParaStakingOnChain (substrateApi: _SubstrateApi, useAddresses: string[], chainInfoMap: Record<string, _ChainInfo>, chain: string, stakingCallback: (networkKey: string, rs: StakingItem) => void, nominatorStateCallback: (nominatorMetadata: NominatorMetadata) => void) {
+  const { symbol } = _getChainNativeTokenBasicInfo(chainInfoMap[chain]);
 
-  return parentApi.api.query.parachainStaking.delegatorState.multi(useAddresses, (ledgers: Codec[]) => {
+  return substrateApi.api.query.parachainStaking.delegatorState.multi(useAddresses, async (ledgers: Codec[]) => {
     if (ledgers) {
-      for (let i = 0; i < ledgers.length; i++) {
-        const ledger = ledgers[i];
+      await Promise.all(ledgers.map(async (_delegatorState, i) => {
+        const delegatorState = _delegatorState.toPrimitive() as unknown as PalletParachainStakingDelegator;
         const owner = reformatAddress(useAddresses[i], 42);
-        const data = ledger.toHuman() as Record<string, any> | null;
 
-        if (data !== null) {
-          let _totalBalance = data.total as string;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          let _unlockingBalance = data.lessTotal ? data.lessTotal as string : data.requests.lessTotal as string;
+        if (delegatorState) {
+          const _totalBalance = delegatorState.total;
+          // let _unlockingBalance = delegatorState.lessTotal ? delegatorState.lessTotal : delegatorState.requests.lessTotal;
+          const _unlockingBalance = delegatorState.lessTotal;
 
-          _totalBalance = _totalBalance.replaceAll(',', '');
-          _unlockingBalance = _unlockingBalance.replaceAll(',', '');
-
-          const totalBalance = new BN(_totalBalance);
-          const unlockingBalance = new BN(_unlockingBalance);
+          const totalBalance = new BN(_totalBalance.toString());
+          const unlockingBalance = new BN(_unlockingBalance.toString());
           const activeBalance = totalBalance.sub(unlockingBalance);
 
-          const stakingItem = {
-            name: networks[chain].name,
+          stakingCallback(chain, {
+            name: chainInfoMap[chain].name,
             chain: chain,
             balance: totalBalance.toString(),
             activeBalance: activeBalance.toString(),
@@ -192,12 +236,14 @@ export function getParaStakingOnChain (parentApi: _SubstrateApi, useAddresses: s
             state: APIItemState.READY,
             type: StakingType.NOMINATED,
             address: owner
-          } as StakingItem;
+          } as StakingItem);
 
-          callback(chain, stakingItem);
+          const nominatorMetadata = await subscribeParaChainNominatorMetadata(chainInfoMap[chain], owner, substrateApi, delegatorState);
+
+          nominatorStateCallback(nominatorMetadata);
         } else {
-          const stakingItem = {
-            name: networks[chain].name,
+          stakingCallback(chain, {
+            name: chainInfoMap[chain].name,
             chain: chain,
             balance: '0',
             activeBalance: '0',
@@ -207,55 +253,88 @@ export function getParaStakingOnChain (parentApi: _SubstrateApi, useAddresses: s
             state: APIItemState.READY,
             type: StakingType.NOMINATED,
             address: owner
-          } as StakingItem;
+          } as StakingItem);
 
-          callback(chain, stakingItem);
+          nominatorStateCallback({
+            chain,
+            type: StakingType.NOMINATED,
+            address: owner,
+            status: StakingStatus.NOT_STAKING,
+            activeStake: '0',
+            nominations: [],
+            unstakings: []
+          } as NominatorMetadata);
         }
-      }
+      }));
     }
   });
 }
 
-export function getAstarStakingOnChain (parentApi: _SubstrateApi, useAddresses: string[], networks: Record<string, _ChainInfo>, chain: string, callback: (networkKey: string, rs: StakingItem) => void) {
-  const { symbol } = _getChainNativeTokenBasicInfo(networks[chain]);
+export function getAstarStakingOnChain (substrateApi: _SubstrateApi, useAddresses: string[], chainInfoMap: Record<string, _ChainInfo>, chain: string, stakingCallback: (networkKey: string, rs: StakingItem) => void, nominatorStateCallback: (nominatorMetadata: NominatorMetadata) => void) {
+  const { symbol } = _getChainNativeTokenBasicInfo(chainInfoMap[chain]);
 
-  return parentApi.api.query.dappsStaking.ledger.multi(useAddresses, (ledgers: Codec[]) => {
+  return substrateApi.api.query.dappsStaking.ledger.multi(useAddresses, async (ledgers: Codec[]) => {
     if (ledgers) {
-      for (let i = 0; i < ledgers.length; i++) {
+      await Promise.all(ledgers.map(async (_ledger, i) => {
         let bnUnlockingBalance = BN_ZERO;
         const owner = reformatAddress(useAddresses[i], 42);
 
-        const ledger = ledgers[i];
-        const data = ledger.toHuman() as Record<string, any>;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const unlockingChunks = data.unbondingInfo.unlockingChunks as Record<string, string>[];
-        const _totalStake = data.locked as string;
+        const ledger = _ledger.toPrimitive() as unknown as PalletDappsStakingAccountLedger;
 
-        for (const chunk of unlockingChunks) {
-          const bnChunk = new BN(chunk.amount.replaceAll(',', ''));
+        if (ledger && ledger.locked > 0) {
+          const unlockingChunks = ledger.unbondingInfo.unlockingChunks;
+          const _totalStake = ledger.locked;
+          const bnTotalStake = new BN(_totalStake.toString());
 
-          bnUnlockingBalance = bnUnlockingBalance.add(bnChunk);
+          for (const chunk of unlockingChunks) {
+            const bnChunk = new BN(chunk.amount.toString());
+
+            bnUnlockingBalance = bnUnlockingBalance.add(bnChunk);
+          }
+
+          const bnActiveStake = bnTotalStake.sub(bnUnlockingBalance);
+
+          stakingCallback(chain, {
+            name: chainInfoMap[chain].name,
+            chain: chain,
+            balance: bnTotalStake.toString(),
+            activeBalance: bnActiveStake.toString(),
+            unlockingBalance: bnUnlockingBalance.toString(),
+            nativeToken: symbol,
+            unit: symbol,
+            state: APIItemState.READY,
+            type: StakingType.NOMINATED,
+            address: owner
+          } as StakingItem);
+
+          const nominatorMetadata = await subscribeAstarNominatorMetadata(chainInfoMap[chain], owner, substrateApi, ledger);
+
+          nominatorStateCallback(nominatorMetadata);
+        } else {
+          stakingCallback(chain, {
+            name: chainInfoMap[chain].name,
+            chain,
+            balance: '0',
+            activeBalance: '0',
+            unlockingBalance: '0',
+            nativeToken: symbol,
+            unit: symbol,
+            state: APIItemState.READY,
+            type: StakingType.NOMINATED,
+            address: owner
+          } as StakingItem);
+
+          nominatorStateCallback({
+            chain,
+            type: StakingType.NOMINATED,
+            address: owner,
+            status: StakingStatus.NOT_STAKING,
+            activeStake: '0',
+            nominations: [],
+            unstakings: []
+          } as NominatorMetadata);
         }
-
-        const bnTotalStake = new BN(_totalStake.replaceAll(',', ''));
-        const bnActiveStake = bnTotalStake.sub(bnUnlockingBalance);
-
-        const stakingItem = {
-          name: networks[chain].name,
-          chain: chain,
-          balance: bnTotalStake.toString(),
-          activeBalance: bnActiveStake.toString(),
-          unlockingBalance: bnUnlockingBalance.toString(),
-          nativeToken: symbol,
-          unit: symbol,
-          state: APIItemState.READY,
-          type: StakingType.NOMINATED,
-          address: owner
-        } as StakingItem;
-
-        // eslint-disable-next-line node/no-callback-literal
-        callback(chain, stakingItem);
-      }
+      }));
     }
   });
 }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominatorMetadata, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { subscribeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
@@ -141,9 +141,15 @@ export class KoniSubscription {
   }
 
   initStakingOnChainSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
-    const unsub = stakingOnChainApi(addresses, substrateApiMap, (networkKey, rs) => {
+    const stakingCallback = (networkKey: string, rs: StakingItem) => {
       this.state.setStakingItem(networkKey, rs);
-    }, this.state.getActiveChainInfoMap());
+    };
+
+    const nominatorStateCallback = (nominatorMetadata: NominatorMetadata) => {
+      this.state.updateStakingNominatorMetadata(nominatorMetadata);
+    };
+
+    const unsub = stakingOnChainApi(addresses, substrateApiMap, this.state.getActiveChainInfoMap(), stakingCallback, nominatorStateCallback);
 
     if (onlyRunOnFirstTime) {
       unsub && unsub();

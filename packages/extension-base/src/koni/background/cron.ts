@@ -3,9 +3,9 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ApiMap, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_CHAIN_NOMINATOR_METADATA, CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-base/constants';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-base/constants';
 import { KoniSubscription } from '@subwallet/extension-base/koni/background/subscription';
-import { _ChainConnectionStatus, _ChainState, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportSubstrateStaking, _isChainSupportWasmNft } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -152,7 +152,7 @@ export class KoniCron {
       (commonReload || needUpdateStaking || stakingSubmitted) && this.resetStakingReward();
       (commonReload || needUpdateStaking || stakingSubmitted) && this.removeCron('refreshStakingReward');
       (commonReload || needUpdateStaking || stakingSubmitted) && this.removeCron('refreshPoolingStakingReward');
-      (commonReload || needUpdateStaking || stakingSubmitted) && this.removeCron('updateNominatorMetadata');
+      // (commonReload || needUpdateStaking || stakingSubmitted) && this.removeCron('updateNominatorMetadata');
       needUpdateStaking && this.removeCron('updateChainStakingMetadata');
 
       // Chains
@@ -311,10 +311,8 @@ export class KoniCron {
     this.resetStakingReward();
     this.removeCron('refreshStakingReward');
     this.removeCron('refreshPoolingStakingReward');
-    this.removeCron('updateNominatorMetadata');
     this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
     this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
-    this.addCron('updateNominatorMetadata', this.updateNominatorMetadata(address, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap()), CRON_REFRESH_CHAIN_NOMINATOR_METADATA);
 
     await waitTimeout(1800);
 

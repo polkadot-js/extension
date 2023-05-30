@@ -120,8 +120,8 @@ export default class DatabaseService {
     }));
   }
 
-  subscribeNominatorMetadata (callback: (data: NominatorMetadata[]) => void) {
-    this.stores.nominatorMetadata.subscribeAll().subscribe(({
+  subscribeNominatorMetadata (addresses: string[], callback: (data: NominatorMetadata[]) => void) {
+    return this.stores.nominatorMetadata.subscribeByAddresses(addresses).subscribe(({
       next: (data) => callback && callback(data)
     }));
   }

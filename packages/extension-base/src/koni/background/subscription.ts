@@ -268,7 +268,7 @@ export class KoniSubscription {
     });
 
     await getNominationStakingRewardData(addresses, targetNetworkMap, (rewardItem: StakingRewardItem) => {
-      this.state.updateStakingReward(rewardItem, 'slowInterval');
+      this.state.updateStakingReward(rewardItem);
     });
   }
 
@@ -307,7 +307,7 @@ export class KoniSubscription {
     });
 
     const updateState = (result: StakingRewardItem) => {
-      this.state.updateStakingReward(result, 'fastInterval');
+      this.state.updateStakingReward(result);
     };
 
     await Promise.all([
@@ -331,8 +331,6 @@ export class KoniSubscription {
   }
 
   async fetchChainStakingMetadata (chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
-    console.log('fetching chain staking metadata');
-
     const filteredChainInfoMap: Record<string, _ChainInfo> = {};
 
     Object.values(chainInfoMap).forEach((chainInfo) => {

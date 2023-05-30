@@ -30,6 +30,9 @@ cryptoWaitReady()
 
     responseMessage({ id: '0', response: { status: 'crypto_ready' } } as PageStatus);
 
+    // wake web-runner up
+    koniState.wakeup().catch((err) => console.warn(err));
+
     console.log('[Mobile] initialization completed');
   })
   .catch((error): void => {

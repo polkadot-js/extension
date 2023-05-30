@@ -11,6 +11,7 @@ export class EventService extends EventEmitter<EventRegistry> {
   private pendingEvents: EventItem<EventType>[] = [];
   private lazyEmitter = new EventEmitter<{lazy: [EventItem<EventType>[], EventType[]]}>();
 
+  public readonly waitCryptoReady: Promise<boolean>;
   public readonly waitKeyringReady: Promise<boolean>;
   public readonly waitAccountReady: Promise<boolean>;
   public readonly waitChainReady: Promise<boolean>;
@@ -20,6 +21,7 @@ export class EventService extends EventEmitter<EventRegistry> {
     super();
     this.lazyTime = options.lazyTime;
     this.timeoutId = null;
+    this.waitCryptoReady = this.generateWaitPromise('crypto.ready');
     this.waitKeyringReady = this.generateWaitPromise('keyring.ready');
     this.waitAccountReady = this.generateWaitPromise('account.ready');
     this.waitChainReady = this.generateWaitPromise('chain.ready');

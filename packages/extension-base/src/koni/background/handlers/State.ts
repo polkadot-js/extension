@@ -275,6 +275,7 @@ export default class KoniState {
   }
 
   public async init () {
+    await this.eventService.waitCryptoReady;
     await this.chainService.init();
     await this.migrationService.run();
     this.startSubscription();

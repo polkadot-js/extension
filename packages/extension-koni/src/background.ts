@@ -93,6 +93,7 @@ cryptoWaitReady()
     keyring.restoreKeyringPassword().finally(() => {
       koniState.updateKeyringState();
     });
+    koniState.eventService.emit('crypto.ready', true);
   })
   .catch((error): void => {
     console.error('initialization failed', error);

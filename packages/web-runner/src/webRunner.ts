@@ -27,6 +27,7 @@ cryptoWaitReady()
     keyring.restoreKeyringPassword().finally(() => {
       koniState.updateKeyringState();
     });
+    koniState.eventService.emit('crypto.ready', true);
 
     responseMessage({ id: '0', response: { status: 'crypto_ready' } } as PageStatus);
 

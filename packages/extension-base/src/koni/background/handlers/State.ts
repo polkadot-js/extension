@@ -502,9 +502,11 @@ export default class KoniState {
     this.stakingRewardSubject.next(this.stakingRewardState);
   }
 
-  public updateStakingReward (stakingRewardData: StakingRewardItem[], type: 'slowInterval' | 'fastInterval', callback?: (stakingRewardData: StakingRewardJson) => void): void {
+  public updateStakingReward (stakingRewardData: StakingRewardItem, type: 'slowInterval' | 'fastInterval', callback?: (stakingRewardData: StakingRewardJson) => void): void {
     this.stakingRewardState.ready = true;
-    this.stakingRewardState[type] = stakingRewardData;
+    this.stakingRewardState[type] = [...this.stakingRewardState[type], stakingRewardData];
+
+    console.log('stakingRewardState', this.stakingRewardState);
 
     if (callback) {
       callback(this.stakingRewardState);

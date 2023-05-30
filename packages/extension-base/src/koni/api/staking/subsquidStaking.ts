@@ -49,10 +49,8 @@ const getSubsquidQuery = (account: string, chain: string) => {
   }`;
 };
 
-const getSubsquidStaking = async (accounts: string[], chain: string, chainInfoMap: Record<string, _ChainInfo>): Promise<StakingRewardItem[]> => {
+const getSubsquidStaking = async (accounts: string[], chain: string, chainInfoMap: Record<string, _ChainInfo>, callback: (rewardItem: StakingRewardItem) => void) => {
   try {
-    const result: StakingRewardItem[] = [];
-
     await Promise.all(accounts.map(async (account) => {
       if ((_isChainEvmCompatible(chainInfoMap[chain]) && isEthereumAddress(account)) || (!_isChainEvmCompatible(chainInfoMap[chain]) && !isEthereumAddress(account))) {
         const parsedAccount = reformatAddress(account, _getChainSubstrateAddressPrefix(chainInfoMap[chain]));
@@ -91,20 +89,16 @@ const getSubsquidStaking = async (accounts: string[], chain: string, chainInfoMa
         }
 
         if (stakingRewardItem.totalReward && parseFloat(stakingRewardItem.totalReward) > 0) {
-          result.push(stakingRewardItem);
+          callback(stakingRewardItem);
         }
       }
     }));
-
-    return result;
   } catch (e) {
-    return [];
+    console.debug(e);
   }
 };
 
-export const getAllSubsquidStaking = async (accounts: string[], chainInfoMap: Record<string, _ChainInfo>): Promise<StakingRewardItem[]> => {
-  let rewardList: StakingRewardItem[] = [];
-
+export const getAllSubsquidStaking = async (accounts: string[], chainInfoMap: Record<string, _ChainInfo>, callback: (rewardItem: StakingRewardItem) => void) => {
   const filteredNetworks: string[] = [];
 
   Object.values(chainInfoMap).forEach((network) => {
@@ -115,13 +109,9 @@ export const getAllSubsquidStaking = async (accounts: string[], chainInfoMap: Re
 
   try {
     await Promise.all(filteredNetworks.map(async (network) => {
-      const rewardItems = await getSubsquidStaking(accounts, network, chainInfoMap);
-
-      rewardList = rewardList.concat(rewardItems);
+      await getSubsquidStaking(accounts, network, chainInfoMap, callback);
     }));
   } catch (e) {
-    return rewardList;
+    console.debug(e);
   }
-
-  return rewardList;
 };

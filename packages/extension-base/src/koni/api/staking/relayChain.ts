@@ -141,7 +141,7 @@ export function getRelayPoolingOnChain (substrateApi: _SubstrateApi, useAddresse
   });
 }
 
-export async function getNominationPoolReward (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>): Promise<StakingRewardItem[]> {
+export async function getNominationPoolReward (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, callBack: (rs: StakingRewardItem) => void) {
   const targetNetworks: string[] = [];
   const validAddresses: string[] = [];
 
@@ -155,8 +155,6 @@ export async function getNominationPoolReward (addresses: string[], chainInfoMap
     }
   });
 
-  const rewardList: StakingRewardItem[] = [];
-
   try {
     await Promise.all(targetNetworks.map(async (networkKey) => {
       const substrateApi = await substrateApiMap[networkKey].isReady;
@@ -166,7 +164,7 @@ export async function getNominationPoolReward (addresses: string[], chainInfoMap
           const _unclaimedReward = await substrateApi.api.call?.nominationPoolsApi?.pendingRewards(address);
 
           if (_unclaimedReward) {
-            rewardList.push({
+            callBack({
               address: address,
               chain: networkKey,
               unclaimedReward: _unclaimedReward.toString(),
@@ -179,8 +177,6 @@ export async function getNominationPoolReward (addresses: string[], chainInfoMap
       }
     }));
   } catch (e) {
-    return rewardList;
+    console.debug(e);
   }
-
-  return rewardList;
 }

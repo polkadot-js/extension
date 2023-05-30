@@ -165,7 +165,7 @@ export function getAmplitudeStakingOnChain (parentApi: _SubstrateApi, useAddress
   return getMultiStakingAmplitude(parentApi, useAddresses, networks, chain, callback, nominatorStateCallback);
 }
 
-export async function getAmplitudeUnclaimedStakingReward (substrateApiMap: Record<string, _SubstrateApi>, addresses: string[], networks: Record<string, _ChainInfo>, chains: string[]): Promise<StakingRewardItem[]> {
+export async function getAmplitudeUnclaimedStakingReward (substrateApiMap: Record<string, _SubstrateApi>, addresses: string[], networks: Record<string, _ChainInfo>, chains: string[], callBack: (rs: StakingRewardItem) => void): Promise<StakingRewardItem[]> {
   if (chains.length === 0) {
     return [];
   }
@@ -188,18 +188,14 @@ export async function getAmplitudeUnclaimedStakingReward (substrateApiMap: Recor
       await Promise.all(useAddresses.map(async (address) => {
         const _unclaimedReward = await apiProps.api.query.parachainStaking.rewards(address);
 
-        const unclaimedReward = _unclaimedReward.toString();
-
-        const rewardItem = {
+        callBack({
           chain,
           name: networkInfo.name,
           state: APIItemState.READY,
           type: StakingType.NOMINATED,
           address: reformatAddress(address, 42),
-          unclaimedReward
-        } as StakingRewardItem;
-
-        unclaimedRewardList.push(rewardItem);
+          unclaimedReward: _unclaimedReward.toString()
+        } as StakingRewardItem);
       }));
     }
   }));

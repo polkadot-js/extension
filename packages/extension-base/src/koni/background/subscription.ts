@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominatorMetadata, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, NominatorMetadata, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { subscribeBalance } from '@subwallet/extension-base/koni/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
@@ -267,9 +267,9 @@ export class KoniSubscription {
       }
     });
 
-    const result = await getNominationStakingRewardData(addresses, targetNetworkMap);
-
-    this.state.updateStakingReward(result, 'slowInterval');
+    await getNominationStakingRewardData(addresses, targetNetworkMap, (rewardItem: StakingRewardItem) => {
+      this.state.updateStakingReward(rewardItem, 'slowInterval');
+    });
   }
 
   async subscribeStakingRewardFastInterval (address: string) {
@@ -306,14 +306,14 @@ export class KoniSubscription {
       activeNetworks.push(key);
     });
 
-    const [poolingStakingRewards, amplitudeUnclaimedStakingRewards] = await Promise.all([
-      getPoolingStakingRewardData(pooledAddresses, targetChainMap, this.state.getSubstrateApiMap()),
-      getAmplitudeUnclaimedStakingReward(this.state.getSubstrateApiMap(), addresses, chainInfoMap, activeNetworks)
+    const updateState = (result: StakingRewardItem) => {
+      this.state.updateStakingReward(result, 'fastInterval');
+    };
+
+    await Promise.all([
+      getPoolingStakingRewardData(pooledAddresses, targetChainMap, this.state.getSubstrateApiMap(), updateState),
+      getAmplitudeUnclaimedStakingReward(this.state.getSubstrateApiMap(), addresses, chainInfoMap, activeNetworks, updateState)
     ]);
-
-    const result = [...poolingStakingRewards, ...amplitudeUnclaimedStakingRewards];
-
-    this.state.updateStakingReward(result, 'fastInterval');
   }
 
   async fetchingStakingFromApi (): Promise<Record<string, ChainStakingMetadata>> {

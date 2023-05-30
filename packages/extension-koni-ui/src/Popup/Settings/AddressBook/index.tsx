@@ -4,10 +4,11 @@
 import { AddressJson } from '@subwallet/extension-base/background/types';
 import { AccountItemBase, AccountItemWithName, AddContactModal, BackIcon, EditContactModal, FilterModal, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ADD_ADDRESS_BOOK_MODAL, EDIT_ADDRESS_BOOK_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useFormatAddress, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { funcSortByName, reformatAddress } from '@subwallet/extension-koni-ui/utils';
-import { Badge, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Badge, ButtonProps, Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
 import { FadersHorizontal, Plus } from 'phosphor-react';
@@ -61,7 +62,7 @@ const FILTER_MODAL_ID = 'manage-address-book-filter-modal';
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
-
+  const { isWebUI } = useContext(ScreenContext);
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -188,16 +189,16 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [formatAddress, onSelectItem]);
 
   const goBack = useCallback(() => {
-    navigate('/settings/list');
-  }, [navigate]);
+    if (isWebUI) {
+      navigate('/settings');
+    } else {
+      navigate('/settings/list');
+    }
+  }, [isWebUI, navigate]);
 
-  return (
-    <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
-        onBack={goBack}
-        subHeaderIcons={subHeaderIcons}
-        title={t('Manage address book')}
-      >
+  const content = useMemo(() => {
+    return (
+      <>
         <SwList.Section
           actionBtnIcon={(
             <Badge dot={!!selectedFilters.length}>
@@ -224,6 +225,7 @@ const Component: React.FC<Props> = (props: Props) => {
           searchPlaceholder={t<string>('Account name')}
           showActionBtn={true}
         />
+
         <FilterModal
           closeIcon={<BackIcon />}
           id={FILTER_MODAL_ID}
@@ -236,6 +238,42 @@ const Component: React.FC<Props> = (props: Props) => {
         />
         <AddContactModal />
         {selectedItem && <EditContactModal addressJson={selectedItem} />}
+      </>
+    );
+  }, [filterOptions, filterSelectionMap, groupSeparator, items, onApplyFilter, onChangeFilterOption, onCloseFilterModal, openFilter, renderItem, selectedFilters.length, selectedItem, t]);
+
+  if (isWebUI) {
+    return (
+      <Layout.Base
+        showSubHeader={true}
+        subHeaderBackground={'transparent'}
+        withSideMenu
+      >
+        {isWebUI && (
+          <SwSubHeader
+            background='transparent'
+            center={false}
+            onBack={goBack}
+            rightButtons={subHeaderIcons}
+            showBackButton={true}
+            title={t<string>('Manage address book')}
+          />
+        )}
+        <div style={{ marginTop: 32 }}>
+          {content}
+        </div>
+      </Layout.Base>
+    );
+  }
+
+  return (
+    <PageWrapper className={CN(className)}>
+      <Layout.WithSubHeaderOnly
+        onBack={goBack}
+        subHeaderIcons={subHeaderIcons}
+        title={t('Manage address book')}
+      >
+        {content}
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
@@ -244,7 +282,9 @@ const Component: React.FC<Props> = (props: Props) => {
 const ManageAddressBook = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '--row-gap': token.sizeXS,
-
+    '.__web-ui': {
+      marginTop: `${token.margin + 24}px`
+    },
     '.ant-sw-screen-layout-body': {
       paddingTop: token.padding,
       height: '100%',

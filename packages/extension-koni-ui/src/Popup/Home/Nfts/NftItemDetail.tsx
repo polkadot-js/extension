@@ -14,6 +14,7 @@ import useGetAccountInfoByAddress from '@subwallet/extension-koni-ui/hooks/scree
 import { INftItemDetail } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
 import { BackgroundIcon, Button, ButtonProps, Field, Icon, Image, Logo, ModalContext, SwModal } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
@@ -29,7 +30,6 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import Transaction from '../../Transaction/Transaction';
 import SendNFT from '../../Transaction/variants/SendNFT';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 
 type Props = ThemeProps
 
@@ -237,11 +237,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             {isWebUI && (
               <Button
                 block
-                icon={<Icon
-                  phosphorIcon={PaperPlaneTilt}
-                  type='phosphor'
-                  weight={'fill'}
-                />}
+                icon={(
+                  <Icon
+                    phosphorIcon={PaperPlaneTilt}
+                    type='phosphor'
+                    weight={'fill'}
+                  />
+                )}
                 onClick={onClickSend}
               >
                 <span className={'nft_item_detail__send_text'}>Send</span>
@@ -334,11 +336,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           {!isWebUI && (
             <Button
               block
-              icon={<Icon
-                phosphorIcon={PaperPlaneTilt}
-                type='phosphor'
-                weight={'fill'}
-              />}
+              icon={(
+                <Icon
+                  phosphorIcon={PaperPlaneTilt}
+                  type='phosphor'
+                  weight={'fill'}
+                />
+              )}
               onClick={onClickSend}
             >
               <span className={'nft_item_detail__send_text'}>Send</span>

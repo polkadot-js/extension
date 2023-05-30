@@ -56,7 +56,14 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       bottom: 0,
       borderBottom: `1px solid ${token.colorBgInput}`
     },
-
+    '.web-confirmation': {
+      '.ant-sw-modal-content': {
+        padding: 0,
+        '.ant-sw-modal-header': {
+          borderRadius: 0
+        }
+      }
+    },
     '.modal-full': {
       '.ant-sw-modal-content': {
         '.ant-sw-modal-header': {

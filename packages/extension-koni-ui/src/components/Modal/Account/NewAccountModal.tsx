@@ -5,7 +5,8 @@ import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/S
 import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
-import { CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL, SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
@@ -20,18 +21,20 @@ import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-type Props = ThemeProps;
+type Props = ThemeProps & {
+  setAccountTypes?: React.Dispatch<React.SetStateAction<KeypairType[]>>
+};
 
 const modalId = NEW_ACCOUNT_MODAL;
 
 const defaultSelectedTypes = [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE];
 
-const Component: React.FC<Props> = ({ className }: Props) => {
+const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
   const { t } = useTranslation();
-  const { checkActive, inactiveModal } = useContext(ModalContext);
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const isActive = checkActive(modalId);
-
+  const { isWebUI } = useContext(ScreenContext);
   const [selectedItems, setSelectedItems] = useState<KeypairType[]>(defaultSelectedTypes);
 
   const onCancel = useCallback(() => {
@@ -39,9 +42,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [inactiveModal]);
 
   const onSubmit = useCallback(() => {
-    navigate('/accounts/new-seed-phrase', { state: { accountTypes: selectedItems } });
+    if (isWebUI) {
+      activeModal(SEED_PHRASE_MODAL);
+
+      setAccountTypes && setAccountTypes(selectedItems);
+    } else {
+      navigate('/accounts/new-seed-phrase', { state: { accountTypes: selectedItems } });
+    }
+
     inactiveModal(modalId);
-  }, [navigate, selectedItems, inactiveModal]);
+  }, [isWebUI, inactiveModal, activeModal, setAccountTypes, selectedItems, navigate]);
 
   const onBack = useSwitchModal(modalId, CREATE_ACCOUNT_MODAL);
 

@@ -73,7 +73,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
       collectionId,
       itemId,
       owner
-    }, [collectionId, itemId, nftChain, nftItems, owner, modalContent, nftDetail]);
+    }, [collectionId, itemId, nftChain, owner, modalContent, nftDetail]);
 
   const nftItem = useMemo((): NftItem => {
     const { collectionId,
@@ -88,7 +88,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
         item.collectionId === collectionId &&
         item.id === itemId
     ) || DEFAULT_ITEM;
-  }, [currentNftDetails]);
+  }, [currentNftDetails, nftItems]);
 
   const collectionInfo = useMemo((): NftCollection => {
     const { collectionId,
@@ -101,13 +101,10 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
     ) || DEFAULT_COLLECTION;
   }, [currentNftDetails, nftCollections]);
 
-  const chainInfo = useMemo(() => chainInfoMap[nftChain], [chainInfoMap, nftChain]);
-  const addressPrefix = useGetChainPrefixBySlug(nftChain);
+  const chainInfo = useMemo(() => chainInfoMap[currentNftDetails.nftChain], [chainInfoMap, currentNftDetails]);
+  const addressPrefix = useGetChainPrefixBySlug(currentNftDetails.nftChain);
 
   const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
-
-  console.log('%c Rainbowww!', 'font-weight: bold; font-size: 50px;color: red; text-shadow: 3px 3px 0 rgb(217,31,38) , 6px 6px 0 rgb(226,91,14) , 9px 9px 0 rgb(245,221,8) , 12px 12px 0 rgb(5,148,68) , 15px 15px 0 rgb(2,135,206) , 18px 18px 0 rgb(4,77,145) , 21px 21px 0 rgb(42,21,113); margin-bottom: 12px; padding: 5%;');
-  console.log('==>>', { chain, from, onDone, setChain, setFrom });
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
 
@@ -149,7 +146,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
     });
   }, [t, from]);
 
-  const onFieldsChange: FormCallbacks<SendNFTFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onFieldsChange: FormCallbacks<SendNFTFormProps>['onFieldsChange'] = useCallback((_changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);
 
     setIsDisable(error);
@@ -203,9 +200,9 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
   const preCheckReadOnly = usePreCheckReadOnly(from);
 
   useEffect(() => {
-    setChain(nftChain);
-    setFrom(owner);
-  }, [nftChain, owner, setChain, setFrom]);
+    setChain(currentNftDetails.nftChain);
+    setFrom(currentNftDetails.owner);
+  }, [currentNftDetails, setChain, setFrom]);
 
   useEffect(() => {
     if (nftItem === DEFAULT_ITEM || collectionInfo === DEFAULT_COLLECTION) {

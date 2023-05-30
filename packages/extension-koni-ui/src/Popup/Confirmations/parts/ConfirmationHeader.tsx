@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CaretRight } from 'phosphor-react';
-import React from 'react';
+import { CaretRight, X } from 'phosphor-react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -17,6 +18,36 @@ interface Props extends ThemeProps {
 }
 
 function Component ({ className, index, numberOfConfirmations, onClickNext, onClickPrev, title }: Props) {
+  const { isWebUI } = useContext(ScreenContext);
+
+  if (isWebUI) {
+    return (
+      <SwSubHeader
+        background='transparent'
+        center={true}
+        className={CN(className, 'confirmation-header')}
+        onBack={onClickPrev}
+        paddingVertical={true}
+        rightButtons={
+          [{
+            className: CN('__right-block'),
+            // onClick: onClickNext,
+            size: 'xs',
+            icon: (
+              <Icon
+                phosphorIcon={X}
+                size='md'
+              />
+            )
+          }
+          ]
+        }
+        showBackButton={true}
+        title={title}
+      />
+    );
+  }
+
   return (
     <SwSubHeader
       background='transparent'

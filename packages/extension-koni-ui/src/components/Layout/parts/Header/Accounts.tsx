@@ -13,7 +13,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
 import { Divider, Logo, Popover, SwList } from '@subwallet/react-ui';
 import { ListChecks } from 'phosphor-react';
-import React, { forwardRef, LegacyRef, useCallback, useMemo } from 'react';
+import React, { forwardRef, LegacyRef, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -64,6 +64,7 @@ const StyledActions = styled.div<ThemeProps>(({ theme: { token } }: ThemeProps) 
 const Component: React.FC = () => {
   const { t } = useTranslation();
   const { accounts: _accounts, currentAccount } = useSelector((state: RootState) => state.accountState);
+  const [open, setOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
   // const currentAuth = useGetCurrentAuth();
@@ -73,6 +74,10 @@ const Component: React.FC = () => {
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));
   }, [accounts]);
+
+  const handleOpenChange = useCallback((newOpen: boolean) => {
+    setOpen(newOpen);
+  }, []);
 
   const onClickDetailAccount = useCallback((address: string) => {
     return () => {
@@ -125,7 +130,10 @@ const Component: React.FC = () => {
 
     if (currentAccountIsAll) {
       return (
-        <div key={item.address} onClick={() => _onSelect(item.address)}>
+        <div
+          key={item.address}
+          onClick={() => _onSelect(item.address)}
+        >
           <AccountItemWithName
             address={item.address}
             className='all-account-selection'
@@ -136,7 +144,10 @@ const Component: React.FC = () => {
     }
 
     return (
-      <div key={item.address} onClick={() => _onSelect(item.address)}>
+      <div
+        key={item.address}
+        onClick={() => _onSelect(item.address)}
+      >
         <AccountCardSelection
           accountName={item.name || ''}
           address={item.address}
@@ -197,7 +208,7 @@ const Component: React.FC = () => {
         />
         <Divider />
         <StyledActions>
-          <SelectAccountFooter />
+          <SelectAccountFooter extraAction={handleOpenChange} />
         </StyledActions>
       </>
     );
@@ -206,6 +217,8 @@ const Component: React.FC = () => {
   return (
     <Popover
       content={popOverContent}
+      onOpenChange={handleOpenChange}
+      open={open}
       overlayInnerStyle={{
         padding: '16px 0'
       }}

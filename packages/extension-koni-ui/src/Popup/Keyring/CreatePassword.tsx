@@ -227,7 +227,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   type='warning'
                 />
               </Form.Item>
-              { submitError && (
+              {submitError && (
                 <Form.Item
                   help={submitError}
                   validateStatus='error'
@@ -253,10 +253,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               )
               : (
                 <SwModal
-                  closeIcon={<Icon
-                    phosphorIcon={CaretLeft}
-                    size='sm'
-                  />}
+                  closeIcon={(
+                    <Icon
+                      phosphorIcon={CaretLeft}
+                      size='sm'
+                    />
+                  )}
                   id={modalId}
                   onCancel={closeModal}
                   rightIconProps={{

@@ -549,9 +549,12 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
 
   return (
     <>
-      <TransactionContent className={CN(`${className} -transaction-content`)}>
+      <TransactionContent className={CN(`${className} -transaction-content`, {
+        '__modal-content': modalContent
+      })}
+      >
         <div className={'__brief common-text text-light-4 text-center'}>
-          {t('Transfer token with the following details')}
+          {modalContent ? t('You are doing a token transfer with the following information') : t('Transfer token with the following details')}
         </div>
 
         <Form
@@ -688,12 +691,16 @@ const SendFund = styled(_SendFund)(({ theme }) => {
     },
 
     '&.__modal-footer': {
+      padding: 0,
+      margin: 0,
       '.ant-btn': {
         width: '100%',
         margin: '16px 0'
       }
     },
-
+    '&.__modal-content': {
+      padding: 0
+    },
     '&.-transaction-content.-is-zero-balance': {
       '.free-balance .ant-number': {
         '.ant-number-integer, .ant-number-decimal': {

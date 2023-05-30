@@ -64,19 +64,21 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
     return icons;
   }, [onClickFilterIcon, onClickSearchIcon, onOpenCustomizeModal, showFilterIcon, showSearchIcon, t]);
 
-  const SCREEN_HEADERS: Record<keyof CompoundedHeader, string[]> = {
-    Controller: [
-      'porfolio',
-      'crowdloans',
-      'history',
-      'dapps',
-      'staking'
-    ],
-    Balance: [
-      'porfolio'
-    ],
-    Simple: []
-  };
+  const SCREEN_HEADERS: Record<keyof CompoundedHeader, string[]> = useMemo(() => (
+    {
+      Controller: [
+        'porfolio',
+        'crowdloans',
+        'history',
+        'dapps',
+        'staking'
+      ],
+      Balance: [
+        'porfolio'
+      ],
+      Simple: []
+    }
+  ), []);
 
   const onClickListIcon = useCallback(() => {
     navigate('/settings/list');

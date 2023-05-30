@@ -8,9 +8,11 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { House, Robot } from 'phosphor-react';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useRouteError } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+
+import { ScreenContext } from '../contexts/ScreenContext';
 
 type Props = ThemeProps;
 
@@ -20,39 +22,47 @@ function Component ({ className = '' }: Props) {
   const { token } = useTheme() as Theme;
   const goHome = useDefaultNavigate().goHome;
 
+  const { isWebUI } = useContext(ScreenContext);
+
   console.error(error);
 
   return (
     <PageWrapper className={CN('main-page-container', className)}>
-      <div className={'__body-area'}>
-        <PageIcon
-          color={token.colorError}
-          iconProps={{
-            phosphorIcon: Robot
-          }}
-        />
-        <div className={'__title'}>{t('Opps! An Error Occurred')}</div>
-        <div className={'__content'}>
-          <span>{t('Sorry, something went wrong.')}</span>
-          <br />
-          <span>{t('Please try again later.')}</span>
+      <div className={CN('container', {
+        '__web-ui': isWebUI
+      })}
+      >
+        <div className={'__body-area'}>
+          <PageIcon
+            color={token.colorError}
+            iconProps={{
+              phosphorIcon: Robot
+            }}
+          />
+          <div className={'__title'}>{t('Opps! An Error Occurred')}</div>
+          <div className={'__content'}>
+            <span>{t('Sorry, something went wrong.')}</span>
+            <br />
+            <span>{t('Please try again later.')}</span>
+          </div>
         </div>
-      </div>
 
-      <div className={'__footer-area'}>
-        <Button
-          block={true}
-          icon={(
-            <Icon
-              className={'icon-submit'}
-              phosphorIcon={House}
-              weight='fill'
-            />
-          )}
-          onClick={goHome}
-        >
-          {t('Back to home')}
-        </Button>
+        <div className={'__footer-area'}>
+          <Button
+            block={true}
+            icon={(
+              <Icon
+                className={'icon-submit'}
+                phosphorIcon={House}
+                weight='fill'
+              />
+            )}
+            onClick={goHome}
+          >
+            {t('Back to home')}
+          </Button>
+        </div>
+
       </div>
     </PageWrapper>
   );
@@ -67,6 +77,24 @@ const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } 
     flexDirection: 'column',
     position: 'relative',
 
+    '.container': {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      '&.__web-ui': {
+        justifyContent: 'center',
+        alignItems: 'center',
+
+        '.__body-area': {
+          flex: 0,
+          padding: 0,
+          marginBottom: 50
+        },
+        '.__footer-area': {
+          minWidth: '50%'
+        }
+      }
+    },
     '&:before': {
       content: '""',
       backgroundImage: extendToken.tokensScreenDangerBackgroundColor,

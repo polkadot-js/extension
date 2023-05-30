@@ -1,221 +1,121 @@
-
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-//[object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-import { Menu } from '@subwallet/react-ui';
-import CN from 'classnames';
-import { Wallet, Rocket, Database, Globe, Clock, Gear, Info, MessengerLogo, ArrowSquareUpRight } from 'phosphor-react';
 import { Logo3D } from '@subwallet/extension-koni-ui/components/Logo';
+import { CONTACT_US, FAQS_URL, TERMS_OF_SERVICE_URL } from '@subwallet/extension-koni-ui/constants';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { useLocation, useNavigate } from 'react-router';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { Menu } from '@subwallet/react-ui';
 import { MenuItemType } from '@subwallet/react-ui/es/menu/hooks/useItems';
-import { useMemo } from 'react';
+import CN from 'classnames';
+import { ArrowSquareUpRight, Clock, Database, Gear, Globe, Info, MessengerLogo, Rocket, Wallet } from 'phosphor-react';
+import React, { useCallback, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 
 export type Props = ThemeProps;
 
 type SideMenuItemType = MenuItemType;
-
 const menuItems: SideMenuItemType[] = [
   {
     label: 'Porfolio',
     key: '/home',
-    icon: <Wallet
-      height={20}
-      weight='fill'
-      width={20}
-    />
+    icon: (
+      <Wallet
+        height={20}
+        weight='fill'
+        width={20}
+      />
+    )
   },
   {
     label: 'Crowdloans',
     key: '/home/crowdloans',
-    icon: <Rocket
-      height={20}
-      weight='fill'
-      width={20}
-    />
+    icon: (
+      <Rocket
+        height={20}
+        weight='fill'
+        width={20}
+      />
+    )
   },
   {
     label: 'Staking',
     key: '/home/staking',
-    icon: <Database
-      height={20}
-      weight='fill'
-      width={20}
-    />
+    icon: (
+      <Database
+        height={20}
+        weight='fill'
+        width={20}
+      />
+    )
   },
   {
     label: 'DApps',
     key: '/home/dapps',
-    icon: <Globe
-      height={20}
-      weight='fill'
-      width={20}
-    />
+    icon: (
+      <Globe
+        height={20}
+        weight='fill'
+        width={20}
+      />
+    )
   },
-  {
-    label: 'History',
+  { label: 'History',
     key: '/home/history',
-    icon: <Clock
-      height={20}
-      weight='fill'
-      width={20}
-    />
-  },
+    icon: (
+      <Clock
+        height={20}
+        weight='fill'
+        width={20}
+      />
+
+    ) },
   {
     label: 'Settings',
     key: '/settings',
-    icon: <Gear
-      height={20}
-      weight='fill'
-      width={20}
-    />
+    icon: (
+      <Gear
+        height={20}
+        weight='fill'
+        width={20}
+      />
+    )
   }
 ];
 
 const staticMenuItems: SideMenuItemType[] = [
   {
     label: 'FAQs',
-    key: '/home/faqs',
-    icon: <Info
-      height={20}
-      weight='fill'
-      width={20}
-    />
+    key: 'faqs',
+    icon: (
+      <Info
+        height={20}
+        weight='fill'
+        width={20}
+      />
+    )
   },
   {
     label: 'Contact',
-    key: '/home/contact',
-    icon: <MessengerLogo
-      height={20}
-      weight='fill'
-      width={20}
-    />
+    key: 'contact',
+    icon: (
+      <MessengerLogo
+        height={20}
+        weight='fill'
+        width={20}
+      />
+    )
   },
   {
     label: 'Terms of services',
-    key: '/home/tos',
-    icon: <ArrowSquareUpRight
-      height={20}
-      weight='fill'
-      width={20}
-    />
+    key: 'tos',
+    icon: (
+      <ArrowSquareUpRight
+        height={20}
+        weight='fill'
+        width={20}
+      />
+    )
   }
 ];
 
@@ -225,9 +125,26 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   // animate sidebar
   // const [isHovered, setHovered] = useState<boolean>(true);
 
-  const handleNavigate = ({ key }: {
+  const handleLinks = useCallback(({ key }: { key: string}) => {
+    switch (key) {
+      case 'faqs':
+        openInNewTab(FAQS_URL)();
+        break;
+      case 'tos':
+        openInNewTab(TERMS_OF_SERVICE_URL)();
+        break;
+      case 'contact':
+        openInNewTab(CONTACT_US)();
+        break;
+      default:
+    }
+  }, []);
+
+  const handleNavigate = useCallback(({ key }: {
     key: string
-  }) => navigate(`${key}`);
+  }) => {
+    navigate(`${key}`);
+  }, [navigate]);
 
   const selectedKey = useMemo(() => {
     const availableKey: string[] = [
@@ -257,7 +174,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         />
         <Menu
           items={staticMenuItems}
-          onClick={handleNavigate}
+          onClick={handleLinks}
           selectedKeys={selectedKey}
         />
       </div>

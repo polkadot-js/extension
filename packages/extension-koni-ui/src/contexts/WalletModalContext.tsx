@@ -7,11 +7,14 @@ import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { KeypairType } from '@polkadot/util-crypto/types';
+
+import SeedPhraseModal from '../components/Modal/Account/SeedPhraseModal';
 import { ThemeProps } from '../types';
 import { ScreenContext } from './ScreenContext';
 
@@ -52,8 +55,12 @@ export const usePredefinedModal = () => {
   return { openPModal, isOpenPModal };
 };
 
-const ModalWrapper = styled.div<ThemeProps>(
-  () => {
+const ModalWrapper = styled.div<ThemeProps & {
+  isWebUI?: boolean
+}>(
+  ({ isWebUI }) => {
+    const padding = isWebUI ? '0' : 'unset';
+
     return {
       height: '100%',
 
@@ -64,7 +71,7 @@ const ModalWrapper = styled.div<ThemeProps>(
 
         '.ant-sw-modal': {
           position: 'relative',
-
+          padding: padding,
           '.ant-sw-modal-content': {
             borderRadius: 8,
             paddingBottom: 0
@@ -78,6 +85,7 @@ const ModalWrapper = styled.div<ThemeProps>(
 export const WalletModalContext = ({ children }: Props) => {
   const { activeModal, hasActiveModal, inactiveAll, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [accountTypes, setAccountTypes] = useState<KeypairType[]>([]);
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
   const { isWebUI } = useContext(ScreenContext);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
@@ -109,7 +117,7 @@ export const WalletModalContext = ({ children }: Props) => {
     }
   }, [hasMasterPassword, inactiveAll, isLocked]);
 
-  return <ModalWrapper>
+  return <ModalWrapper isWebUI={isWebUI}>
     <div
       className={CN({
         'desktop-modal': isWebUI
@@ -119,7 +127,7 @@ export const WalletModalContext = ({ children }: Props) => {
     />
     {children}
     <SwModal
-      className={'modal-full'}
+      className={isWebUI ? 'web-confirmation' : 'modal-full'}
       closable={false}
       id={'confirmations'}
       onCancel={onCloseModal}
@@ -129,9 +137,10 @@ export const WalletModalContext = ({ children }: Props) => {
       <Confirmations />
     </SwModal>
     <CreateAccountModal />
+    <SeedPhraseModal accountTypes={accountTypes} />
     <ImportAccountModal />
     <AttachAccountModal />
-    <NewAccountModal />
+    <NewAccountModal setAccountTypes={setAccountTypes} />
     <DeriveAccountModal />
     <RequestCreatePasswordModal />
     <RequestCameraAccessModal />

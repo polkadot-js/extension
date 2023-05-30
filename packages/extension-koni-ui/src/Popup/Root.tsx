@@ -120,6 +120,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       }
     } else if (pathName === DEFAULT_ROUTER_PATH) {
       if (hasConfirmations) {
+        console.log('hasConfirmations');
         openPModal('confirmations');
       } else {
         navigate(tokenUrl);

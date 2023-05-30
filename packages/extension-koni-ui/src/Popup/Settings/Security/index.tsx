@@ -106,10 +106,14 @@ const Component: React.FC<Props> = (props: Props) => {
       if (noAccount) {
         navigate(DEFAULT_ROUTER_PATH);
       } else {
-        navigate('/settings/list');
+        if (isWebUI) {
+          navigate('/settings');
+        } else {
+          navigate('/settings/list');
+        }
       }
     }
-  }, [canGoBack, goBack, navigate, noAccount]);
+  }, [canGoBack, goBack, isWebUI, navigate, noAccount]);
 
   const updateCamera = useCallback((currentValue: boolean) => {
     return () => {

@@ -506,8 +506,6 @@ export default class KoniState {
     this.stakingRewardState.ready = true;
     this.stakingRewardState[type] = [...this.stakingRewardState[type], stakingRewardData];
 
-    console.log('stakingRewardState', this.stakingRewardState);
-
     if (callback) {
       callback(this.stakingRewardState);
     }

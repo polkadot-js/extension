@@ -149,7 +149,7 @@ export function subscribeEssentialChainStakingMetadata (substrateApiMap: Record<
 
       // @ts-ignore
       unsubList.push(unsub);
-    } else {
+    } else if (_STAKING_CHAIN_GROUP.relay.includes(chainInfo.slug)) {
       const unsub = await subscribeRelayChainStakingMetadata(chainInfo, substrateApi, callback);
 
       // @ts-ignore

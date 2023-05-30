@@ -296,7 +296,7 @@ export default class KoniState {
   }
 
   public onReady () {
-    // Todo: Need optimize in the future to, only run important services onetime to save resouces
+    // Todo: Need optimize in the future to, only run important services onetime to save resources
     // Todo: If optimize must check activity of web-runner of mobile
     this._start().catch(console.error);
   }
@@ -1621,6 +1621,7 @@ export default class KoniState {
   }
 
   public async sleep () {
+    // Wait starting finish before sleep to avoid conflict
     this.generalStatus === ServiceStatus.STARTING && this.waitStarting && await this.waitStarting;
 
     // Avoid sleep multiple times
@@ -1641,11 +1642,9 @@ export default class KoniState {
     this.waitSleeping = sleeping.promise;
 
     // Stopping services
-    this.cron.stop();
-    this.subscription.stop();
+    await Promise.all([this.cron.stop(), this.subscription.stop()]);
     await this.pauseAllNetworks(undefined, 'IDLE mode');
-    await this.historyService.stop();
-    await this.priceService.stop();
+    await Promise.all([this.historyService.stop(), this.priceService.stop()]);
 
     // Complete sleeping
     sleeping.resolve();
@@ -1654,6 +1653,7 @@ export default class KoniState {
   }
 
   private async _start (isWakeup = false) {
+    // Wait sleep finish before start to avoid conflict
     this.generalStatus === ServiceStatus.STOPPING && this.waitSleeping && await this.waitSleeping;
 
     // Avoid start multiple times
@@ -1673,13 +1673,11 @@ export default class KoniState {
     this.generalStatus = ServiceStatus.STARTING;
     this.waitStarting = starting.promise;
 
+    // Resume all networks if wakeup from sleep
     isWakeup && await this.resumeAllNetworks();
 
     // Start services
-    this.cron.start().catch(console.error);
-    this.subscription.start().catch(console.error);
-    this.historyService.start().catch(console.error);
-    this.priceService.start().catch(console.error);
+    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start()]);
 
     // Complete starting
     starting.resolve();

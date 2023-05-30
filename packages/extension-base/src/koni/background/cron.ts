@@ -179,7 +179,7 @@ export class KoniCron {
     this.status = 'running';
   };
 
-  stop = () => {
+  stop = async () => {
     if (this.status === 'stopped') {
       return;
     }
@@ -198,6 +198,8 @@ export class KoniCron {
     this.removeAllCrons();
 
     this.status = 'stopped';
+
+    return Promise.resolve();
   };
 
   updateApiMapStatus = () => {

@@ -100,6 +100,39 @@ export default class EvmRequestHandler {
     return promise;
   }
 
+  public updateConfirmation<CT extends ConfirmationType> (
+    id: string,
+    type: CT,
+    payload: ConfirmationDefinitions[CT][0]['payload'],
+    options: ConfirmationsQueueItemOptions = {},
+    validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined
+  ) {
+    const confirmations = this.confirmationsQueueSubject.getValue();
+    const confirmationType = confirmations[type] as Record<string, ConfirmationDefinitions[CT][0]>;
+
+    // Check duplicate request
+    const exists = confirmationType[id];
+
+    if (!exists) {
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Request does not exist');
+    }
+
+    const payloadJson = JSON.stringify(payload);
+
+    confirmationType[id] = {
+      ...exists,
+      payload,
+      payloadJson,
+      ...options
+    } as ConfirmationDefinitions[CT][0];
+
+    if (validator) {
+      this.confirmationsPromiseMap[id].validator = validator;
+    }
+
+    this.confirmationsQueueSubject.next(confirmations);
+  }
+
   private async signMessage (confirmation: ConfirmationDefinitions['evmSignatureRequest'][0]): Promise<string> {
     const { account, payload, type } = confirmation.payload;
     const address = account.address;

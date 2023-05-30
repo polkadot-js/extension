@@ -1169,11 +1169,16 @@ export interface EvmSendTransactionRequestExternal extends EvmSendTransactionReq
 export interface EvmSignatureRequestExternal extends EvmSignatureRequest, EvmRequestExternal {}
 
 export interface AddNetworkRequestExternal { // currently only support adding pure Evm network
-  chainId: string,
-  rpcUrls: string[],
-  chainName: string,
-  blockExplorerUrls?: string[],
-  requestId?: string
+  chainId: string;
+  rpcUrls: string[];
+  chainName: string;
+  blockExplorerUrls?: string[];
+  requestId?: string;
+  nativeCurrency: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
 }
 
 export interface AddNetworkExternalRequest { // currently only support adding pure Evm network
@@ -1192,6 +1197,8 @@ export interface AddTokenRequestExternal {
   name: string;
   symbol: string;
   decimals: number;
+  validated: boolean;
+  contractError: boolean;
 }
 
 export interface ConfirmationDefinitions {

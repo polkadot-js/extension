@@ -1629,6 +1629,7 @@ export default class KoniState {
   }
 
   public async wakeup () {
+    await this.eventService.waitChainReady;
     await this.resumeAllNetworks();
     this.cron.start();
     this.subscription.start();

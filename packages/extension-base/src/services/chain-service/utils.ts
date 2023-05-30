@@ -68,7 +68,15 @@ export function _isPureSubstrateChain (chainInfo: _ChainInfo) {
 
 export function _getOriginChainOfAsset (assetSlug: string) {
   if (assetSlug.startsWith(_CUSTOM_PREFIX)) {
-    return assetSlug.split('-')[1];
+    const arr = assetSlug.split('-').slice(1);
+
+    if (arr[0] === 'custom') {
+      const end = arr.findIndex((str) => Object.values(_AssetType).includes(str as _AssetType));
+
+      return arr.slice(0, end).join('-');
+    }
+
+    return arr[0];
   }
 
   return assetSlug.split('-')[0];

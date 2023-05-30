@@ -114,7 +114,7 @@ export default class EvmRequestHandler {
     const exists = confirmationType[id];
 
     if (!exists) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, "Don't exists request");
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Request does not exist');
     }
 
     const payloadJson = JSON.stringify(payload);

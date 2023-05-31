@@ -22,7 +22,7 @@ export function getRelayStakingOnChain (substrateApi: _SubstrateApi, useAddresse
         const owner = reformatAddress(useAddresses[i], 42);
         const ledger = _ledger.toPrimitive() as unknown as PalletStakingStakingLedger;
 
-        if (ledger && ledger.active) {
+        if (ledger) {
           const _totalBalance = ledger.total.toString();
           const _activeBalance = ledger.active.toString();
           const bnUnlockingBalance = new BN(_totalBalance).sub(new BN(_activeBalance));

@@ -246,6 +246,11 @@ export default styled(NewAccountSelection)(
     }
     ${Account} {
       padding: 2px 4px;
+
+      ${Checkbox} {
+        margin-left: 8px;
+        margin-right: 16px;
+      }
     }
   }
 

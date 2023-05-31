@@ -65,9 +65,6 @@ export default styled(AccountsTree)`
     flex-direction: column;
     
   .accountWichCheckbox {
-    display: flex;
-    align-items: center;
-
     & .address {
       flex: 1;
     }

@@ -189,6 +189,7 @@ export default styled(AccountSelection)(
       
       ${Checkbox} {
         margin-left: 8px;
+        margin-right: 16px;
       }
     }
   }

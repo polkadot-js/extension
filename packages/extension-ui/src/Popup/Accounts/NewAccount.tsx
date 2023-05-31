@@ -149,6 +149,10 @@ export default withRouter(styled(NewAccount)`
     bottom: -8px !important;
   }
 
+  .accountSelection {
+    max-width: 100%;
+  }
+
   .content {
     margin-top: 8px;
     overflow-y: scroll;

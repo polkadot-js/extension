@@ -183,6 +183,8 @@ function Account({
 
 export default styled(Account)(
   ({ theme, withCheckbox }: Props) => `
+  display: flex;
+  
   ${Address}:hover {
     background: ${withCheckbox ? theme.menuBackground : theme.menuBackground};
     ${withCheckbox ? ' cursor: pointer;' : ''}   
@@ -198,6 +200,7 @@ export default styled(Account)(
   }
 
   .address {
+    min-width: 0;
     display: flex;
     align-items: center;
     margin-bottom: 16px;

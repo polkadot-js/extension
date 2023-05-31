@@ -38,7 +38,7 @@ export default function useChainChecker () {
             const chainInfo = chainInfoMap[chain];
 
             setConnectingChain(chain);
-            notify({ message: t('Chain {{name}} is connecting', { replace: { name: chainInfo?.name } }), duration: 1.5 });
+            notify({ message: t('Chain {{name}} is connecting', { replace: { name: chainInfo?.name } }), duration: 1.5, type: 'warning' });
           }).catch(console.error);
         };
 

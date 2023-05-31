@@ -33,7 +33,7 @@ const defaultAddressBookModalId = 'input-account-address-book-modal';
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { addressPrefix,
     className = '', disabled, id, label, onBlur, onChange, onFocus,
-    placeholder, readOnly, saveAddress, showAddressBook, showScanner, statusHelp, value } = props;
+    placeholder, readOnly, saveAddress, showAddressBook, showScanner, status, statusHelp, value } = props;
   const { t } = useTranslation();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -159,6 +159,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         }
         readOnly={readOnly}
         ref={inputRef}
+        status={status}
         statusHelp={statusHelp}
         suffix={(
           <>

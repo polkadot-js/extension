@@ -336,7 +336,7 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
     allDappsInfo.push({
       commission: 0,
       expectedReturn: 0,
-      address: dappAddress.toLowerCase(),
+      address: isEthereumAddress(dappAddress) ? dappAddress.toLowerCase() : dappAddress,
       totalStake: totalStake,
       ownStake: '0',
       otherStake: totalStake.toString(),

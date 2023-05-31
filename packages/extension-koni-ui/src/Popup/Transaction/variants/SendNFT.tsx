@@ -77,6 +77,7 @@ const Component: React.FC = () => {
 
   const chainInfo = useMemo(() => chainInfoMap[nftChain], [chainInfoMap, nftChain]);
   const addressPrefix = useGetChainPrefixBySlug(nftChain);
+  const fromChainGenesisHash = chainInfoMap[nftChain]?.substrateInfo?.genesisHash || '';
 
   const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
@@ -217,6 +218,7 @@ const Component: React.FC = () => {
             <AddressInput
               addressPrefix={addressPrefix}
               label={t('Send to')}
+              networkGenesisHash={fromChainGenesisHash}
               placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}

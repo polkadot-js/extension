@@ -17,7 +17,7 @@ import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, u
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, findChainInfoByGenesisHash, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
@@ -264,6 +264,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
   const fromChainNetworkPrefix = useGetChainPrefixBySlug(chain);
   const destChainNetworkPrefix = useGetChainPrefixBySlug(destChain);
+  const fromChainGenesisHash = chainInfoMap[chain]?.substrateInfo?.genesisHash || '';
 
   const tokenItems = useMemo<TokenItemType[]>(() => {
     return getTokenItems(
@@ -295,6 +296,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
     const isOnChain = chain === destChain;
 
+    const account = findAccountByAddress(accounts, _recipientAddress);
+
     if (isOnChain) {
       if (isSameAddress(from, _recipientAddress)) {
         // todo: change message later
@@ -317,8 +320,22 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       }
     }
 
+    if (account) {
+      if (account.isHardware) {
+        const destChainInfo = chainInfoMap[destChain];
+
+        if (account.originGenesisHash !== destChainInfo.substrateInfo?.genesisHash) {
+          const accountChain = findChainInfoByGenesisHash(chainInfoMap, account.originGenesisHash || '');
+
+          const accountChainName = accountChain?.name || 'Unknown';
+
+          return Promise.reject(t('Your sending network must be the same with the initially chosen network when you started connecting with Ledger', { replace: { network: accountChainName } }));
+        }
+      }
+    }
+
     return Promise.resolve();
-  }, [chainInfoMap, form, t]);
+  }, [accounts, chainInfoMap, form, t]);
 
   const validateAmount = useCallback((rule: Rule, amount: string): Promise<void> => {
     if (!amount) {
@@ -625,6 +642,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               label={t('Send to')}
+              networkGenesisHash={fromChainGenesisHash}
               placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}

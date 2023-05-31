@@ -1604,7 +1604,7 @@ export default class KoniExtension {
       data: inputData,
       extrinsicType: isTransferNativeToken ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.TRANSFER_TOKEN,
       ignoreWarnings: transferAll,
-      isTransferAll: transferAll,
+      isTransferAll: isTransferNativeToken ? transferAll : false,
       edAsWarning: isTransferNativeToken
     });
   }

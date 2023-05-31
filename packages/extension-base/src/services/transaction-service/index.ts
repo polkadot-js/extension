@@ -659,11 +659,17 @@ export default class TransactionService {
       const isToContract = await isContractAddress(payload.to || '', evmApi);
 
       payload.isToContract = isToContract;
-      payload.parseData = isToContract
-        ? payload.data
-          ? (await parseContractInput(payload.data || '', payload.to || '', chainInfo)).result
-          : ''
-        : payload.data || '';
+
+      try {
+        payload.parseData = isToContract
+          ? payload.data
+            ? (await parseContractInput(payload.data || '', payload.to || '', chainInfo)).result
+            : ''
+          : payload.data || '';
+      } catch (e) {
+        console.warn('Unable to parse contract input data');
+        payload.parseData = payload.data as string;
+      }
     }
 
     if ('data' in payload && payload.data === undefined) {

@@ -10,7 +10,7 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "1.0.6",
+  "version": "1.0.7-0",
   "workspaces": [
     "packages/*"
   ],
@@ -40,7 +40,7 @@
     "test:one": "polkadot-dev-run-test --detectOpenHandles",
     "watch": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch",
     "watch-dev": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch -d inline-source-map",
-    "web-runner:build": "cd packages/web-runner && yarn webpack --config webpack.config.cjs --mode production",
+    "web-runner:build": "cd packages/web-runner && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
     "web-runner:dev": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development"
   },
@@ -73,7 +73,7 @@
     "@polkadot/util": "^12.2.1",
     "@polkadot/util-crypto": "^12.2.1",
     "@polkadot/x-fetch": "^12.2.1",
-    "@subwallet/chain-list": "^0.1.9-beta.1",
+    "@subwallet/chain-list": "^0.1.9",
     "@subwallet/keyring": "^0.0.9",
     "@subwallet/ui-keyring": "^0.0.9",
     "babel-core": "^7.0.0-bridge.0",

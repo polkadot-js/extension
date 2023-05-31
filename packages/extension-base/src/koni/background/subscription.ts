@@ -345,24 +345,42 @@ export class KoniSubscription {
       return;
     }
 
+    const timeout = new Promise((resolve) => {
+      const id = setTimeout(() => {
+        clearTimeout(id);
+        resolve(null);
+      }, 3000);
+    });
+
     // Fetch data from helper API
-    const dataFromApi = await this.fetchingStakingFromApi();
+    const _dataFromApi = await Promise.race([
+      this.fetchingStakingFromApi(),
+      timeout
+    ]);
+
+    const dataFromApi = _dataFromApi as Record<string, ChainStakingMetadata> | null;
 
     await Promise.all(Object.values(filteredChainInfoMap).map(async (chainInfo) => {
       // Use fetch API data if available
-      if (dataFromApi[chainInfo.slug]) {
-        this.state.updateChainStakingMetadata(dataFromApi[chainInfo.slug]);
+      if (dataFromApi && dataFromApi[chainInfo.slug]) {
+        this.state.updateChainStakingMetadata(dataFromApi[chainInfo.slug], {
+          expectedReturn: dataFromApi[chainInfo.slug].expectedReturn,
+          inflation: dataFromApi[chainInfo.slug].inflation,
+          nominatorCount: dataFromApi[chainInfo.slug].nominatorCount
+        });
       } else {
         const chainStakingMetadata = await getChainStakingMetadata(chainInfo, substrateApiMap[chainInfo.slug]);
 
-        this.state.updateChainStakingMetadata(chainStakingMetadata);
+        this.state.updateChainStakingMetadata(chainStakingMetadata, {
+          expectedReturn: chainStakingMetadata.expectedReturn,
+          inflation: chainStakingMetadata.inflation,
+          nominatorCount: chainStakingMetadata.nominatorCount
+        });
       }
     }));
   }
 
   async fetchNominatorMetadata (currentAddress: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>) {
-    console.log('fetching nominator metadata');
-
     const filteredChainInfoMap: Record<string, _ChainInfo> = {};
 
     Object.values(chainInfoMap).forEach((chainInfo) => {

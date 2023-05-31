@@ -166,6 +166,7 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
   ]);
 
   const eraStakers = _eraStakers as any[];
+  let allCurrentNominators: Record<string, unknown>[] = [];
   const nominatorList: string[] = [];
 
   for (const item of eraStakers) {
@@ -173,11 +174,12 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
     const rawValidatorStat = item[1].toHuman() as Record<string, any>;
     const eraNominators = rawValidatorStat.others as Record<string, any>[];
 
-    for (const nominator of eraNominators) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      if (!nominatorList.includes(nominator.who as string)) {
-        nominatorList.push(nominator.who as string);
-      }
+    allCurrentNominators = allCurrentNominators.concat(eraNominators);
+  }
+
+  for (const nominator of allCurrentNominators) {
+    if (!nominatorList.includes(nominator.who as string)) {
+      nominatorList.push(nominator.who as string);
     }
   }
 

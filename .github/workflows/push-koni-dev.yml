@@ -15,7 +15,7 @@ jobs:
     name: ${{ matrix.step }}
     runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
         token: ${{ secrets.GH_PAT }}
@@ -26,6 +26,7 @@ jobs:
         GH_RELEASE_GITHUB_API_TOKEN: ${{ secrets.GH_PAT }}
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         NEXTCLOUD_CONFIG: ${{ secrets.NEXTCLOUD_CONFIG }}
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         GH_RELEASE_FILES: master-build.zip,master-src.zip
         COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         REF_NAME: ${{ github.ref_name }}

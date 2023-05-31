@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## 1.0.6
+Build date: May 26, 2023.
+
+Features & Update:
+- Add “I trust this site” option on the phishing page screen (#1380)
+- Temporarily hide XCM channels from Moonbeam (#1440)
+- Update login & welcome screen (#1450)
+
+Update chain list:
+- Update logo for some chains and some tokens
+- Add USDT, USDC on EVM chain
+- Add Support For AI Serpenator NFT Collection
+
+Fixed bugs:
+- Fix bug show unclaim reward (#1432)
+- Update APR for some chain (#1429)
+- Fix bug show Moonfit’s NFT (#1404)
+- Fix bug when stake (#1392)
+- Update RMRK API (#1414)
+- Fix bug get balance when send token (#1428)
+
 ## 1.0.5
 Build date: May 20, 2023.
 

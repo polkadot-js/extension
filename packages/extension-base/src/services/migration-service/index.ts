@@ -20,8 +20,8 @@ export default class MigrationService {
   public async run (): Promise<void> {
     const keys = Object.keys(MigrationScripts).sort((a, b) => a.localeCompare(b));
 
-    // Await timeout 2s
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Await timeout 1s
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     for (let i = 0; i < keys.length; i++) {
       try {

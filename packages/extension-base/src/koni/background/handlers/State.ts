@@ -1629,6 +1629,7 @@ export default class KoniState {
   }
 
   public async wakeup () {
+    await this.eventService.waitChainReady;
     await this.resumeAllNetworks();
     this.cron.start();
     this.subscription.start();
@@ -1732,6 +1733,21 @@ export default class KoniState {
 
   public async reloadStaking () {
     return await this.cron.reloadStaking();
+  }
+
+  public async approvePassPhishingPage (_url: string) {
+    return new Promise<boolean>((resolve) => {
+      this.settingService.getPassPhishingList((value) => {
+        const result = { ...value };
+        const url = this.requestService.stripUrl(_url);
+
+        result[url] = { pass: true };
+
+        this.settingService.setPassPhishing(result, () => {
+          resolve(true);
+        });
+      });
+    });
   }
 
   public async resetWallet (resetAll: boolean) {

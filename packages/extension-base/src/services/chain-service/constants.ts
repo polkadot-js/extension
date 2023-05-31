@@ -58,7 +58,7 @@ export const _STAKING_CHAIN_GROUP = {
   kilt: ['kilt', 'kilt_peregrine'],
   nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph'],
   bifrost: ['bifrost', 'bifrost_testnet'],
-  aleph: ['aleph, alephTest'] // A0 has distinct tokenomics
+  aleph: ['aleph', 'alephTest'] // A0 has distinct tokenomics
 };
 
 export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours

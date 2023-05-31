@@ -371,9 +371,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       }
 
       if (part.destChain) {
-        if (part.destChain !== values.chain && assetRegistry[values.asset]?.assetType === _AssetType.NATIVE) {
-          setIsTransferAll(false);
-        }
+        setForceUpdateMaxValue(isTransferAll ? {} : undefined);
 
         if (values.to) {
           validateField.push('to');
@@ -384,7 +382,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         form.validateFields(validateField).catch(noop);
       }
     },
-    [form, setFrom, assetRegistry, setChain, setAsset]
+    [setFrom, form, assetRegistry, setChain, setAsset, isTransferAll]
   );
 
   // Submit transaction

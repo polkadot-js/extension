@@ -44,7 +44,11 @@ export function subscribeAmplitudeStakingMetadata (chain: string, substrateApi: 
     const maxDelegations = substrateApi.api.consts.parachainStaking.maxDelegationsPerRound.toString();
     const minDelegatorStake = substrateApi.api.consts.parachainStaking.minDelegatorStake.toString();
     const unstakingDelay = substrateApi.api.consts.parachainStaking.stakeDuration.toString();
-    const unstakingPeriod = parseInt(unstakingDelay) * _STAKING_ERA_LENGTH_MAP[chain];
+    const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
+    const blockPerRound = parseFloat(_blockPerRound);
+
+    const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
+    const unstakingPeriod = blockDuration * parseInt(unstakingDelay);
 
     callback(chain, {
       chain,

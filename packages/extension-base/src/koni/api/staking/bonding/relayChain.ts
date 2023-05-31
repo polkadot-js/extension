@@ -67,10 +67,6 @@ export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: str
     const bnCurrentActiveStake = new BN(nominatorMetadata.activeStake);
 
     bnTotalStake = bnTotalStake.add(bnCurrentActiveStake);
-
-    if (nominatorMetadata.unstakings.length > 0) {
-      errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));
-    }
   }
 
   if (!bnTotalStake.gte(bnMinStake)) {
@@ -134,7 +130,7 @@ export function subscribeRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
     const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
 
     const minPoolJoin = _minPoolJoin?.toString() || undefined;
-    const unlockingPeriod = parseInt(unlockingEras) * _STAKING_ERA_LENGTH_MAP[chainInfo.slug]; // in hours
+    const unlockingPeriod = parseInt(unlockingEras) * (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default); // in hours
 
     callback(chainInfo.slug, {
       chain: chainInfo.slug,

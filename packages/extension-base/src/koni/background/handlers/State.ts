@@ -408,13 +408,6 @@ export default class KoniState {
     return this.dbService.getPooledStakings(addresses, this.activeChainSlugs);
   }
 
-  // TODO: delete later
-  // public async getStoredStaking (address: string) {
-  //   const items = await this.dbService.stores.staking.getDataByAddressAsObject(address);
-  //
-  //   return items || {};
-  // }
-
   public subscribeStaking () {
     return this.stakingSubject;
   }

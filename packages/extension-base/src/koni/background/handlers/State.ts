@@ -33,6 +33,7 @@ import { isContractAddress, parseContractInput } from '@subwallet/extension-base
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { decodePair } from '@subwallet/keyring/pair/decode';
 import { keyring } from '@subwallet/ui-keyring';
+import { Subscription } from 'dexie';
 import SimpleKeyring from 'eth-simple-keyring';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
@@ -98,8 +99,7 @@ export default class KoniState {
   private stakingRewardSubject = new Subject<StakingRewardJson>();
   private stakingRewardState: StakingRewardJson = {
     ready: false,
-    slowInterval: [],
-    fastInterval: []
+    data: {}
   } as StakingRewardJson;
 
   private lazyMap: Record<string, unknown> = {};
@@ -270,21 +270,30 @@ export default class KoniState {
   public async init () {
     await this.chainService.init();
     await this.migrationService.run();
-    this.startSubscription();
     this.eventService.emit('chain.ready', true);
 
     this.onReady();
     this.onAccountAdd();
     this.onAccountRemove();
+
+    await this.startSubscription();
   }
 
-  private startSubscription () {
+  private async startSubscription () {
+    await this.eventService.waitKeyringReady;
+
     this.dbService.subscribeChainStakingMetadata([], (data) => {
       this.chainStakingMetadataSubject.next(data);
     });
 
-    this.dbService.subscribeNominatorMetadata((data) => {
-      this.stakingNominatorMetadataSubject.next(data);
+    let unsub: Subscription | undefined;
+
+    this.keyringService.accountSubject.subscribe((accounts) => { // TODO: improve this
+      unsub && unsub.unsubscribe();
+
+      unsub = this.dbService.subscribeNominatorMetadata(Object.keys(accounts), (data) => {
+        this.stakingNominatorMetadataSubject.next(data);
+      });
     });
   }
 
@@ -399,13 +408,6 @@ export default class KoniState {
     return this.dbService.getPooledStakings(addresses, this.activeChainSlugs);
   }
 
-  // TODO: delete later
-  // public async getStoredStaking (address: string) {
-  //   const items = await this.dbService.stores.staking.getDataByAddressAsObject(address);
-  //
-  //   return items || {};
-  // }
-
   public subscribeStaking () {
     return this.stakingSubject;
   }
@@ -426,8 +428,8 @@ export default class KoniState {
     this.dbService.updateStaking(networkKey, item.address, item).catch((e) => this.logger.warn(e));
   }
 
-  public updateChainStakingMetadata (item: ChainStakingMetadata) {
-    this.dbService.updateChainStakingMetadata(item).catch((e) => this.logger.warn(e));
+  public updateChainStakingMetadata (item: ChainStakingMetadata, changes?: Record<string, unknown>) {
+    this.dbService.updateChainStakingMetadata(item, changes).catch((e) => this.logger.warn(e));
   }
 
   public updateStakingNominatorMetadata (item: NominatorMetadata) {
@@ -497,14 +499,16 @@ export default class KoniState {
   }
 
   public resetStakingReward () {
-    this.stakingRewardState.slowInterval = [];
+    this.stakingRewardState.data = {};
 
     this.stakingRewardSubject.next(this.stakingRewardState);
   }
 
-  public updateStakingReward (stakingRewardData: StakingRewardItem[], type: 'slowInterval' | 'fastInterval', callback?: (stakingRewardData: StakingRewardJson) => void): void {
+  public updateStakingReward (stakingRewardData: StakingRewardItem, callback?: (stakingRewardData: StakingRewardJson) => void): void {
     this.stakingRewardState.ready = true;
-    this.stakingRewardState[type] = stakingRewardData;
+    const key = `${stakingRewardData.chain}___${stakingRewardData.address}___${stakingRewardData.type}`;
+
+    this.stakingRewardState.data[key] = stakingRewardData;
 
     if (callback) {
       callback(this.stakingRewardState);

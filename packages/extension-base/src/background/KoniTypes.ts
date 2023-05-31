@@ -156,8 +156,7 @@ export interface StakingJson {
 
 export interface StakingRewardJson {
   ready: boolean;
-  slowInterval: Array<StakingRewardItem>;
-  fastInterval: Array<StakingRewardItem>;
+  data: Record<string, StakingRewardItem>;
 }
 
 export interface PriceJson {
@@ -1411,16 +1410,19 @@ export interface ChainStakingMetadata {
   chain: string;
   type: StakingType;
 
+  // essential
   era: number, // also round for parachains
-  expectedReturn?: number; // in %, annually
-  inflation?: number; // in %, annually
   minJoinNominationPool?: string; // for relaychain supports nomination pool
   minStake: string;
-  nominatorCount?: number;
   maxValidatorPerNominator: number;
   maxWithdrawalRequestPerValidator: number;
   allowCancelUnstaking: boolean;
   unstakingPeriod: number; // in hours
+
+  // supplemental
+  expectedReturn?: number; // in %, annually
+  inflation?: number; // in %, annually
+  nominatorCount?: number;
 }
 
 export interface NominationInfo {

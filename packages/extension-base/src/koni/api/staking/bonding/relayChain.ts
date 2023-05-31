@@ -67,6 +67,10 @@ export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: str
     const bnCurrentActiveStake = new BN(nominatorMetadata.activeStake);
 
     bnTotalStake = bnTotalStake.add(bnCurrentActiveStake);
+
+    if (nominatorMetadata.unstakings.length > 0 && bnCurrentActiveStake.isZero()) {
+      errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));
+    }
   }
 
   if (!bnTotalStake.gte(bnMinStake)) {

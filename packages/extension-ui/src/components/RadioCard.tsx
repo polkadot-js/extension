@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '../types';
@@ -16,11 +16,13 @@ interface Props extends ThemeProps {
   option: Option;
   selectedValue: string;
   onChange: (value: string) => void;
-  tabIndex?: number;
 }
 
-function RadioCard({ className, onChange, option, selectedValue, tabIndex = 0 }: Props): React.ReactElement<Props> {
+function RadioCard({ className, onChange, option, selectedValue }: Props): React.ReactElement<Props> {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const [isFocusVisible, setIsFocusVisible] = useState(false);
+
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = event.target;
@@ -39,37 +41,48 @@ function RadioCard({ className, onChange, option, selectedValue, tabIndex = 0 }:
     }
   }, [inputRef, handleChange]);
 
-  const _onKeyPress = useCallback(
-    (event: React.KeyboardEvent<HTMLSpanElement>) => {
-      if (event.key === 'Enter' || event.key === 'Space') {
-        handleClick();
-      }
-    },
-    [handleClick]
-  );
-
   return (
     <div className={className}>
-      <label
+      <Label
         htmlFor={option.text}
+        isOutlined={isFocusVisible}
         onClick={handleClick}
-        onKeyDown={_onKeyPress}
-        tabIndex={tabIndex}
       >
         <span>{option.text}</span>
         <input
           checked={selectedValue === option.value}
           id={option.text}
+          onBlur={() => setIsFocusVisible(false)}
           onChange={handleChange}
+          onFocus={() => {
+            const isFocusVisible = !!inputRef.current?.matches(':focus-visible');
+
+            setIsFocusVisible(isFocusVisible);
+          }}
           ref={inputRef}
-          tabIndex={undefined}
           type='radio'
           value={option.value}
         />
-      </label>
+      </Label>
     </div>
   );
 }
+
+const Label = styled.label<{ isOutlined: boolean }>`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    width: 100%;
+    padding: 16px;
+
+    :has(input:focus-visible) {
+      outline-style: auto;
+    }
+
+    /* :has selector is the pure css solution to this problem, but doesn't have (so far) enough support ;( */
+    ${({ isOutlined }) => (isOutlined ? 'outline-style: auto;' : '')}
+`;
 
 export default styled(RadioCard)(
   ({ theme }: Props) => `
@@ -94,21 +107,6 @@ export default styled(RadioCard)(
 
     input {
       outline: 1px solid ${theme.primaryColor};
-    }
-  }
-
-  label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    width: 100%;
-    padding: 16px;
-
-    &:focus {
-      input {
-        outline: 1px solid ${theme.primaryColor};
-      }
     }
   }
 

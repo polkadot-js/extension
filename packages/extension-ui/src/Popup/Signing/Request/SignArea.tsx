@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { FormEvent, useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
@@ -100,8 +100,18 @@ function SignArea({ buttonText, className, error, isExternal, isFirst, isLast, s
     margin-bottom: 0px;
   `;
 
+  const isFormValid = isFirst && !error && (!isLocked || password);
+
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isFormValid) {
+      _onSign();
+    }
+  };
+
   return (
-    <>
+    <form onSubmit={onSubmit}>
       <div className={className}>
         {isFirst && !isExternal && (
           <>
@@ -125,20 +135,21 @@ function SignArea({ buttonText, className, error, isExternal, isFirst, isLast, s
           isDanger
           isDisabled={!isFirst}
           onClick={_onCancel}
+          type='button'
         >
           {t<string>('Decline')}
         </Button>
         <Button
           data-sign-transaction
           isBusy={isBusy}
-          isDisabled={!isFirst || (!!isLocked && !password) || !!error}
+          isDisabled={!isFormValid}
           isSuccess
-          onClick={_onSign}
+          type='submit'
         >
           {buttonText}
         </Button>
       </CustomButtonArea>
-    </>
+    </form>
   );
 }
 

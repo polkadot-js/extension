@@ -8,7 +8,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import border from '../../assets/border.svg';
-import { Loading, PopupBorderContainer, SigningReqContext, Svg } from '../../components';
+import { Loading, SigningReqContext, Svg } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Z_INDEX } from '../../zindex';
 import Request from './Request';

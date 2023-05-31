@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { FormEvent, useCallback, useContext, useId, useState } from 'react';
 import styled from 'styled-components';
 
 import helpIcon from '../assets/help.svg';
@@ -63,6 +63,8 @@ function AccountNamePasswordCreation({
   const options = useGenesisHashOptions();
   const { master } = useContext(AccountContext);
 
+  const formId = useId();
+
   const _onCreate = useCallback(() => {
     if (name && password) {
       onCreate(name, password);
@@ -104,9 +106,23 @@ function AccountNamePasswordCreation({
     </CustomFooter>
   );
 
+  const isFormValid = Boolean(password && name);
+
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isFormValid) {
+      _onCreate();
+    }
+  };
+
   return (
     <>
-      <Container className={className}>
+      <Form
+        className={className}
+        id={formId}
+        onSubmit={onSubmit}
+      >
         <StyledHeader
           text={t<string>('Choose how your new account is displayed and protected it in Aleph Zero Signer.')}
           title={t<string>('Visibility & security')}
@@ -140,7 +156,7 @@ function AccountNamePasswordCreation({
             {footer}
           </>
         )}
-      </Container>
+      </Form>
       {onBackClick && buttonLabel && (
         <StyledButtonArea>
           {master && isDeriving ? (
@@ -154,10 +170,10 @@ function AccountNamePasswordCreation({
             <BackButton onClick={_onBackClick} />
           )}
           <Button
-            data-button-action='add new root'
+            form={formId}
             isBusy={isBusy}
-            isDisabled={!password || !name}
-            onClick={_onCreate}
+            isDisabled={!isFormValid}
+            type='submit'
           >
             {buttonLabel}
           </Button>
@@ -167,7 +183,7 @@ function AccountNamePasswordCreation({
   );
 }
 
-const Container = styled.div`
+const Form = styled.form`
   margin-right: 8px;
   margin-bottom: auto;
 `;

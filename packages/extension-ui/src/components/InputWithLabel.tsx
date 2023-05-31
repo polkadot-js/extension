@@ -91,7 +91,10 @@ function InputWithLabel({
         withError={isError}
       />
       {type === 'password' && (
-        <IconButton onClick={toggleObscure}>
+        <IconButton
+          onClick={toggleObscure}
+          type='button'
+        >
           <img src={isObscured ? viewOff : viewOn} />
         </IconButton>
       )}

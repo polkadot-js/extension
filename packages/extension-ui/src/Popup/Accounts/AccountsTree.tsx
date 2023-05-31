@@ -71,9 +71,5 @@ export default styled(AccountsTree)`
     & .address {
       flex: 1;
     }
-
-    & .accountTree-checkbox label span {
-      top: -12px;
-    }
   }
 `;

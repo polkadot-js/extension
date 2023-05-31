@@ -4,7 +4,7 @@
 import type { ThemeProps } from '../types';
 
 import { saveAs } from 'file-saver';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { FormEvent, useCallback, useContext, useId, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
@@ -40,6 +40,8 @@ function Export({
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
 
+  const formId = useId();
+
   const _goTo = (path: string) => () => onAction(path);
 
   const onPassChange = useCallback((password: string) => {
@@ -47,7 +49,7 @@ function Export({
     setError('');
   }, []);
 
-  const _onExportButtonClick = useCallback((): void => {
+  const _onExport = useCallback((): void => {
     setIsBusy(true);
 
     exportAccount(address, pass)
@@ -65,6 +67,16 @@ function Export({
       });
   }, [address, onAction, pass, show, t]);
 
+  const isFormValid = Boolean(pass && !error);
+
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isFormValid) {
+      _onExport();
+    }
+  };
+
   return (
     <>
       <Header
@@ -78,7 +90,11 @@ function Export({
           title={t<string>('Do not share your JSON file!')}
         />
         <Address address={address} />
-        <div className='password-container'>
+        <form
+          className='password-container'
+          id={formId}
+          onSubmit={onSubmit}
+        >
           <InputWithLabel
             data-export-password
             disabled={isBusy}
@@ -96,22 +112,24 @@ function Export({
               {error}
             </Warning>
           )}
-        </div>
+        </form>
       </div>
       <VerticalSpace />
       <ButtonArea>
         <Button
           onClick={_goTo(`..`)}
           secondary
+          type='button'
         >
           {t<string>('Cancel')}
         </Button>
         <Button
           className='export-button'
           data-export-button
+          form={formId}
           isBusy={isBusy}
-          isDisabled={!pass || !!error}
-          onClick={_onExportButtonClick}
+          isDisabled={!isFormValid}
+          type='submit'
         >
           {t<string>('Export')}
         </Button>
@@ -127,6 +145,10 @@ export default withRouter(styled(Export)`
 
   .password-container {
     position: relative;
+
+    & > :not(:last-child) {
+      margin-bottom: 8px;
+    }
   }
 
   .center {

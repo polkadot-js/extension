@@ -16,6 +16,7 @@ import { ActionContext, Link, Svg, Tooltip } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { LINKS } from '../links';
 import { getConnectedTabsUrl } from '../messaging';
+import { triggerOnEnterSpace } from '../util/keyDownWrappers';
 import { Z_INDEX } from '../zindex';
 
 interface Props extends ThemeProps {
@@ -76,7 +77,7 @@ function Header({
               <div
                 className='arrow-container'
                 onClick={goToFnOverride || _onBackArrowClick}
-                onKeyDown={goToFnOverride || _onBackArrowClick}
+                onKeyDown={triggerOnEnterSpace(goToFnOverride || _onBackArrowClick)}
                 tabIndex={0}
               >
                 <Svg

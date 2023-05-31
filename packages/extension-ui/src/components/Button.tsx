@@ -1,15 +1,16 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ButtonHTMLAttributes } from 'react';
 
 import React, { useCallback, useRef } from 'react';
 import styled from 'styled-components';
 
+import { ThemeProps } from '../types';
 import Spinner from './Spinner';
 import Svg from './Svg';
 
-interface Props extends ThemeProps {
+type Props = {
   className?: string;
   children?: React.ReactNode;
   isBusy?: boolean;
@@ -20,9 +21,18 @@ interface Props extends ThemeProps {
   tertiary?: boolean;
   onClick?: () => void;
   to?: string;
-}
+} & ButtonHTMLAttributes<HTMLButtonElement> &
+  ThemeProps;
 
-function Button({ children, className = '', isBusy, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
+function Button({
+  children,
+  className = '',
+  isBusy,
+  isDisabled,
+  onClick,
+  to,
+  ...buttonHTMLAttrs
+}: Props): React.ReactElement<Props> {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const _onClick = useCallback((): void => {
     if (isBusy || isDisabled) {
@@ -46,6 +56,7 @@ function Button({ children, className = '', isBusy, isDisabled, onClick, to }: P
 
   return (
     <button
+      {...buttonHTMLAttrs}
       className={`${className}${isDisabled || isBusy ? ' isDisabled' : ''}${isBusy ? ' isBusy' : ''}`}
       disabled={isDisabled || isBusy}
       onClick={_onClick}
@@ -77,7 +88,7 @@ export default styled(Button)(
   width: ${tertiary ? 'max-content' : '100%'};
   height: ${tertiary ? 'unset' : '48px'};
   box-sizing: border-box;
-  border: none;
+  border: 1px solid transparent;
   border-radius: ${tertiary ? '2px' : theme.buttonBorderRadius};
   color: ${
     isBusy
@@ -132,7 +143,7 @@ export default styled(Button)(
   }
 
   &:not(:disabled):hover, &:active {
-    border: none;
+    border: 1px solid transparent;;
     background: ${
       isDanger
         ? theme.buttonBackgroundDangerHover
@@ -206,7 +217,5 @@ export default styled(Button)(
       visibility: visible;
     }
   }
-
-
 `
 );

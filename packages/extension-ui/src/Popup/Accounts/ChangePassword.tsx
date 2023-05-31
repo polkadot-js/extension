@@ -1,7 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { FormEvent, useCallback, useContext, useId, useState } from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
@@ -25,7 +25,6 @@ import { changePassword } from '../../messaging';
 import { Header, Password } from '../../partials';
 import { Result } from '../../util/validators';
 
-
 const EditPassword = () => {
   const { t } = useTranslation();
   const { show } = useToast();
@@ -37,14 +36,19 @@ const EditPassword = () => {
 
   const accountName = useAccountName(address);
 
+  const [isBusy, setIsBusy] = useState(false);
   const [providedPass, setProvidedPass] = useState('');
   const [isProvidedPassWrong, setIsProvidedPassWrong] = useState(false);
   const [nextPass, setNextPass] = useState<string | null>(null);
+
+  const formId = useId();
 
   const saveChanges = async (): Promise<void> => {
     if (nextPass === null) {
       return;
     }
+
+    setIsBusy(true);
 
     try {
       await changePassword(address, providedPass, nextPass);
@@ -54,13 +58,27 @@ const EditPassword = () => {
       show(t<string>('The current password is invalid'), 'critical');
       setIsProvidedPassWrong(true);
     }
+
+    setIsBusy(false);
   };
 
+  const onProvidedPassChange = useCallback(
+    (value: string) => {
+      setProvidedPass(value);
+      setIsProvidedPassWrong(false);
+    },
+    [setIsProvidedPassWrong, setProvidedPass]
+  );
 
-  const onProvidedPassChange = useCallback((value: string) => {
-    setProvidedPass(value);
-    setIsProvidedPassWrong(false);
-  }, [setIsProvidedPassWrong, setProvidedPass]);
+  const isFormValid = Boolean(providedPass && nextPass);
+
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (isFormValid) {
+      saveChanges();
+    }
+  };
 
   return (
     <>
@@ -70,7 +88,10 @@ const EditPassword = () => {
         withHelp
       />
       <ScrollWrapper>
-        <ContentWrapper>
+        <Form
+          id={formId}
+          onSubmit={onSubmit}
+        >
           <Address address={address} />
           <InputWrapper>
             <ValidatedInput
@@ -81,13 +102,9 @@ const EditPassword = () => {
               type='password'
               validator={Result.ok}
             />
-            {
-              isProvidedPassWrong && (
-                <StyleMessage messageType='critical'>
-                  {t('Unable to decode using the supplied passphrase')}
-                </StyleMessage>
-              )
-            }
+            {isProvidedPassWrong && (
+              <StyleMessage messageType='critical'>{t('Unable to decode using the supplied passphrase')}</StyleMessage>
+            )}
           </InputWrapper>
           <Password
             label={t('New password')}
@@ -95,18 +112,22 @@ const EditPassword = () => {
             repeatLabel={t('Confirm new password')}
             validationUserInput={getUserInputs(accountName)}
           />
-        </ContentWrapper>
+        </Form>
         <VerticalSpace />
         <ButtonArea>
           <Button
             onClick={goBack}
             secondary
+            type='button'
           >
             {t<string>('Cancel')}
           </Button>
           <Button
-            isDisabled={!providedPass || !nextPass}
+            form={formId}
+            isBusy={isBusy}
+            isDisabled={!isFormValid}
             onClick={saveChanges}
+            type='submit'
           >
             {t<string>('Save')}
           </Button>
@@ -116,7 +137,7 @@ const EditPassword = () => {
   );
 };
 
-const ContentWrapper = styled.div`
+const Form = styled.form`
   & > :not(:last-child) {
     margin-bottom: 24px;
   }
@@ -133,7 +154,6 @@ const StyledInputWithLabel = styled(InputWithLabel)`
 `;
 
 const StyleMessage = styled(Message)`
-  width: calc(100% + 8px);
   margin-inline: 15px;
 `;
 

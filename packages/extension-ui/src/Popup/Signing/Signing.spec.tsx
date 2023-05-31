@@ -249,7 +249,7 @@ describe('Signing requests', () => {
       await act(flushAllPromises);
       wrapper.update();
 
-      wrapper.find('[data-sign-transaction=true]').first().simulate('click');
+      wrapper.find('button[type="submit"]').simulate('submit');
       expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, false, 'hunter1');
     });
 
@@ -261,7 +261,7 @@ describe('Signing requests', () => {
 
       await act(flushAllPromises);
 
-      wrapper.find('[data-sign-transaction=true]').first().simulate('click');
+      wrapper.find('button[type="submit"]').simulate('submit');
 
       expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, true, 'hunter1');
     });
@@ -274,16 +274,16 @@ describe('Signing requests', () => {
         throw new Error('Unable to decode using the supplied passphrase');
       });
       enterPassword('wrongPassword');
-      await act(flushAllPromises);
-      wrapper.update();
-      wrapper.find('[data-sign-transaction=true]').first().simulate('click');
+
       await act(flushAllPromises);
       wrapper.update();
 
-      setTimeout(() => {
-        wrapper.update();
-        expect(wrapper.find('.warning-message').text()).toBe('Unable to decode using the supplied passphrase');
-      }, 1500);
+      wrapper.find('button[type="submit"]').simulate('submit');
+
+      await act(flushAllPromises);
+      wrapper.update();
+
+      expect(wrapper.find({ children: 'Unable to decode using the supplied passphrase' }).length).toBeGreaterThan(0);
     });
 
     it('when last request has been removed/cancelled, shows the previous one', async () => {

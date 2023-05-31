@@ -1,9 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
-
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { FormEvent, useCallback, useContext, useEffect, useId, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
@@ -30,32 +28,11 @@ import { LINKS } from '../../links';
 import { tieAccount } from '../../messaging';
 import { Header } from '../../partials';
 
-interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
-  className?: string;
-}
-
-const CustomFooter = styled(HelperFooter)`
-  width: auto;
-  margin-bottom: 24px;
-  gap: 12px;
-
-  .wrapper {
-    display: flex;
-    gap: 8px;
-    margin-left: -12px;
-  };
-`;
-
-const CustomButtonArea = styled(ButtonArea)`
-  padding-top:8px;
-`;
-
 function EditNetwork({
-  className,
   match: {
     params: { address }
   }
-}: Props): React.ReactElement<Props> {
+}: RouteComponentProps<{ address: string }>): React.ReactElement<RouteComponentProps<{ address: string }>> {
   const { t } = useTranslation();
   const { show } = useToast();
   const { accounts } = useContext(AccountContext);
@@ -86,6 +63,8 @@ function EditNetwork({
 
   const [hasGenesisChanged, setHasGenesisChanged] = useState(false);
 
+  const formId = useId();
+
   useEffect(() => {
     if (account && genesis !== account.genesisHash) {
       setHasGenesisChanged(true);
@@ -107,6 +86,16 @@ function EditNetwork({
     </CustomFooter>
   );
 
+  const isFormValid = hasGenesisChanged;
+
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isFormValid) {
+      _saveChanges();
+    }
+  };
+
   return (
     <>
       <ScrollWrapper>
@@ -117,18 +106,17 @@ function EditNetwork({
           withBackdrop
           withHelp
         />
-        <div className={className}>
-          <div
-            className='checkbox-container'
-            onKeyDown={toggleChecked}
-            tabIndex={0}
-          >
+        <Form
+          id={formId}
+          onSubmit={onSubmit}
+        >
+          <CheckboxContainer>
             <Checkbox
               checked={checked}
               label={t<string>('Show test networks')}
               onChange={toggleChecked}
             />
-          </div>
+          </CheckboxContainer>
           <RadioGroup
             defaultSelectedValue={genesis}
             onSelectionChange={setGenesis}
@@ -136,17 +124,19 @@ function EditNetwork({
             withTestNetwork={checked}
           />
           {footer}
-        </div>
+        </Form>
         <CustomButtonArea>
           <Button
             onClick={_goTo(`/account/edit-menu/${address}?isExternal=${isExternal.toString()}`)}
             secondary
+            type='button'
           >
             {t<string>('Cancel')}
           </Button>
           <Button
-            isDisabled={!hasGenesisChanged}
-            onClick={_saveChanges}
+            form={formId}
+            isDisabled={!isFormValid}
+            type='submit'
           >
             {t<string>('Change')}
           </Button>
@@ -157,16 +147,32 @@ function EditNetwork({
   );
 }
 
-export default withRouter(
-  styled(EditNetwork)`
+const Form = styled.form`
     display: flex;
     flex-direction: column;
     gap: 24px;
+`;
 
-    .checkbox-container{
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-`
-);
+const CustomFooter = styled(HelperFooter)`
+  width: auto;
+  margin-bottom: 24px;
+  gap: 12px;
+
+  .wrapper {
+    display: flex;
+    gap: 8px;
+    margin-left: -12px;
+  };
+`;
+
+const CustomButtonArea = styled(ButtonArea)`
+  padding-top:8px;
+`;
+
+const CheckboxContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+export default withRouter(EditNetwork);

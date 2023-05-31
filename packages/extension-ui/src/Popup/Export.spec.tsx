@@ -45,9 +45,18 @@ describe('Export component', () => {
     );
   });
 
+  it('has form with submit button', () => {
+    const submitButton = wrapper.find('button[type="submit"]');
+    const form = wrapper.find('form');
+
+    expect(form.props().id).toBeTruthy();
+    expect(submitButton.props().form).toBe(form.props().id);
+  });
+
   it('creates export message on button press', async () => {
     enterPassword('passw0rd');
-    wrapper.find('[data-export-button] button').simulate('click');
+
+    wrapper.find('form').simulate('submit');
     await act(flushAllPromises);
 
     expect(messaging.exportAccount).toHaveBeenCalledWith(VALID_ADDRESS, 'passw0rd');
@@ -65,7 +74,7 @@ describe('Export component', () => {
       throw new Error('Unable to decode using the supplied passphrase');
     });
     enterPassword();
-    wrapper.find('[data-export-button] button').simulate('click');
+    wrapper.find('form').simulate('submit');
     await act(flushAllPromises);
     wrapper.update();
 
@@ -82,9 +91,12 @@ describe('Export component', () => {
       throw new Error('Unable to decode using the supplied passphrase');
     });
     enterPassword();
-    wrapper.find('[data-export-button] button').simulate('click');
+    wrapper.find('form').simulate('submit');
     await act(flushAllPromises);
     wrapper.update();
+
+    expect(wrapper.find({ children: 'Unable to decode using the supplied passphrase' }).length).toBeGreaterThan(0);
+
     enterPassword();
 
     expect(wrapper.find(WarningBox)).toHaveLength(1);

@@ -53,7 +53,7 @@ const Wrapper = styled.div`
   position: absolute;
   left: 0px;
   right: 0px;
-  bottom: 16px;
+  bottom: 40px;
   margin: 0px 8px;
 `;
 

@@ -32,18 +32,17 @@ function RemoveAuth({ className, url }: Props): React.ReactElement {
   }, [onAction, url]);
 
   const disconnectElement = (
-    <div
+    <button
       className='remove-container'
       onClick={goToDisconnect}
-      onKeyDown={goToDisconnect}
-      tabIndex={0}
+      type='button'
     >
       <Svg
         className='remove-icon'
         src={removeIcon}
       />
       <span className='remove-text'>{t('Disconnect')}</span>
-    </div>
+    </button>
   );
 
   return (
@@ -62,11 +61,13 @@ export default styled(RemoveAuth)(
   display: flex;
 
   .remove-container{
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    cursor: pointer;
+    background: none;
+    border: none;
 
     font-family: ${theme.secondaryFontFamily};
     font-style: normal;

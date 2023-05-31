@@ -55,8 +55,10 @@ describe.skip('ImportSeed', () => {
   };
 
   const enterName = (name: string): Promise<void> => type(wrapper.find('input').first(), name);
-  const password = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').first(), password);
-  const repeat = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').last(), password);
+  const password = (password: string) => (): Promise<void> =>
+    type(wrapper.find('input[type="password"]').first(), password);
+  const repeat = (password: string) => (): Promise<void> =>
+    type(wrapper.find('input[type="password"]').last(), password);
 
   beforeEach(async () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -110,13 +112,17 @@ describe.skip('ImportSeed', () => {
       await typeSeed(wrapper, 'asdf');
       await typeSeed(wrapper, '');
 
-      expect(wrapper.find(Warning).find('.warning-message').text()).toEqual('Mnemonic needs to contain 12, 15, 18, 21, 24 words');
+      expect(wrapper.find(Warning).find('.warning-message').text()).toEqual(
+        'Mnemonic needs to contain 12, 15, 18, 21, 24 words'
+      );
       expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
     });
 
     it('shows the expected account with derivation when correct seed is typed and next step button is enabled', async () => {
       const suri = `${account.seed}${account.derivation}`;
-      const validateCall = jest.spyOn(messaging, 'validateSeed').mockResolvedValue({ address: account.expectedAddressWithDerivation, suri });
+      const validateCall = jest
+        .spyOn(messaging, 'validateSeed')
+        .mockResolvedValue({ address: account.expectedAddressWithDerivation, suri });
 
       await typeSeed(wrapper, account.seed);
       wrapper.find('.advancedToggle').simulate('click');
@@ -168,7 +174,9 @@ describe.skip('ImportSeed', () => {
 
       beforeEach(async () => {
         jest.spyOn(messaging, 'createAccountSuri').mockResolvedValue(true);
-        jest.spyOn(messaging, 'validateSeed').mockResolvedValue({ address: account.expectedAddressWithDerivation, suri });
+        jest
+          .spyOn(messaging, 'validateSeed')
+          .mockResolvedValue({ address: account.expectedAddressWithDerivation, suri });
 
         await typeSeed(wrapper, account.seed);
         wrapper.find('.advancedToggle').simulate('click');
@@ -181,7 +189,7 @@ describe.skip('ImportSeed', () => {
 
       it('saves account with provided name and password', async () => {
         await enterName(account.name).then(password(account.password)).then(repeat(account.password));
-        wrapper.find('[data-button-action="add new root"] button').simulate('click');
+        wrapper.find('button[type="submit"]').simulate('click');
         await act(flushAllPromises);
         wrapper.update();
 

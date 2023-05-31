@@ -8,6 +8,7 @@ import chevronIcon from '../assets/chevron.svg';
 import copyIcon from '../assets/copyMenu.svg';
 import externalLinkIcon from '../assets/externalLink.svg';
 import { ThemeProps } from '../types';
+import { triggerOnEnterSpace } from '../util/keyDownWrappers';
 import Svg from './Svg';
 
 type ExtraOptions = 'chevron' | 'copy' | 'link';
@@ -83,7 +84,7 @@ function EditMenuCard({
       <div
         className={className}
         onClick={onClick}
-        onKeyDown={onClick}
+        onKeyDown={triggerOnEnterSpace(onClick)}
         tabIndex={tabIndex}
       >
         <div className='flex-container'>

@@ -4,7 +4,7 @@
 import type { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { FormEvent, useCallback, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
 import helpIcon from '../../assets/help.svg';
@@ -16,7 +16,7 @@ import {
   ButtonArea,
   HelperFooter,
   LearnMore,
-  Svg,
+  Svg
 } from '../../components';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
@@ -60,7 +60,7 @@ const CustomFooter = styled(HelperFooter)`
   }
 `;
 
-function Request({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
+function Request({ authId, className, isFirst, url }: Props): React.ReactElement<Props> {
   const { accounts, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
@@ -116,22 +116,34 @@ function Request({ authId, className, isFirst, request: { origin }, url }: Props
     </CustomFooter>
   );
 
+  const isFormValid = isFirst;
+
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isFormValid) {
+      _onApprove();
+    }
+  };
+
   return (
-    <>
-      <div className={className}>
-        <AccountSelection url={url} />
-        <CustomButtonArea footer={footer}>
-          <Button
-            data-accept-request-button
-            onClick={_onClose}
-            secondary
-          >
-            {t<string>('Cancel')}
-          </Button>
-          {isFirst && <Button onClick={_onApprove}>{t<string>('Connect')}</Button>}
-        </CustomButtonArea>
-      </div>
-    </>
+    <form
+      className={className}
+      onSubmit={onSubmit}
+    >
+      <AccountSelection url={url} />
+      <CustomButtonArea footer={footer}>
+        <Button
+          data-accept-request-button
+          onClick={_onClose}
+          secondary
+          type='button'
+        >
+          {t<string>('Cancel')}
+        </Button>
+        {isFirst && <Button type='submit'>{t<string>('Connect')}</Button>}
+      </CustomButtonArea>
+    </form>
   );
 }
 
@@ -140,7 +152,7 @@ export default styled(Request)`
 
   & ${BottomWrapper} {
     position: sticky;
-    bottom: -8px !important;
+    margin-inline: -32px;
   }
 
   .accountList {

@@ -125,6 +125,14 @@ describe('Derive', () => {
       return { address: derivedAddress, suri: defaultDerivation } as ResponseDeriveValidate;
     });
 
+    it('has form with submit button', () => {
+      const submitButton = wrapper.find('button[type="submit"]');
+      const form = wrapper.find('form');
+
+      expect(form.props().id).toBeTruthy();
+      expect(submitButton.props().form).toBe(form.props().id);
+    });
+
     it('Password field is visible and not in error state', () => {
       const passwordField = wrapper.find('[data-input-password]').first();
 
@@ -137,13 +145,15 @@ describe('Derive', () => {
 
     it('The error disappears when typing a new password and "Create derived account" is enabled', async () => {
       await type(wrapper.find('input[type="password"]'), 'wrong_pass');
-      wrapper.find('[data-button-action="create derived account"] button').simulate('click');
+      wrapper.find('form').simulate('submit');
       await act(flushAllPromises);
       wrapper.update();
 
+      expect(wrapper.find({ children: 'Wrong password' }).length).toBeGreaterThan(0);
+
       await type(wrapper.find('input[type="password"]'), 'new_attempt');
 
-      const button = wrapper.find('[data-button-action="create derived account"] button');
+      const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(false);
       expect(wrapper.find('.warning-message')).toHaveLength(0);
@@ -152,7 +162,7 @@ describe('Derive', () => {
     it('Button is enabled when password is set', async () => {
       await type(wrapper.find('input[type="password"]'), parentPassword);
 
-      const button = wrapper.find('[data-button-action="create derived account"] button');
+      const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(false);
       expect(wrapper.find('.warning-message')).toHaveLength(0);
@@ -185,11 +195,11 @@ describe('Derive', () => {
     it('An error is visible and the button is disabled when suri is incorrect', async () => {
       await type(wrapper.find('input[type="password"]'), parentPassword);
       await type(wrapper.find('[data-input-suri] input'), '//');
-      wrapper.find('[data-button-action="create derived account"] button').simulate('click');
+      wrapper.find('form').simulate('submit');
       await act(flushAllPromises);
       wrapper.update();
 
-      const button = wrapper.find('[data-button-action="create derived account"] button');
+      const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(true);
       expect(wrapper.find('.warning-message')).toHaveLength(1);
@@ -200,7 +210,7 @@ describe('Derive', () => {
       await type(wrapper.find('input[type="password"]'), parentPassword);
       await type(wrapper.find('[data-input-suri] input'), '///');
 
-      const button = wrapper.find('[data-button-action="create derived account"] button');
+      const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(true);
       expect(wrapper.find('.warning-message')).toHaveLength(1);
@@ -212,7 +222,7 @@ describe('Derive', () => {
       await type(wrapper.find('input[type="password"]'), parentPassword);
       await type(wrapper.find('[data-input-suri] input'), '//somehard/soft');
 
-      const button = wrapper.find('[data-button-action="create derived account"] button');
+      const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(false);
       expect(wrapper.find('.warning-message')).toHaveLength(0);
@@ -221,12 +231,15 @@ describe('Derive', () => {
     it('The error disappears and "Create derived account" is enabled when typing a new suri', async () => {
       await type(wrapper.find('input[type="password"]'), parentPassword);
       await type(wrapper.find('[data-input-suri] input'), '//');
-      wrapper.find('[data-button-action="create derived account"] button').simulate('click');
+      wrapper.find('form').simulate('submit');
       await act(flushAllPromises);
       wrapper.update();
+
+      expect(wrapper.find({ children: 'Invalid derivation path' }).length).toBeGreaterThan(0);
+
       await type(wrapper.find('[data-input-suri] input'), 'new');
 
-      const button = wrapper.find('[data-button-action="create derived account"] button');
+      const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(false);
       expect(wrapper.find('Warning')).toHaveLength(0);
@@ -274,11 +287,11 @@ describe('Derive', () => {
         const deriveMock = jest.spyOn(messaging, 'deriveAccount');
 
         await type(wrapper.find('input[type="password"]'), parentPassword);
-        wrapper.find('[data-button-action="create derived account"] button').simulate('click');
+        wrapper.find('form').simulate('submit');
         await act(flushAllPromises);
         wrapper.update();
         await enterName(newAccount.name).then(password(newAccount.password)).then(repeat(newAccount.password));
-        wrapper.find('[data-button-action="add new root"] button').simulate('click');
+        wrapper.find('form').simulate('submit');
         await act(flushAllPromises);
         wrapper.update();
 
@@ -315,7 +328,7 @@ describe('Derive', () => {
 
       await type(pathInput, '//somehard/soft');
 
-      const button = wrapper.find('[data-button-action="create derived account"] button');
+      const button = wrapper.find('button[type="submit"]');
 
       expect(button.prop('disabled')).toBe(true);
       expect(wrapper.find('[data-input-suri]').first().prop('isError')).toBe(true);

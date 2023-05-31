@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { FormEvent, useCallback, useContext, useEffect, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
@@ -61,15 +61,22 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
     onAction('/auth-list');
   }, [onAction]);
 
-  const StyledHeader = styled(Header)`
-    &.backdrop-margin-left {
-      margin-left: 0px;
+  const isFormValid = selectedAccountsChanged;
+
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isFormValid) {
+      _onApprove();
     }
-  `;
+  };
 
   return (
     <ScrollWrapper>
-      <div className={className}>
+      <form
+        className={className}
+        onSubmit={onSubmit}
+      >
         <StyledHeader
           text={t<string>('Connected accounts')}
           withBackArrow
@@ -98,18 +105,19 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
           <Button
             onClick={_onCancel}
             secondary
+            type='button'
           >
             {t<string>('Cancel')}
           </Button>
           <Button
             className='acceptButton'
-            isDisabled={!selectedAccountsChanged}
-            onClick={_onApprove}
+            isDisabled={!isFormValid}
+            type='submit'
           >
             {t<string>('Change')}
           </Button>
         </CustomButtonArea>
-      </div>
+      </form>
     </ScrollWrapper>
   );
 }
@@ -166,3 +174,9 @@ export default withRouter(styled(AccountManagement)`
   
 
 `);
+
+const StyledHeader = styled(Header)`
+  &.backdrop-margin-left {
+    margin-left: 0px;
+  }
+`;

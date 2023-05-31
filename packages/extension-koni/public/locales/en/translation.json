@@ -1224,5 +1224,6 @@
   "Attach an account without private key": "",
   "Your camera is not available": "",
   "I trust this site": "",
-  "This site has been previously blocked. Do you wish to unblock and grant access to it?": ""
+  "This site has been previously blocked. Do you wish to unblock and grant access to it?": "",
+  "The token contract is invalid.": ""
 }

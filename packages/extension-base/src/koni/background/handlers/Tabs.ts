@@ -8,13 +8,15 @@ import { EvmProviderError } from '@subwallet/extension-base/background/errors/Ev
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, RequestEvmProviderSend, RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, PassPhishing, RequestEvmProviderSend, RequestSettingsType, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesSign';
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/setting-service/constants';
 import { canDerive } from '@subwallet/extension-base/utils';
@@ -102,6 +104,7 @@ export default class KoniTabs {
   readonly #koniState: KoniState;
   private evmEventEmitterMap: Record<string, Record<string, (eventName: EvmEventType, payload: any) => void>> = {};
   #chainPatrolService: boolean = DEFAULT_CHAIN_PATROL_ENABLE;
+  #passPhishing: Record<string, PassPhishing> = {};
 
   constructor (koniState: KoniState) {
     this.#koniState = koniState;
@@ -113,6 +116,15 @@ export default class KoniTabs {
     this.#koniState.settingService.getSettings(updateChainPatrolService);
     this.#koniState.settingService.getSubject().subscribe({
       next: updateChainPatrolService
+    });
+
+    const updatePassPhishing = (rs: Record<string, PassPhishing>) => {
+      this.#passPhishing = rs;
+    };
+
+    this.#koniState.settingService.getPassPhishingList(updatePassPhishing);
+    this.#koniState.settingService.passPhishingSubject().subscribe({
+      next: updatePassPhishing
     });
   }
 
@@ -208,26 +220,40 @@ export default class KoniTabs {
     });
   }
 
-  protected async redirectIfPhishing (url: string): Promise<boolean> {
+  private checkPassList (_url: string): boolean {
+    const url = stripUrl(_url);
+
+    const result = this.#passPhishing[url];
+
+    return result ? !result.pass : true;
+  }
+
+  protected async checkPhishing (url: string): Promise<boolean> {
     const isInDenyList = await checkIfDenied(url);
 
     if (isInDenyList) {
-      this.redirectPhishingLanding(url);
-
-      return true;
+      return this.checkPassList(url);
     }
 
     if (this.#chainPatrolService) {
       const isInChainPatrolDenyList = await chainPatrolCheckUrl(url);
 
       if (isInChainPatrolDenyList) {
-        this.redirectPhishingLanding(url);
-
-        return true;
+        return this.checkPassList(url);
       }
     }
 
     return false;
+  }
+
+  protected async redirectIfPhishing (url: string): Promise<boolean> {
+    const result = await this.checkPhishing(url);
+
+    if (result) {
+      this.redirectPhishingLanding(url);
+    }
+
+    return result;
   }
 
   ///
@@ -432,29 +458,46 @@ export default class KoniTabs {
 
     const tokenType = _tokenType === 'erc20' ? _AssetType.ERC20 : _AssetType.ERC721;
 
-    const validate = await this.#koniState.validateCustomAsset({
+    const tokenInfo: AddTokenRequestExternal = {
+      slug: '',
+      type: tokenType,
+      name: input?.options?.symbol || '',
+      contractAddress: input.options.address,
+      symbol: input?.options?.symbol || '',
+      decimals: input?.options?.decimals || 0,
+      originChain: chain,
+      contractError: false,
+      validated: false
+    };
+
+    this.#koniState.validateCustomAsset({
       type: tokenType,
       contractAddress: input.options.address,
       originChain: chain
-    });
+    })
+      .then((validate) => {
+        if (validate.contractError) {
+          tokenInfo.contractError = true;
+        } else {
+          tokenInfo.slug = validate?.existedSlug;
+          tokenInfo.name = validate.name;
+          tokenInfo.symbol = validate.symbol;
+          tokenInfo.decimals = validate.decimals;
+        }
+      })
+      .catch(() => {
+        tokenInfo.contractError = true;
+      })
+      .finally(() => {
+        tokenInfo.validated = true;
+
+        this.#koniState.requestService.updateConfirmation(id, 'addTokenRequest', tokenInfo);
+      });
 
     // Below code is comment because we will handle exited token in the ui-view
     // if (validate.isExist) {
     //   throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current token is existed');
     // } else
-    if (validate.contractError) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Contract address is invalid');
-    }
-
-    const tokenInfo: AddTokenRequestExternal = {
-      slug: validate?.existedSlug,
-      type: tokenType,
-      name: validate.name,
-      contractAddress: input.options.address,
-      symbol: validate.symbol,
-      decimals: validate.decimals,
-      originChain: chain
-    };
 
     return await this.#koniState.addTokenConfirm(id, url, tokenInfo);
   }
@@ -463,7 +506,7 @@ export default class KoniTabs {
     const input = params as AddNetworkRequestExternal[];
 
     if (input && input.length > 0) {
-      const { blockExplorerUrls, chainId, chainName, rpcUrls } = input[0];
+      const { blockExplorerUrls, chainId, chainName, nativeCurrency: { decimals, symbol }, rpcUrls } = input[0];
 
       if (chainId) {
         const chainIdNum = parseInt(chainId, 16);
@@ -514,15 +557,21 @@ export default class KoniTabs {
 
           const provider = filteredUrls[0];
 
-          const chainInfo = await this.#koniState.validateCustomChain(provider);
-
-          if (!chainInfo.success) {
-            throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid provider');
-          }
+          const chainInfo: ValidateNetworkResponse = {
+            existentialDeposit: '0',
+            genesisHash: '',
+            success: true,
+            addressPrefix: '',
+            evmChainId: chainIdNum,
+            decimals: decimals,
+            symbol: symbol,
+            paraId: null,
+            name: chainName
+          };
 
           const newProviderKey = _generateCustomProviderKey(0);
 
-          return await this.#koniState.addNetworkConfirm(id, url, {
+          const networkData: _NetworkUpsertParams = {
             mode: 'insert',
             chainSpec: {
               evmChainId: chainInfo.evmChainId,
@@ -540,8 +589,34 @@ export default class KoniTabs {
               symbol: chainInfo.symbol,
               chainType: 'EVM',
               name: chainInfo.name
+            },
+            unconfirmed: true
+          };
+
+          this.#koniState.validateCustomChain(provider).then((res) => {
+            if (!res.success) {
+              networkData.providerError = res.error;
+            } else {
+              networkData.chainSpec = {
+                evmChainId: res.evmChainId,
+                decimals: res.decimals,
+                existentialDeposit: res.existentialDeposit,
+                genesisHash: res.genesisHash,
+                paraId: res.paraId,
+                addressPrefix: res.addressPrefix ? parseInt(res.addressPrefix) : 0
+              };
+
+              networkData.chainEditInfo.symbol = res.symbol;
+              networkData.chainEditInfo.name = res.name;
             }
+          }).catch(() => {
+            networkData.providerError = _CHAIN_VALIDATION_ERROR.NONE;
+          }).finally(() => {
+            networkData.unconfirmed = false;
+            this.#koniState.requestService.updateConfirmation(id, 'addNetworkRequest', networkData);
           });
+
+          return await this.#koniState.addNetworkConfirm(id, url, networkData);
         } else {
           throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Invalid provider');
         }

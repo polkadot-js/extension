@@ -16,9 +16,9 @@ import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging'
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
 import { qrSignerScan } from '@subwallet/extension-koni-ui/utils/scanner/attach';
-import { Form, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
+import { Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { QrCode } from 'phosphor-react';
+import { QrCode, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -154,10 +154,18 @@ const Component: React.FC<Props> = (props: Props) => {
             <span>,&nbsp;</span>
             <span>{t('for more details.')}</span>
           </div>
-          <Form.Item
-            help={validateState.message}
-            validateStatus={validateState.status}
-          />
+          {
+            validateState.message && (
+              <div className='error-container'>
+                <Icon
+                  customSize='28px'
+                  phosphorIcon={XCircle}
+                  weight='fill'
+                />
+                <span className='error-content'>{validateState.message}</span>
+              </div>
+            )
+          }
           <SwQrScanner
             className={className}
             id={modalId}
@@ -206,6 +214,21 @@ const ConnectQrSigner = styled(Component)<Props>(({ theme: { token } }: Props) =
       lineHeight: token.lineHeightHeading6,
       color: token.colorLink,
       textDecoration: 'underline'
+    },
+
+    '.error-container': {
+      color: token.colorError,
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: token.marginXXL - 2,
+      justifyContent: 'center'
+    },
+
+    '.error-content': {
+      marginLeft: token.marginXS,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6
     }
   };
 });

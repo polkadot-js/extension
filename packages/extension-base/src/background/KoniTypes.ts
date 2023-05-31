@@ -1169,11 +1169,16 @@ export interface EvmSendTransactionRequestExternal extends EvmSendTransactionReq
 export interface EvmSignatureRequestExternal extends EvmSignatureRequest, EvmRequestExternal {}
 
 export interface AddNetworkRequestExternal { // currently only support adding pure Evm network
-  chainId: string,
-  rpcUrls: string[],
-  chainName: string,
-  blockExplorerUrls?: string[],
-  requestId?: string
+  chainId: string;
+  rpcUrls: string[];
+  chainName: string;
+  blockExplorerUrls?: string[];
+  requestId?: string;
+  nativeCurrency: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
 }
 
 export interface AddNetworkExternalRequest { // currently only support adding pure Evm network
@@ -1192,6 +1197,8 @@ export interface AddTokenRequestExternal {
   name: string;
   symbol: string;
   decimals: number;
+  validated: boolean;
+  contractError: boolean;
 }
 
 export interface ConfirmationDefinitions {
@@ -1839,6 +1846,16 @@ export interface AllLogoMap {
   assetLogoMap: Record<string, string>
 }
 
+// Phishing detect
+
+export interface PassPhishing {
+  pass: boolean;
+}
+
+export interface RequestPassPhishingPage {
+  url: string;
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1902,6 +1919,9 @@ export interface KoniRequestSignatures {
   'pri(balance.getSubscription)': [RequestSubscribeBalance, BalanceJson, BalanceJson];
   'pri(crowdloan.getCrowdloan)': [RequestCrowdloan, CrowdloanJson];
   'pri(crowdloan.getSubscription)': [RequestSubscribeCrowdloan, CrowdloanJson, CrowdloanJson];
+
+  // Phishing page
+  'pri(phishing.pass)': [RequestPassPhishingPage, boolean];
 
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];

@@ -264,6 +264,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
   const fromChainNetworkPrefix = useGetChainPrefixBySlug(chain);
   const destChainNetworkPrefix = useGetChainPrefixBySlug(destChain);
+  const fromChainGenesisHash = chainInfoMap[chain]?.substrateInfo?.genesisHash || '';
 
   const tokenItems = useMemo<TokenItemType[]>(() => {
     return getTokenItems(
@@ -295,6 +296,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
     const isOnChain = chain === destChain;
 
+    const account = findAccountByAddress(accounts, _recipientAddress);
+
     if (isOnChain) {
       if (isSameAddress(from, _recipientAddress)) {
         // todo: change message later
@@ -317,8 +320,20 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       }
     }
 
+    if (account) {
+      if (account.isHardware) {
+        const destChainInfo = chainInfoMap[destChain];
+
+        if (account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
+          const destChainName = destChainInfo?.name || 'Unknown';
+
+          return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
+        }
+      }
+    }
+
     return Promise.resolve();
-  }, [chainInfoMap, form, t]);
+  }, [accounts, chainInfoMap, form, t]);
 
   const validateAmount = useCallback((rule: Rule, amount: string): Promise<void> => {
     if (!amount) {
@@ -371,9 +386,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       }
 
       if (part.destChain) {
-        if (part.destChain !== values.chain && assetRegistry[values.asset]?.assetType === _AssetType.NATIVE) {
-          setIsTransferAll(false);
-        }
+        setForceUpdateMaxValue(isTransferAll ? {} : undefined);
 
         if (values.to) {
           validateField.push('to');
@@ -384,7 +397,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         form.validateFields(validateField).catch(noop);
       }
     },
-    [form, setFrom, assetRegistry, setChain, setAsset]
+    [setFrom, form, assetRegistry, setChain, setAsset, isTransferAll]
   );
 
   // Submit transaction
@@ -627,6 +640,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               label={t('Send to')}
+              networkGenesisHash={fromChainGenesisHash}
               placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}

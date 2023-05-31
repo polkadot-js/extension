@@ -17,7 +17,7 @@ import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, u
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, findChainInfoByGenesisHash, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
@@ -324,12 +324,10 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       if (account.isHardware) {
         const destChainInfo = chainInfoMap[destChain];
 
-        if (account.originGenesisHash !== destChainInfo.substrateInfo?.genesisHash) {
-          const accountChain = findChainInfoByGenesisHash(chainInfoMap, account.originGenesisHash || '');
+        if (account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
+          const destChainName = destChainInfo?.name || 'Unknown';
 
-          const accountChainName = accountChain?.name || 'Unknown';
-
-          return Promise.reject(t('Your sending network must be the same with the initially chosen network when you started connecting with Ledger', { replace: { network: accountChainName } }));
+          return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
         }
       }
     }

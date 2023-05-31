@@ -9,7 +9,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Image, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight } from 'phosphor-react';
@@ -55,6 +55,7 @@ const Component: React.FC = () => {
 
   const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { nftCollections, nftItems } = useSelector((state) => state.nft);
+  const { accounts } = useSelector((state) => state.accountState);
   const [isBalanceReady, setIsBalanceReady] = useState(true);
 
   const nftItem = useMemo((): NftItem =>
@@ -116,10 +117,22 @@ const Component: React.FC = () => {
           return Promise.reject(message);
         }
 
+        const account = findAccountByAddress(accounts, _recipientAddress);
+
+        if (account && account.isHardware) {
+          const destChainInfo = chainInfoMap[chain];
+
+          if (account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
+            const destChainName = destChainInfo?.name || 'Unknown';
+
+            return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
+          }
+        }
+
         return Promise.resolve();
       }
     });
-  }, [t, from]);
+  }, [from, accounts, t, chainInfoMap, chain]);
 
   const onFieldsChange: FormCallbacks<SendNFTFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { error } = simpleCheckForm(allFields);

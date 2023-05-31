@@ -1,14 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import LoginBg from '@subwallet/extension-koni-ui/assets/WelcomeBg.png';
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import Logo3D from '@subwallet/extension-koni-ui/components/Logo/Logo3D';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Icon, ModalContext } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, Image, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
@@ -72,13 +70,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       <div className='bg-image' />
       <div className='body-container'>
         <div className='logo-container'>
-          <Logo3D
-            height={100}
-            width={66}
+          <Image
+            src={'./images/subwallet/welcome-logo.png'}
+            width={139}
           />
-        </div>
-        <div className='title'>
-          {t('SubWallet')}
         </div>
         <div className='sub-title'>
           {t('Choose how you\'d like to set up your wallet')}
@@ -120,7 +115,7 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
     position: 'relative',
 
     '.bg-image': {
-      backgroundImage: `url(${LoginBg})`,
+      backgroundImage: 'url("./images/subwallet/welcome-background.png")',
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'top',
       backgroundSize: 'contain',
@@ -138,6 +133,7 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '.logo-container': {
         marginTop: token.sizeLG * 3,
+        marginBottom: token.sizeLG,
         color: token.colorTextBase
       },
 
@@ -151,46 +147,46 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '.sub-title': {
         marginTop: token.marginXS,
-        marginBottom: token.sizeLG * 3,
+        marginBottom: token.sizeLG * 2 + token.sizeXS,
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
         color: token.colorTextLight3
+      }
+    },
+
+    '.buttons-container': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.sizeXS
+    },
+
+    '.welcome-import-button': {
+      height: 'auto',
+
+      '.welcome-import-icon': {
+        height: token.sizeLG,
+        width: token.sizeLG,
+        marginLeft: token.sizeMD - token.size
       },
 
-      '.buttons-container': {
+      '.welcome-import-button-content': {
         display: 'flex',
         flexDirection: 'column',
-        gap: token.sizeXS,
+        gap: token.sizeXXS,
+        fontWeight: token.fontWeightStrong,
+        padding: `${token.paddingSM - 1}px ${token.paddingLG}px`,
+        textAlign: 'start',
 
-        '.welcome-import-button': {
-          height: 'auto',
+        '.welcome-import-button-title': {
+          fontSize: token.fontSizeHeading5,
+          lineHeight: token.lineHeightHeading5,
+          color: token.colorTextBase
+        },
 
-          '.welcome-import-icon': {
-            height: token.sizeLG,
-            width: token.sizeLG,
-            marginLeft: token.sizeMD - token.size
-          },
-
-          '.welcome-import-button-content': {
-            display: 'flex',
-            flexDirection: 'column',
-            gap: token.sizeXXS,
-            fontWeight: token.fontWeightStrong,
-            padding: `${token.paddingSM - 1}px ${token.paddingLG}px`,
-            textAlign: 'start',
-
-            '.welcome-import-button-title': {
-              fontSize: token.fontSizeHeading5,
-              lineHeight: token.lineHeightHeading5,
-              color: token.colorTextBase
-            },
-
-            '.welcome-import-button-description': {
-              fontSize: token.fontSizeHeading6,
-              lineHeight: token.lineHeightHeading6,
-              color: token.colorTextLabel
-            }
-          }
+        '.welcome-import-button-description': {
+          fontSize: token.fontSizeHeading6,
+          lineHeight: token.lineHeightHeading6,
+          color: token.colorTextLabel
         }
       }
     }

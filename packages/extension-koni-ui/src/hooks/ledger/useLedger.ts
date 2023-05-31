@@ -97,6 +97,9 @@ export function useLedger (slug?: string, active = true): Result {
 
     clearTimeout(timeOutRef.current);
 
+    setWarning(null);
+    setError(null);
+
     timeOutRef.current = setTimeout(() => {
       ledger.getAddress(false, 0, 0)
         .then((res) => {
@@ -135,6 +138,8 @@ export function useLedger (slug?: string, active = true): Result {
   const signTransaction = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
     if (ledger) {
       return new Promise((resolve, reject) => {
+        setError(null);
+
         ledger.sign(message, accountOffset, addressOffset, accountOption)
           .then((result) => {
             resolve(result);

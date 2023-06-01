@@ -1,6 +1,6 @@
-    1688	Nam Phạm                      	[Issue 1461] fix bug joining nomination pool when has unstaking
-    1339	AnhMTV                        	
-     852	S2kael                        	[Issue-1454] [Confirmation] Fix bug when sign ledger
+    1689	Nam Phạm                      	[Issue 1108] update calculating staking APR for Ternoa
+    1347	AnhMTV                        	
+     858	S2kael                        	[Issue-1311] [UnStake] Update validation
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	

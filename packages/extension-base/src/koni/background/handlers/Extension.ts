@@ -22,7 +22,7 @@ import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObjec
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isNativeToken, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
@@ -1705,8 +1705,8 @@ export default class KoniExtension {
     return this.#koniState.disableChain(networkKey);
   }
 
-  private async enableChain (networkKey: string): Promise<boolean> {
-    return await this.#koniState.enableChain(networkKey);
+  private async enableChain ({ chainSlug, enableTokens }: EnableChainParams): Promise<boolean> {
+    return await this.#koniState.enableChain(chainSlug, enableTokens);
   }
 
   private async validateNetwork ({ existedChainSlug,
@@ -1913,9 +1913,9 @@ export default class KoniExtension {
     return { ...rs, isSendingSelf };
   }
 
-  private async enableChains (targetKeys: string[]) {
+  private async enableChains ({ chainSlugs, enableTokens }: EnableMultiChainParams) {
     try {
-      await Promise.all(targetKeys.map((networkKey) => this.enableChain(networkKey)));
+      await Promise.all(chainSlugs.map((chainSlug) => this.enableChain({ chainSlug, enableTokens })));
     } catch (e) {
       return false;
     }
@@ -3417,7 +3417,7 @@ export default class KoniExtension {
       case 'pri(chainService.getSupportedContractTypes)':
         return this.getSupportedSmartContractTypes();
       case 'pri(chainService.enableChain)':
-        return await this.enableChain(request as string);
+        return await this.enableChain(request as EnableChainParams);
       case 'pri(chainService.disableChain)':
         return await this.disableChain(request as string);
       case 'pri(chainService.removeChain)':
@@ -3429,7 +3429,7 @@ export default class KoniExtension {
       case 'pri(chainService.resetDefaultChains)':
         return this.resetDefaultNetwork();
       case 'pri(chainService.enableChains)':
-        return await this.enableChains(request as string[]);
+        return await this.enableChains(request as EnableMultiChainParams);
       case 'pri(chainService.subscribeAssetRegistry)':
         return this.subscribeAssetRegistry(id, port);
       case 'pri(chainService.subscribeMultiChainAssetMap)':

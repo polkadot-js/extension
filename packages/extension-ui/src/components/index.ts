@@ -47,7 +47,7 @@ export { default as SkeletonCard } from './SkeletonCard';
 export { MnemonicPill, MnemonicInput } from './Mnemonic';
 export { default as SplashHandler } from './SplashHandler';
 export { default as Video } from './Video';
-export { default as EditMenuCard } from './EditMenuCard';
+export * as LinksList from './LinksList';
 export { default as HelperFooter } from './HelperFooter';
 export { default as ScrollWrapper } from './ScrollWrapper';
 export { default as BottomWrapper } from './BottomWrapper';

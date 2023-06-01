@@ -9,7 +9,7 @@ import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
 import { canDerive } from '@polkadot/extension-base/utils';
-import { EditMenuCard, Identicon } from '@polkadot/extension-ui/components';
+import { Identicon } from '@polkadot/extension-ui/components';
 import useMetadata from '@polkadot/extension-ui/hooks/useMetadata';
 import { IconTheme } from '@polkadot/react-identicon/types';
 
@@ -18,6 +18,7 @@ import subAccountIcon from '../../assets/subAccount.svg';
 import forgetIcon from '../../assets/vanish.svg';
 import { Svg } from '../../components';
 import { AccountContext, SettingsContext } from '../../components/contexts';
+import * as LinksList from '../../components/LinksList';
 import { useGoTo } from '../../hooks/useGoTo';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
@@ -83,78 +84,71 @@ function EditAccountMenu({
           prefix={prefix}
           value={formatted || recodedAccount?.address}
         />
-        <EditMenuCard
-          description={account?.name || ''}
-          extra='chevron'
-          onClick={goTo(`/account/edit-name/${address}`)}
-          position='top'
-          title={t<string>('Name')}
-        />
-        <CopyToClipboard text={(address && address) || ''}>
-          <EditMenuCard
-            description={ellipsisName(formatted || address) || t('<unknown>')}
-            extra='copy'
-            onClick={_onCopy}
-            position='middle'
-            title={t<string>('Address')}
+        <LinksList.Group>
+          <LinksList.Item
+            description={account?.name || ''}
+            onClick={goTo(`/account/edit-name/${address}`)}
+            rightIcon='chevron'
+            title={t<string>('Name')}
           />
-        </CopyToClipboard>
-        <EditMenuCard
-          description={chain?.name.replace(' Relay Chain', '') || t<string>('Any chain')}
-          extra='chevron'
-          onClick={goTo(`/account/edit-network/${address}`)}
-          position='middle'
-          title={t<string>('Network')}
-        />
-        <EditMenuCard
-          description=''
-          extra='chevron'
-          onClick={goTo(`/account/change-password/${address}`)}
-          position='bottom'
-          title={t<string>('Change password')}
-        />
+          <CopyToClipboard text={(address && address) || ''}>
+            <LinksList.Item
+              description={ellipsisName(formatted || address) || t('<unknown>')}
+              onClick={_onCopy}
+              rightIcon='copy'
+              title={t<string>('Address')}
+            />
+          </CopyToClipboard>
+          <LinksList.Item
+            description={chain?.name.replace(' Relay Chain', '') || t<string>('Any chain')}
+            onClick={goTo(`/account/edit-network/${address}`)}
+            rightIcon='chevron'
+            title={t<string>('Network')}
+          />
+          <LinksList.Item
+            onClick={goTo(`/account/change-password/${address}`)}
+            rightIcon='chevron'
+            title={t<string>('Change password')}
+          />
+        </LinksList.Group>
         {!!master && isExternal === 'false' && canDerive(type) && (
-          <EditMenuCard
-            description=''
-            extra='chevron'
-            onClick={goTo(`/account/derive/${address}/locked`)}
-            position='both'
+          <LinksList.Group>
+            <LinksList.Item
+              onClick={goTo(`/account/derive/${address}/locked`)}
+              preIcon={
+                <Svg
+                  className='icon'
+                  src={subAccountIcon}
+                />
+              }
+              rightIcon='chevron'
+              title={t<string>('Derive sub-account')}
+            />
+          </LinksList.Group>
+        )}
+        <LinksList.Group>
+          <LinksList.Item
+            onClick={goTo(`/account/export/${address}`)}
             preIcon={
               <Svg
                 className='icon'
-                src={subAccountIcon}
+                src={exportAccountIcon}
               />
             }
-            title={t<string>('Derive sub-account')}
+            rightIcon='chevron'
+            title={t<string>('Export account')}
           />
-        )}
-        <EditMenuCard
-          description=''
-          extra='chevron'
-          onClick={goTo(`/account/export/${address}`)}
-          position='both'
-          preIcon={
-            <Svg
-              className='icon'
-              src={exportAccountIcon}
-            />
-          }
-          title={t<string>('Export account')}
-        />
-        <EditMenuCard
-          description=''
-          extra='chevron'
-          isDanger
-          onClick={goTo(`/account/forget/${address}`)}
-          position='both'
-          preIcon={
-            <Svg
-              className='forgetIcon'
-              src={forgetIcon}
-            />
-          }
-          title={t<string>('Forget')}
-        />
+        </LinksList.Group>
+        <LinksList.Group>
+          <ForgetListItem
+            onClick={goTo(`/account/forget/${address}`)}
+            preIcon={
+              <ForgetIcon src={forgetIcon} />
+            }
+            rightIcon='chevron'
+            title={t<string>('Forget')}
+          />
+        </LinksList.Group>
       </div>
     </>
   );
@@ -191,3 +185,21 @@ export default React.memo(
     )
   )
 );
+
+const ForgetIcon = styled(Svg)`
+  width: 20px;
+  height: 20px;
+  background: ${({ theme }) => theme.iconDangerColor};
+`;
+
+const ForgetListItem = styled(LinksList.Item)`
+  color: ${({ theme }) => theme.textColorDanger};
+  
+  &:hover, &:focus {
+    color: ${({ theme }) => theme.buttonBackgroundDangerHover};
+    
+    ${ForgetIcon} {
+      background: ${({ theme }) => theme.buttonBackgroundDangerHover};
+    }
+  }
+`;

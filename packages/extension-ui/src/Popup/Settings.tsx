@@ -8,7 +8,8 @@ import styled from 'styled-components';
 
 import infoIcon from '../assets/information.svg';
 import trustedIcon from '../assets/trusted.svg';
-import { EditMenuCard, Svg } from '../components';
+import { Svg } from '../components';
+import * as LinksList from '../components/LinksList';
 import { useGoTo } from '../hooks/useGoTo';
 import useTranslation from '../hooks/useTranslation';
 import Header from '../partials/Header';
@@ -16,13 +17,6 @@ import Header from '../partials/Header';
 interface Props extends ThemeProps {
   className?: string;
 }
-
-const SettingsMenuCard = styled(EditMenuCard)`
-  margin-bottom: 4px;
-  .description {
-    width: 24px
-  }
-`;
 
 function Settings({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -36,32 +30,26 @@ function Settings({ className }: Props): React.ReactElement<Props> {
         withBackArrow
         withHelp
       />
-      <div className={className}>
-        <SettingsMenuCard
+      <LinksList.Group className={className}>
+        <LinksList.Item
           description=''
           onClick={goTo('/auth-list')}
-          position='top'
           preIcon={
-            <Svg
-              className='icon'
-              src={trustedIcon}
-            />
+            <Icon src={trustedIcon} />
           }
+          rightIcon='chevron'
           title={t<string>('Trusted Apps')}
         />
-        <SettingsMenuCard
+        <LinksList.Item
           description=''
           onClick={goTo('/about')}
-          position='bottom'
           preIcon={
-            <Svg
-              className='icon'
-              src={infoIcon}
-            />
+            <Icon src={infoIcon} />
           }
+          rightIcon='chevron'
           title={t<string>('About Aleph Zero Signer')}
         />
-      </div>
+      </LinksList.Group>
     </>
   );
 }
@@ -78,12 +66,11 @@ export default React.memo(
   &::-webkit-scrollbar {
     display: none;
   }
-
-  .icon {
-    width: 20px;
-    height: 20px;
-    background: ${theme.primaryColor};
-  }
   `
-  )
-);
+));
+
+const Icon = styled(Svg)`
+  width: 20px;
+  height: 20px;
+  background: ${({ theme }) => theme.primaryColor};
+`;

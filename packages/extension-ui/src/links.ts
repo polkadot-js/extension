@@ -14,5 +14,6 @@ export const LINKS = {
   TRUSTED_APPS: 'https://docs.alephzero.org/aleph-zero/aleph-zero-signer/what-are-trusted-apps',
   PRIVACY_POLICY: 'https://alephzero.org/signer-privacy-policy',
   TERMS_OF_SERVICE: 'https://alephzero.org/signer-terms-of-service',
-  PHISHING: 'https://github.com/polkadot-js/phishing/issues/new'
+  PHISHING: 'https://github.com/polkadot-js/phishing/issues/new',
+  FEEDBACK: 'https://discord.com/invite/alephzero'
 } as const;

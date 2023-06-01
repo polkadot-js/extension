@@ -11,3 +11,7 @@ Object.defineProperty(global.self, 'crypto', {
 
 global.TextDecoder = TextDecoder;
 global.TextEncoder = TextEncoder;
+
+global.prompt = jest.fn();
+
+document.execCommand = jest.fn();

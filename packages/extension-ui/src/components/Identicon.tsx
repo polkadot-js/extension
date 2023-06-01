@@ -13,12 +13,11 @@ interface Props {
   className?: string;
   iconTheme?: IconTheme;
   isExternal?: boolean | null;
-  onCopy?: () => void;
   prefix?: number;
   value?: string | null;
 }
 
-function Identicon({ className, iconTheme, onCopy, prefix, value }: Props): React.ReactElement<Props> {
+function Identicon({ className, iconTheme, prefix, value }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <Icon
@@ -40,10 +39,8 @@ export default styled(Identicon)(
   border: 1px solid ${theme.avatarBorderColor};
   overflow: hidden;
 
-  .icon {
-    cursor: initial;
-  }
-  cursor: initial;
+  /* Identicon copies address on click - this prevents onClick from firing */
+  pointer-events: none;
 
   .container:before {
     box-shadow: none;

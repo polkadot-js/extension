@@ -9,7 +9,7 @@ import type { ThemeProps } from '../types';
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { MouseEvent, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -125,14 +125,6 @@ function Address({
 
   const _onClick = useCallback(() => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
 
-  const _onCopy = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      e.stopPropagation();
-      show(t<string>('Public address copied to your clipboard'), 'success');
-    },
-    [show, t]
-  );
-
   const Name = () => {
     const accountName = name || account?.name;
     const displayName = accountName || t('<unknown>');
@@ -167,24 +159,27 @@ function Address({
 
   const parentNameSuri = getParentNameSuri(parentName, suri);
 
-  const _ellipsisName = useCallback(ellipsisName, [ellipsisName]);
+  const handleOnClick = useCallback(() => {
+    if (!address) {
+      return;
+    }
 
-  const handleOnClick = useCallback(
-    () => {
-      if (!address) {
-        return;
-      }
+    if (actions) {
+      onAction(`/account/edit-menu/${address}${isExternal ? '?isExternal=true' : '?isExternal=false'}`);
+    }
 
-      if (actions) {
-        onAction(`/account/edit-menu/${address}${isExternal ? '?isExternal=true' : '?isExternal=false'}`);
-      }
+    if (withExport) {
+      onAction(`/account/export/${address}`);
+    }
+  }, [address, actions, withExport, onAction, isExternal]);
 
-      if (withExport) {
-        onAction(`/account/export/${address}`);
-      }
-    },
-    [address, actions, withExport, onAction, isExternal]
-  );
+  const onCopy = (_: string, isSuccessful: boolean) => {
+    if (isSuccessful) {
+      show(t<string>('Public address copied to your clipboard'), 'success');
+    }
+  };
+
+  const onCopyClickStopPropagation = <T,>(e: MouseEvent<T>) => e.stopPropagation();
 
   return (
     <div
@@ -199,56 +194,59 @@ function Address({
           prefix={prefix}
           value={formatted || address}
         />
-        <CopyToClipboard text={(address && address) || ''}>
-          <div className='info'>
-            {parentName ? (
-              <>
-                <div className='name-banner'>
-                  <FontAwesomeIcon
-                    className='deriveIcon'
-                    icon={faCodeBranch}
+        <div className='info'>
+          {parentName ? (
+            <>
+              <div className='name-banner'>
+                <FontAwesomeIcon
+                  className='deriveIcon'
+                  icon={faCodeBranch}
+                />
+                <div
+                  className='parentName'
+                  data-field='parent'
+                  title={parentNameSuri}
+                >
+                  <Svg
+                    className='subaccount-icon'
+                    src={subAccountIcon}
                   />
-                  <div
-                    className='parentName'
-                    data-field='parent'
-                    title={parentNameSuri}
-                  >
-                    <Svg
-                      className='subaccount-icon'
-                      src={subAccountIcon}
-                    />
-                    <span>{parentNameSuri}</span>
-                  </div>
+                  <span>{parentNameSuri}</span>
                 </div>
                 <div className='displaced'>
                   <Name />
                 </div>
-              </>
-            ) : (
-              <div data-field='name'>
-                <Name />
               </div>
-            )}
-            {chain?.genesisHash && chain?.genesisHash !== ALEPH_ZERO_GENESIS_HASH && (
-              <div
-                className='banner chain'
-                data-field='chain'
-                style={chain.definition.color ? { backgroundColor: chain.definition.color } : undefined}
-              >
-                {chain.name.replace(' Relay Chain', '')}
-              </div>
-            )}
-            <div className='addressDisplay'>
+            </>
+          ) : (
+            <div data-field='name'>
+              <Name />
+            </div>
+          )}
+          {chain?.genesisHash && chain?.genesisHash !== ALEPH_ZERO_GENESIS_HASH && (
+            <div
+              className='banner chain'
+              data-field='chain'
+              style={chain.definition.color ? { backgroundColor: chain.definition.color } : undefined}
+            >
+              {chain.name.replace(' Relay Chain', '')}
+            </div>
+          )}
+          <div className='addressDisplay'>
+            <CopyToClipboard
+              onCopy={onCopy}
+              text={address || ''}
+            >
               <div
                 className='fullAddress'
                 data-field='address'
-                onClick={_onCopy}
+                onClick={onCopyClickStopPropagation}
               >
-                {_ellipsisName(formatted || address) || t('<unknown>')}
+                {ellipsisName(formatted || address) || t('<unknown>')}
               </div>
-            </div>
+            </CopyToClipboard>
           </div>
-        </CopyToClipboard>
+        </div>
         {withExport && address && (
           <div
             className='export'

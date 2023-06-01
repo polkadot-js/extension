@@ -14,6 +14,8 @@ import React, { ReactNode } from 'react';
 import { act } from 'react-dom/test-utils';
 import { BrowserRouter as Router } from 'react-router-dom';
 
+import { noop } from '@polkadot/util';
+
 import * as MetadataCache from '../MetadataCache';
 import { westendMetadata } from '../Popup/Signing/metadataMock';
 import { flushAllPromises } from '../testHelpers';
@@ -22,7 +24,7 @@ import { DEFAULT_TYPE } from '../util/defaultType';
 import { ellipsisName } from '../util/ellipsisName';
 import getParentNameSuri from '../util/getParentNameSuri';
 import { Theme, themes } from './themes';
-import { AccountContext, Address } from '.';
+import { AccountContext, ActionContext, Address } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
@@ -139,7 +141,8 @@ const accountsWithGenesisHash = [
 
 const mountComponent = async (
   addressComponentProps: AddressComponentProps,
-  contextAccounts: AccountJson[]
+  contextAccounts: AccountJson[],
+  onActionMock: (to?: string) => void = noop
 ): Promise<{
   wrapper: ReactWrapper;
 }> => {
@@ -147,19 +150,21 @@ const mountComponent = async (
   const { actions = actionStub } = addressComponentProps;
 
   const wrapper = mount(
-    <Router>
-      <AccountContext.Provider
-        value={{
-          accounts: contextAccounts,
-          hierarchy: buildHierarchy(contextAccounts)
-        }}
-      >
-        <Address
-          actions={actions as ReactNode}
-          {...addressComponentProps}
-        />
-      </AccountContext.Provider>
-    </Router>
+    <ActionContext.Provider value={onActionMock}>
+      <Router>
+        <AccountContext.Provider
+          value={{
+            accounts: contextAccounts,
+            hierarchy: buildHierarchy(contextAccounts)
+          }}
+        >
+          <Address
+            actions={actions as ReactNode}
+            {...addressComponentProps}
+          />
+        </AccountContext.Provider>
+      </Router>
+    </ActionContext.Provider>
   );
 
   await act(flushAllPromises);
@@ -173,7 +178,8 @@ const getWrapper = async (
     theme: Theme;
   },
   contextAccounts: AccountJson[],
-  withAccountsInContext: boolean
+  withAccountsInContext: boolean,
+  onActionMock?: (to: string | undefined) => void
 ) => {
   // the address component can query info about the account from the account context
   // in this case, the account's address (any encoding) should suffice
@@ -185,9 +191,10 @@ const getWrapper = async (
           address: account.address,
           theme: themes.dark
         },
-        contextAccounts
+        contextAccounts,
+        onActionMock
       )
-    : await mountComponent(account, []);
+    : await mountComponent(account, [], onActionMock);
 
   return mountedComponent.wrapper;
 };
@@ -235,9 +242,11 @@ const genesisHashTestSuite = (account: AccountTestGenesisJson, withAccountsInCon
     withAccountsInContext ? 'in context from address' : 'from props'
   } with ${expectedNetworkLabel} genesiHash`, () => {
     let wrapper: ReactWrapper;
+    const onActionMock: jest.Mock = jest.fn();
 
     beforeAll(async () => {
-      wrapper = await getWrapper(account, accountsWithGenesisHash, withAccountsInContext);
+      onActionMock.mockClear();
+      wrapper = await getWrapper(account, accountsWithGenesisHash, withAccountsInContext, onActionMock);
     });
 
     it('shows the account address correctly encoded', () => {
@@ -248,12 +257,15 @@ const genesisHashTestSuite = (account: AccountTestGenesisJson, withAccountsInCon
       expect(wrapper.find('Identicon').first().prop('iconTheme')).toEqual(expectedIconTheme);
     });
 
-    // TODO: fix when copy to clipboard is implemented on the designs
-    // it('Copy buttons contain the encoded address', () => {
-    //   // the first CopyToClipboard is from the identicon, the second from the copy button
-    //   expect(wrapper.find('CopyToClipboard').at(0).prop('text')).toEqual(expectedEncodedAddress);
-    //   expect(wrapper.find('CopyToClipboard').at(1).prop('text')).toEqual(expectedEncodedAddress);
-    // });
+    it.only('Copy address to clipboard on click and do not go to account menu', () => {
+      // eslint-disable-next-line deprecation/deprecation
+      (document.execCommand as jest.Mock).mockClear();
+
+      wrapper.find('.fullAddress').simulate('click');
+      expect(onActionMock).not.toHaveBeenCalled();
+      // eslint-disable-next-line deprecation/deprecation
+      expect(document.execCommand).toHaveBeenCalledWith('copy');
+    });
 
     it('Network label shows the correct network', () => {
       expect(wrapper.find('[data-field="chain"]').text()).toEqual(expectedNetworkLabel);

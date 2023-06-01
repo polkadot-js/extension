@@ -80,7 +80,6 @@ function EditAccountMenu({
           className='identityIcon'
           iconTheme={theme}
           isExternal={isExternal === 'true'}
-          onCopy={_onCopy}
           prefix={prefix}
           value={formatted || recodedAccount?.address}
         />

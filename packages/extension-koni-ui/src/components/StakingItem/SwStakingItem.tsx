@@ -81,47 +81,53 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
   const rightIcon = useMemo(() => {
     if (!isWebUI) {
       <Button
-        icon={<Icon
-          className={'right-icon'}
-          phosphorIcon={DotsThree}
-          size='xs'
-          type='phosphor'
-              />}
+        icon={(
+          <Icon
+            className={'right-icon'}
+            phosphorIcon={DotsThree}
+            size='xs'
+            type='phosphor'
+          />
+        )}
         onClick={_onClickRightIcon}
         size='sm'
         type='ghost'
       />;
     }
 
-    return <Popover
-      content={
-        <ActionList
-          chainStakingMetadata={stakingData.chainStakingMetadata}
-          nominatorMetadata={stakingData.nominatorMetadata}
-          reward={stakingData.reward}
+    return (
+      <Popover
+        content={
+          <ActionList
+            chainStakingMetadata={stakingData.chainStakingMetadata}
+            nominatorMetadata={stakingData.nominatorMetadata}
+            reward={stakingData.reward}
+          />
+        }
+        overlayInnerStyle={{
+          padding: '0',
+          background: '#1A1A1A'
+        }}
+        placement='bottomRight'
+        showArrow={false}
+        trigger='click'
+      >
+        <Button
+          icon={(
+            <Icon
+              className={'right-icon'}
+              phosphorIcon={DotsThree}
+              size='xs'
+              type='phosphor'
+            />
+          )}
+          onClick={(e) => e.stopPropagation()}
+          size='sm'
+          type='ghost'
         />
-      }
-      overlayInnerStyle={{
-        padding: '0',
-        background: '#1A1A1A'
-      }}
-      placement='bottomRight'
-      showArrow={false}
-      trigger='click'
-    >
-      <Button
-        icon={<Icon
-          className={'right-icon'}
-          phosphorIcon={DotsThree}
-          size='xs'
-          type='phosphor'
-              />}
-        onClick={(e) => e.stopPropagation()}
-        size='sm'
-        type='ghost'
-      />
-    </Popover>;
-  }, [isWebUI]);
+      </Popover>
+    );
+  }, [_onClickRightIcon, isWebUI, stakingData.chainStakingMetadata, stakingData.nominatorMetadata, stakingData.reward]);
 
   // TODO: update priceChangeStatus
   const priceChangeStatus = 'increase';

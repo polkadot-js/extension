@@ -1,9 +1,11 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+/* eslint-disable react/jsx-no-bind */
 import type { ColumnsType } from '@subwallet/react-ui/es/table';
 
 import { Table } from '@subwallet/react-ui';
+import React from 'react';
 
 type Props<T> = {
   className?: string
@@ -19,7 +21,7 @@ const Component = <T extends object>({ columns,
     <Table
       columns={columns}
       dataSource={dataSource}
-      onRow={(record, rowIndex) => {
+      onRow={(record) => {
         return {
           onClick: () => {
             onClick && onClick(record);

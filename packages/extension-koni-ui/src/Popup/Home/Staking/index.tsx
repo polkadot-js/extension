@@ -1,22 +1,28 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem } from '@subwallet/extension-koni-ui/components';
+import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { StakingItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenItem } from '@subwallet/extension-koni-ui/components';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useGetStakingList, useNotification, usePreCheckReadOnly, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
-import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
-import { ArrowClockwise, FadersHorizontal, Plus, Trophy } from 'phosphor-react';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { PhosphorIcon, StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
+import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, Number as NumberItem, Popover, SwList, Table, Tag } from '@subwallet/react-ui';
+import capitalize from '@subwallet/react-ui/es/_util/capitalize';
+import { ArrowClockwise, DotsThree, FadersHorizontal, Plus, Trophy, User, Users } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
-import MoreActionModal, { MORE_ACTION_MODAL } from './MoreActionModal';
+import MoreActionModal, { ActionList, MORE_ACTION_MODAL } from './MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from './StakingDetailModal';
 
 type Props = ThemeProps
@@ -33,22 +39,30 @@ const FILTER_OPTIONS = [
   { label: 'Pooled', value: StakingType.POOLED }
 ];
 
-const rightIcon = <Icon
-  phosphorIcon={Plus}
-  size='sm'
-  type='phosphor'
-/>;
+const rightIcon = (
+  <Icon
+    phosphorIcon={Plus}
+    size='sm'
+    type='phosphor'
+  />
+);
 
-const reloadIcon = <Icon
-  phosphorIcon={ArrowClockwise}
-  size='sm'
-  type='phosphor'
-/>;
+const reloadIcon = (
+  <Icon
+    phosphorIcon={ArrowClockwise}
+    size='sm'
+    type='phosphor'
+  />
+);
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState<string>('');
+
+  const { accountBalance: { tokenGroupBalanceMap } } = useContext(HomeContext);
+  const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
 
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
@@ -157,6 +171,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
+  const filteredList = useMemo(() => {
+    return stakingItems.filter(filterFunction).filter((item: StakingDataType) =>
+      searchFunction(item, searchInput)
+    );
+  }, [filterFunction, searchFunction, searchInput, stakingItems]);
+
   const emptyStakingList = useCallback(() => {
     return (
       <EmptyList
@@ -174,6 +194,174 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       setSelectedItem(undefined);
     }
   }, [address, currentAccount?.address, inactiveModal, navigate]);
+
+  const currentChainBalance = useCallback((staking: StakingItem) => {
+    const currentChainAsset: _MultiChainAsset | _ChainAsset | undefined = Object.values(multiChainAssetMap).find((item) => item.name === staking.name) || Object.values(assetRegistryMap).find((item) => item.name === staking.name);
+
+    if (!currentChainAsset) {
+      return undefined;
+    }
+
+    const currentChainBalance: TokenBalanceItemType = tokenGroupBalanceMap[currentChainAsset.slug];
+
+    return currentChainBalance;
+  }, [assetRegistryMap, multiChainAssetMap, tokenGroupBalanceMap]);
+
+  const { token } = useContext(ThemeContext);
+
+  const columns = useMemo(() => {
+    return [
+      {
+        title: 'Token name',
+        dataIndex: 'name',
+        key: 'name',
+        render: (_, row: StakingDataType) => {
+          const { staking: { chain,
+            name,
+            nativeToken } } = row;
+
+          return (
+            <TokenItem
+              chainDisplayName={name || ''}
+              logoKey={nativeToken}
+              networkKey={chain}
+              symbol={nativeToken}
+            />
+          );
+        }
+      },
+      {
+        title: 'Type',
+        dataIndex: 'type',
+        key: 'type',
+        render: (_, row: StakingDataType) => {
+          const { staking: { type: stakingType } } = row;
+          const tagColor = stakingType === StakingType.POOLED ? 'success' : 'warning';
+          const tagIcon: PhosphorIcon = stakingType === StakingType.POOLED ? Users : User;
+
+          return (
+            <Tag
+              className='staking-tag'
+              color={tagColor}
+              icon={<Icon phosphorIcon={tagIcon} />}
+            >
+              {capitalize(stakingType)}
+            </Tag>
+          );
+        }
+      },
+      {
+        title: 'Price',
+        dataIndex: 'price',
+        key: 'price',
+        render: (_, row: StakingDataType) => {
+          // TODO: update priceChangeStatus
+          const currentChainInfo = currentChainBalance(row.staking);
+
+          if (!currentChainInfo) {
+            return <></>;
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          const marginColor: string = currentChainInfo?.priceChangeStatus === 'increase' ? token?.colorSuccess : token?.colorError;
+          const { price24hValue, priceValue } = currentChainInfo;
+          const margin = !price24hValue || !priceValue ? 0 : Math.abs(price24hValue - priceValue) / price24hValue * 100;
+
+          return (
+            <div className={'price-wrapper'}>
+              <NumberItem
+                decimal={0}
+                decimalOpacity={0.45}
+                prefix={'$'}
+                value={currentChainInfo?.priceValue}
+              />
+              <NumberItem
+                className='margin-percentage'
+                decimal={0}
+                decimalColor={marginColor}
+                intColor={marginColor}
+                prefix={currentChainInfo?.priceChangeStatus === 'decrease' ? '-' : '+'}
+                size={12}
+                suffix='%'
+                unitColor={marginColor}
+                value={margin}
+              />
+            </div>
+          );
+        }
+      },
+      {
+        title: 'Bonded funds',
+        dataIndex: 'bonded',
+        key: 'bonded',
+        render: (_, row: StakingDataType) => {
+          const { staking } = row;
+          const currentChainInfo = currentChainBalance(row.staking);
+
+          if (!currentChainInfo) {
+            return <></>;
+          }
+
+          const balanceValue = getBalanceValue(staking.balance || '0', row.decimals);
+          const convertedBalanceValue = getConvertedBalanceValue(balanceValue, Number(`${priceMap[staking.chain] || 0}`));
+
+          return (
+            <div className='funds-wrapper'>
+              <div className='funds'>
+                <NumberItem
+                  className={'__value'}
+                  decimal={0}
+                  decimalOpacity={0.45}
+                  suffix={staking.unit}
+                  value={balanceValue}
+                />
+                <NumberItem
+                  className={'__converted-value'}
+                  decimal={0}
+                  decimalOpacity={0.45}
+                  intOpacity={0.45}
+                  prefix='$'
+                  size={12}
+                  unitOpacity={0.45}
+                  value={convertedBalanceValue}
+                />
+              </div>
+              <Popover
+                content={
+                  <ActionList
+                    chainStakingMetadata={row.chainStakingMetadata}
+                    nominatorMetadata={row.nominatorMetadata}
+                    reward={row.reward}
+                  />
+                }
+                overlayInnerStyle={{
+                  padding: '0',
+                  background: '#1A1A1A'
+                }}
+                placement='bottomRight'
+                showArrow={false}
+                trigger='click'
+              >
+                <Button
+                  icon={(
+                    <Icon
+                      className={'right-icon'}
+                      phosphorIcon={DotsThree}
+                      size='xs'
+                      type='phosphor'
+                    />
+                  )}
+                  onClick={(e) => e.stopPropagation()}
+                  size='sm'
+                  type='ghost'
+                />
+              </Popover>
+            </div>
+          );
+        }
+      }
+    ];
+  }, [currentChainBalance, token?.colorError, token?.colorSuccess]);
 
   const listSection = useMemo(() => {
     if (isWebUI) {
@@ -216,10 +404,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   type='ghost'
                 />
                 <Button
-                  icon={<Icon
-                    phosphorIcon={Plus}
-                    size='sm'
-                  />}
+                  icon={(
+                    <Icon
+                      phosphorIcon={Plus}
+                      size='sm'
+                    />
+                  )}
                   onClick={preCheckReadOnly(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`))}
                   type='ghost'
                 />
@@ -232,13 +422,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             showActionBtn
             showExtraButton
           />
-          <SwList
-            filterBy={filterFunction}
-            list={stakingItems}
-            renderItem={renderItem}
-            renderWhenEmpty={emptyStakingList}
-            searchBy={searchFunction}
-            searchTerm={searchInput}
+
+          <Table
+            columns={columns}
+            dataSource={filteredList}
+            onRow={(record: StakingDataType) => {
+              return {
+                onClick: () => onClickItem(record)
+              };
+            }}
+            pagination={false}
           />
         </div>
       );
@@ -264,7 +457,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [emptyStakingList, filterFunction, isWebUI, navigate, notify, onClickActionBtn, preCheckReadOnly, renderItem, searchFunction, searchInput, stakingItems, t]);
+  }, [columns, emptyStakingList, filterFunction, filteredList, isWebUI, navigate, notify, onClickActionBtn, onClickItem, preCheckReadOnly, renderItem, searchFunction, searchInput, stakingItems, t]);
 
   return (
     <PageWrapper
@@ -330,6 +523,11 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
       '.container': {
         marginBottom: 12
       }
+    },
+
+    '.funds-wrapper': {
+      display: 'flex',
+      justifyContent: 'end'
     },
 
     '.ant-sw-screen-layout-body': {

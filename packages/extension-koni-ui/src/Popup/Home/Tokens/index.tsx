@@ -47,7 +47,6 @@ const Component = (): React.ReactElement => {
   } = useOutletContext();
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
-  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
 
   useEffect(() => {
     outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Token name');
@@ -178,16 +177,17 @@ const Component = (): React.ReactElement => {
 
         if (!chainAsset) {
           console.warn('Not found chain asset for token slug: ', newItem.slug);
-          result.push({ ...newItem} );
+          result.push({ ...newItem });
         } else {
           const chainDisplayName = chainAsset.name;
-          result.push({ ...newItem, chainDisplayName} );
+
+          result.push({ ...newItem, chainDisplayName });
         }
       }
     });
 
     return result.filter((item) => item.symbol.toLowerCase().includes(searchTextLowerCase));
-  }, [sortedTokenGroups, tokenGroupBalanceMap, outletContext?.searchInput, chainInfoMap, assetRegistryMap]);
+  }, [outletContext?.searchInput, sortedTokenGroups, tokenGroupBalanceMap, multiChainAssetMap, assetRegistryMap]);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
@@ -212,13 +212,15 @@ const Component = (): React.ReactElement => {
                   dataIndex: 'name',
                   key: 'name',
                   render: (_, row) => {
-                    return <TokenItem
-                      chain={row.chain}
-                      chainDisplayName={row.chainDisplayName || ''}
-                      logoKey={row.logoKey}
-                      slug={row.slug}
-                      symbol={row.symbol}
-                    />;
+                    return (
+                      <TokenItem
+                        chain={row.chain}
+                        chainDisplayName={row.chainDisplayName || ''}
+                        logoKey={row.logoKey}
+                        slug={row.slug}
+                        symbol={row.symbol}
+                      />
+                    );
                   }
                 },
                 {
@@ -360,7 +362,7 @@ type WrapperProps = ThemeProps & {
   searchInput?: string
 }
 
-const WrapperComponent = ({ className = '', searchInput }: WrapperProps): React.ReactElement<Props> => {
+const WrapperComponent = ({ className = '' }: WrapperProps): React.ReactElement<Props> => {
   const dataContext = useContext(DataContext);
 
   return (

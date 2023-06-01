@@ -6,7 +6,7 @@ import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenConte
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Input, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { ChangeEventHandler, useContext, useMemo, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import styled from 'styled-components';
@@ -24,21 +24,21 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState<string>('');
 
-  const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+  const handleInputChange: ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
     const value = e?.target?.value;
 
     setSearchInput(value);
-  };
+  }, []);
 
   const TAB_LIST = ['Tokens', 'NFTs'];
 
-  const handleSelectTab = (index: number) => {
+  const handleSelectTab = useCallback((index: number) => {
     if (!index) {
       navigate('tokens');
     } else {
       navigate('nfts/collections');
     }
-  };
+  }, [navigate]);
 
   const activeTabIndex = useMemo(() => {
     const currentTab = pathname.split('/').filter((i) => !!i)[1];

@@ -59,7 +59,7 @@ const ModalWrapper = styled.div<ThemeProps & {
   isWebUI?: boolean
 }>(
   ({ isWebUI }) => {
-    const padding = isWebUI ? '0' : 'unset';
+    const spacing = isWebUI ? '0' : 'unset';
 
     return {
       height: '100%',
@@ -71,10 +71,17 @@ const ModalWrapper = styled.div<ThemeProps & {
 
         '.ant-sw-modal': {
           position: 'relative',
-          padding: padding,
+          padding: spacing,
           '.ant-sw-modal-content': {
             borderRadius: 8,
-            paddingBottom: 0
+            paddingBottom: 0,
+            '.ant-sw-modal-header': {
+              marginBottom: isWebUI ? 16 : 'unset'
+            },
+            '.ant-sw-modal-body': {
+              padding: spacing,
+              margin: spacing
+            }
           }
         }
       }

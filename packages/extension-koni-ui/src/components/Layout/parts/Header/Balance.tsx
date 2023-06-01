@@ -239,10 +239,12 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             >
               <Button
                 className={CN(`type-${item.type}`)}
-                icon={<Icon
-                  phosphorIcon={item.icon}
-                  weight='bold'
-                      />}
+                icon={(
+                  <Icon
+                    phosphorIcon={item.icon}
+                    weight='bold'
+                  />
+                )}
                 onClick={() => handleClick(item.type)}
                 shape='squircle'
                 size='sm'

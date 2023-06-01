@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { getFreeBalance } from '@subwallet/extension-koni-ui/messaging';
+import { getFreeBalance, updateAssetSetting } from '@subwallet/extension-koni-ui/messaging';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useSelector } from '../common';
@@ -14,7 +14,7 @@ const DEFAULT_BALANCE = { value: '0', symbol: '', decimals: 18 };
 
 const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
   const { t } = useTranslation();
-  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const { chainInfoMap, chainStateMap } = useSelector((state) => state.chainStore);
   const { assetRegistry, assetSettingMap } = useSelector((state) => state.assetRegistry);
 
   const chainInfo = useMemo((): _ChainInfo | undefined => (chainInfoMap[chain]), [chainInfoMap, chain]);
@@ -38,6 +38,7 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
 
     if (address && chain) {
       const promiseList = [] as Promise<any>[];
+      const isChainActive = chainStateMap[chain]?.active;
       const nativeTokenActive = nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible;
       let childTokenActive = true;
 
@@ -45,7 +46,17 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
         childTokenActive = false;
       }
 
-      if (nativeTokenActive && childTokenActive) {
+      if (isChainActive) {
+        if (!nativeTokenActive || !childTokenActive) {
+          promiseList.push(updateAssetSetting({
+            tokenSlug: tokenSlug,
+            assetSetting: {
+              visible: true
+            },
+            autoEnableNativeToken: true
+          }));
+        }
+
         promiseList.push(getFreeBalance({ address, networkKey: chain })
           .then((balance) => {
             !cancel && setNativeTokenBalance(balance);
@@ -74,11 +85,11 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
       } else {
         const tokenNames = [];
 
-        if (!nativeTokenActive && nativeTokenSlug && assetRegistry[nativeTokenSlug]) {
+        if (!isChainActive && nativeTokenSlug && assetRegistry[nativeTokenSlug]) {
           tokenNames.push(assetRegistry[nativeTokenSlug].symbol);
         }
 
-        if (!childTokenActive && tokenSlug && assetRegistry[tokenSlug]) {
+        if (!isChainActive && tokenSlug && tokenSlug !== nativeTokenSlug && assetRegistry[tokenSlug]) {
           tokenNames.push(assetRegistry[tokenSlug].symbol);
         }
 
@@ -94,7 +105,7 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
       setIsLoading(true);
       setError(null);
     };
-  }, [address, chain, nativeTokenSlug, tokenSlug, isRefresh, assetSettingMap, t, assetRegistry, chainInfo?.name]);
+  }, [address, chain, nativeTokenSlug, tokenSlug, isRefresh, assetSettingMap, t, assetRegistry, chainInfo?.name, chainStateMap]);
 
   return { refreshBalance, tokenBalance, nativeTokenBalance, nativeTokenSlug, isLoading, error };
 };

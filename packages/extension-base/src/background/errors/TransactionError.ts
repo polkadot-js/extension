@@ -2,12 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
-import {
-  BasicTxErrorType,
-  StakingTxErrorType,
-  TransactionErrorType,
-  TransferTxErrorType
-} from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, StakingTxErrorType, TransactionErrorType, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 
 // Todo: finish this map in the future
 const defaultErrorMap = {

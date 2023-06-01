@@ -172,7 +172,7 @@ export default styled(EditMenuCard)(
 
   .flex-group {
     display: flex;
-    gap: 4px;
+    gap: 40px;
     align-content: flex-start;
     align-items: center;
     justify-content: space-between;
@@ -198,6 +198,7 @@ export default styled(EditMenuCard)(
     font-weight: 300;
     font-size: 14px;
     line-height: 145%;
+    min-width: 0;
     max-width: 230px;
     white-space: pre-line;
     gap: 14px;
@@ -207,7 +208,6 @@ export default styled(EditMenuCard)(
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
-      width: 80px;
       text-align: right;
     }
 

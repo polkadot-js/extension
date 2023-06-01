@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainStakingMetadata, NominationInfo, NominationPoolInfo, NominatorMetadata, PalletNominationPoolsBondedPoolInner, StakingStatus, StakingTxErrorType, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, PalletIdentityRegistration, PalletNominationPoolsPoolMember, PalletStakingExposure, parseIdentity, parsePoolStashAddress, TernoaStakingRewardsStakingRewardsData, transformPoolName, ValidatorExtraInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
@@ -212,7 +212,7 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
     chain,
     type: StakingType.NOMINATED,
     era: parseInt(currentEra),
-    expectedReturn, // in %, annually
+    expectedReturn: !_STAKING_CHAIN_GROUP.ternoa.includes(chain) ? expectedReturn : undefined, // in %, annually
     inflation,
     minStake: minStake.toString(),
     maxValidatorPerNominator: parseInt(maxNominations),
@@ -635,11 +635,14 @@ export async function getRelayValidatorsInfo (chain: string, substrateApi: _Subs
   const allValidators: string[] = [];
   const validatorInfoList: ValidatorInfo[] = [];
 
-  const [_totalEraStake, _eraStakers, _minBond] = await Promise.all([
+  const [_totalEraStake, _eraStakers, _minBond, _stakingRewards] = await Promise.all([
     chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
     chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra)),
-    chainApi.api.query.staking.minNominatorBond()
+    chainApi.api.query.staking.minNominatorBond(),
+    chainApi.api.query.stakingRewards && chainApi.api.query.stakingRewards.data()
   ]);
+
+  const stakingRewards = _stakingRewards?.toPrimitive() as unknown as TernoaStakingRewardsStakingRewardsData;
 
   const maxNominatorRewarded = chainApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
   const bnTotalEraStake = new BN(_totalEraStake.toString());
@@ -725,9 +728,17 @@ export async function getRelayValidatorsInfo (chain: string, substrateApi: _Subs
 
     const bnValidatorStake = totalStakeMap[validator.address].div(bnDecimals);
 
-    validator.expectedReturn = _STAKING_CHAIN_GROUP.aleph.includes(chain)
-      ? calculateAlephZeroValidatorReturn(chainStakingMetadata.expectedReturn as number, getCommission(commission))
-      : calculateValidatorStakedReturn(chainStakingMetadata.expectedReturn as number, bnValidatorStake, bnAvgStake, getCommission(commission));
+    if (_STAKING_CHAIN_GROUP.aleph.includes(chain)) {
+      validator.expectedReturn = calculateAlephZeroValidatorReturn(chainStakingMetadata.expectedReturn as number, getCommission(commission));
+    } else if (_STAKING_CHAIN_GROUP.ternoa.includes(chain)) {
+      const rewardPerValidator = new BN(stakingRewards.sessionExtraRewardPayout).divn(allValidators.length).div(bnDecimals);
+      const validatorStake = totalStakeMap[validator.address].div(bnDecimals).toNumber();
+
+      validator.expectedReturn = calculateTernoaValidatorReturn(rewardPerValidator.toNumber(), validatorStake, getCommission(commission));
+    } else {
+      validator.expectedReturn = calculateValidatorStakedReturn(chainStakingMetadata.expectedReturn as number, bnValidatorStake, bnAvgStake, getCommission(commission));
+    }
+
     validator.commission = parseFloat(commission.split('%')[0]);
     validator.blocked = extraInfoMap[validator.address].blocked;
     validator.identity = extraInfoMap[validator.address].identity;

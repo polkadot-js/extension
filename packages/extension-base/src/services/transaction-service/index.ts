@@ -18,7 +18,7 @@ import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/reques
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { TRANSACTION_TIMEOUT } from '@subwallet/extension-base/services/transaction-service/constants';
 import { parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
-import { getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
+import { getBaseTransactionInfo, getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEmitter, TransactionEventMap, TransactionEventResponse, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
 import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
@@ -35,7 +35,7 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { Signer, SignerResult } from '@polkadot/api/types';
 import { EventRecord } from '@polkadot/types/interfaces';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
-import { u8aToHex } from '@polkadot/util';
+import { isHex, u8aToHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
 
 export default class TransactionService {
@@ -566,10 +566,12 @@ export default class TransactionService {
       blockHash: blockHash || ''
     }).catch(console.error);
 
+    const info = isHex(extrinsicHash) ? extrinsicHash : getBaseTransactionInfo(transaction, this.chainService.getChainInfoMap());
+
     this.notificationService.notify({
       type: NotificationType.SUCCESS,
       title: 'Transaction completed',
-      message: `Transaction ${transaction?.extrinsicHash} completed`,
+      message: `Transaction ${info} completed`,
       action: { url: this.getTransactionLink(id) },
       notifyViaBrowser: true
     });
@@ -592,10 +594,12 @@ export default class TransactionService {
         blockHash: blockHash || ''
       }).catch(console.error);
 
+      const info = isHex(transaction?.extrinsicHash) ? transaction?.extrinsicHash : getBaseTransactionInfo(transaction, this.chainService.getChainInfoMap());
+
       this.notificationService.notify({
         type: NotificationType.ERROR,
         title: 'Transaction failed',
-        message: `Transaction ${transaction?.extrinsicHash} failed`,
+        message: `Transaction ${info} failed`,
         action: { url: this.getTransactionLink(id) },
         notifyViaBrowser: true
       });
@@ -713,7 +717,8 @@ export default class TransactionService {
     const eventData: TransactionEventResponse = {
       id,
       errors: [],
-      warnings: []
+      warnings: [],
+      extrinsicHash: id
     };
 
     this.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
@@ -791,7 +796,8 @@ export default class TransactionService {
     const eventData: TransactionEventResponse = {
       id,
       errors: [],
-      warnings: []
+      warnings: [],
+      extrinsicHash: id
     };
 
     (transaction as SubmittableExtrinsic).signAsync(address, {

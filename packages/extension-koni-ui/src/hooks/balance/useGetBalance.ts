@@ -47,13 +47,20 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
       }
 
       if (isChainActive) {
-        if (!nativeTokenActive || !childTokenActive) {
+        if (!childTokenActive) {
           promiseList.push(updateAssetSetting({
-            tokenSlug: tokenSlug,
+            tokenSlug,
             assetSetting: {
               visible: true
             },
             autoEnableNativeToken: true
+          }));
+        } else if (nativeTokenSlug && !nativeTokenActive) {
+          promiseList.push(updateAssetSetting({
+            tokenSlug: nativeTokenSlug,
+            assetSetting: {
+              visible: true
+            }
           }));
         }
 

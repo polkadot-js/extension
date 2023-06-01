@@ -8,6 +8,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
+import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -36,6 +37,32 @@ interface CollatorInfo {
   status: string | Record<string, string>
 }
 
+export function subscribeAmplitudeStakingMetadata (chain: string, substrateApi: _SubstrateApi, callback: (chain: string, rs: ChainStakingMetadata) => void) {
+  return substrateApi.api.query.parachainStaking.round((_round: Codec) => {
+    const roundObj = _round.toHuman() as Record<string, string>;
+    const round = parseRawNumber(roundObj.current);
+    const maxDelegations = substrateApi.api.consts.parachainStaking.maxDelegationsPerRound.toString();
+    const minDelegatorStake = substrateApi.api.consts.parachainStaking.minDelegatorStake.toString();
+    const unstakingDelay = substrateApi.api.consts.parachainStaking.stakeDuration.toString();
+    const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
+    const blockPerRound = parseFloat(_blockPerRound);
+
+    const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
+    const unstakingPeriod = blockDuration * parseInt(unstakingDelay);
+
+    callback(chain, {
+      chain,
+      type: StakingType.NOMINATED,
+      era: round,
+      minStake: minDelegatorStake,
+      maxValidatorPerNominator: parseInt(maxDelegations),
+      maxWithdrawalRequestPerValidator: 1, // by default
+      allowCancelUnstaking: true,
+      unstakingPeriod
+    });
+  });
+}
+
 export async function getAmplitudeStakingMetadata (chain: string, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   const chainApi = await substrateApi.isReady;
 
@@ -60,6 +87,76 @@ export async function getAmplitudeStakingMetadata (chain: string, substrateApi: 
     allowCancelUnstaking: true,
     unstakingPeriod
   } as ChainStakingMetadata;
+}
+
+export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, delegatorState: ParachainStakingStakeOption, unstakingInfo: Record<string, number>) {
+  const nominationList: NominationInfo[] = [];
+  const unstakingList: UnstakingInfo[] = [];
+  const minDelegatorStake = substrateApi.api.consts.parachainStaking.minDelegatorStake.toString();
+
+  let activeStake = '0';
+
+  if (delegatorState) { // delegatorState can be null while unstaking all
+    const identityInfo = substrateApi.api.query.identity ? (await substrateApi.api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration : undefined;
+    const identity = identityInfo ? parseIdentity(identityInfo) : undefined;
+
+    activeStake = delegatorState.amount.toString();
+    const bnActiveStake = new BN(activeStake);
+    let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
+
+    if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
+      delegationStatus = StakingStatus.EARNING_REWARD;
+    }
+
+    nominationList.push({
+      status: delegationStatus,
+      chain: chainInfo.slug,
+      validatorAddress: delegatorState.owner,
+      activeStake: delegatorState.amount.toString(),
+      validatorMinStake: '0',
+      hasUnstaking: !!unstakingInfo && Object.values(unstakingInfo).length > 0,
+      validatorIdentity: identity
+    });
+  }
+
+  if (unstakingInfo && Object.values(unstakingInfo).length > 0) {
+    const _currentBlockInfo = await substrateApi.api.rpc.chain.getHeader();
+
+    const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;
+    const currentBlockNumber = currentBlockInfo.number;
+
+    const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
+    const blockPerRound = parseFloat(_blockPerRound);
+
+    const nearestUnstakingBlock = Object.keys(unstakingInfo)[0];
+    const nearestUnstakingAmount = Object.values(unstakingInfo)[0];
+
+    const blockDuration = (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
+
+    const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber <= 0;
+    const remainingBlock = parseInt(nearestUnstakingBlock) - (currentBlockNumber + 1);
+    const waitingTime = remainingBlock * blockDuration;
+
+    unstakingList.push({
+      chain: chainInfo.slug,
+      status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+      claimable: nearestUnstakingAmount.toString(),
+      waitingTime: waitingTime > 0 ? waitingTime : 0,
+      validatorAddress: delegatorState?.owner || undefined
+    });
+  }
+
+  const stakingStatus = getStakingStatusByNominations(new BN(activeStake), nominationList);
+
+  return {
+    chain: chainInfo.slug,
+    type: StakingType.NOMINATED,
+    status: stakingStatus,
+    address: address,
+    activeStake: activeStake,
+    nominations: nominationList,
+    unstakings: unstakingList
+  } as NominatorMetadata;
 }
 
 export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {

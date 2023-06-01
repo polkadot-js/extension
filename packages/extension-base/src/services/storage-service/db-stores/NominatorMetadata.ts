@@ -10,9 +10,9 @@ export default class NominatorMetadataStore extends BaseStoreWithAddressAndChain
     return this.table.toArray();
   }
 
-  subscribeByAddress (address: string) {
+  subscribeByAddresses (addresses: string[]) {
     return liveQuery(
-      () => this.getByAddress(address)
+      () => this.getByAddress(addresses)
     );
   }
 
@@ -22,8 +22,8 @@ export default class NominatorMetadataStore extends BaseStoreWithAddressAndChain
     );
   }
 
-  getByAddress (address: string) {
-    return this.table.where('address').anyOfIgnoreCase(address).toArray();
+  getByAddress (addresses: string[]) {
+    return this.table.where('address').anyOfIgnoreCase(addresses).toArray();
   }
 
   async removeByAddress (address: string) {

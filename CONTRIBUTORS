@@ -1,6 +1,6 @@
-    1676	Nam Phạm                      	
-    1330	AnhMTV                        	Update @subwallet/chain-list
-     843	S2kael                        	[Issue-1398] Update text
+    1688	Nam Phạm                      	[Issue 1461] fix bug joining nomination pool when has unstaking
+    1339	AnhMTV                        	
+     852	S2kael                        	[Issue-1454] [Confirmation] Fix bug when sign ledger
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	
@@ -11,7 +11,7 @@
       69	dominhquang                   	Fix bug UI for Staking feature
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       53	Dominhquangdev                	update Bridge code
-      14	S2kael                        	
+      16	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

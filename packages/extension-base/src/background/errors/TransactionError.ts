@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
-import { BasicTxErrorType, StakingTxErrorType, TransactionErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  BasicTxErrorType,
+  StakingTxErrorType,
+  TransactionErrorType,
+  TransferTxErrorType
+} from '@subwallet/extension-base/background/KoniTypes';
 
 // Todo: finish this map in the future
 const defaultErrorMap = {
@@ -76,6 +81,10 @@ const defaultErrorMap = {
   },
   [StakingTxErrorType.INACTIVE_NOMINATION_POOL]: {
     message: 'This nomination pool is not active',
+    code: undefined
+  },
+  [TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT]: {
+    message: 'Receiver is not enough existential deposit',
     code: undefined
   }
 } as Record<TransactionErrorType, { message: string, code?: number }>;

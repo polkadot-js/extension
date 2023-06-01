@@ -32,6 +32,7 @@ import { reformatAddress } from '@subwallet/extension-base/utils';
 import { convertSubjectInfoToAddresses } from '@subwallet/extension-base/utils/address';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
+import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { createPair } from '@subwallet/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
@@ -1594,13 +1595,24 @@ export default class KoniExtension {
     this.addContact(to);
 
     const additionalValidator = async (inputTransaction: SWTransactionResponse): Promise<void> => {
+      const minAmount = tokenInfo.minAmount || '0';
+
       if (!isTransferNativeToken) {
         const { value: balance } = await this.#koniState.balanceService.getTokenFreeBalance(from, networkKey, tokenSlug);
-        const minAmount = tokenInfo.minAmount || '0';
 
         if (new BigN(balance).minus(transferAmount.value).lt(minAmount)) {
           inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
         }
+      }
+
+      const { value: reciverBalance } = await this.#koniState.balanceService.getTokenFreeBalance(to, networkKey, tokenSlug);
+
+      if (new BigN(reciverBalance).plus(transferAmount.value).lt(minAmount)) {
+        const atLeast = new BigN(minAmount).minus(reciverBalance).plus(1);
+
+        const atLeastStr = formatNumber(atLeast, tokenInfo.decimals || 0, balanceFormatter);
+
+        inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `You must transfer at least ${atLeastStr} ${tokenInfo.symbol} to keep the destination account alive`));
       }
     };
 

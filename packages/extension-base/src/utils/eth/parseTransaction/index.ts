@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { EvmTransactionArg, EvmTransactionData, NestedArray, ParseEvmTransactionData, ResponseParseEvmContractInput, ResponseQrParseRLP } from '@subwallet/extension-base/background/KoniTypes';
+import { EvmTransactionArg, NestedArray, ParseEvmTransactionData, ResponseParseEvmContractInput, ResponseQrParseRLP } from '@subwallet/extension-base/background/KoniTypes';
 import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmAbiExplorer, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -122,50 +122,68 @@ export const isContractAddress = async (address: string, evmApi: _EvmApi): Promi
   }
 };
 
+const parseInputWithAbi = (input: string, abi: any): ParseEvmTransactionData | null => {
+  const decoder = new InputDataDecoder(abi);
+  const raw = decoder.decodeData(input);
+
+  if (raw.method && raw.methodName) {
+    const temp: ParseEvmTransactionData = {
+      method: raw.method,
+      methodName: raw.methodName,
+      args: []
+    };
+
+    raw.types.forEach((type, index) => {
+      temp.args.push(parseResult(type, raw.inputs[index], raw.names[index]));
+    });
+
+    return temp;
+  } else {
+    return null;
+  }
+};
+
 export const parseContractInput = async (input: string, contractAddress: string, network: _ChainInfo | null): Promise<ResponseParseEvmContractInput> => {
-  let result: EvmTransactionData = input;
+  for (const abi of ABIs) {
+    const temp = parseInputWithAbi(input, abi);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const _ABIs: any[] = [...ABIs];
-
-  if (contractAddress && network) {
-    if (_getEvmAbiExplorer(network)) {
-      const res = await axios.get(_getEvmAbiExplorer(network), {
-        params: {
-          address: contractAddress
-        }
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (res.status === 200 && res.data.status === '1') {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        _ABIs.unshift(res.data.result);
-      }
+    if (temp) {
+      return {
+        result: temp
+      };
     }
   }
 
-  for (const abi of _ABIs) {
-    const decoder = new InputDataDecoder(abi);
-    const raw = decoder.decodeData(input);
+  if (contractAddress && network) {
+    console.log('parseOnline');
 
-    if (raw.method && raw.methodName) {
-      const temp: ParseEvmTransactionData = {
-        method: raw.method,
-        methodName: raw.methodName,
-        args: []
-      };
+    if (_getEvmAbiExplorer(network)) {
+      try {
+        const res = await axios.get(_getEvmAbiExplorer(network), {
+          params: {
+            address: contractAddress
+          },
+          timeout: 3000
+        });
 
-      raw.types.forEach((type, index) => {
-        temp.args.push(parseResult(type, raw.inputs[index], raw.names[index]));
-      });
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (res.status === 200 && res.data.status === '1') {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+          const abi = res.data.result;
+          const temp = parseInputWithAbi(input, abi);
 
-      result = temp;
-      break;
+          if (temp) {
+            return {
+              result: temp
+            };
+          }
+        }
+      } catch (e) {}
     }
   }
 
   return {
-    result
+    result: input
   };
 };
 
@@ -220,45 +238,41 @@ export const parseEvmRlp = async (data: string, networkMap: Record<string, _Chai
 
   const network: _ChainInfo | null = getChainInfoByChainId(networkMap, parseInt(tx.ethereumChainId));
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const _ABIs: any[] = [...ABIs];
+  for (const abi of ABIs) {
+    const temp = parseInputWithAbi(tx.data, abi);
+
+    if (temp) {
+      result.data = temp;
+
+      return result;
+    }
+  }
 
   if (tx.action && network) {
     if (await isContractAddress(tx.action, evmApiMap[network.slug])) {
       if (_getEvmAbiExplorer(network) !== '') {
-        const res = await axios.get(_getEvmAbiExplorer(network), {
-          params: {
-            address: tx.action
-          }
-        });
+        try {
+          const res = await axios.get(_getEvmAbiExplorer(network), {
+            params: {
+              address: tx.action
+            },
+            timeout: 2000
+          });
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (res.status === 200 && res.data.status === '1') {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          _ABIs.unshift(res.data.result);
-        }
+          if (res.status === 200 && res.data.status === '1') {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+            const abi = res.data.result;
+            const temp = parseInputWithAbi(tx.data, abi);
+
+            if (temp) {
+              result.data = temp;
+
+              return result;
+            }
+          }
+        } catch (e) {}
       }
-    }
-  }
-
-  for (const abi of _ABIs) {
-    const decoder = new InputDataDecoder(abi);
-    const raw = decoder.decodeData(tx.data);
-
-    if (raw.method && raw.methodName) {
-      const temp: ParseEvmTransactionData = {
-        method: raw.method,
-        methodName: raw.methodName,
-        args: []
-      };
-
-      raw.types.forEach((type, index) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-        temp.args.push(parseResult(type, raw.inputs[index], raw.names[index]));
-      });
-
-      result.data = temp;
-      break;
     }
   }
 

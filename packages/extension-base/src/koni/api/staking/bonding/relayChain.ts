@@ -11,6 +11,7 @@ import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/servi
 import { reformatAddress } from '@subwallet/extension-base/utils';
 
 import { Bytes } from '@polkadot/types';
+import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -67,7 +68,7 @@ export function validatePoolBondingCondition (chainInfo: _ChainInfo, amount: str
 
     bnTotalStake = bnTotalStake.add(bnCurrentActiveStake);
 
-    if (nominatorMetadata.unstakings.length > 0) {
+    if (nominatorMetadata.unstakings.length > 0 && bnCurrentActiveStake.isZero()) {
       errors.push(new TransactionError(StakingTxErrorType.EXIST_UNSTAKING_REQUEST));
     }
   }
@@ -111,6 +112,44 @@ export function validateRelayBondingCondition (chainInfo: _ChainInfo, amount: st
   return errors;
 }
 
+export function subscribeRelayChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi, callback: (chain: string, rs: ChainStakingMetadata) => void) {
+  return substrateApi.api.query.staking.currentEra(async (_currentEra: Codec) => {
+    const currentEra = _currentEra.toString();
+    const maxNominations = substrateApi.api.consts.staking.maxNominations.toString();
+    const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
+    const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
+
+    const [_minNominatorBond, _minPoolJoin, _minimumActiveStake] = await Promise.all([
+      substrateApi.api.query.staking.minNominatorBond(),
+      substrateApi.api.query?.nominationPools?.minJoinBond(),
+      substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake()
+    ]);
+
+    const minActiveStake = _minimumActiveStake?.toString() || '0';
+    const minNominatorBond = _minNominatorBond.toString();
+
+    const bnMinActiveStake = new BN(minActiveStake);
+    const bnMinNominatorBond = new BN(minNominatorBond);
+
+    const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
+
+    const minPoolJoin = _minPoolJoin?.toString() || undefined;
+    const unlockingPeriod = parseInt(unlockingEras) * (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default); // in hours
+
+    callback(chainInfo.slug, {
+      chain: chainInfo.slug,
+      type: StakingType.NOMINATED,
+      era: parseInt(currentEra),
+      minStake: minStake.toString(),
+      maxValidatorPerNominator: parseInt(maxNominations),
+      maxWithdrawalRequestPerValidator: parseInt(maxUnlockingChunks),
+      allowCancelUnstaking: true,
+      unstakingPeriod: unlockingPeriod,
+      minJoinNominationPool: minPoolJoin
+    });
+  });
+}
+
 export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   const chain = chainInfo.slug;
   const chainApi = await substrateApi.isReady;
@@ -131,6 +170,7 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
   ]);
 
   const eraStakers = _eraStakers as any[];
+  let allCurrentNominators: Record<string, unknown>[] = [];
   const nominatorList: string[] = [];
 
   for (const item of eraStakers) {
@@ -138,11 +178,12 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
     const rawValidatorStat = item[1].toHuman() as Record<string, any>;
     const eraNominators = rawValidatorStat.others as Record<string, any>[];
 
-    for (const nominator of eraNominators) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      if (!nominatorList.includes(nominator.who as string)) {
-        nominatorList.push(nominator.who as string);
-      }
+    allCurrentNominators = allCurrentNominators.concat(eraNominators);
+  }
+
+  for (const nominator of allCurrentNominators) {
+    if (!nominatorList.includes(nominator.who as string)) {
+      nominatorList.push(nominator.who as string);
     }
   }
 
@@ -181,6 +222,112 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
     minJoinNominationPool: minPoolJoin,
     nominatorCount: nominatorList.length
   } as ChainStakingMetadata;
+}
+
+export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, ledger: PalletStakingStakingLedger) {
+  const chain = chainInfo.slug;
+  const chainApi = await substrateApi.isReady;
+
+  const [_nominations, _currentEra, _bonded, _minimumActiveStake, _minNominatorBond] = await Promise.all([
+    chainApi.api.query?.staking?.nominators(address),
+    chainApi.api.query?.staking?.currentEra(),
+    chainApi.api.query?.staking?.bonded(address),
+    chainApi.api.query?.staking?.minimumActiveStake && chainApi.api.query?.staking?.minimumActiveStake(),
+    chainApi.api.query?.staking?.minNominatorBond()
+  ]);
+
+  const minActiveStake = _minimumActiveStake?.toString() || '0';
+  const minNominatorBond = _minNominatorBond.toString();
+
+  const bnMinActiveStake = new BN(minActiveStake);
+  const bnMinNominatorBond = new BN(minNominatorBond);
+
+  const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
+
+  const _maxNominatorRewardedPerValidator = chainApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+  const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
+  const nominations = _nominations.toPrimitive() as unknown as PalletStakingNominations;
+  const currentEra = _currentEra.toString();
+  const bonded = _bonded.toHuman();
+
+  const activeStake = ledger.active.toString();
+  const nominationList: NominationInfo[] = [];
+  const unstakingList: UnstakingInfo[] = [];
+
+  if (nominations) {
+    const validatorList = nominations.targets;
+
+    await Promise.all(validatorList.map(async (validatorAddress) => {
+      let nominationStatus = StakingStatus.NOT_EARNING;
+      const [_identityInfo, _eraStaker] = await Promise.all([
+        chainApi.api.query.identity.identityOf(validatorAddress),
+        chainApi.api.query.staking.erasStakers(currentEra, validatorAddress)
+      ]);
+      const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
+      const identityInfo = _identityInfo.toHuman() as unknown as PalletIdentityRegistration;
+      const identity = parseIdentity(identityInfo);
+      const topNominators = eraStaker.others.map((nominator) => {
+        return nominator.who;
+      });
+
+      if (!topNominators.includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if nominator has target but not in nominator list
+        nominationStatus = StakingStatus.WAITING;
+      } else if (topNominators.slice(0, maxNominatorRewardedPerValidator).includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
+        nominationStatus = StakingStatus.EARNING_REWARD;
+      }
+
+      nominationList.push({
+        chain,
+        validatorAddress,
+        status: nominationStatus,
+        validatorIdentity: identity,
+        activeStake: '0' // relaychain allocates stake accordingly
+      } as NominationInfo);
+    }));
+  }
+
+  let stakingStatus = StakingStatus.NOT_EARNING;
+  const bnActiveStake = new BN(activeStake);
+  let waitingNominationCount = 0;
+
+  if (bnActiveStake.gte(minStake)) {
+    for (const nomination of nominationList) {
+      if (nomination.status === StakingStatus.EARNING_REWARD) { // only need 1 earning nomination to count
+        stakingStatus = StakingStatus.EARNING_REWARD;
+      } else if (nomination.status === StakingStatus.WAITING) {
+        waitingNominationCount += 1;
+      }
+    }
+
+    if (waitingNominationCount === nominationList.length) {
+      stakingStatus = StakingStatus.WAITING;
+    }
+  }
+
+  ledger.unlocking.forEach((unlockingChunk) => {
+    const isClaimable = unlockingChunk.era - parseInt(currentEra) <= 0;
+    const remainingEra = unlockingChunk.era - (parseInt(currentEra) + 1);
+    const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+
+    unstakingList.push({
+      chain,
+      status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+      claimable: unlockingChunk.value.toString(),
+      waitingTime: waitingTime > 0 ? waitingTime : 0
+    } as UnstakingInfo);
+  });
+
+  return {
+    chain,
+    type: StakingType.NOMINATED,
+    status: stakingStatus,
+    address: address,
+    activeStake,
+
+    nominations: nominationList,
+    unstakings: unstakingList,
+    isBondedBefore: bonded !== null
+  } as NominatorMetadata;
 }
 
 export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
@@ -305,6 +452,83 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
     nominations: nominationList,
     unstakings: unstakingList,
     isBondedBefore: bonded !== null
+  } as NominatorMetadata;
+}
+
+export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, poolMemberInfo: PalletNominationPoolsPoolMember) {
+  const _maxNominatorRewardedPerValidator = substrateApi.api.consts.staking.maxNominatorRewardedPerValidator.toString();
+  const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
+  const poolsPalletId = substrateApi.api.consts.nominationPools.palletId.toString();
+  const poolStashAccount = parsePoolStashAddress(substrateApi.api, 0, poolMemberInfo.poolId, poolsPalletId);
+
+  const [_nominations, _poolMetadata, _currentEra] = await Promise.all([
+    substrateApi.api.query.staking.nominators(poolStashAccount),
+    substrateApi.api.query.nominationPools.metadata(poolMemberInfo.poolId),
+    substrateApi.api.query.staking.currentEra()
+  ]);
+
+  const poolMetadata = _poolMetadata.toPrimitive() as unknown as Bytes;
+  const currentEra = _currentEra.toString();
+  const nominations = _nominations.toJSON() as unknown as PalletStakingNominations;
+
+  let stakingStatus = StakingStatus.NOT_EARNING;
+
+  const poolName = transformPoolName(poolMetadata.isUtf8 ? poolMetadata.toUtf8() : poolMetadata.toString());
+
+  if (nominations) {
+    const validatorList = nominations.targets;
+
+    await Promise.all(validatorList.map(async (validatorAddress) => {
+      const _eraStaker = await substrateApi.api.query.staking.erasStakers(currentEra, validatorAddress);
+      const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
+      const topNominators = eraStaker.others.map((nominator) => {
+        return nominator.who;
+      }).slice(0, maxNominatorRewardedPerValidator);
+
+      if (topNominators.includes(reformatAddress(poolStashAccount, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
+        stakingStatus = StakingStatus.EARNING_REWARD;
+      }
+    }));
+  }
+
+  const joinedPoolInfo: NominationInfo = {
+    activeStake: poolMemberInfo.points.toString(),
+    chain: chainInfo.slug,
+    status: stakingStatus,
+    validatorIdentity: poolName,
+    validatorAddress: poolMemberInfo.poolId.toString(), // use poolId
+    hasUnstaking: poolMemberInfo.unbondingEras && Object.keys(poolMemberInfo.unbondingEras).length > 0
+  };
+
+  const unstakings: UnstakingInfo[] = [];
+
+  Object.entries(poolMemberInfo.unbondingEras).forEach(([unlockingEra, amount]) => {
+    const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) <= 0;
+    const remainingEra = parseInt(unlockingEra) - (parseInt(currentEra) + 1);
+    const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
+
+    unstakings.push({
+      chain: chainInfo.slug,
+      status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+      claimable: amount.toString(),
+      waitingTime: waitingTime > 0 ? waitingTime : 0
+    } as UnstakingInfo);
+  });
+
+  const bnActiveStake = new BN(poolMemberInfo.points.toString());
+
+  if (!bnActiveStake.gt(BN_ZERO)) {
+    stakingStatus = StakingStatus.NOT_EARNING;
+  }
+
+  return {
+    chain: chainInfo.slug,
+    type: StakingType.POOLED,
+    address,
+    status: stakingStatus,
+    activeStake: poolMemberInfo.points.toString(),
+    nominations: [joinedPoolInfo], // can only join 1 pool at a time
+    unstakings
   } as NominatorMetadata;
 }
 

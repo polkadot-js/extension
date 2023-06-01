@@ -4,10 +4,10 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainStakingMetadata, NominatorMetadata, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getAmplitudeBondingExtrinsic, getAmplitudeClaimRewardExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeNominatorMetadata, getAmplitudeStakingMetadata, getAmplitudeUnbondingExtrinsic, getAmplitudeWithdrawalExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/amplitude';
-import { getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarNominatorMetadata, getAstarStakingMetadata, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
-import { getParaBondingExtrinsic, getParaCancelWithdrawalExtrinsic, getParachainCollatorsInfo, getParaChainNominatorMetadata, getParaChainStakingMetadata, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, validateParaChainBondingCondition, validateParaChainUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
-import { getPoolingClaimRewardExtrinsic, getPoolingWithdrawalExtrinsic, getRelayBondingExtrinsic, getRelayCancelWithdrawalExtrinsic, getRelayChainNominatorMetadata, getRelayChainStakingMetadata, getRelayPoolsInfo, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, validateRelayBondingCondition, validateRelayUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
+import { getAmplitudeBondingExtrinsic, getAmplitudeClaimRewardExtrinsic, getAmplitudeCollatorsInfo, getAmplitudeNominatorMetadata, getAmplitudeStakingMetadata, getAmplitudeUnbondingExtrinsic, getAmplitudeWithdrawalExtrinsic, subscribeAmplitudeStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/amplitude';
+import { getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarNominatorMetadata, getAstarStakingMetadata, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, subscribeAstarStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
+import { getParaBondingExtrinsic, getParaCancelWithdrawalExtrinsic, getParachainCollatorsInfo, getParaChainNominatorMetadata, getParaChainStakingMetadata, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, subscribeParaChainStakingMetadata, validateParaChainBondingCondition, validateParaChainUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
+import { getPoolingClaimRewardExtrinsic, getPoolingWithdrawalExtrinsic, getRelayBondingExtrinsic, getRelayCancelWithdrawalExtrinsic, getRelayChainNominatorMetadata, getRelayChainStakingMetadata, getRelayPoolsInfo, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, subscribeRelayChainStakingMetadata, validateRelayBondingCondition, validateRelayUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
@@ -125,4 +125,41 @@ export async function getCancelWithdrawalExtrinsic (substrateApi: _SubstrateApi,
   }
 
   return getRelayCancelWithdrawalExtrinsic(substrateApi, selectedUnstaking);
+}
+
+export function subscribeEssentialChainStakingMetadata (substrateApiMap: Record<string, _SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, callback: (chain: string, rs: ChainStakingMetadata) => void) {
+  const unsubList: VoidFunction[] = [];
+
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  Object.values(chainInfoMap).forEach(async (chainInfo: _ChainInfo) => {
+    const substrateApi = await substrateApiMap[chainInfo.slug].isReady;
+
+    if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
+      const unsub = await subscribeAstarStakingMetadata(chainInfo.slug, substrateApi, callback);
+
+      // @ts-ignore
+      unsubList.push(unsub);
+    } else if (_STAKING_CHAIN_GROUP.para.includes(chainInfo.slug)) {
+      const unsub = await subscribeParaChainStakingMetadata(chainInfo.slug, substrateApi, callback);
+
+      // @ts-ignore
+      unsubList.push(unsub);
+    } else if (_STAKING_CHAIN_GROUP.amplitude.includes(chainInfo.slug)) {
+      const unsub = await subscribeAmplitudeStakingMetadata(chainInfo.slug, substrateApi, callback);
+
+      // @ts-ignore
+      unsubList.push(unsub);
+    } else if (_STAKING_CHAIN_GROUP.relay.includes(chainInfo.slug)) {
+      const unsub = await subscribeRelayChainStakingMetadata(chainInfo, substrateApi, callback);
+
+      // @ts-ignore
+      unsubList.push(unsub);
+    }
+  });
+
+  return () => {
+    unsubList.forEach((unsub) => {
+      unsub && unsub();
+    });
+  };
 }

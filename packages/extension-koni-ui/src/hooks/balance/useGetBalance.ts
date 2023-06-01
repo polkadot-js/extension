@@ -15,7 +15,7 @@ const DEFAULT_BALANCE = { value: '0', symbol: '', decimals: 18 };
 const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
   const { t } = useTranslation();
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
-  const assetSettingMap = useSelector((state) => state.assetRegistry.assetSettingMap);
+  const { assetRegistry, assetSettingMap } = useSelector((state) => state.assetRegistry);
 
   const chainInfo = useMemo((): _ChainInfo | undefined => (chainInfoMap[chain]), [chainInfoMap, chain]);
   const nativeTokenSlug = useMemo(() => chainInfo ? _getChainNativeTokenSlug(chainInfo) : undefined, [chainInfo]);
@@ -38,13 +38,14 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
 
     if (address && chain) {
       const promiseList = [] as Promise<any>[];
-      let tokenIsActive = nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible;
+      const nativeTokenActive = nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible;
+      let childTokenActive = true;
 
       if (tokenSlug && tokenSlug !== nativeTokenSlug && !assetSettingMap[tokenSlug]?.visible) {
-        tokenIsActive = false;
+        childTokenActive = false;
       }
 
-      if (tokenIsActive) {
+      if (nativeTokenActive && childTokenActive) {
         promiseList.push(getFreeBalance({ address, networkKey: chain })
           .then((balance) => {
             !cancel && setNativeTokenBalance(balance);
@@ -71,10 +72,20 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
           !cancel && setIsLoading(false);
         });
       } else {
+        const tokenNames = [];
+
+        if (!nativeTokenActive && nativeTokenSlug && assetRegistry[nativeTokenSlug]) {
+          tokenNames.push(assetRegistry[nativeTokenSlug].symbol);
+        }
+
+        if (!childTokenActive && tokenSlug && assetRegistry[tokenSlug]) {
+          tokenNames.push(assetRegistry[tokenSlug].symbol);
+        }
+
         !cancel && setNativeTokenBalance(DEFAULT_BALANCE);
         !cancel && setTokenBalance(DEFAULT_BALANCE);
         !cancel && setIsLoading(false);
-        !cancel && setError(t('Chain or token is inactive'));
+        !cancel && setError(t('Please enable {{tokenNames}} on {{chain}}', { tokenNames: tokenNames.join(', '), chain: chainInfo?.name }));
       }
     }
 
@@ -83,7 +94,7 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
       setIsLoading(true);
       setError(null);
     };
-  }, [address, chain, nativeTokenSlug, tokenSlug, isRefresh, assetSettingMap, t]);
+  }, [address, chain, nativeTokenSlug, tokenSlug, isRefresh, assetSettingMap, t, assetRegistry, chainInfo?.name]);
 
   return { refreshBalance, tokenBalance, nativeTokenBalance, nativeTokenSlug, isLoading, error };
 };

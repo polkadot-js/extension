@@ -47,20 +47,28 @@ describe('Create Account', () => {
     );
 
   describe('CreateAccount component', () => {
-    const clickNext = () => wrapper.findWhere(
-      (node) => node.type() === 'button' && node.text() === 'Next'
-    ).simulate('click');
+    const clickNext = () =>
+      wrapper.findWhere((node) => node.type() === 'button' && node.text() === 'Next').simulate('click');
 
-    const clickBack = () => wrapper.findWhere(
-      (node) => node.type() === 'button' && !!node.find('.arrowLeft').length
-    ).simulate('click');
+    const clickBack = () =>
+      wrapper.findWhere((node) => node.type() === 'button' && !!node.find('.arrowLeft').length).simulate('click');
 
-    const isPresent = <T,>(statelessComponent: FunctionComponent<T>) => expect(wrapper.find(statelessComponent).exists()).toBeTruthy();
-    const isAbsent = <T,>(statelessComponent: FunctionComponent<T>) => expect(wrapper.find(statelessComponent).exists()).toBeFalsy();
+    const isPresent = <T,>(statelessComponent: FunctionComponent<T>) =>
+      expect(wrapper.find(statelessComponent).exists()).toBeTruthy();
+    const isAbsent = <T,>(statelessComponent: FunctionComponent<T>) =>
+      expect(wrapper.find(statelessComponent).exists()).toBeFalsy();
 
-    const checkIsSecretCopiedCheckbox = () => wrapper.find({type: 'checkbox'}).simulate('change', {target: {checked: true}});
+    const checkIsSecretCopiedCheckbox = () =>
+      wrapper.find({ type: 'checkbox' }).simulate('change', { target: { checked: true } });
+
+    // eslint-disable-next-line deprecation/deprecation
+    const isClipboardUntouched = () => expect(document.execCommand).not.toHaveBeenCalled();
+    // eslint-disable-next-line deprecation/deprecation
+    const isClipboardCleared = () => expect(document.execCommand).toHaveBeenCalled();
 
     beforeEach(async () => {
+      // eslint-disable-next-line deprecation/deprecation
+      (document.execCommand as jest.Mock).mockClear();
       onActionStub = jest.fn();
       jest.spyOn(messaging, 'createSeed').mockResolvedValue(exampleAccount);
       jest.spyOn(messaging, 'createAccountSuri').mockResolvedValue(true);
@@ -126,6 +134,17 @@ describe('Create Account', () => {
       await act(flushAllPromises);
 
       isPresent(AccountNamePasswordCreation);
+    });
+
+    it('clears clipboard after step 2', () => {
+      clickNext();
+      checkIsSecretCopiedCheckbox();
+
+      isClipboardUntouched();
+
+      clickNext();
+
+      isClipboardCleared();
     });
   });
 });

@@ -200,7 +200,7 @@ function SeedAndPath({ className, genesis, onAccountChange, onNextStep, type }: 
           onSubmit={onSubmit}
         >
           <StyledHeader
-            text={t<string>(' You can paste it into any field.')}
+            text={t<string>('You can paste it into any field.')}
             title={t<string>('Enter your 12-word secret phrase')}
           />
           <MnemonicWrapper>

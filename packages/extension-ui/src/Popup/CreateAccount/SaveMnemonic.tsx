@@ -52,7 +52,7 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
     <HelperFooter>
       <Checkbox
         checked={isSecretCopied}
-        label={t('I have copied the secret phrase to a safe place')}
+        label={t('I have safely stored the secret phrase. The clipboard will be cleared upon clicking "Next".')}
         onChange={setIsSecretCopied}
         variant='small'
       />
@@ -103,12 +103,14 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
       </ContentContainer>
       <ButtonArea footer={footer}>
         <BackButton onClick={onPreviousStep} />
-        <Button
-          isDisabled={!isSecretCopied}
-          onClick={onNextStep}
-        >
-          {t<string>('Next')}
-        </Button>
+        <CopyToClipboard text=' '>
+          <Button
+            isDisabled={!isSecretCopied}
+            onClick={onNextStep}
+          >
+            {t<string>('Next')}
+          </Button>
+        </CopyToClipboard>
       </ButtonArea>
     </>
   );
@@ -132,6 +134,7 @@ const MnemonicContainer = styled.div`
   width: 100%;
   user-select: all;
   margin-bottom: 32px;
+  row-gap: 12px;
 
   .mnemonic-index {
     user-select: none;
@@ -154,28 +157,6 @@ export default React.memo(
       width: 16px;
       height: 16px;
       background: ${theme.primaryColor};
-    }
-    
-    .mnemonic-container {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      width: 100%;
-      user-select: all;
-
-      .mnemonic-index {
-        user-select: none;
-      }
-    }
-
-    .mnemonic-pill {
-      box-sizing: border-box;
-      width: 108px;
-      margin-bottom: 8px;
-      input {
-        text-align: left;
-      }
     }
 
     .copy-to-clipboard {

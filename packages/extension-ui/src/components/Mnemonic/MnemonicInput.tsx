@@ -83,26 +83,7 @@ export default styled(MnemonicInput)`
   .mnemonic-container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px 5px;
+    gap: 12px 5px;
     width: 100%;
-  }
-
-  .mnemonic-pill {
-    box-sizing: border-box;
-    min-width: 0;
-  }
-
-  .mnemonic-index {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: ${({ theme }) => theme.subTextColor};
-    background: ${({ theme }) => theme.menuBackground};
-    min-width: 24px;
-    min-height: 24px;
-    font-weight: 300;
-    font-size: 13px;
-    line-height: 130%;
-    border-radius: 50%;
   }
 `;

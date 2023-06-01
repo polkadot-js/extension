@@ -72,6 +72,7 @@ const variantToStyles = {
     width: '11px',
     top: '4px',
     left: '0px',
+    paddingLeft: '24px',
     after: {
       height: '11px',
       width: '11px',
@@ -84,6 +85,7 @@ const variantToStyles = {
     width: '16px',
     top: '2px',
     left: '0px',
+    paddingLeft: '26px',
     after: {
       height: '10px',
       width: '13px',
@@ -99,7 +101,7 @@ const Label = styled.label<{ isOutlined: boolean; variant: NonNullable<Props['va
     min-height: ${({ variant }) => `calc(${variantToStyles[variant].width} + 4px)`};
     cursor: pointer;
     user-select: none;
-    padding-left: 26px;
+    padding-left: ${({ variant }) => variantToStyles[variant].paddingLeft};;
     padding-top: 1px;
     color: ${({ theme }) => theme.subTextColor};
     font-size: ${({ theme }) => theme.fontSize};

@@ -4,7 +4,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 import React, { useState } from 'react';
-import styled from 'styled-components';
 
 import { EMPTY_SEED_WORDS, SEED_WORDS_LENGTH } from '@polkadot/extension-ui/Popup/ImportSeed/consts';
 
@@ -21,7 +20,20 @@ export default {
 } satisfies Meta<typeof MnemonicInput>;
 
 const MnemonicInputWrapper = ({ showError }: { showError: boolean }) => {
-  const [seedWords, setSeedWords] = useState(EMPTY_SEED_WORDS);
+  const [seedWords, setSeedWords] = useState([
+    'interest',
+    'kangaroo',
+    'language',
+    'marriage',
+    'material',
+    'mechanic',
+    'midnight',
+    'mosquito',
+    'mountain',
+    'multiply',
+    'mushroom',
+    'negative'
+  ]);
 
   const onInputChange = (nextSeedWords: string[]) =>
     setSeedWords([...nextSeedWords, ...EMPTY_SEED_WORDS].slice(0, SEED_WORDS_LENGTH));

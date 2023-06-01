@@ -121,6 +121,15 @@ export type _NetworkUpsertParams = {
 
 export const _CUSTOM_PREFIX = 'custom-';
 
+export interface EnableChainParams {
+  chainSlug: string,
+  enableTokens?: boolean
+}
+export interface EnableMultiChainParams {
+  chainSlugs: string[],
+  enableTokens?: boolean
+}
+
 export interface _ValidateCustomAssetRequest {
   contractAddress: string,
   originChain: string,

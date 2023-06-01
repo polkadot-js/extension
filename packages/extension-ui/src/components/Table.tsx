@@ -23,8 +23,8 @@ function Table({ children, className = '', isFull }: Props): React.ReactElement<
 export default React.memo(
   styled(Table)(
     ({ theme }: ThemeProps) => `
+  table-layout: fixed;
   border: 0;
-  display: block;
   font-size: ${theme.labelFontSize};
   line-height: ${theme.labelLineHeight};
   margin-bottom: 1rem;
@@ -37,7 +37,6 @@ export default React.memo(
 
   tr {
     display: flex;
-    width: 312px;
     max-height: 34px;
     padding: 6px 4px 8px;
     flex-direction: row;

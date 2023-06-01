@@ -7,10 +7,8 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import border from '../../assets/border.svg';
-import { Loading, SigningReqContext, Svg } from '../../components';
+import { Loading, SigningReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { Z_INDEX } from '../../zindex';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
 
@@ -46,10 +44,6 @@ function Signing({ className }: Props): React.ReactElement<Props> {
   return request ? (
     <>
       <div className={className}>
-        <Svg
-          className='border'
-          src={border}
-        />
         <div className='content'>
           {requests.length > 1 && (
             <div className='centered'>
@@ -87,17 +81,6 @@ export default React.memo(
       height: 584px;
       overflow-y: hidden;
       overflow-x: hidden;
-    }
-
-    .border {
-      z-index: ${Z_INDEX.BORDER};
-      position: absolute;
-      top: 0;
-      right: 0;
-      pointer-events: none;
-      background: ${theme.newTransactionBackground};
-      height: 600px;
-      width: 360px;
     }
 
     .centered {

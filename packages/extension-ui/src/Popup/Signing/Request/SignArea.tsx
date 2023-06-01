@@ -156,5 +156,4 @@ function SignArea({ buttonText, className, error, isExternal, isFirst, isLast, s
 export default styled(SignArea)`
   flex-direction: column;
   padding: 6px 8px;
-  max-width: 344px;
 `;

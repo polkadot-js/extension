@@ -64,9 +64,8 @@ function TransactionStatus({
 export default React.memo(
   withRouter(
     styled(TransactionStatus)(
-      ({ match, theme }: Props) => `
+      ({ theme }: Props) => `
   .content {
-    outline: ${match.params.status === 'signed' ? theme.successBackground : theme.dangerBackground} solid 37px;
     border-radius: 32px;
     height: 584px;
     margin-top: 8px;

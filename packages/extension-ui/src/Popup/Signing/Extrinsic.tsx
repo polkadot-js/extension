@@ -7,6 +7,7 @@ import type { SignerPayloadJSON } from '@polkadot/types/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import styled from "styled-components";
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { bnToBn, formatNumber } from '@polkadot/util';
@@ -85,7 +86,7 @@ function Extrinsic({
   }
 
   return (
-    <Table className={className}>
+    <FullWidthTable className={className}>
       <tr>
         <td className='label'>{t<string>('from')}</td>
         <div className='separator'></div>
@@ -131,8 +132,12 @@ function Extrinsic({
         <div className='separator'></div>
         <td className='data'>{formatNumber(nonce)}</td>
       </tr>
-    </Table>
+    </FullWidthTable>
   );
 }
 
 export default React.memo(Extrinsic);
+
+const FullWidthTable = styled(Table)`
+  width: 100%;
+`;

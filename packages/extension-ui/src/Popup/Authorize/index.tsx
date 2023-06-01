@@ -6,7 +6,7 @@ import type { ThemeProps } from '../../types';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, AuthorizeReqContext, Checkbox } from '../../components';
+import { AuthorizeReqContext, Checkbox } from '../../components';
 import Account from '../Accounts/Account';
 import Request from './Request';
 
@@ -16,14 +16,10 @@ interface Props extends ThemeProps {
 
 function Authorize({ className = '' }: Props): React.ReactElement {
   const requests = useContext(AuthorizeReqContext);
-  const { accounts } = useContext(AccountContext);
-  const classes = [requests.length === 1 ? 'lastRequest' : null, !accounts.length ? 'warning-outline' : null]
-    .filter(Boolean)
-    .join(' ');
 
   return (
     <>
-      <div className={`${className} ${classes}`}>
+      <div className={`${className} ${requests.length === 1 ? 'lastRequest' : ''}`}>
         {requests.map(
           ({ id, request, url }, index): React.ReactNode => (
             <Request
@@ -96,12 +92,6 @@ export default styled(Authorize)(
 
   && {
     padding: 0;
-  }
-
-
-
-  &.warning-outline {
-    outline:  37px solid ${theme.warningColor};
   }
 `
 );

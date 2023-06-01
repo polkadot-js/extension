@@ -45,7 +45,6 @@ function isRawPayload(payload: SignerPayloadJSON | SignerPayloadRaw): payload is
 }
 
 const StyledAddress = styled(Address)`
-  max-width: 324px;
   margin: 0px 8px 8px 8px;
 `;
 

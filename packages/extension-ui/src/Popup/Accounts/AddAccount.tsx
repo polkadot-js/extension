@@ -169,7 +169,6 @@ export default React.memo(
     font-size: 16px;
     line-height: 150%;
     letter-spacing: 0.04em;
-    max-width: 312px;
     color: ${theme.subTextColor};
     margin-top: 0px;
   }

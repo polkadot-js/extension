@@ -477,7 +477,7 @@ export default class Extension {
 
   // this method is called when we want to open up the popup from the ui
   private windowOpen (path: AllowedPath): boolean {
-    const url = `${chrome.extension.getURL('index.html')}#${path}`;
+    const url = `${chrome.extension.getURL('external.html')}#${path}`;
 
     if (!ALLOWED_PATH.includes(path)) {
       console.error('Not allowed to open the url:', url);

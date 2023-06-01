@@ -77,7 +77,6 @@ function PhishingDetected({ className }: Props): React.ReactElement<Props> {
 export default styled(PhishingDetected)(
   ({ theme }: Props) => `
   .content {
-    outline: ${theme.dangerBackground} solid 37px;
     border-radius: 32px;
     height: 584px;
     margin-top: 8px;

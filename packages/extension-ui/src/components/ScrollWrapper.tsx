@@ -44,9 +44,5 @@ export default styled(ScrollWrapper)(
   ${Label}:not(.label), ${Address}, ${PasswordFeedback} {
     width: calc(100% + 8px);
   }
-
-  .header .container{
-    width: 360px;
-  }
 `
 );

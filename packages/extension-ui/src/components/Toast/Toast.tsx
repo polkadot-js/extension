@@ -68,7 +68,6 @@ export default styled(Toast)(
   gap: 14px;
   color : ${theme.toastTextColor};
   isolation: isolate;
-  width: 344px;
   padding: 16px;
   box-sizing: border-box;
   animation: toast 0.2s, toast  0.2s linear ${TOAST_TIMEOUT / 1000}s reverse;

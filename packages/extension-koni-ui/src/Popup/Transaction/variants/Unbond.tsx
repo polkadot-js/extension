@@ -12,7 +12,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertFieldToObject, isAccountAll, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, isAccountAll, noop, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -67,6 +67,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [form] = Form.useForm<UnstakeFormProps>();
   const [isBalanceReady, setIsBalanceReady] = useState(true);
+  const [amountChange, setAmountChange] = useState(false);
 
   const formDefault = useMemo((): UnstakeFormProps => ({
     from: from,
@@ -134,6 +135,18 @@ const Component: React.FC<Props> = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
   const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+
+  const onValuesChange: FormCallbacks<UnstakeFormProps>['onValuesChange'] = useCallback((changes: Partial<UnstakeFormProps>) => {
+    const { from, validator, value } = changes;
+
+    if ((from || validator) && amountChange) {
+      form.validateFields(['value']).finally(noop);
+    }
+
+    if (value !== undefined) {
+      setAmountChange(true);
+    }
+  }, [amountChange, form]);
 
   const onFieldsChange: FormCallbacks<UnstakeFormProps>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     // TODO: field change
@@ -228,6 +241,12 @@ const Component: React.FC<Props> = (props: Props) => {
     setChain(stakingChain || '');
   }, [setChain, stakingChain]);
 
+  useEffect(() => {
+    if (amountChange) {
+      form.validateFields(['value']).finally(noop);
+    }
+  }, [form, amountChange, minValue, bondedValue, decimals]);
+
   return (
     <>
       <TransactionContent>
@@ -239,6 +258,7 @@ const Component: React.FC<Props> = (props: Props) => {
             name='unstake-form'
             onFieldsChange={onFieldsChange}
             onFinish={onSubmit}
+            onValuesChange={onValuesChange}
           >
             <Form.Item
               hidden={!isAll}

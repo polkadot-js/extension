@@ -4,6 +4,7 @@
 /* eslint @typescript-eslint/no-empty-interface: "off" */
 
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
@@ -113,7 +114,9 @@ export type _NetworkUpsertParams = {
     // Common
     existentialDeposit: string,
     decimals: number
-  }
+  },
+  unconfirmed?: boolean;
+  providerError?: _CHAIN_VALIDATION_ERROR;
 }
 
 export const _CUSTOM_PREFIX = 'custom-';

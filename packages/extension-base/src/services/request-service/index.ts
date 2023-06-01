@@ -49,6 +49,10 @@ export default class RequestService {
     this.#popupHandler.updateIconV2(shouldClose);
   }
 
+  public stripUrl (url: string): string {
+    return this.#authRequestHandler.stripUrl(url);
+  }
+
   getAddressList (value = false): Record<string, boolean> {
     const addressList = Object.keys(this.keyringService.accounts);
 
@@ -192,6 +196,16 @@ export default class RequestService {
 
   public async completeConfirmation (request: RequestConfirmationComplete): Promise<boolean> {
     return await this.#evmRequestHandler.completeConfirmation(request);
+  }
+
+  public updateConfirmation<CT extends ConfirmationType> (
+    id: string,
+    type: CT,
+    payload: ConfirmationDefinitions[CT][0]['payload'],
+    options: ConfirmationsQueueItemOptions = {},
+    validator?: (input: ConfirmationDefinitions[CT][1]) => Error | undefined
+  ) {
+    return this.#evmRequestHandler.updateConfirmation(id, type, payload, options, validator);
   }
 
   // General methods

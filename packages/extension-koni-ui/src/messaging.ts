@@ -851,3 +851,8 @@ export async function getLogoMap (): Promise<AllLogoMap> {
 export async function reloadCron (request: CronReloadRequest): Promise<boolean> {
   return sendMessage('pri(cron.reload)', request);
 }
+
+// Phishing page
+export async function passPhishingPage (url: string): Promise<boolean> {
+  return sendMessage('pri(phishing.pass)', { url });
+}

@@ -120,8 +120,8 @@ export default class DatabaseService {
     }));
   }
 
-  subscribeNominatorMetadata (callback: (data: NominatorMetadata[]) => void) {
-    this.stores.nominatorMetadata.subscribeAll().subscribe(({
+  subscribeNominatorMetadata (addresses: string[], callback: (data: NominatorMetadata[]) => void) {
+    return this.stores.nominatorMetadata.subscribeByAddresses(addresses).subscribe(({
       next: (data) => callback && callback(data)
     }));
   }
@@ -174,7 +174,7 @@ export default class DatabaseService {
 
   async cleanUpNft (chain: string, owner: string, collectionIds: string[], nftIds: string[], ownNothing?: boolean) {
     if (ownNothing) {
-      return this.stores.nft.deleteNftsByChainAndOwner(chain, reformatAddress(owner, 42));
+      return this.stores.nft.deleteNftsByChainAndOwner(chain, reformatAddress(owner, 42), collectionIds);
     }
 
     return this.stores.nft.cleanUpNfts(chain, reformatAddress(owner, 42), collectionIds, nftIds);
@@ -227,7 +227,13 @@ export default class DatabaseService {
   }
 
   // Staking
-  async updateChainStakingMetadata (item: ChainStakingMetadata) {
+  async updateChainStakingMetadata (item: ChainStakingMetadata, changes?: Record<string, unknown>) {
+    const existingRecord = await this.stores.chainStakingMetadata.getByChainAndType(item.chain, item.type);
+
+    if (existingRecord && changes) {
+      return this.stores.chainStakingMetadata.updateByChainAndType(item.chain, item.type, changes);
+    }
+
     return this.stores.chainStakingMetadata.upsert(item);
   }
 

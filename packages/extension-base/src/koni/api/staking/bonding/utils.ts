@@ -124,6 +124,11 @@ export interface Unlocking {
   value: BN;
 }
 
+export interface TernoaStakingRewardsStakingRewardsData {
+  sessionEraPayout: string,
+  sessionExtraRewardPayout: string
+}
+
 export function parsePoolStashAddress (api: ApiPromise, index: number, poolId: number, poolsPalletId: string) {
   const ModPrefix = stringToU8a('modl');
   const U32Opts = { bitLength: 32, isLe: true };
@@ -221,6 +226,15 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
 
 export function calculateAlephZeroValidatorReturn (chainStakedReturn: number, commission: number) {
   return chainStakedReturn * (100 - commission) / 100;
+}
+
+export function calculateTernoaValidatorReturn (rewardPerValidator: number, validatorStake: number, commission: number) {
+  const percentRewardForNominators = (100 - commission) / 100;
+  const rewardForNominators = rewardPerValidator * percentRewardForNominators;
+
+  const stakeRatio = rewardForNominators / validatorStake;
+
+  return stakeRatio * 365 * 100;
 }
 
 export function calculateValidatorStakedReturn (chainStakedReturn: number, totalValidatorStake: BN, avgStake: BN, commission: number) {

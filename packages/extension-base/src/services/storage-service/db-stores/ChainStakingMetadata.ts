@@ -34,4 +34,8 @@ export default class ChainStakingMetadataStore extends BaseStoreWithChain<ChainS
   async removeByChains (chains: string[]) {
     return this.table.where('chain').anyOfIgnoreCase(chains).delete();
   }
+
+  updateByChainAndType (chain: string, type = StakingType.NOMINATED, changes: Record<string, unknown>) {
+    return this.table.update([chain, type], changes);
+  }
 }

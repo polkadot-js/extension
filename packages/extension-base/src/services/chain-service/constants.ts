@@ -190,7 +190,7 @@ export const _BALANCE_PARSING_CHAIN_GROUP = {
 // XCM------------------------------------------------------------------------------------------------------------------
 
 export const _XCM_CHAIN_GROUP = {
-  polkadotXcm: ['astar', 'shiden', 'statemine', 'statemint'],
+  polkadotXcm: ['astar', 'shiden', 'statemine', 'statemint', 'equilibrium_parachain'],
   xcmPallet: ['polkadot', 'kusama']
   // default is xTokens pallet
 };

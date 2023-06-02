@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
@@ -13,7 +13,7 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useChainChecker, useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -55,7 +55,6 @@ function getTokenItems (
   address: string,
   accounts: AccountJson[],
   chainInfoMap: Record<string, _ChainInfo>,
-  chainStateMap: Record<string, _ChainState>,
   assetRegistry: Record<string, _ChainAsset>,
   assetSettingMap: Record<string, AssetSetting>,
   multiChainAssetMap: Record<string, _MultiChainAsset>,
@@ -221,12 +220,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
   const preCheckReadOnly = usePreCheckReadOnly(from, 'The account you are using is watch-only, you cannot send assets with it');
+  const chainChecker = useChainChecker();
 
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
   const [, update] = useState({});
   const [isBalanceReady, setIsBalanceReady] = useState(true);
   const [forceUpdateMaxValue, setForceUpdateMaxValue] = useState<object|undefined>(undefined);
+  const chainStatus = useMemo(() => chainStateMap[chain]?.connectionStatus, [chain, chainStateMap]);
 
   const handleTransferAll = useCallback((value: boolean) => {
     setForceUpdateMaxValue({});
@@ -271,13 +272,12 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       from,
       accounts,
       chainInfoMap,
-      chainStateMap,
       assetRegistry,
       assetSettingMap,
       multiChainAssetMap,
       sendFundSlug
     );
-  }, [accounts, assetRegistry, assetSettingMap, chainInfoMap, chainStateMap, from, multiChainAssetMap, sendFundSlug]);
+  }, [accounts, assetRegistry, assetSettingMap, chainInfoMap, from, multiChainAssetMap, sendFundSlug]);
 
   const validateRecipientAddress = useCallback((rule: Rule, _recipientAddress: string): Promise<void> => {
     if (!_recipientAddress) {
@@ -549,7 +549,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return () => {
       cancel = true;
     };
-  }, [asset, assetRegistry, assetSettingMap, chain, destChain, form, from]);
+  }, [asset, assetRegistry, chain, chainStatus, destChain, form, from]);
 
   useEffect(() => {
     const bnTransferAmount = new BN(transferAmount || '0');
@@ -559,6 +559,12 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       setIsTransferAll(true);
     }
   }, [maxTransfer, transferAmount]);
+
+  useEffect(() => {
+    if (destChain && destChain !== chain) {
+      chainChecker(destChain);
+    }
+  }, [chain, chainChecker, destChain]);
 
   return (
     <>

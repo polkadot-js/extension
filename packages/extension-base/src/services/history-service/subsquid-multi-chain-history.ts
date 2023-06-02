@@ -414,9 +414,11 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
 
     const _addresses = addresses.filter((add) => retryAddresses.includes(add.toLowerCase()));
 
-    const retryHistories = await fetchMultiChainHistories(_addresses, chainMap, maxPage, countMap, lastId);
+    if (_addresses.length > 0) {
+      const retryHistories = await fetchMultiChainHistories(_addresses, chainMap, maxPage, countMap, lastId);
 
-    histories.push(...retryHistories);
+      histories.push(...retryHistories);
+    }
   }
 
   return histories;

@@ -179,8 +179,9 @@ export const _TRANSFER_CHAIN_GROUP = {
   kintsugi: ['kintsugi', 'kintsugi_test', 'interlay'],
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
   crab: ['crab', 'pangolin'],
-  bitcountry: ['pioneer', 'bitcountry'],
-  statemine: ['statemint', 'statemine', 'darwinia2']
+  bitcountry: ['pioneer', 'bitcountry', 'bifrost'],
+  statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya'],
+  riochain: ['riochain']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {

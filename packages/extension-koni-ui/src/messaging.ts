@@ -606,12 +606,12 @@ export async function disableChain (networkKey: string): Promise<boolean> {
   return sendMessage('pri(chainService.disableChain)', networkKey);
 }
 
-export async function enableChain (networkKey: string): Promise<boolean> {
-  return sendMessage('pri(chainService.enableChain)', networkKey);
+export async function enableChain (networkKey: string, enableTokens = true): Promise<boolean> {
+  return sendMessage('pri(chainService.enableChain)', { chainSlug: networkKey, enableTokens });
 }
 
-export async function enableChains (targetKeys: string[]): Promise<boolean> {
-  return sendMessage('pri(chainService.enableChains)', targetKeys);
+export async function enableChains (targetKeys: string[], enableTokens = true): Promise<boolean> {
+  return sendMessage('pri(chainService.enableChains)', { chainSlugs: targetKeys, enableTokens });
 }
 
 export async function disableChains (targetKeys: string[]): Promise<boolean> {

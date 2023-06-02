@@ -1608,7 +1608,7 @@ export default class KoniExtension {
       const { value: receiverBalance } = await this.#koniState.balanceService.getTokenFreeBalance(to, networkKey, tokenSlug);
 
       if (new BigN(receiverBalance).plus(transferAmount.value).lt(minAmount)) {
-        const atLeast = new BigN(minAmount).minus(receiverBalance).plus(1);
+        const atLeast = new BigN(minAmount).minus(receiverBalance).plus((tokenInfo.decimals || 0) === 0 ? 0 : 1);
 
         const atLeastStr = formatNumber(atLeast, tokenInfo.decimals || 0, balanceFormatter);
 
@@ -1685,11 +1685,9 @@ export default class KoniExtension {
       additionalValidator = async (inputTransaction: SWTransactionResponse): Promise<void> => {
         const { value: receiverBalance } = await this.#koniState.balanceService.getTokenFreeBalance(to, destinationTokenInfo.originChain, destinationTokenInfo.slug);
         const minAmount = destinationTokenInfo.minAmount || '0';
-        const minValue = new BigN(minAmount).multipliedBy(XCM_MIN_AMOUNT_RATIO);
 
-        if (new BigN(receiverBalance).plus(value).lt(minValue)) {
-          const atLeast = new BigN(minValue).minus(receiverBalance).plus(1);
-
+        if (new BigN(receiverBalance).lt(minAmount)) {
+          const atLeast = new BigN(minAmount).multipliedBy(XCM_MIN_AMOUNT_RATIO).plus((destinationTokenInfo.decimals || 0) === 0 ? 0 : 1);
           const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
 
           inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `You must transfer at least ${atLeastStr} ${originTokenInfo.symbol} to keep the destination account alive`));

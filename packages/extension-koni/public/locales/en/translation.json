@@ -1226,5 +1226,6 @@
   "I trust this site": "",
   "This site has been previously blocked. Do you wish to unblock and grant access to it?": "",
   "The token contract is invalid.": "",
-  "Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.": ""
+  "Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.": "",
+  "Please enable {{tokenNames}} on {{chain}}": ""
 }

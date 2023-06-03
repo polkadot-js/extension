@@ -9,6 +9,7 @@ import { TransactionWarning } from '@subwallet/extension-base/background/warning
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
@@ -179,7 +180,18 @@ export default class TransactionService {
     const transferNativeNum = parseInt(transferNative);
 
     if (transferNativeNum + feeNum > balanceNum) {
-      validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+      if (!isTransferAll) {
+        validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+      } else {
+        if ([
+          ..._TRANSFER_CHAIN_GROUP.acala,
+          ..._TRANSFER_CHAIN_GROUP.genshiro,
+          ..._TRANSFER_CHAIN_GROUP.bitcountry,
+          ..._TRANSFER_CHAIN_GROUP.statemine
+        ].includes(chain)) { // Chain not have transfer all function
+          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+        }
+      }
     }
 
     if (!isTransferAll) {

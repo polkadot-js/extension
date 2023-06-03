@@ -11,6 +11,7 @@ import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
+import {BehaviorSubject} from "rxjs";
 
 export interface _DataMap {
   chainInfoMap: Record<string, _ChainInfo>,
@@ -46,11 +47,13 @@ export interface _ChainBaseApi {
   apiError?: string;
   apiRetry?: number;
   isApiReady: boolean;
+  isApiConnectedSubject: BehaviorSubject<boolean>;
   isApiReadyOnce: boolean;
   isApiConnected: boolean; // might be redundant
-  isApiInitialized: boolean;
-  isDevelopment?: boolean;
-  recoverConnect?: () => void;
+  connect: () => void;
+  disconnect: () => void;
+  recoverConnect: () => void;
+  destroy: () => void;
 
   isReady: Promise<any>; // to be overwritten by child interface
 }
@@ -71,8 +74,6 @@ export interface _SubstrateApiState {
 
 export interface _SubstrateApi extends _SubstrateApiState, _ChainBaseApi {
   api: ApiPromise;
-  isNotSupport?: boolean;
-
   isReady: Promise<_SubstrateApi>;
 
   specName: string;

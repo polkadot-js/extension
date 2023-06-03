@@ -6,6 +6,7 @@ import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainSt
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { _ASSET_LOGO_MAP_SRC, _ASSET_REF_SRC, _CHAIN_ASSET_SRC, _CHAIN_INFO_SRC, _CHAIN_LOGO_MAP_SRC, _DEFAULT_ACTIVE_CHAINS, _MULTI_CHAIN_ASSET_SRC } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
+import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
@@ -53,17 +54,15 @@ export class ChainService {
     this.dbService = dbService;
     this.eventService = eventService;
 
-    this.substrateChainHandler = new SubstrateChainHandler();
-    this.evmChainHandler = new EvmChainHandler();
-
-    this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
+    this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
     this.xcmRefMapSubject.next(this.getXcmRefMap());
 
-    this.logger = createLogger('chain-service');
+    this.substrateChainHandler = new SubstrateChainHandler();
+    this.evmChainHandler = new EvmChainHandler();
 
-    this.refreshChainStateInterval(3000, 6);
+    this.logger = createLogger('chain-service');
   }
 
   // Getter
@@ -490,16 +489,29 @@ export class ChainService {
   private initApiForChain (chainInfo: _ChainInfo) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
-    if (chainInfo.substrateInfo !== null) {
+    const subscribeStatus = (isConnected: boolean) => {
+      const currentStatus = this.getChainStateByKey(chainInfo.slug).connectionStatus;
+      const newStatus = isConnected ? _ChainConnectionStatus.CONNECTED : _ChainConnectionStatus.DISCONNECTED;
+
+      // Avoid unnecessary update in case disable chain
+      if (currentStatus !== newStatus) {
+        this.setChainConnectionStatus(chainInfo.slug, newStatus);
+        this.chainStateMapSubject.next(this.getChainStateMap());
+      }
+    };
+
+    if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo !== undefined) {
       const chainApi = this.initApi(chainInfo.slug, endpoint, 'substrate', providerName);
 
-      this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as _SubstrateApi);
+      this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as SubstrateApi);
+      chainApi.isApiConnectedSubject.subscribe(subscribeStatus);
     }
 
-    if (chainInfo.evmInfo !== null) {
+    if (chainInfo.evmInfo !== null && chainInfo.evmInfo !== undefined) {
       const chainApi = this.initApi(chainInfo.slug, endpoint, 'evm', providerName);
 
       this.evmChainHandler.setEvmApi(chainInfo.slug, chainApi as _EvmApi);
+      chainApi.isApiConnectedSubject.subscribe(subscribeStatus);
     }
   }
 
@@ -533,7 +545,6 @@ export class ChainService {
     this.lockChainInfoMap = true;
     chainStateMap[chainSlug].active = true;
     this.initApiForChain(chainInfo);
-    this.refreshChainStateInterval(3000, 6);
 
     this.dbService.updateChainStore({
       ...chainInfo,
@@ -1286,36 +1297,10 @@ export class ChainService {
     return this.substrateChainHandler.resumeAllApis();
   }
 
-  private refreshChainStateTimeout: NodeJS.Timeout | undefined = undefined;
-  private refreshChainStateTimes = 0;
-
-  private refreshChainStateInterval (delay = 0, times?: number) {
-    clearTimeout(this.refreshChainStateTimeout);
-
-    setTimeout(() => {
-      if (times) {
-        this.refreshChainStateTimes = times;
-      }
-
-      this.refreshChainStateTimes -= 1;
-
-      if (this.refreshChainStateTimes < 0) {
-        return;
-      }
-
-      this.updateApiMapStatus().catch(console.error);
-
-      this.refreshChainStateTimeout = setTimeout(() => {
-        this.updateApiMapStatus().catch(console.error);
-        this.refreshChainStateInterval(0);
-      }, 3000);
-    }, delay);
-  }
-
-  public async updateApiMapStatus () {
+  public checkAndUpdateStatusMapForChain (chainSlug: string) {
     const substrateApiMap = this.getSubstrateApiMap();
     const evmApiMap = this.getEvmApiMap();
-    const chainStateMap = this.getChainStateMap();
+    const chainState = this.getChainStateByKey(chainSlug);
     let update = false;
 
     function updateState (current: _ChainState, status: _ChainConnectionStatus) {
@@ -1325,38 +1310,18 @@ export class ChainService {
       }
     }
 
-    const promiseList = Object.entries(chainStateMap).map(async ([chain, chainState]) => {
-      try {
-        if (chainState.active) {
-          if (substrateApiMap[chain]) {
-            const api = substrateApiMap[chain];
+    if (chainState.active) {
+      const api = substrateApiMap[chainSlug] || evmApiMap[chainSlug];
 
-            if (api.isApiConnected) {
-              updateState(chainState, _ChainConnectionStatus.CONNECTED);
-
-              return;
-            }
-          } else if (evmApiMap[chain]) {
-            const api = evmApiMap[chain];
-
-            if (await api?.api?.eth.net.isListening()) {
-              updateState(chainState, _ChainConnectionStatus.CONNECTED);
-
-              return;
-            }
-          }
-        }
-
-        updateState(chainState, _ChainConnectionStatus.DISCONNECTED);
-      } catch (e) {
-        updateState(chainState, _ChainConnectionStatus.DISCONNECTED);
+      if (api) {
+        updateState(chainState, api.isApiConnected ? _ChainConnectionStatus.CONNECTED : _ChainConnectionStatus.DISCONNECTED);
       }
-    });
-
-    await Promise.all(promiseList);
+    } else {
+      updateState(chainState, _ChainConnectionStatus.DISCONNECTED);
+    }
 
     if (update) {
-      this.chainStateMapSubject.next(chainStateMap);
+      this.dataMap.chainStateMap[chainSlug] = chainState;
     }
   }
 

@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetType } from '@subwallet/chain-list/types';
+import { EvmApi } from '@subwallet/extension-base/services/chain-service/handler/EvmApi';
 import { _EvmChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SmartContractTokenInfo } from '@subwallet/extension-base/services/chain-service/types';
-import Web3 from 'web3';
+import { BehaviorSubject } from 'rxjs';
 import { Contract } from 'web3-eth-contract';
 
 import { logger as createLogger } from '@polkadot/util/logger';
@@ -13,6 +14,7 @@ import { Logger } from '@polkadot/util/types';
 
 export class EvmChainHandler {
   private evmApiMap: Record<string, _EvmApi> = {};
+  readonly apiStateMapSubject = new BehaviorSubject<Record<string, boolean>>({});
   private logger: Logger;
 
   constructor () {
@@ -32,8 +34,13 @@ export class EvmChainHandler {
   }
 
   public destroyEvmApi (chainSlug: string) {
-    // TODO: handle API destroy better
-    delete this.evmApiMap[chainSlug];
+    const evmApi = this.getEvmApiByChain(chainSlug);
+
+    if (!evmApi) {
+      return;
+    }
+
+    this.evmApiMap[chainSlug].destroy();
   }
 
   public refreshApi (slug: string, endpoint: string, providerName?: string) {
@@ -41,43 +48,26 @@ export class EvmChainHandler {
   }
 
   public initApi (chainSlug: string, apiUrl: string, providerName?: string): _EvmApi {
-    let api: Web3;
+    const existed = this.getEvmApiByChain(chainSlug);
 
-    if (apiUrl.startsWith('http')) {
-      api = new Web3(new Web3.providers.HttpProvider(apiUrl));
-    } else {
-      api = new Web3(new Web3.providers.WebsocketProvider(apiUrl));
+    if (existed) {
+      existed.connect();
+
+      return existed;
     }
 
-    return ({
-      api,
-      providerName,
-      chainSlug,
-      apiUrl,
+    const apiObject = new EvmApi(chainSlug, apiUrl, providerName);
 
-      isApiReady: true,
-      isApiReadyOnce: true,
-      isApiConnected: true,
-      isApiInitialized: true,
+    apiObject.isApiConnectedSubject.subscribe((isConnected) => {
+      const currentMap = this.apiStateMapSubject.getValue();
 
-      get isReady () {
-        const self = this as _EvmApi;
+      this.apiStateMapSubject.next({
+        ...currentMap,
+        [chainSlug]: isConnected
+      });
+    });
 
-        async function f (): Promise<_EvmApi> {
-          return new Promise<_EvmApi>((resolve, reject) => {
-            (function wait () {
-              if (self.isApiReady) {
-                return resolve(self);
-              }
-
-              setTimeout(wait, 10);
-            })();
-          });
-        }
-
-        return f();
-      }
-    }) as unknown as _EvmApi;
+    return apiObject;
   }
 
   public async getChainSpec (evmApi: _EvmApi) {

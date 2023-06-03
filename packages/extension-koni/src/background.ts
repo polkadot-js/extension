@@ -46,7 +46,6 @@ chrome.runtime.onConnect.addListener((port): void => {
   if (PORT_EXTENSION === port.name) {
     openCount += 1;
     koniState.wakeup().catch((err) => console.warn(err));
-    // TODO: wakeup happens every time popup opens, no matter if the background is asleep or not
 
     if (waitingToStop) {
       clearTimeout(idleTimer);
@@ -94,6 +93,7 @@ cryptoWaitReady()
     keyring.restoreKeyringPassword().finally(() => {
       koniState.updateKeyringState();
     });
+    koniState.eventService.emit('crypto.ready', true);
   })
   .catch((error): void => {
     console.error('initialization failed', error);

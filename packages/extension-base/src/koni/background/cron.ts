@@ -77,10 +77,12 @@ export class KoniCron {
     });
   };
 
-  start = () => {
+  start = async () => {
     if (this.status === 'running') {
       return;
     }
+
+    await Promise.all([this.state.eventService.waitKeyringReady, this.state.eventService.waitAssetReady]);
 
     const currentAccountInfo = this.state.keyringService.currentAccount;
 
@@ -166,7 +168,7 @@ export class KoniCron {
     this.status = 'running';
   };
 
-  stop = () => {
+  stop = async () => {
     if (this.status === 'stopped') {
       return;
     }
@@ -185,28 +187,8 @@ export class KoniCron {
     this.removeAllCrons();
 
     this.status = 'stopped';
-  };
 
-  recoverApiMap = () => {
-    const apiMap = this.state.getApiMap();
-
-    for (const [networkKey, apiProp] of Object.entries(apiMap.substrate)) {
-      if (!apiProp.isApiConnected) {
-        this.state.refreshSubstrateApi(networkKey);
-      }
-    }
-
-    for (const [key, evmApi] of Object.entries(apiMap.evm)) {
-      evmApi.api.eth.net.isListening()
-        .catch(() => {
-          this.state.refreshWeb3Api(key);
-        });
-    }
-
-    const { address } = this.state.keyringService.currentAccount;
-
-    // Todo: re-check this before remove
-    this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
+    return Promise.resolve();
   };
 
   refreshNft = (address: string, apiMap: ApiMap, smartContractNfts: _ChainAsset[], chainInfoMap: Record<string, _ChainInfo>) => {

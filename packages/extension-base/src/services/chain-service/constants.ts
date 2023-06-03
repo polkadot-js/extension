@@ -26,7 +26,7 @@ export const _PURE_EVM_CHAINS = ['binance', 'binance_test', 'ethereum', 'ethereu
 // Get balance----------------------------------------------------------------------------------------------------------
 
 export const _BALANCE_CHAIN_GROUP = {
-  kintsugi: ['kintsugi', 'interlay', 'kintsugi_test'],
+  kintsugi: ['kintsugi', 'interlay', 'kintsugi_test', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
   bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry'],
@@ -176,12 +176,13 @@ export const _TRANSFER_NOT_SUPPORTED_CHAINS = ['subspace_gemini_3a', 'kulupu', '
 
 export const _TRANSFER_CHAIN_GROUP = {
   acala: ['karura', 'acala', 'acala_testnet'],
-  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay'],
+  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
   crab: ['crab', 'pangolin'],
   bitcountry: ['pioneer', 'bitcountry', 'bifrost'],
   statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya'],
-  riochain: ['riochain']
+  riochain: ['riochain'],
+  sora_substrate: ['sora_substrate']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {

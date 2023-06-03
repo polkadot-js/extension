@@ -102,6 +102,9 @@ export async function checkSupportTransfer (networkKey: string, tokenInfo: _Chai
   } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
+  } else if (_TRANSFER_CHAIN_GROUP.sora_substrate.includes(networkKey)) {
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
   // } else if (_TRANSFER_CHAIN_GROUP.riochain.includes(networkKey) && _isNativeToken(tokenInfo)) {
   //   result.supportTransfer = true;
   //   result.supportTransferAll = true;
@@ -129,6 +132,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
   const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
+  const isTxAssetsSupported = !!api && !!api.tx && !!api.tx.assets;
   let transferAmount; // for PSP-22 tokens, might be deprecated in the future
 
   if (_isTokenWasmSmartContract(tokenInfo) && api.query.contracts) {
@@ -159,10 +163,12 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
   } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
     transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
-  // } else if (_TRANSFER_CHAIN_GROUP.riochain.includes(networkKey)) {
-  //   if (_isNativeToken(tokenInfo)) {
-  //     transfer = api.tx.currencies.transferNativeCurrency(to, value);
-  //   }
+    // } else if (_TRANSFER_CHAIN_GROUP.riochain.includes(networkKey)) {
+    //   if (_isNativeToken(tokenInfo)) {
+    //     transfer = api.tx.currencies.transferNativeCurrency(to, value);
+    //   }
+  } else if (_TRANSFER_CHAIN_GROUP.sora_substrate.includes(networkKey) && isTxAssetsSupported) {
+    transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
   } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
     if (transferAll) {
       transfer = api.tx.balances.transferAll(to, false);

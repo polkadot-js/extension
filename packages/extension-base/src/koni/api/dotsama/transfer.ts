@@ -140,9 +140,9 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
   } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxTokensSupported) {
     if (transferAll) {
-      transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo), false);
+      transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), false);
     } else if (value) {
-      transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo), new BN(value));
+      transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), new BN(value));
     }
   } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported) {
     transfer = api.tx.eqBalances.transfer([_getTokenOnChainAssetId(tokenInfo)], to, value);
@@ -163,6 +163,8 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
       transfer = api.tx.balances.transfer(to, new BN(value));
     }
   }
+
+  console.log('tx', transfer?.toHex());
 
   return [transfer, transferAmount || value];
 };

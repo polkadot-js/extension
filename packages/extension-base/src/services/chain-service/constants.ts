@@ -176,11 +176,11 @@ export const _TRANSFER_NOT_SUPPORTED_CHAINS = ['subspace_gemini_3a', 'kulupu', '
 
 export const _TRANSFER_CHAIN_GROUP = {
   acala: ['karura', 'acala', 'acala_testnet'],
-  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay'],
+  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay', 'bifrost_dot', 'hydradx_main'],
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
   crab: ['crab', 'pangolin'],
   bitcountry: ['pioneer', 'bitcountry'],
-  statemine: ['statemint', 'statemine', 'darwinia2']
+  statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'parallel']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {

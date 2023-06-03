@@ -141,6 +141,12 @@ export default class TransactionService {
             }
           }
         } catch (e) {
+          const error = e as Error;
+
+          if (error.message.includes('gas required exceeds allowance')) {
+            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+          }
+
           estimateFee.value = '0';
         }
       }
@@ -172,16 +178,16 @@ export default class TransactionService {
     const edNum = parseInt(existentialDeposit);
     const transferNativeNum = parseInt(transferNative);
 
+    if (transferNativeNum + feeNum > balanceNum) {
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+    }
+
     if (!isTransferAll) {
-      if (transferNativeNum + feeNum > balanceNum) {
-        validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-      } else {
-        if (balanceNum - (transferNativeNum + feeNum) <= edNum) {
-          if (edAsWarning) {
-            validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
-          } else {
-            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
-          }
+      if (balanceNum - (transferNativeNum + feeNum) < edNum) {
+        if (edAsWarning) {
+          validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+        } else {
+          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
         }
       }
     }

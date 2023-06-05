@@ -395,6 +395,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               statusHelpAsTooltip={true}
             >
               <AddressInput
+                {
+                  ...
+                  (
+                    (!!contractValidation.status && contractValidation.status !== 'validating')
+                      ? {
+                        statusHelp: contractValidation.message,
+                        status: contractValidation.status
+                      }
+                      : {}
+                  )
+                }
                 disabled={selectedTokenType === ''}
                 label={t('Contract address')}
                 showScanner={true}
@@ -434,10 +445,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 tooltip={t('Price ID')}
               />
             </Form.Item>
-            <Form.Item
-              help={contractValidation.message}
-              validateStatus={contractValidation.status}
-            />
           </Form>
         </div>
       </Layout.WithSubHeaderOnly>

@@ -1686,22 +1686,25 @@ export default class KoniExtension {
         substrateApi
       });
 
-      await this.updateAssetSetting({
-        autoEnableNativeToken: false,
-        tokenSlug: destinationTokenInfo.slug,
-        assetSetting: { visible: true }
-      });
+      // await this.updateAssetSetting({
+      //   autoEnableNativeToken: false,
+      //   tokenSlug: destinationTokenInfo.slug,
+      //   assetSetting: { visible: true }
+      // });
 
       additionalValidator = async (inputTransaction: SWTransactionResponse): Promise<void> => {
-        const { value: receiverBalance } = await this.#koniState.balanceService.getTokenFreeBalance(to, destinationTokenInfo.originChain, destinationTokenInfo.slug);
-        const minAmount = destinationTokenInfo.minAmount || '0';
+        return new Promise((resolve) => {
+          const minAmount = destinationTokenInfo.minAmount || '0';
 
-        if (new BigN(receiverBalance).lt(minAmount)) {
-          const atLeast = new BigN(minAmount).multipliedBy(XCM_MIN_AMOUNT_RATIO).plus((destinationTokenInfo.decimals || 0) === 0 ? 0 : 1);
-          const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
+          if (new BigN(value).lt(minAmount)) {
+            const atLeast = new BigN(minAmount).multipliedBy(XCM_MIN_AMOUNT_RATIO);
+            const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
 
-          inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `You must transfer at least ${atLeastStr} ${originTokenInfo.symbol} to keep the destination account alive`));
-        }
+            inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `You must transfer at least ${atLeastStr} ${originTokenInfo.symbol} to keep the destination account alive`));
+          }
+
+          resolve();
+        });
       };
     }
 

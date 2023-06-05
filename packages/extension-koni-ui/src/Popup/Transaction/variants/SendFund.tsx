@@ -13,7 +13,7 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { useChainChecker, useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -220,7 +220,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
   const preCheckReadOnly = usePreCheckReadOnly(from, 'The account you are using is watch-only, you cannot send assets with it');
-  const chainChecker = useChainChecker();
 
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
@@ -559,12 +558,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       setIsTransferAll(true);
     }
   }, [maxTransfer, transferAmount]);
-
-  useEffect(() => {
-    if (destChain && destChain !== chain) {
-      chainChecker(destChain);
-    }
-  }, [chain, chainChecker, destChain]);
 
   return (
     <>

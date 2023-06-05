@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { UnsignedTransaction } from '@ethersproject/transactions/src.ts';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
@@ -24,11 +25,12 @@ import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEm
 import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { anyNumberToBN } from '@subwallet/extension-base/utils/eth';
-import { parseTxAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
+import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import keyring from '@subwallet/ui-keyring';
+import { addHexPrefix } from 'ethereumjs-util';
+import { ethers } from 'ethers';
 import EventEmitter from 'eventemitter3';
-import RLP, { Input } from 'rlp';
 import { BehaviorSubject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
@@ -36,7 +38,7 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { Signer, SignerResult } from '@polkadot/api/types';
 import { EventRecord } from '@polkadot/types/interfaces';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
-import { isHex, u8aToHex } from '@polkadot/util';
+import { isHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
 
 export default class TransactionService {
@@ -629,32 +631,17 @@ export default class TransactionService {
   public generateHashPayload (chain: string, transaction: TransactionConfig): HexString {
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
-    const txObject: Web3Transaction = {
+    const txObject: UnsignedTransaction = {
       nonce: transaction.nonce || 1,
-      from: transaction.from as string,
-      gasPrice: anyNumberToBN(transaction.gasPrice).toNumber(),
-      gasLimit: anyNumberToBN(transaction.gas).toNumber(),
+      gasPrice: addHexPrefix(anyNumberToBN(transaction.gasPrice).toString(16)),
+      gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
       to: transaction.to !== undefined ? transaction.to : '',
-      value: anyNumberToBN(transaction.value).toNumber(),
+      value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
       data: transaction.data ? transaction.data : '',
       chainId: _getEvmChainId(chainInfo)
     };
 
-    const data: Input = [
-      txObject.nonce,
-      txObject.gasPrice,
-      txObject.gasLimit,
-      txObject.to,
-      txObject.value,
-      txObject.data,
-      txObject.chainId,
-      new Uint8Array([0x00]),
-      new Uint8Array([0x00])
-    ];
-
-    const encoded = RLP.encode(data);
-
-    return u8aToHex(encoded);
+    return ethers.utils.serializeTransaction(txObject) as HexString;
   }
 
   private async signAndSendEvmTransaction ({ address,
@@ -719,8 +706,6 @@ export default class TransactionService {
     // generate hashPayload for EVM transaction
     payload.hashPayload = this.generateHashPayload(chain, payload);
 
-    const hashPayload = payload.hashPayload;
-
     const emitter = new EventEmitter<TransactionEventMap>();
 
     const txObject: Web3Transaction = {
@@ -755,18 +740,9 @@ export default class TransactionService {
           if (!isExternal) {
             signedTransaction = payload;
           } else {
-            const signed = parseTxAndSignature(txObject, payload as `0x${string}`);
-            const signature = payload.slice(2);
+            const signed = mergeTransactionAndSignature(txObject, payload as `0x${string}`);
 
-            console.log(signature);
-
-            const r = `0x${signature.substring(0, 64)}`;
-            const s = `0x${signature.substring(64, 128)}`;
-            const v = `0x${signature.substring(128)}`;
             const recover = web3Api.eth.accounts.recoverTransaction(signed);
-            const recover1 = web3Api.eth.accounts.recover({ r, s, v, messageHash: hashPayload });
-
-            console.log(recover1);
 
             if (recover.toLowerCase() !== account.address.toLowerCase()) {
               throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');

@@ -70,6 +70,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
           <Logo
             className={'__option-logo'}
             network={item.key}
+            shape='squircle'
             size={24}
           />
         )}

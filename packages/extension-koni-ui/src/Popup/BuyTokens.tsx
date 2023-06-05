@@ -90,7 +90,7 @@ function Component ({ className }: Props) {
   const formDefault: BuyTokensFormProps = {
     address: isAllAccount ? '' : (currentAccount?.address || ''),
     tokenKey: fixedTokenKey || '',
-    service: 'transak'
+    service: '' as SupportService
   };
 
   const [loading, setLoading] = useState(false);

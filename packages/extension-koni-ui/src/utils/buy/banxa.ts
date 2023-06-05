@@ -27,7 +27,7 @@ interface OrderResponse {
   checkout_url: string
 }
 
-type CreateBanxaOrderResponse = OrderResponse[]
+type CreateBanxaOrderResponse = OrderResponse[];
 
 export const createBanxaOrder: CreateBuyOrderFunction = (token, address, network) => {
   return new Promise<string>((resolve, reject) => {

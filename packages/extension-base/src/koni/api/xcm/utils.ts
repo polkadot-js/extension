@@ -12,22 +12,24 @@ export const FOUR_INSTRUCTIONS_LIMITED_WEIGHT = { Limited: 5000000000 };
 
 // get multilocation for destination chain from a parachain
 
-export function getReceiverLocation (destinationChainInfo: _ChainInfo, toAddress: string): Record<string, any> {
+export function getReceiverLocation (destinationChainInfo: _ChainInfo, toAddress: string, version?: string): Record<string, any> {
+  const network = version && version === 'V3' ? undefined : 'Any';
+
   if (destinationChainInfo.slug === COMMON_CHAIN_SLUGS.ASTAR_EVM) {
     const ss58Address = evmToAddress(toAddress, 2006); // TODO: shouldn't pass addressPrefix directly
 
-    return { AccountId32: { network: 'Any', id: decodeAddress(ss58Address) } };
+    return { AccountId32: { network, id: decodeAddress(ss58Address) } };
   }
 
   if (_isChainEvmCompatible(destinationChainInfo)) {
-    return { AccountKey20: { network: 'Any', key: toAddress } };
+    return { AccountKey20: { network, key: toAddress } };
   }
 
-  return { AccountId32: { network: 'Any', id: decodeAddress(toAddress) } };
+  return { AccountId32: { network, id: decodeAddress(toAddress) } };
 }
 
 export function getBeneficiary (destinationChainInfo: _ChainInfo, recipientAddress: string, version = 'V1') {
-  const receiverLocation: Record<string, any> = getReceiverLocation(destinationChainInfo, recipientAddress);
+  const receiverLocation: Record<string, any> = getReceiverLocation(destinationChainInfo, recipientAddress, version);
 
   return {
     [version]: {
@@ -68,7 +70,7 @@ export function getTokenLocation (tokenInfo: _ChainAsset, sendingValue: string, 
 }
 
 export function getDestMultilocation (destinationChainInfo: _ChainInfo, recipient: string, version = 'V1') {
-  const receiverLocation = getReceiverLocation(destinationChainInfo, recipient);
+  const receiverLocation = getReceiverLocation(destinationChainInfo, recipient, version);
 
   if (_isSubstrateParaChain(destinationChainInfo)) {
     const interior = {
@@ -100,7 +102,7 @@ export function getDestinationChainLocation (destinationChainInfo: _ChainInfo, v
   if (_isSubstrateParaChain(destinationChainInfo)) {
     return {
       [version]: {
-        parents: 0,
+        parents: 1,
         interior: {
           X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
         }

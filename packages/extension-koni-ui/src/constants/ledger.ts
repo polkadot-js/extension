@@ -11,7 +11,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     icon: 'substrate',
     network: 'polkadot',
     slug: ChainInfoMap.polkadot.slug,
-    isDevMode: false
+    isDevMode: false,
+    isEthereum: false
   },
   {
     displayName: 'Kusama network',
@@ -19,22 +20,27 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     icon: 'substrate',
     network: 'kusama',
     slug: ChainInfoMap.kusama.slug,
-    isDevMode: false
+    isDevMode: false,
+    isEthereum: false
   },
-  // {
-  //   displayName: 'Moonbeam',
-  //   genesisHash: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
-  //   icon: 'ethereum',
-  //   network: 'moonbeam',
-  //   isDevMode: false
-  // },
+  {
+    displayName: 'Moonbeam',
+    genesisHash: ChainInfoMap.moonbeam.substrateInfo?.genesisHash || '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
+    network: 'moonbeam',
+    icon: 'ethereum',
+    slug: ChainInfoMap.moonbeam.slug,
+    isDevMode: false,
+    isEthereum: true,
+    chainId: 1284
+  },
   {
     displayName: 'Acala network',
     genesisHash: ChainInfoMap.acala.substrateInfo?.genesisHash || '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
     icon: 'substrate',
     network: 'acala',
     slug: ChainInfoMap.acala.slug,
-    isDevMode: true
+    isDevMode: true,
+    isEthereum: false
   }
   // {
   //   displayName: 'Centrifuge',

@@ -820,6 +820,7 @@ export interface CreateHardwareAccountItem {
   genesisHash: string;
   hardwareType: string;
   name: string;
+  isEthereum: boolean;
 }
 
 export interface RequestAccountCreateHardwareMultiple {
@@ -1134,12 +1135,14 @@ export interface EvmSignatureRequest extends EvmSignRequest {
   id: string;
   type: string;
   payload: unknown;
+  chain: string;
 }
 
 export interface EvmSendTransactionRequest extends TransactionConfig, EvmSignRequest {
   estimateGas: string;
   parseData: EvmTransactionData;
   isToContract: boolean;
+  chain: string;
 }
 
 export interface ConfirmationsQueueItemOptions {
@@ -1271,14 +1274,28 @@ export interface ResponseParseEvmContractInput {
 
 /// Ledger
 
-export interface LedgerNetwork {
+export interface AbstractLedgerNetwork {
   genesisHash: string;
   displayName: string;
   network: string; // network is predefined in ledger lib
   slug: string; // slug in chain list
   icon: 'substrate' | 'ethereum';
   isDevMode: boolean;
+  isEthereum: boolean;
 }
+
+export interface LedgerSubstrateNetwork extends AbstractLedgerNetwork {
+  icon: 'substrate';
+  isEthereum: false;
+}
+
+export interface LedgerEVMNetwork extends AbstractLedgerNetwork {
+  icon: 'ethereum';
+  isEthereum: true;
+  chainId: number;
+}
+
+export type LedgerNetwork = LedgerSubstrateNetwork | LedgerEVMNetwork;
 
 /// On-ramp
 

@@ -697,6 +697,8 @@ export default class TransactionService {
     // generate hashPayload for EVM transaction
     payload.hashPayload = this.generateHashPayload(chain, payload);
 
+    const hashPayload = payload.hashPayload;
+
     const emitter = new EventEmitter<TransactionEventMap>();
 
     const txObject: Web3Transaction = {
@@ -731,8 +733,17 @@ export default class TransactionService {
             signedTransaction = payload;
           } else {
             const signed = parseTxAndSignature(txObject, payload as `0x${string}`);
+            const signature = payload.slice(2);
 
+            console.log(signature);
+
+            const r = `0x${signature.substring(0, 64)}`;
+            const s = `0x${signature.substring(64, 128)}`;
+            const v = `0x${signature.substring(128)}`;
             const recover = web3Api.eth.accounts.recoverTransaction(signed);
+            const recover1 = web3Api.eth.accounts.recover({ r, s, v, messageHash: hashPayload });
+
+            console.log(recover1);
 
             if (recover.toLowerCase() !== account.address.toLowerCase()) {
               throw new EvmProviderError(EvmProviderErrorType.UNAUTHORIZED, 'Bad signature');

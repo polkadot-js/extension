@@ -202,7 +202,8 @@ const Component: React.FC<Props> = (props: Props) => {
           addressOffset: 0, // don't change
           genesisHash: selectedChain.genesisHash,
           hardwareType: 'ledger',
-          name: item.name
+          name: item.name,
+          isEthereum: selectedChain.isEthereum
         }))
       })
         .then(() => {

@@ -2059,16 +2059,32 @@ export default class KoniExtension {
     }
 
     for (const account of accounts) {
-      const { accountIndex, address, addressOffset, genesisHash, hardwareType, name } = account;
-      const key = keyring.addHardware(address, hardwareType, {
+      const { accountIndex, address, addressOffset, genesisHash, hardwareType, isEthereum, name } = account;
+      let result: KeyringPair;
+
+      const baseMeta: KeyringPair$Meta = {
+        name,
+        hardwareType,
         accountIndex,
         addressOffset,
         genesisHash,
-        name,
         originGenesisHash: genesisHash
-      });
+      };
 
-      const result = key.pair;
+      if (isEthereum) {
+        result = keyring.keyring.addFromAddress(address, {
+          ...baseMeta,
+          isExternal: true,
+          isHardware: true
+        }, null, 'ethereum');
+
+        keyring.saveAccount(result);
+      } else {
+        result = keyring.addHardware(address, hardwareType, {
+          ...baseMeta,
+          availableGenesisHashes: [genesisHash]
+        }).pair;
+      }
 
       const _address = result.address;
 

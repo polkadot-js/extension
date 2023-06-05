@@ -8,6 +8,9 @@ import { u8aToHex } from '@polkadot/util';
 
 export const parseTxAndSignature = (tx: Web3Transaction, _signature: `0x${string}`): `0x${string}` => {
   const signature = _signature.slice(2);
+
+  console.log(signature);
+
   const r = `0x${signature.substring(0, 64)}`;
   const s = `0x${signature.substring(64, 128)}`;
   const v = `0x${signature.substring(128)}`;

@@ -1559,34 +1559,44 @@ export default class KoniExtension {
     // Get native token amount
     const freeBalance = await this.#koniState.balanceService.getTokenFreeBalance(from, networkKey, tokenSlug);
 
-    if (isEthereumAddress(from) && isEthereumAddress(to) && _isTokenTransferredByEvm(tokenInfo)) { // TODO: review this
-      chainType = ChainType.EVM;
-      const txVal: string = transferAll ? freeBalance.value : (value || '0');
+    try {
+      if (isEthereumAddress(from) && isEthereumAddress(to) && _isTokenTransferredByEvm(tokenInfo)) { // TODO: review this
+        chainType = ChainType.EVM;
+        const txVal: string = transferAll ? freeBalance.value : (value || '0');
 
-      // Estimate with EVM API
-      if (_isTokenEvmSmartContract(tokenInfo) || _isLocalToken(tokenInfo)) {
-        [
-          transaction,
-          transferAmount.value
-        ] = await getERC20TransactionObject(_getContractAddressOfToken(tokenInfo), chainInfo, from, to, txVal, !!transferAll, evmApiMap);
+        // Estimate with EVM API
+        if (_isTokenEvmSmartContract(tokenInfo) || _isLocalToken(tokenInfo)) {
+          [
+            transaction,
+            transferAmount.value
+          ] = await getERC20TransactionObject(_getContractAddressOfToken(tokenInfo), chainInfo, from, to, txVal, !!transferAll, evmApiMap);
+        } else {
+          [
+            transaction,
+            transferAmount.value
+          ] = await getEVMTransactionObject(chainInfo, to, txVal, !!transferAll, evmApiMap);
+        }
       } else {
-        [
-          transaction,
-          transferAmount.value
-        ] = await getEVMTransactionObject(chainInfo, to, txVal, !!transferAll, evmApiMap);
-      }
-    } else {
-      const substrateApi = this.#koniState.getSubstrateApi(networkKey);
+        const substrateApi = this.#koniState.getSubstrateApi(networkKey);
 
-      [transaction, transferAmount.value] = await createTransferExtrinsic({
-        transferAll: !!transferAll,
-        value: value || '0',
-        from: from,
-        networkKey,
-        tokenInfo,
-        to: to,
-        substrateApi
-      });
+        [transaction, transferAmount.value] = await createTransferExtrinsic({
+          transferAll: !!transferAll,
+          value: value || '0',
+          from: from,
+          networkKey,
+          tokenInfo,
+          to: to,
+          substrateApi
+        });
+      }
+    } catch (e) {
+      const error = e as Error;
+
+      if (error.message.includes('transfer amount exceeds balance')) {
+        error.message = 'Not enough balance';
+      }
+
+      throw error;
     }
 
     const transferNativeAmount = isTransferNativeToken ? transferAmount.value : '0';
@@ -1616,7 +1626,7 @@ export default class KoniExtension {
       extrinsicType: isTransferNativeToken ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.TRANSFER_TOKEN,
       ignoreWarnings: transferAll,
       isTransferAll: isTransferNativeToken ? transferAll : false,
-      edAsWarning: true,
+      edAsWarning: isTransferNativeToken,
       additionalValidator: additionalValidator
     });
   }

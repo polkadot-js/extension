@@ -32,7 +32,7 @@ const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug
 
   return (
     <Typography.Paragraph className={CN(className, 'free-balance')}>
-      {label || t('Sender available balance:')}&nbsp;
+      {!error && ((label || t('Sender available balance:') + ' '))}
       {isLoading && <ActivityIndicator size={14} />}
       {error && <Typography.Text className={'error-message'}>{error}</Typography.Text>}
       {

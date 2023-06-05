@@ -6,7 +6,7 @@ import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/comp
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
 import { TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useAssetChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
@@ -136,7 +136,7 @@ function Component ({ className }: Props) {
   const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
   const [disabledRightBtn, setDisabledRightBtn] = useState<boolean>(false);
 
-  const checkAsset = useAssetChecker();
+  const chainChecker = useChainChecker();
 
   const goBack = useCallback(() => {
     navigate(homePath);
@@ -171,8 +171,8 @@ function Component ({ className }: Props) {
   }, [disabledRightBtn, onClickRightBtn, showRightBtn]);
 
   useEffect(() => {
-    asset !== '' && checkAsset(asset);
-  }, [asset, checkAsset]);
+    chain !== '' && chainChecker(chain);
+  }, [chain, chainChecker]);
 
   return (
     <Layout.Home

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
@@ -17,11 +17,11 @@ import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, u
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
-// import BigN from 'bignumber.js';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PaperPlaneTilt } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -340,18 +340,18 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       return Promise.reject(t('Amount is required'));
     }
 
-    // if ((new BigN(amount)).eq(new BigN(0))) {
-    //   return Promise.reject(t('Amount must be greater than 0'));
-    // }
+    if ((new BigN(amount)).eq(new BigN(0))) {
+      return Promise.reject(t('Amount must be greater than 0'));
+    }
 
-    // if ((new BigN(amount)).gt(new BigN(maxTransfer))) {
-    //   const maxString = formatBalance(maxTransfer, decimals);
-    //
-    //   return Promise.reject(t('Amount must be equal or less than {{number}}', { replace: { number: maxString } }));
-    // }
+    if ((new BigN(amount)).gt(new BigN(maxTransfer))) {
+      const maxString = formatBalance(maxTransfer, decimals);
+
+      return Promise.reject(t('Amount must be equal or less than {{number}}', { replace: { number: maxString } }));
+    }
 
     return Promise.resolve();
-  }, [t]);
+  }, [decimals, maxTransfer, t]);
 
   const onValuesChange: FormCallbacks<TransferFormProps>['onValuesChange'] = useCallback(
     (part: Partial<TransferFormProps>, values: TransferFormProps) => {

@@ -9,6 +9,7 @@ import { TransactionWarning } from '@subwallet/extension-base/background/warning
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
@@ -141,6 +142,12 @@ export default class TransactionService {
             }
           }
         } catch (e) {
+          const error = e as Error;
+
+          if (error.message.includes('gas required exceeds allowance')) {
+            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+          }
+
           estimateFee.value = '0';
         }
       }
@@ -172,16 +179,27 @@ export default class TransactionService {
     const edNum = parseInt(existentialDeposit);
     const transferNativeNum = parseInt(transferNative);
 
-    if (!isTransferAll) {
-      if (transferNativeNum + feeNum > balanceNum) {
+    if (transferNativeNum + feeNum > balanceNum) {
+      if (!isTransferAll) {
         validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
       } else {
-        if (balanceNum - (transferNativeNum + feeNum) <= edNum) {
-          if (edAsWarning) {
-            validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
-          } else {
-            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
-          }
+        if ([
+          ..._TRANSFER_CHAIN_GROUP.acala,
+          ..._TRANSFER_CHAIN_GROUP.genshiro,
+          ..._TRANSFER_CHAIN_GROUP.bitcountry,
+          ..._TRANSFER_CHAIN_GROUP.statemine
+        ].includes(chain)) { // Chain not have transfer all function
+          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+        }
+      }
+    }
+
+    if (!isTransferAll) {
+      if (balanceNum - (transferNativeNum + feeNum) < edNum) {
+        if (edAsWarning) {
+          validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+        } else {
+          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
         }
       }
     }

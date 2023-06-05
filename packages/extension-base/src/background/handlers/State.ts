@@ -74,7 +74,7 @@ const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
 
 const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,
-  height: 625,
+  height: 600,
   state: 'normal',
   type: 'popup',
   url: NOTIFICATION_URL,
@@ -83,7 +83,7 @@ const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
 
 const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,
-  height: 625,
+  height: 600,
   state: 'normal',
   type: 'normal',
   url: NOTIFICATION_URL,

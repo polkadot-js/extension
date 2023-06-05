@@ -17,12 +17,26 @@ const config = {
   "docs": {
     "autodocs": "tag"
   },
+  staticDirs: ['../packages/extension/public'],
   webpackFinal: async (config) => {
     return {
       ...config,
-      resolve: { ...config.resolve, alias: {...config.resolve.alias, ...webpackConfig.resolve.alias} },
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...config.resolve.alias,
+          ...webpackConfig.resolve.alias,
+          '@polkadot/hw-ledger': require.resolve('./__mocks__/@polkadot/hw-ledger.js'),
+          '../messaging': require.resolve('./__mocks__/messaging'),
+          '../../messaging': require.resolve('./__mocks__/messaging'),
+        },
+      },
     };
   },
+  env: (config) => ({
+    ...config,
+    EXTENSION_PREFIX: 'STORYBOOK-PREFIX',
+  }),
 };
 
 export default config;

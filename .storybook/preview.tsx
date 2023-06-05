@@ -1,8 +1,12 @@
+import React from 'react';
 
 import { withThemeFromJSXProvider } from '@storybook/addon-styling';
 import { ThemeProvider } from 'styled-components';
 import { themes } from '../packages/extension-ui/src/components/themes'
 import { BodyTheme } from '../packages/extension-ui/src/components/View'
+
+import type { Preview } from '@storybook/react';
+import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from './__mocks__/messaging';
 
 /** @type { import('@storybook/react').Preview } */
 const preview = {
@@ -23,7 +27,7 @@ const preview = {
           type: "mobile",
           styles: {
             width: "360px",
-            height: "625px",
+            height: "600px",
           }
         },
         fullWidth: {
@@ -50,6 +54,10 @@ const preview = {
 
 export default preview;
 
+type Mock = {
+  setMockImpl(nextMockImpl: Function): void;
+};
+
 export const decorators = [
   withThemeFromJSXProvider({
     GlobalStyles: BodyTheme,
@@ -59,4 +67,31 @@ export const decorators = [
     },
     defaultTheme: 'dark'
   }),
-];
+  (Story) => {
+    window.localStorage.clear();
+    window.localStorage.setItem('welcome_read', 'ok');
+
+    return <Story />;
+  },
+  (Story) => {
+    subscribeAccounts.setMockImpl((cb: Function) => cb([]));
+    subscribeAuthorizeRequests.setMockImpl((cb: Function) => cb([]));
+    subscribeMetadataRequests.setMockImpl((cb: Function) => cb([]));
+    subscribeSigningRequests.setMockImpl((cb: Function) => cb([]));
+
+    return <Story />;
+  },
+] satisfies Preview['decorators'];
+
+window.chrome = {
+  runtime: {
+    connect() {
+      return {
+        onMessage: {
+          addListener() {}
+        },
+        postMessage() {}
+      };
+    }
+  },
+} as unknown as typeof window.chrome;

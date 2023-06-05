@@ -17,6 +17,7 @@ import {
   Button,
   ButtonArea,
   HelperFooter,
+  Hero,
   LearnMore,
   Svg,
   VerticalSpace
@@ -99,21 +100,17 @@ function Forget({
         withHelp
       />
       <div className={className}>
-        <div className='text-container'>
-          <AnimatedSvg
-            className='forgetIcon'
-            src={animatedForget}
-          />
-          <span className='heading'>{t<string>('Forget account')}</span>
-          <span className='subtitle'>
+        <StyleHero
+          headerText={t<string>('Forget account')}
+          iconType='forget'
+        >
+          <Text>
             {t<string>(
               'Even though you can remove account from Aleph Zero Signer, you can restore it here or in another wallet with the secret phrase. '
             )}
-          </span>
-          <span className='subtitle'>
-            {t<string>('Not sure if you have it? You can export JSON file and use it as well.')}
-          </span>
-        </div>
+          </Text>
+          <Text>{t<string>('Not sure if you have it? You can export JSON file and use it as well.')}</Text>
+        </StyleHero>
         <StyledAddress
           address={address}
           withExport
@@ -139,37 +136,20 @@ function Forget({
   );
 }
 
-export default withRouter(
-  styled(Forget)(
-    ({ theme }: Props) => `
+const StyleHero = styled(Hero)`
+  margin-block: 16px;
+`;
 
-  .text-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-top: 16px;
+const Text = styled.p`
+  margin: 0;
+
+  :not(:last-child) {
     margin-bottom: 16px;
-    gap: 16px;
-    
-    .heading {
-      font-weight: 700;
-      font-size: 24px;
-      line-height: 118%;
-      letter-spacing: 0.03em;
-      font-family: ${theme.secondaryFontFamily};
-      color: ${theme.textColorDanger};
-    }
-
-    .subtitle {
-      font-weight: 300;
-      font-size: 14px;
-      line-height: 145%;
-      text-align: center;
-      letter-spacing: 0.07em; 
-      color: ${theme.subTextColor};
-    }
   }
+`;
+
+export default withRouter(
+  styled(Forget)`
 
   .forgetIcon {
     margin: 0 auto;
@@ -178,5 +158,4 @@ export default withRouter(
   }
 
 `
-  )
 );

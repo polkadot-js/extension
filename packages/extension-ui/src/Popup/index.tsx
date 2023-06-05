@@ -112,7 +112,6 @@ export default function Popup(): React.ReactElement {
 
   const _onAction = useCallback(
     (to?: string): void => {
-      console.log('onAction');
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
 
       if (!to) {

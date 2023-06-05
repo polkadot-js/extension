@@ -6,8 +6,7 @@ import styled from 'styled-components';
 
 import useToast from '@polkadot/extension-ui/hooks/useToast';
 
-import { Loading, ScrollWrapper } from '../../components';
-import AccountCreationSuccess from '../../components/AccountCreationSuccess';
+import { Loading, ScrollWrapper, Success } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useMetadata from '../../hooks/useMetadata';
@@ -81,20 +80,19 @@ function CreateAccount(): React.ReactElement {
           text={t<string>('Create an account')}
           total={3}
           withBackdrop
-          withMargin
         />
       )}
       <Loading>
-        {step === 1 && <SafetyFirst onNextStep={_onNextStep} />}
+        {step === 1 && <StyledSafetyFirst onNextStep={_onNextStep} />}
         {seed && step === 2 && (
-          <SaveMnemonic
+          <StyledSaveMnemonic
             onNextStep={_onNextStep}
             onPreviousStep={_onPreviousStep}
             seed={seed}
           />
         )}
         {seed && step === 3 && (
-          <AccountNamePasswordCreation
+          <StyledAccountNamePasswordCreation
             address={address}
             buttonLabel={t<string>('Create')}
             genesisHash={genesisHash}
@@ -104,11 +102,23 @@ function CreateAccount(): React.ReactElement {
             setGenesis={setGenesis}
           />
         )}
-        {step === 4 && <AccountCreationSuccess />}
+        {step === 4 && <Success text={t('Account created successfully!')} />}
       </Loading>
     </ScrollWrapper>
   );
 }
+
+const StyledSafetyFirst = styled(SafetyFirst)`
+  margin-block: auto;
+`;
+
+const StyledSaveMnemonic = styled(SaveMnemonic)`
+  margin-top: 36px;
+`;
+
+const StyledAccountNamePasswordCreation = styled(AccountNamePasswordCreation)`
+  margin-top: 36px;
+`;
 
 export default styled(CreateAccount)`
   label::after {

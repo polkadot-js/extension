@@ -8,9 +8,8 @@ import styled from 'styled-components';
 
 import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 
-import animTrusted from '../../assets/anim_trusted.svg';
 import helpIcon from '../../assets/help.svg';
-import { AnimatedSvg, ButtonArea, HelperFooter, LearnMore, ScrollWrapper, Svg, VerticalSpace } from '../../components';
+import { ButtonArea, HelperFooter, Hero, LearnMore, ScrollWrapper, Svg } from '../../components';
 import { useGoTo } from '../../hooks/useGoTo';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';
@@ -87,21 +86,17 @@ function AuthManagement({ className }: Props): React.ReactElement<Props> {
       />
       <div className={className}>
         {!authList || !hasAuthList ? (
-          <div className='empty-list'>
-            <AnimatedSvg
-              className='animated-trusted'
-              src={animTrusted}
-            />
-            <span className='heading'>{t<string>('No app request yet')}</span>
-            <span className='subtitle'>
-              {t<string>(
-                'This view will contain a list of apps and associated accounts that you have granted the Trusted status. The requests are initiated by apps.'
-              )}
-            </span>
-          </div>
+          <StyledHero
+            headerText={t<string>('No app request yet')}
+            iconType='trust'
+          >
+            {t<string>(
+              'This view will contain a list of apps and associated accounts that you have granted the Trusted status. The requests are initiated by apps.'
+            )}
+          </StyledHero>
         ) : (
           <CustomScrollWrapper>
-            <div className='website-list'>
+            <WebsiteListContainer>
               {Object.entries<AuthUrlInfo>(authList).map(([url, info]) => (
                 <WebsiteEntry
                   info={info}
@@ -110,74 +105,49 @@ function AuthManagement({ className }: Props): React.ReactElement<Props> {
                   url={url}
                 />
               ))}
-            </div>
+            </WebsiteListContainer>
           </CustomScrollWrapper>
         )}
       </div>
-      <VerticalSpace />
       <CustomButtonArea footer={footer} />
     </>
   );
 }
 
+const StyledHero = styled(Hero)`
+  margin-top: 64px;
+`;
+
+const WebsiteListContainer = styled.div`
+  margin-top: 4px;
+
+  ${WebsiteEntry}:first-child {
+      border-radius: 8px 8px 2px 2px;
+  }
+
+  ${WebsiteEntry}:last-child {
+      border-radius: 2px 2px 8px 8px;
+  }
+
+  ${WebsiteEntry}:only-child {
+      border-radius: 8px;
+  }
+
+  ${WebsiteEntry}:not(:last-child) {
+      margin-bottom: 2px;
+  }
+`;
+
 export default styled(AuthManagement)`
-  height: calc(100vh - 2px);
+  flex-grow: 1;
+
   overflow-y: auto;
 
-  .empty-list {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 16px;
-    margin-top: 56px;
-  }
+  display: flex;
+  flex-direction: column;
 
   .inputFilter {
     margin-bottom: 0.8rem;
     padding: 0 !important;
-  }
-
-  .animated-trusted {
-    width: 96px;
-    height: 96px;
-  }
-  
-
-  .heading {
-      font-weight: 700;
-      font-size: 24px;
-      line-height: 118%;
-      letter-spacing: 0.03em;
-      font-family: ${({ theme }: ThemeProps) => theme.secondaryFontFamily};
-
-    }
-
-    .subtitle {
-      font-weight: 300;
-      font-size: 14px;
-      line-height: 145%;
-      text-align: center;
-      letter-spacing: 0.07em; 
-      color: ${({ theme }: ThemeProps) => theme.subTextColor};
-      padding: 0 8px;
-    }
-
-  .website-list {
-    margin-top: 4px;
-
-    ${WebsiteEntry}:first-child {
-        border-radius: 8px 8px 2px 2px;
-        margin-bottom: 2px;
-    }
-
-    ${WebsiteEntry}:last-child {
-        border-radius: 2px 2px 8px 8px;
-        margin-top: 2px;
-    }
-
-    ${WebsiteEntry}:only-child {
-        border-radius: 8px;
-    }
   }
 `;

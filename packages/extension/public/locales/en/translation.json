@@ -368,5 +368,9 @@
   "Your secret phrase is safe!": "",
   "Derivation path is required": "",
   "This field is required": "",
-  "Feedback": ""
+  "Feedback": "",
+  "I have safely stored the secret phrase. The clipboard will be cleared upon clicking \"Next\".": "",
+  "New account has been imported successfully!": "",
+  "Metadata update": "",
+  "This approval enables future requests to be decoded using this metadata.": ""
 }

@@ -28,8 +28,16 @@ function Button({
   children,
   className = '',
   isBusy,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  isDanger,
   isDisabled,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  isSuccess,
   onClick,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  secondary,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  tertiary,
   to,
   ...buttonHTMLAttrs
 }: Props): React.ReactElement<Props> {

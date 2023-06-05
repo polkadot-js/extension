@@ -4,7 +4,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import alephMark from '../assets/alephMark.svg';
+import { Hero } from '../components';
 import * as LinksList from '../components/LinksList';
 import useTranslation from '../hooks/useTranslation';
 import { LINKS } from '../links';
@@ -21,16 +21,13 @@ const About = () => {
         withHelp
       />
       <Container>
-        <Hero>
-          <AlephLogo src={alephMark} />
-          <HeroTextContainer>
-            <Heading>{t<string>('Aleph Zero Signer')}</Heading>
-            <Version>
-              {t<string>('Version')}&nbsp;{t<string>('version-number')}
-            </Version>
-          </HeroTextContainer>
-        </Hero>
-        <Nav>
+        <StyledHero
+          headerText={t<string>('Aleph Zero Signer')}
+          iconType='aleph'
+        >
+          {t<string>('Version')}&nbsp;{t<string>('version-number')}
+        </StyledHero>
+        <nav>
           <LinksList.Group>
             <LinksList.Item
               link={LINKS.GENERAL_INTRODUCTION}
@@ -62,18 +59,13 @@ const About = () => {
               title={t<string>('Visit Website')}
             />
           </LinksList.Group>
-        </Nav>
+        </nav>
       </Container>
     </>
   );
 };
 
-export default About;
-
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
   color: ${({ theme }) => theme.textColor};
   height: 100%;
   overflow-y: scroll;
@@ -84,46 +76,8 @@ const Container = styled.div`
   }
 `;
 
-const Hero = styled.div``;
-
-const AlephLogo = styled.img`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
+const StyledHero = styled(Hero)`
+  margin-bottom: 32px;
 `;
 
-const HeroTextContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 34px;
-  margin-bottom: 36px;
-`;
-
-const Heading = styled.span`
-  font-family: ${({ theme }) => theme.secondaryFontFamily};
-  font-style: normal;
-  font-weight: bold;
-  font-size: 24px;
-  line-height: 118%;
-  display: flex;
-  align-items: center;
-  text-align: center;
-  letter-spacing: 0.03em;
-  `;
-
-const Version = styled.span`
-  font-style: normal;
-  font-weight: 300;
-  font-size: 14px;
-  line-height: 145%;
-  display: flex;
-  align-items: center;
-  text-align: center;
-  letter-spacing: 0.07em;
-  color: ${({ theme }) => theme.subTextColor}
-`;
-
-const Nav = styled.nav``;
+export default React.memo(About);

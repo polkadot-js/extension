@@ -2,130 +2,128 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
-import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import { ActionBar, ActionContext, Button, Link, Table, Warning } from '../../components';
+import { ActionContext, Button, ButtonArea, Table } from '../../components';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { approveMetaRequest, rejectMetaRequest } from '../../messaging';
 
 interface Props {
-  className?: string;
   request: MetadataDef;
   metaId: string;
   url: string;
 }
 
-function Request ({ className, metaId, request, url }: Props): React.ReactElement<Props> {
+function Request({ metaId, request, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const chain = useMetadata(request.genesisHash);
   const onAction = useContext(ActionContext);
 
-  const _onApprove = useCallback(
-    (): void => {
-      approveMetaRequest(metaId)
-        .then(() => onAction())
-        .catch(console.error);
-    },
-    [metaId, onAction]
-  );
+  const _onApprove = useCallback((): void => {
+    approveMetaRequest(metaId)
+      .then(() => onAction())
+      .catch(console.error);
+  }, [metaId, onAction]);
 
-  const _onReject = useCallback(
-    (): void => {
-      rejectMetaRequest(metaId)
-        .then(() => onAction())
-        .catch(console.error);
-    },
-    [metaId, onAction]
-  );
+  const _onReject = useCallback((): void => {
+    rejectMetaRequest(metaId)
+      .then(() => onAction())
+      .catch(console.error);
+  }, [metaId, onAction]);
+
+  const data = [
+    { label: t<string>('from'), data: url, dataTitle: url },
+    { label: t<string>('chain'), data: request.chain },
+    { label: t<string>('icon'), data: request.icon },
+    { label: t<string>('decimals'), data: request.tokenDecimals },
+    { label: t<string>('symbol'), data: request.tokenSymbol },
+    { label: t<string>('upgrade'), data: chain ? chain.specVersion : `${t('<unknown>')} -> ${request.specVersion}` }
+  ];
 
   return (
-    <div className={className}>
-      <Table>
-        <tr>
-          <td className='label'>{t<string>('from')}</td>
-          <td className='data'>{url}</td>
-        </tr>
-        <tr>
-          <td className='label'>{t<string>('chain')}</td>
-          <td className='data'>{request.chain}</td>
-        </tr>
-        <tr>
-          <td className='label'>{t<string>('icon')}</td>
-          <td className='data'>{request.icon}</td>
-        </tr>
-        <tr>
-          <td className='label'>{t<string>('decimals')}</td>
-          <td className='data'>{request.tokenDecimals}</td>
-        </tr>
-        <tr>
-          <td className='label'>{t<string>('symbol')}</td>
-          <td className='data'>{request.tokenSymbol}</td>
-        </tr>
-        <tr>
-          <td className='label'>{t<string>('upgrade')}</td>
-          <td className='data'>{chain ? chain.specVersion : t('<unknown>')} -&gt; {request.specVersion}</td>
-        </tr>
-      </Table>
-      <div className='requestInfo'>
-        <Warning className='requestWarning'>
-          {t<string>('This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.')}
-        </Warning>
+    <>
+      <Column>
+        {data.map(({ data, dataTitle, label }) => (
+          <Row key={label}>
+            <Label>{label}</Label>
+            <UnderlineWrapper>
+              <Underline />
+            </UnderlineWrapper>
+            <Data title={dataTitle}>{data}</Data>
+          </Row>
+        ))}
+      </Column>
+      <ButtonArea>
         <Button
-          className='btnAccept'
+          isDanger
+          onClick={_onReject}
+        >
+          {t<string>('Dismiss')}
+        </Button>
+        <Button
+          isSuccess
           onClick={_onApprove}
         >
-          {t<string>('Yes, do this metadata update')}
+          {t<string>('Update')}
         </Button>
-        <ActionBar className='btnReject'>
-          <Link
-            isDanger
-            onClick={_onReject}
-          >
-            {t<string>('Reject')}
-          </Link>
-        </ActionBar>
-      </div>
-    </div>
+      </ButtonArea>
+    </>
   );
 }
 
-export default styled(Request)(({ theme }: ThemeProps) => `
-  .btnAccept {
-    margin: 25px auto 0;
-    width: 90%;
-  }
+const Column = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: auto;
 
-  .btnReject {
-    margin: 8px 0 15px 0;
-    text-decoration: underline;
+  & > :not(:last-child) {
+    margin-bottom: 12px;
   }
+`;
 
-  .icon {
-    background: ${theme.buttonBackgroundDanger};
-    color: white;
-    min-width: 18px;
-    width: 14px;
-    height: 18px;
-    font-size: 10px;
-    line-height: 20px;
-    margin: 16px 15px 0 1.35rem;
-    font-weight: 800;
-    padding-left: 0.5px;
-  }
+const Row = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 8px;
+`;
 
-  .requestInfo {
-    align-items: center;
-    background: ${theme.highlightedAreaBackground};
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 8px;
-  }
+const Text = styled.span`
+  font-family: 'Karla';
+  font-style: normal;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 145%;
 
-  .requestWarning {
-    margin: 24px 24px 0 1.45rem;
-  }
-`);
+  letter-spacing: 0.07em;
+
+  color: ${({ theme }) => theme.textColorSuggestion};
+`;
+
+const Label = styled(Text)`
+  text-transform: capitalize;
+`;
+
+const Data = styled(Text)`
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+`;
+
+const UnderlineWrapper = styled.div`
+  flex-grow: 1;
+  margin-inline: 5px;
+  min-width: 20px;
+`;
+
+const Underline = styled.span`
+  display: inline-block;
+  width: 100%;
+  height: 1px;
+  vertical-align: baseline;
+  background-color: ${({ theme }) => theme.underlineDark};
+`;
+
+export default Request;

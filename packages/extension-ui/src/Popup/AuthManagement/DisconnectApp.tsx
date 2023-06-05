@@ -7,8 +7,7 @@ import React, { useCallback, useContext } from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
-import animatedRemove from '../../assets/anim_unlink.svg';
-import { AnimatedSvg, Button, ButtonArea, FaviconBox, VerticalSpace } from '../../components';
+import { Button, ButtonArea, FaviconBox, Hero } from '../../components';
 import { ActionContext } from '../../components/contexts';
 import { useGoTo } from '../../hooks/useGoTo';
 import useToast from '../../hooks/useToast';
@@ -16,23 +15,20 @@ import useTranslation from '../../hooks/useTranslation';
 import { removeAuthorization } from '../../messaging';
 import Header from '../../partials/Header';
 
-interface Props extends ThemeProps {
-  className?: string;
-}
 interface URLState {
   url: string;
 }
 
 const CustomFaviconBox = styled(FaviconBox)`
-    margin: 0 auto;
-    margin-top: 16px;
+    margin-inline: auto;
+    margin-bottom: auto;
 
     :hover {
       background: ${({ theme }: ThemeProps) => theme.inputBorderColor};
     }
 `;
 
-function DisconnectApp({ className }: Props): React.ReactElement<Props> {
+function DisconnectApp(): React.ReactElement {
   const { t } = useTranslation();
   const { url } = useParams<URLState>();
   const decodedUrl = decodeURIComponent(url);
@@ -55,22 +51,15 @@ function DisconnectApp({ className }: Props): React.ReactElement<Props> {
         withBackArrow
         withHelp
       />
-      <div className={className}>
-        <div className='content'>
-          <AnimatedSvg
-            className='animated-remove-icon'
-            src={animatedRemove}
-          />
-          <span className='heading'>{t<string>('Disconnecting app')}</span>
-          <span className='subtitle'>
-            {t<string>(
-              "You're about to disconnect an app from the Signer. This will result in disconnecting all connected accounts from this app."
-            )}
-          </span>
-          <CustomFaviconBox url={decodedUrl} />
-        </div>
-      </div>
-      <VerticalSpace />
+      <StyledHero
+        headerText={t<string>('Disconnecting app')}
+        iconType='disconnect'
+      >
+        {t<string>(
+          "You're about to disconnect an app from the Signer. This will result in disconnecting all connected accounts from this app."
+        )}
+      </StyledHero>
+      <CustomFaviconBox url={decodedUrl} />
       <ButtonArea>
         <Button
           onClick={goTo(`/url/manage?url=${url}`)}
@@ -89,56 +78,9 @@ function DisconnectApp({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(
-  styled(DisconnectApp)(
-    ({ theme }: Props) => `
-  color: ${theme.textColor};
-  height: 100%;
-  height: calc(100vh - 2px);
-  overflow-y: scroll;
-  scrollbar-width: none;
+const StyledHero = styled(Hero)`
+  margin-top: 50px;
+  margin-bottom: 32px;
+`;
 
-  .content {
-    margin-top: 56px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 16px;
-  }
-
-  .heading {
-    font-family: ${theme.secondaryFontFamily};
-    font-style: normal;
-    font-weight: 700;
-    font-size: 20px;
-    line-height: 120%;
-    text-align: center;
-    letter-spacing: 0.035em;
-    color: ${theme.textColorDanger};
-    
-  }
-
-  .subtitle {
-    font-style: normal;
-    font-weight: 300;
-    font-size: 14px;
-    line-height: 145%;
-    text-align: center;
-    letter-spacing: 0.07em;
-    color: ${theme.subTextColor};
-  }
-
-  .animated-remove-icon {
-    display: flex;
-    justify-content: center;
-    width: 96px;
-    height: 96px;
-    margin: 0 auto;
-  }
-      
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  `
-  )
-);
+export default React.memo(DisconnectApp);

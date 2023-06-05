@@ -1,0 +1,33 @@
+<svg width="144" height="144" viewBox="13 13 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="72" cy="72" r="48.75" stroke="#3C5061" stroke-width="1.5" stroke-dasharray="3 3"/>
+<circle cx="72" cy="72" r="35.25" stroke="#1B2B38" stroke-width="1.5"/>
+<path d="M123.75 72.75H100.5" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<path d="M87.75 23.25V27.75H80.25V35.25" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<path d="M87.75 102L87.75 122.25" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<path d="M107.25 102.75H96.75V113.25H87.75" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<path d="M117.75 48.75H110.25V59.25H100.5" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<circle cx="3" cy="3" r="3" transform="matrix(-1 0 0 1 129.75 69.75)" fill="#111B24" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<circle cx="3" cy="3" r="3" transform="matrix(-1 0 0 1 113.25 99.75)" fill="#111B24" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<circle cx="3" cy="3" r="3" transform="matrix(-1 0 0 1 90.75 17.25)" fill="#111B24" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<circle cx="3" cy="3" r="3" transform="matrix(-1 0 0 1 123.75 45.75)" fill="#111B24" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<circle cx="3" cy="3" r="3" transform="matrix(1 8.74228e-08 8.74228e-08 -1 84.75 128.25)" fill="#111B24" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<path d="M20.25 72.75L43.5 72.75" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<path d="M56.25 122.25L56.25 108.75L66.75 108.75" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<path d="M56.25 43.5L56.25 23.25" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<path d="M32.25 48.75L43.5 48.75" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<path d="M26.25 96.75L33.75 96.75L33.75 86.25L45 86.25" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<circle cx="3" cy="3" r="3" transform="matrix(1 8.74228e-08 8.74228e-08 -1 14.25 75.75)" fill="#111B24" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<circle cx="3" cy="3" r="3" transform="matrix(1 8.74228e-08 8.74228e-08 -1 26.25 51.75)" fill="#111B24" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<circle cx="3" cy="3" r="3" transform="matrix(1 8.74228e-08 8.74228e-08 -1 53.25 128.25)" fill="#111B24" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<circle cx="3" cy="3" r="3" transform="matrix(1 8.74228e-08 8.74228e-08 -1 20.25 99.75)" fill="#111B24" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<circle cx="3" cy="3" r="3" transform="matrix(-1 -1.74846e-07 -1.74846e-07 1 59.25 17.25)" fill="#111B24" stroke="white" stroke-width="1.5" stroke-linejoin="bevel"/>
+<path d="M43.5 40.5L72 31.5L100.5 40.5C100.5 40.5 100.5 64.5 100.5 82.5C100.5 100.5 72 111 72 111C72 111 43.5 100.5 43.5 82.5C43.5 64.5 43.5 40.5 43.5 40.5Z" fill="#111B24"/>
+<path d="M43.5 40.5L72 31.5L100.5 40.5C100.5 40.5 100.5 64.5 100.5 82.5C100.5 100.5 72 111 72 111C72 111 43.5 100.5 43.5 82.5C43.5 64.5 43.5 40.5 43.5 40.5Z" fill="#00EAC7" fill-opacity="0.06"/>
+<path d="M43.5 40.5L72 31.5L100.5 40.5C100.5 40.5 100.5 64.5 100.5 82.5C100.5 100.5 72 111 72 111C72 111 43.5 100.5 43.5 82.5C43.5 64.5 43.5 40.5 43.5 40.5Z" stroke="#00EAC7" stroke-width="3" stroke-linejoin="bevel"/>
+<path d="M62.2083 72.7085L69.2083 78.5418L83.2083 62.2085" stroke="#00EAC7" stroke-width="3" stroke-linejoin="bevel"/>
+<path d="M51.75 47.2501L72 40.5001L92.25 47.2501C92.25 47.2501 92.25 67.393 92.25 80.2501C92.25 93.1073 72 102 72 102C72 102 51.75 93.1073 51.75 80.2501C51.75 67.393 51.75 47.2501 51.75 47.2501Z" stroke="#00EAC7" stroke-width="1.5" stroke-linejoin="bevel"/>
+<path d="M116.25 117.75V125.25" stroke="#1B2B38" stroke-width="1.5" stroke-linecap="square"/>
+<path d="M120.75 117.75V125.25" stroke="#1B2B38" stroke-width="1.5" stroke-linecap="square"/>
+<path d="M125.25 117.75L125.25 125.25" stroke="#1B2B38" stroke-width="1.5" stroke-linecap="square"/>
+<rect x="18" y="18" width="7.5" height="7.5" fill="#1B2B38"/>
+</svg>

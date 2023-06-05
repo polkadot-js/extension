@@ -7,8 +7,7 @@ import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import partnerLogo from '../assets/partnerLogo.svg';
-import secureIMG from '../assets/secure.png';
-import { ActionContext, Button, ButtonArea, LearnMore, List, VerticalSpace } from '../components';
+import { ActionContext, Button, ButtonArea, Hero, LearnMore, List, VerticalSpace } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { LINKS } from '../links';
 
@@ -28,11 +27,10 @@ const Welcome = function ({ className }: Props): React.ReactElement<Props> {
   return (
     <>
       <div className={className}>
-        <img
-          className='centered-img'
-          src={secureIMG}
+        <Hero
+          headerText={t<string>('Your privacy is protected')}
+          iconType='secure'
         />
-        <span className='heading'>{t<string>('Your privacy is protected')}</span>
         <List>
           <li>{t<string>('Aleph Zero Signer does not send any clicks, pageviews, and events to external servers')}</li>
           <li>{t<string>('Aleph Zero Signer does not use any analytics')}</li>
@@ -50,8 +48,7 @@ const Welcome = function ({ className }: Props): React.ReactElement<Props> {
           <span className='subtitle'>
             {t<string>('For extra protection, we highly recommend using the')}&nbsp;
             <LearnMore href={LINKS.PARTNER}>{t<string>('Threat Slayer extension')}</LearnMore>
-            &nbsp;
-            {t<string>('which protects you from dangerous websites in real-time.')}
+            &nbsp;{t<string>('which protects you from dangerous websites in real-time.')}
           </span>
         </div>
       </div>
@@ -69,24 +66,7 @@ export default styled(Welcome)(
   display: flex;
   flex-direction: column;
 
-  .centered-img {
-    justify-content: center;
-    display: flex;
-    margin: 8px auto;
-    width: 144px;
-    height: 144px;
-  }
-  
-  .heading {
-    font-family: ${theme.secondaryFontFamily};
-    font-weight: 700;
-    font-size: 20px;
-    line-height: 120%;
-    text-align: center;
-    margin: 0 auto;
-    letter-spacing: 0.035em;
-    color: ${theme.textColor};
-  }
+  margin-top: 40px;
 
   .partner {
     display: flex;

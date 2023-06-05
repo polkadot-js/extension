@@ -15,6 +15,7 @@ export { default as Dropdown } from './Dropdown';
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as Header } from './Header';
 export { default as Icon } from './Icon';
+export { default as Hero } from './Hero';
 export { default as Identicon } from './Identicon';
 export { default as InputFilter } from './InputFilter';
 export { default as InputWithLabel } from './InputWithLabel';
@@ -59,6 +60,7 @@ export { default as PopupBorderContainer } from './PopupBorderContainer';
 export { default as FaviconBox } from './FaviconBox';
 export { default as LearnMore } from './LearnMore';
 export { default as AnimatedSvg } from './AnimatedSvg';
+export { default as Success } from './Success';
 
 export { Input, TextArea } from './TextInputs';
 

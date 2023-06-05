@@ -5,6 +5,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '../types';
+import { triggerOnEnterSpace } from '../util/keyDownWrappers';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -29,12 +30,10 @@ function MenuCard({
     <div
       className={className}
       onClick={onClick}
-      onKeyDown={onClick}
+      onKeyDown={triggerOnEnterSpace(onClick)}
       tabIndex={tabIndex}
     >
-      <div
-        className='flex-container'
-      >
+      <div className='flex-container'>
         {preIcon && <div className='icon'>{preIcon}</div>}
         <div className='flex-group'>
           <div className='title'>{title}</div>

@@ -72,6 +72,8 @@ export default React.memo(
     display: flex;
     flex-direction: column;
     gap: 8px;
+    /* Fix MenuCard outline hidden because of overflow-y. */
+    margin-top: 5px;
   }
 
   &::-webkit-scrollbar {

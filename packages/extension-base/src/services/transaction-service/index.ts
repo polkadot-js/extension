@@ -9,6 +9,7 @@ import { TransactionWarning } from '@subwallet/extension-base/background/warning
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo, _getEvmChainId } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
@@ -18,7 +19,7 @@ import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/reques
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { TRANSACTION_TIMEOUT } from '@subwallet/extension-base/services/transaction-service/constants';
 import { parseTransferEventLogs, parseXcmEventLogs } from '@subwallet/extension-base/services/transaction-service/event-parser';
-import { getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
+import { getBaseTransactionInfo, getTransactionId, isSubstrateTransaction } from '@subwallet/extension-base/services/transaction-service/helpers';
 import { SWTransaction, SWTransactionInput, SWTransactionResponse, TransactionEmitter, TransactionEventMap, TransactionEventResponse, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
 import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base/services/transaction-service/utils';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
@@ -35,7 +36,7 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { Signer, SignerResult } from '@polkadot/api/types';
 import { EventRecord } from '@polkadot/types/interfaces';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
-import { u8aToHex } from '@polkadot/util';
+import { isHex, u8aToHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
 
 export default class TransactionService {
@@ -141,6 +142,12 @@ export default class TransactionService {
             }
           }
         } catch (e) {
+          const error = e as Error;
+
+          if (error.message.includes('gas required exceeds allowance')) {
+            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+          }
+
           estimateFee.value = '0';
         }
       }
@@ -172,16 +179,27 @@ export default class TransactionService {
     const edNum = parseInt(existentialDeposit);
     const transferNativeNum = parseInt(transferNative);
 
-    if (!isTransferAll) {
-      if (transferNativeNum + feeNum > balanceNum) {
-        // validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+    if (transferNativeNum + feeNum > balanceNum) {
+      if (!isTransferAll) {
+        validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
       } else {
-        if (balanceNum - (transferNativeNum + feeNum) <= edNum) {
-          if (edAsWarning) {
-            // validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
-          } else {
-            // validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
-          }
+        if ([
+          ..._TRANSFER_CHAIN_GROUP.acala,
+          ..._TRANSFER_CHAIN_GROUP.genshiro,
+          ..._TRANSFER_CHAIN_GROUP.bitcountry,
+          ..._TRANSFER_CHAIN_GROUP.statemine
+        ].includes(chain)) { // Chain not have transfer all function
+          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+        }
+      }
+    }
+
+    if (!isTransferAll) {
+      if (balanceNum - (transferNativeNum + feeNum) < edNum) {
+        if (edAsWarning) {
+          validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
+        } else {
+          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
         }
       }
     }
@@ -566,10 +584,12 @@ export default class TransactionService {
       blockHash: blockHash || ''
     }).catch(console.error);
 
+    const info = isHex(extrinsicHash) ? extrinsicHash : getBaseTransactionInfo(transaction, this.chainService.getChainInfoMap());
+
     this.notificationService.notify({
       type: NotificationType.SUCCESS,
       title: 'Transaction completed',
-      message: `Transaction ${transaction?.extrinsicHash} completed`,
+      message: `Transaction ${info} completed`,
       action: { url: this.getTransactionLink(id) },
       notifyViaBrowser: true
     });
@@ -592,10 +612,12 @@ export default class TransactionService {
         blockHash: blockHash || ''
       }).catch(console.error);
 
+      const info = isHex(transaction?.extrinsicHash) ? transaction?.extrinsicHash : getBaseTransactionInfo(transaction, this.chainService.getChainInfoMap());
+
       this.notificationService.notify({
         type: NotificationType.ERROR,
         title: 'Transaction failed',
-        message: `Transaction ${transaction?.extrinsicHash} failed`,
+        message: `Transaction ${info} failed`,
         action: { url: this.getTransactionLink(id) },
         notifyViaBrowser: true
       });
@@ -713,7 +735,8 @@ export default class TransactionService {
     const eventData: TransactionEventResponse = {
       id,
       errors: [],
-      warnings: []
+      warnings: [],
+      extrinsicHash: id
     };
 
     this.requestService.addConfirmation(id, url || EXTENSION_REQUEST_URL, 'evmSendTransactionRequest', payload, {})
@@ -791,7 +814,8 @@ export default class TransactionService {
     const eventData: TransactionEventResponse = {
       id,
       errors: [],
-      warnings: []
+      warnings: [],
+      extrinsicHash: id
     };
 
     (transaction as SubmittableExtrinsic).signAsync(address, {

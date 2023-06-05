@@ -14,7 +14,7 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.46.4-3-x",
+  "version": "0.46.4",
   "versions": {
     "git": "0.46.4-3-x",
     "npm": "0.46.3"
@@ -40,19 +40,19 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.75.14",
+    "@polkadot/dev": "^0.75.16",
     "@types/node": "^20.2.5",
     "i18next-scanner": "^4.2.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^10.7.3",
-    "@polkadot/keyring": "^12.2.1",
-    "@polkadot/networks": "^12.2.1",
-    "@polkadot/types": "^10.7.3",
-    "@polkadot/util": "^12.2.1",
-    "@polkadot/util-crypto": "^12.2.1",
-    "@polkadot/x-fetch": "^12.2.1",
+    "@polkadot/api": "^10.8.1",
+    "@polkadot/keyring": "^12.2.2",
+    "@polkadot/networks": "^12.2.2",
+    "@polkadot/types": "^10.8.1",
+    "@polkadot/util": "^12.2.2",
+    "@polkadot/util-crypto": "^12.2.2",
+    "@polkadot/x-fetch": "^12.2.2",
     "safe-buffer": "^5.2.1",
     "typescript": "^5.0.3"
   }

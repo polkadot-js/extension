@@ -74,9 +74,9 @@ const ModalWrapper = styled.div<ThemeProps & {
           padding: spacing,
           '.ant-sw-modal-content': {
             borderRadius: 8,
-            paddingBottom: 0,
             '.ant-sw-modal-header': {
-              marginBottom: isWebUI ? 16 : 'unset'
+              // marginBottom: isWebUI ? 16 : 'unset'
+              marginBottom: 16
             },
             '.ant-sw-modal-body': {
               padding: spacing,

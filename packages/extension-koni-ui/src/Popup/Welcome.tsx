@@ -6,7 +6,7 @@ import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-k
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, DOWNLOAD_EXTENSION, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Divider, Icon,Image, Input, ModalContext } from '@subwallet/react-ui';
+import { Button, ButtonProps, Divider, Icon, Image, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Eye, EyeSlash, FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -66,7 +66,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     }
   ], [t]);
 
-  const buttonList = useMemo(() => isWebUI ? items : items.slice(0, 3), [isWebUI]);
+  const buttonList = useMemo(() => isWebUI ? items : items.slice(0, 3), [isWebUI, items]);
 
   const openModal = useCallback((id: string) => {
     return () => {
@@ -75,14 +75,15 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
         return;
       }
+
       if (id === CREATE_ACCOUNT_MODAL) {
         navigate('/accounts/new-seed-phrase', { state: { accountTypes: [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE] } });
       } else {
         inactiveModal(SELECT_ACCOUNT_MODAL);
         activeModal(id);
-      };
+      }
     };
-    }, [activeModal, inactiveModal, navigate]
+  }, [activeModal, inactiveModal, navigate]
   );
 
   return (
@@ -100,10 +101,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       >
         <div className={CN('brand-container', 'flex-column')}>
           <div className='logo-container'>
-          <Image
-            src={'/images/subwallet/welcome-logo.png'}
-            width={139}
-          />
+            <Image
+              src={'/images/subwallet/welcome-logo.png'}
+              width={139}
+            />
           </div>
           {/* <div className='title'>{t(isWebUI ? 'Welcome to SubWallet!' : 'SubWallet')}</div> */}
           <div className='sub-title'>
@@ -241,43 +242,6 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
         fontSize: token.fontSizeHeading5,
         lineHeight: token.lineHeightHeading5,
         color: token.colorTextLight3
-      }
-    },
-
-    '.buttons-container': {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: token.sizeXS
-    },
-
-    '.welcome-import-button': {
-      height: 'auto',
-
-      '.welcome-import-icon': {
-        height: token.sizeLG,
-        width: token.sizeLG,
-        marginLeft: token.sizeMD - token.size
-      },
-
-      '.welcome-import-button-content': {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: token.sizeXXS,
-        fontWeight: token.fontWeightStrong,
-        padding: `${token.paddingSM - 1}px ${token.paddingLG}px`,
-        textAlign: 'start',
-
-        '.welcome-import-button-title': {
-          fontSize: token.fontSizeHeading5,
-          lineHeight: token.lineHeightHeading5,
-          color: token.colorTextBase
-        },
-
-        '.welcome-import-button-description': {
-          fontSize: token.fontSizeHeading6,
-          lineHeight: token.lineHeightHeading6,
-          color: token.colorTextLabel
-        }
       },
 
       '&.__web-ui': {
@@ -285,6 +249,18 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
         height: '100%',
         width: 'fit-content',
         margin: '0 auto',
+
+        '.add-wallet-container': {
+          width: '60%',
+          alignItems: 'stretch',
+
+          '.address-input': {
+            margin: `${token.marginSM + 4}px 0`
+          },
+          '.add-wallet-button': {
+            marginBottom: token.marginSM
+          }
+        },
 
         '.title': {
           marginTop: token.marginSM + 4,
@@ -335,14 +311,45 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
               paddingRight: token.sizeXL
             }
           }
+        }
+      }
+    },
+
+    '.buttons-container': {
+      '.buttons': {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: token.sizeXS
+      }
+    },
+
+    '.welcome-import-button': {
+      height: 'auto',
+
+      '.welcome-import-icon': {
+        height: token.sizeLG,
+        width: token.sizeLG,
+        marginLeft: token.sizeMD - token.size
+      },
+
+      '.welcome-import-button-content': {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: token.sizeXXS,
+        fontWeight: token.fontWeightStrong,
+        padding: `${token.paddingSM - 1}px ${token.paddingLG}px`,
+        textAlign: 'start',
+
+        '.welcome-import-button-title': {
+          fontSize: token.fontSizeHeading5,
+          lineHeight: token.lineHeightHeading5,
+          color: token.colorTextBase
         },
 
-        '.add-wallet-container': {
-          width: '50%',
-          alignItems: 'stretch',
-          '.address-input': {
-            margin: `${token.marginSM + 4}px 0`
-          }
+        '.welcome-import-button-description': {
+          fontSize: token.fontSizeHeading6,
+          lineHeight: token.lineHeightHeading6,
+          color: token.colorTextLabel
         }
       }
     }

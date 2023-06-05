@@ -213,7 +213,7 @@ export const parseEvmRlp = async (data: string, networkMap: Record<string, _Chai
     data: tx.data,
     gasPrice: new BigN(tx.gasPrice).toNumber(),
     gas: new BigN(tx.gas).toNumber(),
-    to: tx.action,
+    to: tx.to,
     value: new BigN(tx.value).toNumber(),
     nonce: new BigN(tx.nonce).toNumber()
   };
@@ -223,12 +223,12 @@ export const parseEvmRlp = async (data: string, networkMap: Record<string, _Chai
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const _ABIs: any[] = [...ABIs];
 
-  if (tx.action && network) {
-    if (await isContractAddress(tx.action, evmApiMap[network.slug])) {
+  if (tx.to && network) {
+    if (await isContractAddress(tx.to, evmApiMap[network.slug])) {
       if (_getEvmAbiExplorer(network) !== '') {
         const res = await axios.get(_getEvmAbiExplorer(network), {
           params: {
-            address: tx.action
+            address: tx.to
           }
         });
 

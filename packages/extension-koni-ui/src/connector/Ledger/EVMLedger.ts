@@ -4,8 +4,9 @@
 import type { AccountOptions, LedgerAddress, LedgerSignature, LedgerVersion } from '@polkadot/hw-ledger/types';
 
 import EthApp from '@ledgerhq/hw-app-eth';
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { Ledger, LedgerTypes } from '@subwallet/extension-koni-ui/connector/Ledger/index';
-import { PredefinedLedgerNetwork } from '@subwallet/extension-koni-ui/constants/ledger';
+import { findChainInfoByChainId } from '@subwallet/extension-koni-ui/utils';
 
 import { transports } from '@polkadot/hw-ledger-transports';
 import { hexStripPrefix, u8aToHex } from '@polkadot/util';
@@ -15,10 +16,10 @@ export class EVMLedger extends Ledger {
   // readonly #chainId: number;
   readonly #transport: LedgerTypes;
 
-  constructor (transport: LedgerTypes, chainId: number) {
+  constructor (transport: LedgerTypes, chainId: number, chainInfoMap: Record<string, _ChainInfo>) {
     super();
 
-    const chain = PredefinedLedgerNetwork.find((_chain) => _chain.isEthereum && _chain.chainId === chainId);
+    const chain = findChainInfoByChainId(chainInfoMap, chainId);
 
     // u2f is deprecated
     if (!['hid', 'webusb'].includes(transport)) {

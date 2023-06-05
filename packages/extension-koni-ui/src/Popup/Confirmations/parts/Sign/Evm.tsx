@@ -141,7 +141,6 @@ const Component: React.FC<Props> = (props: Props) => {
     setLoading(true);
 
     setTimeout(() => {
-      console.log(hashPayload);
       ledgerSign(hexToU8a(hashPayload), account.accountIndex, account.addressOffset)
         .then(({ signature }) => {
           console.log(signature);

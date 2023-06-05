@@ -80,7 +80,7 @@ export default class TransactionService {
   private checkDuplicate (transaction: ValidateTransactionResponseInput): TransactionError[] {
     // Check duplicated transaction
     const existed = this.processingTransactions
-      .filter((item) => item.address === transaction.address && item.chain === transaction.chain);
+      .filter((item) => item.address === transaction.address && item.chain === transaction.chain && [ExtrinsicStatus.QUEUED, ExtrinsicStatus.SUBMITTING, ExtrinsicStatus.UNKNOWN].includes(item.status));
 
     if (existed.length > 0) {
       return [new TransactionError(BasicTxErrorType.DUPLICATE_TRANSACTION)];
@@ -641,6 +641,8 @@ export default class TransactionService {
       chainId: _getEvmChainId(chainInfo)
     };
 
+    console.log(txObject);
+
     return ethers.utils.serializeTransaction(txObject) as HexString;
   }
 
@@ -774,10 +776,12 @@ export default class TransactionService {
             })
             .once('error', (e) => {
               eventData.errors.push(new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, e.message));
+              console.log(e);
               emitter.emit('error', eventData);
             })
             .catch((e: Error) => {
               eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, e.message));
+              console.log(e);
               emitter.emit('error', eventData);
             });
         } else {

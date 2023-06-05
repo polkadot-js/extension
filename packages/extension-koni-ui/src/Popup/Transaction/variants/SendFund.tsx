@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
@@ -67,7 +67,8 @@ function getTokenItems (
     return [];
   }
 
-  const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
+  const isLedger = !!account.isHardware;
+  const validLedgerNetwork = account.availableGenesisHashes?.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
   const isAccountEthereum = isEthereumAddress(address);
   const isSetTokenSlug = !!tokenGroupSlug && !!assetRegistry[tokenGroupSlug];
   const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
@@ -78,7 +79,7 @@ function getTokenItems (
     }
 
     const chainAsset = assetRegistry[tokenGroupSlug];
-    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;
+    const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
 
     if (isSetTokenSlug) {
       if (isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger) {
@@ -101,7 +102,7 @@ function getTokenItems (
   const items: TokenItemType[] = [];
 
   Object.values(assetRegistry).forEach((chainAsset) => {
-    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset.originChain : true;
+    const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
     const isTokenFungible = _isAssetFungibleToken(chainAsset);
 
     if (!(isTokenFungible && isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger)) {
@@ -192,15 +193,16 @@ const filterAccountFunc = (
   });
 
   return (account: AccountJson): boolean => {
-    const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
+    const isLedger = !!account.isHardware;
     const isAccountEthereum = isEthereumAddress(account.address);
+    const validLedgerNetwork = account.availableGenesisHashes?.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
 
     if (!defaultFilterAccount(account)) {
       return false;
     }
 
     return chainAssets.some((chainAsset) => {
-      const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;
+      const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
 
       return isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger;
     });
@@ -320,15 +322,13 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       }
     }
 
-    if (account) {
-      if (account.isHardware) {
-        const destChainInfo = chainInfoMap[destChain];
+    if (account?.isHardware) {
+      const destChainInfo = chainInfoMap[destChain];
 
-        if (account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
-          const destChainName = destChainInfo?.name || 'Unknown';
+      if (!isEthereumAddress(account.address) && account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
+        const destChainName = destChainInfo?.name || 'Unknown';
 
-          return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
-        }
+        return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
       }
     }
 

@@ -12,6 +12,9 @@ import { AccountOptions, LedgerAddress, LedgerSignature } from '@polkadot/hw-led
 import { assert } from '@polkadot/util';
 
 import useTranslation from '../common/useTranslation';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 
 interface StateBase {
   isLedgerCapable: boolean;
@@ -42,17 +45,36 @@ const getNetwork = (slug: string, ledgerChains: LedgerNetwork[]): LedgerNetwork 
   return ledgerChains.find((network) => network.slug === slug);
 };
 
-const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[]): Ledger => {
+const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[], chainInfoMap: Record<string, _ChainInfo>): Ledger => {
   const { isLedgerCapable } = baseState;
 
   assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
 
-  const def = getNetwork(slug, ledgerChains);
+  let def = getNetwork(slug, ledgerChains);
+
+  if (!def) {
+    const chain = chainInfoMap[slug];
+
+    if (chain) {
+      if (_isChainEvmCompatible(chain)) {
+        def = {
+          network: chain.name,
+          chainId: chain.evmInfo?.evmChainId || 1,
+          slug: chain.slug,
+          isDevMode: true,
+          isEthereum: true,
+          displayName: chain.name,
+          icon: 'ethereum',
+          genesisHash: ''
+        };
+      }
+    }
+  }
 
   assert(def, 'There is no known Ledger app available for this chain');
 
   if (def.isEthereum) {
-    return new EVMLedger('webusb', def.chainId);
+    return new EVMLedger('webusb', def.chainId, chainInfoMap);
   } else {
     return new SubstrateLedger('webusb', def.network);
   }
@@ -62,6 +84,7 @@ export function useLedger (slug?: string, active = true): Result {
   const { t } = useTranslation();
 
   const ledgerChains = useGetSupportedLedger();
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
 
   const timeOutRef = useRef<NodeJS.Timer>();
 
@@ -87,14 +110,14 @@ export function useLedger (slug?: string, active = true): Result {
       }
 
       try {
-        return retrieveLedger(slug, ledgerChains);
+        return retrieveLedger(slug, ledgerChains, chainInfoMap);
       } catch (error) {
         setError((error as Error).message);
       }
     }
 
     return null;
-  }, [refreshLock, slug, active, ledgerChains]);
+  }, [refreshLock, slug, active, ledgerChains, chainInfoMap]);
 
   useEffect(() => {
     if (!ledger || !slug || !active) {
@@ -108,7 +131,7 @@ export function useLedger (slug?: string, active = true): Result {
 
     timeOutRef.current = setTimeout(() => {
       ledger.getAddress(false, 0, 0)
-        .then((res) => {
+        .then(() => {
           setIsLoading(false);
         })
         .catch((e: Error) => {
@@ -165,6 +188,7 @@ export function useLedger (slug?: string, active = true): Result {
 
   const refresh = useCallback(() => {
     setRefreshLock(true);
+    console.log('refresh');
   }, []);
 
   return useMemo(() => ({

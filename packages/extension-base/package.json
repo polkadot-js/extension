@@ -104,7 +104,6 @@
     "phosphor-react": "^1.4.1",
     "pontem-types-bundle": "^1.0.15",
     "protobufjs": "^7.1.2",
-    "rlp": "^3.0.0",
     "rxjs": "^7.8.0",
     "web3": "^1.10.0",
     "web3-core": "^1.10.0",

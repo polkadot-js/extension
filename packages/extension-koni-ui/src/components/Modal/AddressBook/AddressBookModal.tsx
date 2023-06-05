@@ -15,7 +15,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'reac
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { isAddress } from '@polkadot/util-crypto';
+import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { AccountItemWithName } from '../../Account';
 import GeneralEmptyList from '../../GeneralEmptyList';
@@ -59,7 +59,9 @@ const getGroupPriority = (item: AccountItem): number => {
 };
 
 const checkLedger = (account: AccountJson, networkGenesisHash?: string): boolean => {
-  return !networkGenesisHash || !account.isHardware || account.originGenesisHash === networkGenesisHash;
+  const isEvmAddress = isEthereumAddress(account.address);
+
+  return !networkGenesisHash || !account.isHardware || isEvmAddress || (account.availableGenesisHashes || []).includes(networkGenesisHash);
 };
 
 const Component: React.FC<Props> = (props: Props) => {

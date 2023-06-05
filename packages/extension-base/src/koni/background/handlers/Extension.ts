@@ -2357,7 +2357,7 @@ export default class KoniExtension {
 
       const txObject: TransactionConfig = {
         gasPrice: new BigN(tx.gasPrice).toNumber(),
-        to: tx.action,
+        to: tx.to,
         value: new BigN(tx.value).toNumber(),
         data: tx.data,
         nonce: new BigN(tx.nonce).toNumber(),

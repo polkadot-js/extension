@@ -101,7 +101,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         <div className={CN('brand-container', 'flex-column')}>
           <div className='logo-container'>
           <Image
-            src={'./images/subwallet/welcome-logo.png'}
+            src={'/images/subwallet/welcome-logo.png'}
             width={139}
           />
           </div>
@@ -204,7 +204,7 @@ const Welcome = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.bg-image': {
-      backgroundImage: 'url("./images/subwallet/welcome-background.png")',
+      backgroundImage: 'url("/images/subwallet/welcome-background.png")',
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'top',
       backgroundSize: 'contain',

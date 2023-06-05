@@ -235,8 +235,8 @@ export const updateStaking = (data: StakingJson) => {
 
 export const subscribeStaking = lazySubscribeMessage('pri(staking.getSubscription)', null, updateStaking, updateStaking);
 
-export const updateStakingReward = (data: StakingRewardJson) => {
-  store.dispatch({ type: 'staking/updateStakingReward', payload: [...data.fastInterval, ...data.slowInterval] });
+export const updateStakingReward = (stakingRewardJson: StakingRewardJson) => {
+  store.dispatch({ type: 'staking/updateStakingReward', payload: Object.values(stakingRewardJson.data) });
 };
 
 export const subscribeStakingReward = lazySubscribeMessage('pri(stakingReward.getSubscription)', null, updateStakingReward, updateStakingReward);

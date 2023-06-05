@@ -1,5 +1,48 @@
 # CHANGELOG
 
+## 1.0.7
+Build date: Jun 1, 2023.
+
+Features & Update:
+- Implemented immediate display of the "Add network" screen upon pressing "Add to network" from dApp (#1398)
+- Optimized staking performance (#1461)
+- Excluded Ledger account from the "My Wallet" list when sending tokens that are not supported by the Ledger account (#1454)
+- Added support for "Unstake Max" functionality (#1311)
+- Added validation for the scenario "Transfer Max local token. (#1458)
+- Optimized the requirement to enable tokens in the Transaction Screen (#1482)
+
+Updated chain list
+- Reviewed and updated PriceID.
+
+Fixed bugs:
+- Resolved bugs related to sending funds on some tokens after running script tests (#1460)
+- Fixed the bug causing an error page when sending tokens on a custom network (#1451)
+- Fixed the bug in calculating Ternoa Staking APR (#1108)
+- Resolved the bug causing failure to stake for certain dApps (#1445)
+- Fixed the bug causing failure to stake more for a pool in cases where an unstake request was present (#1470)
+- Updated web runner to fix ABI block explorer on mobile (#1472)
+
+## 1.0.6
+Build date: May 26, 2023.
+
+Features & Update:
+- Add “I trust this site” option on the phishing page screen (#1380)
+- Temporarily hide XCM channels from Moonbeam (#1440)
+- Update login & welcome screen (#1450)
+
+Update chain list:
+- Update logo for some chains and some tokens
+- Add USDT, USDC on EVM chain
+- Add Support For AI Serpenator NFT Collection
+
+Fixed bugs:
+- Fix bug show unclaim reward (#1432)
+- Update APR for some chain (#1429)
+- Fix bug show Moonfit’s NFT (#1404)
+- Fix bug when stake (#1392)
+- Update RMRK API (#1414)
+- Fix bug get balance when send token (#1428)
+
 ## 1.0.5
 Build date: May 20, 2023.
 

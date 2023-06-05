@@ -29,18 +29,25 @@ function runBuild() {
   execSync('yarn build');
 }
 
+function runBuildWebRunner() {
+  execSync('yarn web-runner:build');
+}
+
+function runDeployWebRunner(alias) {
+  execSync(`netlify deploy --dir ./packages/web-runner/build --site sw-web-runner --alias ${alias}`);
+  discordHook.send(`Update new web-runner: https://${alias}--sw-web-runner.netlify.app/`)
+}
+
 function npmGetVersion() {
   return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'package.json'), 'utf8')).version;
 }
 
+const prNumber = process.env.PR_NUMBER || '';
+const branchName = prNumber ? `${process.env.TARGET_BRANCH}-pr-${prNumber}` : process.env.CURRENT_BRANCH.replace('refs/heads/', '');
+const refName = process.env.REF_NAME
+const commitMessage = process.env.COMMIT_MESSAGE
+const buildDateString = new Date().toISOString().slice(0, 19).replaceAll(':', '-')
 async function uploadBuild() {
-  const prNumber = process.env.PR_NUMBER || '';
-  const branchName = prNumber ? `${process.env.TARGET_BRANCH}-pr-${prNumber}` : process.env.CURRENT_BRANCH.replace('refs/heads/', '');
-  const refName = process.env.REF_NAME
-  const commitMessage = process.env.COMMIT_MESSAGE
-  const buildDateString = new Date().toISOString().slice(0, 19).replaceAll(':', '-')
-  const sRefName = refName.replace(/(\/)/g, '-');
-
   discordHook.send('Finish build ' + refName + ': ' + commitMessage)
 
   try {
@@ -77,5 +84,9 @@ runClean();
 runCheck();
 // runTest();
 runBuild();
+
+// Web runner
+runBuildWebRunner();
+runDeployWebRunner(branchName);
 
 uploadBuild()

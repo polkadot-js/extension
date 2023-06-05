@@ -10,7 +10,7 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "1.0.6-0",
+  "version": "1.0.7",
   "workspaces": [
     "packages/*"
   ],
@@ -40,14 +40,13 @@
     "test:one": "polkadot-dev-run-test --detectOpenHandles",
     "watch": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch",
     "watch-dev": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch -d inline-source-map",
-    "web-runner:build": "cd packages/web-runner && yarn webpack --config webpack.config.cjs --mode production",
+    "web-runner:build": "cd packages/web-runner && rm -rf ./build && yarn webpack --config webpack.config.cjs --mode production",
     "web-runner:dev": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development -d inline-source-map",
     "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
     "web-runner:deploy": "yarn web-runner:build && gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'",
     "web-runner:publish": "gh-pages --dist 'packages/web-runner/build' --branch 'webapp-publish'"
   },
   "dependencies": {
-    "@subwallet/keyring": "^0.0.9",
     "@types/node": "^17.0.10",
     "dexie": "^3.2.2",
     "typescript": "^4.5.4"
@@ -80,9 +79,9 @@
     "@polkadot/util": "^12.2.1",
     "@polkadot/util-crypto": "^12.2.1",
     "@polkadot/x-fetch": "^12.2.1",
-    "@subwallet/chain-list": "^0.1.7",
-    "@subwallet/keyring": "^0.0.9",
-    "@subwallet/ui-keyring": "^0.0.9",
+    "@subwallet/chain-list": "^0.1.9",
+    "@subwallet/keyring": "^0.0.10",
+    "@subwallet/ui-keyring": "^0.0.10",
     "babel-core": "^7.0.0-bridge.0",
     "rxjs": "^7.8.0",
     "safe-buffer": "^5.2.1",

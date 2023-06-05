@@ -157,7 +157,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       case _CHAIN_VALIDATION_ERROR.CONNECTION_FAILURE:
         return t('Cannot connect to this provider');
       case _CHAIN_VALIDATION_ERROR.EXISTED_PROVIDER:
-        return t('This chain has already been added');
+        return t('This provider has already been added');
       case _CHAIN_VALIDATION_ERROR.EXISTED_CHAIN:
         return t('This chain has already been added');
       default:

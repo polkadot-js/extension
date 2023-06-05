@@ -9,7 +9,7 @@ import NetworkInformation from '@subwallet/extension-koni-ui/components/NetworkI
 import { TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useAssetChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
@@ -147,7 +147,7 @@ function Component ({ children, className, modalContent = false }: Props) {
   const [showRightBtn, setShowRightBtn] = useState<boolean>(false);
   const [disabledRightBtn, setDisabledRightBtn] = useState<boolean>(false);
 
-  const checkAsset = useAssetChecker();
+  const chainChecker = useChainChecker();
 
   const goBack = useCallback(() => {
     navigate(homePath);
@@ -182,8 +182,8 @@ function Component ({ children, className, modalContent = false }: Props) {
   }, [disabledRightBtn, onClickRightBtn, showRightBtn]);
 
   useEffect(() => {
-    asset !== '' && checkAsset(asset);
-  }, [asset, checkAsset]);
+    chain !== '' && chainChecker(chain);
+  }, [chain, chainChecker]);
 
   if (modalContent) {
     return (

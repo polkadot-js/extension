@@ -242,7 +242,7 @@ function Component ({ authInfo, className = '', id, isBlocked = true, isNotConne
         <>
           <div className={'__content-heading'}>{t('This site has been blocked')}</div>
           <div className={'text-tertiary __content-text'}>
-            t{('This site has been previously blocked. Do you wish to unblock and grant access to it?')}
+            {t('This site has been previously blocked. Do you wish to unblock and grant access to it?')}
           </div>
         </>
       );

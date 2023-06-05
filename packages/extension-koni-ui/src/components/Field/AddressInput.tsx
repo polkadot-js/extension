@@ -25,6 +25,7 @@ interface Props extends BasicInputWrapper, ThemeProps {
   showScanner?: boolean;
   addressPrefix?: number;
   saveAddress?: boolean;
+  networkGenesisHash?: string;
 }
 
 const defaultScannerModalId = 'input-account-address-scanner-modal';
@@ -32,8 +33,8 @@ const defaultAddressBookModalId = 'input-account-address-book-modal';
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
   const { addressPrefix,
-    className = '', disabled, id, label, onBlur, onChange, onFocus,
-    placeholder, readOnly, saveAddress, showAddressBook, showScanner, statusHelp, value } = props;
+    className = '', disabled, id, label, networkGenesisHash, onBlur, onChange, onFocus,
+    placeholder, readOnly, saveAddress, showAddressBook, showScanner, status, statusHelp, value } = props;
   const { t } = useTranslation();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -159,6 +160,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         }
         readOnly={readOnly}
         ref={inputRef}
+        status={status}
         statusHelp={statusHelp}
         suffix={(
           <>
@@ -220,6 +222,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
           <AddressBookModal
             addressPrefix={addressPrefix}
             id={addressBookId}
+            networkGenesisHash={networkGenesisHash}
             onSelect={onSelectAddressBook}
             value={value}
           />

@@ -21,8 +21,9 @@ export interface BasicInputWrapper<T = string> {
   onChange?: BasicOnChangeFunction<T>;
   onBlur?: InputProps['onBlur'];
   onFocus?: InputProps['onFocus'];
+  status?: InputProps['status'];
+  statusHelp?: InputProps['statusHelp'];
   readOnly?: boolean;
-  statusHelp?: string;
   tooltip?: string;
   title?: string;
 }

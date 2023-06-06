@@ -324,8 +324,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
     if (account?.isHardware) {
       const destChainInfo = chainInfoMap[destChain];
+      const availableGen: string[] = account.availableGenesisHashes || [];
 
-      if (!isEthereumAddress(account.address) && account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
+      if (!isEthereumAddress(account.address) && availableGen.includes(destChainInfo?.substrateInfo?.genesisHash || '')) {
         const destChainName = destChainInfo?.name || 'Unknown';
 
         return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));

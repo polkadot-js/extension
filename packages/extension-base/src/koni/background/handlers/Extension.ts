@@ -2,35 +2,259 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
-import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { isJsonPayload, SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
+import {
+  isJsonPayload,
+  SEED_DEFAULT_LENGTH,
+  SEED_LENGTHS
+} from '@subwallet/extension-base/background/handlers/Extension';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { createSubscription } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountExternalError, AccountExternalErrorCode, AccountsWithCurrentAddress, AddressBookInfo, AmountData, AssetSetting, AssetSettingUpdateReq, BalanceJson, BasicTxErrorType, BasicTxWarningCode, BondingOptionParams, BrowserConfirmationType, ChainType, CreateDeriveAccountInfo, CronReloadRequest, CrowdloanJson, CurrentAccountInfo, DeriveAccountInfo, ExternalRequestPromiseStatus, ExtrinsicType, KeyringState, NftCollection, NftJson, NftTransactionRequest, NftTransactionResponse, NominationPoolInfo, OptionInputAddress, PriceJson, RequestAccountCreateExternalV2, RequestAccountCreateHardwareMultiple, RequestAccountCreateHardwareV2, RequestAccountCreateSuriV2, RequestAccountCreateWithSecretKey, RequestAccountExportPrivateKey, RequestAccountMeta, RequestAuthorization, RequestAuthorizationBlock, RequestAuthorizationPerAccount, RequestAuthorizationPerSite, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestBondingSubmit, RequestCameraSettings, RequestChangeEnableChainPatrol, RequestChangeMasterPassword, RequestChangeTimeAutoLock, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrossChainTransfer, RequestDeleteContactAccount, RequestDeriveCreateMultiple, RequestDeriveCreateV2, RequestDeriveCreateV3, RequestDeriveValidateV2, RequestEditContactAccount, RequestForgetSite, RequestFreeBalance, RequestGetDeriveAccounts, RequestGetTransaction, RequestJsonRestoreV2, RequestKeyringExportMnemonic, RequestMaxTransferable, RequestMigratePassword, RequestParseEvmContractInput, RequestParseTransactionSubstrate, RequestPassPhishingPage, RequestQrParseRLP, RequestQrSignEvm, RequestQrSignSubstrate, RequestRejectExternalRequest, RequestResetWallet, RequestResolveExternalRequest, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestSigningApprovePasswordV2, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestStakePoolingBonding, RequestStakePoolingUnbonding, RequestStakeWithdrawal, RequestSubstrateNftSubmitTransaction, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, RequestTuringCancelStakeCompound, RequestTuringStakeCompound, RequestUnbondingSubmit, RequestUnlockKeyring, ResponseAccountCreateSuriV2, ResponseAccountCreateWithSecretKey, ResponseAccountExportPrivateKey, ResponseAccountMeta, ResponseChangeMasterPassword, ResponseCheckPublicAndSecretKey, ResponseDeriveValidateV2, ResponseGetDeriveAccounts, ResponseKeyringExportMnemonic, ResponseMigratePassword, ResponseParseEvmContractInput, ResponseParseTransactionSubstrate, ResponsePrivateKeyValidateV2, ResponseQrParseRLP, ResponseQrSignEvm, ResponseQrSignSubstrate, ResponseRejectExternalRequest, ResponseResetWallet, ResponseResolveExternalRequest, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseUnlockKeyring, StakingJson, StakingRewardJson, StakingType, SupportTransferResponse, ThemeNames, TransactionHistoryItem, TransactionResponse, TransferTxErrorType, ValidateNetworkRequest, ValidateNetworkResponse, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountAuthType, AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeCancel, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApproveSignature, RequestSigningCancel, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseType, SigningRequest } from '@subwallet/extension-base/background/types';
+import {
+  AccountExternalError,
+  AccountExternalErrorCode,
+  AccountsWithCurrentAddress,
+  AddressBookInfo,
+  AmountData,
+  AssetSetting,
+  AssetSettingUpdateReq,
+  BalanceJson,
+  BasicTxErrorType,
+  BasicTxWarningCode,
+  BondingOptionParams,
+  BrowserConfirmationType,
+  ChainType,
+  CreateDeriveAccountInfo,
+  CronReloadRequest,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  DeriveAccountInfo,
+  ExternalRequestPromiseStatus,
+  ExtrinsicType,
+  KeyringState,
+  NftCollection,
+  NftJson,
+  NftTransactionRequest,
+  NftTransactionResponse,
+  NominationPoolInfo,
+  OptionInputAddress,
+  PriceJson,
+  RequestAccountCreateExternalV2,
+  RequestAccountCreateHardwareMultiple,
+  RequestAccountCreateHardwareV2,
+  RequestAccountCreateSuriV2,
+  RequestAccountCreateWithSecretKey,
+  RequestAccountExportPrivateKey,
+  RequestAccountMeta,
+  RequestAuthorization,
+  RequestAuthorizationBlock,
+  RequestAuthorizationPerAccount,
+  RequestAuthorizationPerSite,
+  RequestAuthorizeApproveV2,
+  RequestBatchRestoreV2,
+  RequestBondingSubmit,
+  RequestCameraSettings,
+  RequestChangeEnableChainPatrol,
+  RequestChangeMasterPassword,
+  RequestChangeTimeAutoLock,
+  RequestCheckPublicAndSecretKey,
+  RequestConfirmationComplete,
+  RequestCrossChainTransfer,
+  RequestDeleteContactAccount,
+  RequestDeriveCreateMultiple,
+  RequestDeriveCreateV2,
+  RequestDeriveCreateV3,
+  RequestDeriveValidateV2,
+  RequestEditContactAccount,
+  RequestForgetSite,
+  RequestFreeBalance,
+  RequestGetDeriveAccounts,
+  RequestGetTransaction,
+  RequestJsonRestoreV2,
+  RequestKeyringExportMnemonic,
+  RequestMaxTransferable,
+  RequestMigratePassword,
+  RequestParseEvmContractInput,
+  RequestParseTransactionSubstrate,
+  RequestPassPhishingPage,
+  RequestQrParseRLP,
+  RequestQrSignEvm,
+  RequestQrSignSubstrate,
+  RequestRejectExternalRequest,
+  RequestResetWallet,
+  RequestResolveExternalRequest,
+  RequestSaveRecentAccount,
+  RequestSeedCreateV2,
+  RequestSeedValidateV2,
+  RequestSettingsType,
+  RequestSigningApprovePasswordV2,
+  RequestStakeCancelWithdrawal,
+  RequestStakeClaimReward,
+  RequestStakePoolingBonding,
+  RequestStakePoolingUnbonding,
+  RequestStakeWithdrawal,
+  RequestSubstrateNftSubmitTransaction,
+  RequestTransfer,
+  RequestTransferCheckReferenceCount,
+  RequestTransferCheckSupporting,
+  RequestTransferExistentialDeposit,
+  RequestTuringCancelStakeCompound,
+  RequestTuringStakeCompound,
+  RequestUnbondingSubmit,
+  RequestUnlockKeyring,
+  ResponseAccountCreateSuriV2,
+  ResponseAccountCreateWithSecretKey,
+  ResponseAccountExportPrivateKey,
+  ResponseAccountMeta,
+  ResponseChangeMasterPassword,
+  ResponseCheckPublicAndSecretKey,
+  ResponseDeriveValidateV2,
+  ResponseGetDeriveAccounts,
+  ResponseKeyringExportMnemonic,
+  ResponseMigratePassword,
+  ResponseParseEvmContractInput,
+  ResponseParseTransactionSubstrate,
+  ResponsePrivateKeyValidateV2,
+  ResponseQrParseRLP,
+  ResponseQrSignEvm,
+  ResponseQrSignSubstrate,
+  ResponseRejectExternalRequest,
+  ResponseResetWallet,
+  ResponseResolveExternalRequest,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  ResponseUnlockKeyring,
+  StakingJson,
+  StakingRewardJson,
+  StakingType,
+  SupportTransferResponse,
+  ThemeNames,
+  TransactionHistoryItem,
+  TransactionResponse,
+  TransferTxErrorType,
+  ValidateNetworkRequest,
+  ValidateNetworkResponse,
+  ValidatorInfo
+} from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AccountAuthType,
+  AccountJson,
+  AllowedPath,
+  AuthorizeRequest,
+  MessageTypes,
+  MetadataRequest,
+  RequestAccountChangePassword,
+  RequestAccountCreateExternal,
+  RequestAccountCreateHardware,
+  RequestAccountCreateSuri,
+  RequestAccountEdit,
+  RequestAccountExport,
+  RequestAccountForget,
+  RequestAccountShow,
+  RequestAccountTie,
+  RequestAccountValidate,
+  RequestAuthorizeCancel,
+  RequestAuthorizeReject,
+  RequestBatchRestore,
+  RequestCurrentAccountAddress,
+  RequestDeriveCreate,
+  RequestDeriveValidate,
+  RequestJsonRestore,
+  RequestMetadataApprove,
+  RequestMetadataReject,
+  RequestSeedCreate,
+  RequestSeedValidate,
+  RequestSigningApproveSignature,
+  RequestSigningCancel,
+  RequestTypes,
+  ResponseAccountExport,
+  ResponseAuthorizeList,
+  ResponseDeriveValidate,
+  ResponseJsonGetAccountInfo,
+  ResponseSeedCreate,
+  ResponseSeedValidate,
+  ResponseType,
+  SigningRequest
+} from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, XCM_MIN_AMOUNT_RATIO } from '@subwallet/extension-base/constants';
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
 import { parseSubstrateTransaction } from '@subwallet/extension-base/koni/api/dotsama/parseTransaction';
-import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
+import {
+  checkReferenceCount,
+  checkSupportTransfer,
+  createTransferExtrinsic
+} from '@subwallet/extension-base/koni/api/dotsama/transfer';
 import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-base/koni/api/nft/transfer';
-import { getBondingExtrinsic, getCancelWithdrawalExtrinsic, getClaimRewardExtrinsic, getNominationPoolsInfo, getUnbondingExtrinsic, getValidatorsInfo, getWithdrawalExtrinsic, validateBondingCondition, validateUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding';
-import { getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
-import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, validatePoolBondingCondition, validateRelayUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
-import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
+import {
+  getBondingExtrinsic,
+  getCancelWithdrawalExtrinsic,
+  getClaimRewardExtrinsic,
+  getNominationPoolsInfo,
+  getUnbondingExtrinsic,
+  getValidatorsInfo,
+  getWithdrawalExtrinsic,
+  validateBondingCondition,
+  validateUnbondingCondition
+} from '@subwallet/extension-base/koni/api/staking/bonding';
+import {
+  getTuringCancelCompoundingExtrinsic,
+  getTuringCompoundExtrinsic
+} from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
+import {
+  getPoolingBondingExtrinsic,
+  getPoolingUnbondingExtrinsic,
+  validatePoolBondingCondition,
+  validateRelayUnbondingCondition
+} from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
+import {
+  getERC20TransactionObject,
+  getERC721Transaction,
+  getEVMTransactionObject
+} from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isNativeToken, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import {
+  _ChainState,
+  _NetworkUpsertParams,
+  _ValidateCustomAssetRequest,
+  _ValidateCustomAssetResponse,
+  EnableChainParams,
+  EnableMultiChainParams
+} from '@subwallet/extension-base/services/chain-service/types';
+import {
+  _getChainNativeTokenBasicInfo,
+  _getContractAddressOfToken,
+  _getEvmChainId,
+  _getSubstrateGenesisHash,
+  _getTokenMinAmount,
+  _isAssetSmartContractNft,
+  _isChainEvmCompatible,
+  _isCustomAsset,
+  _isLocalToken,
+  _isNativeToken,
+  _isTokenEvmSmartContract,
+  _isTokenTransferredByEvm
+} from '@subwallet/extension-base/services/chain-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_AUTO_LOCK_TIME } from '@subwallet/extension-base/services/setting-service/constants';
-import { SWTransaction, SWTransactionResponse, SWTransactionResult, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
+import {
+  SWTransaction,
+  SWTransactionResponse,
+  SWTransactionResult,
+  TransactionEmitter,
+  ValidateTransactionResponseInput
+} from '@subwallet/extension-base/services/transaction-service/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { convertSubjectInfoToAddresses } from '@subwallet/extension-base/utils/address';
-import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
+import {
+  createTransactionFromRLP,
+  signatureToHex,
+  Transaction as QrTransaction
+} from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { MetadataDef } from '@subwallet/extension-inject/types';
@@ -46,7 +270,17 @@ import { TransactionConfig } from 'web3-core';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { TypeRegistry } from '@polkadot/types';
 import { assert, BN, BN_ZERO, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
-import { addressToEvm, base64Decode, decodeAddress, isAddress, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
+import {
+  addressToEvm,
+  base64Decode,
+  decodeAddress,
+  isAddress,
+  isEthereumAddress,
+  jsonDecrypt,
+  keyExtractSuri,
+  mnemonicGenerate,
+  mnemonicValidate
+} from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
@@ -1672,6 +1906,7 @@ export default class KoniExtension {
     }
 
     let additionalValidator: undefined | ((inputTransaction: SWTransactionResponse) => Promise<void>);
+    let eventsHandler: undefined | ((eventEmitter: TransactionEmitter) => void);
 
     if (fromKeyPair && destinationTokenInfo) {
       const substrateApi = this.#koniState.getSubstrateApi(originNetworkKey);
@@ -1686,26 +1921,37 @@ export default class KoniExtension {
         substrateApi
       });
 
-      // await this.updateAssetSetting({
-      //   autoEnableNativeToken: false,
-      //   tokenSlug: destinationTokenInfo.slug,
-      //   assetSetting: { visible: true }
-      // });
-
       additionalValidator = async (inputTransaction: SWTransactionResponse): Promise<void> => {
-        return new Promise((resolve) => {
-          const minAmount = destinationTokenInfo.minAmount || '0';
+        const destMinAmount = destinationTokenInfo.minAmount || '0';
 
-          if (new BigN(value).lt(minAmount)) {
-            const atLeast = new BigN(minAmount).multipliedBy(XCM_MIN_AMOUNT_RATIO);
-            const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
+        if (new BigN(value).lt(destMinAmount)) {
+          const atLeast = new BigN(destMinAmount).multipliedBy(XCM_MIN_AMOUNT_RATIO);
+          const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
 
-            inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `You must transfer at least ${atLeastStr} ${originTokenInfo.symbol} to keep the destination account alive`));
+          inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `You must transfer at least ${atLeastStr} ${originTokenInfo.symbol} to keep the destination account alive`));
+        }
+
+        const srcMinAmount = originTokenInfo.minAmount || '0';
+        const isTransferNativeToken = originTokenInfo.assetType === _AssetType.NATIVE;
+
+        if (!isTransferNativeToken) {
+          const { value: balance } = await this.#koniState.balanceService.getTokenFreeBalance(from, originNetworkKey, originTokenInfo.slug);
+
+          if (new BigN(balance).minus(value).lt(srcMinAmount)) {
+            inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
           }
-
-          resolve();
-        });
+        }
       };
+
+      eventsHandler = (eventEmitter: TransactionEmitter) => {
+        eventEmitter.once("send", async () => {
+          this.updateAssetSetting({
+            autoEnableNativeToken: false,
+            tokenSlug: destinationTokenInfo.slug,
+            assetSetting: { visible: true }
+          }).catch(console.error);
+        })
+      }
     }
 
     this.addContact(to);
@@ -1719,9 +1965,11 @@ export default class KoniExtension {
       extrinsicType: ExtrinsicType.TRANSFER_XCM,
       chainType: ChainType.SUBSTRATE,
       transferNativeAmount: _isNativeToken(originTokenInfo) ? value : '0',
+      ignoreWarnings: inputData.transferAll,
       isTransferAll: inputData.transferAll,
       errors,
-      additionalValidator: additionalValidator
+      additionalValidator: additionalValidator,
+      eventsHandler: eventsHandler
     });
   }
 

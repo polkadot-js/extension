@@ -268,6 +268,7 @@ export default class TransactionService {
       // @ts-ignore
       'transaction' in validatedTransaction && delete validatedTransaction.transaction;
       'additionalValidator' in validatedTransaction && delete validatedTransaction.additionalValidator;
+      'eventsHandler' in validatedTransaction && delete validatedTransaction.eventsHandler;
 
       return validatedTransaction;
     }
@@ -294,6 +295,7 @@ export default class TransactionService {
     // @ts-ignore
     'transaction' in validatedTransaction && delete validatedTransaction.transaction;
     'additionalValidator' in validatedTransaction && delete validatedTransaction.additionalValidator;
+    'eventsHandler' in validatedTransaction && delete validatedTransaction.eventsHandler;
 
     return validatedTransaction;
   }
@@ -301,6 +303,8 @@ export default class TransactionService {
   private async sendTransaction (transaction: SWTransaction): Promise<TransactionEmitter> {
     // Send Transaction
     const emitter = transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : (await this.signAndSendEvmTransaction(transaction));
+
+    const { eventsHandler } = transaction;
 
     emitter.on('signed', (data: TransactionEventResponse) => {
       this.onSigned(data);
@@ -325,6 +329,8 @@ export default class TransactionService {
     });
 
     // Todo: handle any event with transaction.eventsHandler
+
+    eventsHandler?.(emitter);
 
     return emitter;
   }

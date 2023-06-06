@@ -1829,7 +1829,7 @@ export default class KoniExtension {
         } else {
           const chainInfo = this.#koniState.chainService.getChainInfoByKey(networkKey);
 
-          if (_isChainEvmCompatible(chainInfo)) {
+          if (_isChainEvmCompatible(chainInfo) && _isTokenTransferredByEvm(tokenInfo)) {
             const web3 = this.#koniState.chainService.getEvmApi(networkKey);
 
             const transaction: TransactionConfig = {

@@ -5,7 +5,7 @@ import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
-import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
@@ -68,7 +68,8 @@ function getTokenItems (
   }
 
   const isLedger = !!account.isHardware;
-  const validLedgerNetwork = account.availableGenesisHashes?.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
+  const validGen: string[] = account.availableGenesisHashes || [];
+  const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug);
   const isAccountEthereum = isEthereumAddress(address);
   const isSetTokenSlug = !!tokenGroupSlug && !!assetRegistry[tokenGroupSlug];
   const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
@@ -102,7 +103,7 @@ function getTokenItems (
   const items: TokenItemType[] = [];
 
   Object.values(assetRegistry).forEach((chainAsset) => {
-    const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
+    const isValidLedger = isLedger ? (isAccountEthereum ? _isTokenTransferredByEvm(chainAsset) : validLedgerNetwork.includes(chainAsset?.originChain)) : true;
     const isTokenFungible = _isAssetFungibleToken(chainAsset);
 
     if (!(isTokenFungible && isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger)) {
@@ -195,7 +196,8 @@ const filterAccountFunc = (
   return (account: AccountJson): boolean => {
     const isLedger = !!account.isHardware;
     const isAccountEthereum = isEthereumAddress(account.address);
-    const validLedgerNetwork = account.availableGenesisHashes?.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
+    const validGen: string[] = account.availableGenesisHashes || [];
+    const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
 
     if (!defaultFilterAccount(account)) {
       return false;

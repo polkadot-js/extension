@@ -107,7 +107,7 @@ const Component: React.FC<Props> = ({ className, transaction }: Props) => {
   );
 };
 
-export const TransferBlock = styled(Component)<Props>(({ theme: { token } }) => {
+export const TransferBlock = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '&.alert-area': {
       marginTop: token.marginSM

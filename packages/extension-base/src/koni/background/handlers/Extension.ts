@@ -1710,7 +1710,7 @@ export default class KoniExtension {
       };
 
       eventsHandler = (eventEmitter: TransactionEmitter) => {
-        eventEmitter.once('send', () => {
+        eventEmitter.on('send', () => {
           try {
             const dest = keyring.getPair(to);
 

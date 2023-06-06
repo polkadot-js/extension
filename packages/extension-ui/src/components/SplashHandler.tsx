@@ -79,11 +79,6 @@ export default styled(SplashHandler)`
     padding-right: 16px;
   }
 
-  ${BottomWrapper} {
-    margin-right: -16px;
-    margin-left: -16px;
-  }
-
   .splash {
     position: absolute;
     top: 0px;

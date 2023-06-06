@@ -7,20 +7,17 @@ import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
-import animatedForget from '../assets/anim_vanish.svg';
 import helpIcon from '../assets/help.svg';
 import {
   AccountContext,
   ActionContext,
   Address,
-  AnimatedSvg,
   Button,
   ButtonArea,
   HelperFooter,
   Hero,
   LearnMore,
-  Svg,
-  VerticalSpace
+  Svg
 } from '../components';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
@@ -28,9 +25,7 @@ import { LINKS } from '../links';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';
 
-interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
-  className?: string;
-}
+type Props = RouteComponentProps<{ address: string }>;
 
 const StyledAddress = styled(Address)`
   .name {
@@ -39,7 +34,6 @@ const StyledAddress = styled(Address)`
 `;
 
 function Forget({
-  className,
   match: {
     params: { address }
   }
@@ -99,8 +93,8 @@ function Forget({
         withBackArrow
         withHelp
       />
-      <div className={className}>
-        <StyleHero
+      <ContentContainer>
+        <Hero
           headerText={t<string>('Forget account')}
           iconType='forget'
         >
@@ -110,13 +104,12 @@ function Forget({
             )}
           </Text>
           <Text>{t<string>('Not sure if you have it? You can export JSON file and use it as well.')}</Text>
-        </StyleHero>
+        </Hero>
         <StyledAddress
           address={address}
           withExport
         />
-      </div>
-      <VerticalSpace />
+      </ContentContainer>
       <ButtonArea footer={footer}>
         <Button
           isDisabled={isBusy}
@@ -136,8 +129,8 @@ function Forget({
   );
 }
 
-const StyleHero = styled(Hero)`
-  margin-block: 16px;
+const ContentContainer = styled.div`
+  margin-bottom: auto;
 `;
 
 const Text = styled.p`
@@ -148,14 +141,4 @@ const Text = styled.p`
   }
 `;
 
-export default withRouter(
-  styled(Forget)`
-
-  .forgetIcon {
-    margin: 0 auto;
-    width: 96px;
-    height: 96px;
-  }
-
-`
-);
+export default withRouter(Forget);

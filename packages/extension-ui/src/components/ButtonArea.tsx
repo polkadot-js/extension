@@ -31,8 +31,6 @@ export default styled(ButtonArea)(
   flex-direction: column;
   margin-bottom: 16px;
   padding-top: ${footer ? '0' : '16px'};
-  padding-left: 16px;
-  padding-right: 16px;
 
   .footer{
     display: flex;

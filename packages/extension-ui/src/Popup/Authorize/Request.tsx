@@ -152,7 +152,7 @@ export default styled(Request)`
 
   & ${BottomWrapper} {
     position: sticky;
-    margin-inline: -32px;
+    margin-inline: -16px;
   }
 
   .accountList {

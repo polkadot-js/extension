@@ -374,7 +374,7 @@ export default class TransactionService {
       fee: transaction.estimateFee,
       blockNumber: 0, // Will be added in next step
       blockHash: '', // Will be added in next step
-      nonce: nonce || 0,
+      nonce: nonce ?? 0,
       startBlock: startBlock || 0
     };
 
@@ -632,7 +632,7 @@ export default class TransactionService {
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
     const txObject: UnsignedTransaction = {
-      nonce: transaction.nonce || 1,
+      nonce: transaction.nonce ?? 0,
       gasPrice: addHexPrefix(anyNumberToBN(transaction.gasPrice).toString(16)),
       gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
       to: transaction.to !== undefined ? transaction.to : '',
@@ -640,8 +640,6 @@ export default class TransactionService {
       data: transaction.data ? transaction.data : '',
       chainId: _getEvmChainId(chainInfo)
     };
-
-    console.log(txObject);
 
     return ethers.utils.serializeTransaction(txObject) as HexString;
   }
@@ -711,7 +709,7 @@ export default class TransactionService {
     const emitter = new EventEmitter<TransactionEventMap>();
 
     const txObject: Web3Transaction = {
-      nonce: payload.nonce || 1,
+      nonce: payload.nonce ?? 0,
       from: payload.from as string,
       gasPrice: anyNumberToBN(payload.gasPrice).toNumber(),
       gasLimit: anyNumberToBN(payload.gas).toNumber(),
@@ -776,12 +774,10 @@ export default class TransactionService {
             })
             .once('error', (e) => {
               eventData.errors.push(new TransactionError(BasicTxErrorType.SEND_TRANSACTION_FAILED, e.message));
-              console.log(e);
               emitter.emit('error', eventData);
             })
             .catch((e: Error) => {
               eventData.errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SEND, e.message));
-              console.log(e);
               emitter.emit('error', eventData);
             });
         } else {

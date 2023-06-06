@@ -37,7 +37,7 @@ export default class QrSigner {
   public async signTransaction (tx: Web3Transaction): Promise<SignerResult> {
     return new Promise((resolve, reject): void => {
       const txObject: UnsignedTransaction = {
-        nonce: tx.nonce || 1,
+        nonce: tx.nonce ?? 0,
         gasPrice: addHexPrefix(tx.gasPrice.toString(16)),
         gasLimit: addHexPrefix(tx.gasLimit.toString(16)),
         to: tx.to !== undefined ? tx.to : '',

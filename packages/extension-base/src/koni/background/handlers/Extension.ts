@@ -1689,9 +1689,9 @@ export default class KoniExtension {
 
       additionalValidator = async (inputTransaction: SWTransactionResponse): Promise<void> => {
         const destMinAmount = destinationTokenInfo.minAmount || '0';
+        const atLeast = new BigN(destMinAmount).multipliedBy(XCM_MIN_AMOUNT_RATIO);
 
-        if (new BigN(value).lt(destMinAmount)) {
-          const atLeast = new BigN(destMinAmount).multipliedBy(XCM_MIN_AMOUNT_RATIO);
+        if (new BigN(value).lt(atLeast)) {
           const atLeastStr = formatNumber(atLeast, destinationTokenInfo.decimals || 0, balanceFormatter);
 
           inputTransaction.errors.push(new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, `You must transfer at least ${atLeastStr} ${originTokenInfo.symbol} to keep the destination account alive`));

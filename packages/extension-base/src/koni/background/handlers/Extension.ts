@@ -1711,11 +1711,18 @@ export default class KoniExtension {
 
       eventsHandler = (eventEmitter: TransactionEmitter) => {
         eventEmitter.once('send', () => {
-          this.updateAssetSetting({
-            autoEnableNativeToken: false,
-            tokenSlug: destinationTokenInfo.slug,
-            assetSetting: { visible: true }
-          }).catch(console.error);
+          try {
+            const dest = keyring.getPair(to);
+
+            if (dest) {
+              this.updateAssetSetting({
+                autoEnableNativeToken: false,
+                tokenSlug: destinationTokenInfo.slug,
+                assetSetting: { visible: true }
+              }).catch(console.error);
+            }
+          } catch (e) {
+          }
         });
       };
     }

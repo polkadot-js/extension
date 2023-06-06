@@ -3,7 +3,7 @@
 
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { _getSubstrateParaId, _getXcmAssetMultilocation, _isChainEvmCompatible, _isNativeToken, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getSubstrateParaId, _getXcmAssetMultilocation, _isChainEvmCompatible, _isNativeToken, _isSubstrateParaChain, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 
@@ -98,22 +98,18 @@ export function getDestMultilocation (destinationChainInfo: _ChainInfo, recipien
   };
 }
 
-export function getDestinationChainLocation (destinationChainInfo: _ChainInfo, version = 'V1') {
-  if (_isSubstrateParaChain(destinationChainInfo)) {
-    return {
-      [version]: {
-        parents: 1,
-        interior: {
-          X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
-        }
-      }
-    };
-  }
+export function getDestinationChainLocation (originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, version = 'V1') {
+  const parents = _isSubstrateRelayChain(originChainInfo) ? 0 : 1;
+  const interior = _isSubstrateParaChain(destinationChainInfo)
+    ? {
+      X1: { Parachain: _getSubstrateParaId(destinationChainInfo) }
+    }
+    : 'Here';
 
   return {
     [version]: {
-      parents: 1,
-      interior: 'Here'
+      parents,
+      interior
     }
   };
 }

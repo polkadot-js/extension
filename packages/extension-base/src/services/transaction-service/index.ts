@@ -358,6 +358,7 @@ export default class TransactionService {
 
   private transactionToHistories (id: string, startBlock?: number, nonce?: number, eventLogs?: EventRecord[]): TransactionHistoryItem[] {
     const transaction = this.getTransaction(id);
+    const extrinsicType = transaction.extrinsicType;
     const historyItem: TransactionHistoryItem = {
       origin: 'app',
       chain: transaction.chain,
@@ -383,7 +384,7 @@ export default class TransactionService {
     const baseNativeAmount = { value: '0', decimals: nativeAsset.decimals, symbol: nativeAsset.symbol };
 
     // Fill data by extrinsicType
-    switch (transaction.extrinsicType) {
+    switch (extrinsicType) {
       case ExtrinsicType.TRANSFER_BALANCE: {
         const inputData = parseTransactionData<ExtrinsicType.TRANSFER_TOKEN>(transaction.data);
 
@@ -415,8 +416,7 @@ export default class TransactionService {
         historyItem.amount = { value: inputData.value || '0', decimals: sendingTokenInfo.decimals || 0, symbol: sendingTokenInfo.symbol };
 
         // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        historyItem.additionalInfo = { destinationChain: inputData?.destinationNetworkKey || '' };
+        historyItem.additionalInfo = { destinationChain: inputData?.destinationNetworkKey || '', originalChain: inputData.originNetworkKey || '', fee: transaction.estimateFee };
         eventLogs && parseXcmEventLogs(historyItem, eventLogs, transaction.chain, sendingTokenInfo, chainInfo);
       }
 
@@ -507,7 +507,25 @@ export default class TransactionService {
       const toAccount = historyItem?.to && keyring.getPair(historyItem.to);
 
       if (toAccount) {
-        return [historyItem, { ...historyItem, address: toAccount.address, direction: TransactionDirection.RECEIVED }];
+        const receiverHistory: TransactionHistoryItem = {
+          ...historyItem,
+          address: toAccount.address,
+          direction: TransactionDirection.RECEIVED
+        };
+
+        switch (extrinsicType) {
+          case ExtrinsicType.TRANSFER_XCM: {
+            const inputData = parseTransactionData<ExtrinsicType.TRANSFER_XCM>(transaction.data);
+
+            receiverHistory.chain = inputData.destinationNetworkKey;
+            break;
+          }
+
+          default:
+            break;
+        }
+
+        return [historyItem, receiverHistory];
       }
     } catch (e) {
       console.warn(e);

@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { getBeneficiary, getDestinationChainLocation, getDestWeight, getTokenLocation } from '@subwallet/extension-base/koni/api/xcm/utils';
-import { _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isNativeToken, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { ApiPromise } from '@polkadot/api';
 
@@ -11,11 +11,21 @@ export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originC
   const weightParam = getDestWeight();
   const beneficiary = getBeneficiary(destinationChainInfo, recipientAddress);
   const destination = getDestinationChainLocation(originChainInfo, destinationChainInfo);
-  const assetLocation = getTokenLocation(tokenInfo, value);
+  let assetLocation = getTokenLocation(tokenInfo, value);
 
   let method = 'limitedReserveTransferAssets';
 
-  if (_isSubstrateRelayChain(destinationChainInfo)) {
+  if (['astar', 'shiden'].includes(originChainInfo.slug) && !_isNativeToken(tokenInfo)) {
+    method = 'limitedReserveWithdrawAssets';
+  } else if (['statemint', 'statemine'].includes(originChainInfo.slug) && _isSubstrateRelayChain(destinationChainInfo)) {
+    assetLocation = {
+      V1: [
+        {
+          id: { Concrete: { parents: 1, interior: 'Here' } },
+          fun: { Fungible: value }
+        }
+      ]
+    };
     method = 'limitedTeleportAssets';
   }
 

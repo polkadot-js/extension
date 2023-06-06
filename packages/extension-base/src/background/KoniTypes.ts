@@ -508,6 +508,7 @@ export interface AmountData extends BasicTokenInfo {
 
 export interface XCMTransactionAdditionalInfo {
   destinationChain: string,
+  originalChain: string,
   fee?: AmountData
 }
 

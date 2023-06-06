@@ -1,10 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
+import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { Ledger } from '@subwallet/extension-koni-ui/connector/Ledger';
 import { EVMLedger } from '@subwallet/extension-koni-ui/connector/Ledger/EVMLedger';
 import { SubstrateLedger } from '@subwallet/extension-koni-ui/connector/Ledger/SubstrateLedger';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/useGetSupportedLedger';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -12,9 +15,6 @@ import { AccountOptions, LedgerAddress, LedgerSignature } from '@polkadot/hw-led
 import { assert } from '@polkadot/util';
 
 import useTranslation from '../common/useTranslation';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 
 interface StateBase {
   isLedgerCapable: boolean;

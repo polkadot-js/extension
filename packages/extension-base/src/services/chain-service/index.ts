@@ -59,7 +59,7 @@ export class ChainService {
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
     this.xcmRefMapSubject.next(this.getXcmRefMap());
 
-    this.substrateChainHandler = new SubstrateChainHandler();
+    this.substrateChainHandler = new SubstrateChainHandler(this.dbService.stores.metadata);
     this.evmChainHandler = new EvmChainHandler();
 
     this.logger = createLogger('chain-service');
@@ -460,6 +460,8 @@ export class ChainService {
 
   // Business logic
   public async init () {
+    await this.eventService.waitDatabaseReady;
+
     // TODO: reconsider the flow of initiation
     const [latestAssetRefMap, latestMultiChainAssetMap] = await Promise.all([
       this.fetchLatestData(_ASSET_REF_SRC, AssetRefMap),
@@ -474,19 +476,28 @@ export class ChainService {
     this.chainStateMapSubject.next(this.getChainStateMap());
     this.assetRegistrySubject.next(this.getAssetRegistry());
 
-    this.initApis();
+    await this.initApis();
     await this.initAssetSettings();
   }
 
-  private initApis () { // TODO: this might be async
-    Object.entries(this.getChainInfoMap()).forEach(([slug, chainInfo]) => {
-      if (this.getChainStateByKey(slug).active) {
-        this.initApiForChain(chainInfo);
-      }
-    });
+  private async initApis () {
+    const chainInfoMap = this.getChainInfoMap();
+    const chainStateMap = this.getChainStateMap();
+
+    await Promise.all(Object.entries(chainInfoMap)
+      .filter(([slug]) => chainStateMap[slug]?.active)
+      .map(([, chainInfo]) => {
+        try {
+          return this.initApiForChain(chainInfo);
+        } catch (e) {
+          console.error(e);
+
+          return Promise.resolve();
+        }
+      }));
   }
 
-  private initApiForChain (chainInfo: _ChainInfo) {
+  private async initApiForChain (chainInfo: _ChainInfo) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
     const subscribeStatus = (isConnected: boolean) => {
@@ -501,14 +512,14 @@ export class ChainService {
     };
 
     if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo !== undefined) {
-      const chainApi = this.initApi(chainInfo.slug, endpoint, 'substrate', providerName);
+      const chainApi = await this.initApi(chainInfo.slug, endpoint, 'substrate', providerName);
 
       this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as SubstrateApi);
       chainApi.isApiConnectedSubject.subscribe(subscribeStatus);
     }
 
     if (chainInfo.evmInfo !== null && chainInfo.evmInfo !== undefined) {
-      const chainApi = this.initApi(chainInfo.slug, endpoint, 'evm', providerName);
+      const chainApi = await this.initApi(chainInfo.slug, endpoint, 'evm', providerName);
 
       this.evmChainHandler.setEvmApi(chainInfo.slug, chainApi as _EvmApi);
       chainApi.isApiConnectedSubject.subscribe(subscribeStatus);
@@ -525,16 +536,16 @@ export class ChainService {
     }
   }
 
-  private initApi (slug: string, endpoint: string, type = 'substrate', providerName?: string): _ChainBaseApi {
+  private async initApi (slug: string, endpoint: string, type = 'substrate', providerName?: string): Promise<_ChainBaseApi> {
     switch (type) {
       case 'evm':
-        return this.evmChainHandler.initApi(slug, endpoint, providerName);
+        return await this.evmChainHandler.initApi(slug, endpoint, providerName);
       default: // substrate by default
-        return this.substrateChainHandler.initApi(slug, endpoint, providerName);
+        return await this.substrateChainHandler.initApi(slug, endpoint, providerName);
     }
   }
 
-  private _enableChain (chainSlug: string): boolean {
+  private async _enableChain (chainSlug: string): Promise<boolean> {
     const chainInfo = this.getChainInfoByKey(chainSlug);
     const chainStateMap = this.getChainStateMap();
 
@@ -544,7 +555,7 @@ export class ChainService {
 
     this.lockChainInfoMap = true;
     chainStateMap[chainSlug].active = true;
-    this.initApiForChain(chainInfo);
+    await this.initApiForChain(chainInfo);
 
     this.dbService.updateChainStore({
       ...chainInfo,
@@ -558,8 +569,8 @@ export class ChainService {
     return true;
   }
 
-  public enableChain (chainSlug: string): boolean {
-    const rs = this._enableChain(chainSlug);
+  public async enableChain (chainSlug: string) {
+    const rs = await this._enableChain(chainSlug);
 
     if (rs) {
       this.updateChainStateMapSubscription();
@@ -568,8 +579,8 @@ export class ChainService {
     return rs;
   }
 
-  public enableChains (chainSlugs: string[]): boolean {
-    const rs = chainSlugs.map(this._enableChain.bind(this));
+  public async enableChains (chainSlugs: string[]): Promise<boolean> {
+    const rs = await Promise.all(chainSlugs.map(this._enableChain.bind(this)));
 
     if (rs.some((r) => r)) {
       this.updateChainStateMapSubscription();
@@ -854,7 +865,7 @@ export class ChainService {
   }
 
   // Can only update providers or block explorer, crowdloan url
-  private updateChain (params: _NetworkUpsertParams) {
+  private async updateChain (params: _NetworkUpsertParams) {
     const chainSlug = params.chainEditInfo.slug;
     const targetChainInfo = this.getChainInfoByKey(chainSlug);
     const targetChainState = this.getChainStateByKey(chainSlug);
@@ -870,7 +881,7 @@ export class ChainService {
       }
 
       // TODO: it might override existed API
-      this.initApiForChain(targetChainInfo);
+      await this.initApiForChain(targetChainInfo);
       this.updateChainStateMapSubscription();
     }
 
@@ -901,7 +912,7 @@ export class ChainService {
     }).catch((e) => this.logger.error(e));
   }
 
-  private insertChain (params: _NetworkUpsertParams) {
+  private async insertChain (params: _NetworkUpsertParams) {
     const chainInfoMap = this.getChainInfoMap();
 
     if (!params.chainSpec) {
@@ -964,7 +975,8 @@ export class ChainService {
       currentProvider: params.chainEditInfo.currentProvider,
       slug: newChainSlug
     };
-    this.initApiForChain(chainInfo);
+
+    await this.initApiForChain(chainInfo);
 
     // create a record in assetRegistry for native token and update store/subscription
     const nativeTokenSlug = this.upsertCustomToken({
@@ -999,7 +1011,7 @@ export class ChainService {
     return nativeTokenSlug;
   }
 
-  public upsertChain (params: _NetworkUpsertParams) {
+  public async upsertChain (params: _NetworkUpsertParams) {
     if (this.lockChainInfoMap) {
       return;
     }
@@ -1009,9 +1021,9 @@ export class ChainService {
     let result;
 
     if (params.mode === 'update') { // update existing chainInfo
-      this.updateChain(params);
+      await this.updateChain(params);
     } else { // insert custom network
-      result = this.insertChain(params);
+      result = await this.insertChain(params);
     }
 
     this.lockChainInfoMap = false;
@@ -1058,9 +1070,9 @@ export class ChainService {
         // TODO: EVM chain might have WS provider
         if (provider.startsWith('http')) {
           // HTTP provider is EVM by default
-          api = this.evmChainHandler.initApi('custom', provider);
+          api = await this.evmChainHandler.initApi('custom', provider);
         } else {
-          api = this.substrateChainHandler.initApi('custom', provider);
+          api = await this.substrateChainHandler.initApi('custom', provider);
         }
 
         const connectionTimeout = new Promise((resolve) => {
@@ -1262,7 +1274,7 @@ export class ChainService {
   public refreshEvmApi (slug: string) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(slug);
 
-    this.evmChainHandler.refreshApi(slug, endpoint, providerName);
+    this.evmChainHandler.refreshApi(slug, endpoint, providerName).catch(console.error);
   }
 
   public stopAllChainApis () {
@@ -1399,7 +1411,7 @@ export class ChainService {
 
       // if chain not enabled, then automatically enable
       if (chainState && !chainState.active) {
-        this.enableChain(chainState.slug);
+        await this.enableChain(chainState.slug);
         needUpdateSubject = true;
 
         if (autoEnableNativeToken) {

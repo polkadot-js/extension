@@ -6,6 +6,7 @@ import { SWTransaction } from '@subwallet/extension-base/services/transaction-se
 
 export interface EventRegistry {
   'crypto.ready': [boolean],
+  'database.ready': [boolean],
   'keyring.ready': [boolean],
   'account.updateCurrent': [CurrentAccountInfo],
   'account.ready': [boolean],

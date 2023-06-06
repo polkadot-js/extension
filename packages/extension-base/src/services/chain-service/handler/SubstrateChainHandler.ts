@@ -6,6 +6,7 @@ import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wa
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import MetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/Metadata';
 import { BehaviorSubject } from 'rxjs';
 
 import { ContractPromise } from '@polkadot/api-contract';
@@ -22,7 +23,7 @@ export class SubstrateChainHandler {
   private logger: Logger;
   readonly apiStateMapSubject = new BehaviorSubject<Record<string, boolean>>({});
 
-  constructor () {
+  constructor (private metadataStore?: MetadataStore) {
     this.logger = createLogger('substrate-chain-handler');
   }
 
@@ -181,17 +182,18 @@ export class SubstrateChainHandler {
     substrateAPI.destroy();
   }
 
-  public initApi (chainSlug: string, apiUrl: string, providerName?: string): _SubstrateApi {
-    const exsited = this.substrateApiMap[chainSlug];
+  public async initApi (chainSlug: string, apiUrl: string, providerName?: string): Promise<_SubstrateApi> {
+    const existed = this.substrateApiMap[chainSlug];
 
     // Return existed to avoid re-init metadata
-    if (exsited) {
-      exsited.connect();
+    if (existed) {
+      existed.connect();
 
-      return exsited;
+      return existed;
     }
 
-    const apiObject = new SubstrateApi(apiUrl, apiUrl, providerName);
+    const metadata = await this.metadataStore?.getMetadata(chainSlug);
+    const apiObject = new SubstrateApi(apiUrl, apiUrl, { providerName, metadata });
 
     apiObject.isApiConnectedSubject.subscribe((isConnected) => {
       const currentMap = this.apiStateMapSubject.getValue();
@@ -201,6 +203,21 @@ export class SubstrateChainHandler {
         [chainSlug]: isConnected
       });
     });
+
+    // Update metadata to database with async methods
+    this.metadataStore && apiObject.isReady.then((api) => {
+      // Avoid date existed metadata
+      if (metadata && metadata.specVersion === api.specVersion && metadata.genesisHash === api.api.genesisHash.toHex()) {
+        return;
+      }
+
+      this.metadataStore?.updateMetadata(chainSlug, {
+        chain: chainSlug,
+        genesisHash: api.api.genesisHash.toHex(),
+        specVersion: api.specVersion,
+        hexValue: api.api.runtimeMetadata.toHex()
+      }).catch(console.error);
+    }).catch(console.error);
 
     return apiObject;
   }

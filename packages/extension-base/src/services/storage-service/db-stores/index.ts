@@ -10,5 +10,6 @@ export { default as StakingStore } from './Staking';
 export { default as TransactionStore } from './Transaction';
 export { default as MigrationStore } from './Migration';
 
+export { default as MetadataStore } from './Metadata';
 export { default as ChainStore } from './Chain';
 export { default as AssetStore } from './Asset';

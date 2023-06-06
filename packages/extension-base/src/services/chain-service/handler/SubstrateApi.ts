@@ -8,6 +8,7 @@ import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS } from '@subwallet/extension-base/services/chain-service/constants';
 import { getSubstrateConnectProvider } from '@subwallet/extension-base/services/chain-service/handler/light-client';
 import { DEFAULT_AUX } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
+import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { typesBundle, typesChain } from '@subwallet/extension-base/services/chain-service/helper/api-helper';
 import { _SubstrateApi, _SubstrateDefaultFormatBalance } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
@@ -15,6 +16,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
+import { ApiOptions } from '@polkadot/api/types';
 import { ProviderInterface } from '@polkadot/rpc-provider/types';
 import { TypeRegistry } from '@polkadot/types/create';
 import { Registry } from '@polkadot/types/types';
@@ -55,7 +57,7 @@ export class SubstrateApi implements _SubstrateApi {
   systemName = '';
   systemVersion = '';
 
-  constructor (chainSlug: string, apiUrl: string, providerName?: string) {
+  constructor (chainSlug: string, apiUrl: string, { metadata, providerName }: _ApiOptions = {}) {
     this.chainSlug = chainSlug;
     this.apiUrl = apiUrl;
     this.providerName = providerName;
@@ -67,12 +69,18 @@ export class SubstrateApi implements _SubstrateApi {
 
     this.provider = provider;
 
-    const apiOption = {
+    const apiOption: ApiOptions = {
       provider,
       typesBundle,
       typesChain: typesChain,
       registry: this.registry
     };
+
+    if (metadata) {
+      apiOption.metadata = {
+        [`${metadata.genesisHash}-${metadata.specVersion}`]: metadata.hexValue
+      };
+    }
 
     if (_API_OPTIONS_CHAIN_GROUP.acala.includes(chainSlug)) {
       this.api = new ApiPromise(acalaOptions({ provider }));
@@ -168,6 +176,7 @@ export class SubstrateApi implements _SubstrateApi {
 
     this.specName = this.api.runtimeVersion.specName.toString();
     this.specVersion = this.api.runtimeVersion.specVersion.toString();
+
     const [systemChain, systemChainType, systemName, systemVersion] = await Promise.all([
       api.rpc.system?.chain(),
       api.rpc.system?.chainType

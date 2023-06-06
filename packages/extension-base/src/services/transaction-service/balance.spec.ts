@@ -41,7 +41,7 @@ describe('test token transfer', () => {
       console.log('current', i);
       console.log(networkKey, 'start');
 
-      const _api = substrateChainHandler.initApi(networkKey, chain.providers[Object.keys(chain.providers)[0]]);
+      const _api = await substrateChainHandler.initApi(networkKey, chain.providers[Object.keys(chain.providers)[0]]);
 
       const api = await _api.isReady;
 
@@ -91,7 +91,7 @@ describe('test token transfer', () => {
       console.log('current', i);
       console.log(networkKey, 'start');
 
-      const _api = evmChainHandler.initApi(networkKey, chain.providers[Object.keys(chain.providers)[0]]);
+      const _api = await evmChainHandler.initApi(networkKey, chain.providers[Object.keys(chain.providers)[0]]);
 
       const api = await _api.isReady;
 

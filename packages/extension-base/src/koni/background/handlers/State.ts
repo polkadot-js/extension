@@ -132,10 +132,10 @@ export default class KoniState {
   constructor (providers: Providers = {}) {
     this.providers = providers;
 
-    this.dbService = new DatabaseService();
     this.eventService = new EventService();
-    this.subscanService = new SubscanService();
+    this.dbService = new DatabaseService(this.eventService);
     this.keyringService = new KeyringService(this.eventService);
+    this.subscanService = new SubscanService();
 
     this.notificationService = new NotificationService();
     this.chainService = new ChainService(this.dbService, this.eventService);
@@ -1053,7 +1053,7 @@ export default class KoniState {
   }
 
   public async upsertChainInfo (data: _NetworkUpsertParams): Promise<boolean> {
-    const newNativeTokenSlug = this.chainService.upsertChain(data);
+    const newNativeTokenSlug = await this.chainService.upsertChain(data);
 
     if (newNativeTokenSlug) {
       await this.chainService.updateAssetSetting(newNativeTokenSlug, { visible: true });
@@ -1755,7 +1755,7 @@ export default class KoniState {
     });
 
     if (needActiveTokens.length) {
-      this.chainService.enableChains(needEnableChains);
+      await this.chainService.enableChains(needEnableChains);
       this.chainService.setAssetSettings({ ...currentAssetSettings });
     }
   }

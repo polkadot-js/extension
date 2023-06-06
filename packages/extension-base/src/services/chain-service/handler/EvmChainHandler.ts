@@ -3,7 +3,7 @@
 
 import { _AssetType } from '@subwallet/chain-list/types';
 import { EvmApi } from '@subwallet/extension-base/services/chain-service/handler/EvmApi';
-import { _EvmChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { _ApiOptions, _EvmChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SmartContractTokenInfo } from '@subwallet/extension-base/services/chain-service/types';
 import { BehaviorSubject } from 'rxjs';
@@ -43,11 +43,11 @@ export class EvmChainHandler {
     this.evmApiMap[chainSlug].destroy();
   }
 
-  public refreshApi (slug: string, endpoint: string, providerName?: string) {
-    this.evmApiMap[slug] = this.initApi(slug, endpoint, providerName);
+  public async refreshApi (slug: string, endpoint: string, providerName?: string) {
+    this.evmApiMap[slug] = await this.initApi(slug, endpoint, providerName);
   }
 
-  public initApi (chainSlug: string, apiUrl: string, providerName?: string): _EvmApi {
+  public async initApi (chainSlug: string, apiUrl: string, providerName?: string): Promise<_EvmApi> {
     const existed = this.getEvmApiByChain(chainSlug);
 
     if (existed) {
@@ -56,7 +56,7 @@ export class EvmChainHandler {
       return existed;
     }
 
-    const apiObject = new EvmApi(chainSlug, apiUrl, providerName);
+    const apiObject = new EvmApi(chainSlug, apiUrl, { providerName });
 
     apiObject.isApiConnectedSubject.subscribe((isConnected) => {
       const currentMap = this.apiStateMapSubject.getValue();
@@ -67,7 +67,7 @@ export class EvmChainHandler {
       });
     });
 
-    return apiObject;
+    return Promise.resolve(apiObject);
   }
 
   public async getChainSpec (evmApi: _EvmApi) {

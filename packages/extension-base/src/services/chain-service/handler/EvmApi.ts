@@ -3,6 +3,7 @@
 
 import '@polkadot/types-augment';
 
+import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { BehaviorSubject } from 'rxjs';
@@ -49,7 +50,7 @@ export class EvmApi implements _EvmApi {
     this.intervalCheckApi = this.createIntervalCheckApi();
   }
 
-  constructor (chainSlug: string, apiUrl: string, providerName?: string) {
+  constructor (chainSlug: string, apiUrl: string, { providerName }: _ApiOptions = {}) {
     this.chainSlug = chainSlug;
     this.apiUrl = apiUrl;
     this.providerName = providerName || 'unknown';
@@ -96,7 +97,6 @@ export class EvmApi implements _EvmApi {
     this.api.eth.net.isListening()
       .then(() => {
         this.isApiReadyOnce = true;
-        console.log('Connect directly');
         this.onConnect();
         console.log(`Connected to ${this.chainSlug} (EVM) at ${this.apiUrl}`);
       }).catch((error) => {

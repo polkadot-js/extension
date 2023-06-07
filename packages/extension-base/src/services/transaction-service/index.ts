@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { UnsignedTransaction } from '@ethersproject/transactions/src.ts';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
@@ -29,7 +28,7 @@ import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/et
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import keyring from '@subwallet/ui-keyring';
 import { addHexPrefix } from 'ethereumjs-util';
-import { ethers } from 'ethers';
+import { ethers, TransactionLike } from 'ethers';
 import EventEmitter from 'eventemitter3';
 import { BehaviorSubject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
@@ -649,7 +648,7 @@ export default class TransactionService {
   public generateHashPayload (chain: string, transaction: TransactionConfig): HexString {
     const chainInfo = this.chainService.getChainInfoByKey(chain);
 
-    const txObject: UnsignedTransaction = {
+    const txObject: TransactionLike = {
       nonce: transaction.nonce ?? 0,
       gasPrice: addHexPrefix(anyNumberToBN(transaction.gasPrice).toString(16)),
       gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
@@ -659,7 +658,7 @@ export default class TransactionService {
       chainId: _getEvmChainId(chainInfo)
     };
 
-    return ethers.utils.serializeTransaction(txObject) as HexString;
+    return ethers.Transaction.from(txObject).unsignedSerialized as HexString;
   }
 
   private async signAndSendEvmTransaction ({ address,

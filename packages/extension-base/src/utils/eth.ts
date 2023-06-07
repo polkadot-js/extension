@@ -58,12 +58,12 @@ export const anyNumberToBN = (value?: string | number | BNEther): BigN => {
 
 export const createTransactionFromRLP = (rlp: string): Transaction | null => {
   try {
-    const transaction = ethers.utils.parseTransaction(rlp);
+    const transaction = ethers.Transaction.from(rlp);
     const nonce = transaction.nonce.toString(16);
-    const gasPrice = transaction.gasPrice?.toHexString() || '';
-    const gas = transaction.gasLimit.toHexString();
+    const gasPrice = transaction.gasPrice?.toString(16) || '';
+    const gas = transaction.gasLimit.toString(16);
     const to = transaction.to || '';
-    const value = transaction.value.toHexString();
+    const value = transaction.value.toString(16);
     const data = transaction.data;
     const ethereumChainId = transaction.chainId.toString(16);
 

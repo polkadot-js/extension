@@ -17,8 +17,6 @@
   "version": "1.0.7-2",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
-    "@ethereumjs/common": "^2.6.5",
-    "@ethereumjs/tx": "^4.0.2",
     "@fortawesome/fontawesome-svg-core": "^6.2.1",
     "@fortawesome/free-brands-svg-icons": "^6.2.1",
     "@fortawesome/free-regular-svg-icons": "^6.2.1",
@@ -48,9 +46,6 @@
     "boring-avatars": "^1.7.0",
     "bowser": "^2.11.0",
     "classnames": "^2.3.2",
-    "ethereumjs-tx": "^2.1.2",
-    "ethereumjs-util": "^7.1.5",
-    "ethers": "^5.7.2",
     "file-saver": "^2.0.5",
     "i18next": "^21.9.2",
     "moment": "^2.29.4",
@@ -79,10 +74,8 @@
     "redux": "^4.2.0",
     "redux-persist": "^6.0.0",
     "redux-toolkit": "^1.1.2",
-    "rlp": "^3.0.0",
     "semantic-ui-react": "^2.1.4",
-    "styled-components": "^5.3.6",
-    "web3": "^1.10.0"
+    "styled-components": "^5.3.6"
   },
   "devDependencies": {
     "@subwallet/extension-mocks": "^1.0.7-2",

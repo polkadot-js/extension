@@ -30,7 +30,7 @@ export interface SWTransaction extends ValidateTransactionResponse, Partial<Pick
 export type SWTransactionResult = Omit<SWTransaction, 'transaction' | 'additionalValidator'>
 
 type SwInputBase = Pick<SWTransaction, 'address' | 'url' | 'data' | 'extrinsicType' | 'chain' | 'chainType' | 'ignoreWarnings' | 'transferNativeAmount'>
-& Partial<Pick<SWTransaction, 'additionalValidator'>>;
+& Partial<Pick<SWTransaction, 'additionalValidator' | 'eventsHandler'>>;
 export interface SWTransactionInput extends SwInputBase {
   transaction?: SWTransaction['transaction'] | null;
   warnings?: SWTransaction['warnings'];

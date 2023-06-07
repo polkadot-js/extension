@@ -5,6 +5,7 @@ import '@polkadot/types-augment';
 
 import { options as acalaOptions } from '@acala-network/api';
 import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
+import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS } from '@subwallet/extension-base/services/chain-service/constants';
 import { getSubstrateConnectProvider } from '@subwallet/extension-base/services/chain-service/handler/light-client';
 import { DEFAULT_AUX } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
@@ -30,6 +31,7 @@ export class SubstrateApi implements _SubstrateApi {
   provider: ProviderInterface;
   apiRetry = 0;
   apiUrl: string;
+  metadata?: MetadataItem;
 
   isApiReady = false;
   isApiReadyOnce = false;
@@ -57,18 +59,15 @@ export class SubstrateApi implements _SubstrateApi {
   systemName = '';
   systemVersion = '';
 
-  constructor (chainSlug: string, apiUrl: string, { metadata, providerName }: _ApiOptions = {}) {
-    this.chainSlug = chainSlug;
-    this.apiUrl = apiUrl;
-    this.providerName = providerName;
-    this.registry = new TypeRegistry();
+  private createProvider (apiUrl: string): ProviderInterface {
+    if (apiUrl.startsWith('light://')) {
+      return getSubstrateConnectProvider(apiUrl.replace('light://substrate-connect/', ''));
+    } else {
+      return new WsProvider(apiUrl, API_AUTO_CONNECT_MS);
+    }
+  }
 
-    const provider = apiUrl.startsWith('light://')
-      ? getSubstrateConnectProvider(apiUrl.replace('light://substrate-connect/', ''))
-      : new WsProvider(apiUrl, API_AUTO_CONNECT_MS);
-
-    this.provider = provider;
-
+  private createApi (provider: ProviderInterface): ApiPromise {
     const apiOption: ApiOptions = {
       provider,
       typesBundle,
@@ -76,26 +75,37 @@ export class SubstrateApi implements _SubstrateApi {
       registry: this.registry
     };
 
-    if (metadata) {
+    if (this.metadata) {
+      const metadata = this.metadata;
+
       apiOption.metadata = {
         [`${metadata.genesisHash}-${metadata.specVersion}`]: metadata.hexValue
       };
     }
 
-    if (_API_OPTIONS_CHAIN_GROUP.acala.includes(chainSlug)) {
-      this.api = new ApiPromise(acalaOptions({ provider }));
-    } else if (_API_OPTIONS_CHAIN_GROUP.turing.includes(chainSlug)) {
-      this.api = new ApiPromise({
+    if (_API_OPTIONS_CHAIN_GROUP.acala.includes(this.chainSlug)) {
+      return new ApiPromise(acalaOptions({ provider }));
+    } else if (_API_OPTIONS_CHAIN_GROUP.turing.includes(this.chainSlug)) {
+      return new ApiPromise({
         provider,
         rpc: oakRpc,
         types: oakTypes
       });
     } else {
-      this.api = new ApiPromise(apiOption);
+      return new ApiPromise(apiOption);
     }
+  }
+
+  constructor (chainSlug: string, apiUrl: string, { metadata, providerName }: _ApiOptions = {}) {
+    this.chainSlug = chainSlug;
+    this.apiUrl = apiUrl;
+    this.providerName = providerName;
+    this.registry = new TypeRegistry();
+    this.metadata = metadata;
+    this.provider = this.createProvider(apiUrl);
+    this.api = this.createApi(this.provider);
 
     this.handleApiReady = createPromiseHandler<_SubstrateApi>();
-
     this.api.on('ready', this.onReady.bind(this));
     this.api.on('connected', this.onConnect.bind(this));
     this.api.on('disconnected', this.onDisconnect.bind(this));
@@ -104,6 +114,28 @@ export class SubstrateApi implements _SubstrateApi {
 
   get isReady (): Promise<_SubstrateApi> {
     return this.handleApiReady.promise;
+  }
+
+  async updateApiUrl (apiUrl: string) {
+    if (this.apiUrl === apiUrl) {
+      return;
+    }
+
+    // Disconnect with old provider
+    this.isApiReadyOnce = false;
+    this.api.off('ready', this.onReady.bind(this));
+    this.api.off('connected', this.onConnect.bind(this));
+    this.api.off('disconnected', this.onDisconnect.bind(this));
+    this.api.off('error', this.onError.bind(this));
+    await this.disconnect();
+
+    // Create new provider and api
+    this.provider = this.createProvider(apiUrl);
+    this.api = this.createApi(this.provider);
+    this.api.on('ready', this.onReady.bind(this));
+    this.api.on('connected', this.onConnect.bind(this));
+    this.api.on('disconnected', this.onDisconnect.bind(this));
+    this.api.on('error', this.onError.bind(this));
   }
 
   connect (): void {
@@ -116,25 +148,25 @@ export class SubstrateApi implements _SubstrateApi {
     }
   }
 
-  disconnect (): void {
+  async disconnect () {
     if (this.api.isConnected) {
-      this.api.disconnect().catch(console.error).finally(() => {
-        this.updateConnectedStatus(false);
-      });
-    } else {
-      this.updateConnectedStatus(false);
+      try {
+        await this.api.disconnect();
+      } catch (e) {
+        console.error(e);
+      }
     }
+
+    this.updateConnectedStatus(false);
   }
 
-  recoverConnect (): void {
-    // Todo: update and avoid retry
-    this.apiRetry = 0;
-
-    // Todo: Need check this method
+  async recoverConnect () {
+    await this.disconnect();
     this.connect();
+    await this.handleApiReady.promise;
   }
 
-  destroy (): void {
+  destroy () {
     // Todo: implement this in the future
     return this.disconnect();
   }

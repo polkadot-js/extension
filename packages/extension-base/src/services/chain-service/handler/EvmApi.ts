@@ -39,31 +39,40 @@ export class EvmApi implements _EvmApi {
     return this.isReadyHandler.promise;
   }
 
-  recoverConnect (): void {
+  async updateApiUrl (apiUrl: string) {
+    this.apiUrl = apiUrl;
+
+    await this.disconnect();
+    this.api.setProvider(this.createProvider(apiUrl));
+    this.connect();
+  }
+
+  async recoverConnect () {
     const wsProvider = this.provider as WebsocketProvider;
 
     if (wsProvider.reconnect) {
       wsProvider.reconnect();
     }
 
-    this.clearIntervalCheckApi();
-    this.intervalCheckApi = this.createIntervalCheckApi();
+    await this.isReadyHandler.promise;
+  }
+
+  private createProvider (apiUrl: string): HttpProvider | WebsocketProvider {
+    if (apiUrl.startsWith('http')) {
+      return new Web3.providers.HttpProvider(apiUrl);
+    } else {
+      return new Web3.providers.WebsocketProvider(apiUrl);
+    }
   }
 
   constructor (chainSlug: string, apiUrl: string, { providerName }: _ApiOptions = {}) {
     this.chainSlug = chainSlug;
     this.apiUrl = apiUrl;
     this.providerName = providerName || 'unknown';
-
-    if (apiUrl.startsWith('http')) {
-      this.provider = new Web3.providers.HttpProvider(apiUrl);
-    } else {
-      this.provider = new Web3.providers.WebsocketProvider(apiUrl);
-    }
-
+    this.provider = this.createProvider(apiUrl);
     this.api = new Web3(this.provider);
-
     this.isReadyHandler = createPromiseHandler<_EvmApi>();
+
     // Create it only to avoid undefined error, it will be overwrite in connect()
     this.intervalCheckApi = this.createIntervalCheckApi();
     this.connect();
@@ -77,7 +86,6 @@ export class EvmApi implements _EvmApi {
         .then(() => {
           this.onConnect();
         }).catch(() => {
-          console.warn(`Disconnected from ${this.apiUrl} of ${this.chainSlug} (EVM)`);
           this.onDisconnect();
         });
     }, 10000);
@@ -87,7 +95,7 @@ export class EvmApi implements _EvmApi {
     clearInterval(this.intervalCheckApi);
   }
 
-  connect (): void {
+  connect () {
     // For websocket provider, connect it
     const wsProvider = this.provider as WebsocketProvider;
 
@@ -111,7 +119,7 @@ export class EvmApi implements _EvmApi {
     this.intervalCheckApi = this.createIntervalCheckApi();
   }
 
-  disconnect (): void {
+  async disconnect () {
     this.clearIntervalCheckApi();
     this.onDisconnect();
 
@@ -121,25 +129,34 @@ export class EvmApi implements _EvmApi {
     wsProvider.disconnect && wsProvider.disconnect();
 
     this.updateConnectedStatus(false);
+
+    return Promise.resolve();
   }
 
-  destroy (): void {
+  destroy () {
     // Todo: implement this in the future
     return this.disconnect();
   }
 
   onConnect (): void {
-    this.updateConnectedStatus(true);
-    this.isApiReady = true;
+    if (!this.isApiConnected) {
+      this.isApiReady = true;
 
-    if (this.isApiReadyOnce) {
-      this.isReadyHandler.resolve(this);
+      if (this.isApiReadyOnce) {
+        this.isReadyHandler.resolve(this);
+      }
     }
+
+    this.updateConnectedStatus(true);
   }
 
   onDisconnect (): void {
     this.updateConnectedStatus(false);
-    this.isApiReady = false;
-    this.isReadyHandler = createPromiseHandler<_EvmApi>();
+
+    if (this.isApiConnected) {
+      console.warn(`Disconnected from ${this.apiUrl} of ${this.chainSlug} (EVM)`);
+      this.isApiReady = false;
+      this.isReadyHandler = createPromiseHandler<_EvmApi>();
+    }
   }
 }

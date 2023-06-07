@@ -2,22 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetType } from '@subwallet/chain-list/types';
+import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
 import { EvmApi } from '@subwallet/extension-base/services/chain-service/handler/EvmApi';
-import { _ApiOptions, _EvmChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { _EvmChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SmartContractTokenInfo } from '@subwallet/extension-base/services/chain-service/types';
-import { BehaviorSubject } from 'rxjs';
 import { Contract } from 'web3-eth-contract';
 
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 
-export class EvmChainHandler {
-  private evmApiMap: Record<string, _EvmApi> = {};
-  readonly apiStateMapSubject = new BehaviorSubject<Record<string, boolean>>({});
+export class EvmChainHandler extends AbstractChainHandler {
+  private evmApiMap: Record<string, EvmApi> = {};
   private logger: Logger;
 
-  constructor () {
+  constructor (parent: ChainService) {
+    super(parent);
     this.logger = createLogger('evm-chain-handler');
   }
 
@@ -29,45 +30,62 @@ export class EvmChainHandler {
     return this.evmApiMap[chainSlug];
   }
 
-  public setEvmApi (chainSlug: string, evmApi: _EvmApi) {
+  public setEvmApi (chainSlug: string, evmApi: EvmApi) {
     this.evmApiMap[chainSlug] = evmApi;
   }
 
-  public destroyEvmApi (chainSlug: string) {
-    const evmApi = this.getEvmApiByChain(chainSlug);
-
-    if (!evmApi) {
-      return;
-    }
-
-    this.evmApiMap[chainSlug].destroy();
-  }
-
-  public async refreshApi (slug: string, endpoint: string, providerName?: string) {
-    this.evmApiMap[slug] = await this.initApi(slug, endpoint, providerName);
-  }
-
-  public async initApi (chainSlug: string, apiUrl: string, providerName?: string): Promise<_EvmApi> {
+  public async initApi (chainSlug: string, apiUrl: string, providerName?: string) {
     const existed = this.getEvmApiByChain(chainSlug);
 
     if (existed) {
       existed.connect();
+
+      if (apiUrl !== existed.apiUrl) {
+        existed.updateApiUrl(apiUrl).catch(console.error);
+      }
 
       return existed;
     }
 
     const apiObject = new EvmApi(chainSlug, apiUrl, { providerName });
 
-    apiObject.isApiConnectedSubject.subscribe((isConnected) => {
-      const currentMap = this.apiStateMapSubject.getValue();
-
-      this.apiStateMapSubject.next({
-        ...currentMap,
-        [chainSlug]: isConnected
-      });
-    });
+    apiObject.isApiConnectedSubject.subscribe(this.handleConnect.bind(this, chainSlug));
 
     return Promise.resolve(apiObject);
+  }
+
+  public async recoverApi (chainSlug: string): Promise<void> {
+    const existed = this.getEvmApiByChain(chainSlug);
+
+    await existed?.recoverConnect();
+  }
+
+  destroyEvmApi (chain: string) {
+    const evmApi = this.getEvmApiByChain(chain);
+
+    evmApi?.destroy().catch(console.error);
+  }
+
+  async sleep () {
+    this.cancelAllRecover();
+
+    await Promise.all(Object.values(this.getEvmApiMap()).map((evmApi) => {
+      return evmApi.disconnect().catch(console.error);
+    }));
+
+    return Promise.resolve();
+  }
+
+  wakeUp () {
+    const activeChains = this.parent.getActiveChains();
+
+    for (const chain of activeChains) {
+      const evmApi = this.getEvmApiByChain(chain);
+
+      evmApi?.connect();
+    }
+
+    return Promise.resolve();
   }
 
   public async getChainSpec (evmApi: _EvmApi) {

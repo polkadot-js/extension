@@ -3,11 +3,11 @@
 
 import { _AssetType } from '@subwallet/chain-list/types';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
+import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import MetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/Metadata';
-import { BehaviorSubject } from 'rxjs';
 
 import { ContractPromise } from '@polkadot/api-contract';
 import { BN } from '@polkadot/util';
@@ -18,12 +18,13 @@ import { _PSP22_ABI, _PSP34_ABI } from '../helper';
 
 export const DEFAULT_AUX = ['Aux1', 'Aux2', 'Aux3', 'Aux4', 'Aux5', 'Aux6', 'Aux7', 'Aux8', 'Aux9'];
 
-export class SubstrateChainHandler {
-  private substrateApiMap: Record<string, _SubstrateApi> = {};
-  private logger: Logger;
-  readonly apiStateMapSubject = new BehaviorSubject<Record<string, boolean>>({});
+export class SubstrateChainHandler extends AbstractChainHandler {
+  private substrateApiMap: Record<string, SubstrateApi> = {};
 
-  constructor (private metadataStore?: MetadataStore) {
+  private logger: Logger;
+
+  constructor (parent: ChainService) {
+    super(parent);
     this.logger = createLogger('substrate-chain-handler');
   }
 
@@ -35,27 +36,31 @@ export class SubstrateChainHandler {
     return this.substrateApiMap[chainSlug];
   }
 
-  public resumeAllApis () {
-    return Promise.all(Object.values(this.getSubstrateApiMap()).map(async (substrateApi) => {
-      if (!substrateApi.api.isConnected && substrateApi.api.connect) {
-        await substrateApi.api.connect();
-      }
+  public async wakeUp () {
+    const activeChains = this.parent.getActiveChains();
+
+    for (const chain of activeChains) {
+      const evmApi = this.getSubstrateApiByChain(chain);
+
+      evmApi?.connect();
+    }
+
+    return Promise.resolve();
+  }
+
+  public async sleep () {
+    this.cancelAllRecover();
+
+    await Promise.all(Object.values(this.getSubstrateApiMap()).map((substrateApi) => {
+      return substrateApi.disconnect().catch(console.error);
     }));
   }
 
-  public disconnectAllApis () {
-    return Promise.all(Object.values(this.getSubstrateApiMap()).map(async (substrateApi) => {
-      if (substrateApi.api.isConnected) {
-        substrateApi.api?.disconnect && await substrateApi.api?.disconnect();
-      }
-    }));
-  }
+  async recoverApi (chainSlug: string) {
+    const existed = this.getSubstrateApiByChain(chainSlug);
 
-  public refreshApi (slug: string) {
-    const substrateApi = this.getSubstrateApiByChain(slug);
-
-    if (substrateApi && !substrateApi.isApiConnected) {
-      substrateApi.recoverConnect && substrateApi.recoverConnect();
+    if (existed) {
+      return existed.recoverConnect();
     }
   }
 
@@ -168,18 +173,14 @@ export class SubstrateChainHandler {
     }
   }
 
-  public setSubstrateApi (chainSlug: string, substrateApi: _SubstrateApi) {
+  public setSubstrateApi (chainSlug: string, substrateApi: SubstrateApi) {
     this.substrateApiMap[chainSlug] = substrateApi;
   }
 
   public destroySubstrateApi (chainSlug: string) {
     const substrateAPI = this.substrateApiMap[chainSlug];
 
-    if (!substrateAPI) {
-      return;
-    }
-
-    substrateAPI.destroy();
+    substrateAPI?.destroy().catch(console.error);
   }
 
   public async initApi (chainSlug: string, apiUrl: string, providerName?: string): Promise<_SubstrateApi> {
@@ -189,29 +190,26 @@ export class SubstrateChainHandler {
     if (existed) {
       existed.connect();
 
+      if (apiUrl !== existed.apiUrl) {
+        await existed.updateApiUrl(apiUrl);
+      }
+
       return existed;
     }
 
-    const metadata = await this.metadataStore?.getMetadata(chainSlug);
+    const metadata = await this.parent.getMetadata(chainSlug);
     const apiObject = new SubstrateApi(apiUrl, apiUrl, { providerName, metadata });
 
-    apiObject.isApiConnectedSubject.subscribe((isConnected) => {
-      const currentMap = this.apiStateMapSubject.getValue();
-
-      this.apiStateMapSubject.next({
-        ...currentMap,
-        [chainSlug]: isConnected
-      });
-    });
+    apiObject.isApiConnectedSubject.subscribe(this.handleConnect.bind(this, chainSlug));
 
     // Update metadata to database with async methods
-    this.metadataStore && apiObject.isReady.then((api) => {
+    apiObject.isReady.then((api) => {
       // Avoid date existed metadata
       if (metadata && metadata.specVersion === api.specVersion && metadata.genesisHash === api.api.genesisHash.toHex()) {
         return;
       }
 
-      this.metadataStore?.updateMetadata(chainSlug, {
+      this.parent.upsertMetadata(chainSlug, {
         chain: chainSlug,
         genesisHash: api.api.genesisHash.toHex(),
         specVersion: api.specVersion,

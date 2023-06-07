@@ -1210,7 +1210,7 @@ export default class KoniState {
     }
   }
 
-  public pauseAllNetworks (code?: number, reason?: string): Promise<void[]> {
+  public pauseAllNetworks (code?: number, reason?: string) {
     return this.chainService.stopAllChainApis();
   }
 

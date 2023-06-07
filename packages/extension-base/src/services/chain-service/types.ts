@@ -50,12 +50,13 @@ export interface _ChainBaseApi {
   isApiConnectedSubject: BehaviorSubject<boolean>;
   isApiReadyOnce: boolean;
   isApiConnected: boolean; // might be redundant
+  updateApiUrl: (apiUrl: string) => Promise<void>;
   connect: () => void;
-  disconnect: () => void;
-  recoverConnect: () => void;
-  destroy: () => void;
+  disconnect: () => Promise<void>;
+  recoverConnect: () => Promise<void>;
+  destroy: () => Promise<void>;
 
-  isReady: Promise<any>; // to be overwritten by child interface
+  isReady: Promise<_ChainBaseApi>; // to be overwritten by child interface
 }
 
 export interface _SubstrateChainMetadata {

@@ -9,7 +9,7 @@ export default class MetadataStore extends BaseStoreWithChain<IMetadataItem> {
     return this.table.where('chain').equals(chain).first();
   }
 
-  updateMetadata (chain: string, metadata: IMetadataItem) {
+  upsertMetadata (chain: string, metadata: IMetadataItem) {
     return this.table.put(metadata, chain);
   }
 

@@ -3217,7 +3217,7 @@ export default class KoniExtension {
 
     function convertRs (rs: Record<string, SWTransaction>): Record<string, SWTransactionResult> {
       return Object.fromEntries(Object.entries(rs).map(([key, value]) => {
-        const { additionalValidator, transaction, ...transactionResult } = value;
+        const { additionalValidator, eventsHandler, transaction, ...transactionResult } = value;
 
         return [key, transactionResult];
       }));

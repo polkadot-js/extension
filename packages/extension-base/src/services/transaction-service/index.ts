@@ -854,7 +854,7 @@ export default class TransactionService {
         if (txState.status.isInBlock) {
           eventData.eventLogs = txState.events;
 
-          if (!eventData.extrinsicHash || eventData.extrinsicHash === '') {
+          if (!eventData.extrinsicHash || eventData.extrinsicHash === '' || !isHex(eventData.extrinsicHash)) {
             eventData.extrinsicHash = txState.txHash.toHex();
             eventData.blockHash = txState.status.asInBlock.toHex();
             emitter.emit('extrinsicHash', eventData);

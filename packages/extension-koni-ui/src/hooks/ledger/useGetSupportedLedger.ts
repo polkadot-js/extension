@@ -7,9 +7,9 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 const useGetSupportedLedger = () => {
-  const { chainStateMap } = useSelector((state: RootState) => state.chainStore);
+  const { chainInfoMap, chainStateMap } = useSelector((state: RootState) => state.chainStore);
 
-  return useMemo(() => getSupportedLedger(chainStateMap), [chainStateMap]);
+  return useMemo(() => getSupportedLedger(chainInfoMap, chainStateMap), [chainInfoMap, chainStateMap]);
 };
 
 export default useGetSupportedLedger;

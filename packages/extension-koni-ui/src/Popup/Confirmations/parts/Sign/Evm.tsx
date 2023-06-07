@@ -64,6 +64,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const signMode = useMemo(() => getSignMode(account), [account]);
   const isLedger = useMemo(() => signMode === AccountSignMode.LEDGER, [signMode]);
+  const isMessage = isEvmMessage(payload);
 
   const [loading, setLoading] = useState(false);
 
@@ -72,7 +73,8 @@ const Component: React.FC<Props> = (props: Props) => {
     isLocked,
     ledger,
     refresh: refreshLedger,
-    signTransaction: ledgerSign,
+    signMessage: ledgerSignMessage,
+    signTransaction: ledgerSignTransaction,
     warning: ledgerWarning } = useLedger(chain?.slug, isLedger);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [
@@ -141,9 +143,10 @@ const Component: React.FC<Props> = (props: Props) => {
     setLoading(true);
 
     setTimeout(() => {
-      ledgerSign(hexToU8a(hashPayload), account.accountIndex, account.addressOffset)
+      const signPromise = isMessage ? ledgerSignMessage(hexToU8a(hashPayload), account.accountIndex, account.addressOffset) : ledgerSignTransaction(hexToU8a(hashPayload), account.accountIndex, account.addressOffset);
+
+      signPromise
         .then(({ signature }) => {
-          console.log(signature);
           onApproveSignature({ signature });
         })
         .catch((e: Error) => {
@@ -151,7 +154,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         });
     });
-  }, [account.accountIndex, account.addressOffset, hashPayload, isLedgerConnected, ledger, ledgerSign, onApproveSignature, refreshLedger]);
+  }, [account.accountIndex, account.addressOffset, hashPayload, isLedgerConnected, isMessage, ledger, ledgerSignMessage, ledgerSignTransaction, onApproveSignature, refreshLedger]);
 
   const onConfirm = useCallback(() => {
     switch (signMode) {

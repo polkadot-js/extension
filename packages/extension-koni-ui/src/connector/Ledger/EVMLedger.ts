@@ -4,9 +4,7 @@
 import type { AccountOptions, LedgerAddress, LedgerSignature, LedgerVersion } from '@polkadot/hw-ledger/types';
 
 import EthApp from '@ledgerhq/hw-app-eth';
-import { _ChainInfo } from '@subwallet/chain-list/types';
-import { Ledger, LedgerTypes } from '@subwallet/extension-koni-ui/connector/Ledger/index';
-import { findChainInfoByChainId } from '@subwallet/extension-koni-ui/utils';
+import { Ledger, LedgerTypes } from '@subwallet/extension-koni-ui/types';
 
 import { transports } from '@polkadot/hw-ledger-transports';
 import { hexStripPrefix, u8aToHex } from '@polkadot/util';
@@ -16,16 +14,12 @@ export class EVMLedger extends Ledger {
   // readonly #chainId: number;
   readonly #transport: LedgerTypes;
 
-  constructor (transport: LedgerTypes, chainId: number, chainInfoMap: Record<string, _ChainInfo>) {
+  constructor (transport: LedgerTypes) {
     super();
-
-    const chain = findChainInfoByChainId(chainInfoMap, chainId);
 
     // u2f is deprecated
     if (!['hid', 'webusb'].includes(transport)) {
       throw new Error(`Unsupported transport ${transport}`);
-    } else if (!chain) {
-      throw new Error(`Unsupported chain ${chainId}`);
     }
 
     // this.#chainId = chainId;
@@ -63,10 +57,9 @@ export class EVMLedger extends Ledger {
     });
   }
 
-  async sign (message: Uint8Array, accountOffset = 0, addressOffset = 0, accountOptions: AccountOptions): Promise<LedgerSignature> {
+  async signTransaction (message: Uint8Array, accountOffset = 0, addressOffset = 0, accountOptions: AccountOptions): Promise<LedgerSignature> {
     return this.#withApp(async (app): Promise<LedgerSignature> => {
       const hex = hexStripPrefix(u8aToHex(message));
-
       const path = this.#serializePath(accountOffset, addressOffset, accountOptions);
 
       const { r, s, v } = await this.#wrapError(app.signTransaction(path, hex));
@@ -74,6 +67,24 @@ export class EVMLedger extends Ledger {
       const hexR = r.length % 2 === 1 ? `0${r}` : r;
       const hexS = s.length % 2 === 1 ? `0${s}` : s;
       const hexV = v.length % 2 === 1 ? `0${v}` : v;
+
+      return {
+        signature: `0x${hexR + hexS + hexV}`
+      };
+    });
+  }
+
+  async signMessage (message: Uint8Array, accountOffset = 0, addressOffset = 0, accountOptions: AccountOptions): Promise<LedgerSignature> {
+    return this.#withApp(async (app): Promise<LedgerSignature> => {
+      const hex = hexStripPrefix(u8aToHex(message));
+      const path = this.#serializePath(accountOffset, addressOffset, accountOptions);
+
+      const { r, s, v } = await this.#wrapError(app.signPersonalMessage(path, hex));
+
+      const hexR = r.length % 2 === 1 ? `0${r}` : r;
+      const hexS = s.length % 2 === 1 ? `0${s}` : s;
+      const vString = v.toString(16);
+      const hexV = vString.length % 2 === 1 ? `0${vString}` : vString;
 
       return {
         signature: `0x${hexR + hexS + hexV}`

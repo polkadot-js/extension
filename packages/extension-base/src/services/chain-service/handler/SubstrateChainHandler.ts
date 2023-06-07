@@ -6,7 +6,7 @@ import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wa
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
-import { _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { _ApiOptions, _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
 import { ContractPromise } from '@polkadot/api-contract';
@@ -23,7 +23,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
 
   private logger: Logger;
 
-  constructor (parent: ChainService) {
+  constructor (parent?: ChainService) {
     super(parent);
     this.logger = createLogger('substrate-chain-handler');
   }
@@ -37,7 +37,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
   }
 
   public async wakeUp () {
-    const activeChains = this.parent.getActiveChains();
+    const activeChains = this.parent?.getActiveChains() || [];
 
     for (const chain of activeChains) {
       const evmApi = this.getSubstrateApiByChain(chain);
@@ -183,7 +183,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     substrateAPI?.destroy().catch(console.error);
   }
 
-  public async initApi (chainSlug: string, apiUrl: string, providerName?: string): Promise<_SubstrateApi> {
+  public async initApi (chainSlug: string, apiUrl: string, { onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}): Promise<_SubstrateApi> {
     const existed = this.substrateApiMap[chainSlug];
 
     // Return existed to avoid re-init metadata
@@ -197,10 +197,11 @@ export class SubstrateChainHandler extends AbstractChainHandler {
       return existed;
     }
 
-    const metadata = await this.parent.getMetadata(chainSlug);
+    const metadata = await this.parent?.getMetadata(chainSlug);
     const apiObject = new SubstrateApi(apiUrl, apiUrl, { providerName, metadata });
 
     apiObject.isApiConnectedSubject.subscribe(this.handleConnect.bind(this, chainSlug));
+    onUpdateStatus && apiObject.isApiConnectedSubject.subscribe(onUpdateStatus);
 
     // Update metadata to database with async methods
     apiObject.isReady.then((api) => {
@@ -209,7 +210,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
         return;
       }
 
-      this.parent.upsertMetadata(chainSlug, {
+      this.parent?.upsertMetadata(chainSlug, {
         chain: chainSlug,
         genesisHash: api.api.genesisHash.toHex(),
         specVersion: api.specVersion,

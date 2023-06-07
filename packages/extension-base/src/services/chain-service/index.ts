@@ -5,12 +5,11 @@ import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, M
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { _ASSET_LOGO_MAP_SRC, _ASSET_REF_SRC, _CHAIN_ASSET_SRC, _CHAIN_INFO_SRC, _CHAIN_LOGO_MAP_SRC, _DEFAULT_ACTIVE_CHAINS, _MULTI_CHAIN_ASSET_SRC } from '@subwallet/extension-base/services/chain-service/constants';
-import { EvmApi } from '@subwallet/extension-base/services/chain-service/handler/EvmApi';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
 import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
@@ -507,7 +506,7 @@ export class ChainService {
   private async initApiForChain (chainInfo: _ChainInfo) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
-    const subscribeStatus = (isConnected: boolean) => {
+    const onUpdateStatus = (isConnected: boolean) => {
       const currentStatus = this.getChainStateByKey(chainInfo.slug).connectionStatus;
       const newStatus = isConnected ? _ChainConnectionStatus.CONNECTED : _ChainConnectionStatus.DISCONNECTED;
 
@@ -519,19 +518,15 @@ export class ChainService {
     };
 
     if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo !== undefined) {
-      const chainApi = await this.initApi(chainInfo.slug, endpoint, 'substrate', providerName);
+      const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
 
       this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as SubstrateApi);
-      // Todo: Need unsub this if renew api
-      chainApi.isApiConnectedSubject.subscribe(subscribeStatus);
     }
 
     if (chainInfo.evmInfo !== null && chainInfo.evmInfo !== undefined) {
-      const chainApi = await this.initApi(chainInfo.slug, endpoint, 'evm', providerName);
+      const chainApi = await this.evmChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
 
-      this.evmChainHandler.setEvmApi(chainInfo.slug, chainApi as EvmApi);
-      // Todo: Need unsub this if renew api
-      chainApi.isApiConnectedSubject.subscribe(subscribeStatus);
+      this.evmChainHandler.setEvmApi(chainInfo.slug, chainApi);
     }
   }
 
@@ -542,15 +537,6 @@ export class ChainService {
 
     if (chainInfo.evmInfo !== null) {
       this.evmChainHandler.destroyEvmApi(chainInfo.slug);
-    }
-  }
-
-  private async initApi (slug: string, endpoint: string, type = 'substrate', providerName?: string): Promise<_ChainBaseApi> {
-    switch (type) {
-      case 'evm':
-        return await this.evmChainHandler.initApi(slug, endpoint, providerName);
-      default: // substrate by default
-        return await this.substrateChainHandler.initApi(slug, endpoint, providerName);
     }
   }
 

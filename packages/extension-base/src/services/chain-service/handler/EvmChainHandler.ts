@@ -5,7 +5,7 @@ import { _AssetType } from '@subwallet/chain-list/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
 import { EvmApi } from '@subwallet/extension-base/services/chain-service/handler/EvmApi';
-import { _EvmChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { _ApiOptions, _EvmChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SmartContractTokenInfo } from '@subwallet/extension-base/services/chain-service/types';
 import { Contract } from 'web3-eth-contract';
@@ -17,7 +17,7 @@ export class EvmChainHandler extends AbstractChainHandler {
   private evmApiMap: Record<string, EvmApi> = {};
   private logger: Logger;
 
-  constructor (parent: ChainService) {
+  constructor (parent?: ChainService) {
     super(parent);
     this.logger = createLogger('evm-chain-handler');
   }
@@ -34,7 +34,7 @@ export class EvmChainHandler extends AbstractChainHandler {
     this.evmApiMap[chainSlug] = evmApi;
   }
 
-  public async initApi (chainSlug: string, apiUrl: string, providerName?: string) {
+  public async initApi (chainSlug: string, apiUrl: string, { onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}) {
     const existed = this.getEvmApiByChain(chainSlug);
 
     if (existed) {
@@ -50,6 +50,7 @@ export class EvmChainHandler extends AbstractChainHandler {
     const apiObject = new EvmApi(chainSlug, apiUrl, { providerName });
 
     apiObject.isApiConnectedSubject.subscribe(this.handleConnect.bind(this, chainSlug));
+    apiObject.isApiConnectedSubject.subscribe(onUpdateStatus);
 
     return Promise.resolve(apiObject);
   }
@@ -77,7 +78,7 @@ export class EvmChainHandler extends AbstractChainHandler {
   }
 
   wakeUp () {
-    const activeChains = this.parent.getActiveChains();
+    const activeChains = this.parent?.getActiveChains() || [];
 
     for (const chain of activeChains) {
       const evmApi = this.getEvmApiByChain(chain);

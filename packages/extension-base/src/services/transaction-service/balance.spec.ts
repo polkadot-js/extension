@@ -93,9 +93,9 @@ describe('test token transfer', () => {
 
       const _api = await evmChainHandler.initApi(networkKey, chain.providers[Object.keys(chain.providers)[0]]);
 
-      const api = await _api.isReady;
+      evmChainHandler.setEvmApi(networkKey, _api);
 
-      evmChainHandler.setEvmApi(networkKey, api);
+      await _api.isReady;
 
       const assets = Object.values(ChainAssetMap).filter((asset) => asset.originChain === networkKey && ![_AssetType.ERC721, _AssetType.PSP34].includes(asset.assetType));
       const evmApiMap = evmChainHandler.getEvmApiMap();

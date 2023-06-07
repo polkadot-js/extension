@@ -23,7 +23,8 @@ export interface _SubstrateChainSpec {
 
 export interface _ApiOptions {
   providerName?: string,
-  metadata?: MetadataItem
+  metadata?: MetadataItem,
+  onUpdateStatus?: (isConnected: boolean) => void;
 }
 
 export enum _CHAIN_VALIDATION_ERROR {

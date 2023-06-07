@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi } from '@subwallet/extension-base/services/chain-service/types';
 import { BehaviorSubject } from 'rxjs';
 
@@ -20,11 +21,11 @@ export abstract class AbstractChainHandler {
   protected recoverMap: Record<string, RetryObject>;
   protected isSleeping = false;
 
-  protected constructor (protected parent: ChainService) {
+  protected constructor (protected parent?: ChainService) {
     this.recoverMap = {};
   }
 
-  abstract initApi (chainSlug: string, apiUrl: string, providerName?: string): Promise<_ChainBaseApi>;
+  abstract initApi (chainSlug: string, apiUrl: string, options: Omit<_ApiOptions, 'metadata'>): Promise<_ChainBaseApi>;
   abstract recoverApi (chainSlug: string): void;
   abstract sleep (): Promise<void>;
   abstract wakeUp (): Promise<void>;
@@ -49,7 +50,7 @@ export abstract class AbstractChainHandler {
   // Recover api if it is disconnected
   protected handleRecover (chain: string): void {
     // Not recover inactive chain
-    if (!this.parent.getChainStateByKey(chain)?.active) {
+    if (!this.parent?.getChainStateByKey(chain)?.active) {
       this.cancelRecover(chain);
 
       return;

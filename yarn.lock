@@ -5420,6 +5420,7 @@ __metadata:
     "@subwallet/extension-mocks": ^1.0.7-2
     "@subwallet/keyring": ^0.0.10
     "@subwallet/ui-keyring": ^0.0.10
+    "@types/uuid": ^9.0.1
     "@unique-nft/types": ^0.6.0-4
     "@zeitgeistpm/type-defs": ^1.0.0
     "@zeroio/type-definitions": ^0.0.14
@@ -5449,6 +5450,7 @@ __metadata:
     protobufjs: ^7.1.2
     rlp: ^3.0.0
     rxjs: ^7.8.0
+    uuid: ^9.0.0
     web3: ^1.10.0
     web3-core: ^1.10.0
     web3-core-helpers: ^1.10.0
@@ -6487,6 +6489,13 @@ __metadata:
   version: 0.0.3
   resolution: "@types/use-sync-external-store@npm:0.0.3"
   checksum: 161ddb8eec5dbe7279ac971531217e9af6b99f7783213566d2b502e2e2378ea19cf5e5ea4595039d730aa79d3d35c6567d48599f69773a02ffcff1776ec2a44e
+  languageName: node
+  linkType: hard
+
+"@types/uuid@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "@types/uuid@npm:9.0.1"
+  checksum: c472b8a77cbeded4bc529220b8611afa39bd64677f507838f8083d8aac8033b1f88cb9ddaa2f8589e0dcd2317291d0f6e1379f82d5ceebd6f74f3b4825288e00
   languageName: node
   linkType: hard
 

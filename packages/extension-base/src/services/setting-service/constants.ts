@@ -17,5 +17,6 @@ export const DEFAULT_SETTING: UiSettings = {
   theme: DEFAULT_THEME,
   camera: false,
   timeAutoLock: DEFAULT_AUTO_LOCK_TIME,
-  enableChainPatrol: DEFAULT_CHAIN_PATROL_ENABLE
+  enableChainPatrol: DEFAULT_CHAIN_PATROL_ENABLE,
+  walletReference: ''
 };

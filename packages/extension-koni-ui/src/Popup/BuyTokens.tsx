@@ -81,6 +81,7 @@ function Component ({ className }: Props) {
 
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+  const { walletReference } = useSelector((state: RootState) => state.settings);
   const checkAsset = useAssetChecker();
 
   const [currentAddress] = useState<string | undefined>(currentAccount?.address);
@@ -153,7 +154,7 @@ function Component ({ className }: Props) {
     if (urlPromise && serviceInfo && buyInfo.services.includes(service)) {
       const { network: serviceNetwork, symbol } = serviceInfo;
 
-      urlPromise(symbol, walletAddress, serviceNetwork)
+      urlPromise(symbol, walletAddress, serviceNetwork, walletReference)
         .then((url) => {
           openInNewTab(url)();
         })
@@ -169,7 +170,7 @@ function Component ({ className }: Props) {
     } else {
       setLoading(false);
     }
-  }, [form, chainInfoMap, notify, t]);
+  }, [form, chainInfoMap, walletReference, notify, t]);
 
   const isSupportBuyTokens = useMemo(() => {
     if (selectedService && selectedAddress && selectedTokenKey) {

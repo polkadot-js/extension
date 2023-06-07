@@ -401,6 +401,8 @@ export interface UiSettings {
   camera: boolean;
   timeAutoLock: number;
   enableChainPatrol: boolean;
+  // On-ramp service account reference
+  walletReference: string;
 }
 
 export type RequestSettingsType = UiSettings;

@@ -9,6 +9,7 @@ import MigrateImportedToken from '@subwallet/extension-base/services/migration-s
 import MigrateNetworkSettings from '@subwallet/extension-base/services/migration-service/scripts/MigrateNetworkSettings';
 import MigrateSettings from '@subwallet/extension-base/services/migration-service/scripts/MigrateSettings';
 import MigrateTransactionHistory from '@subwallet/extension-base/services/migration-service/scripts/MigrateTransactionHistory';
+import MigrateWalletReference from '@subwallet/extension-base/services/migration-service/scripts/MigrateWalletReference';
 
 import BaseMigrationJob from '../Base';
 
@@ -22,6 +23,7 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.0.1-50': MigrateSettings,
   '1.0.1-60': MigrateAuthUrls,
   '1.0.3-01': MigrateAutoLock,
-  '1.0.3-02': MigrateChainPatrol
+  '1.0.3-02': MigrateChainPatrol,
+  '1.0.7-02': MigrateWalletReference
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

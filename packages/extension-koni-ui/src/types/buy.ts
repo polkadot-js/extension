@@ -21,4 +21,4 @@ export interface BuyServiceInfo extends BuyService {
   support: BuyTokenInfo['support']
 }
 
-export type CreateBuyOrderFunction = (token: string, address: string, network: string) => Promise<string>;
+export type CreateBuyOrderFunction = (token: string, address: string, network: string, walletReference: string) => Promise<string>;

@@ -24,6 +24,7 @@ const initialState: AppSettings = {
   camera: false,
   timeAutoLock: DEFAULT_AUTO_LOCK_TIME,
   enableChainPatrol: DEFAULT_CHAIN_PATROL_ENABLE,
+  walletReference: '',
 
   // AuthUrls
   authUrls: {},

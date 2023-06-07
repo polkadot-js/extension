@@ -18,9 +18,9 @@ export const mergeTransactionAndSignature = (tx: Web3Transaction, _rawSignature:
     nonce: tx.nonce,
     gasPrice: addHexPrefix(tx.gasPrice.toString(16)),
     gasLimit: addHexPrefix(tx.gasLimit.toString(16)),
-    to: tx.to !== undefined ? tx.to : '',
+    to: tx.to,
     value: addHexPrefix(tx.value.toString(16)),
-    data: tx.data ? tx.data : '',
+    data: tx.data,
     chainId: tx.chainId,
     signature: signature
   };

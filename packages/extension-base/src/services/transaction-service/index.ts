@@ -654,7 +654,7 @@ export default class TransactionService {
       gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
       to: transaction.to !== undefined ? transaction.to : '',
       value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
-      data: transaction.data ? transaction.data : '',
+      data: transaction.data,
       chainId: _getEvmChainId(chainInfo)
     };
 
@@ -732,7 +732,7 @@ export default class TransactionService {
       gasLimit: anyNumberToBN(payload.gas).toNumber(),
       to: payload.to !== undefined ? payload.to : '',
       value: anyNumberToBN(payload.value).toNumber(),
-      data: payload.data ? payload.data : '',
+      data: payload.data,
       chainId: payload.chainId
     };
 

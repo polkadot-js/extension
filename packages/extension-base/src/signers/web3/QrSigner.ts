@@ -41,7 +41,7 @@ export default class QrSigner {
         gasLimit: addHexPrefix(tx.gasLimit.toString(16)),
         to: tx.to !== undefined ? tx.to : '',
         value: addHexPrefix(tx.value.toString(16)),
-        data: tx.data ? tx.data : '',
+        data: tx.data,
         chainId: tx.chainId
       };
 

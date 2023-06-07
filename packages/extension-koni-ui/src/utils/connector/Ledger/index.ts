@@ -5,7 +5,7 @@ import { TFunction } from 'i18next';
 
 export const convertLedgerWarning = (message: string, t: TFunction) => {
   if (message.includes('Locked device (0x5515)')) {
-    return t('Locked device (0x5515)');
+    return t('Please unlock your Ledger');
   } else {
     return null;
   }

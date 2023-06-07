@@ -4,6 +4,7 @@
 import { ApolloClient, createHttpLink, gql, InMemoryCache } from '@apollo/client';
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainType, ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { MAX_FETCH_PAGE_PER_SESSION, MIN__NUM_HISTORY_PER_ACCOUNT } from '@subwallet/extension-base/services/history-service/constants';
 import fetch from 'cross-fetch';
 
 import { isArray } from '@polkadot/util';
@@ -341,7 +342,7 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
   };
 }
 
-export async function fetchMultiChainHistories (addresses: string[], chainMap: Record<string, _ChainInfo>, maxPage = 25, countMap: Record<string, number> = {}, _lastId?: string) {
+export async function fetchMultiChainHistories (addresses: string[], chainMap: Record<string, _ChainInfo>, maxPage = MAX_FETCH_PAGE_PER_SESSION, countMap: Record<string, number> = {}, _lastId?: string) {
   const responseData: MultiHistoryData[] = [];
 
   let currentPage = 0;
@@ -420,7 +421,7 @@ export async function fetchMultiChainHistories (addresses: string[], chainMap: R
     const retryAddresses: string[] = [];
 
     for (const [address, number] of Object.entries(countMap)) {
-      if (number < 30) {
+      if (number < MIN__NUM_HISTORY_PER_ACCOUNT) {
         retryAddresses.push(address);
       }
     }

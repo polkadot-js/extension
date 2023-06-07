@@ -27,7 +27,7 @@ export interface SWTransaction extends ValidateTransactionResponse, Partial<Pick
   eventsHandler?: (eventEmitter: TransactionEmitter) => void;
 }
 
-export type SWTransactionResult = Omit<SWTransaction, 'transaction' | 'additionalValidator'>
+export type SWTransactionResult = Omit<SWTransaction, 'transaction' | 'additionalValidator' | 'eventsHandler'>
 
 type SwInputBase = Pick<SWTransaction, 'address' | 'url' | 'data' | 'extrinsicType' | 'chain' | 'chainType' | 'ignoreWarnings' | 'transferNativeAmount'>
 & Partial<Pick<SWTransaction, 'additionalValidator' | 'eventsHandler'>>;

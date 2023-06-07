@@ -6,6 +6,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainType, ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import fetch from 'cross-fetch';
 
+import { isArray } from '@polkadot/util';
 import { decodeAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 const MULTI_CHAIN_URL = 'https://squid.subsquid.io/multi-chain-tx/v/v1/graphql';
@@ -194,6 +195,18 @@ function generateSignature (input: { r: string, s: string, v: string }): string 
   return `0x${rHex}${sHex}${vHex}`;
 }
 
+const parseArgs = (args: unknown): TransferArgs => {
+  if (isArray(args)) {
+    return {
+      from: args[0] as string,
+      to: args[1] as string,
+      amount: args[2] as string
+    };
+  } else {
+    return args as TransferArgs;
+  }
+};
+
 export function parseSubsquidTransactionData (address: string, type: SubsquidTransactionType, historyItem: MultiHistoryData, chainInfo: _ChainInfo, args: any, data: any): TransactionHistoryItem {
   const chainType = chainInfo.substrateInfo ? ChainType.SUBSTRATE : ChainType.EVM;
   const nativeDecimals = chainInfo.substrateInfo?.decimals || chainInfo.evmInfo?.decimals || 18;
@@ -213,7 +226,7 @@ export function parseSubsquidTransactionData (address: string, type: SubsquidTra
     case SubsquidTransactionType.BalanceTransfer: {
       transactionType = ExtrinsicType.TRANSFER_BALANCE;
       const extrinsic = (data as TransferTransactionData).extrinsic;
-      const parsedArgs = args as TransferArgs;
+      const parsedArgs = parseArgs(args);
 
       to = autoFormatAddress(parsedArgs.to);
       from = autoFormatAddress(parsedArgs.from);

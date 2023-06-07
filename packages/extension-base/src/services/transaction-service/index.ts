@@ -69,7 +69,7 @@ export default class TransactionService {
   }
 
   private get processingTransactions (): SWTransaction[] {
-    return this.allTransactions.filter((t) => t.status === ExtrinsicStatus.QUEUED || t.status === ExtrinsicStatus.PROCESSING);
+    return this.allTransactions.filter((t) => t.status === ExtrinsicStatus.QUEUED || t.status === ExtrinsicStatus.SUBMITTING);
   }
 
   public getTransaction (id: string) {
@@ -79,7 +79,7 @@ export default class TransactionService {
   private checkDuplicate (transaction: ValidateTransactionResponseInput): TransactionError[] {
     // Check duplicated transaction
     const existed = this.processingTransactions
-      .filter((item) => item.address === transaction.address && item.chain === transaction.chain && [ExtrinsicStatus.QUEUED, ExtrinsicStatus.SUBMITTING, ExtrinsicStatus.UNKNOWN].includes(item.status));
+      .filter((item) => item.address === transaction.address && item.chain === transaction.chain);
 
     if (existed.length > 0) {
       return [new TransactionError(BasicTxErrorType.DUPLICATE_TRANSACTION)];

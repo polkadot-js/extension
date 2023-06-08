@@ -355,10 +355,11 @@ async function subscribeTokensAccountsPallet (addresses: string[], chain: string
   const unsubList = await Promise.all(Object.values(tokenMap).map(async (tokenInfo) => {
     try {
       const onChainInfo = _getTokenOnChainInfo(tokenInfo);
+      const assetId = _getTokenOnChainAssetId(tokenInfo);
 
       // Get Token Balance
       // @ts-ignore
-      return await api.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo]), (balances: TokenBalanceRaw[]) => {
+      return await api.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo || assetId]), (balances: TokenBalanceRaw[]) => {
         const tokenBalance = {
           reserved: sumBN(balances.map((b) => (b.reserved || new BN(0)))),
           frozen: sumBN(balances.map((b) => (b.frozen || new BN(0)))),

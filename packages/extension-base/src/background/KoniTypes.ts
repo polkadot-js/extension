@@ -508,6 +508,7 @@ export interface AmountData extends BasicTokenInfo {
 
 export interface XCMTransactionAdditionalInfo {
   destinationChain: string,
+  originalChain: string,
   fee?: AmountData
 }
 
@@ -592,6 +593,7 @@ export enum TransferTxErrorType {
   NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
   INVALID_TOKEN = 'INVALID_TOKEN',
   TRANSFER_ERROR = 'TRANSFER_ERROR',
+  RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT',
 }
 
 export type TransactionErrorType = BasicTxErrorType | TransferTxErrorType | StakingTxErrorType

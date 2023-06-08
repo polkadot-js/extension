@@ -123,17 +123,13 @@ export const PREDEFINED_BUY_TOKEN: Record<string, BuyTokenInfo> = {
       transak: {
         network: 'bsc',
         symbol: 'BNB'
-      },
-      banxa: {
-        network: 'BNB',
-        symbol: 'BNB'
       }
     },
     network: 'binance',
     slug: 'binance-NATIVE-BNB',
     symbol: 'BNB',
     support: 'ETHEREUM',
-    services: ['transak', 'banxa']
+    services: ['transak']
   },
   NEER: {
     serviceInfo: {

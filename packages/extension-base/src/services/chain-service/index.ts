@@ -57,7 +57,7 @@ export class ChainService {
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
-    this.xcmRefMapSubject.next(this.getXcmRefMap());
+    this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
 
     this.substrateChainHandler = new SubstrateChainHandler(this);
     this.evmChainHandler = new EvmChainHandler(this);
@@ -67,15 +67,16 @@ export class ChainService {
 
   // Getter
   public getXcmRefMap () {
-    const result: Record<string, _AssetRef> = {};
-
-    Object.entries(AssetRefMap).forEach(([key, assetRef]) => {
-      if (assetRef.path === _AssetRefPath.XCM) {
-        result[key] = assetRef;
-      }
-    });
-
-    return result;
+    return this.dataMap.assetRefMap;
+    // const result: Record<string, _AssetRef> = {};
+    //
+    // Object.entries(AssetRefMap).forEach(([key, assetRef]) => {
+    //   if (assetRef.path === _AssetRefPath.XCM) {
+    //     result[key] = assetRef;
+    //   }
+    // });
+    //
+    // return result;
   }
 
   public getEvmApi (slug: string) {
@@ -481,6 +482,7 @@ export class ChainService {
     this.chainInfoMapSubject.next(this.getChainInfoMap());
     this.chainStateMapSubject.next(this.getChainStateMap());
     this.assetRegistrySubject.next(this.getAssetRegistry());
+    this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
 
     await this.initApis();
     await this.initAssetSettings();

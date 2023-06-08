@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 1.0.8
+Build date: Jun 8, 2023.
+
+Features & Update:
+- Add validate for case: the transaction amount is too small to keep the destination account alive (#1479)
+- Update notification in case transaction time out (#1385)
+- Add support for USDT on more chains and update param for XCM on Astar (#1352)
+- Update some screens follow by design (#1419)
+
+Fixed bugs:
+- Fixed bug Don’t show send history in case xcm on same account (#1499)
+- Fixed bug error page when perform XCM on Firefox browser (#1505)
+- Fixed bug Do not Apply master password in case import multi account but file json have information "IsMasterPassword" (#1490)
+- Fixed bug send fund ERC20 token on Polygon (#1492)
+
 ## 1.0.7
 Build date: Jun 1, 2023.
 

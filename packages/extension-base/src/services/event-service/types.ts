@@ -5,6 +5,8 @@ import { CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTyp
 import { SWTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 
 export interface EventRegistry {
+  'general.sleep': [boolean],
+  'general.wakeup': [boolean],
   'crypto.ready': [boolean],
   'database.ready': [boolean],
   'keyring.ready': [boolean],

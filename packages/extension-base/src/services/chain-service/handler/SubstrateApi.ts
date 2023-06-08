@@ -6,7 +6,7 @@ import '@polkadot/types-augment';
 import { options as acalaOptions } from '@acala-network/api';
 import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
-import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS } from '@subwallet/extension-base/services/chain-service/constants';
+import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS, API_CONNECT_TIMEOUT } from '@subwallet/extension-base/services/chain-service/constants';
 import { getSubstrateConnectProvider } from '@subwallet/extension-base/services/chain-service/handler/light-client';
 import { DEFAULT_AUX } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
@@ -29,10 +29,10 @@ export class SubstrateApi implements _SubstrateApi {
   api: ApiPromise;
   providerName?: string;
   provider: ProviderInterface;
-  apiRetry = 0;
   apiUrl: string;
   metadata?: MetadataItem;
 
+  useLightClient = false;
   isApiReady = false;
   isApiReadyOnce = false;
   apiError?: string;
@@ -61,9 +61,13 @@ export class SubstrateApi implements _SubstrateApi {
 
   private createProvider (apiUrl: string): ProviderInterface {
     if (apiUrl.startsWith('light://')) {
+      this.useLightClient = true;
+
       return getSubstrateConnectProvider(apiUrl.replace('light://substrate-connect/', ''));
     } else {
-      return new WsProvider(apiUrl, API_AUTO_CONNECT_MS);
+      this.useLightClient = true;
+
+      return new WsProvider(apiUrl, API_AUTO_CONNECT_MS, {}, API_CONNECT_TIMEOUT);
     }
   }
 
@@ -122,14 +126,15 @@ export class SubstrateApi implements _SubstrateApi {
     }
 
     // Disconnect with old provider
+    await this.disconnect();
     this.isApiReadyOnce = false;
     this.api.off('ready', this.onReady.bind(this));
     this.api.off('connected', this.onConnect.bind(this));
     this.api.off('disconnected', this.onDisconnect.bind(this));
     this.api.off('error', this.onError.bind(this));
-    await this.disconnect();
 
     // Create new provider and api
+    this.apiUrl = apiUrl;
     this.provider = this.createProvider(apiUrl);
     this.api = this.createApi(this.provider);
     this.api.on('ready', this.onReady.bind(this));
@@ -142,19 +147,18 @@ export class SubstrateApi implements _SubstrateApi {
     if (this.api.isConnected) {
       this.updateConnectedStatus(true);
     } else {
-      this.api.connect().then(() => {
-        this.updateConnectedStatus(true);
-      }).catch(console.error);
+      this.api.connect()
+        .then(() => {
+          this.updateConnectedStatus(true);
+        }).catch(console.error);
     }
   }
 
   async disconnect () {
-    if (this.api.isConnected) {
-      try {
-        await this.api.disconnect();
-      } catch (e) {
-        console.error(e);
-      }
+    try {
+      await this.api.disconnect();
+    } catch (e) {
+      console.error(e);
     }
 
     this.updateConnectedStatus(false);
@@ -183,8 +187,8 @@ export class SubstrateApi implements _SubstrateApi {
   }
 
   onConnect (): void {
-    this.apiRetry = 0;
     this.updateConnectedStatus(true);
+    console.log(`Connected to ${this.chainSlug || ''} at ${this.apiUrl}`);
 
     if (this.isApiReadyOnce) {
       this.handleApiReady.resolve(this);
@@ -193,6 +197,7 @@ export class SubstrateApi implements _SubstrateApi {
 
   onDisconnect (): void {
     this.isApiReady = false;
+    console.log(`Disconnected from ${this.chainSlug} at ${this.apiUrl}`);
     this.updateConnectedStatus(false);
     this.handleApiReady = createPromiseHandler<_SubstrateApi>();
   }
@@ -209,11 +214,8 @@ export class SubstrateApi implements _SubstrateApi {
     this.specName = this.api.runtimeVersion.specName.toString();
     this.specVersion = this.api.runtimeVersion.specVersion.toString();
 
-    const [systemChain, systemChainType, systemName, systemVersion] = await Promise.all([
+    const [systemChain, systemName, systemVersion] = await Promise.all([
       api.rpc.system?.chain(),
-      api.rpc.system?.chainType
-        ? api.rpc.system?.chainType()
-        : Promise.resolve(registry.createType('ChainType', 'Live')),
       api.rpc.system?.name(),
       api.rpc.system?.version()
     ]);
@@ -226,8 +228,6 @@ export class SubstrateApi implements _SubstrateApi {
     const ss58Format = properties.ss58Format.unwrapOr(DEFAULT_SS58).toNumber();
     const tokenSymbol = properties.tokenSymbol.unwrapOr([formatBalance.getDefaults().unit, ...DEFAULT_AUX]);
     const tokenDecimals = properties.tokenDecimals.unwrapOr([DEFAULT_DECIMALS]);
-
-    console.log(`Connected to ${this.systemChain} (${systemChainType.toString()}) at ${this.apiUrl}`);
 
     registry.setChainProperties(registry.createType('ChainProperties', { ss58Format, tokenDecimals, tokenSymbol }));
 

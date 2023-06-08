@@ -7,8 +7,10 @@ import { _ChainBaseApi } from '@subwallet/extension-base/services/chain-service/
 import { BehaviorSubject } from 'rxjs';
 
 const SHORT_RECOVER_RETRY = 3;
-const SHORT_RETRY_TIME = 15000;
-const LONG_RETRY_TIME = 60000;
+
+export const FIRST_RECONNECT_TIME = 3000;
+export const SHORT_RETRY_TIME = 15000;
+export const LONG_RETRY_TIME = 60000;
 
 interface RetryObject {
   retryTimes: number;
@@ -25,6 +27,7 @@ export abstract class AbstractChainHandler {
     this.recoverMap = {};
   }
 
+  abstract getApiByChain (chain: string): _ChainBaseApi | undefined;
   abstract initApi (chainSlug: string, apiUrl: string, options: Omit<_ApiOptions, 'metadata'>): Promise<_ChainBaseApi>;
   abstract recoverApi (chainSlug: string): void;
   abstract sleep (): Promise<void>;
@@ -32,17 +35,18 @@ export abstract class AbstractChainHandler {
 
   handleConnect (chain: string, isConnected: boolean): void {
     const currentMap = this.apiStateMapSubject.getValue();
+    const currentStatus = currentMap[chain];
 
     // Update api state
-    this.apiStateMapSubject.next({
-      ...currentMap,
-      [chain]: isConnected
-    });
+    if (currentStatus !== isConnected) {
+      this.apiStateMapSubject.next({
+        ...currentMap,
+        [chain]: isConnected
+      });
+    }
 
     // Handle connection change
-    if (isConnected) {
-      this.cancelRecover(chain);
-    } else {
+    if (!isConnected) {
       this.handleRecover(chain);
     }
   }
@@ -63,13 +67,17 @@ export abstract class AbstractChainHandler {
 
     const retryTimes = retryRecord.retryTimes;
     // Slow down recover frequency if increasing recover times
-    const retryTimeout = retryTimes >= SHORT_RECOVER_RETRY ? LONG_RETRY_TIME : SHORT_RETRY_TIME;
+    const retryTimeout = retryTimes === 0 ? FIRST_RECONNECT_TIME : (retryTimes >= SHORT_RECOVER_RETRY ? LONG_RETRY_TIME : SHORT_RETRY_TIME);
 
     // Recover api after retry timeout
     const timeout = setTimeout(() => {
-      console.log(`Recover ${chain} api after ${retryTimeout}ms`);
-      this.recoverApi(chain);
-      this.handleRecover(chain); // This will be cancel if api is connected
+      if (this.getApiByChain(chain)?.isApiConnected || this.isSleeping) {
+        // Cancel recover if api is connected
+        this.cancelRecover(chain);
+      } else {
+        this.recoverApi(chain);
+        this.handleRecover(chain); // This will be cancel if api is connected
+      }
     }, retryTimeout);
 
     this.recoverMap[chain] = { ...retryRecord, retryTimes: retryTimes + 1, timeout };

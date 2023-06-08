@@ -30,6 +30,10 @@ export class EvmChainHandler extends AbstractChainHandler {
     return this.evmApiMap[chainSlug];
   }
 
+  public getApiByChain (chain: string) {
+    return this.getEvmApiByChain(chain);
+  }
+
   public setEvmApi (chainSlug: string, evmApi: EvmApi) {
     this.evmApiMap[chainSlug] = evmApi;
   }
@@ -58,7 +62,11 @@ export class EvmChainHandler extends AbstractChainHandler {
   public async recoverApi (chainSlug: string): Promise<void> {
     const existed = this.getEvmApiByChain(chainSlug);
 
-    await existed?.recoverConnect();
+    if (existed && !existed.isApiReadyOnce) {
+      console.log(`Reconnect ${existed.providerName || existed.chainSlug} at ${existed.apiUrl}`);
+
+      return existed.recoverConnect();
+    }
   }
 
   destroyEvmApi (chain: string) {
@@ -68,6 +76,7 @@ export class EvmChainHandler extends AbstractChainHandler {
   }
 
   async sleep () {
+    this.isSleeping = true;
     this.cancelAllRecover();
 
     await Promise.all(Object.values(this.getEvmApiMap()).map((evmApi) => {
@@ -78,11 +87,13 @@ export class EvmChainHandler extends AbstractChainHandler {
   }
 
   wakeUp () {
+    this.isSleeping = false;
     const activeChains = this.parent?.getActiveChains() || [];
 
     for (const chain of activeChains) {
       const evmApi = this.getEvmApiByChain(chain);
 
+      // Not found evmApi mean it active with substrate interface
       evmApi?.connect();
     }
 

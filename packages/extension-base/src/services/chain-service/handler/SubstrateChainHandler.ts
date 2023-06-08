@@ -4,7 +4,7 @@
 import { _AssetType } from '@subwallet/chain-list/types';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
+import { AbstractChainHandler, SHORT_RETRY_TIME } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ApiOptions, _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -36,19 +36,35 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     return this.substrateApiMap[chainSlug];
   }
 
+  public getApiByChain (chain: string) {
+    return this.getSubstrateApiByChain(chain);
+  }
+
   public async wakeUp () {
+    this.isSleeping = false;
     const activeChains = this.parent?.getActiveChains() || [];
 
     for (const chain of activeChains) {
-      const evmApi = this.getSubstrateApiByChain(chain);
+      const api = this.getSubstrateApiByChain(chain);
 
-      evmApi?.connect();
+      // Not found substrateInterface mean it active with evm interface
+      if (api) {
+        api?.connect();
+
+        if (!api.useLightClient) {
+          // Manual fire handle connect to avoid some chain can not reconnect
+          setTimeout(() => {
+            this.handleConnect(chain, api.isApiConnected);
+          }, SHORT_RETRY_TIME);
+        }
+      }
     }
 
     return Promise.resolve();
   }
 
   public async sleep () {
+    this.isSleeping = true;
     this.cancelAllRecover();
 
     await Promise.all(Object.values(this.getSubstrateApiMap()).map((substrateApi) => {
@@ -59,7 +75,9 @@ export class SubstrateChainHandler extends AbstractChainHandler {
   async recoverApi (chainSlug: string) {
     const existed = this.getSubstrateApiByChain(chainSlug);
 
-    if (existed) {
+    if (existed && !existed.isApiReadyOnce) {
+      console.log(`Reconnect ${existed.providerName || existed.chainSlug} at ${existed.apiUrl}`);
+
       return existed.recoverConnect();
     }
   }
@@ -198,7 +216,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     }
 
     const metadata = await this.parent?.getMetadata(chainSlug);
-    const apiObject = new SubstrateApi(apiUrl, apiUrl, { providerName, metadata });
+    const apiObject = new SubstrateApi(chainSlug, apiUrl, { providerName, metadata });
 
     apiObject.isApiConnectedSubject.subscribe(this.handleConnect.bind(this, chainSlug));
     onUpdateStatus && apiObject.isApiConnectedSubject.subscribe(onUpdateStatus);

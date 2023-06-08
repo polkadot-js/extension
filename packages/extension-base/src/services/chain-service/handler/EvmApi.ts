@@ -95,18 +95,16 @@ export class EvmApi implements _EvmApi {
     clearInterval(this.intervalCheckApi);
   }
 
-  connect () {
+  connect (): void {
     // For websocket provider, connect it
     const wsProvider = this.provider as WebsocketProvider;
 
     wsProvider.connect && wsProvider.connect();
-
     // Check if api is ready
     this.api.eth.net.isListening()
       .then(() => {
         this.isApiReadyOnce = true;
         this.onConnect();
-        console.log(`Connected to ${this.chainSlug} (EVM) at ${this.apiUrl}`);
       }).catch((error) => {
         this.isApiReadyOnce = false;
         this.isApiReady = false;
@@ -140,6 +138,7 @@ export class EvmApi implements _EvmApi {
 
   onConnect (): void {
     if (!this.isApiConnected) {
+      console.log(`Connected to ${this.chainSlug} at ${this.apiUrl}`);
       this.isApiReady = true;
 
       if (this.isApiReadyOnce) {
@@ -154,7 +153,7 @@ export class EvmApi implements _EvmApi {
     this.updateConnectedStatus(false);
 
     if (this.isApiConnected) {
-      console.warn(`Disconnected from ${this.apiUrl} of ${this.chainSlug} (EVM)`);
+      console.warn(`Disconnected from ${this.chainSlug} of ${this.apiUrl} (EVM)`);
       this.isApiReady = false;
       this.isReadyHandler = createPromiseHandler<_EvmApi>();
     }

@@ -1628,6 +1628,7 @@ export default class KoniState {
   public async sleep () {
     // Wait starting finish before sleep to avoid conflict
     this.generalStatus === ServiceStatus.STARTING && this.waitStarting && await this.waitStarting;
+    this.eventService.emit('general.sleep', true);
 
     // Avoid sleep multiple times
     if (this.generalStatus === ServiceStatus.STOPPED) {
@@ -1679,7 +1680,10 @@ export default class KoniState {
     this.waitStarting = starting.promise;
 
     // Resume all networks if wakeup from sleep
-    isWakeup && await this.resumeAllNetworks();
+    if (isWakeup) {
+      await this.resumeAllNetworks();
+      this.eventService.emit('general.wakeup', true);
+    }
 
     // Start services
     await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start()]);

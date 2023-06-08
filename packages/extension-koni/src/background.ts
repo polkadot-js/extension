@@ -76,8 +76,6 @@ chrome.runtime.onInstalled.addListener(function (details) {
   if (details.reason === 'install') {
     onExtensionInstall();
   }
-
-  handleExtensionIdling();
 });
 
 chrome.runtime.onStartup.addListener(function () {
@@ -94,6 +92,9 @@ cryptoWaitReady()
       koniState.updateKeyringState();
     });
     koniState.eventService.emit('crypto.ready', true);
+
+    // Sleep extension after 2 minutes of inactivity or without any action
+    handleExtensionIdling();
   })
   .catch((error): void => {
     console.error('initialization failed', error);

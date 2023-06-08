@@ -542,7 +542,7 @@ export class ChainService {
     }
   }
 
-  private async _enableChain (chainSlug: string): Promise<boolean> {
+  public async enableChain (chainSlug: string) {
     const chainInfo = this.getChainInfoByKey(chainSlug);
     const chainStateMap = this.getChainStateMap();
 
@@ -551,39 +551,61 @@ export class ChainService {
     }
 
     this.lockChainInfoMap = true;
-    chainStateMap[chainSlug].active = true;
-    await this.initApiForChain(chainInfo);
 
     this.dbService.updateChainStore({
       ...chainInfo,
       active: true,
       currentProvider: chainStateMap[chainSlug].currentProvider
     }).catch(console.error);
+    chainStateMap[chainSlug].active = true;
+
+    await this.initApiForChain(chainInfo);
+
     this.lockChainInfoMap = false;
 
     this.eventService.emit('chain.updateState', chainSlug);
 
+    this.updateChainStateMapSubscription();
+
     return true;
   }
 
-  public async enableChain (chainSlug: string) {
-    const rs = await this._enableChain(chainSlug);
-
-    if (rs) {
-      this.updateChainStateMapSubscription();
-    }
-
-    return rs;
-  }
-
   public async enableChains (chainSlugs: string[]): Promise<boolean> {
-    const rs = await Promise.all(chainSlugs.map(this._enableChain.bind(this)));
+    const chainInfoMap = this.getChainInfoMap();
+    const chainStateMap = this.getChainStateMap();
+    let needUpdate = false;
 
-    if (rs.some((r) => r)) {
-      this.updateChainStateMapSubscription();
+    if (this.lockChainInfoMap) {
+      return false;
     }
 
-    return rs.every((r) => r);
+    this.lockChainInfoMap = true;
+
+    const initPromises = chainSlugs.map(async (chainSlug) => {
+      const chainInfo = chainInfoMap[chainSlug];
+      const currentState = chainStateMap[chainSlug]?.active;
+
+      if (!currentState) {
+        this.dbService.updateChainStore({
+          ...chainInfo,
+          active: true,
+          currentProvider: chainStateMap[chainSlug].currentProvider
+        }).catch(console.error);
+
+        chainStateMap[chainSlug].active = true;
+        await this.initApiForChain(chainInfo);
+
+        this.eventService.emit('chain.updateState', chainSlug);
+        needUpdate = true;
+      }
+    });
+
+    await Promise.all(initPromises);
+
+    this.lockChainInfoMap = false;
+    needUpdate && this.updateChainStateMapSubscription();
+
+    return needUpdate;
   }
 
   public disableChain (chainSlug: string): boolean {

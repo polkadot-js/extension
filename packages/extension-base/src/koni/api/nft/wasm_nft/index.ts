@@ -75,7 +75,11 @@ export class WasmNftApi extends BaseNftApi {
     const _attributeCount = _onChainAttributeCount?.output?.toJSON() as Record<string, unknown>;
     const onChainAttributeCount = _onChainAttributeCount.output ? (_attributeCount?.ok || _attributeCount?.Ok) as string : '0';
 
-    return parseInt(onChainAttributeCount) !== 0;
+    if (!_onChainAttributeCount.result.isOk) {
+      return false;
+    }
+
+    return !!onChainAttributeCount && parseInt(onChainAttributeCount) !== 0;
   }
 
   private parseFeaturedTokenUri (tokenUri: string) {

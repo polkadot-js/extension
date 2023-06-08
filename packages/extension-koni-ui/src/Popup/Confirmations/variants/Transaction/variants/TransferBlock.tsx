@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import { useGetChainPrefixBySlug, useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { SwAlert } from '@subwallet/react-ui';
+import CN from 'classnames';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -15,7 +16,7 @@ import { BaseTransactionConfirmationProps } from './Base';
 
 type Props = BaseTransactionConfirmationProps;
 
-const Component: React.FC<Props> = ({ transaction }: Props) => {
+const Component: React.FC<Props> = ({ className, transaction }: Props) => {
   const { t } = useTranslation();
   const data = transaction.data as ExtrinsicDataTypeMap[ExtrinsicType.TRANSFER_BALANCE];
   const xcmData = transaction.data as ExtrinsicDataTypeMap[ExtrinsicType.TRANSFER_XCM];
@@ -91,10 +92,25 @@ const Component: React.FC<Props> = ({ transaction }: Props) => {
           value={transaction.estimateFee?.value || 0}
         />
       </MetaInfo>
+      {
+        transaction.extrinsicType === ExtrinsicType.TRANSFER_XCM &&
+        (
+          <SwAlert
+            className={CN(className, 'alert-area')}
+            description={t("You'll need to pay an additional fee for the destination network in a cross-chain transfer. This fee cannot be calculated in advance.")}
+            title={t('Pay attention!')}
+            type='warning'
+          />
+        )
+      }
     </>
   );
 };
 
-export const TransferBlock = styled(Component)<Props>(({ theme: { token } }) => {
-  return {};
+export const TransferBlock = styled(Component)<Props>(({ theme: { token } }: Props) => {
+  return {
+    '&.alert-area': {
+      marginTop: token.marginSM
+    }
+  };
 });

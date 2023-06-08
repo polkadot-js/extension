@@ -341,7 +341,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       return (
         <HistoryItem
           item={item}
-          key={`${item.extrinsicHash}-${item.address}`}
+          key={`${item.extrinsicHash}-${item.address}-${item.direction}`}
           onClick={onOpenDetail(item)}
         />
       );

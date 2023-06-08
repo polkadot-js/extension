@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
@@ -57,7 +57,6 @@ function getTokenItems (
   address: string,
   accounts: AccountJson[],
   chainInfoMap: Record<string, _ChainInfo>,
-  chainStateMap: Record<string, _ChainState>,
   assetRegistry: Record<string, _ChainAsset>,
   assetSettingMap: Record<string, AssetSetting>,
   multiChainAssetMap: Record<string, _MultiChainAsset>,
@@ -229,6 +228,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const [, update] = useState({});
   const [isBalanceReady, setIsBalanceReady] = useState(true);
   const [forceUpdateMaxValue, setForceUpdateMaxValue] = useState<object|undefined>(undefined);
+  const chainStatus = useMemo(() => chainStateMap[chain]?.connectionStatus, [chain, chainStateMap]);
 
   const handleTransferAll = useCallback((value: boolean) => {
     setForceUpdateMaxValue({});
@@ -273,13 +273,12 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       from,
       accounts,
       chainInfoMap,
-      chainStateMap,
       assetRegistry,
       assetSettingMap,
       multiChainAssetMap,
       sendFundSlug
     );
-  }, [accounts, assetRegistry, assetSettingMap, chainInfoMap, chainStateMap, from, multiChainAssetMap, sendFundSlug]);
+  }, [accounts, assetRegistry, assetSettingMap, chainInfoMap, from, multiChainAssetMap, sendFundSlug]);
 
   const validateRecipientAddress = useCallback((rule: Rule, _recipientAddress: string): Promise<void> => {
     if (!_recipientAddress) {
@@ -551,7 +550,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
     return () => {
       cancel = true;
     };
-  }, [asset, assetRegistry, assetSettingMap, chain, destChain, form, from]);
+  }, [asset, assetRegistry, chain, chainStatus, destChain, form, from]);
 
   useEffect(() => {
     const bnTransferAmount = new BN(transferAmount || '0');

@@ -40,8 +40,8 @@ const Component: React.FC<Props> = (props: Props) => {
           name: _getChainName(chainInfoMap[xcmInfo.destinationChain])
         }}
         originChain={{
-          slug: data.chain,
-          name: _getChainName(chainInfoMap[data.chain])
+          slug: xcmInfo.originalChain || data.chain,
+          name: _getChainName(chainInfoMap[xcmInfo.originalChain || data.chain])
         }}
         recipientAddress={data.to}
         recipientName={data.toName}

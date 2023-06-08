@@ -6,7 +6,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
 import { AccountAuthType, AccountJson, AddressJson, AuthorizeRequest, ConfirmationRequestBase, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeCancel, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
@@ -508,6 +508,7 @@ export interface AmountData extends BasicTokenInfo {
 
 export interface XCMTransactionAdditionalInfo {
   destinationChain: string,
+  originalChain: string,
   fee?: AmountData
 }
 
@@ -592,6 +593,7 @@ export enum TransferTxErrorType {
   NOT_ENOUGH_FEE = 'NOT_ENOUGH_FEE',
   INVALID_TOKEN = 'INVALID_TOKEN',
   TRANSFER_ERROR = 'TRANSFER_ERROR',
+  RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT',
 }
 
 export type TransactionErrorType = BasicTxErrorType | TransferTxErrorType | StakingTxErrorType
@@ -1882,9 +1884,9 @@ export interface KoniRequestSignatures {
   'pri(chainService.subscribeMultiChainAssetMap)': [null, Record<string, _MultiChainAsset>, Record<string, _MultiChainAsset>];
   'pri(chainService.subscribeXcmRefMap)': [null, Record<string, _AssetRef>, Record<string, _AssetRef>];
   'pri(chainService.upsertChain)': [_NetworkUpsertParams, boolean];
-  'pri(chainService.enableChains)': [string[], boolean];
+  'pri(chainService.enableChains)': [EnableMultiChainParams, boolean];
+  'pri(chainService.enableChain)': [EnableChainParams, boolean];
   'pri(chainService.disableChains)': [string[], boolean];
-  'pri(chainService.enableChain)': [string, boolean];
   'pri(chainService.disableChain)': [string, boolean];
   'pri(chainService.removeChain)': [string, boolean];
   'pri(chainService.deleteCustomAsset)': [string, boolean];

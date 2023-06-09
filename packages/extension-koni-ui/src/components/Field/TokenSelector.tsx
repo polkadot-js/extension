@@ -174,6 +174,11 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
 export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return ({
+    '&.ant-select-modal-input-container .ant-select-modal-input-wrapper': {
+      paddingLeft: 12,
+      paddingRight: 12
+    },
+
     '&.chain-selector-input .__selected-item': {
       color: token.colorText
     },

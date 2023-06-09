@@ -39,7 +39,7 @@ async function handleBlock ({ id }: AuthorizeRequest) {
 export const filterAuthorizeAccounts = (accounts: AccountJson[], accountAuthType: AccountAuthType) => {
   let rs = [...accounts];
 
-  rs = rs.filter((acc) => acc.isReadOnly !== true);
+  // rs = rs.filter((acc) => acc.isReadOnly !== true);
 
   if (accountAuthType === 'evm') {
     rs = rs.filter((acc) => (!isAccountAll(acc.address) && acc.type === 'ethereum'));

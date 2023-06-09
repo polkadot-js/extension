@@ -23,7 +23,7 @@ import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { PaperPlaneTilt } from 'phosphor-react';
+import { PaperPlaneRight, PaperPlaneTilt } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -464,14 +464,26 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   }, [maxTransfer]);
 
   // TODO: Need to review
+  // Auto fill logic
   useEffect(() => {
     const { asset, from } = form.getFieldsValue();
 
+    const updateInfoWithTokenSlug = (tokenSlug: string) => {
+      const tokenInfo = assetRegistry[tokenSlug];
+
+      form.setFieldsValue({
+        asset: tokenSlug,
+        chain: tokenInfo.originChain,
+        destChain: tokenInfo.originChain
+      });
+      setChain(tokenInfo.originChain);
+    };
+
     if (tokenItems.length) {
+      let isApplyDefaultAsset = true;
+
       if (!asset) {
         const account = findAccountByAddress(accounts, from);
-
-        let pass = false;
 
         if (account?.originGenesisHash) {
           const network = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash);
@@ -480,36 +492,18 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             const token = tokenItems.find((item) => item.originChain === network.slug);
 
             if (token) {
-              form.setFieldsValue({
-                asset: token.slug,
-                chain: assetRegistry[token.slug].originChain,
-                destChain: assetRegistry[token.slug].originChain
-              });
-              setChain(assetRegistry[token.slug].originChain);
-              pass = true;
+              updateInfoWithTokenSlug(token.slug);
+              isApplyDefaultAsset = false;
             }
           }
         }
-
-        if (!pass) {
-          form.setFieldsValue({
-            asset: tokenItems[0].slug,
-            chain: assetRegistry[tokenItems[0].slug].originChain,
-            destChain: assetRegistry[tokenItems[0].slug].originChain
-          });
-          setChain(assetRegistry[tokenItems[0].slug].originChain);
-        }
       } else {
-        const isSelectedTokenInList = tokenItems.some((i) => i.slug === asset);
+        // Apply default asset if current asset is not in token list
+        isApplyDefaultAsset = !tokenItems.some((i) => i.slug === asset);
+      }
 
-        if (!isSelectedTokenInList) {
-          form.setFieldsValue({
-            asset: tokenItems[0].slug,
-            chain: assetRegistry[tokenItems[0].slug].originChain,
-            destChain: assetRegistry[tokenItems[0].slug].originChain
-          });
-          setChain(assetRegistry[tokenItems[0].slug].originChain);
-        }
+      if (isApplyDefaultAsset) {
+        updateInfoWithTokenSlug(tokenItems[0].slug);
       }
     }
   }, [accounts, tokenItems, assetRegistry, form, setChain, chainInfoMap]);
@@ -563,7 +557,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     <>
       <TransactionContent className={CN(`${className} -transaction-content`)}>
         <div className={'__brief common-text text-light-4 text-center'}>
-          {t('Transfer token with the following details')}
+          {t('You are performing a transfer of a fungible token')}
         </div>
 
         <Form
@@ -596,23 +590,18 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               />
             </Form.Item>
 
-            <Form.Item
-              name={'value'}
-              rules={[
-                {
-                  validator: validateAmount
-                }
-              ]}
-              statusHelpAsTooltip={true}
-              validateTrigger='onBlur'
-            >
-              <AmountInput
-                decimals={decimals}
-                forceUpdateMaxValue={forceUpdateMaxValue}
-                maxValue={maxTransfer}
-                onSetMax={onSetMaxTransferable}
-                showMaxButton={true}
-                tooltip={t('Amount')}
+            <Icon
+              className={'middle-item'}
+              phosphorIcon={PaperPlaneRight}
+              size={'md'}
+            />
+
+            <Form.Item name={'destChain'}>
+              <ChainSelector
+                disabled={!destChainItems.length}
+                items={destChainItems}
+                title={t('Select destination chain')}
+                tooltip={t('Select destination chain')}
               />
             </Form.Item>
           </div>
@@ -647,12 +636,23 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             />
           </Form.Item>
 
-          <Form.Item name={'destChain'}>
-            <ChainSelector
-              disabled={!destChainItems.length}
-              items={destChainItems}
-              title={t('Select destination chain')}
-              tooltip={t('Select destination chain')}
+          <Form.Item
+            name={'value'}
+            rules={[
+              {
+                validator: validateAmount
+              }
+            ]}
+            statusHelpAsTooltip={true}
+            validateTrigger='onBlur'
+          >
+            <AmountInput
+              decimals={decimals}
+              forceUpdateMaxValue={forceUpdateMaxValue}
+              maxValue={maxTransfer}
+              onSetMax={onSetMaxTransferable}
+              showMaxButton={true}
+              tooltip={t('Amount')}
             />
           </Form.Item>
         </Form>
@@ -696,6 +696,14 @@ const SendFund = styled(_SendFund)(({ theme }) => {
       paddingLeft: token.padding,
       paddingRight: token.padding,
       marginBottom: token.marginMD
+    },
+
+    '.form-row': {
+      gap: 8
+    },
+
+    '.middle-item': {
+      marginBottom: token.marginSM
     },
 
     '&.-transaction-content.-is-zero-balance': {

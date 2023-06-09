@@ -557,7 +557,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     <>
       <TransactionContent className={CN(`${className} -transaction-content`)}>
         <div className={'__brief common-text text-light-4 text-center'}>
-          {t('Transfer token with the following details')}
+          {t('You are performing a transfer of a fungible token')}
         </div>
 
         <Form

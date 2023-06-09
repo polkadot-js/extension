@@ -327,6 +327,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [curAdr, currentAccount?.address, inactiveModal]);
 
   const emptyList = useCallback(() => {
+    if (isWebUI) {
+      return <NoContent pageType={PAGE_TYPE.HISTORY} />;
+    }
+
     return (
       <EmptyList
         emptyMessage={t('Your transaction history will appear here!')}
@@ -334,7 +338,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         phosphorIcon={Clock}
       />
     );
-  }, [t]);
+  }, [t, isWebUI]);
 
   const renderItem = useCallback(
     (item: TransactionHistoryDisplayItem) => {
@@ -358,9 +362,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     return (
       fromName?.includes(searchTextLowerCase) ||
-      toName?.includes(searchTextLowerCase) ||
-      symbol?.includes(searchTextLowerCase) ||
-      network?.includes(searchTextLowerCase)
+        toName?.includes(searchTextLowerCase) ||
+        symbol?.includes(searchTextLowerCase) ||
+        network?.includes(searchTextLowerCase)
     );
   }, [chainInfoMap]);
 
@@ -387,22 +391,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             showActionBtn
             showExtraButton
           />
-          {historyList.length <= 0
-            ? (
-              <NoContent pageType={PAGE_TYPE.HISTORY} />
-            )
-            : (
-              <SwList
-                filterBy={filterFunction}
-                groupBy={groupBy}
-                groupSeparator={groupSeparator}
-                list={historyList}
-                renderItem={renderItem}
-                renderWhenEmpty={emptyList}
-                searchBy={searchFunc}
-                searchTerm={searchInput}
-              />
-            )}
+          <SwList
+            filterBy={filterFunction}
+            groupBy={groupBy}
+            groupSeparator={groupSeparator}
+            list={historyList}
+            renderItem={renderItem}
+            renderWhenEmpty={emptyList}
+            searchBy={searchFunc}
+            searchTerm={searchInput}
+          />
         </div>
       );
     }
@@ -479,6 +477,15 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
     flexDirection: 'column',
+
+    '.web-list': {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      '.ant-sw-list': {
+        flex: 1
+      }
+    },
 
     '.history-header.ant-sw-sub-header-container': {
       marginBottom: 0

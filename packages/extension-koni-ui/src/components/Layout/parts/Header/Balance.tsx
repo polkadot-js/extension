@@ -12,10 +12,9 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Divider, Icon, ModalContext, Number, Tag, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowFatLineDown, Eye, EyeClosed, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import { ArrowFatLinesDown, Eye, EyeClosed, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
-// import { useNavigate } from 'react-router';
 import styled from 'styled-components';
 
 const TRANSFER_FUND_MODAL = 'transfer-fund-modal';
@@ -34,7 +33,7 @@ const actions: Action[] = [
   {
     label: 'Receive',
     type: 'receive',
-    icon: ArrowFatLineDown
+    icon: ArrowFatLinesDown
   },
   {
     label: 'Send',
@@ -49,7 +48,9 @@ const actions: Action[] = [
 ];
 
 function Component ({ className }: Props): React.ReactElement<Props> {
-  const [displayBalance, setDisplayBalance] = useState<boolean>(false);
+  const [displayBalance, setDisplayBalance] = useState<boolean>(true);
+
+  const handleDisplayBalance = useCallback(() => setDisplayBalance(!displayBalance), [displayBalance]);
 
   const { t } = useTranslation();
   const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
@@ -118,7 +119,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 size='sm'
               />
             }
-            onClick={() => setDisplayBalance(!displayBalance)}
+            onClick={handleDisplayBalance}
             type='ghost'
           />
         </div>
@@ -242,6 +243,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 icon={(
                   <Icon
                     phosphorIcon={item.icon}
+                    size='sm'
                     weight='bold'
                   />
                 )}

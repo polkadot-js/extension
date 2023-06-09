@@ -52,8 +52,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <Layout.Base
           headerList={['Controller', 'Balance']}
           showWebHeader
+          withBackground={['tokens', 'nfts'].includes(pathEls[1])}
           withSideMenu
-        withBackground={['tokens', 'nfts'].includes(pathEls[1])}
         >
           <Porfolio />
         </Layout.Base>

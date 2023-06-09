@@ -236,16 +236,28 @@ const Component: React.FC<Props> = (props: Props) => {
         title={t('Security settings')}
         withSideMenu
       >
-        {isWebUI && (
-          <SwSubHeader
-            background='transparent'
-            center={false}
-            className='web-header'
-            onBack={() => navigate(-1)}
-            showBackButton={true}
-            title={t('Security settings')}
-          />
-        )}
+        {isWebUI
+          ? (
+            <SwSubHeader
+              background='transparent'
+              center={false}
+              className='web-header'
+              onBack={goBack}
+              showBackButton={true}
+              title={t('Security settings')}
+            />
+          )
+          : (
+            <SwSubHeader
+              background={'transparent'}
+              center
+              onBack={goBack}
+              paddingVertical
+              showBackButton
+              title={t('Security settings')}
+            />
+
+          )}
         <div className={CN('body-container', {
           '__web-ui': isWebUI
         })}

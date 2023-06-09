@@ -74,7 +74,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
         },
         {
           test: [/\.css$/i, /\.scss$/i],
-          use: ["style-loader", "css-loader", 'sass-loader'],
+          use: ['style-loader', 'css-loader', 'sass-loader']
         },
         {
           test: [/\.svg$/, /\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.woff2?$/],
@@ -107,7 +107,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
         process: 'process/browser.js'
       }),
       new webpack.ProvidePlugin({
-        process: 'process/browser',
+        process: 'process/browser'
       }),
       new webpack.DefinePlugin({
         'process.env': {
@@ -133,7 +133,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           {
             from: path.resolve(__dirname, './public/locales'),
             to: path.resolve(__dirname, './build/locales')
-          },
+          }
         ]
       }),
       new HtmlWebpackPlugin({
@@ -171,5 +171,5 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
 module.exports = createConfig({
   fallback: './src/fallback.ts',
   'web-runner': './src/webRunner.ts',
-  main: "./src/index.tsx",
+  main: './src/index.tsx'
 }, {}, false);

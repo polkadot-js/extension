@@ -210,7 +210,7 @@ const Component: React.FC<Props> = (props: Props) => {
 const ConnectQrSigner = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.__web-ui': {
-      maxWidth: '50%',
+      maxWidth: '400px',
       margin: '0 auto'
     },
     '.container': {

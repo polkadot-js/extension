@@ -77,7 +77,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base className='login-container'>
+      <Layout.Base
+        className='login-container'
+        headerList={['Simple']}
+        showWebHeader
+      >
         <div className='bg-gradient' />
         {!isWebUI && <div className='bg-image' />}
         <div className={CN('body-container', {
@@ -86,10 +90,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         >
           <div className='main-wrapper'>
             <div className='logo-container'>
-            <Image
-              src='/images/subwallet/gradient-logo.png'
-              width={80}
-            />
+              <Image
+                src='/images/subwallet/gradient-logo.png'
+                width={80}
+              />
             </div>
             <div className='title'>
               {t('Welcome back!')}
@@ -168,11 +172,20 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        padding: '0 20%',
+        width: '400px',
+        margin: '0 auto',
 
         '.logo-container': {
           margin: 0
         }
+      },
+
+      '.password-input': {
+        marginTop: '36px !important'
+      },
+
+      '.forgot-password': {
+        marginTop: '0 !important'
       }
     },
 

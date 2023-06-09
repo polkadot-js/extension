@@ -183,6 +183,9 @@ const Component: React.FC = () => {
     <div
       {...props}
       ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}
+      style={{
+        zIndex: 999
+      }}
     >
       <MetaInfo.AccountGroup
         accounts={accounts}
@@ -212,7 +215,7 @@ const Component: React.FC = () => {
         </StyledActions>
       </>
     );
-  }, [accounts, emptyTokenList, noAllAccounts, renderItem, t]);
+  }, [accounts, emptyTokenList, handleOpenChange, noAllAccounts, renderItem, t]);
 
   return (
     <Popover

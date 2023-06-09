@@ -109,12 +109,10 @@ const Component: React.FC = () => {
     <div
       {...props}
       ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}
+      style={{
+        zIndex: 999
+      }}
     >
-      {/* <MetaInfo.AccountGroup */}
-      {/*   accounts={[]} */}
-      {/*   className='ava-group' */}
-      {/*   content={`${chainInfoList.length} networks`} */}
-      {/* /> */}
       <NetworkGroupItem
         chains={chainInfoList}
         className='ava-group'

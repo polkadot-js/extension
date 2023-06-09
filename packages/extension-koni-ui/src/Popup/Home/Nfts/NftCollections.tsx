@@ -142,6 +142,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [getNftsByCollection, handleOnClickCollection]);
 
   const emptyNft = useCallback(() => {
+    if (isWebUI) {
+      return <NoContent pageType={PAGE_TYPE.NFT} />;
+    }
+
     return (
       <EmptyList
         emptyMessage={t('Your NFT collectible will appear here!')}
@@ -149,7 +153,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         phosphorIcon={Image}
       />
     );
-  }, [t]);
+  }, [isWebUI, t]);
 
   const listSection = useMemo(() => {
     if (!isWebUI) {
@@ -208,16 +212,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         {listSection}
         <Button
           block
-          children={t('Import collectible')}
           icon={(
             <Icon
               phosphorIcon={PlusCircle}
-              size='xs'
+              size='md'
+              weight='fill'
             />
           )}
           onClick={() => activeModal(IMPORT_NFT_MODAL)}
           type='ghost'
-        />
+        >
+          {t('Import collectible')}
+        </Button>
       </Layout.Base>
 
       <CustomModal

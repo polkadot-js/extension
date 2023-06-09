@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { FilterModal, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { ActionItemType, ActionModal } from '@subwallet/extension-koni-ui/components/Modal/ActionModal';
 import { WebsiteAccessItem } from '@subwallet/extension-koni-ui/components/Setting/WebsiteAccessItem';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { changeAuthorizationAll, forgetAllSite } from '@subwallet/extension-koni-ui/messaging';
@@ -57,6 +58,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const authUrlMap = useSelector((state: RootState) => state.settings.authUrls);
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const goBack = useDefaultNavigate().goBack;
   const { token } = useTheme() as Theme;
@@ -198,58 +200,87 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   return (
     <PageWrapper className={`manage-website-access ${className}`}>
-      <SwSubHeader
-        background={'transparent'}
-        center
-        onBack={goBack}
-        paddingVertical
-        rightButtons={[
-          {
-            icon: (
-              <Icon
-                customSize={'24px'}
-                phosphorIcon={GearSix}
-                type='phosphor'
-                weight={'bold'}
-              />
-            ),
-            onClick: onOpenActionModal
-          }
-        ]}
-        showBackButton
-        title={t('Manage website access')}
-      />
+      <Layout.Base
+        withSideMenu
+      >
+        {isWebUI
+          ? (
+            <SwSubHeader
+              background='transparent'
+              center={false}
+              onBack={goBack}
+              rightButtons={[
+                {
+                  icon: (
+                    <Icon
+                      customSize={'24px'}
+                      phosphorIcon={GearSix}
+                      type='phosphor'
+                      weight={'bold'}
+                    />
+                  ),
+                  onClick: onOpenActionModal
+                }
+              ]}
+              showBackButton={true}
+              title={t('Manage website access')}
+            />
+          )
+          : (
+            <SwSubHeader
+              background={'transparent'}
+              center
+              onBack={goBack}
+              paddingVertical
+              rightButtons={[
+                {
+                  icon: (
+                    <Icon
+                      customSize={'24px'}
+                      phosphorIcon={GearSix}
+                      type='phosphor'
+                      weight={'bold'}
+                    />
+                  ),
+                  onClick: onOpenActionModal
+                }
+              ]}
+              showBackButton
+              title={t('Manage website access')}
+            />
+          )}
 
-      <SwList.Section
-        actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-        enableSearchInput
-        filterBy={filterFunction}
-        list={websiteAccessItems}
-        onClickActionBtn={onClickActionBtn}
-        renderItem={renderItem}
-        renderWhenEmpty={renderEmptyList}
-        searchFunction={searchFunc}
-        searchMinCharactersCount={2}
-        searchPlaceholder={t<string>('Search or enter a website')}
-        showActionBtn
-      />
+        <SwList.Section
+          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+          enableSearchInput
+          filterBy={filterFunction}
+          list={websiteAccessItems}
+          onClickActionBtn={onClickActionBtn}
+          renderItem={renderItem}
+          renderWhenEmpty={renderEmptyList}
+          searchFunction={searchFunc}
+          searchMinCharactersCount={2}
+          searchPlaceholder={t<string>('Search or enter a website')}
+          showActionBtn
+        />
 
-      <ActionModal
-        actions={actions}
-        id={ACTION_MODAL_ID}
-        onCancel={onCloseActionModal}
-        title={t('Access configuration')}
-      />
+        <ActionModal
+          actions={actions}
+          id={ACTION_MODAL_ID}
+          onCancel={onCloseActionModal}
+          title={t('Access configuration')}
+        />
 
-      <FilterModal
-        id={FILTER_MODAL_ID}
-        onApplyFilter={onApplyFilter}
-        onCancel={onCloseFilterModal}
-        onChangeOption={onChangeFilterOption}
-        optionSelectionMap={filterSelectionMap}
-        options={filterOptions}
-        title={t('Filter')}
-      />
+        <FilterModal
+          id={FILTER_MODAL_ID}
+          onApplyFilter={onApplyFilter}
+          onCancel={onCloseFilterModal}
+          onChangeOption={onChangeFilterOption}
+          optionSelectionMap={filterSelectionMap}
+          options={filterOptions}
+          title={t('Filter')}
+        />
+      </Layout.Base>
     </PageWrapper>
   );
 }

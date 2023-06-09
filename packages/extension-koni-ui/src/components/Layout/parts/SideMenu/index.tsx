@@ -59,6 +59,9 @@ const SideMenu = styled(Component)<Props>(({ theme: { token } }: Props) => ({
     height: '100%',
     transition: 'margin .8s',
 
+    '.ant-menu': {
+      background: '#1A1A1A'
+    },
     '.ant-menu-item': {
       backgroundColor: '#1A1A1A',
       display: 'flex',
@@ -71,8 +74,8 @@ const SideMenu = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       borderRadius: 0,
 
       '.ant-menu-item-icon': {
-        minHeight: 20,
-        minWidth: 20,
+        minHeight: 24,
+        minWidth: 24,
         marginRight: 5
       }
     },

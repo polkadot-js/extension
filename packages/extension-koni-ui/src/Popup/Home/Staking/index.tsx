@@ -4,6 +4,7 @@
 import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { StakingItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenItem } from '@subwallet/extension-koni-ui/components';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -13,6 +14,7 @@ import { useFilterModal, useGetStakingList, useNotification, usePreCheckReadOnly
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, Number as NumberItem, Popover, SwList, Table, Tag } from '@subwallet/react-ui';
@@ -207,7 +209,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return currentChainBalance;
   }, [assetRegistryMap, multiChainAssetMap, tokenGroupBalanceMap]);
 
-  const { token } = useContext(ThemeContext);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const { token }: {
+    token: GlobalToken
+  } = useContext(ThemeContext);
 
   const columns = useMemo(() => {
     return [
@@ -361,7 +366,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       }
     ];
-  }, [currentChainBalance, token?.colorError, token?.colorSuccess]);
+  }, [currentChainBalance, priceMap, token?.colorError, token?.colorSuccess]);
 
   const listSection = useMemo(() => {
     if (isWebUI) {
@@ -423,16 +428,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             showExtraButton
           />
 
-          <Table
-            columns={columns}
-            dataSource={filteredList}
-            onRow={(record: StakingDataType) => {
-              return {
-                onClick: () => onClickItem(record)
-              };
-            }}
-            pagination={false}
-          />
+          { filteredList.length > 0
+            ? (
+              <Table
+                columns={columns}
+                dataSource={filteredList}
+                onRow={(record: StakingDataType) => {
+                  return {
+                    onClick: () => onClickItem(record)
+                  };
+                }}
+                pagination={false}
+              />
+            )
+            : (
+              <NoContent pageType={PAGE_TYPE.STAKING} />
+            )}
         </div>
       );
     }
@@ -520,6 +531,12 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
     '.web-list': {
       width: '100%',
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      '.ant-sw-list': {
+        flex: 1
+      },
       '.container': {
         marginBottom: 12
       }

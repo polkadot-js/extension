@@ -32,10 +32,12 @@ interface ReadOnlyAccountInput {
   address?: string;
 }
 
-const FooterIcon = <Icon
-  phosphorIcon={Eye}
-  weight='fill'
-/>;
+const FooterIcon = (
+  <Icon
+    phosphorIcon={Eye}
+    weight='fill'
+  />
+);
 
 const modalId = 'attach-read-only-scanner-modal';
 const formName = 'attach-read-only-form';
@@ -240,7 +242,7 @@ const AttachReadOnly = styled(Component)<Props>(
   ({ theme: { token } }: Props) => {
     return {
       '.__web-ui': {
-        maxWidth: '60%',
+        maxWidth: '400px',
         margin: '0 auto'
       },
       '.container': {

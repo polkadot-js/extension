@@ -5,6 +5,7 @@ import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 import { FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
@@ -13,6 +14,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetCrowdloanList from '@subwallet/extension-koni-ui/hooks/screen/crowdloan/useGetCrowdloanList';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { CrowdloanItemType } from '@subwallet/extension-koni-ui/types/crowdloan';
@@ -65,7 +67,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
-  const { token } = useContext(ThemeContext);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const theme: {
+    token: GlobalToken
+  } = useContext(ThemeContext);
   const items: CrowdloanItemType[] = useGetCrowdloanList();
   const [searchInput, setSearchInput] = useState<string>('');
   const { activeModal } = useContext(ModalContext);
@@ -250,7 +255,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           }
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-          const marginColor: string = currentChainInfo?.priceChangeStatus === 'increase' ? token?.colorSuccess : token?.colorError;
+          const marginColor: string = currentChainInfo?.priceChangeStatus === 'increase' ? theme.token?.colorSuccess : theme.token?.colorError;
           const { price24hValue, priceValue } = currentChainInfo;
           const margin = !price24hValue || !priceValue ? 0 : Math.abs(price24hValue - priceValue) / price24hValue * 100;
 
@@ -302,9 +307,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       }
     ];
-  }, [currentChainBalance, getParaStateLabel, token?.colorError, token?.colorSuccess]);
+  }, [currentChainBalance, getParaStateLabel, theme.token?.colorError, theme.token?.colorSuccess]);
 
   const crowdloansContent = useMemo(() => {
+    console.log('filteredItems', filteredItems.length);
+
     if (isWebUI) {
       return (
         <div className='web-list'>
@@ -322,16 +329,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             showActionBtn
           />
 
-          <Table
-            columns={columns}
-            dataSource={filteredItems}
-            // onRow={(record: StakingDataType) => {
-            //   // return {
-            //   //   onClick: () => onClickItem(record)
-            //   // };
-            // }}
-            pagination={false}
-          />
+          {filteredItems.length > 0
+            ? (
+              <Table
+                columns={columns}
+                dataSource={filteredItems}
+                pagination={false}
+              />
+            )
+            : (
+              <NoContent pageType={PAGE_TYPE.CROWDLOANS} />
+            )}
         </div>
       );
     }
@@ -388,6 +396,17 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
+
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
+    '.web-list': {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column'
+    },
 
     '.project-container': {
       display: 'flex',

@@ -111,7 +111,7 @@ const CreatePasswordDone = styled(Component)<Props>(({ theme: { token } }: Props
     textAlign: 'center',
 
     '&.__web-ui': {
-      maxWidth: '50%',
+      maxWidth: '400px',
       margin: '0 auto'
     },
 

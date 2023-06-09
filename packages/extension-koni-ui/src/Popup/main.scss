@@ -573,7 +573,8 @@ div#popup-container {
           background-color: transparent;
           border: none;
           text-align: end;
-
+          padding: 0;
+          padding-bottom: 8;
           display: table-cell;
           max-width: 0px;
 
@@ -596,6 +597,8 @@ div#popup-container {
       border-radius: 8px;
 
         .ant-table-cell {
+          border-top: none !important;
+          border-bottom: none !important;
           padding: 14px 16px;
           background: #1A1A1A;
           margin: 8px 0;

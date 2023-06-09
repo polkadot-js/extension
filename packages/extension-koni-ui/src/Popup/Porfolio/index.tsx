@@ -22,6 +22,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const [searchPlaceholder, setSearchPlaceholder] = useState<string>();
 
   const navigate = useNavigate();
+  const goBack = useCallback(() => navigate(-1), [navigate]);
   const [searchInput, setSearchInput] = useState<string>('');
 
   const handleInputChange: ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
@@ -85,7 +86,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 background='transparent'
                 center={false}
                 className='web-header'
-                onBack={() => navigate(-1)}
+                onBack={goBack}
                 showBackButton
                 title={detailTitle}
               />
@@ -113,10 +114,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-const Porfolio = styled(Component)<Props>(({ theme: { token } }) => {
+const Porfolio = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    height: '100%',
-
     '.right-section': {
       justifySelf: 'end',
       display: 'flex',
@@ -127,8 +126,8 @@ const Porfolio = styled(Component)<Props>(({ theme: { token } }) => {
     },
 
     '&.__web-ui': {
-      height: 'auto',
-
+      display: 'flex',
+      flexDirection: 'column',
       '.react-tabs__tab-list': {
         display: 'flex',
         borderRadius: token.borderRadiusLG,
@@ -142,6 +141,7 @@ const Porfolio = styled(Component)<Props>(({ theme: { token } }) => {
 
       '.menu-bar': {
         display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-between',
         flex: 1,
         background: 'transparent',
@@ -176,7 +176,7 @@ const Porfolio = styled(Component)<Props>(({ theme: { token } }) => {
           borderRadius: 0,
           color: '#FFFFFF',
           padding: 0,
-          margin: '0px 8px',
+          marginRight: 16,
 
           '&--selected': {
             background: 'transparent',

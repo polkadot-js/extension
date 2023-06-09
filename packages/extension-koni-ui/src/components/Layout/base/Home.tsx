@@ -81,7 +81,7 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
   ), []);
 
   const onClickListIcon = useCallback(() => {
-    navigate('/settings/list');
+    navigate('/settings');
   }, [navigate]);
 
   const currentRoute = useMemo(() => {

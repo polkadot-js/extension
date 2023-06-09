@@ -119,47 +119,17 @@ const Component: React.FC<Props> = (props: Props) => {
       </div>
     </Layout.Base>
   );
-  // return (
-  //   <PageWrapper className={className}>
-  //     <Layout.WithSubHeaderOnly
-  //       leftFooterButton={{
-  //         block: true,
-  //         onClick: viewInHistory,
-  //         children: t('View transaction')
-  //       }}
-  //       rightFooterButton={{
-  //         block: true,
-  //         onClick: goHome,
-  //         children: t('Back to home')
-  //       }}
-  //       subHeaderLeft={<CloseIcon />}
-  //       title={t('Successful')}
-  //     >
-  //       <div className='container'>
-  //         <div className='page-icon'>
-  //           <PageIcon
-  //             color='var(--page-icon-color)'
-  //             iconProps={{
-  //               weight: 'fill',
-  //               phosphorIcon: CheckCircle
-  //             }}
-  //           />
-  //         </div>
-  //         <div className='title'>
-  //           {t('All done!')}
-  //         </div>
-  //         <div className='description'>
-  //           {t('Your request has been sent. You can track its progress in History tab.')}
-  //         </div>
-  //       </div>
-  //     </Layout.WithSubHeaderOnly>
-  //   </PageWrapper>
-  // );
 };
 
 const TransactionDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     textAlign: 'center',
+
+    '&.__web-ui': {
+      textAlign: 'center',
+      width: '400px',
+      margin: '0 auto'
+    },
 
     '.page-icon': {
       display: 'flex',

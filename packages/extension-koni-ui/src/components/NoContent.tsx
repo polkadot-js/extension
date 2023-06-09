@@ -3,7 +3,7 @@
 
 import { Button, Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Coin, Image, ListBullets, MagnifyingGlass, PlusCircle, RocketLaunch, SlidersHorizontal } from 'phosphor-react';
+import { Coin, Image, ListBullets, MagnifyingGlass, PlusCircle, RocketLaunch, SlidersHorizontal, Trophy } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -15,6 +15,7 @@ export enum PAGE_TYPE {
   SEARCH = 'search',
   CROWDLOANS = 'crowdloans',
   HISTORY = 'history',
+  STAKING = 'staking',
 }
 
 type Props = ThemeProps & {
@@ -36,12 +37,12 @@ const pageContents: Record<string, PageContent> = {
   [PAGE_TYPE.NFT]: {
     icon: Image,
     title: 'No collectible found',
-    content: 'Your collectibles will appear here',
+    content: 'Your collectibles will appear here'
   },
   [PAGE_TYPE.TOKEN]: {
     icon: Coin,
     title: 'No token found',
-    content: 'Your token will appear here',
+    content: 'Your token will appear here'
   },
   [PAGE_TYPE.SEARCH]: {
     icon: MagnifyingGlass,
@@ -59,8 +60,13 @@ const pageContents: Record<string, PageContent> = {
   },
   [PAGE_TYPE.HISTORY]: {
     icon: ListBullets,
-    title: 'No transaction found',
+    title: 'No transaction yet',
     content: 'Your transaction history will appear here'
+  },
+  [PAGE_TYPE.STAKING]: {
+    icon: Trophy,
+    title: 'No staking',
+    content: 'Your staking accounts will appear here'
   }
 };
 
@@ -95,6 +101,7 @@ const NoContent = styled(Component)<Props>(() => {
     height: '100%',
 
     '.message-wrapper': {
+      height: '100%',
       flex: 1,
       display: 'flex',
       flexDirection: 'column',

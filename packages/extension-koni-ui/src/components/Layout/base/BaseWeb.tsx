@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
@@ -19,7 +20,7 @@ export interface LayoutBaseWebProps {
   withBackground?: boolean
 }
 
-const StyledLayout = styled('div')(({ theme: { extendToken } }) => {
+const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken } }: ThemeProps) => {
   return {
     display: 'flex',
     flex: 'auto',
@@ -39,6 +40,8 @@ const StyledLayout = styled('div')(({ theme: { extendToken } }) => {
     },
 
     '.layout-content': {
+      display: 'flex',
+      flexDirection: 'column',
       overflow: 'auto',
       width: '100%',
       padding: '40px 36px 80px 44px',
@@ -61,7 +64,7 @@ const StyledLayout = styled('div')(({ theme: { extendToken } }) => {
       },
 
       '.layout-content-main': {
-        height: '100%'
+        flex: 1
       }
     }
   };

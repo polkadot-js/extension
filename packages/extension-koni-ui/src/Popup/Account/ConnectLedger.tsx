@@ -381,7 +381,7 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
     },
 
     '.__web-ui': {
-      width: '60%',
+      width: '400px',
       margin: '0 auto',
 
       '.ledger-button': {

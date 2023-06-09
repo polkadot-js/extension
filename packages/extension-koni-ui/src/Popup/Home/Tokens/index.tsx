@@ -265,16 +265,17 @@ const Component = (): React.ReactElement => {
           )}
         <Button
           block
-          children={t('Manage token list')}
           icon={(
             <Icon
               phosphorIcon={SlidersHorizontal}
-              size='xs'
+              size='md'
             />
           )}
           onClick={onClickManageToken}
           type='ghost'
-        />
+        >
+          {t('Manage token list')}
+        </Button>
       </div>
     );
   }
@@ -380,7 +381,9 @@ const Tokens = styled(WrapperComponent)<WrapperProps>(({ theme: { extendToken, t
     overflow: 'hidden',
 
     'token-table': {
-
+      '.token-group-balance-item': {
+        marginBottom: '0px !important'
+      }
     },
     '.__empty-list': {
       marginTop: token.marginSM,

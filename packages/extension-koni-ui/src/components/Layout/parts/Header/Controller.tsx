@@ -25,10 +25,14 @@ function Component ({ className, onBack, showBackButton, title = 'Porfolio' }: P
     if (showBackButton && onBack) {
       return (
         <Button
-          icon={<Icon
-            phosphorIcon={CaretLeft}
-            size={'sm'}
-                />}
+          icon={
+            (
+              <Icon
+                phosphorIcon={CaretLeft}
+                size={'sm'}
+              />
+            )
+          }
           onClick={onBack}
           type='ghost'
         />

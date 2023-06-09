@@ -67,6 +67,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
 
   const originChainInfo = useGetChainInfo(nftItem.chain);
+
   const ownerAccountInfo = useGetAccountInfoByAddress(nftItem.owner || '');
   const accountExternalUrl = getExplorerLink(originChainInfo, nftItem.owner, 'account');
 

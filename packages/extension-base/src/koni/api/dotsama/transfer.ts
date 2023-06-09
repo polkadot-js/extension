@@ -102,6 +102,12 @@ export async function checkSupportTransfer (networkKey: string, tokenInfo: _Chai
   } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
+  } else if (_TRANSFER_CHAIN_GROUP.sora_substrate.includes(networkKey)) {
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
+  // } else if (_TRANSFER_CHAIN_GROUP.riochain.includes(networkKey) && _isNativeToken(tokenInfo)) {
+  //   result.supportTransfer = true;
+  //   result.supportTransferAll = true;
   }
 
   return result;
@@ -126,6 +132,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
   const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
+  const isTxAssetsSupported = !!api && !!api.tx && !!api.tx.assets;
   let transferAmount; // for PSP-22 tokens, might be deprecated in the future
 
   if (_isTokenWasmSmartContract(tokenInfo) && api.query.contracts) {
@@ -138,14 +145,14 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     transferAmount = value;
   } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
     transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
-  } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxTokensSupported) {
+  } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && isTxTokensSupported) {
     if (transferAll) {
       transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), false);
     } else if (value) {
       transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), new BN(value));
     }
-  } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported) {
-    transfer = api.tx.eqBalances.transfer([_getTokenOnChainAssetId(tokenInfo)], to, value);
+  } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && isTxEqBalancesSupported) {
+    transfer = api.tx.eqBalances.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
   } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
     if (transferAll) {
       transfer = api.tx.kton.transferAll(to, false);
@@ -155,6 +162,12 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && !_isNativeToken(tokenInfo)) {
     transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
   } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
+    transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
+    // } else if (_TRANSFER_CHAIN_GROUP.riochain.includes(networkKey)) {
+    //   if (_isNativeToken(tokenInfo)) {
+    //     transfer = api.tx.currencies.transferNativeCurrency(to, value);
+    //   }
+  } else if (_TRANSFER_CHAIN_GROUP.sora_substrate.includes(networkKey) && isTxAssetsSupported) {
     transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
   } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
     if (transferAll) {

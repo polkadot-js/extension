@@ -21,6 +21,7 @@ import { Image, Trash } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 
 type Props = ThemeProps
 
@@ -76,6 +77,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       <NftGalleryWrapper
         fallbackImage={collectionInfo.image}
         handleOnClick={handleOnClickNft}
+        have3dViewer={SHOW_3D_MODELS_CHAIN.includes(nftItem.chain)}
         image={nftItem.image}
         key={`${nftItem.chain}_${nftItem.collectionId}_${nftItem.id}`}
         routingParams={routingParams}

@@ -15,13 +15,15 @@ interface Props extends ThemeProps {
   itemCount?: number;
   handleOnClick?: (params?: any) => void;
   routingParams?: any;
+  have3dViewer?: boolean;
 }
 
-function Component ({ className = '', fallbackImage, handleOnClick, image, itemCount, routingParams, title }: Props): React.ReactElement<Props> {
+function Component ({ className = '', fallbackImage, handleOnClick, have3dViewer, image, itemCount, routingParams, title }: Props): React.ReactElement<Props> {
   const { extendToken } = useTheme() as Theme;
 
   const [showImage, setShowImage] = useState(true);
   const [showVideo, setShowVideo] = useState(false);
+  const [show3dViewer, setShow3dViewer] = useState(false);
 
   const onClick = useCallback(() => {
     handleOnClick && handleOnClick(routingParams);
@@ -34,6 +36,7 @@ function Component ({ className = '', fallbackImage, handleOnClick, image, itemC
 
   const handleVideoError = useCallback(() => {
     setShowVideo(false);
+    setShow3dViewer(true);
   }, []);
 
   const getCollectionImage = useCallback(() => {
@@ -91,13 +94,38 @@ function Component ({ className = '', fallbackImage, handleOnClick, image, itemC
       );
     }
 
+    if (have3dViewer && show3dViewer) {
+      return (
+        <LazyLoadComponent>
+          {/* @ts-ignore */}
+          <model-viewer
+            alt={'model-viewer'}
+            ar-status={'not-presenting'}
+            auto-rotate={true}
+            auto-rotate-delay={100}
+            bounds={'tight'}
+            disable-pan={true}
+            disable-scroll={true}
+            disable-tap={true}
+            disable-zoom={true}
+            environment-image={'neutral'}
+            interaction-prompt={'none'}
+            loading={'eager'}
+            src={getCollectionImage()}
+            style={{ width: '100%', height: '100%' }}
+            touch-action={'none'}
+          />
+        </LazyLoadComponent>
+      );
+    }
+
     return (
       <LazyLoadImage
         src={extendToken.defaultImagePlaceholder}
         visibleByDefault={true}
       />
     );
-  }, [showImage, showVideo, extendToken.defaultImagePlaceholder, handleImageError, loadingPlaceholder, getCollectionImage, handleVideoError]);
+  }, [showImage, showVideo, have3dViewer, show3dViewer, extendToken.defaultImagePlaceholder, handleImageError, loadingPlaceholder, getCollectionImage, handleVideoError]);
 
   return (
     <NftItem_

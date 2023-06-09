@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## master
+
+Changes:
+
+- Adjust object index access for stricter tsconfig settings
+
+
 ## 0.46.4 Jun 5, 2023
 
 - **Important** Not published to the stores, aligns with latest released packages.

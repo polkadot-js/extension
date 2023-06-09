@@ -10,7 +10,6 @@ import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS, API_CONNECT_TIMEOUT } fr
 import { getSubstrateConnectProvider } from '@subwallet/extension-base/services/chain-service/handler/light-client';
 import { DEFAULT_AUX } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { typesBundle, typesChain } from '@subwallet/extension-base/services/chain-service/helper/api-helper';
 import { _SubstrateApi, _SubstrateDefaultFormatBalance } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { BehaviorSubject } from 'rxjs';
@@ -18,6 +17,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { ApiOptions } from '@polkadot/api/types';
+import { typesBundle } from '@polkadot/apps-config/api';
 import { ProviderInterface } from '@polkadot/rpc-provider/types';
 import { TypeRegistry } from '@polkadot/types/create';
 import { Registry } from '@polkadot/types/types';
@@ -75,7 +75,6 @@ export class SubstrateApi implements _SubstrateApi {
     const apiOption: ApiOptions = {
       provider,
       typesBundle,
-      typesChain: typesChain,
       registry: this.registry
     };
 

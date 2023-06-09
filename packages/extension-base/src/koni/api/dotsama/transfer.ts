@@ -144,7 +144,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     } else if (value) {
       transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), new BN(value));
     }
-  } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported) {
+  } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && isTxEqBalancesSupported) {
     transfer = api.tx.eqBalances.transfer([_getTokenOnChainAssetId(tokenInfo)], to, value);
   } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
     if (transferAll) {

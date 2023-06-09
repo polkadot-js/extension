@@ -50,7 +50,7 @@ function transformAccounts (accounts: string[]): InjectedAccount[] {
 // add a compat interface of metaMaskSource to window.injectedWeb3
 function injectMetaMaskWeb3 (win: Web3Window): void {
   // decorate the compat interface
-  win.injectedWeb3.Web3Source = {
+  win.injectedWeb3['Web3Source'] = {
     enable: async (): Promise<Injected> => {
       const providerRaw = await detectEthereumProvider({ mustBeMetaMask: true });
       const provider = isMetaMaskProvider(providerRaw);

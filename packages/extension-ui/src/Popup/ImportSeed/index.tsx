@@ -1,6 +1,8 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { HexString } from '@polkadot/util/types';
+
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation.js';
@@ -14,7 +16,7 @@ import SeedAndPath from './SeedAndPath.js';
 
 export interface AccountInfo {
   address: string;
-  genesis?: string;
+  genesis?: HexString;
   suri: string;
 }
 

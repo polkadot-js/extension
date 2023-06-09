@@ -8,6 +8,7 @@ import '@polkadot/extension-mocks/chrome';
 import type { ReactWrapper } from 'enzyme';
 import type { AccountJson } from '@polkadot/extension-base/background/types';
 import type { IconTheme } from '@polkadot/react-identicon/types';
+import type { HexString } from '@polkadot/util/types';
 import type { Props as AddressComponentProps } from './Address.js';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
@@ -48,7 +49,7 @@ interface AccountTestJson extends AccountJson {
 interface AccountTestGenesisJson extends AccountTestJson {
   expectedEncodedAddress: string;
   expectedNetworkLabel: string;
-  genesisHash: string;
+  genesisHash: HexString;
 }
 
 const externalAccount = { address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', expectedIconTheme: 'polkadot', isExternal: true, name: 'External Account', type: 'sr25519' } as AccountJson;

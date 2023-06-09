@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountJson } from '@polkadot/extension-base/background/types';
+import type { HexString } from '@polkadot/util/types';
 import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -50,7 +51,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
   }, [address, selectedAccounts, setSelectedAccounts]);
 
   const _onChangeGenesis = useCallback(
-    (genesisHash?: string | null): void => {
+    (genesisHash?: HexString | null): void => {
       tieAccount(address, genesisHash || null)
         .catch(console.error);
     },

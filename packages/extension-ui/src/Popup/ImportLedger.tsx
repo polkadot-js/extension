@@ -1,6 +1,7 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { HexString } from '@polkadot/util/types';
 import type { ThemeProps } from '../types.js';
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
@@ -39,7 +40,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const [addressOffset, setAddressOffset] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
-  const [genesis, setGenesis] = useState<string | null>(null);
+  const [genesis, setGenesis] = useState<HexString | null>(null);
   const onAction = useContext(ActionContext);
   const [name, setName] = useState<string | null>(null);
   const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset);

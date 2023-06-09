@@ -1,6 +1,8 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { HexString } from '@polkadot/util/types';
+
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation.js';
@@ -28,7 +30,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const [type, setType] = useState(DEFAULT_TYPE);
   const [name, setName] = useState('');
   const options = useGenesisHashOptions();
-  const [genesisHash, setGenesis] = useState('');
+  const [genesisHash, setGenesis] = useState<HexString | null>(null);
   const chain = useMetadata(genesisHash, true);
 
   useEffect((): void => {
@@ -82,7 +84,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   );
 
   const _onChangeNetwork = useCallback(
-    (newGenesisHash: string) => setGenesis(newGenesisHash),
+    (newGenesisHash: HexString) => setGenesis(newGenesisHash),
     []
   );
 

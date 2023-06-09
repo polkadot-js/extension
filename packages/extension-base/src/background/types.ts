@@ -41,16 +41,6 @@ export type SeedLengths = 12 | 24;
 
 export interface AccountJson extends KeyringPair$Meta {
   address: string;
-  genesisHash?: string | null;
-  isExternal?: boolean;
-  isHardware?: boolean;
-  isHidden?: boolean;
-  isDefaultAuthSelected?: boolean
-  name?: string;
-  parentAddress?: string;
-  suri?: string;
-  type?: KeypairType;
-  whenCreated?: number;
 }
 
 export type AccountWithChildren = AccountJson & {
@@ -194,13 +184,13 @@ export type RequestMetadataSubscribe = null;
 
 export interface RequestAccountCreateExternal {
   address: string;
-  genesisHash?: string | null;
+  genesisHash?: HexString | null;
   name: string;
 }
 
 export interface RequestAccountCreateSuri {
   name: string;
-  genesisHash?: string | null;
+  genesisHash?: HexString | null;
   password: string;
   suri: string;
   type?: KeypairType;
@@ -210,7 +200,7 @@ export interface RequestAccountCreateHardware {
   accountIndex: number;
   address: string;
   addressOffset: number;
-  genesisHash: string;
+  genesisHash: HexString;
   hardwareType: string;
   name: string;
 }
@@ -223,7 +213,7 @@ export interface RequestAccountChangePassword {
 
 export interface RequestAccountEdit {
   address: string;
-  genesisHash?: string | null;
+  genesisHash?: HexString | null;
   name: string;
 }
 
@@ -238,7 +228,7 @@ export interface RequestAccountShow {
 
 export interface RequestAccountTie {
   address: string;
-  genesisHash: string | null;
+  genesisHash: HexString | null;
 }
 
 export interface RequestAccountValidate {
@@ -248,7 +238,7 @@ export interface RequestAccountValidate {
 
 export interface RequestDeriveCreate {
   name: string;
-  genesisHash?: string | null;
+  genesisHash?: HexString | null;
   suri: string;
   parentAddress: string;
   parentPassword: string;
@@ -429,7 +419,7 @@ export type AllowedPath = typeof ALLOWED_PATH[number];
 export interface ResponseJsonGetAccountInfo {
   address: string;
   name: string;
-  genesisHash: string;
+  genesisHash: HexString;
   type: KeypairType;
 }
 

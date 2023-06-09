@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // this _must_ be changed for each extension
-export const EXTENSION_PREFIX = process.env.EXTENSION_PREFIX || '';
+export const EXTENSION_PREFIX = process.env['EXTENSION_PREFIX'] || '';
 
-if (!EXTENSION_PREFIX && !process.env.PORT_PREFIX) {
+if (!EXTENSION_PREFIX && !process.env['PORT_PREFIX']) {
   throw new Error('CRITICAL: The extension does not define an own EXTENSION_PREFIX environment variable as part of the build, this is required to ensure that messages are not shared between extensions. Failure to do so will yield messages sent to multiple extensions.');
 }
 
-const PORT_PREFIX = `${EXTENSION_PREFIX || 'unknown'}-${process.env.PORT_PREFIX || 'unknown'}`;
+const PORT_PREFIX = `${EXTENSION_PREFIX || 'unknown'}-${process.env['PORT_PREFIX'] || 'unknown'}`;
 
 export const PORT_CONTENT = `${PORT_PREFIX}-content`;
 export const PORT_EXTENSION = `${PORT_PREFIX}-extension`;

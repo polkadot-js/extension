@@ -6,7 +6,9 @@ import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 
 export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   {
-    displayName: 'Polkadot network',
+    accountName: 'Polkadot',
+    appName: 'Polkadot',
+    networkName: 'Polkadot network',
     genesisHash: ChainInfoMap.polkadot.substrateInfo?.genesisHash || '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
     icon: 'substrate',
     network: 'polkadot',
@@ -15,7 +17,9 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isEthereum: false
   },
   {
-    displayName: 'Kusama network',
+    accountName: 'Kusama',
+    appName: 'Kusama',
+    networkName: 'Kusama network',
     genesisHash: ChainInfoMap.kusama.substrateInfo?.genesisHash || '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
     icon: 'substrate',
     network: 'kusama',
@@ -24,7 +28,9 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isEthereum: false
   },
   {
-    displayName: 'Acala network',
+    accountName: 'Acala',
+    appName: 'Acala',
+    networkName: 'Acala network',
     genesisHash: ChainInfoMap.acala.substrateInfo?.genesisHash || '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
     icon: 'substrate',
     network: 'acala',
@@ -33,7 +39,9 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isEthereum: false
   },
   {
-    displayName: 'All EVM networks',
+    accountName: 'EVM',
+    appName: 'Ethereum',
+    networkName: 'EVM networks',
     genesisHash: '',
     network: 'ethereum',
     icon: 'ethereum',

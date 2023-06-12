@@ -123,12 +123,11 @@ export function useLedger (slug?: string, active = true): Result {
           setIsLoading(false);
           const chainInfo = chainInfoMap[slug];
           const isEthereumNetwork = _isChainEvmCompatible(chainInfo);
-          const { displayName } = (isEthereumNetwork ? { displayName: 'Ethereum' } : getNetwork(ledgerChains, slug, isEthereumNetwork)) || { displayName: 'unknown network' };
-          const network = displayName.replaceAll(' network', '');
+          const { appName } = getNetwork(ledgerChains, slug, isEthereumNetwork) || { appName: 'unknown network' };
 
           const message = e.message;
           const warningMessage = convertLedgerWarning(message, t);
-          const errorMessage = convertLedgerError(message, t, network);
+          const errorMessage = convertLedgerError(message, t, appName);
 
           setIsLocked(true);
           setWarning(warningMessage);

@@ -1276,7 +1276,9 @@ export interface ResponseParseEvmContractInput {
 
 export interface LedgerNetwork {
   genesisHash: string;
-  displayName: string;
+  networkName: string;
+  accountName: string;
+  appName: string;
   network: string; // network is predefined in ledger lib
   slug: string; // slug in chain list
   icon: 'substrate' | 'ethereum';

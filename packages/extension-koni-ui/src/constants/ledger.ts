@@ -33,7 +33,7 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isEthereum: false
   },
   {
-    displayName: 'Ethereum network',
+    displayName: 'All EVM networks',
     genesisHash: '',
     network: 'ethereum',
     icon: 'ethereum',

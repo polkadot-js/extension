@@ -1,6 +1,8 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { HexString } from '@polkadot/util/types';
+
 import React, { useCallback, useContext, useState } from 'react';
 
 import { QrScanAddress } from '@polkadot/react-qr';
@@ -13,7 +15,7 @@ import { Header, Name } from '../partials/index.js';
 
 interface QrAccount {
   content: string;
-  genesisHash: string;
+  genesisHash: HexString | null;
   isAddress: boolean;
   name?: string;
 }

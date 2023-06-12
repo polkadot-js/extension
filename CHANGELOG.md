@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.46.5 Jun 12, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Adjust object index access for stricter tsconfig settings
+- Upgrade to `@polkadot/api` 10.9.1
+- Bump to `@polkadot/util` 12.3.2
+
+
 ## 0.46.4 Jun 5, 2023
 
 - **Important** Not published to the stores, aligns with latest released packages.

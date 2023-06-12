@@ -12,7 +12,7 @@ export const convertLedgerWarning = (message: string, t: TFunction) => {
 };
 
 export const convertLedgerError = (message: string, t: TFunction, network: string) => {
-  if (message.includes('App does not seem to be open') || message.includes('CLA_NOT_SUPPORTED (0x6e00)')) {
+  if (message.includes('App does not seem to be open') || message.includes('CLA_NOT_SUPPORTED (0x6e00)') || message.includes('Unknown Status Code: 28161')) {
     return t('Open "{{network}}" on Ledger to connect', { replace: { network: network } });
   } else {
     return t('Fail to connect. Click to retry');

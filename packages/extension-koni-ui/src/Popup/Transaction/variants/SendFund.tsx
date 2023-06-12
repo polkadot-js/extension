@@ -408,7 +408,37 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
     let sendPromise: Promise<SWTransactionResponse>;
 
+    const account = findAccountByAddress(accounts, from);
+
+    if (!account) {
+      setLoading(false);
+      notification({
+        message: t("Can't find account"),
+        type: 'error'
+      });
+
+      return;
+    }
+
+    const isLedger = !!account.isHardware;
+    const isEthereum = isEthereumAddress(account.address);
+    const chainAsset = assetRegistry[asset];
+
     if (chain === destChain) {
+      if (isLedger) {
+        if (isEthereum) {
+          if (!_isTokenTransferredByEvm(chainAsset)) {
+            setLoading(false);
+            notification({
+              message: t('Ledger does not support transfer for this token'),
+              type: 'warning'
+            });
+
+            return;
+          }
+        }
+      }
+
       // Transfer token or send fund
       sendPromise = makeTransfer({
         from,
@@ -419,9 +449,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         transferAll: isTransferAll
       });
     } else {
-      const acc = findAccountByAddress(accounts, from);
-
-      if (acc?.isHardware) {
+      if (isLedger) {
         setLoading(false);
         notification({
           message: t('This feature is not available for Ledger account'),
@@ -453,7 +481,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         })
       ;
     }, 300);
-  }, [chain, from, asset, isTransferAll, accounts, notification, t, onSuccess, onError]);
+  }, [accounts, from, assetRegistry, asset, chain, notification, t, isTransferAll, onSuccess, onError]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 

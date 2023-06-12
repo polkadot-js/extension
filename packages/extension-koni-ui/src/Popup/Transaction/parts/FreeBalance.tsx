@@ -32,7 +32,7 @@ const Component = ({ address, chain, className, label, onBalanceReady, tokenSlug
 
   return (
     <Typography.Paragraph className={CN(className, 'free-balance')}>
-      {!error && ((label || t('Sender available balance:') + ' '))}
+      {!error && <span className='__label'>{label || t('Sender available balance:')}</span>}
       {isLoading && <ActivityIndicator size={14} />}
       {error && <Typography.Text className={'error-message'}>{error}</Typography.Text>}
       {
@@ -73,6 +73,10 @@ const FreeBalance = styled(Component)<Props>(({ theme: { token } }: Props) => {
     display: 'flex',
     flexWrap: 'wrap',
     color: token.colorTextTertiary,
+
+    '.__label': {
+      marginRight: 3
+    },
 
     '.error-message': {
       color: token.colorError

@@ -43,7 +43,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       <Logo
         className='chain-logo'
         network={value}
-        shape='squircle'
+        shape='circle'
         size={token.controlHeightSM}
       />
     );
@@ -97,7 +97,15 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
 export const ChainSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return ({
+    '&.ant-select-modal-input-container .ant-select-modal-input-wrapper': {
+      paddingLeft: 12,
+      paddingRight: 12
+    },
+
     '&.chain-selector-input .__selected-item': {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
       color: token.colorText
     },
 

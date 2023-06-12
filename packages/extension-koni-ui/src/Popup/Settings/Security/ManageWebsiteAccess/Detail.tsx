@@ -13,7 +13,6 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateAuthUrls } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ManageWebsiteAccessDetailParam } from '@subwallet/extension-koni-ui/types/navigation';
-import { filterNotReadOnlyAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Icon, ModalContext, Switch, SwList } from '@subwallet/react-ui';
 import { GearSix, MagnifyingGlass, Plugs, PlugsConnected, ShieldCheck, ShieldSlash, X } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -41,7 +40,7 @@ function Component ({ accountAuthType, authInfo, className = '', goBack, origin,
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const accountItems = useMemo(() => {
-    const accountListWithoutAll = filterNotReadOnlyAccount(accounts.filter((opt) => opt.address !== 'ALL'));
+    const accountListWithoutAll = accounts.filter((opt) => opt.address !== 'ALL');
 
     if (accountAuthType === 'substrate') {
       return accountListWithoutAll.filter((acc) => !isEthereumAddress(acc.address));

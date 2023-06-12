@@ -101,7 +101,7 @@ function getTokenItems (
   const items: TokenItemType[] = [];
 
   Object.values(assetRegistry).forEach((chainAsset) => {
-    const isValidLedger = isLedger ? (isAccountEthereum ? _isTokenTransferredByEvm(chainAsset) : validLedgerNetwork.includes(chainAsset?.originChain)) : true;
+    const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
     const isTokenFungible = _isAssetFungibleToken(chainAsset);
 
     if (!(isTokenFungible && isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger)) {

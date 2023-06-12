@@ -2125,8 +2125,11 @@ export default class KoniExtension {
       throw new Error('No accounts to import');
     }
 
+    const slugMap: Record<string, string> = {};
+
     for (const account of accounts) {
       const { accountIndex, address, addressOffset, genesisHash, hardwareType, isEthereum, name } = account;
+
       let result: KeyringPair;
 
       const baseMeta: KeyringPair$Meta = {
@@ -2146,11 +2149,18 @@ export default class KoniExtension {
         }, null, 'ethereum');
 
         keyring.saveAccount(result);
+        slugMap.ethereum = 'ethereum';
       } else {
         result = keyring.addHardware(address, hardwareType, {
           ...baseMeta,
           availableGenesisHashes: [genesisHash]
         }).pair;
+
+        const [slug] = this.#koniState.findNetworkKeyByGenesisHash(genesisHash);
+
+        if (slug) {
+          slugMap[slug] = slug;
+        }
       }
 
       const _address = result.address;
@@ -2181,6 +2191,10 @@ export default class KoniExtension {
         resolve();
       });
     });
+
+    if (Object.keys(slugMap).length) {
+      this.enableChains({ chainSlugs: Object.keys(slugMap), enableTokens: true }).catch(console.error);
+    }
 
     return true;
   }

@@ -90,10 +90,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     return accounts.filter(({ address }) => !isAccountAll(address));
   }, [accounts]);
 
-  const noReadOnlyAccounts = useMemo(() => {
-    return noAllAccounts.filter(({ isReadOnly }) => !isReadOnly);
-  }, [noAllAccounts]);
-
   const _onSelect = useCallback((address: string) => {
     if (address) {
       const accountByAddress = findAccountByAddress(accounts, address);
@@ -221,7 +217,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             setConnectionState(isAllowed ? ConnectionStatement.CONNECTED : ConnectionStatement.DISCONNECTED);
           }
         } else {
-          const numberAccounts = noReadOnlyAccounts.filter(({ address }) => filterType(address)).length;
+          const numberAccounts = noAllAccounts.filter(({ address }) => filterType(address)).length;
           const numberAllowedAccounts = Object.entries(allowedMap)
             .filter(([address]) => filterType(address))
             .filter(([, value]) => value)
@@ -246,7 +242,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       setConnected(0);
       setConnectionState(ConnectionStatement.NOT_CONNECTED);
     }
-  }, [currentAccount?.address, currentAuth, isAllAccount, noReadOnlyAccounts]);
+  }, [currentAccount?.address, currentAuth, isAllAccount, noAllAccounts]);
 
   const visibleText = useMemo((): string => {
     switch (connectionState) {

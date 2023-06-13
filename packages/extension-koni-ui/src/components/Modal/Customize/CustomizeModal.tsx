@@ -52,7 +52,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               weight='fill'
             />
           }
-          name={t('Show tokens with zero balance')}
+          name={t('Show zero balance')}
           rightItem={
             <Switch
               checked={isShowZeroBalance}

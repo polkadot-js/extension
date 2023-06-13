@@ -15,6 +15,7 @@ import { _BALANCE_CHAIN_GROUP, _PURE_EVM_CHAINS } from '@subwallet/extension-bas
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isPureEvmChain, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses, sumBN } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
 import { Contract } from 'web3-eth-contract';
 
 import { ApiPromise } from '@polkadot/api';
@@ -290,7 +291,7 @@ async function subscribeEquilibriumTokenBalance (addresses: string[], chain: str
 
         // @ts-ignore
         const freeTokenBalance = balanceList.find((data: EqBalanceItem) => data[0] === parseInt(assetId));
-        const bnFreeTokenBalance = freeTokenBalance ? new BN(freeTokenBalance[1].positive.toString()) : BN_ZERO;
+        const bnFreeTokenBalance = freeTokenBalance ? new BN(new BigN(freeTokenBalance[1].positive).toString()) : BN_ZERO;
 
         tokenFreeBalance = tokenFreeBalance.add(bnFreeTokenBalance);
       }

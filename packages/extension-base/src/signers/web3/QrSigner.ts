@@ -3,10 +3,11 @@
 
 import { ExternalRequestPromise, ExternalRequestPromiseStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { QrState, Web3Transaction } from '@subwallet/extension-base/signers/types';
-import RLP, { Input } from 'rlp';
+import { addHexPrefix } from 'ethereumjs-util';
+import { ethers, TransactionLike } from 'ethers';
 
 import { SignerResult } from '@polkadot/api/types';
-import { u8aToHex } from '@polkadot/util';
+import { HexString } from '@polkadot/util/types';
 
 interface CallbackProps {
   qrState: QrState
@@ -34,19 +35,17 @@ export default class QrSigner {
 
   public async signTransaction (tx: Web3Transaction): Promise<SignerResult> {
     return new Promise((resolve, reject): void => {
-      const data: Input = [
-        tx.nonce,
-        tx.gasPrice,
-        tx.gasLimit,
-        tx.to,
-        tx.value,
-        tx.data,
-        tx.chainId,
-        new Uint8Array([0x00]),
-        new Uint8Array([0x00])
-      ];
+      const txObject: TransactionLike = {
+        nonce: tx.nonce ?? 0,
+        gasPrice: addHexPrefix(tx.gasPrice.toString(16)),
+        gasLimit: addHexPrefix(tx.gasLimit.toString(16)),
+        to: tx.to !== undefined ? tx.to : '',
+        value: addHexPrefix(tx.value.toString(16)),
+        data: tx.data,
+        chainId: tx.chainId
+      };
 
-      const qrPayload = RLP.encode(data);
+      const qrPayload = ethers.Transaction.from(txObject).unsignedSerialized as HexString;
 
       const resolver = (result: SignerResult | PromiseLike<SignerResult>): void => {
         this.#resolver();
@@ -59,7 +58,7 @@ export default class QrSigner {
         qrState: {
           isQrHashed: false,
           qrAddress: tx.from,
-          qrPayload: u8aToHex(qrPayload),
+          qrPayload: qrPayload,
           qrId: this.#id,
           isEthereum: true
         }

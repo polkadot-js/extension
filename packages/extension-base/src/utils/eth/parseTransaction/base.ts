@@ -156,7 +156,7 @@ export class InputDataDecoder {
         data = `0x${data}`;
       }
 
-      const _inputs = ethers.utils.defaultAbiCoder.decode(types, data);
+      const _inputs = ethers.AbiCoder.defaultAbiCoder().decode(types, data);
 
       const inputs = deepRemoveUnwantedArrayProperties(_inputs);
 
@@ -228,12 +228,12 @@ export class InputDataDecoder {
 
           try {
             // @ts-ignore
-            inputs = ethers.utils.defaultAbiCoder.decode(types, inputsBuf);
+            inputs = ethers.AbiCoder.defaultAbiCoder().decode(types, inputsBuf);
           } catch (err) {
             try {
-              const ifc = new ethers.utils.Interface([]);
+              const ifc = new ethers.Interface([]);
 
-              inputs = ifc.decodeFunctionData(ethers.utils.FunctionFragment.fromObject(abi as JsonFragment), data);
+              inputs = ifc.decodeFunctionData(ethers.FunctionFragment.from(abi as JsonFragment), data);
             } catch (err) {}
           }
 
@@ -292,8 +292,8 @@ export class InputDataDecoder {
         const method = obj.name || null;
 
         try {
-          const ifc = new ethers.utils.Interface([]);
-          const _result = ifc.decodeFunctionData(ethers.utils.FunctionFragment.fromObject(obj as FunctionFragment), data);
+          const ifc = new ethers.Interface([]);
+          const _result = ifc.decodeFunctionData(ethers.FunctionFragment.from(obj as FunctionFragment), data);
           const inputs = deepRemoveUnwantedArrayProperties(_result);
 
           result.method = method;

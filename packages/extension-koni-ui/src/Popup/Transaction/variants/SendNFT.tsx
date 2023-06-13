@@ -121,8 +121,9 @@ const Component: React.FC = () => {
 
         if (account && account.isHardware) {
           const destChainInfo = chainInfoMap[chain];
+          const availableGen: string[] = account.availableGenesisHashes || [];
 
-          if (account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
+          if (!isEthereumAddress(account.address) && availableGen.includes(destChainInfo?.substrateInfo?.genesisHash || '')) {
             const destChainName = destChainInfo?.name || 'Unknown';
 
             return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));

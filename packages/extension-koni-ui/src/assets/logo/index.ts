@@ -1058,9 +1058,9 @@ export const DefaultLogosMap: Record<string, string> = {
 };
 
 export const IconMap = {
-  __connected__: '/images/icons/__connected__.png',
-  __disconnected__: '/images/icons/__disconnected__.png',
-  __qr_code__: '/images/icons/__qr_code__.png'
+  __connected__: '/images/icons/connected.png',
+  __disconnected__: '/images/icons/disconnected.png',
+  __qr_code__: '/images/icons/qr_code.png'
 };
 
 export default DefaultLogosMap;

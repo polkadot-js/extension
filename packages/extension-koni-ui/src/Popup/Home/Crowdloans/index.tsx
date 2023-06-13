@@ -329,17 +329,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             showActionBtn
           />
 
-          {filteredItems.length > 0
-            ? (
-              <Table
-                columns={columns}
-                dataSource={filteredItems}
-                pagination={false}
-              />
-            )
-            : (
-              <NoContent pageType={PAGE_TYPE.CROWDLOANS} />
-            )}
+          <div className='web-container'>
+            {filteredItems.length > 0
+              ? (
+                <Table
+                  columns={columns}
+                  dataSource={filteredItems}
+                  pagination={false}
+                />
+              )
+              : (
+                <NoContent pageType={PAGE_TYPE.CROWDLOANS} />
+              )}
+          </div>
+
         </div>
       );
     }
@@ -405,7 +408,11 @@ const Crowdloans = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.web-list': {
       flex: 1,
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      '.web-container': {
+        height: '100%',
+        marginTop: 24
+      }
     },
 
     '.project-container': {

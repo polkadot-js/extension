@@ -261,17 +261,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           'web-wrapper': isWebUI
         })}
         >
-          {!isWebUI ? (
-            <SwHeader
-              left='logo'
-              onClickLeft={goHome}
-              rightButtons={headerIcons}
-              showLeftButton={true}
-            >
-              {/*  // todo: i18n Settings */}
-              Settings
-            </SwHeader>
-          ) : <Headers.Controller title='Settings' />}
+          {!isWebUI
+            ? (
+              <SwHeader
+                left='logo'
+                onClickLeft={goHome}
+                rightButtons={headerIcons}
+                showLeftButton={true}
+              >
+                Settings
+              </SwHeader>
+            )
+            : (
+              <Headers.Controller title='Settings' />
+            )}
           <div className={CN({
             '__scroll-container': !isWebUI,
             '__web-container': isWebUI
@@ -356,7 +359,11 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
 
     '.__web-container': {
       width: '70%',
-      margin: '0 auto'
+      margin: '0 auto',
+
+      '.group-content': {
+        marginBottom: 16
+      }
     },
 
     '.__scroll-container': {

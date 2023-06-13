@@ -4,7 +4,6 @@
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
@@ -595,11 +594,13 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
               />
             </Form.Item>
 
-            <Icon
-              className={'middle-item'}
-              phosphorIcon={PaperPlaneRight}
-              size={'md'}
-            />
+            {!modalContent && (
+              <Icon
+                className={'middle-item'}
+                phosphorIcon={PaperPlaneRight}
+                size={'md'}
+              />
+            )}
 
             <Form.Item name={'destChain'}>
               <ChainSelector
@@ -665,6 +666,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         <FreeBalance
           address={from}
           chain={chain}
+          className='balance'
           onBalanceReady={setIsBalanceReady}
           tokenSlug={asset}
         />
@@ -705,13 +707,22 @@ const SendFund = styled(_SendFund)(({ theme }) => {
       marginBottom: token.marginMD
     },
 
+    '.balance': {
+      marginBottom: 16
+    },
+
     '&.__modal-footer': {
       padding: 0,
       margin: 0,
+
       '.ant-btn': {
         width: '100%',
-        margin: '16px 0'
+        margin: '16px 0 0'
       }
+
+    },
+    '.ant-form-item:last-child': {
+      margin: 0
     },
     '&.__modal-content': {
       padding: 0

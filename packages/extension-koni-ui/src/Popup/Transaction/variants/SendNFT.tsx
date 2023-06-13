@@ -229,7 +229,10 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
 
   return (
     <>
-      <TransactionContent className={CN('-transaction-content')}>
+      <TransactionContent className={CN('-transaction-content', {
+        '__web-content': modalContent
+      })}
+      >
         <div className={CN('nft_item_detail text-center', {
           '__modal-ui': modalContent
         })}
@@ -336,6 +339,9 @@ const SendNFT = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
+    '.__web-content': {
+      padding: 0
+    },
 
     '.nft_item_detail h5': {
       marginTop: token.marginXS,
@@ -343,6 +349,13 @@ const SendNFT = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__modal-ui': {
+      padding: 0,
+      '&.transaction-footer': {
+        margin: 0,
+        '.ant-btn': {
+          margin: '32px 0 0'
+        }
+      },
       '&.form-container': {
         display: 'flex',
         flexDirection: 'column-reverse'

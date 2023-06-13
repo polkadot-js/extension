@@ -104,6 +104,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     onOpenReceive
   ]);
 
+  const handleCancelTransfer = useCallback(() => inactiveModal(TRANSFER_FUND_MODAL), [inactiveModal]);
+  const handleCancelBuy = useCallback(() => inactiveModal(BUY_TOKEN_MODAL), [inactiveModal]);
+
   return (
     <div className={CN(className, 'flex-row')}>
       <div className='balance-item'>
@@ -247,6 +250,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                     weight='bold'
                   />
                 )}
+                // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => handleClick(item.type)}
                 shape='squircle'
                 size='sm'
@@ -259,7 +263,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
       <CustomModal
         id={TRANSFER_FUND_MODAL}
-        onCancel={() => inactiveModal(TRANSFER_FUND_MODAL)}
+        onCancel={handleCancelTransfer}
         title={t('Transfer')}
       >
         <Transaction modalContent>
@@ -269,7 +273,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
       <CustomModal
         id={BUY_TOKEN_MODAL}
-        onCancel={() => inactiveModal(BUY_TOKEN_MODAL)}
+        onCancel={handleCancelBuy}
         title={t('Buy token')}
       >
         <BuyTokens modalContent />

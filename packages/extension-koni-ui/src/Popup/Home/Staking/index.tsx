@@ -538,7 +538,7 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
         flex: 1
       },
       '.container': {
-        marginBottom: 12
+        marginBottom: 24
       }
     },
 

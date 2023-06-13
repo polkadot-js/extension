@@ -40,7 +40,7 @@ export const CustomModal = styled(Component)<Props>(({ theme: { token } }: Props
     },
 
     '.ant-sw-modal-body': {
-      paddingBottom: token.paddingXS
+      paddingBottom: token.paddingSM + 4
     },
 
     '.ant-sw-modal-footer': {

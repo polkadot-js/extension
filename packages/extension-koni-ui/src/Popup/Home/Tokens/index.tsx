@@ -227,7 +227,7 @@ const Component = (): React.ReactElement => {
                   title: 'Portfolio %',
                   dataIndex: 'percentage',
                   key: 'percentage',
-                  render: () => <>85%</>
+                  render: () => <p>85%</p>
                 },
                 {
                   title: 'Price',

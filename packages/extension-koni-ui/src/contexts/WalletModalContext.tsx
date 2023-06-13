@@ -59,28 +59,50 @@ const ModalWrapper = styled.div<ThemeProps & {
   isWebUI?: boolean
 }>(
   ({ isWebUI }) => {
-    const spacing = isWebUI ? '0' : 'unset';
+    // const spacing = isWebUI ? '0' : 'unset';
+
+    if (isWebUI) {
+      return {
+        height: '100%',
+
+        '.ant-sw-modal-wrap': {
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+
+          '.ant-sw-modal': {
+            position: 'relative',
+            '.ant-sw-modal-content': {
+              borderRadius: 8,
+              paddingBottom: 0,
+              '.ant-sw-modal-header': {
+                // marginBottom: 16
+              },
+              '.ant-sw-modal-body': {
+                // margin: spacing
+                ' .ant-sw-list': {
+                // overflow:
+                }
+              }
+            }
+          }
+        }
+      };
+    }
 
     return {
       height: '100%',
 
       '.ant-sw-modal-wrap': {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-
         '.ant-sw-modal': {
-          position: 'relative',
-          padding: spacing,
+          width: '100% !important',
           '.ant-sw-modal-content': {
-            borderRadius: 8,
+            width: '100% !important',
             '.ant-sw-modal-header': {
-              // marginBottom: isWebUI ? 16 : 'unset'
-              marginBottom: 16
             },
             '.ant-sw-modal-body': {
-              padding: spacing,
-              margin: spacing
+              ' .ant-sw-list': {
+              }
             }
           }
         }
@@ -126,9 +148,9 @@ export const WalletModalContext = ({ children }: Props) => {
 
   return <ModalWrapper isWebUI={isWebUI}>
     <div
-      className={CN({
-        'desktop-modal': isWebUI
-      })}
+      // className={CN({
+      //   'desktop-modal': isWebUI
+      // })}
       id='popup-container'
       style={{ zIndex: hasActiveModal ? undefined : -1 }}
     />

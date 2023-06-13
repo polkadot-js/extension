@@ -210,7 +210,10 @@ function Component ({ className, modalContent }: Props) {
   }, [fixedTokenKey]);
 
   return (
-    <PageWrapper className={CN(className, 'transaction-wrapper')}>
+    <PageWrapper className={CN(className, 'transaction-wrapper', {
+      '__web-wrapper': modalContent
+    })}
+    >
       {!modalContent && (
         <SwSubHeader
           background={'transparent'}
@@ -268,10 +271,6 @@ function Component ({ className, modalContent }: Props) {
         </Form>
 
         <div className={'common-text __note'}>
-          {t('You will be directed to the chosen supplier to complete this transaction')}
-        </div>
-
-        <div className={'common-text __note'}>
           {t('You will be taken to independent provider to complete this transaction')}
         </div>
       </div>
@@ -296,12 +295,12 @@ function Component ({ className, modalContent }: Props) {
 
 function Wrapper ({ modalContent, ...rest }: Props) {
   if (modalContent) {
-    return <>
+    return (
       <Component
         modalContent={modalContent}
         {...rest}
       />
-    </>;
+    );
   }
 
   return (
@@ -310,7 +309,6 @@ function Wrapper ({ modalContent, ...rest }: Props) {
       showTabBar={false}
     >
       <Component
-        modalContent={modalContent}
         {...rest}
       />
     </Layout.Home>
@@ -321,6 +319,21 @@ const BuyTokens = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
     flexDirection: 'column',
+
+    '&.__web-wrapper': {
+      '.__scroll-container': {
+        padding: 0
+      },
+      '.__layout-footer': {
+        padding: 0,
+        margin: 0,
+
+        '.ant-btn': {
+          width: '100%',
+          margin: '16px 0 0'
+        }
+      }
+    },
 
     '.__scroll-container': {
       flex: 1,

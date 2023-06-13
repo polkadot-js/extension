@@ -34,6 +34,35 @@ body {
   margin: 0;
 }
 
+*::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/*SubWallet main css*/
+*, :after, :before {
+  -webkit-box-sizing: inherit;
+  box-sizing: inherit
+}
+
+input, button, select, optgroup, textarea {
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  line-height: inherit;
+}
+
+body ::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 6px;
+  height: 6px
+}
 [tabindex='-1']:focus {
   outline: none;
 }
@@ -576,7 +605,7 @@ div#popup-container {
           padding: 0;
           padding-bottom: 8;
           display: table-cell;
-          max-width: 0px;
+          width: 25%;
 
           &:first-child {
             text-align: start;
@@ -594,25 +623,28 @@ div#popup-container {
       }
 
       .ant-table-row {
-      border-radius: 8px;
+        border-radius: 8px;
 
         .ant-table-cell {
           border-top: none !important;
           border-bottom: none !important;
-          padding: 14px 16px;
+          padding: 12px 0;
           background: #1A1A1A;
           margin: 8px 0;
           text-align: end;
+          width: 25%;
 
           &:first-child {
             border-top-left-radius: 8px;
             border-bottom-left-radius: 8px;
             text-align: start;
+            padding-left: 13px;
           }
 
           &:last-child {
             border-top-right-radius: 8px;
             border-bottom-right-radius: 8px;
+            padding-right: 16px;
           }
         }
       }

@@ -34,6 +34,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { isWebUI } = useContext(ScreenContext);
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
   const navigate = useNavigate();
+  const renderEyecon = useCallback(
+    (visible: boolean) => visible ? <Eye /> : <EyeSlash />
+    , []);
 
   const items = useMemo((): WelcomeButtonItem[] => [
     {
@@ -151,9 +154,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             <div className={CN('add-wallet-container', 'flex-column')}>
               <div className='sub-title'>{t('Watch any wallet')}</div>
               <Input.Password
-                // disabled={loading}
                 className='address-input'
-                iconRender={(visible) => (visible ? <Eye /> : <EyeSlash />)}
+                iconRender={renderEyecon}
                 placeholder={t('Enter address')}
                 prefix={<Wallet />}
                 visibilityToggle={{

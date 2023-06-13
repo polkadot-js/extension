@@ -24,6 +24,6 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.0.1-60': MigrateAuthUrls,
   '1.0.3-01': MigrateAutoLock,
   '1.0.3-02': MigrateChainPatrol,
-  '1.0.7-01': MigrateLedgerAccount
+  '1.0.9-01': MigrateLedgerAccount
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

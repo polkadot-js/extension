@@ -11,7 +11,7 @@ import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/accou
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
+import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
@@ -110,31 +110,20 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     setLoading(true);
 
     if (reformatAddress) {
-      createAccountHardwareMultiple({
-        accounts: [{
-          accountIndex: 0,
-          address: reformatAddress,
-          addressOffset: 0, // don't change
-          genesisHash: '',
-          hardwareType: 'ledger',
-          name: accountName,
-          isEthereum: isEthereum
-        }]
+      createAccountExternalV2({
+        name: accountName,
+        address: reformatAddress,
+        genesisHash: '',
+        isEthereum: isEthereum,
+        isAllowed: true,
+        isReadOnly: true
       })
-      // createAccountExternalV2({
-      //   name: accountName,
-      //   address: reformatAddress,
-      //   genesisHash: '',
-      //   isEthereum: isEthereum,
-      //   isAllowed: true,
-      //   isReadOnly: true
-      // })
         .then((errors) => {
-          // if (errors.length) {
-          //   form.setFields([{ name: fieldName, errors: errors.map((e) => e.message) }]);
-          // } else {
-          onComplete();
-          // }
+          if (errors.length) {
+            form.setFields([{ name: fieldName, errors: errors.map((e) => e.message) }]);
+          } else {
+            onComplete();
+          }
         })
         .catch((error: Error) => {
           form.setFields([{ name: fieldName, errors: [error.message] }]);

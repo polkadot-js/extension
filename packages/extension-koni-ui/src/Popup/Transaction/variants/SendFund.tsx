@@ -267,7 +267,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
   const fromChainNetworkPrefix = useGetChainPrefixBySlug(chain);
   const destChainNetworkPrefix = useGetChainPrefixBySlug(destChain);
-  const fromChainGenesisHash = chainInfoMap[chain]?.substrateInfo?.genesisHash || '';
+  const destChainGenesisHash = chainInfoMap[destChain]?.substrateInfo?.genesisHash || '';
 
   const tokenItems = useMemo<TokenItemType[]>(() => {
     return getTokenItems(
@@ -326,7 +326,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       const destChainInfo = chainInfoMap[destChain];
       const availableGen: string[] = account.availableGenesisHashes || [];
 
-      if (!isEthereumAddress(account.address) && availableGen.includes(destChainInfo?.substrateInfo?.genesisHash || '')) {
+      if (!isEthereumAddress(account.address) && !availableGen.includes(destChainInfo?.substrateInfo?.genesisHash || '')) {
         const destChainName = destChainInfo?.name || 'Unknown';
 
         return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
@@ -658,7 +658,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               label={t('Send to')}
-              networkGenesisHash={fromChainGenesisHash}
+              networkGenesisHash={destChainGenesisHash}
               placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}

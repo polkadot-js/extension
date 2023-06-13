@@ -6,6 +6,7 @@ import MigrateAuthUrls from '@subwallet/extension-base/services/migration-servic
 import MigrateAutoLock from '@subwallet/extension-base/services/migration-service/scripts/MigrateAutoLock';
 import MigrateChainPatrol from '@subwallet/extension-base/services/migration-service/scripts/MigrateChainPatrol';
 import MigrateImportedToken from '@subwallet/extension-base/services/migration-service/scripts/MigrateImportedToken';
+import MigrateLedgerAccount from '@subwallet/extension-base/services/migration-service/scripts/MigrateLedgerAccount';
 import MigrateNetworkSettings from '@subwallet/extension-base/services/migration-service/scripts/MigrateNetworkSettings';
 import MigrateSettings from '@subwallet/extension-base/services/migration-service/scripts/MigrateSettings';
 import MigrateTransactionHistory from '@subwallet/extension-base/services/migration-service/scripts/MigrateTransactionHistory';
@@ -22,6 +23,7 @@ export default <Record<string, typeof BaseMigrationJob>> {
   '1.0.1-50': MigrateSettings,
   '1.0.1-60': MigrateAuthUrls,
   '1.0.3-01': MigrateAutoLock,
-  '1.0.3-02': MigrateChainPatrol
+  '1.0.3-02': MigrateChainPatrol,
+  '1.0.9-01': MigrateLedgerAccount
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

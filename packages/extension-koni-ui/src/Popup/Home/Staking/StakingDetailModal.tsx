@@ -9,7 +9,7 @@ import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
-import { useGetAccountByAddress, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetAccountByAddress, usePreCheckStakeAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
@@ -50,7 +50,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { currentAccount } = useSelector((state) => state.accountState);
-  const onClickFooterButton = usePreCheckReadOnly(currentAccount?.address);
+  const onClickFooterButton = usePreCheckStakeAction(currentAccount?.address);
 
   const chainInfo = useFetchChainInfo(staking.chain);
   const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);

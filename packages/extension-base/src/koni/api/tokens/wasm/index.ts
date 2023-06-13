@@ -16,9 +16,17 @@ export function getPSP34ContractPromise (apiPromise: ApiPromise, contractAddress
   return new ContractPromise(apiPromise, _PSP34_ABI, contractAddress);
 }
 
+const mustFormatNumberReg = /^-?[0-9][0-9,.]+$/;
+
 export async function getPSP34TransferExtrinsic (networkKey: string, substrateApi: _SubstrateApi, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   const contractAddress = params.contractAddress as string;
   const onChainOption = params.onChainOption as Record<string, string>;
+
+  for (const [key, value] of Object.entries(onChainOption)) {
+    if (mustFormatNumberReg.test(value)) {
+      onChainOption[key] = value.replaceAll(',', '');
+    }
+  }
 
   try {
     const contractPromise = getPSP34ContractPromise(substrateApi.api, contractAddress);
@@ -28,6 +36,8 @@ export async function getPSP34TransferExtrinsic (networkKey: string, substrateAp
     // @ts-ignore
     return contractPromise.tx['psp34::transfer']({ gasLimit }, recipientAddress, onChainOption, {});
   } catch (e) {
+    console.debug(e);
+
     return null;
   }
 }

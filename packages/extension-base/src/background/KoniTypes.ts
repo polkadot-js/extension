@@ -824,6 +824,7 @@ export interface CreateHardwareAccountItem {
   genesisHash: string;
   hardwareType: string;
   name: string;
+  isEthereum: boolean;
 }
 
 export interface RequestAccountCreateHardwareMultiple {
@@ -1277,13 +1278,15 @@ export interface ResponseParseEvmContractInput {
 
 export interface LedgerNetwork {
   genesisHash: string;
-  displayName: string;
+  networkName: string;
+  accountName: string;
+  appName: string;
   network: string; // network is predefined in ledger lib
   slug: string; // slug in chain list
   icon: 'substrate' | 'ethereum';
   isDevMode: boolean;
+  isEthereum: boolean;
 }
-
 /// On-ramp
 
 export interface TransakNetwork {

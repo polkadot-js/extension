@@ -78,6 +78,9 @@ chrome.runtime.onInstalled.addListener(function (details) {
   }
 });
 
+// Setup uninstall URL every background start
+chrome.runtime.setUninstallURL('https://forms.gle/mAxcUCumXfnEaQHm7');
+
 chrome.runtime.onStartup.addListener(function () {
   handleExtensionIdling();
 });

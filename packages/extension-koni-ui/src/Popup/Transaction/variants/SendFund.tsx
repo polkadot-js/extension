@@ -4,8 +4,7 @@
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
-import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
@@ -23,7 +22,7 @@ import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { PaperPlaneTilt } from 'phosphor-react';
+import { PaperPlaneRight, PaperPlaneTilt } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -66,7 +65,9 @@ function getTokenItems (
     return [];
   }
 
-  const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
+  const isLedger = !!account.isHardware;
+  const validGen: string[] = account.availableGenesisHashes || [];
+  const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug);
   const isAccountEthereum = isEthereumAddress(address);
   const isSetTokenSlug = !!tokenGroupSlug && !!assetRegistry[tokenGroupSlug];
   const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
@@ -77,7 +78,7 @@ function getTokenItems (
     }
 
     const chainAsset = assetRegistry[tokenGroupSlug];
-    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;
+    const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
 
     if (isSetTokenSlug) {
       if (isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger) {
@@ -100,7 +101,7 @@ function getTokenItems (
   const items: TokenItemType[] = [];
 
   Object.values(assetRegistry).forEach((chainAsset) => {
-    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset.originChain : true;
+    const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
     const isTokenFungible = _isAssetFungibleToken(chainAsset);
 
     if (!(isTokenFungible && isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger)) {
@@ -191,15 +192,17 @@ const filterAccountFunc = (
   });
 
   return (account: AccountJson): boolean => {
-    const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
+    const isLedger = !!account.isHardware;
     const isAccountEthereum = isEthereumAddress(account.address);
+    const validGen: string[] = account.availableGenesisHashes || [];
+    const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
 
     if (!defaultFilterAccount(account)) {
       return false;
     }
 
     return chainAssets.some((chainAsset) => {
-      const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;
+      const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
 
       return isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger;
     });
@@ -264,7 +267,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
   const fromChainNetworkPrefix = useGetChainPrefixBySlug(chain);
   const destChainNetworkPrefix = useGetChainPrefixBySlug(destChain);
-  const fromChainGenesisHash = chainInfoMap[chain]?.substrateInfo?.genesisHash || '';
+  const destChainGenesisHash = chainInfoMap[destChain]?.substrateInfo?.genesisHash || '';
 
   const tokenItems = useMemo<TokenItemType[]>(() => {
     return getTokenItems(
@@ -319,15 +322,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       }
     }
 
-    if (account) {
-      if (account.isHardware) {
-        const destChainInfo = chainInfoMap[destChain];
+    if (account?.isHardware) {
+      const destChainInfo = chainInfoMap[destChain];
+      const availableGen: string[] = account.availableGenesisHashes || [];
 
-        if (account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
-          const destChainName = destChainInfo?.name || 'Unknown';
+      if (!isEthereumAddress(account.address) && !availableGen.includes(destChainInfo?.substrateInfo?.genesisHash || '')) {
+        const destChainName = destChainInfo?.name || 'Unknown';
 
-          return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
-        }
+        return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
       }
     }
 
@@ -406,7 +408,37 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
     let sendPromise: Promise<SWTransactionResponse>;
 
+    const account = findAccountByAddress(accounts, from);
+
+    if (!account) {
+      setLoading(false);
+      notification({
+        message: t("Can't find account"),
+        type: 'error'
+      });
+
+      return;
+    }
+
+    const isLedger = !!account.isHardware;
+    const isEthereum = isEthereumAddress(account.address);
+    const chainAsset = assetRegistry[asset];
+
     if (chain === destChain) {
+      if (isLedger) {
+        if (isEthereum) {
+          if (!_isTokenTransferredByEvm(chainAsset)) {
+            setLoading(false);
+            notification({
+              message: t('Ledger does not support transfer for this token'),
+              type: 'warning'
+            });
+
+            return;
+          }
+        }
+      }
+
       // Transfer token or send fund
       sendPromise = makeTransfer({
         from,
@@ -417,9 +449,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         transferAll: isTransferAll
       });
     } else {
-      const acc = findAccountByAddress(accounts, from);
-
-      if (acc?.isHardware) {
+      if (isLedger) {
         setLoading(false);
         notification({
           message: t('This feature is not available for Ledger account'),
@@ -451,7 +481,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         })
       ;
     }, 300);
-  }, [chain, from, asset, isTransferAll, accounts, notification, t, onSuccess, onError]);
+  }, [accounts, from, assetRegistry, asset, chain, notification, t, isTransferAll, onSuccess, onError]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
@@ -464,14 +494,26 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   }, [maxTransfer]);
 
   // TODO: Need to review
+  // Auto fill logic
   useEffect(() => {
     const { asset, from } = form.getFieldsValue();
 
+    const updateInfoWithTokenSlug = (tokenSlug: string) => {
+      const tokenInfo = assetRegistry[tokenSlug];
+
+      form.setFieldsValue({
+        asset: tokenSlug,
+        chain: tokenInfo.originChain,
+        destChain: tokenInfo.originChain
+      });
+      setChain(tokenInfo.originChain);
+    };
+
     if (tokenItems.length) {
+      let isApplyDefaultAsset = true;
+
       if (!asset) {
         const account = findAccountByAddress(accounts, from);
-
-        let pass = false;
 
         if (account?.originGenesisHash) {
           const network = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash);
@@ -480,36 +522,18 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             const token = tokenItems.find((item) => item.originChain === network.slug);
 
             if (token) {
-              form.setFieldsValue({
-                asset: token.slug,
-                chain: assetRegistry[token.slug].originChain,
-                destChain: assetRegistry[token.slug].originChain
-              });
-              setChain(assetRegistry[token.slug].originChain);
-              pass = true;
+              updateInfoWithTokenSlug(token.slug);
+              isApplyDefaultAsset = false;
             }
           }
         }
-
-        if (!pass) {
-          form.setFieldsValue({
-            asset: tokenItems[0].slug,
-            chain: assetRegistry[tokenItems[0].slug].originChain,
-            destChain: assetRegistry[tokenItems[0].slug].originChain
-          });
-          setChain(assetRegistry[tokenItems[0].slug].originChain);
-        }
       } else {
-        const isSelectedTokenInList = tokenItems.some((i) => i.slug === asset);
+        // Apply default asset if current asset is not in token list
+        isApplyDefaultAsset = !tokenItems.some((i) => i.slug === asset);
+      }
 
-        if (!isSelectedTokenInList) {
-          form.setFieldsValue({
-            asset: tokenItems[0].slug,
-            chain: assetRegistry[tokenItems[0].slug].originChain,
-            destChain: assetRegistry[tokenItems[0].slug].originChain
-          });
-          setChain(assetRegistry[tokenItems[0].slug].originChain);
-        }
+      if (isApplyDefaultAsset) {
+        updateInfoWithTokenSlug(tokenItems[0].slug);
       }
     }
   }, [accounts, tokenItems, assetRegistry, form, setChain, chainInfoMap]);
@@ -563,7 +587,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     <>
       <TransactionContent className={CN(`${className} -transaction-content`)}>
         <div className={'__brief common-text text-light-4 text-center'}>
-          {t('Transfer token with the following details')}
+          {t('You are performing a transfer of a fungible token')}
         </div>
 
         <Form
@@ -596,23 +620,18 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               />
             </Form.Item>
 
-            <Form.Item
-              name={'value'}
-              rules={[
-                {
-                  validator: validateAmount
-                }
-              ]}
-              statusHelpAsTooltip={true}
-              validateTrigger='onBlur'
-            >
-              <AmountInput
-                decimals={decimals}
-                forceUpdateMaxValue={forceUpdateMaxValue}
-                maxValue={maxTransfer}
-                onSetMax={onSetMaxTransferable}
-                showMaxButton={true}
-                tooltip={t('Amount')}
+            <Icon
+              className={'middle-item'}
+              phosphorIcon={PaperPlaneRight}
+              size={'md'}
+            />
+
+            <Form.Item name={'destChain'}>
+              <ChainSelector
+                disabled={!destChainItems.length}
+                items={destChainItems}
+                title={t('Select destination chain')}
+                tooltip={t('Select destination chain')}
               />
             </Form.Item>
           </div>
@@ -639,7 +658,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               label={t('Send to')}
-              networkGenesisHash={fromChainGenesisHash}
+              networkGenesisHash={destChainGenesisHash}
               placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}
@@ -647,12 +666,23 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             />
           </Form.Item>
 
-          <Form.Item name={'destChain'}>
-            <ChainSelector
-              disabled={!destChainItems.length}
-              items={destChainItems}
-              title={t('Select destination chain')}
-              tooltip={t('Select destination chain')}
+          <Form.Item
+            name={'value'}
+            rules={[
+              {
+                validator: validateAmount
+              }
+            ]}
+            statusHelpAsTooltip={true}
+            validateTrigger='onBlur'
+          >
+            <AmountInput
+              decimals={decimals}
+              forceUpdateMaxValue={forceUpdateMaxValue}
+              maxValue={maxTransfer}
+              onSetMax={onSetMaxTransferable}
+              showMaxButton={true}
+              tooltip={t('Amount')}
             />
           </Form.Item>
         </Form>
@@ -696,6 +726,14 @@ const SendFund = styled(_SendFund)(({ theme }) => {
       paddingLeft: token.padding,
       paddingRight: token.padding,
       marginBottom: token.marginMD
+    },
+
+    '.form-row': {
+      gap: 8
+    },
+
+    '.middle-item': {
+      marginBottom: token.marginSM
     },
 
     '&.-transaction-content.-is-zero-balance': {

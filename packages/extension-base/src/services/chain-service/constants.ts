@@ -27,7 +27,7 @@ export const _PURE_EVM_CHAINS = ['binance', 'binance_test', 'ethereum', 'ethereu
 // Get balance----------------------------------------------------------------------------------------------------------
 
 export const _BALANCE_CHAIN_GROUP = {
-  kintsugi: ['kintsugi', 'interlay', 'kintsugi_test'],
+  kintsugi: ['kintsugi', 'interlay', 'kintsugi_test', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
   bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main'],
@@ -177,11 +177,13 @@ export const _TRANSFER_NOT_SUPPORTED_CHAINS = ['subspace_gemini_3a', 'kulupu', '
 
 export const _TRANSFER_CHAIN_GROUP = {
   acala: ['karura', 'acala', 'acala_testnet'],
-  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay', 'bifrost_dot', 'hydradx_main'],
+  kintsugi: ['kintsugi', 'kintsugi_test', 'interlay', 'hydradx_main', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
   crab: ['crab', 'pangolin'],
-  bitcountry: ['pioneer', 'bitcountry'],
-  statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'parallel']
+  bitcountry: ['pioneer', 'bitcountry', 'bifrost', 'bifrost_dot'],
+  statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel'],
+  riochain: ['riochain'],
+  sora_substrate: ['sora_substrate']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {

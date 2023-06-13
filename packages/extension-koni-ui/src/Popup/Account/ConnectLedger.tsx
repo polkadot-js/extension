@@ -53,7 +53,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [firstStep, setFirstStep] = useState(true);
 
   const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
-    name: network.displayName,
+    name: network.networkName,
     slug: network.network
   })), [supportedLedger]);
 
@@ -68,7 +68,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return supportedLedger.find((n) => n.slug === chain);
   }, [chain, supportedLedger]);
 
-  const networkName = useMemo(() => selectedChain?.displayName.replaceAll(' network', '') || 'Unknown network', [selectedChain]);
+  const accountName = useMemo(() => selectedChain?.accountName || 'Unknown', [selectedChain]);
 
   const { error, getAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain);
 
@@ -105,7 +105,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
               rs[i - start] = {
                 accountIndex: i,
-                name: `Ledger ${networkName} ${i + 1}`,
+                name: `Ledger ${accountName} ${i + 1}`,
                 address: address
               };
             } catch (e) {
@@ -129,7 +129,7 @@ const Component: React.FC<Props> = (props: Props) => {
         handler().then().catch().finally(() => setIsLoadMore(false));
       }
     };
-  }, [getAddress, networkName, refresh]);
+  }, [getAddress, accountName, refresh]);
 
   const onNextStep = useCallback(() => {
     setFirstStep(false);
@@ -202,7 +202,8 @@ const Component: React.FC<Props> = (props: Props) => {
           addressOffset: 0, // don't change
           genesisHash: selectedChain.genesisHash,
           hardwareType: 'ledger',
-          name: item.name
+          name: item.name,
+          isEthereum: selectedChain.isEthereum
         }))
       })
         .then(() => {

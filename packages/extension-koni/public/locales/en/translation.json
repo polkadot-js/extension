@@ -1229,5 +1229,6 @@
   "Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.": "",
   "Please enable {{tokenNames}} on {{chain}}": "",
   "You'll need to pay an additional fee for the destination network in a cross-chain transfer. This fee cannot be calculated in advance.": "",
-  "Pay attention!": ""
+  "Pay attention!": "",
+  "You are performing a transfer of a fungible token": ""
 }

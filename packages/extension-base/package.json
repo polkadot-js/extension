@@ -17,7 +17,7 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "1.0.8-0",
+  "version": "1.0.9-0",
   "main": "index.js",
   "dependencies": {
     "@acala-network/api": "^5.0.2",
@@ -70,11 +70,11 @@
     "@sora-substrate/type-definitions": "^1.17.7",
     "@subsocial/types": "^0.6.8",
     "@substrate/connect": "^0.7.26",
-    "@subwallet/chain-list": "0.1.10",
-    "@subwallet/extension-base": "^1.0.8-0",
-    "@subwallet/extension-chains": "^1.0.8-0",
-    "@subwallet/extension-dapp": "^1.0.8-0",
-    "@subwallet/extension-inject": "^1.0.8-0",
+    "@subwallet/chain-list": "0.1.11-beta.1",
+    "@subwallet/extension-base": "^1.0.9-0",
+    "@subwallet/extension-chains": "^1.0.9-0",
+    "@subwallet/extension-dapp": "^1.0.9-0",
+    "@subwallet/extension-inject": "^1.0.9-0",
     "@subwallet/keyring": "^0.0.10",
     "@subwallet/ui-keyring": "^0.0.10",
     "@unique-nft/types": "^0.6.0-4",
@@ -113,6 +113,6 @@
     "web3-utils": "^1.10.0"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^1.0.8-0"
+    "@subwallet/extension-mocks": "^1.0.9-0"
   }
 }

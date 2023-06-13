@@ -17,7 +17,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { hexToU8a } from '@polkadot/util';
+import { hexToU8a, u8aToU8a } from '@polkadot/util';
 
 import { DisplayPayloadModal, EvmQr, ScanSignature } from '../Qr';
 
@@ -143,7 +143,7 @@ const Component: React.FC<Props> = (props: Props) => {
     setLoading(true);
 
     setTimeout(() => {
-      const signPromise = isMessage ? ledgerSignMessage(hexToU8a(hashPayload), account.accountIndex, account.addressOffset) : ledgerSignTransaction(hexToU8a(hashPayload), account.accountIndex, account.addressOffset);
+      const signPromise = isMessage ? ledgerSignMessage(u8aToU8a(hashPayload), account.accountIndex, account.addressOffset) : ledgerSignTransaction(hexToU8a(hashPayload), account.accountIndex, account.addressOffset);
 
       signPromise
         .then(({ signature }) => {

@@ -7,7 +7,7 @@ import { KeyringJson } from '@subwallet/ui-keyring/types';
 
 import { isString } from '@polkadot/util';
 
-export default class MigrateSettings extends BaseMigrationJob {
+export default class MigrateLedgerAccount extends BaseMigrationJob {
   public override async run (): Promise<void> {
     try {
       return new Promise((resolve) => {

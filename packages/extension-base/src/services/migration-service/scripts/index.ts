@@ -6,10 +6,10 @@ import MigrateAuthUrls from '@subwallet/extension-base/services/migration-servic
 import MigrateAutoLock from '@subwallet/extension-base/services/migration-service/scripts/MigrateAutoLock';
 import MigrateChainPatrol from '@subwallet/extension-base/services/migration-service/scripts/MigrateChainPatrol';
 import MigrateImportedToken from '@subwallet/extension-base/services/migration-service/scripts/MigrateImportedToken';
+import MigrateLedgerAccount from '@subwallet/extension-base/services/migration-service/scripts/MigrateLedgerAccount';
 import MigrateNetworkSettings from '@subwallet/extension-base/services/migration-service/scripts/MigrateNetworkSettings';
 import MigrateSettings from '@subwallet/extension-base/services/migration-service/scripts/MigrateSettings';
 import MigrateTransactionHistory from '@subwallet/extension-base/services/migration-service/scripts/MigrateTransactionHistory';
-import MigrateLedgerAccount from '@subwallet/extension-base/services/migration-service/scripts/MirgrateLedgerAccount';
 
 import BaseMigrationJob from '../Base';
 

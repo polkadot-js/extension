@@ -19,6 +19,7 @@ import Web3 from 'web3';
 
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
+import { Network } from 'manta-extension-sdk/dist/browser/wallet/crate/pkg/manta_wasm_wallet';
 
 export class ChainService {
   private dataMap: _DataMap = {

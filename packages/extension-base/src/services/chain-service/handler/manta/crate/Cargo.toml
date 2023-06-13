@@ -1,0 +1,49 @@
+[package]
+name = "manta-wasm-wallet"
+edition = "2021"
+version = "1.5.1"
+authors = ["Manta Network <contact@manta.network>"]
+readme = "README.md"
+license-file = "LICENSE"
+repository = "https://github.com/Manta-Network/sdk"
+homepage = "https://github.com/Manta-Network"
+documentation = "https://github.com/Manta-Network/sdk"
+categories = [""]
+keywords = [""]
+description = "Manta Wallet API WebAssembly and JS Bindings"
+publish = false
+
+[package.metadata.docs.rs]
+# To build locally:
+# RUSTDOCFLAGS="--cfg doc_cfg" cargo +nightly doc --all-features --open
+all-features = true
+rustdoc-args = ["--cfg", "doc_cfg"]
+
+[badges]
+is-it-maintained-issue-resolution = { repository = "Manta-Network/sdk" }
+is-it-maintained-open-issues = { repository = "Manta-Network/sdk" }
+maintenance = { status = "actively-developed" }
+
+[lib]
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
+
+# Disable app restart functionality which does not work in dev mode, only in actual builds.
+disable-restart = []
+
+[dependencies]
+console_error_panic_hook = { version = "0.1.7", default-features = false }
+getrandom = { version = "0.2.8", default-features = false, features = ["js"] }
+js-sys = { version = "0.3.60", default-features = false }
+manta-accounting = { git = "https://github.com/manta-network/manta-rs.git", tag = "v0.5.17", default-features = false, features = ["serde"] }
+manta-crypto = { git = "https://github.com/manta-network/manta-rs.git", tag = "v0.5.17", default-features = false, features = ["serde"] }
+manta-pay = { git = "https://github.com/manta-network/manta-rs.git", tag = "v0.5.17", default-features = true, features = ["arkworks", "groth16", "http", "scale", "serde", "wallet"] }
+manta-util = { git = "https://github.com/manta-network/manta-rs.git", tag = "v0.5.17", default-features = false, features = ["serde", "reqwest"] }
+scale-codec = { package = "parity-scale-codec", version = "3.2.1", default-features = false, features = ["derive", "max-encoded-len"] }
+serde-wasm-bindgen = { version = "0.4.5", default-features = false }
+serde_json = { version = "1.0.89", default-features = false, features = ["alloc", "arbitrary_precision"] }
+wasm-bindgen = { version = "0.2.83", default-features = false, features = ["serde-serialize", "std"] }
+wasm-bindgen-futures = { version = "0.4.33", default-features = false }
+
+[dev-dependencies]
+wasm-bindgen-test = { version = "0.2", default-features = false }

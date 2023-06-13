@@ -4,6 +4,7 @@
 import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useNavigateOnChangeAccount } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -21,7 +22,6 @@ import { Image, Trash } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 
 type Props = ThemeProps
 

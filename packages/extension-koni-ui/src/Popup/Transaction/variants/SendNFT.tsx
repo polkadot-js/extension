@@ -314,6 +314,9 @@ const SendNFT = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     '.nft_item_detail': {
       width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
 
       '.ant-image-img': {
         maxWidth: '100%',

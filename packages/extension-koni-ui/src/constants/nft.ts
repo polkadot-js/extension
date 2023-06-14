@@ -2,4 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export const SHOW_3D_MODELS_CHAIN = ['pioneer', 'bitcountry', 'shibuya'];
-export const DEFAULT_MODEL_VIEWER_PROPS: Record<string, unknown> = {};
+export const DEFAULT_MODEL_VIEWER_PROPS: Record<string, unknown> = {
+  'camera-controls': 'true',
+  'rotation-per-second': '30deg'
+};

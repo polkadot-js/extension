@@ -201,13 +201,13 @@ export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo
   await Promise.all(delegatorState.delegations.map(async (delegation) => {
     const [_delegationScheduledRequests, _identity, _collatorInfo] = await Promise.all([
       substrateApi.api.query.parachainStaking.delegationScheduledRequests(delegation.owner),
-      substrateApi.api.query.identity.identityOf(delegation.owner),
+      substrateApi.api.query.identity?.identityOf(delegation.owner),
       substrateApi.api.query.parachainStaking.candidateInfo(delegation.owner)
     ]);
 
     const collatorInfo = _collatorInfo.toPrimitive() as unknown as ParachainStakingCandidateMetadata;
     const minDelegation = collatorInfo?.lowestTopDelegationAmount.toString();
-    const identityInfo = _identity.toHuman() as unknown as PalletIdentityRegistration;
+    const identityInfo = _identity?.toHuman() as unknown as PalletIdentityRegistration;
     const delegationScheduledRequests = _delegationScheduledRequests.toPrimitive() as unknown as PalletParachainStakingDelegationRequestsScheduledRequest[];
 
     const identity = parseIdentity(identityInfo);

@@ -1,15 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Wallet as WasmWallet } from 'manta-extension-sdk/dist/browser/wallet/crate/pkg/manta_wasm_wallet';
+import type { Wallet as WasmWallet } from './pkg';
 
-import { Address, Checkpoint } from 'manta-extension-sdk/dist/browser/interfaces';
-import LedgerApi from 'manta-extension-sdk/dist/browser/ledger-api';
-import { getLedgerSyncedCount } from 'manta-extension-sdk/dist/browser/utils';
+import { getLedgerSyncedCount } from 'manta-extension-sdk';
+import LedgerApi from 'manta-extension-sdk/ledger-api';
 
 import { ApiPromise } from '@polkadot/api';
 import { BN, u8aToBn } from '@polkadot/util';
 import { base58Encode } from '@polkadot/util-crypto';
+import { Address, Checkpoint } from 'manta-extension-sdk/interfaces';
 
 export type PalletName = 'mantaPay' | 'mantaSBT';
 

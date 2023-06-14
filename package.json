@@ -78,6 +78,7 @@
     "babel-core": "^7.0.0-bridge.0",
     "rxjs": "^7.8.0",
     "safe-buffer": "^5.2.1",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "manta-extension-sdk": "file:C:\\Users\\99999\\Code\\blockchain\\test\\manta-sdk"
   }
 }

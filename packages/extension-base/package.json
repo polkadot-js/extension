@@ -99,7 +99,7 @@
     "i18next": "^21.9.2",
     "is-buffer": "^2.0.5",
     "json-rpc-engine": "^6.1.0",
-    "manta-extension-sdk": "^1.0.29-beta.2",
+    "manta-extension-sdk": "file:C:\\Users\\99999\\Code\\blockchain\\test\\manta-sdk",
     "moment": "^2.29.4",
     "moonbeam-types-bundle": "^2.0.10",
     "phosphor-react": "^1.4.1",

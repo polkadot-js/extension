@@ -5433,7 +5433,7 @@ __metadata:
     i18next: ^21.9.2
     is-buffer: ^2.0.5
     json-rpc-engine: ^6.1.0
-    manta-extension-sdk: ^1.0.29-beta.2
+    manta-extension-sdk: "file:C:\\Users\\99999\\Code\\blockchain\\test\\manta-sdk"
     moment: ^2.29.4
     moonbeam-types-bundle: ^2.0.10
     phosphor-react: ^1.4.1
@@ -17384,9 +17384,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"manta-extension-sdk@npm:^1.0.29-beta.2":
-  version: 1.0.29-beta.2
-  resolution: "manta-extension-sdk@npm:1.0.29-beta.2"
+"manta-extension-sdk@file:C:\\Users\\99999\\Code\\blockchain\\test\\manta-sdk::locator=root-workspace-0b6124%40workspace%3A.":
+  version: 1.0.29-beta.9
+  resolution: "manta-extension-sdk@file:/C%3A/Users/99999/Code/blockchain/test/manta-sdk#/C%3A/Users/99999/Code/blockchain/test/manta-sdk::hash=bdd089&locator=root-workspace-0b6124%40workspace%3A."
   dependencies:
     "@polkadot/api": ^10.1.4
     "@polkadot/types": ^10.1.4
@@ -17394,7 +17394,7 @@ __metadata:
     "@polkadot/util-crypto": ^11.1.1
     bn.js: ^5.2.0
     manta-scale-codec: ^0.11.0-beta.1
-  checksum: 27b49128b1d09d4b5b44b6e1792e9c43bbe20a22c867a5f55869ec4a9d1e20245d31a675d0146b315234921a76685091cb72491a73f65aeb9615ce412a00310c
+  checksum: c03ca846cbad82d3cbeb14e6ea08ac3c489669940d8718aab28facffc399b0dfe7cfb975ce1723fb1120f279bb40dc70e8efaa0d77eb0604eaf34c58b44fc08d
   languageName: node
   linkType: hard
 

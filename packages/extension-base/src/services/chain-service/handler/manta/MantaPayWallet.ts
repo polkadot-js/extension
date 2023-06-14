@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MantaBaseWallet, Network, PalletName } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaBaseWallet';
-import { PAY_PARAMETER_NAMES, PAY_PROVING_NAMES } from 'manta-extension-sdk/dist/browser/constants';
-import { Address } from 'manta-extension-sdk/dist/browser/interfaces';
-import LedgerApi from 'manta-extension-sdk/dist/browser/ledger-api';
-import { fetchFiles, privateTransferBuildUnsigned, toPrivateBuildUnsigned, toPublicBuildUnsigned } from 'manta-extension-sdk/dist/browser/utils';
-import * as mantaWasm from 'manta-extension-sdk/dist/browser/wallet/crate/pkg';
+import { fetchFiles, privateTransferBuildUnsigned, toPrivateBuildUnsigned, toPublicBuildUnsigned } from 'manta-extension-sdk/utils';
+import { Address } from 'manta-extension-sdk/interfaces';
+import { PAY_PARAMETER_NAMES, PAY_PROVING_NAMES } from 'manta-extension-sdk/constants';
+import LedgerApi from 'manta-extension-sdk/ledger-api';
+import * as mantaWasm from './pkg';
 
 import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';

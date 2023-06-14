@@ -155,8 +155,6 @@ export const parseContractInput = async (input: string, contractAddress: string,
   }
 
   if (contractAddress && network) {
-    console.log('parseOnline');
-
     if (_getEvmAbiExplorer(network)) {
       try {
         const res = await axios.get(_getEvmAbiExplorer(network), {
@@ -231,7 +229,7 @@ export const parseEvmRlp = async (data: string, networkMap: Record<string, _Chai
     data: tx.data,
     gasPrice: new BigN(tx.gasPrice).toNumber(),
     gas: new BigN(tx.gas).toNumber(),
-    to: tx.action,
+    to: tx.to,
     value: new BigN(tx.value).toNumber(),
     nonce: new BigN(tx.nonce).toNumber()
   };
@@ -248,13 +246,13 @@ export const parseEvmRlp = async (data: string, networkMap: Record<string, _Chai
     }
   }
 
-  if (tx.action && network) {
-    if (await isContractAddress(tx.action, evmApiMap[network.slug])) {
+  if (tx.to && network) {
+    if (await isContractAddress(tx.to, evmApiMap[network.slug])) {
       if (_getEvmAbiExplorer(network) !== '') {
         try {
           const res = await axios.get(_getEvmAbiExplorer(network), {
             params: {
-              address: tx.action
+              address: tx.to
             },
             timeout: 2000
           });

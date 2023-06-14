@@ -6,35 +6,48 @@ import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 
 export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   {
-    displayName: 'Polkadot network',
+    accountName: 'Polkadot',
+    appName: 'Polkadot',
+    networkName: 'Polkadot network',
     genesisHash: ChainInfoMap.polkadot.substrateInfo?.genesisHash || '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
     icon: 'substrate',
     network: 'polkadot',
     slug: ChainInfoMap.polkadot.slug,
-    isDevMode: false
+    isDevMode: false,
+    isEthereum: false
   },
   {
-    displayName: 'Kusama network',
+    accountName: 'Kusama',
+    appName: 'Kusama',
+    networkName: 'Kusama network',
     genesisHash: ChainInfoMap.kusama.substrateInfo?.genesisHash || '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
     icon: 'substrate',
     network: 'kusama',
     slug: ChainInfoMap.kusama.slug,
-    isDevMode: false
+    isDevMode: false,
+    isEthereum: false
   },
-  // {
-  //   displayName: 'Moonbeam',
-  //   genesisHash: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
-  //   icon: 'ethereum',
-  //   network: 'moonbeam',
-  //   isDevMode: false
-  // },
   {
-    displayName: 'Acala network',
+    accountName: 'Acala',
+    appName: 'Acala',
+    networkName: 'Acala network',
     genesisHash: ChainInfoMap.acala.substrateInfo?.genesisHash || '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
     icon: 'substrate',
     network: 'acala',
     slug: ChainInfoMap.acala.slug,
-    isDevMode: true
+    isDevMode: true,
+    isEthereum: false
+  },
+  {
+    accountName: 'EVM',
+    appName: 'Ethereum',
+    networkName: 'EVM networks',
+    genesisHash: '',
+    network: 'ethereum',
+    icon: 'ethereum',
+    slug: ChainInfoMap.ethereum.slug,
+    isDevMode: false,
+    isEthereum: true
   }
   // {
   //   displayName: 'Centrifuge',

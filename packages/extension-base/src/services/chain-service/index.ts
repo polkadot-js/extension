@@ -690,7 +690,7 @@ export class ChainService {
 
       for (const [storedSlug, storedChainInfo] of Object.entries(storedChainSettingMap)) {
         if (storedSlug in latestChainInfoMap) { // check predefined chains first, keep setting for providers and currentProvider
-          mergedChainInfoMap[storedSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[storedSlug].providers };
+          mergedChainInfoMap[storedSlug].providers = { ...storedChainInfo.providers, ...mergedChainInfoMap[storedSlug].providers }; // TODO: review merging providers
           this.dataMap.chainStateMap[storedSlug] = {
             currentProvider: storedChainInfo.currentProvider,
             slug: storedSlug,

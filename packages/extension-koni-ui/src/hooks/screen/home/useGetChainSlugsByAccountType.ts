@@ -13,12 +13,12 @@ import { useSelector } from 'react-redux';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<string, _ChainInfo>, accountNetwork?: string): string[] {
+function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<string, _ChainInfo>, accountNetworks?: string[]): string[] {
   const result: string[] = [];
 
   Object.keys(chainInfoMap).forEach((chain) => {
-    if (accountNetwork) {
-      if (chain === accountNetwork) {
+    if (accountNetworks) {
+      if (accountNetworks.includes(chain)) {
         result.push(chain);
       }
     } else {
@@ -70,10 +70,16 @@ export function useGetChainSlugsByAccountType (address?: string): string[] {
       account = findAccountByAddress(accounts, address);
     }
 
-    const originGenesisHash = account?.originGenesisHash;
+    if (account?.isHardware) {
+      const isEthereum = isEthereumAddress(account.address || '');
 
-    if (originGenesisHash) {
-      return findNetworkJsonByGenesisHash(chainInfoMap, originGenesisHash)?.slug;
+      if (isEthereum) {
+        return undefined;
+      } else {
+        const availableGen: string[] = account.availableGenesisHashes || [];
+
+        return availableGen.map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug || '');
+      }
     } else {
       return undefined;
     }

@@ -17,7 +17,7 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "1.0.9-0",
+  "version": "1.0.9-2",
   "main": "index.js",
   "dependencies": {
     "@acala-network/api": "^5.0.2",
@@ -70,11 +70,11 @@
     "@sora-substrate/type-definitions": "^1.17.7",
     "@subsocial/types": "^0.6.8",
     "@substrate/connect": "^0.7.26",
-    "@subwallet/chain-list": "0.1.11-beta.1",
-    "@subwallet/extension-base": "^1.0.9-0",
-    "@subwallet/extension-chains": "^1.0.9-0",
-    "@subwallet/extension-dapp": "^1.0.9-0",
-    "@subwallet/extension-inject": "^1.0.9-0",
+    "@subwallet/chain-list": "0.1.11",
+    "@subwallet/extension-base": "^1.0.9-2",
+    "@subwallet/extension-chains": "^1.0.9-2",
+    "@subwallet/extension-dapp": "^1.0.9-2",
+    "@subwallet/extension-inject": "^1.0.9-2",
     "@subwallet/keyring": "^0.0.10",
     "@subwallet/ui-keyring": "^0.0.10",
     "@unique-nft/types": "^0.6.0-4",
@@ -92,7 +92,7 @@
     "eth-simple-keyring": "^4.2.0",
     "ethereumjs-tx": "^2.1.2",
     "ethereumjs-util": "^7.1.5",
-    "ethers": "^5.7.2",
+    "ethers": "^6.4.2",
     "eventemitter3": "^5.0.0",
     "file-saver": "^2.0.5",
     "graphql": "^16.6.0",
@@ -104,7 +104,6 @@
     "phosphor-react": "^1.4.1",
     "pontem-types-bundle": "^1.0.15",
     "protobufjs": "^7.1.2",
-    "rlp": "^3.0.0",
     "rxjs": "^7.8.0",
     "web3": "^1.10.0",
     "web3-core": "^1.10.0",
@@ -113,6 +112,6 @@
     "web3-utils": "^1.10.0"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^1.0.9-0"
+    "@subwallet/extension-mocks": "^1.0.9-2"
   }
 }

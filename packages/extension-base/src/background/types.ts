@@ -37,7 +37,6 @@ export interface AbstractAddressJson extends KeyringPair$Meta {
   type?: KeypairType;
   whenCreated?: number;
   name?: string;
-  originGenesisHash?: string | null;
 }
 
 export interface AccountJson extends AbstractAddressJson {
@@ -52,6 +51,8 @@ export interface AccountJson extends AbstractAddressJson {
   isReadOnly?: boolean;
   parentAddress?: string;
   suri?: string;
+  originGenesisHash?: string | null;
+  availableGenesisHashes?: string[];
 }
 
 export interface AddressJson extends AbstractAddressJson {

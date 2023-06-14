@@ -110,7 +110,9 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
     const acc = findAccountByAddress(accounts, _selectedAccount);
 
     return Object.values(assetRegistryMap).filter((asset) => {
-      if (acc?.originGenesisHash && chainInfoMap[asset.originChain].substrateInfo?.genesisHash !== acc.originGenesisHash) {
+      const availableGen: string[] = acc?.availableGenesisHashes || [];
+
+      if (acc?.isHardware && !isEvmAddress && !availableGen.includes(chainInfoMap[asset.originChain].substrateInfo?.genesisHash || '')) {
         return false;
       }
 
@@ -137,14 +139,19 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
       activeModal(AccountSelectorModalId);
     } else {
       // if currentAccount is ledger type
-      if (currentAccount.originGenesisHash) {
-        const network = findNetworkJsonByGenesisHash(chainInfoMap, currentAccount.originGenesisHash);
+      if (currentAccount.isHardware) {
+        if (!isEthereumAddress(currentAccount.address)) {
+          const availableGen: string[] = currentAccount.availableGenesisHashes || [];
+          const networks = availableGen
+            .map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug)
+            .filter((slug) => slug) as string[];
 
-        if (network) {
-          setReceiveSelectedResult((prevState) => ({ ...prevState, selectedNetwork: network.slug }));
-          activeModal(RECEIVE_QR_MODAL);
+          if (networks.length === 1) {
+            setReceiveSelectedResult((prevState) => ({ ...prevState, selectedNetwork: networks[0] }));
+            activeModal(RECEIVE_QR_MODAL);
 
-          return;
+            return;
+          }
         }
       }
 

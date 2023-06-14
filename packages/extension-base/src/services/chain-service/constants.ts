@@ -189,6 +189,8 @@ export const _BALANCE_PARSING_CHAIN_GROUP = {
   bobabeam: ['bobabeam', 'bobabase']
 };
 
+export const _MANTA_ZK_CHAIN_GROUP = ['manta', 'calamari', 'calamari_test'];
+
 // XCM------------------------------------------------------------------------------------------------------------------
 
 export const _XCM_CHAIN_GROUP = {

@@ -4,7 +4,16 @@
 import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { _ASSET_LOGO_MAP_SRC, _ASSET_REF_SRC, _CHAIN_ASSET_SRC, _CHAIN_INFO_SRC, _CHAIN_LOGO_MAP_SRC, _DEFAULT_ACTIVE_CHAINS, _MULTI_CHAIN_ASSET_SRC } from '@subwallet/extension-base/services/chain-service/constants';
+import {
+  _ASSET_LOGO_MAP_SRC,
+  _ASSET_REF_SRC,
+  _CHAIN_ASSET_SRC,
+  _CHAIN_INFO_SRC,
+  _CHAIN_LOGO_MAP_SRC,
+  _DEFAULT_ACTIVE_CHAINS,
+  _MANTA_ZK_CHAIN_GROUP,
+  _MULTI_CHAIN_ASSET_SRC
+} from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
@@ -19,7 +28,7 @@ import Web3 from 'web3';
 
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
-import { Network } from 'manta-extension-sdk/dist/browser/wallet/crate/pkg/manta_wasm_wallet';
+import { MantaChainHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaChainHandler';
 
 export class ChainService {
   private dataMap: _DataMap = {
@@ -36,6 +45,7 @@ export class ChainService {
 
   private substrateChainHandler: SubstrateChainHandler;
   private evmChainHandler: EvmChainHandler;
+  private mantaChainHandler: MantaChainHandler;
 
   // TODO: consider BehaviorSubject
   private chainInfoMapSubject = new Subject<Record<string, _ChainInfo>>();
@@ -56,6 +66,7 @@ export class ChainService {
 
     this.substrateChainHandler = new SubstrateChainHandler();
     this.evmChainHandler = new EvmChainHandler();
+    this.mantaChainHandler = new MantaChainHandler();
 
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
@@ -495,6 +506,10 @@ export class ChainService {
 
     if (chainInfo.substrateInfo !== null) {
       const chainApi = this.initApi(chainInfo.slug, endpoint, 'substrate', providerName);
+
+      if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug)) {
+        this.mantaChainHandler.initMantaPayWallet()
+      }
 
       this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as _SubstrateApi);
     }

@@ -1,1 +1,0 @@
-# Manta Wallet WASM Bindgen

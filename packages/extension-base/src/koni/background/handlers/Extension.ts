@@ -1502,15 +1502,15 @@ export default class KoniExtension {
   }
 
   // Save address to contact
-  private addContact (to: string) {
-    const toAddress = reformatAddress(to);
-    const account = keyring.getAccount(toAddress);
-    const contact = keyring.getAddress(toAddress);
-
-    if (!account && (!contact || contact.meta.isRecent)) {
-      keyring.saveAddress(toAddress, {});
-    }
-  }
+  // private addContact (to: string) {
+  //   const toAddress = reformatAddress(to);
+  //   const account = keyring.getAccount(toAddress);
+  //   const contact = keyring.getAddress(toAddress);
+  //
+  //   if (!account && (!contact || contact.meta.isRecent)) {
+  //     keyring.saveAddress(toAddress, {});
+  //   }
+  // }
 
   private validateTransfer (tokenSlug: string, from: string, to: string, value: string | undefined, transferAll: boolean | undefined): [TransactionError[], KeyringPair | undefined, BN | undefined, _ChainAsset] {
     const errors: TransactionError[] = [];

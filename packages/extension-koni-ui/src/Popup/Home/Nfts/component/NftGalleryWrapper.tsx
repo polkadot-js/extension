@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { DEFAULT_MODEL_VIEWER_PROPS } from '@subwallet/extension-koni-ui/constants';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, NftItem as NftItem_ } from '@subwallet/react-ui';
 import React, { useCallback, useState } from 'react';
@@ -114,6 +115,7 @@ function Component ({ className = '', fallbackImage, handleOnClick, have3dViewer
             src={getCollectionImage()}
             style={{ width: '100%', height: '100%' }}
             touch-action={'none'}
+            {...DEFAULT_MODEL_VIEWER_PROPS}
           />
         </LazyLoadComponent>
       );

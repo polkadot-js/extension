@@ -186,30 +186,34 @@ export class SubstrateChainHandler {
     delete this.substrateApiMap[chainSlug];
   }
 
-  public initApi (chainSlug: string, apiUrl: string, providerName?: string): _SubstrateApi {
+  public initApi (chainSlug: string, apiUrl: string, externalApiPromise?: ApiPromise, providerName?: string): _SubstrateApi {
     const registry = new TypeRegistry();
-
-    const provider = apiUrl.startsWith('light://')
-      ? getSubstrateConnectProvider(apiUrl.replace('light://substrate-connect/', ''))
-      : new WsProvider(apiUrl, API_AUTO_CONNECT_MS);
-
-    const apiOption = { provider, typesBundle, typesChain: typesChain };
-
-    // @ts-ignore
-    apiOption.registry = registry;
 
     let api: ApiPromise;
 
-    if (_API_OPTIONS_CHAIN_GROUP.acala.includes(chainSlug)) {
-      api = new ApiPromise(acalaOptions({ provider }));
-    } else if (_API_OPTIONS_CHAIN_GROUP.turing.includes(chainSlug)) {
-      api = new ApiPromise({
-        provider,
-        rpc: oakRpc,
-        types: oakTypes
-      });
+    if (!externalApiPromise) {
+      const provider = apiUrl.startsWith('light://')
+        ? getSubstrateConnectProvider(apiUrl.replace('light://substrate-connect/', ''))
+        : new WsProvider(apiUrl, API_AUTO_CONNECT_MS);
+
+      const apiOption = { provider, typesBundle, typesChain: typesChain };
+
+      // @ts-ignore
+      apiOption.registry = registry;
+
+      if (_API_OPTIONS_CHAIN_GROUP.acala.includes(chainSlug)) {
+        api = new ApiPromise(acalaOptions({ provider }));
+      } else if (_API_OPTIONS_CHAIN_GROUP.turing.includes(chainSlug)) {
+        api = new ApiPromise({
+          provider,
+          rpc: oakRpc,
+          types: oakTypes
+        });
+      } else {
+        api = new ApiPromise(apiOption);
+      }
     } else {
-      api = new ApiPromise(apiOption);
+      api = externalApiPromise;
     }
 
     const substrateApi: _SubstrateApi = ({
@@ -238,7 +242,7 @@ export class SubstrateChainHandler {
 
       recoverConnect: () => {
         substrateApi.apiRetry = 0;
-        provider.connect().then(this.logger.log).catch(this.logger.error);
+        api.connect().then(this.logger.log).catch(this.logger.error);
       },
       get isReady () {
         const self = this as _SubstrateApi;
@@ -282,7 +286,7 @@ export class SubstrateChainHandler {
 
       if (substrateApi.apiRetry > API_MAX_RETRY) {
         this.logger.log(`Disconnect from provider ${JSON.stringify(apiUrl)} because retry maxed out`);
-        provider.disconnect()
+        api.disconnect()
           .then(this.logger.log)
           .catch(this.logger.error);
       }

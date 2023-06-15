@@ -4,17 +4,9 @@
 import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import {
-  _ASSET_LOGO_MAP_SRC,
-  _ASSET_REF_SRC,
-  _CHAIN_ASSET_SRC,
-  _CHAIN_INFO_SRC,
-  _CHAIN_LOGO_MAP_SRC,
-  _DEFAULT_ACTIVE_CHAINS,
-  _MANTA_ZK_CHAIN_GROUP,
-  _MULTI_CHAIN_ASSET_SRC
-} from '@subwallet/extension-base/services/chain-service/constants';
+import { _ASSET_LOGO_MAP_SRC, _ASSET_REF_SRC, _CHAIN_ASSET_SRC, _CHAIN_INFO_SRC, _CHAIN_LOGO_MAP_SRC, _DEFAULT_ACTIVE_CHAINS, _MANTA_ZK_CHAIN_GROUP, _MULTI_CHAIN_ASSET_SRC } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
+import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaPrivateHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainBaseApi, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
@@ -26,9 +18,9 @@ import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 
+import { ApiPromise } from '@polkadot/api';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
-import { MantaChainHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaChainHandler';
 
 export class ChainService {
   private dataMap: _DataMap = {
@@ -45,7 +37,7 @@ export class ChainService {
 
   private substrateChainHandler: SubstrateChainHandler;
   private evmChainHandler: EvmChainHandler;
-  private mantaChainHandler: MantaChainHandler;
+  private mantaChainHandler: MantaPrivateHandler;
 
   // TODO: consider BehaviorSubject
   private chainInfoMapSubject = new Subject<Record<string, _ChainInfo>>();
@@ -66,7 +58,7 @@ export class ChainService {
 
     this.substrateChainHandler = new SubstrateChainHandler();
     this.evmChainHandler = new EvmChainHandler();
-    this.mantaChainHandler = new MantaChainHandler();
+    this.mantaChainHandler = new MantaPrivateHandler(this.dbService);
 
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
@@ -505,13 +497,27 @@ export class ChainService {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
     if (chainInfo.substrateInfo !== null) {
-      const chainApi = this.initApi(chainInfo.slug, endpoint, 'substrate', providerName);
-
       if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug)) {
-        this.mantaChainHandler.initMantaPayWallet()
-      }
+        this.mantaChainHandler.initMantaPay(endpoint, chainInfo.slug)
+          .then((apiPromise) => {
+            const chainApi = this.initApi(chainInfo.slug, endpoint, 'substrate', providerName, apiPromise);
 
-      this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as _SubstrateApi);
+            console.log('created MantaPay', this.mantaChainHandler.privateWallet);
+
+            this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as _SubstrateApi);
+          })
+          .catch(() => {
+            console.error('Error creating MantaPay');
+
+            const chainApi = this.initApi(chainInfo.slug, endpoint, 'substrate', providerName);
+
+            this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as _SubstrateApi);
+          });
+      } else {
+        const chainApi = this.initApi(chainInfo.slug, endpoint, 'substrate', providerName);
+
+        this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as _SubstrateApi);
+      }
     }
 
     if (chainInfo.evmInfo !== null) {
@@ -531,12 +537,12 @@ export class ChainService {
     }
   }
 
-  private initApi (slug: string, endpoint: string, type = 'substrate', providerName?: string): _ChainBaseApi {
+  private initApi (slug: string, endpoint: string, type = 'substrate', providerName?: string, externalApiPromise?: ApiPromise): _ChainBaseApi {
     switch (type) {
       case 'evm':
         return this.evmChainHandler.initApi(slug, endpoint, providerName);
       default: // substrate by default
-        return this.substrateChainHandler.initApi(slug, endpoint, providerName);
+        return this.substrateChainHandler.initApi(slug, endpoint, externalApiPromise, providerName);
     }
   }
 

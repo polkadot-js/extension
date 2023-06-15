@@ -502,8 +502,6 @@ export class ChainService {
           .then((apiPromise) => {
             const chainApi = this.initApi(chainInfo.slug, endpoint, 'substrate', providerName, apiPromise);
 
-            console.log('created MantaPay', this.mantaChainHandler.privateWallet);
-
             this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as _SubstrateApi);
           })
           .catch(() => {

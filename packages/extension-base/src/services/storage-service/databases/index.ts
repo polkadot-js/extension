@@ -33,6 +33,8 @@ export interface IMigration {
   timestamp: number
 }
 
+export type IMantaPayLedger = any;
+
 export default class KoniDatabase extends Dexie {
   public price!: Table<PriceJson, object>;
   public balances!: Table<IBalance, object>;
@@ -49,6 +51,8 @@ export default class KoniDatabase extends Dexie {
 
   public chainStakingMetadata!: Table<ChainStakingMetadata, object>;
   public nominatorMetadata!: Table<NominatorMetadata, object>;
+
+  public mantaPay!: Table<IMantaPayLedger, object>;
 
   private schemaVersion: number;
 
@@ -73,6 +77,27 @@ export default class KoniDatabase extends Dexie {
 
       chainStakingMetadata: '[chain+type], chain, type',
       nominatorMetadata: '[chain+address+type], [chain+address], chain, address, type'
+    });
+
+    this.conditionalVersion(2, {
+      // DO NOT declare all columns, only declare properties to be indexed
+      // Read more: https://dexie.org/docs/Version/Version.stores()
+      // Primary key is always the first entry
+      chain: 'slug',
+      asset: 'slug',
+      price: 'currency',
+      balances: '[tokenSlug+address], tokenSlug, address',
+      nfts: '[chain+address+collectionId+id], [address+chain], chain, id, address, collectionId, name',
+      nftCollections: '[chain+collectionId], chain, collectionId, collectionName',
+      crowdloans: '[chain+address], chain, address',
+      stakings: '[chain+address+type], [chain+address], chain, address, type',
+      transactions: '[chain+address+extrinsicHash], &[chain+address+extrinsicHash], chain, address, extrinsicHash, action',
+      migrations: '[key+name]',
+
+      chainStakingMetadata: '[chain+type], chain, type',
+      nominatorMetadata: '[chain+address+type], [chain+address], chain, address, type',
+
+      mantaPay: 'key'
     });
   }
 

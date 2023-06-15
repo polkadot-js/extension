@@ -18,15 +18,19 @@ export class MantaPrivateHandler {
   }
 
   private async saveLedgerState (palletName: interfaces.PalletName, network: interfaces.Network, data: any): Promise<boolean> {
-    console.log('save data with dbService for current account');
+    console.log('save data with dbService for current account', this.currentAddress);
+
+    await this.dbService.setMantaPayLedger({
+      key: `storage_state_${palletName}_${network}_${this.currentAddress}`,
+      ...data
+    });
 
     return true;
   }
 
   private async getLedgerState (palletName: interfaces.PalletName, network: interfaces.Network): Promise<any> {
-    console.log('get');
-
-    return true;
+    const result = await this.dbService.getMantaPayLedger(`storage_state_${palletName}_${network}_${this.currentAddress}`);
+    return result;
   }
 
   public async initMantaPay (providerUrl: string, network: string) {
@@ -35,8 +39,8 @@ export class MantaPrivateHandler {
     const baseWallet = await BaseWallet.init({
       apiEndpoint: providerUrl,
       loggingEnabled: true,
-      provingFilePath: '../pay-parameters/parameters',
-      parametersFilePath: '../pay-parameters/proving',
+      provingFilePath: './manta-pay/proving',
+      parametersFilePath: './manta-pay/parameters',
       saveStorageStateToLocal: this.saveLedgerState,
       getStorageStateFromLocal: this.getLedgerState
     });

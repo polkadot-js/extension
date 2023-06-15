@@ -7,6 +7,7 @@ import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
 import BaseStore from '@subwallet/extension-base/services/storage-service/db-stores/BaseStore';
 import ChainStakingMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/ChainStakingMetadata';
+import MantaPayStore from '@subwallet/extension-base/services/storage-service/db-stores/MantaPay';
 import NominatorMetadataStore from '@subwallet/extension-base/services/storage-service/db-stores/NominatorMetadata';
 import { HistoryQuery } from '@subwallet/extension-base/services/storage-service/db-stores/Transaction';
 import { reformatAddress } from '@subwallet/extension-base/utils';
@@ -41,7 +42,9 @@ export default class DatabaseService {
 
       // staking
       chainStakingMetadata: new ChainStakingMetadataStore(this._db.chainStakingMetadata),
-      nominatorMetadata: new NominatorMetadataStore(this._db.nominatorMetadata)
+      nominatorMetadata: new NominatorMetadataStore(this._db.nominatorMetadata),
+
+      mantaPay: new MantaPayStore(this._db.mantaPay)
     };
   }
 
@@ -279,5 +282,13 @@ export default class DatabaseService {
           reject(e);
         });
     });
+  }
+
+  async setMantaPayLedger (data: any) {
+    await this._db.mantaPay.put(data); // just override if exist
+  }
+
+  async getMantaPayLedger (key: string) {
+    await this._db.mantaPay.get({ key });
   }
 }

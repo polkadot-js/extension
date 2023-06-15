@@ -3,6 +3,7 @@
 
 import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { CAMERA_CONTROLS_MODEL_VIEWER_PROPS, DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useNavigateOnChangeAccount } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -172,6 +173,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [nftItem.externalUrl]);
 
+  const show3DModel = SHOW_3D_MODELS_CHAIN.includes(nftItem.chain);
+
   return (
     <PageWrapper
       className={`${className}`}
@@ -192,8 +195,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Image
               className={CN({ clickable: nftItem.externalUrl })}
               height={358}
+              modelViewerProps={show3DModel ? { ...DEFAULT_MODEL_VIEWER_PROPS, ...CAMERA_CONTROLS_MODEL_VIEWER_PROPS } : undefined}
               onClick={onImageClick}
               src={nftItem.image}
+              width={ show3DModel ? 358 : undefined}
             />
           </div>
 
@@ -426,7 +431,12 @@ const NftItemDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
     '.nft_item_detail__nft_image': {
       display: 'flex',
       justifyContent: 'center',
-      width: '100%'
+      width: '100%',
+
+      '.ant-image-img': {
+        maxWidth: '100%',
+        objectFit: 'cover'
+      }
     }
   });
 });

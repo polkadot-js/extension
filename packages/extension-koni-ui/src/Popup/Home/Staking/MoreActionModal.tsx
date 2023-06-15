@@ -4,7 +4,7 @@
 import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
-import { useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useHandleSubmitTransaction, usePreCheckStakeAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -195,7 +195,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
   }, [chainStakingMetadata, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);
 
-  const onPreCheck = usePreCheckReadOnly(currentAccount?.address);
+  const onPreCheck = usePreCheckStakeAction(currentAccount?.address);
   const onClickItem = useCallback((action: StakingAction, onClick: () => void) => {
     const _onClick = () => {
       setSelected(action);

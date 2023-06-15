@@ -1,5 +1,31 @@
 # CHANGELOG
 
+## 1.0.9
+Build date: Jun 13, 2023.
+
+Features & Update:
+- Integration Ledger EVM account (#538)
+- Allow DApp access to read-only account (#1225)
+- Review and support send fund for more token (#1449)
+- Optimize decode contract in transaction (#1474)
+- Update the new send fund screen (#1509)
+- Update chain-list (#1519)
+- Update uninstall URL (#1530)
+
+Bugs fixed:
+- Fixed bug Do not get transaction history in case the wallet have multi-account (#1411)
+- Fixed bug Show duplicate token on receive list when search custom token (#1514)
+- Fixed bug Do not transfer BNC token on the Bifrost Polkadot (#1522)
+- Fixed bug "Bad signature" when personal sign with EVM Ledger account (#1533)
+
+Update `@subwallet/chain-list@0.1.11`:
+- Add vsTokens and vTokens
+- Add VERSE token
+- Support WASM NFT Collection on the Astar network
+- Support USAGII NFT collection from Paras on the Astar network
+- Hide the channel xcm USDT: Equilibrium —> Statemint
+- Update provider for Calamari
+
 ## 1.0.8
 Build date: Jun 8, 2023.
 

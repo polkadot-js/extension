@@ -1391,13 +1391,13 @@ export default class KoniState {
 
     const account: AccountJson = { address: pair.address, ...pair.meta };
 
-    let qrPayload = '';
+    let hashPayload = '';
     let canSign = false;
 
     switch (method) {
       case 'personal_sign':
         canSign = true;
-        qrPayload = payload as string;
+        hashPayload = payload as string;
         break;
       case 'eth_sign':
       case 'eth_signTypedData':
@@ -1417,7 +1417,7 @@ export default class KoniState {
       account: account,
       type: method,
       payload: payload as unknown,
-      hashPayload: qrPayload,
+      hashPayload: hashPayload,
       canSign: canSign,
       id
     };

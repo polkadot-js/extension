@@ -78,7 +78,7 @@ const Component: React.FC = () => {
 
   const chainInfo = useMemo(() => chainInfoMap[nftChain], [chainInfoMap, nftChain]);
   const addressPrefix = useGetChainPrefixBySlug(nftChain);
-  const fromChainGenesisHash = chainInfoMap[nftChain]?.substrateInfo?.genesisHash || '';
+  const chainGenesisHash = chainInfoMap[nftChain]?.substrateInfo?.genesisHash || '';
 
   const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
@@ -120,12 +120,13 @@ const Component: React.FC = () => {
         const account = findAccountByAddress(accounts, _recipientAddress);
 
         if (account && account.isHardware) {
-          const destChainInfo = chainInfoMap[chain];
+          const chainInfo = chainInfoMap[chain];
+          const availableGen: string[] = account.availableGenesisHashes || [];
 
-          if (account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
-            const destChainName = destChainInfo?.name || 'Unknown';
+          if (!isEthereumAddress(account.address) && !availableGen.includes(chainInfo?.substrateInfo?.genesisHash || '')) {
+            const chainName = chainInfo?.name || 'Unknown';
 
-            return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
+            return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: chainName } }));
           }
         }
 
@@ -231,7 +232,7 @@ const Component: React.FC = () => {
             <AddressInput
               addressPrefix={addressPrefix}
               label={t('Send to')}
-              networkGenesisHash={fromChainGenesisHash}
+              networkGenesisHash={chainGenesisHash}
               placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}

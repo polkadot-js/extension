@@ -87,9 +87,12 @@ export async function checkSupportTransfer (networkKey: string, tokenInfo: _Chai
   } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxTokensSupported) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
-  } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
+  } else if (
+    _TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey)
+    // && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported
+  ) {
+    result.supportTransfer = false;
+    result.supportTransferAll = false;
   } else if (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) && _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
@@ -134,7 +137,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
-  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
+  // const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
   const isTxAssetsSupported = !!api && !!api.tx && !!api.tx.assets;
   let transferAmount; // for PSP-22 tokens, might be deprecated in the future
 
@@ -154,8 +157,12 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     } else if (value) {
       transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), new BN(value));
     }
-  } else if (_TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey) && isTxEqBalancesSupported) {
-    transfer = api.tx.eqBalances.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
+  } else if (
+    _TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey)
+    // && isTxEqBalancesSupported
+  ) {
+    // transfer = api.tx.eqBalances.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
+    /* empty */
   } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
     if (transferAll) {
       transfer = api.tx.kton.transferAll(to, false);

@@ -5,6 +5,7 @@ export * from './account';
 export * from './common';
 export * from './history';
 export * from './modal';
+export * from './nft';
 export * from './number';
 export * from './signing';
 export * from './stakingStatusUi';

@@ -260,11 +260,11 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
     await Promise.all(validatorList.map(async (validatorAddress) => {
       let nominationStatus = StakingStatus.NOT_EARNING;
       const [_identityInfo, _eraStaker] = await Promise.all([
-        chainApi.api.query.identity.identityOf(validatorAddress),
+        chainApi.api.query.identity?.identityOf(validatorAddress),
         chainApi.api.query.staking.erasStakers(currentEra, validatorAddress)
       ]);
       const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
-      const identityInfo = _identityInfo.toHuman() as unknown as PalletIdentityRegistration;
+      const identityInfo = _identityInfo?.toHuman() as unknown as PalletIdentityRegistration;
       const identity = parseIdentity(identityInfo);
       const topNominators = eraStaker.others.map((nominator) => {
         return nominator.who;

@@ -155,7 +155,7 @@ export function transformPoolName (input: string): string {
 export function parseIdentity (identityInfo: PalletIdentityRegistration | null): string | undefined {
   let identity;
 
-  if (identityInfo !== null) {
+  if (identityInfo) {
     const displayName = identityInfo?.info?.display?.Raw;
     const web = identityInfo?.info?.web?.Raw;
     const riot = identityInfo?.info?.riot?.Raw;

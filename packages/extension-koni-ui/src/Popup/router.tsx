@@ -92,6 +92,7 @@ const ClaimReward = new LazyLoader(() => import('@subwallet/extension-koni-ui/Po
 const Withdraw = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Withdraw'));
 
 const ErrorFallback = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/ErrorFallback'));
+const Debugger = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Debugger'));
 
 // A Placeholder page
 export function Example () {
@@ -113,6 +114,7 @@ export const router = createHashRouter([
       Welcome.generateRouterObject('/welcome'),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),
+      Debugger.generateRouterObject('/debugger'),
       {
         ...Home.generateRouterObject('/home'),
         children: [

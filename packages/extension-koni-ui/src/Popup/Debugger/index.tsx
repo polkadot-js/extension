@@ -61,3 +61,5 @@ export const Debugger = styled(Component)<Props>(({ theme: { token } }: ThemePro
     }
   });
 });
+
+export default Debugger;

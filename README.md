@@ -1,18 +1,24 @@
-# polkadot{.js} extension
+# Aleph Zero Signer
 
-A very simple scaffolding browser extension that injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts, allowing for use by any dapp. This is an extensible POC implementation of a Polkadot/Substrate browser signer.
+A browser extension managing accounts and signing transactions in a secure way, that enables simple integration with dapps using the [polkadot-js/extension-dapp](https://polkadot.js.org/docs/extension/) API.
 
-As it stands, it does one thing: it _only_ manages accounts and allows the signing of transactions with those accounts. It does not inject providers for use by dapps at this early point, nor does it perform wallet functions where it constructs and submits txs to the network.
+Works with:
+* https://azero.dev
+* https://dashboard.azero.dev
+* https://polkadot.js.org/apps
+
+and with every webapp using the [extension-dapp](https://polkadot.js.org/docs/extension/) API.
+
+This project builds on [polkadot-js/extension](https://github.com/polkadot-js/extension). 
 
 ## Installation
 
-- On Chrome, install via [Chrome web store](https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd)
-- On Firefox, install via [Firefox add-ons](https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/)
-
-![interface screenshots](docs/extension-overview.png)
+- On Chrome, install via [Chrome web store](TODO)
+- On Firefox, install via [Firefox add-ons](TODO)
 
 ## Documentation and examples
-Find out more about how to use the extension as a Dapp developper, cookbook, as well as answers to most frequent questions in the [Polkadot-js extension documentation](https://polkadot.js.org/docs/extension/)
+
+Simple Singer integration guide `<add link here>`. Find more information in [polkadot-js/extension-dapp API documentation](https://polkadot.js.org/docs/extension/).
 
 ## Development version
 
@@ -30,9 +36,9 @@ Steps to build the extension and view your changes in a browser:
     - check "Enable add-on debugging"
     - click on "Load Temporary Add-on" and point to `packages/extension/build/manifest.json`
     - if developing, after making changes - reload the extension
-3. When visiting `https://polkadot.js.org/apps/` it will inject the extension
+3. When visiting `https://azero.dev` it will inject the extension
 
-Once added, you can create an account (via a generated seed) or import via an existing seed. The [apps UI](https://github.com/polkadot-js/apps/), when loaded, will show these accounts as `<account name> (extension)`
+Once added, you can create an account (via a generated seed) or import via an existing seed. The [azero.dev](https://azero.dev) and [test.azero.dev](https://test.azero.dev), when loaded, will show these accounts as `<account name> (ALEPH-ZERO-SIGNER)`
 
 ## Development
 
@@ -43,13 +49,6 @@ The repo is split into a number of packages -
 - [extension-dapp](packages/extension-dapp/) - A convenience wrapper to work with the injected objects, simplifying data extraction for any dapp that wishes to integrate the extension (or any extension that supports the interface)
 - [extension-inject](packages/extension-inject/) - A convenience wrapper that allows extension developers to inject their extension for use by any dapp
 
-## Dapp developers
-
-The actual in-depth technical breakdown is given in the next section for any dapp developer wishing to work with the raw objects injected into the window. However, convenience wrappers are provided that allows for any dapp to use this extension (or any other extension that conforms to the interface) without having to manage any additional info.
-
-The documentation for Dapp development is available [in the polkadot-js doc](https://polkadot.js.org/docs/extension).
-
-This approach is used to support multiple external signers in for instance [apps](https://github.com/polkadot-js/apps/). You can read more about the convenience wrapper [@polkadot/extension-dapp](packages/extension-dapp/) along with usage samples.
 
 ## API interface
 
@@ -105,10 +104,10 @@ The extension injects `injectedWeb3` into the global `window` object, exposing t
 ```js
 window.injectedWeb3 = {
   // this is the name for this extension, there could be multiples injected,
-  // each with their own keys, here `polkadot-js` is for this extension
-  'polkadot-js': {
+  // each with their own keys, here `aleph-zero-signer` is for this extension
+  'aleph-zero-signer': {
     // semver for the package
-    version: '0.1.0',
+    version: '1.0.0',
 
     // this is called to enable the injection, and returns an injected
     // object containing the accounts, signer and provider interfaces
@@ -122,7 +121,7 @@ window.injectedWeb3 = {
 
 ### Using the mnemonic and password from the extension
 
-When you create a keypair via the extension, it supplies a 12-word mnemonic seed and asks you to create a password. This password only encrypts the private key on disk so that the password is required to spend funds in `polkadot-js/apps` or to import the account from backup. The password does not protect the mnemonic phrase. That is, if an attacker were to acquire the mnemonic phrase, they would be able to use it to spend funds without the password.
+When you create a keypair via the extension, it supplies a 12-word mnemonic seed and asks you to create a password. This password only encrypts the private key on disk so that the password is required to spend funds in `https://azero.dev` or to import the account from backup. The password does not protect the mnemonic phrase. That is, if an attacker were to acquire the mnemonic phrase, they would be able to use it to spend funds without the password.
 
 ### Importing mnemonics from other key generation utilities
 

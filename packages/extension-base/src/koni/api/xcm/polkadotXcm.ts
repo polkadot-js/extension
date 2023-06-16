@@ -20,7 +20,7 @@ export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originC
     method = 'limitedReserveWithdrawAssets';
   } else if (['statemint', 'statemine'].includes(originChainInfo.slug) && _isSubstrateRelayChain(destinationChainInfo)) {
     assetLocation = {
-      V1: [
+      [version]: [
         {
           id: { Concrete: { parents: 1, interior: 'Here' } },
           fun: { Fungible: value }

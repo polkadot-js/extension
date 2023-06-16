@@ -289,6 +289,6 @@ export default class DatabaseService {
   }
 
   async getMantaPayLedger (key: string) {
-    await this._db.mantaPay.get({ key });
+    return this._db.mantaPay.get({ key });
   }
 }

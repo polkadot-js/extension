@@ -856,3 +856,16 @@ export async function reloadCron (request: CronReloadRequest): Promise<boolean> 
 export async function passPhishingPage (url: string): Promise<boolean> {
   return sendMessage('pri(phishing.pass)', { url });
 }
+
+// Manta pay
+export async function enableMantaPay () {
+  return sendMessage('pri(mantaPay.enable)', null);
+}
+
+export async function initialSyncMantaPay () {
+  return sendMessage('pri(mantaPay.initialSyncMantaPay)', null);
+}
+
+export async function getMantaZkBalance () {
+  return sendMessage('pri(mantaPay.getZkBalance)', null);
+}

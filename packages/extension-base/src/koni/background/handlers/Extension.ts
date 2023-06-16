@@ -3292,6 +3292,22 @@ export default class KoniExtension {
     return await this.#koniState.approvePassPhishingPage(url);
   }
 
+  private async enableMantaPay () { // always takes the current account
+    return await this.#koniState.enableMantaPay();
+  }
+
+  private async initialSyncMantaPay () {
+    const result = await this.#koniState.initialSyncMantaPay();
+
+    console.log('Finished initial sync for MantaPay');
+
+    return result;
+  }
+
+  private async getZkBalance () {
+    return await this.#koniState.getZkBalance();
+  }
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -3696,6 +3712,12 @@ export default class KoniExtension {
       case 'pri(settings.getLogoMaps)':
         return await this.getLogoMap();
 
+      case 'pri(mantaPay.enable)':
+        return await this.enableMantaPay();
+      case 'pri(mantaPay.initialSyncMantaPay)':
+        return await this.initialSyncMantaPay();
+      case 'pri(mantaPay.getZkBalance)':
+        return await this.getZkBalance();
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

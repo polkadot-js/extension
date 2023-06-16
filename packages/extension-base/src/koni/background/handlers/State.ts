@@ -1769,4 +1769,47 @@ export default class KoniState {
 
     await this.chainService.init();
   }
+
+  public async enableMantaPay () {
+    const currentAddress = this.keyringService.currentAccount.address;
+
+    if (!currentAddress || isEthereumAddress(currentAddress)) {
+      return;
+    }
+
+    // TODO: decode and import mnemonic
+    this.chainService.mantaPay.setCurrentAddress(currentAddress);
+
+    const mnemonic = 'arrange rib doll virtual dress clarify cram meat time grain head poem';
+
+    await this.chainService.mantaPay.privateWallet?.initialSigner();
+    await this.chainService.mantaPay.privateWallet?.loadUserSeedPhrase(mnemonic);
+    const zkAddress = await this.chainService.mantaPay.privateWallet?.getZkAddress();
+
+    console.log('zkAddress', zkAddress);
+
+    return zkAddress;
+  }
+
+  public async initialSyncMantaPay () {
+    const currentAddress = this.keyringService.currentAccount.address;
+
+    if (!currentAddress || isEthereumAddress(currentAddress)) {
+      return;
+    }
+
+    this.chainService.mantaPay.setCurrentAddress(currentAddress);
+
+    await this.chainService.mantaPay.privateWallet?.baseWallet?.isApiReady();
+
+    return await this.chainService.mantaPay.privateWallet?.initialWalletSync();
+  }
+
+  public async getZkBalance () {
+    const assetId = new BN(1);
+
+    const zkBalance = await this.chainService.mantaPay.privateWallet?.getZkBalance(assetId);
+
+    console.log('zkKMA: ', zkBalance?.toString());
+  }
 }

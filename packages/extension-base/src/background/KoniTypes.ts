@@ -1930,6 +1930,11 @@ export interface KoniRequestSignatures {
   // Phishing page
   'pri(phishing.pass)': [RequestPassPhishingPage, boolean];
 
+  // Manta pay
+  'pri(mantaPay.enable)': [null, string | undefined];
+  'pri(mantaPay.initialSyncMantaPay)': [null, boolean | undefined];
+  'pri(mantaPay.getZkBalance)': [null, null];
+
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];
   'pri(authorize.requestsV2)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];

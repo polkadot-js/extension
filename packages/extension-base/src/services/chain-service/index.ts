@@ -39,6 +39,10 @@ export class ChainService {
   private evmChainHandler: EvmChainHandler;
   private mantaChainHandler: MantaPrivateHandler;
 
+  public get mantaPay () {
+    return this.mantaChainHandler;
+  }
+
   // TODO: consider BehaviorSubject
   private chainInfoMapSubject = new Subject<Record<string, _ChainInfo>>();
   private chainStateMapSubject = new Subject<Record<string, _ChainState>>();
@@ -58,7 +62,7 @@ export class ChainService {
 
     this.substrateChainHandler = new SubstrateChainHandler();
     this.evmChainHandler = new EvmChainHandler();
-    this.mantaChainHandler = new MantaPrivateHandler(this.dbService);
+    this.mantaChainHandler = new MantaPrivateHandler(dbService);
 
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);

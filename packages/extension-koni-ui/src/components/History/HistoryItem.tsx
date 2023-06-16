@@ -138,20 +138,19 @@ function Component (
       <div className='value-wrapper'>
         <Number
           className={'__value'}
-          decimal={0}
+          decimal={item?.amount?.decimals || 0}
           decimalOpacity={0.45}
-          suffix={item.amount?.symbol}
-          value={11}
+          suffix={item?.amount?.symbol}
+          value={item?.amount?.value || '0'}
         />
         <Number
-          className={'__converted-value'}
-          decimal={0}
+          className={'__fee'}
+          decimal={item?.fee?.decimals || 0}
           decimalOpacity={0.45}
           intOpacity={0.45}
-          prefix='$'
-          size={12}
+          suffix={item.fee?.symbol}
           unitOpacity={0.45}
-          value={11122}
+          value={item.fee?.value || '0'}
         />
       </div>
 
@@ -302,6 +301,10 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
       marginBottom: 8,
       cursor: 'pointer',
 
+      '& > *': {
+        width: '25%',
+        flex: 1
+      },
       '.__account-name': {
         fontWeight: 500
       },

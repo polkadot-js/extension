@@ -236,7 +236,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       },
       {
-        title: 'Type',
+        title: () => (
+          <span
+            style={{
+              padding: '0 40px'
+            }}
+          >
+            Type
+          </span>
+        ),
         dataIndex: 'type',
         key: 'type',
         render: (_, row: StakingDataType) => {
@@ -348,6 +356,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 trigger='click'
               >
                 <Button
+                  className='extra-button'
                   icon={(
                     <Icon
                       className={'right-icon'}
@@ -544,7 +553,15 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
     '.funds-wrapper': {
       display: 'flex',
-      justifyContent: 'end'
+      justifyContent: 'end',
+
+      '.extra-button': {
+        minWidth: 'unset',
+        marginLeft: 30,
+        '.anticon': {
+          width: 'fit-content'
+        }
+      }
     },
 
     '.ant-sw-screen-layout-body': {

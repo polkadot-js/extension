@@ -44,7 +44,7 @@ const StyledLayout = styled('div')<ThemeProps>(({ theme: { extendToken } }: Them
       flexDirection: 'column',
       overflow: 'auto',
       width: '100%',
-      padding: '40px 36px 80px 44px',
+      padding: '24px 36px 80px 44px',
       background: '#0C0C0C',
       maxHeight: '100vh',
       flex: 1,

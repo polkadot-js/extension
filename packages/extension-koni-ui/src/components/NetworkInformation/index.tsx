@@ -28,6 +28,7 @@ function Component (props: Props): React.ReactElement<Props> {
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
   const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const minStake = useMemo(() =>
     stakeStype === StakingType.POOLED ? chainStakingMetadata?.minPoolBonding || '0' : chainStakingMetadata?.minStake || '0'
   , [chainStakingMetadata?.minPoolBonding, chainStakingMetadata?.minStake, stakeStype]
@@ -80,35 +81,36 @@ function Component (props: Props): React.ReactElement<Props> {
         <div className='alert-title'>{t('Network Information')}</div>
       </div>
       <MetaInfo
-        // className={CN(className)}
         hasBackgroundWrapper
         spaceSize='ms'
         valueColorScheme='light'
       >
-        {chainStakingMetadata?.nominatorCount && <MetaInfo.Default
-          label={t('Active nominators')}
-          labelAlign={'top'}
-        >
-          <div className={'__active-nominators-value'}>
-            <Number
-              className={'__current-nominator-count'}
-              decimal={0}
-              decimalOpacity={1}
-              intOpacity={1}
-              unitOpacity={1}
-              value={chainStakingMetadata.nominatorCount}
-            />
-            <span className={'__slash'}>/</span>
-            <Number
-              className={'__total-nominator-count'}
-              decimal={0}
-              decimalOpacity={1}
-              intOpacity={1}
-              unitOpacity={1}
-              value={1}
-            />
-          </div>
-        </MetaInfo.Default>}
+        {!!chainStakingMetadata?.nominatorCount && (
+          <MetaInfo.Default
+            label={t('Active nominators')}
+            labelAlign={'top'}
+          >
+            <div className={'__active-nominators-value'}>
+              <Number
+                className={'__current-nominator-count'}
+                decimal={0}
+                decimalOpacity={1}
+                intOpacity={1}
+                unitOpacity={1}
+                value={chainStakingMetadata.nominatorCount}
+              />
+              <span className={'__slash'}>/</span>
+              <Number
+                className={'__total-nominator-count'}
+                decimal={0}
+                decimalOpacity={1}
+                intOpacity={1}
+                unitOpacity={1}
+                value={1}
+              />
+            </div>
+          </MetaInfo.Default>
+        )}
         {getMetaInfo()}
         {chainStakingMetadata?.unstakingPeriod && <MetaInfo.Default label={t('Unstaking period')}>
           <span>{getUnstakingPeriod(chainStakingMetadata.unstakingPeriod)}</span>

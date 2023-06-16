@@ -1,11 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Logo3D } from '@subwallet/extension-koni-ui/components/Logo';
 import { CONTACT_US, FAQS_URL, TERMS_OF_SERVICE_URL } from '@subwallet/extension-koni-ui/constants';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Menu } from '@subwallet/react-ui';
+import { Image, Menu } from '@subwallet/react-ui';
 import { MenuItemType } from '@subwallet/react-ui/es/menu/hooks/useItems';
 import CN from 'classnames';
 import { ArrowSquareUpRight, Clock, Database, Gear, Globe, Info, MessengerLogo, Rocket, Wallet } from 'phosphor-react';
@@ -164,7 +163,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       })}
     >
       <div className='logo-container'>
-        <Logo3D />
+        <Image
+          src='/images/subwallet/gradient-logo.png'
+          width={46}
+        />
       </div>
       <div className={CN('menu-wrapper', 'flex-col')}>
         <Menu

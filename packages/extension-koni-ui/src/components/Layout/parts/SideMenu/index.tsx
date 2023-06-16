@@ -25,7 +25,7 @@ const SideMenu = styled(Component)<Props>(({ theme: { token } }: Props) => ({
     },
 
     '.menu-wrapper': {
-      marginTop: 30
+      marginTop: 47
     }
   },
 

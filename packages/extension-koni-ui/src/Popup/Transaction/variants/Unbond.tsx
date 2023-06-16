@@ -9,6 +9,7 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { AccountSelector, AmountInput, NominationSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -58,6 +59,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
 
+  const { isWebUI } = useContext(ScreenContext);
   const dataContext = useContext(DataContext);
   const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
@@ -344,7 +346,7 @@ const Component: React.FC<Props> = (props: Props) => {
           loading={loading}
           onClick={onPreCheckReadOnly(form.submit)}
         >
-          {t('Unbond')}
+          {isWebUI ? t('Submit') : t('Unbond')}
         </Button>
       </TransactionFooter>
     </>

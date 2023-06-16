@@ -235,7 +235,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       },
       {
-        title: 'Status',
+        title: () => (
+          <span
+            style={{
+              padding: '0 20px'
+            }}
+          >
+            Status
+          </span>
+        ),
         dataIndex: 'status',
         key: 'status',
         render: (_, item: CrowdloanItemType) => {

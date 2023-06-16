@@ -482,7 +482,9 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
+
       '.ant-sw-list': {
+        marginTop: 24,
         flex: 1
       }
     },

@@ -8,7 +8,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getAccountType } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Button, Icon, Number } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
-import { ArrowFatLinesDown, CaretLeft, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import { CaretLeft, CopySimple, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -88,7 +88,7 @@ function Component (
           <Button
             icon={(
               <Icon
-                phosphorIcon={ArrowFatLinesDown}
+                phosphorIcon={CopySimple}
                 size={isShrink ? 'sm' : 'md'}
                 weight={'duotone'}
               />

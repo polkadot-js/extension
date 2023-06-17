@@ -1501,15 +1501,16 @@ export default class KoniExtension {
     return historySubject.getValue();
   }
 
-  private addContact (to: string) {
-    const toAddress = reformatAddress(to);
-    const account = keyring.getAccount(toAddress);
-    const contact = keyring.getAddress(toAddress);
-
-    if (!account && (!contact || contact.meta.isRecent)) {
-      keyring.saveAddress(toAddress, {});
-    }
-  }
+  // Save address to contact
+  // private addContact (to: string) {
+  //   const toAddress = reformatAddress(to);
+  //   const account = keyring.getAccount(toAddress);
+  //   const contact = keyring.getAddress(toAddress);
+  //
+  //   if (!account && (!contact || contact.meta.isRecent)) {
+  //     keyring.saveAddress(toAddress, {});
+  //   }
+  // }
 
   private validateTransfer (tokenSlug: string, from: string, to: string, value: string | undefined, transferAll: boolean | undefined): [TransactionError[], KeyringPair | undefined, BN | undefined, _ChainAsset] {
     const errors: TransactionError[] = [];
@@ -1602,7 +1603,7 @@ export default class KoniExtension {
 
     const transferNativeAmount = isTransferNativeToken ? transferAmount.value : '0';
 
-    this.addContact(to);
+    // this.addContact(to);
 
     const additionalValidator = async (inputTransaction: SWTransactionResponse): Promise<void> => {
       const minAmount = tokenInfo.minAmount || '0';
@@ -1727,7 +1728,7 @@ export default class KoniExtension {
       };
     }
 
-    this.addContact(to);
+    // this.addContact(to);
 
     return await this.#koniState.transactionService.handleTransaction({
       url: EXTENSION_REQUEST_URL,
@@ -1753,7 +1754,7 @@ export default class KoniExtension {
 
     const transaction = await getERC721Transaction(this.#koniState.getEvmApi(networkKey), contractAddress, senderAddress, recipientAddress, tokenId);
 
-    this.addContact(recipientAddress);
+    // this.addContact(recipientAddress);
 
     return await this.#koniState.transactionService.handleTransaction({
       address: senderAddress,
@@ -1978,7 +1979,7 @@ export default class KoniExtension {
       ? getNftTransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params || {})
       : await getPSP34TransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params || {});
 
-    this.addContact(recipientAddress);
+    // this.addContact(recipientAddress);
 
     const rs = await this.#koniState.transactionService.handleTransaction({
       address: senderAddress,

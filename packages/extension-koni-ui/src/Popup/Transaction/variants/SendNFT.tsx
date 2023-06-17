@@ -5,6 +5,7 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
@@ -202,13 +203,17 @@ const Component: React.FC = () => {
   // Focus to the first field
   useFocusFormItem(form, 'to');
 
+  const show3DModel = SHOW_3D_MODELS_CHAIN.includes(nftItem.chain);
+
   return (
     <>
       <TransactionContent className={CN('-transaction-content')}>
         <div className={'nft_item_detail text-center'}>
           <Image
             height={120}
+            modelViewerProps={show3DModel ? DEFAULT_MODEL_VIEWER_PROPS : undefined}
             src={nftItem.image}
+            width={120}
           />
           <Typography.Title level={5}>
             {nftItem.name}
@@ -305,6 +310,18 @@ const SendNFT = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.nft_item_detail h5': {
       marginTop: token.marginXS,
       marginBottom: token.margin
+    },
+
+    '.nft_item_detail': {
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+
+      '.ant-image-img': {
+        maxWidth: '100%',
+        objectFit: 'cover'
+      }
     }
   };
 });

@@ -9,9 +9,10 @@ import { ApiPromise } from '@polkadot/api';
 
 export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
   const weightParam = getDestWeight();
-  const beneficiary = getBeneficiary(destinationChainInfo, recipientAddress);
-  const destination = getDestinationChainLocation(originChainInfo, destinationChainInfo);
-  let assetLocation = getTokenLocation(tokenInfo, value);
+  const version = ['statemint', 'statemine', 'shiden'].includes(originChainInfo.slug) ? 'V3' : 'V1';
+  const beneficiary = getBeneficiary(destinationChainInfo, recipientAddress, version);
+  const destination = getDestinationChainLocation(originChainInfo, destinationChainInfo, version);
+  let assetLocation = getTokenLocation(tokenInfo, value, version);
 
   let method = 'limitedReserveTransferAssets';
 
@@ -19,7 +20,7 @@ export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originC
     method = 'limitedReserveWithdrawAssets';
   } else if (['statemint', 'statemine'].includes(originChainInfo.slug) && _isSubstrateRelayChain(destinationChainInfo)) {
     assetLocation = {
-      V1: [
+      [version]: [
         {
           id: { Concrete: { parents: 1, interior: 'Here' } },
           fun: { Fungible: value }

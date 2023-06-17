@@ -183,7 +183,8 @@ export const _TRANSFER_CHAIN_GROUP = {
   bitcountry: ['pioneer', 'bitcountry', 'bifrost', 'bifrost_dot'],
   statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel'],
   riochain: ['riochain'],
-  sora_substrate: ['sora_substrate']
+  sora_substrate: ['sora_substrate'],
+  avail: ['kate']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {

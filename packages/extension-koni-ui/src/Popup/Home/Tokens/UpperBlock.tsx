@@ -4,7 +4,7 @@
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
-import { ArrowFatLinesDown, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import { CopySimple, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -69,7 +69,7 @@ function Component (
       <div className={'__action-button-container'}>
         <Button
           icon={<Icon
-            phosphorIcon={ArrowFatLinesDown}
+            phosphorIcon={CopySimple}
             size={isShrink ? 'sm' : 'md' }
             weight={'duotone'}
           />}

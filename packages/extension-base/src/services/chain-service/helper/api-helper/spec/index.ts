@@ -32,6 +32,7 @@ import crownSterlingChain from './crown-sterling';
 import crust from './crust';
 import testPara from './cumulus-test-parachain';
 import darwinia from './darwinia';
+import dataavail from './dataavail';
 import datahighwayParachain from './datahighway';
 import dockMainnet from './dock-mainnet';
 import dockTestnet from './dock-testnet';
@@ -164,6 +165,7 @@ const spec: Record<string, OverrideBundleDefinition> = {
   'crust-parachain': crust,
   'cumulus-subsocial-parachain': subsocial,
   'cumulus-test-parachain': testPara,
+  'data-avail': dataavail,
   datahighway: westlake,
   'datahighway-parachain': datahighwayParachain,
   dawn: eave,

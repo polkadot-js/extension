@@ -15,13 +15,15 @@ import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { copyToClipboard } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/utils/form/form';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, SwQRCode } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, SettingItem, SwAlert, Switch, SwQRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, Swatches, TrashSimple, User } from 'phosphor-react';
+import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, ShieldCheck, Swatches, TrashSimple, User } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+
+import useConfirmModal from '../../hooks/modal/useConfirmModal';
 
 type Props = ThemeProps;
 
@@ -61,6 +63,27 @@ const Component: React.FC<Props> = (props: Props) => {
   const [saving, setSaving] = useState(false);
 
   const signMode = useGetAccountSignModeByAddress(accountAddress);
+
+  const [isMantaPayEnabled, setIsMantaPayEnabled] = useState(false);
+  const [isMantaPaySyncing, setIsMantaPaySyncing] = useState(false);
+
+  const { handleSimpleConfirmModal } = useConfirmModal({
+    title: t<string>('Confirmation'),
+    maskClosable: true,
+    closable: true,
+    type: 'warning',
+    subTitle: t<string>('Zk mode requires data synchronization'),
+    content: t<string>('You will not be able to use the app until te synchronization is finished. This process can take up to 45 minutes or longer, are you sure to do this?'),
+    okText: t<string>('Enable')
+  });
+
+  const handleEnableMantaPay = useCallback(() => {
+    handleSimpleConfirmModal()
+      .then(() => {
+        setIsMantaPaySyncing(true);
+      })
+      .catch(console.log);
+  }, [handleSimpleConfirmModal]);
 
   const canDerive = useMemo((): boolean => {
     if (account) {
@@ -200,6 +223,14 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [account, goHome, navigate]);
 
+  const onSwitchChainState = useCallback((checked: boolean, event: React.MouseEvent<HTMLButtonElement>) => {
+    setIsMantaPayEnabled(checked);
+
+    if (checked) {
+      handleEnableMantaPay();
+    }
+  }, [handleEnableMantaPay]);
+
   if (!account) {
     return null;
   }
@@ -271,7 +302,7 @@ const Component: React.FC<Props> = (props: Props) => {
               />
             </Form.Item>
           </Form>
-          <div className={CN('account-field', 'mb-lg')}>
+          <div className={CN('account-field')}>
             <Field
               content={toShort(account.address, 11, 13)}
               label={t('Wallet address')}
@@ -297,6 +328,34 @@ const Component: React.FC<Props> = (props: Props) => {
               )}
             />
           </div>
+          {
+            isMantaPaySyncing && (
+              <SwAlert
+                className={CN('alert-area')}
+                description={t('This may take a few minutes, keep this app open for faster sync')}
+                title={t('Zk balance is syncing: 50%')}
+                type='warning'
+              />
+            )
+          }
+          <SettingItem
+            className={CN(`zk-setting ${!isMantaPaySyncing ? 'zk-sync-margin' : ''}`)}
+            leftItemIcon={(
+              <BackgroundIcon
+                backgroundColor={token['green-6']}
+                phosphorIcon={ShieldCheck}
+                size='sm'
+                weight='fill'
+              />
+            )}
+            name={t('Zk mode')}
+            rightItem={(
+              <Switch
+                checked={isMantaPayEnabled}
+                onClick={onSwitchChainState}
+              />
+            )}
+          />
           <Button
             block={true}
             className={CN('account-button', `action-type-${ActionType.DERIVE}`)}
@@ -452,6 +511,21 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
         color: token['gray-5'],
         animation: 'spinner-loading 1s infinite linear'
       }
+    },
+
+    '.alert-area': {
+      marginTop: token.margin,
+      marginBottom: token.marginXS
+    },
+
+    '.zk-setting': {
+      marginBottom: token.marginXS,
+      gap: token.sizeXS,
+      color: token.colorTextLight1
+    },
+
+    '.zk-sync-margin': {
+      marginTop: token.margin
     }
   };
 });

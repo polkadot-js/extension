@@ -2617,13 +2617,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google/model-viewer@npm:^2.0.2":
-  version: 2.1.0
-  resolution: "@google/model-viewer@npm:2.1.0"
+"@google/model-viewer@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "@google/model-viewer@npm:3.1.1"
   dependencies:
-    lit: ^2.2.3
-    three: ^0.146.0
-  checksum: 3590101364e873f0f83536a9ab018ea54a8ef0ae05ee4d6fa4a9847e0e8733e035b62b617b4bb06f2464bef38ad7ca5a4b1b00cad146b5b75b20c72056044a74
+    lit: ^2.7.2
+  peerDependencies:
+    three: ^0.151.2
+  checksum: 191a38036d3f36d22faee20731338493a5ab75039a57113d51787b16b4e8507ab5ccb00e658e123cdda7e24ea72141081d0d07e27740bea1fb2270d8e76c8627
   languageName: node
   linkType: hard
 
@@ -3618,10 +3619,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lit/reactive-element@npm:^1.3.0, @lit/reactive-element@npm:^1.4.0":
+"@lit-labs/ssr-dom-shim@npm:^1.0.0, @lit-labs/ssr-dom-shim@npm:^1.1.0":
+  version: 1.1.1
+  resolution: "@lit-labs/ssr-dom-shim@npm:1.1.1"
+  checksum: 7a7add78e3ee570a7b987b9bf85e700b20d35d31c8b54cf4c8b2e3c8458ed4e2b0ff328706e5be7887f0ca8a02878c186e76609defb78f0d1b3c0e6b47c9f6ef
+  languageName: node
+  linkType: hard
+
+"@lit/reactive-element@npm:^1.3.0":
   version: 1.4.2
   resolution: "@lit/reactive-element@npm:1.4.2"
   checksum: b93eadc195b7da8b93f552d01891f0537b573acb35daa866b3bb9a495972c4e7568a540a9a413df18f92922dbb2f86fa0cdd76412e70f073df4dc4999d86bb30
+  languageName: node
+  linkType: hard
+
+"@lit/reactive-element@npm:^1.6.0":
+  version: 1.6.2
+  resolution: "@lit/reactive-element@npm:1.6.2"
+  dependencies:
+    "@lit-labs/ssr-dom-shim": ^1.0.0
+  checksum: 011a3ef0933fda86ec726d29ebc14e829e2f1ba23eca8ed8ed4d5c6f2a102c55cc6986000c5f4c8c3d0c549bc671f5d84d00ce91adc5bbd95970eec3662c0a92
   languageName: node
   linkType: hard
 
@@ -5548,18 +5565,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.1.11":
-  version: 0.1.11
-  resolution: "@subwallet/chain-list@npm:0.1.11"
+"@subwallet/chain-list@npm:0.2.1":
+  version: 0.2.1
+  resolution: "@subwallet/chain-list@npm:0.2.1"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: bfbdc1033739e1bcbdf84b3f7660b8bced4746e50ff4f93502e7c36a6e4810200e5055283e96d4954291b1df94edbb7cd1572d228a0eab9a7392e31cbdc6c7b1
+  checksum: 0d225a79e87ef363f07fad3ee88719f13ba8f62001a540a34bb2f2ef188c5d33e7daaac2abae5a1ae8a0160a09d66ea7c862168fc366df84db53dab296fc193e
   languageName: node
   linkType: hard
 
-"@subwallet/extension-base@^1.0.9-2, @subwallet/extension-base@workspace:packages/extension-base":
+"@subwallet/extension-base@^1.0.10-0, @subwallet/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-base@workspace:packages/extension-base"
   dependencies:
@@ -5588,12 +5605,12 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": 0.1.11
-    "@subwallet/extension-base": ^1.0.9-2
-    "@subwallet/extension-chains": ^1.0.9-2
-    "@subwallet/extension-dapp": ^1.0.9-2
-    "@subwallet/extension-inject": ^1.0.9-2
-    "@subwallet/extension-mocks": ^1.0.9-2
+    "@subwallet/chain-list": 0.2.1
+    "@subwallet/extension-base": ^1.0.10-0
+    "@subwallet/extension-chains": ^1.0.10-0
+    "@subwallet/extension-dapp": ^1.0.10-0
+    "@subwallet/extension-inject": ^1.0.10-0
+    "@subwallet/extension-mocks": ^1.0.10-0
     "@subwallet/keyring": ^0.0.10
     "@subwallet/ui-keyring": ^0.0.10
     axios: ^1.2.1
@@ -5622,7 +5639,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-chains@^1.0.9-2, @subwallet/extension-chains@workspace:packages/extension-chains":
+"@subwallet/extension-chains@^1.0.10-0, @subwallet/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-chains@workspace:packages/extension-chains"
   dependencies:
@@ -5630,7 +5647,7 @@ __metadata:
     "@polkadot/networks": ^12.2.1
     "@polkadot/util": ^12.2.1
     "@polkadot/util-crypto": ^12.2.1
-    "@subwallet/extension-inject": ^1.0.9-2
+    "@subwallet/extension-inject": ^1.0.10-0
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/types": "*"
@@ -5645,21 +5662,21 @@ __metadata:
     "@metamask/detect-provider": ^1.2.0
     "@polkadot/types": ^10.7.2
     "@polkadot/util": ^12.2.1
-    "@subwallet/extension-inject": ^1.0.9-2
+    "@subwallet/extension-inject": ^1.0.10-0
     web3: ^1.10.0
   peerDependencies:
     "@polkadot/util": "*"
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-dapp@^1.0.9-2, @subwallet/extension-dapp@workspace:packages/extension-dapp":
+"@subwallet/extension-dapp@^1.0.10-0, @subwallet/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/util": ^12.2.1
     "@polkadot/util-crypto": ^12.2.1
-    "@subwallet/extension-inject": ^1.0.9-2
+    "@subwallet/extension-inject": ^1.0.10-0
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/util": "*"
@@ -5667,7 +5684,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-inject@^1.0.9-2, @subwallet/extension-inject@workspace:packages/extension-inject":
+"@subwallet/extension-inject@^1.0.10-0, @subwallet/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -5685,7 +5702,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-koni-ui@^1.0.9-2, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
+"@subwallet/extension-koni-ui@^1.0.10-0, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-koni-ui@workspace:packages/extension-koni-ui"
   dependencies:
@@ -5695,7 +5712,6 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": ^6.2.1
     "@fortawesome/free-solid-svg-icons": ^6.2.1
     "@fortawesome/react-fontawesome": ^0.2.0
-    "@google/model-viewer": ^2.0.2
     "@ledgerhq/hw-app-eth": ^6.33.4
     "@polkadot/api-contract": ^10.7.2
     "@polkadot/hw-ledger": ^12.2.1
@@ -5708,14 +5724,14 @@ __metadata:
     "@polkadot/util-crypto": ^12.2.1
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.1.11
-    "@subwallet/extension-base": ^1.0.9-2
-    "@subwallet/extension-chains": ^1.0.9-2
-    "@subwallet/extension-dapp": ^1.0.9-2
-    "@subwallet/extension-inject": ^1.0.9-2
-    "@subwallet/extension-mocks": ^1.0.9-2
+    "@subwallet/chain-list": 0.2.1
+    "@subwallet/extension-base": ^1.0.10-0
+    "@subwallet/extension-chains": ^1.0.10-0
+    "@subwallet/extension-dapp": ^1.0.10-0
+    "@subwallet/extension-inject": ^1.0.10-0
+    "@subwallet/extension-mocks": ^1.0.10-0
     "@subwallet/keyring": ^0.0.10
-    "@subwallet/react-ui": 5.1.2-b56
+    "@subwallet/react-ui": 5.1.2-b60
     "@subwallet/ui-keyring": ^0.0.10
     "@types/bn.js": ^5.1.1
     "@types/enzyme": ^3.10.12
@@ -5723,6 +5739,7 @@ __metadata:
     "@types/file-saver": ^2.0.5
     "@types/react-copy-to-clipboard": ^5.0.4
     "@types/react-dom": ^18.0.9
+    "@types/react-lazy-load-image-component": ^1.5.3
     "@types/redux-persist": ^4.3.1
     "@types/sinon-chrome": ^2.2.11
     "@types/store": ^2.0.2
@@ -5773,9 +5790,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.0.9-2
-    "@subwallet/extension-inject": ^1.0.9-2
-    "@subwallet/extension-koni-ui": ^1.0.9-2
+    "@subwallet/extension-base": ^1.0.10-0
+    "@subwallet/extension-inject": ^1.0.10-0
+    "@subwallet/extension-koni-ui": ^1.0.10-0
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -5800,7 +5817,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-mocks@^1.0.9-2, @subwallet/extension-mocks@workspace:packages/extension-mocks":
+"@subwallet/extension-mocks@^1.0.10-0, @subwallet/extension-mocks@workspace:packages/extension-mocks":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
@@ -5824,9 +5841,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/react-ui@npm:5.1.2-b56":
-  version: 5.1.2-b56
-  resolution: "@subwallet/react-ui@npm:5.1.2-b56"
+"@subwallet/react-ui@npm:5.1.2-b60":
+  version: 5.1.2-b60
+  resolution: "@subwallet/react-ui@npm:5.1.2-b60"
   dependencies:
     "@ant-design/colors": ^6.0.0
     "@ant-design/cssinjs": ^1.5.6
@@ -5838,6 +5855,7 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": ^6.2.1
     "@fortawesome/free-solid-svg-icons": ^6.2.1
     "@fortawesome/react-fontawesome": ^0.2.0
+    "@google/model-viewer": ^3.1.1
     "@polkadot/react-identicon": ^2.9.14
     "@polkadot/util-crypto": ^11.1.1
     "@rc-component/tour": ~1.1.0
@@ -5886,16 +5904,17 @@ __metadata:
     rc-upload: ~4.3.0
     rc-util: ^5.27.1
     react-copy-to-clipboard: ^5.1.0
-    react-pin-input: ^1.3.0
+    react-pin-input: 1.3.0
     react-qrcode-logo: ^2.9.0
     react-superellipse: ^0.0.6
     react-toastify: ^9.1.1
     scroll-into-view-if-needed: ^3.0.3
+    three: 0.152.2
     throttle-debounce: ^5.0.0
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: d512a3570d5fc7aef93162c3bcc16dbf728482853a538b563ee31ca4ce440350c4ed620e2f355d0d661b731bd54fb143b3d84c646f21a1c05202d8b8fee054b4
+  checksum: be1cab4874f5349377042b3d1be1a054b286333c3858397ee104494ee23eeae76eeaa43d4bc674dcc82adec4e5620b31d447c892b5568348505495eb3052b5e8
   languageName: node
   linkType: hard
 
@@ -5921,9 +5940,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.0.9-2
-    "@subwallet/extension-inject": ^1.0.9-2
-    "@subwallet/extension-koni-ui": ^1.0.9-2
+    "@subwallet/extension-base": ^1.0.10-0
+    "@subwallet/extension-inject": ^1.0.10-0
+    "@subwallet/extension-koni-ui": ^1.0.10-0
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -6452,6 +6471,16 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: ff8282d5005a0b1cd95fb65bf79d3d8485e4cfe2aaf052129033a178684b940014a3f4536bc20d573f8a01cf4c6f4770c74988cef7c2b5cac3041d9f172647e3
+  languageName: node
+  linkType: hard
+
+"@types/react-lazy-load-image-component@npm:^1.5.3":
+  version: 1.5.3
+  resolution: "@types/react-lazy-load-image-component@npm:1.5.3"
+  dependencies:
+    "@types/react": "*"
+    csstype: ^3.0.2
+  checksum: 4e164a897fa750bbb216b97a9fe5b01e98e9620c68a98269d2e73f1416b9dd93277a5ab4052253ab74d0ad058462577f2eae35f94027ff9b4740242e20b185c7
   languageName: node
   linkType: hard
 
@@ -17016,33 +17045,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lit-element@npm:^3.2.0":
-  version: 3.2.2
-  resolution: "lit-element@npm:3.2.2"
+"lit-element@npm:^3.3.0":
+  version: 3.3.2
+  resolution: "lit-element@npm:3.3.2"
   dependencies:
+    "@lit-labs/ssr-dom-shim": ^1.1.0
     "@lit/reactive-element": ^1.3.0
-    lit-html: ^2.2.0
-  checksum: e1df57c02ad5ae4c42b49a5066b3b623bccf7fa6610bbc3f65bc22cbbe1546ecd6a7f717b1f01863929262f416c4b8b7a39ff166114215f93cc22f4e5b3825c3
+    lit-html: ^2.7.0
+  checksum: afe50825be05a8c83be418432dfed2f9a84ca1c6c1d1807e2090def9f94cc403dcbf832b338cdfe39cd168518664c02a6c7392868ca323e356e5744e3b4f45e6
   languageName: node
   linkType: hard
 
-"lit-html@npm:^2.2.0, lit-html@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "lit-html@npm:2.4.0"
+"lit-html@npm:^2.7.0":
+  version: 2.7.4
+  resolution: "lit-html@npm:2.7.4"
   dependencies:
     "@types/trusted-types": ^2.0.2
-  checksum: fb2ff513a23ce35783c231d3c184103b681f62792e2fa500b17f0bbd93b1a3168153b3fd52ccaca2c25ee5bb7f4006b657fc15ae893fa5dc733774c01eda5dce
+  checksum: 3809d62d8b8e66c047a582fe62d430384c63af8c8444da4ca565b41d03e0295be2ce3eaa3c03b58d35a5d74fd8c98976585902204fc28006cfb9adf29fc1761e
   languageName: node
   linkType: hard
 
-"lit@npm:^2.2.3":
-  version: 2.4.1
-  resolution: "lit@npm:2.4.1"
+"lit@npm:^2.7.2":
+  version: 2.7.5
+  resolution: "lit@npm:2.7.5"
   dependencies:
-    "@lit/reactive-element": ^1.4.0
-    lit-element: ^3.2.0
-    lit-html: ^2.4.0
-  checksum: 0f0673bd8f7c31d3f00cef0be26683f46e34048466c54b8663e8f13a7dbb6038f06aafa9abf3f0a6635c2d702fde7319d4f88b2bd9e2bd512f81c95fb691ca87
+    "@lit/reactive-element": ^1.6.0
+    lit-element: ^3.3.0
+    lit-html: ^2.7.0
+  checksum: 61a3f87c57136618f47a30b36cdfb592fcba42dcfbdb104d2b5ca291148c2d9a32fcb713bb91090bd08d6897a00e73f8425da6e3626aa080eaf410a32397ae69
   languageName: node
   linkType: hard
 
@@ -20398,7 +20428,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-pin-input@npm:^1.3.0":
+"react-pin-input@npm:1.3.0":
   version: 1.3.0
   resolution: "react-pin-input@npm:1.3.0"
   peerDependencies:
@@ -22708,10 +22738,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:^0.146.0":
-  version: 0.146.0
-  resolution: "three@npm:0.146.0"
-  checksum: c6eb2005d97c599de7f4eccf73c4b1e8731c353ca3e7b9bf9d3bc2b52a8e288c59c06c148fd93df16df323b28938947227a37e07cc6fbe04aa8f8725e49caa8a
+"three@npm:0.152.2":
+  version: 0.152.2
+  resolution: "three@npm:0.152.2"
+  checksum: 6d2d990dbff60b99c7e58b7f1446bb4bd235c7db5dd848a671385e01ae5c72bec865265be7f5a82907ecc96186acc13177d7de1252bc9592f5c9ebaffd1da1e7
   languageName: node
   linkType: hard
 

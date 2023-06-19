@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 1.0.10
+Build date: Jun 17, 2023.
+
+Features & Update:
+- Update Receive icon to Copy icon on Homepage screen (#1531)
+- Support display 3D NFT (#1516)
+- Re-check and update XCM feature for some chains: Polkadot, Statemint, Statemine, Bifrost Polkadot (#1546)
+
+Bugs fixed:
+- Fixed bug Show incorrect address book type (#1524)
+- Fixed bug Error fetching nominator data for Calamari (#1538)
+- Fixed bug Show incorrect Destination Chain fee on XCM history detail (#1550)
+
+Update `@subwallet/chain-list@0.2.1` (#1541):
+- Add INW (Aleph Zero) token
+- Add support for Avail testnet (Kate)
+- Re-name Statemint & Statemint Parachain to Polkadot Asset Hub & Kusama Asset Hub
+
+
 ## 1.0.9
 Build date: Jun 13, 2023.
 

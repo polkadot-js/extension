@@ -240,6 +240,11 @@ export default class State {
   }
 
   private authComplete = (id: string, resolve: (resValue: AuthResponse) => void, reject: (error: Error) => void): Resolver<AuthResponse> => {
+    const clearAuth = () => {
+      delete this.#authRequests[id];
+      this.updateIconAuth();
+    };
+
     const complete = (authorizedAccounts: string[] = []) => {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
@@ -256,13 +261,12 @@ export default class State {
 
       this.saveCurrentAuthList();
       this.updateDefaultAuthAccounts(authorizedAccounts);
-      delete this.#authRequests[id];
-      this.updateIconAuth();
+      clearAuth();
     };
 
     return {
       reject: (error: Error): void => {
-        complete();
+        clearAuth();
         reject(error);
       },
       resolve: ({ authorizedAccounts, result }: AuthResponse): void => {
@@ -272,7 +276,7 @@ export default class State {
     };
   };
 
-  public udateCurrentTabsUrl (urls: string[]) {
+  public updateCurrentTabsUrl (urls: string[]) {
     const connectedTabs = urls.map((url) => {
       let strippedUrl = '';
 

@@ -8,20 +8,11 @@ import React, { FormEvent, useCallback, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
 import helpIcon from '../../assets/help.svg';
-import {
-  AccountContext,
-  ActionContext,
-  BottomWrapper,
-  Button,
-  ButtonArea,
-  HelperFooter,
-  LearnMore,
-  Svg
-} from '../../components';
+import { AccountContext, BottomWrapper, Button, ButtonArea, HelperFooter, LearnMore, Svg } from '../../components';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';
-import { approveAuthRequest, deleteAuthRequest } from '../../messaging';
+import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 import { AccountSelection } from '../../partials';
 import NoAccount from './NoAccount';
 
@@ -63,8 +54,15 @@ const CustomFooter = styled(HelperFooter)`
 function Request({ authId, className, isFirst, url }: Props): React.ReactElement<Props> {
   const { accounts, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const { t } = useTranslation();
-  const onAction = useContext(ActionContext);
   const { show } = useToast();
+
+  useEffect(() => {
+    const rejectAuth = () => rejectAuthRequest(authId);
+
+    window.addEventListener('beforeunload', rejectAuth);
+
+    return () => window.removeEventListener('beforeunload', rejectAuth);
+  }, [authId]);
 
   useEffect(() => {
     const defaultAccountSelection = accounts
@@ -77,20 +75,17 @@ function Request({ authId, className, isFirst, url }: Props): React.ReactElement
   const _onApprove = useCallback(async (): Promise<void> => {
     try {
       await approveAuthRequest(authId, selectedAccounts);
-      onAction();
       show(t('App connected'), 'success');
       window.close();
     } catch (error) {
       console.error(error);
     }
-  }, [authId, onAction, selectedAccounts, show, t]);
+  }, [authId, selectedAccounts, show, t]);
 
-  const _onClose = useCallback((): void => {
-    deleteAuthRequest(authId)
-      .then(() => onAction())
-      .catch((error: Error) => console.error(error));
+  const _onClose = useCallback(() => {
+    rejectAuthRequest(authId);
     window.close();
-  }, [authId, onAction]);
+  }, [authId]);
 
   if (!accounts.length) {
     return <NoAccount authId={authId} />;

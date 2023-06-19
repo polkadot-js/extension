@@ -4,10 +4,10 @@
 import type { ThemeProps } from '../../types';
 
 import { t } from 'i18next';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { deleteAuthRequest } from '@polkadot/extension-ui/messaging';
+import { approveAuthRequest } from '@polkadot/extension-ui/messaging';
 
 import animatedWarning from '../../assets/anim_warning.svg';
 import helpIcon from '../../assets/help.svg';
@@ -45,14 +45,18 @@ const CustomFooter = styled(HelperFooter)`
 `;
 
 function NoAccount({ authId, className }: Props): React.ReactElement<Props> {
-  const _onClick = useCallback(async () => {
-    try {
-      await deleteAuthRequest(authId);
-      window.close();
-    } catch (error) {
-      console.error(error);
-    }
-  }, [authId]);
+  const approveAuthWithNoAccounts = useCallback(() => approveAuthRequest(authId, []).catch(console.error), [authId]);
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', approveAuthWithNoAccounts);
+
+    return () => window.removeEventListener('beforeunload', approveAuthWithNoAccounts);
+  }, [approveAuthWithNoAccounts]);
+
+  const onClick = () => {
+    approveAuthWithNoAccounts();
+    window.close();
+  };
 
   const footer = (
     <CustomFooter>
@@ -91,8 +95,7 @@ function NoAccount({ authId, className }: Props): React.ReactElement<Props> {
             >
               {t<string>('create an account')}
             </Link>
-            &nbsp;
-            {t<string>("and refresh the application's page.")}&nbsp;
+            &nbsp;{t<string>("and refresh the application's page.")}&nbsp;
           </span>
         </div>
       </div>
@@ -100,7 +103,7 @@ function NoAccount({ authId, className }: Props): React.ReactElement<Props> {
       <CustomButtonArea footer={footer}>
         <Button
           className='acceptButton'
-          onClick={_onClick}
+          onClick={onClick}
           secondary
         >
           {t<string>('Got it!')}

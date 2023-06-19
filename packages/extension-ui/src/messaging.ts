@@ -104,7 +104,7 @@ export async function editAccount(address: string, name: string): Promise<boolea
 }
 
 export function changePassword(address: string, oldPass: string, newPass: string): Promise<boolean> {
-  return sendMessage('pri(accounts.changePassword)', {address, oldPass, newPass});
+  return sendMessage('pri(accounts.changePassword)', { address, oldPass, newPass });
 }
 
 export async function showAccount(address: string, isShowing: boolean): Promise<boolean> {
@@ -129,6 +129,10 @@ export async function forgetAccount(address: string): Promise<boolean> {
 
 export async function approveAuthRequest(id: string, authorizedAccounts: string[]): Promise<boolean> {
   return sendMessage('pri(authorize.approve)', { authorizedAccounts, id });
+}
+
+export async function rejectAuthRequest(id: string): Promise<boolean> {
+  return sendMessage('pri(authorize.reject)', { id });
 }
 
 export async function approveMetaRequest(id: string): Promise<boolean> {
@@ -302,11 +306,19 @@ export async function jsonGetAccountInfo(json: KeyringPair$Json): Promise<Respon
   return sendMessage('pri(json.account.info)', json);
 }
 
-export async function jsonRestore(file: KeyringPair$Json, password: string, skipAuthenticityCheck?: boolean): Promise<void> {
+export async function jsonRestore(
+  file: KeyringPair$Json,
+  password: string,
+  skipAuthenticityCheck?: boolean
+): Promise<void> {
   return sendMessage('pri(json.restore)', { file, password, skipAuthenticityCheck });
 }
 
-export async function batchRestore(file: KeyringPairs$Json, password: string, skipAuthenticityCheck?: boolean): Promise<void> {
+export async function batchRestore(
+  file: KeyringPairs$Json,
+  password: string,
+  skipAuthenticityCheck?: boolean
+): Promise<void> {
   return sendMessage('pri(json.batchRestore)', { file, password, skipAuthenticityCheck });
 }
 

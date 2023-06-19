@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
-import { MetaInfo } from '@subwallet/extension-koni-ui/components/MetaInfo';
 import NetworkGroupItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/NetworkGroupItem';
 import NetworkToggleItem from '@subwallet/extension-koni-ui/components/NetworkToggleItem';
 import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Divider, Icon, Popover, SwList } from '@subwallet/react-ui';
-import { ListChecks, SlidersHorizontal } from 'phosphor-react';
+import { CaretDown, ListChecks, SlidersHorizontal } from 'phosphor-react';
 import React, { forwardRef, LegacyRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const StyledSection = styled(SwList.Section)<ThemeProps>(({ theme: { token } }: ThemeProps) => {
@@ -40,6 +40,7 @@ const Component: React.FC = () => {
   const { t } = useTranslation();
   const chainInfoList = useChainInfoWithState();
 
+  const navigate = useNavigate();
   const searchToken = useCallback((chainInfo: ChainInfoWithState, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
 
@@ -65,6 +66,10 @@ const Component: React.FC = () => {
       />
     );
   }, [t]);
+
+  const handleManageNetworks = useCallback(() => {
+    navigate('/settings/chains/manage');
+  }, [navigate]);
 
   const popOverContent = useMemo(() => {
     return (
@@ -94,6 +99,7 @@ const Component: React.FC = () => {
                 size={'sm'}
               />
             )}
+            onClick={handleManageNetworks}
             type='ghost'
           >
             {t<string>('Manage networks')}
@@ -101,13 +107,14 @@ const Component: React.FC = () => {
         </div>
       </>
     );
-  }, [chainInfoList, emptyTokenList, renderChainItem, searchToken, t]);
+  }, [chainInfoList, emptyTokenList, handleManageNetworks, renderChainItem, searchToken, t]);
 
   // Remove ref error
   // eslint-disable-next-line react/display-name
   const TriggerComponent = forwardRef((props, ref) => (
     <div
       {...props}
+      className={'trigger-container'}
       ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}
       style={{
         zIndex: 999
@@ -117,6 +124,10 @@ const Component: React.FC = () => {
         chains={chainInfoList}
         className='ava-group'
         content={`${chainInfoList.length} networks`}
+      />
+      <Button
+        icon={<CaretDown size={12} />}
+        type='ghost'
       />
     </div>
   ));
@@ -136,7 +147,7 @@ const Component: React.FC = () => {
   );
 };
 
-const Networks = styled(Component)<ThemeProps>(({ theme: { token } }: ThemeProps) => {
+const Networks = styled(Component)<ThemeProps>(() => {
   return {
   };
 });

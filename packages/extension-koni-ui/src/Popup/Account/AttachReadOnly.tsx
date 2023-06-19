@@ -150,7 +150,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   useFocusById(modalId);
 
   const buttonProps = {
-    children: t('Attach read-only account'),
+    children: t('Attach watch-only account'),
     icon: FooterIcon,
     disabled: isDisable,
     onClick: onSubmit,

@@ -176,7 +176,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         {isWebUI
           ? (
             <>
-
               <SwList
                 className={CN('nft_item_list__container')}
                 displayGrid={true}
@@ -194,6 +193,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Button
                 block
                 children={t('Delete this collectible')}
+                disabled={!(originAssetInfo && _isSmartContractToken(originAssetInfo) && _isCustomAsset(originAssetInfo.slug))}
                 icon={(
                   <Icon
                     phosphorIcon={Trash}

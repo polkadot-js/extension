@@ -1,9 +1,10 @@
-// [object Object]
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { AlertBox } from '@subwallet/extension-koni-ui/components';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -31,6 +32,7 @@ const Component: React.FC<PropsType> = ({ className, contents }: PropsType) => {
         contents.map((alert: InstructionContentType, index: number) => (
           <AlertBox
             description={typeof alert.description === 'string' ? t(alert.description) : alert.description}
+            key={index}
             title={t(alert.title)}
             type={alert.type || 'warning'}
           />
@@ -40,7 +42,7 @@ const Component: React.FC<PropsType> = ({ className, contents }: PropsType) => {
   );
 };
 
-const InstructionContainer = styled(Component)<PropsType>(({ theme: { token } }: PropsType) => ({
+const InstructionContainer = styled(Component)<PropsType>(() => ({
   display: 'flex',
   flexDirection: 'column',
   gap: 10

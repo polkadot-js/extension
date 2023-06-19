@@ -96,44 +96,46 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   }, [location]);
 
   useEffect(() => {
-    const pathName = location.pathname;
-
-    if (needMigrate && hasMasterPassword && !isLocked) {
-      if (pathName !== migratePasswordUrl) {
-        navigate(migratePasswordUrl);
-      }
-    } else if (hasMasterPassword && isLocked) {
-      if (pathName !== loginUrl) {
-        navigate(loginUrl);
-      }
-    } else if (!hasMasterPassword) {
-      if (isNoAccount(accounts)) {
-        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
-          navigate(welcomeUrl);
-        }
-      } else {
-        navigate(createPasswordUrl);
-      }
-    } else if (isNoAccount(accounts)) {
-      if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
-        navigate(welcomeUrl);
-      }
-    } else if (pathName === DEFAULT_ROUTER_PATH) {
-      if (hasConfirmations) {
-        console.log('hasConfirmations');
-        openPModal('confirmations');
-      } else {
-        navigate(tokenUrl);
-      }
-    } else if (pathName === loginUrl && !isLocked) {
-      goHome();
-    } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {
-      goHome();
-    } else if (hasInternalConfirmations) {
-      openPModal('confirmations');
-    } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
-      openPModal(null);
-    }
+    // const pathName = location.pathname;
+    //
+    // console.log('=========', isLocked);
+    //
+    // if (needMigrate && hasMasterPassword && !isLocked) {
+    //   if (pathName !== migratePasswordUrl) {
+    //     navigate(migratePasswordUrl);
+    //   }
+    // } else if (hasMasterPassword && isLocked) {
+    //   if (pathName !== loginUrl) {
+    //     navigate(loginUrl);
+    //   }
+    // } else if (!hasMasterPassword) {
+    //   if (isNoAccount(accounts)) {
+    //     if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
+    //       navigate(welcomeUrl);
+    //     }
+    //   } else {
+    //     navigate(createPasswordUrl);
+    //   }
+    // } else if (isNoAccount(accounts)) {
+    //   if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
+    //     navigate(welcomeUrl);
+    //   }
+    // } else if (pathName === DEFAULT_ROUTER_PATH) {
+    //   if (hasConfirmations) {
+    //     console.log('hasConfirmations');
+    //     openPModal('confirmations');
+    //   } else {
+    //     navigate(tokenUrl);
+    //   }
+    // } else if (pathName === loginUrl && !isLocked) {
+    //   goHome();
+    // } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {
+    //   goHome();
+    // } else if (hasInternalConfirmations) {
+    //   openPModal('confirmations');
+    // } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
+    //   openPModal(null);
+    // }
   }, [accounts, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
 
   return <>{children}</>;

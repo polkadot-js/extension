@@ -11,9 +11,9 @@ import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messagin
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
-import { Divider, Logo, Popover, SwList } from '@subwallet/react-ui';
-import { ListChecks } from 'phosphor-react';
-import React, { forwardRef, LegacyRef, useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, Divider, Logo, Popover, SwList } from '@subwallet/react-ui';
+import { CaretDown, ListChecks } from 'phosphor-react';
+import React, { forwardRef, LegacyRef, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -64,6 +64,7 @@ const StyledActions = styled.div<ThemeProps>(({ theme: { token } }: ThemeProps) 
 const Component: React.FC = () => {
   const { t } = useTranslation();
   const { accounts: _accounts, currentAccount } = useSelector((state: RootState) => state.accountState);
+
   const [open, setOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
@@ -179,21 +180,35 @@ const Component: React.FC = () => {
 
   // Remove ref error
   // eslint-disable-next-line react/display-name
-  const TriggerComponent = forwardRef((props, ref) => (
-    <div
-      {...props}
-      ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}
-      style={{
-        zIndex: 999
-      }}
-    >
-      <MetaInfo.AccountGroup
-        accounts={accounts}
-        className='ava-group'
-        content={`${noAllAccounts.length} accounts`}
-      />
-    </div>
-  ));
+  const TriggerComponent = forwardRef((props, ref) => {
+    if (!currentAccount || !currentAccount.name) {
+      return null;
+    } else {
+      const content: string = isAccountAll(currentAccount?.address) ? 'All accounts' : currentAccount?.name;
+
+      return (
+        <div
+          {...props}
+          className={'trigger-container'}
+          ref={ref as unknown as LegacyRef<HTMLDivElement> | undefined}
+          style={{
+            zIndex: 999
+          }}
+        >
+          <MetaInfo.AccountGroup
+            accounts={accounts}
+            className='ava-group'
+            content={content}
+          />
+
+          <Button
+            icon={<CaretDown size={12} />}
+            type='ghost'
+          />
+        </div>
+      );
+    }
+  });
 
   const popOverContent = useMemo(() => {
     return (

@@ -21,7 +21,6 @@ const Component: React.FC<NetworkGroupProps> = (props: NetworkGroupProps) => {
     className, content, label, onClick } = props;
 
   const chainLogos = useMemo(() => {
-    /* const showCount: number = chains.length > 2 ? 3 : 2; */
     const countMore: number = chains.length - 3;
 
     return (
@@ -43,7 +42,7 @@ const Component: React.FC<NetworkGroupProps> = (props: NetworkGroupProps) => {
                     className={'__chain-logo'}
                     network={chain.slug}
                     shape='circle'
-                    size={20}
+                    size={14}
                   />
                 </div>
               );
@@ -100,7 +99,12 @@ const NetworkGroupItem = styled(Component)<NetworkGroupProps>(({ theme: { token 
       position: 'relative',
 
       '.avatar-content': {
-        marginLeft: -8
+        marginLeft: -8,
+        '.ant-image-img': {
+          boxSizing: 'content-box',
+          padding: 2,
+          border: '1px solid #004BFF'
+        }
       },
 
       '&.ml-strong': {

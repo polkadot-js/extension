@@ -302,6 +302,9 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.Base
+        className={CN({
+          'modal-container': modalContent
+        })}
         disableBack={loading}
         onBack={onBack}
         rightFooterButton={{
@@ -326,29 +329,34 @@ const Component: React.FC<Props> = (props: Props) => {
               : titleMap[exportTypes[0]]
         }
       >
-        {!modalContent && <SwSubHeader
-          background={'transparent'}
-          center
-          className={'transaction-header'}
-          onBack={onBack}
-          paddingVertical
-          rightButtons={[
-            {
-              icon: <CloseIcon />,
-              onClick: goHome,
-              disabled: loading
+        {!modalContent && (
+          <SwSubHeader
+            background={'transparent'}
+            center
+            className={'transaction-header'}
+            onBack={onBack}
+            paddingVertical
+            rightButtons={[
+              {
+                icon: <CloseIcon />,
+                onClick: goHome,
+                disabled: loading
+              }
+            ]}
+            showBackButton
+            title={
+              firstStep
+                ? t('Export account')
+                : !exportSingle
+                  ? t('Export successful')
+                  : t(titleMap[exportTypes[0]])
             }
-          ]}
-          showBackButton
-          title={
-            firstStep
-              ? t('Export account')
-              : !exportSingle
-                ? t('Export successful')
-                : t(titleMap[exportTypes[0]])
-          }
-                          />}
-        <div className='body-container'>
+          />
+        )}
+        <div className={CN('body-container', {
+          '__modal-ui': modalContent
+        })}
+        >
           <div className={CN('notice', { 'mb-large': !firstStep })}>
             <AlertBox
               description={t('Anyone with your key can use any assets held in your account.')}
@@ -553,8 +561,31 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.modal-container': {
+      '.ant-sw-screen-layout-footer': {
+        background: '#000'
+      },
+      '.ant-sw-screen-layout-footer-button-container': {
+        background: '#000',
+        padding: 0,
+        margin: 0,
+        marginTop: 32,
+        '.ant-btn': {
+          margin: 0
+        }
+      }
+    },
     '.body-container': {
-      padding: `0 ${token.padding}px`
+      padding: `0 ${token.padding}px`,
+
+      '&.__modal-ui': {
+        padding: 0,
+        background: '#000',
+
+        '.notice': {
+          marginTop: '0 !important'
+        }
+      }
     },
 
     '.notice': {

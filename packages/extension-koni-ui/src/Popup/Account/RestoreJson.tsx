@@ -69,7 +69,7 @@ const instructionContent: InstructionContentType[] = [
     description: "The JSON backup file stores your account's information encrypted with the account's password. It's a second recovery method additionally to the mnemonic phrase. "
   },
   {
-    title: 'What is a JSON?',
+    title: 'How to export your JSON backup file',
     description: (
       <span>
         When you create your account directly on Polkadot-JS UI the JSON file is automatically downloaded to your Downloads folder.
@@ -282,7 +282,7 @@ function Component ({ className }: Props): JSX.Element {
   }, [requirePassword]);
 
   const buttonProps = {
-    children: t('Import from Json'),
+    children: t('Import account'),
     icon: FooterIcon,
     onClick: form.submit,
     disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
@@ -367,32 +367,30 @@ function Component ({ className }: Props): JSX.Element {
                     )}
                 </Form.Item>
               )}
-              {requirePassword && (
-                <>
-                  <Form.Item
-                    validateStatus={submitValidateState.status}
-                  >
-                    <div className='input-label'>
-                      {t('Please enter the password you set when creating your polkadot.js account')}
-                    </div>
-                    <Input
-                      id={`${formName}_${passwordField}`}
-                      onChange={onChangePassword}
-                      placeholder={t('Current password')}
-                      statusHelp={submitValidateState.message}
-                      type='password'
-                      value={password}
-                    />
+              <>
+                <Form.Item
+                  validateStatus={submitValidateState.status}
+                >
+                  <div className='input-label'>
+                    {t('Please enter the password you set when creating your polkadot.js account')}
+                  </div>
+                  <Input
+                    id={`${formName}_${passwordField}`}
+                    onChange={onChangePassword}
+                    placeholder={t('Current password')}
+                    statusHelp={submitValidateState.message}
+                    type='password'
+                    value={password}
+                  />
 
-                  </Form.Item>
-                  {isWebUI && (
-                    <Button
-                      {...buttonProps}
-                      className='action'
-                    />
-                  )}
-                </>
-              )}
+                </Form.Item>
+                {isWebUI && (
+                  <Button
+                    {...buttonProps}
+                    className='action'
+                  />
+                )}
+              </>
             </Form>
             <SwModal
               className={className}

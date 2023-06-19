@@ -232,11 +232,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               {isWebUI && (
                 <>
                   {/* TODO: add logic to form item */}
-                  <Form.Item>
-                    <Checkbox>
-                      <span className={'__option-label'}>Import multiple accounts from this seed phrase</span>
-                    </Checkbox>
-                  </Form.Item>
+                  {/* <Form.Item> */}
+                  {/*   <Checkbox> */}
+                  {/*     <span className={'__option-label'}>Import multiple accounts from this seed phrase</span> */}
+                  {/*   </Checkbox> */}
+                  {/* </Form.Item> */}
                   <Button
                     {...buttonProps}
                     className='action'

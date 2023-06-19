@@ -1,4 +1,5 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors // SPDX-License-Identifier: Apache-2.0
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
 
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
@@ -132,7 +133,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       });
   }, [existentialDeposit, form, genesisHash, isPureEvmChain, navigate, showNotification, t]);
 
-  const blockExplorerValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+  const blockExplorerValidator = useCallback((_rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (value.length === 0 || isUrl(value)) {
         resolve();
@@ -142,7 +143,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     });
   }, [t]);
 
-  const crowdloanUrlValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+  const crowdloanUrlValidator = useCallback((_rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (value.length === 0 || isUrl(value)) {
         resolve();
@@ -165,7 +166,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [t]);
 
-  const providerValidator = useCallback((rule: RuleObject, provider: string): Promise<void> => {
+  const providerValidator = useCallback((_rule: RuleObject, provider: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (isUrl(provider)) {
         setIsShowConnectionStatus(true);
@@ -291,7 +292,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     loading: loading,
     onClick: onSubmit,
     children: 'Save'
-  }), [isSubmitDisabled, onSubmit, isWebUI]);
+  }), [isSubmitDisabled, isWebUI, loading, onSubmit]);
 
   const subHeaderProps = useMemo(() => isWebUI
     ? {
@@ -307,7 +308,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onClick: handleClickSubheaderButton
         }
       ]
-    }, [isWebUI, handleClickSubheaderButton]);
+    }, [isWebUI, t, handleClickSubheaderButton]);
 
   return (
     <PageWrapper className={`chain_import ${className}`}>
@@ -319,7 +320,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       >
         <SwSubHeader
           background='transparent'
-          onBack={() => navigate(-1)}
+          onBack={onBack}
           showBackButton={true}
           {...subHeaderProps}
         />
@@ -365,13 +366,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                     <Input
                       disabled={true}
                       placeholder={t('Network name')}
-                      prefix={<Icon
-                        customSize={'24px'}
-                        iconColor={token['gray-4']}
-                        phosphorIcon={Globe}
-                        type={'phosphor'}
-                        weight={'bold'}
-                      />}
+                      prefix={(
+                        <Icon
+                          customSize={'24px'}
+                          iconColor={token['gray-4']}
+                          phosphorIcon={Globe}
+                          type={'phosphor'}
+                          weight={'bold'}
+                        />
+                      )}
                       tooltip={t('Network name')}
                       tooltipPlacement={'topLeft'}
                     />

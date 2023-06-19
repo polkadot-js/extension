@@ -175,7 +175,7 @@ const Component: React.FC<Props> = (props: Props) => {
         navigate(`/accounts/export/${account.address}`);
       }
     }
-  }, [account?.address, navigate, isWebUI]);
+  }, [account?.address, isWebUI, activeModal, navigate]);
 
   const onCopyAddress = useCallback(() => {
     copyToClipboard(account?.address || '');
@@ -184,7 +184,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
   }, [account?.address, notify]);
 
-  const onUpdate: FormCallbacks<DetailFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+  const onUpdate: FormCallbacks<DetailFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], _allFields: FormFieldData[]) => {
     const changeMap = convertFieldToObject<DetailFormState>(changedFields);
 
     if (changeMap[FormFieldName.NAME]) {
@@ -429,6 +429,11 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
         gap: 16,
         width: '60%',
         margin: '0 auto',
+
+        '.anticon': {
+          height: 'unset !important',
+          width: 'unset !important'
+        },
 
         '& > *': {
           flex: 1

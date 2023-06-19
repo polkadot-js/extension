@@ -76,31 +76,43 @@ const Component: React.FC<Props> = (props: Props) => {
             }}
           />
         </div>
-        <div className='title'>
-          {t('All done!')}
+        <div className={CN('title', {
+          '__web-ui': isWebUI
+        })}
+        >
+          {!isWebUI ? t('All done!') : t("You're all done!")}
         </div>
-        <div className='description'>
+        <div className={CN('description', {
+          '__web-ui': isWebUI
+        })}
+        >
           {t('Follow along with product updates or reach out if you have any questions.')}
         </div>
 
-        {isWebUI && (
-          <Button
-            icon={(
-              <Icon
-                phosphorIcon={ArrowCircleRight}
-                weight={'fill'}
-              />
-            )}
-            onClick={goHome}
-            style={{
-              width: '100%',
-              marginBottom: 80
-            }}
-          >
-            {t('Go to Porfolio')}
-          </Button>
-        )}
-        <SocialGroup />
+        {isWebUI
+          ? (
+            <>
+              <SocialGroup />
+              <Button
+                icon={(
+                  <Icon
+                    phosphorIcon={ArrowCircleRight}
+                    weight={'fill'}
+                  />
+                )}
+                onClick={goHome}
+                style={{
+                  width: '100%',
+                  marginTop: 64
+                }}
+              >
+                {t('Go to Porfolio')}
+              </Button>
+            </>
+          )
+          : (
+            <SocialGroup />
+          )}
       </div>
     </Layout.Base>
   );
@@ -139,7 +151,10 @@ const CreatePasswordDone = styled(Component)<Props>(({ theme: { token } }: Props
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5,
       color: token.colorTextDescription,
-      textAlign: 'center'
+      textAlign: 'center',
+      '&.__web-ui': {
+        padding: `0 ${token.controlHeightLG}px`
+      }
     },
 
     '.button-group': {

@@ -96,20 +96,30 @@ const Controller = styled(Component)<Props>(({ theme }: Props) => ({
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      '.ava-group': {
-        cursor: 'pointer',
+
+      '.trigger-container': {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        cursor: 'pointer',
         margin: '0 4px',
-        padding: '8px 16px',
-
+        padding: '10px 16px',
+        gap: 8,
         background: '#1A1A1A',
         borderRadius: 32,
-        '.__account-item': {
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
+
+        '.ant-btn': {
+          height: 'fit-content',
+          minWidth: 'unset',
+          width: 'fit-content'
+        },
+
+        '.ava-group': {
+          '.__account-item': {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }
         }
       }
     }

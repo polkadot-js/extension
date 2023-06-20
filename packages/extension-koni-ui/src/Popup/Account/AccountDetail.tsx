@@ -6,9 +6,10 @@ import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/Accou
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
+import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { deriveAccountV3, editAccount, forgetAccount } from '@subwallet/extension-koni-ui/messaging';
+import { deriveAccountV3, editAccount, enableMantaPay, forgetAccount } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
@@ -64,7 +65,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const signMode = useGetAccountSignModeByAddress(accountAddress);
 
-  const [isMantaPayEnabled, setIsMantaPayEnabled] = useState(false);
+  const _isMantaPayEnabled = useIsMantaPayEnabled(accountAddress || '');
+
+  const [isMantaPayEnabled, setIsMantaPayEnabled] = useState(_isMantaPayEnabled); // TODO
   const [isMantaPaySyncing, setIsMantaPaySyncing] = useState(false);
 
   const { handleSimpleConfirmModal } = useConfirmModal({
@@ -80,7 +83,11 @@ const Component: React.FC<Props> = (props: Props) => {
   const handleEnableMantaPay = useCallback(() => {
     handleSimpleConfirmModal()
       .then(() => {
-        setIsMantaPaySyncing(true);
+        enableMantaPay()
+          .then(() => {
+            setIsMantaPaySyncing(true);
+          })
+          .catch(console.error);
       })
       .catch(console.log);
   }, [handleSimpleConfirmModal]);

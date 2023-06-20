@@ -198,14 +198,18 @@ export class KoniSubscription {
       this.state.setBalanceItem(result.tokenSlug, result);
     });
 
+    const unsub2 = this.state.subscribeMantaPayBalance();
+
     if (onlyRunOnFirstTime) {
       unsub && unsub();
+      unsub2 && unsub2();
 
       return;
     }
 
     return () => {
       unsub && unsub();
+      unsub2 && unsub2();
     };
   }
 

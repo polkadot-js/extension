@@ -99,6 +99,27 @@ export default class KoniDatabase extends Dexie {
 
       mantaPay: 'key'
     });
+
+    this.conditionalVersion(3, {
+      // DO NOT declare all columns, only declare properties to be indexed
+      // Read more: https://dexie.org/docs/Version/Version.stores()
+      // Primary key is always the first entry
+      chain: 'slug',
+      asset: 'slug',
+      price: 'currency',
+      balances: '[tokenSlug+address], tokenSlug, address',
+      nfts: '[chain+address+collectionId+id], [address+chain], chain, id, address, collectionId, name',
+      nftCollections: '[chain+collectionId], chain, collectionId, collectionName',
+      crowdloans: '[chain+address], chain, address',
+      stakings: '[chain+address+type], [chain+address], chain, address, type',
+      transactions: '[chain+address+extrinsicHash], &[chain+address+extrinsicHash], chain, address, extrinsicHash, action',
+      migrations: '[key+name]',
+
+      chainStakingMetadata: '[chain+type], chain, type',
+      nominatorMetadata: '[chain+address+type], [chain+address], chain, address, type',
+
+      mantaPay: 'key, chain'
+    });
   }
 
   private conditionalVersion (

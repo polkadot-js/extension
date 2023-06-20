@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, ChainStakingMetadata, CrowdloanItem, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingType, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import KoniDatabase, { IBalance, IChain, ICrowdloanItem, INft } from '@subwallet/extension-base/services/storage-service/databases';
 import { AssetStore, BalanceStore, ChainStore, CrowdloanStore, MigrationStore, NftCollectionStore, NftStore, PriceStore, StakingStore, TransactionStore } from '@subwallet/extension-base/services/storage-service/db-stores';
 import BaseStore from '@subwallet/extension-base/services/storage-service/db-stores/BaseStore';
@@ -284,11 +284,22 @@ export default class DatabaseService {
     });
   }
 
-  async setMantaPayLedger (data: any) {
+  async setMantaPayData (data: any) {
     await this._db.mantaPay.put(data); // just override if exist
   }
 
-  async getMantaPayLedger (key: string) {
+  async getMantaPayData (key: string) {
     return this._db.mantaPay.get({ key });
+  }
+
+  subscribeMantaPayConfig (chain: string, callback: (data: MantaPayConfig[]) => void) {
+    this.stores.mantaPay.subscribeMantaPayConfig(chain).subscribe(({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      next: (data) => callback && callback(data)
+    }));
+  }
+
+  async getMantaPayConfig (chain: string) {
+    return this.stores.mantaPay.getConfig(chain);
   }
 }

@@ -4,7 +4,7 @@
 import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { _ASSET_LOGO_MAP_SRC, _ASSET_REF_SRC, _CHAIN_ASSET_SRC, _CHAIN_INFO_SRC, _CHAIN_LOGO_MAP_SRC, _DEFAULT_ACTIVE_CHAINS, _MANTA_ZK_CHAIN_GROUP, _MULTI_CHAIN_ASSET_SRC } from '@subwallet/extension-base/services/chain-service/constants';
+import { _ASSET_LOGO_MAP_SRC, _ASSET_REF_SRC, _CHAIN_ASSET_SRC, _CHAIN_INFO_SRC, _CHAIN_LOGO_MAP_SRC, _DEFAULT_ACTIVE_CHAINS, _MANTA_ZK_CHAIN_GROUP, _MULTI_CHAIN_ASSET_SRC, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaPrivateHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
@@ -283,6 +283,18 @@ export class ChainService {
 
   public getAssetBySlug (slug: string): _ChainAsset {
     return this.getAssetRegistry()[slug];
+  }
+
+  public getMantaZkAssets (chain: string): Record<string, _ChainAsset> {
+    const result: Record<string, _ChainAsset> = {};
+
+    Object.values(this.getAssetRegistry()).forEach((chainAsset) => {
+      if (chainAsset.originChain === chain && _isAssetFungibleToken(chainAsset) && chainAsset.symbol.startsWith(_ZK_ASSET_PREFIX)) {
+        result[chainAsset.slug] = chainAsset;
+      }
+    });
+
+    return result;
   }
 
   public getFungibleTokensByChain (chainSlug: string, checkActive = false): Record<string, _ChainAsset> {
@@ -642,41 +654,41 @@ export class ChainService {
   }
 
   private async fetchLatestData (src: string, defaultValue: unknown) {
-    return Promise.resolve(defaultValue);
-    // try {
-    //   const timeout = new Promise((resolve) => {
-    //     const id = setTimeout(() => {
-    //       clearTimeout(id);
-    //       resolve(null);
-    //     }, 1500);
-    //   });
-    //   let result = defaultValue;
-    //   const resp = await Promise.race([
-    //     timeout,
-    //     fetch(src)
-    //   ]) as Response || null;
-    //
-    //   if (!resp) {
-    //     console.warn('Error fetching latest data', src);
-    //
-    //     return result;
-    //   }
-    //
-    //   if (resp.ok) {
-    //     try {
-    //       result = await resp.json();
-    //       console.log('Fetched latest data', src);
-    //     } catch (err) {
-    //       console.warn('Error parsing latest data', src, err);
-    //     }
-    //   }
-    //
-    //   return result;
-    // } catch (e) {
-    //   console.warn('Error fetching latest data', src, e);
-    //
-    //   return defaultValue;
-    // }
+    // return Promise.resolve(defaultValue);
+    try {
+      const timeout = new Promise((resolve) => {
+        const id = setTimeout(() => {
+          clearTimeout(id);
+          resolve(null);
+        }, 1500);
+      });
+      let result = defaultValue;
+      const resp = await Promise.race([
+        timeout,
+        fetch(src)
+      ]) as Response || null;
+
+      if (!resp) {
+        console.warn('Error fetching latest data', src);
+
+        return result;
+      }
+
+      if (resp.ok) {
+        try {
+          result = await resp.json();
+          console.log('Fetched latest data', src);
+        } catch (err) {
+          console.warn('Error parsing latest data', src, err);
+        }
+      }
+
+      return result;
+    } catch (e) {
+      console.warn('Error fetching latest data', src, e);
+
+      return defaultValue;
+    }
   }
 
   private async initChains () {

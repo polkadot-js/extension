@@ -6,14 +6,14 @@ import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaPayConfig, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
-import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH } from '@subwallet/extension-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, ASTAR_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
-import { _getEvmChainId, _getSubstrateGenesisHash, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParaChain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getEvmChainId, _getSubstrateGenesisHash, _getTokenOnChainAssetId, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParaChain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
@@ -94,6 +94,7 @@ export default class KoniState {
   private nftSubject = new Subject<NftJson>();
 
   private stakingSubject = new Subject<StakingJson>();
+  private mantaPayConfigSubject = new Subject<MantaPayConfig[]>();
   private chainStakingMetadataSubject = new Subject<ChainStakingMetadata[]>();
   private stakingNominatorMetadataSubject = new Subject<NominatorMetadata[]>();
   private stakingRewardSubject = new Subject<StakingRewardJson>();
@@ -272,6 +273,8 @@ export default class KoniState {
     await this.migrationService.run();
     this.eventService.emit('chain.ready', true);
 
+    await this.initMantaPay();
+
     this.onReady();
     this.onAccountAdd();
     this.onAccountRemove();
@@ -279,11 +282,29 @@ export default class KoniState {
     await this.startSubscription();
   }
 
+  private async initMantaPay () {
+    const currentAddress = this.keyringService.currentAccount.address;
+
+    if (!currentAddress || isEthereumAddress(currentAddress)) {
+      return;
+    }
+
+    const mantaPayConfig = await this.chainService.mantaPay.getMantaPayConfig(currentAddress, 'calamari') as MantaPayConfig;
+
+    if (mantaPayConfig && mantaPayConfig.enabled) { // only init if current account enabled mantaPay
+      await this.enableMantaPay(false);
+    }
+  }
+
   private async startSubscription () {
     await this.eventService.waitKeyringReady;
 
     this.dbService.subscribeChainStakingMetadata([], (data) => {
       this.chainStakingMetadataSubject.next(data);
+    });
+
+    this.dbService.subscribeMantaPayConfig('calamari', (data) => {
+      this.mantaPayConfigSubject.next(data);
     });
 
     let unsub: Subscription | undefined;
@@ -383,6 +404,11 @@ export default class KoniState {
     return this.dbService.getNominatorMetadata();
   }
 
+  public async getMantaPayConfig (chain: string): Promise<MantaPayConfig[]> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this.dbService.getMantaPayConfig(chain);
+  }
+
   public async getStaking (): Promise<StakingJson> {
     const addresses = this.getDecodedAddresses();
 
@@ -406,6 +432,10 @@ export default class KoniState {
 
   public async getPooledStakingRecordsByAddress (addresses: string[]): Promise<StakingItem[]> {
     return this.dbService.getPooledStakings(addresses, this.activeChainSlugs);
+  }
+
+  public subscribeMantaPayConfig () {
+    return this.mantaPayConfigSubject;
   }
 
   public subscribeStaking () {
@@ -1770,7 +1800,7 @@ export default class KoniState {
     await this.chainService.init();
   }
 
-  public async enableMantaPay () {
+  public async enableMantaPay (updateStore: boolean) {
     const currentAddress = this.keyringService.currentAccount.address;
 
     if (!currentAddress || isEthereumAddress(currentAddress)) {
@@ -1786,7 +1816,15 @@ export default class KoniState {
     await this.chainService.mantaPay.privateWallet?.loadUserSeedPhrase(mnemonic);
     const zkAddress = await this.chainService.mantaPay.privateWallet?.getZkAddress();
 
-    console.log('zkAddress', zkAddress);
+    if (updateStore) {
+      await this.chainService.mantaPay.saveMantaPayConfig({
+        address: currentAddress,
+        zkAddress: zkAddress,
+        enabled: true,
+        chain: this.chainService.mantaPay.privateWallet?.network?.toLowerCase(),
+        isInitialSync: false
+      } as MantaPayConfig);
+    }
 
     return zkAddress;
   }
@@ -1805,11 +1843,46 @@ export default class KoniState {
     return await this.chainService.mantaPay.privateWallet?.initialWalletSync();
   }
 
-  public async getZkBalance () {
-    const assetId = new BN(1);
+  public getMantaZkBalance () {
+    if (!this.chainService || !this.chainService.mantaPay) {
+      return;
+    }
 
-    const zkBalance = await this.chainService.mantaPay.privateWallet?.getZkBalance(assetId);
+    const chain = this.chainService?.mantaPay.privateWallet?.network;
 
-    console.log('zkKMA: ', zkBalance?.toString());
+    if (!chain) {
+      return;
+    }
+
+    const assetMap = this.chainService.getMantaZkAssets(chain?.toLowerCase());
+
+    this.chainService.mantaPay.privateWallet?.getMultiZkBalance(Object.values(assetMap).map((tokenInfo) => new BN(_getTokenOnChainAssetId(tokenInfo))))
+      .then((zkBalances) => {
+        const assetList = Object.values(assetMap);
+
+        for (let i = 0; i < assetList.length; i++) {
+          const balanceItem = {
+            tokenSlug: assetList[i].slug,
+            state: APIItemState.PENDING,
+            free: '0',
+            locked: '0'
+          } as BalanceItem;
+
+          balanceItem.free = zkBalances[i]?.toString() || '0';
+          balanceItem.state = APIItemState.READY;
+          this.setBalanceItem(balanceItem.tokenSlug, balanceItem);
+        }
+      })
+      .catch(console.warn);
+  }
+
+  public subscribeMantaPayBalance () {
+    this.getMantaZkBalance();
+
+    const interval = setInterval(this.getMantaZkBalance, ASTAR_REFRESH_BALANCE_INTERVAL);
+
+    return () => {
+      interval && clearInterval(interval);
+    };
   }
 }

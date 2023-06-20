@@ -1863,6 +1863,14 @@ export interface RequestPassPhishingPage {
   url: string;
 }
 
+export interface MantaPayConfig {
+  address: string;
+  zkAddress: string;
+  enabled: boolean;
+  chain: string;
+  isInitialSync: boolean;
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1934,6 +1942,7 @@ export interface KoniRequestSignatures {
   'pri(mantaPay.enable)': [null, string | undefined];
   'pri(mantaPay.initialSyncMantaPay)': [null, boolean | undefined];
   'pri(mantaPay.getZkBalance)': [null, null];
+  'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];
 
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];

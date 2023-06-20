@@ -13,6 +13,7 @@ import BondingReducer from './feature/Bonding';
 import AssetRegistryReducer from './feature/common/AssetRegistry';
 import ChainStoreReducer from './feature/common/ChainStore';
 import CrowdloanReducer from './feature/Crowdloan';
+import MantaPayReducer from './feature/MantaPay';
 import NftReducer from './feature/Nft';
 import PriceReducer from './feature/Price';
 import StakingReducer from './feature/Staking';
@@ -37,6 +38,7 @@ const rootReducers = combineReducers({
   price: PriceReducer,
   balance: BalanceReducer,
   bonding: BondingReducer,
+  mantaPay: MantaPayReducer,
 
   // common
   chainStore: ChainStoreReducer,

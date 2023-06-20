@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { MantaPayConfig } from '@subwallet/extension-base/background/KoniTypes';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { BaseWallet, interfaces, MantaPayWallet } from 'manta-extension-sdk';
 
@@ -25,11 +26,22 @@ export class MantaPrivateHandler {
     return this._privateWallet;
   }
 
+  public async saveMantaPayConfig (config: MantaPayConfig) {
+    await this.dbService.setMantaPayData({
+      key: `config_${config.chain}_${config.address}`,
+      ...config
+    });
+  }
+
+  public async getMantaPayConfig (address: string, chain: string): Promise<any> {
+    return this.dbService.getMantaPayData(`config_${chain}_${address}`);
+  }
+
   private async saveLedgerState (palletName: interfaces.PalletName, network: interfaces.Network, data: any): Promise<boolean> {
     try {
       const suffix = this.currentAddress ? `_${this.currentAddress}` : '';
 
-      await this.dbService.setMantaPayLedger({
+      await this.dbService.setMantaPayData({
         key: `storage_state_${palletName}_${network}${suffix}`,
         ...data
       });
@@ -51,7 +63,7 @@ export class MantaPrivateHandler {
       console.log('get ledger data', `storage_state_${palletName}_${network}${suffix}`);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      result = await this.dbService.getMantaPayLedger(`storage_state_${palletName}_${network}${suffix}`);
+      result = await this.dbService.getMantaPayData(`storage_state_${palletName}_${network}${suffix}`);
     } catch (e) {
       console.error(e);
     }
@@ -75,5 +87,13 @@ export class MantaPrivateHandler {
     this._privateWallet = MantaPayWallet.init(networkParam as interfaces.Network, baseWallet);
 
     return this._privateWallet.api;
+  }
+
+  public async syncAllWallet () {
+    console.log(this._privateWallet?.initialSyncIsFinished);
+    console.log('init sync done');
+    await this._privateWallet?.initialWalletSync();
+    await this._privateWallet?.walletSync();
+    console.log('wallet sync done');
   }
 }

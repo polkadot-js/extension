@@ -3293,7 +3293,7 @@ export default class KoniExtension {
   }
 
   private async enableMantaPay () { // always takes the current account
-    return await this.#koniState.enableMantaPay();
+    return await this.#koniState.enableMantaPay(true);
   }
 
   private async initialSyncMantaPay () {
@@ -3304,8 +3304,21 @@ export default class KoniExtension {
     return result;
   }
 
-  private async getZkBalance () {
-    return await this.#koniState.getZkBalance();
+  private subscribeMantaPayConfig (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(mantaPay.subscribeConfig)'>(id, port);
+    const mantaPayConfigSubscription = this.#koniState.subscribeMantaPayConfig().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, mantaPayConfigSubscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.getMantaPayConfig('calamari');
   }
 
   // --------------------------------------------------------------
@@ -3716,8 +3729,8 @@ export default class KoniExtension {
         return await this.enableMantaPay();
       case 'pri(mantaPay.initialSyncMantaPay)':
         return await this.initialSyncMantaPay();
-      case 'pri(mantaPay.getZkBalance)':
-        return await this.getZkBalance();
+      case 'pri(mantaPay.subscribeConfig)':
+        return await this.subscribeMantaPayConfig(id, port);
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

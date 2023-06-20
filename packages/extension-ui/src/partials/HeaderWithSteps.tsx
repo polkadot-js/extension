@@ -6,6 +6,7 @@ import type { ThemeProps } from '../types';
 import React from 'react';
 import styled from 'styled-components';
 
+import { Z_INDEX } from '../zindex';
 import Header from './Header';
 
 interface Props {
@@ -39,6 +40,7 @@ const Steps = styled.div<{ withMargin: boolean }>`
   margin-bottom: ${({ withMargin }) => (withMargin ? '36px' : 0)};
   gap: 8px;
   position: sticky;
+  z-index: ${Z_INDEX.HEADER};
   top: 56px;
 
   :first-child {

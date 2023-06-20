@@ -27,7 +27,8 @@ const StyledFaviconBox = styled(FaviconBox)`
 function PhishingDetected({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { website } = useParams<WebsiteState>();
-  const origin = new URL(`https://${website}`).origin;
+
+  const origin = getWebsiteOriginFromEncodedUrl(website);
 
   const _onClick = useCallback(() => {
     window.close();
@@ -73,6 +74,12 @@ function PhishingDetected({ className }: Props): React.ReactElement<Props> {
     </>
   );
 }
+
+const getWebsiteOriginFromEncodedUrl = (encodedUrl: string) => {
+  const decodedWebsite = decodeURIComponent(encodedUrl);
+
+  return new URL(decodedWebsite).origin;
+};
 
 export default styled(PhishingDetected)(
   ({ theme }: Props) => `

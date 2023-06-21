@@ -7,8 +7,7 @@ import type { SignerPayloadRaw } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
 import type { RequestSign } from './types.js';
 
-import { wrapBytes } from '@polkadot/extension-dapp/wrapBytes';
-import { u8aToHex } from '@polkadot/util';
+import { u8aToHex, u8aWrapBytes } from '@polkadot/util';
 
 export default class RequestBytesSign implements RequestSign {
   public readonly payload: SignerPayloadRaw;
@@ -21,7 +20,7 @@ export default class RequestBytesSign implements RequestSign {
     return {
       signature: u8aToHex(
         pair.sign(
-          wrapBytes(this.payload.data)
+          u8aWrapBytes(this.payload.data)
         )
       )
     };

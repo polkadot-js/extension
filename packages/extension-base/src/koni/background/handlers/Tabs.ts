@@ -8,7 +8,7 @@ import { EvmProviderError } from '@subwallet/extension-base/background/errors/Ev
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, PassPhishing, RequestEvmProviderSend, RequestSettingsType, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, PassPhishing, RequestAddPspToken, RequestEvmProviderSend, RequestSettingsType, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesSign';
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
@@ -17,7 +17,7 @@ import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
-import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _generateCustomProviderKey, _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/setting-service/constants';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
@@ -480,7 +480,7 @@ export default class KoniTabs {
           tokenInfo.contractError = true;
         } else {
           tokenInfo.slug = validate?.existedSlug;
-          tokenInfo.name = validate.name;
+          tokenInfo.name = validate.name || tokenInfo.name;
           tokenInfo.symbol = validate.symbol;
           tokenInfo.decimals = validate.decimals;
         }
@@ -929,6 +929,70 @@ export default class KoniTabs {
     }
   }
 
+  public async addPspToken (id: string, url: string, { genesisHash, tokenInfo: input }: RequestAddPspToken) {
+    const _tokenType = input.type;
+
+    if (_tokenType !== 'psp22' && _tokenType !== 'psp34') {
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, `Assets type ${_tokenType} is not supported`);
+    }
+
+    if (!input.address || !input.symbol) {
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Assets params require address and symbol');
+    }
+
+    const [chain] = this.#koniState.findNetworkKeyByGenesisHash(genesisHash);
+
+    if (!chain) {
+      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current chain is not available');
+    }
+
+    const state = this.#koniState.getChainStateByKey(chain);
+
+    if (!state.active) {
+      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current chain is not available');
+    }
+
+    const tokenType = _tokenType === 'psp22' ? _AssetType.PSP22 : _AssetType.PSP34;
+
+    const tokenInfo: AddTokenRequestExternal = {
+      slug: '',
+      type: tokenType,
+      name: input.symbol || '',
+      contractAddress: input.address,
+      symbol: input.symbol || '',
+      decimals: input.decimals || 0,
+      originChain: chain,
+      contractError: false,
+      validated: false
+    };
+
+    this.#koniState.validateCustomAsset({
+      type: tokenType,
+      contractAddress: input.address,
+      originChain: chain
+    })
+      .then((validate) => {
+        if (validate.contractError) {
+          tokenInfo.contractError = true;
+        } else {
+          tokenInfo.slug = validate?.existedSlug;
+          tokenInfo.name = validate.name || tokenInfo.name;
+          tokenInfo.symbol = validate.symbol;
+          tokenInfo.decimals = validate.decimals;
+        }
+      })
+      .catch(() => {
+        tokenInfo.contractError = true;
+      })
+      .finally(() => {
+        tokenInfo.validated = true;
+
+        this.#koniState.requestService.updateConfirmation(id, 'addTokenRequest', tokenInfo);
+      });
+
+    return await this.#koniState.addTokenConfirm(id, url, tokenInfo);
+  }
+
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type === 'pub(phishing.redirectIfDenied)') {
       return this.redirectIfPhishing(url);
@@ -976,6 +1040,9 @@ export default class KoniTabs {
 
       case 'pub(rpc.unsubscribe)':
         return this.rpcUnsubscribe(request as RequestRpcUnsubscribe, port);
+
+      case 'pub(token.add)':
+        return this.addPspToken(id, url, request as RequestAddPspToken);
 
       ///
       case 'pub(authorize.tabV2)':

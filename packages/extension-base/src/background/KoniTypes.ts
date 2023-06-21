@@ -1865,6 +1865,19 @@ export interface RequestPassPhishingPage {
   url: string;
 }
 
+// Psp token
+
+export interface RequestAddPspToken {
+  genesisHash: string;
+  tokenInfo: {
+    type: string;
+    address: string;
+    symbol: string;
+    name: string;
+    decimals?: number;
+  };
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -2071,6 +2084,9 @@ export interface KoniRequestSignatures {
   'mobile(subscription.start)': [SubscriptionServiceType[], void];
   'mobile(subscription.stop)': [SubscriptionServiceType[], void];
   'mobile(subscription.restart)': [SubscriptionServiceType[], void];
+
+  // Psp token
+  'pub(token.add)': [RequestAddPspToken, boolean];
 }
 
 export interface ApplicationMetadataType {

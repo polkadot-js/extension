@@ -26,6 +26,10 @@ export class MantaPrivateHandler {
     return this._privateWallet;
   }
 
+  public async updateMantaPayConfig (address: string, chain: string, changes: Record<string, any>) {
+    await this.dbService.updateMantaPayData(`config_${chain}_${address}`, changes);
+  }
+
   public async saveMantaPayConfig (config: MantaPayConfig) {
     await this.dbService.setMantaPayData({
       key: `config_${config.chain}_${config.address}`,
@@ -59,8 +63,6 @@ export class MantaPrivateHandler {
 
     try {
       const suffix = this.currentAddress ? `_${this.currentAddress}` : '';
-
-      console.log('get ledger data', `storage_state_${palletName}_${network}${suffix}`);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       result = await this.dbService.getMantaPayData(`storage_state_${palletName}_${network}${suffix}`);

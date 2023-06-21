@@ -8,7 +8,7 @@ import { withErrorLog } from '@subwallet/extension-base/background/handlers/help
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import { AccountRefMap, AddTokenRequestExternal, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaPayConfig, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
-import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, ASTAR_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
@@ -93,8 +93,10 @@ export default class KoniState {
 
   private nftSubject = new Subject<NftJson>();
 
-  private stakingSubject = new Subject<StakingJson>();
   private mantaPayConfigSubject = new Subject<MantaPayConfig[]>();
+  public isMantaPayEnabled = false;
+
+  private stakingSubject = new Subject<StakingJson>();
   private chainStakingMetadataSubject = new Subject<ChainStakingMetadata[]>();
   private stakingNominatorMetadataSubject = new Subject<NominatorMetadata[]>();
   private stakingRewardSubject = new Subject<StakingRewardJson>();
@@ -293,6 +295,9 @@ export default class KoniState {
 
     if (mantaPayConfig && mantaPayConfig.enabled) { // only init if current account enabled mantaPay
       await this.enableMantaPay(false);
+      // await this.initialSyncMantaPay();
+
+      this.isMantaPayEnabled = true;
     }
   }
 
@@ -1840,7 +1845,13 @@ export default class KoniState {
 
     await this.chainService.mantaPay.privateWallet?.baseWallet?.isApiReady();
 
-    return await this.chainService.mantaPay.privateWallet?.initialWalletSync();
+    const syncResult = await this.chainService.mantaPay.privateWallet?.initialWalletSync();
+
+    await this.chainService.mantaPay.updateMantaPayConfig(currentAddress, 'calamari', { isInitialSync: true });
+
+    this.eventService.emit('mantaPay.initSync', undefined);
+
+    return syncResult;
   }
 
   public getMantaZkBalance () {
@@ -1872,17 +1883,37 @@ export default class KoniState {
           balanceItem.state = APIItemState.READY;
           this.setBalanceItem(balanceItem.tokenSlug, balanceItem);
         }
+
+        console.log('updated zk balances');
       })
       .catch(console.warn);
   }
 
   public subscribeMantaPayBalance () {
-    this.getMantaZkBalance();
+    let interval: NodeJS.Timer | undefined;
 
-    const interval = setInterval(this.getMantaZkBalance, ASTAR_REFRESH_BALANCE_INTERVAL);
+    this.chainService.mantaPay.getMantaPayConfig(this.keyringService.currentAccount.address, 'calamari')
+      .then((config: MantaPayConfig) => {
+        if (config && config.enabled && config.isInitialSync) {
+          this.getMantaZkBalance();
+
+          interval = setInterval(this.getMantaZkBalance, MANTA_PAY_BALANCE_INTERVAL);
+        }
+      })
+      .catch(console.warn);
 
     return () => {
       interval && clearInterval(interval);
     };
+  }
+
+  public async syncMantaPay () {
+    if (!this.chainService?.mantaPay?.privateWallet?.initialSyncIsFinished) {
+      console.log('need init sync');
+      await this.initialSyncMantaPay();
+    } else {
+      console.log('normal sync');
+      await this.chainService?.mantaPay?.privateWallet?.walletSync();
+    }
   }
 }

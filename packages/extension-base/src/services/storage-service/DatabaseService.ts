@@ -288,6 +288,10 @@ export default class DatabaseService {
     await this._db.mantaPay.put(data); // just override if exist
   }
 
+  async updateMantaPayData (key: string, data: Record<string, any>) {
+    await this._db.mantaPay.update(key, data); // just override if exist
+  }
+
   async getMantaPayData (key: string) {
     return this._db.mantaPay.get({ key });
   }

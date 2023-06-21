@@ -65,9 +65,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const signMode = useGetAccountSignModeByAddress(accountAddress);
 
-  const _isMantaPayEnabled = useIsMantaPayEnabled(accountAddress || '');
+  const isMantaPayEnabled = useIsMantaPayEnabled(accountAddress || '');
 
-  const [isMantaPayEnabled, setIsMantaPayEnabled] = useState(_isMantaPayEnabled); // TODO
   const [isMantaPaySyncing, setIsMantaPaySyncing] = useState(false);
 
   const { handleSimpleConfirmModal } = useConfirmModal({
@@ -76,7 +75,7 @@ const Component: React.FC<Props> = (props: Props) => {
     closable: true,
     type: 'warning',
     subTitle: t<string>('Zk mode requires data synchronization'),
-    content: t<string>('You will not be able to use the app until te synchronization is finished. This process can take up to 45 minutes or longer, are you sure to do this?'),
+    content: t<string>('You will not be able to use the app until the synchronization is finished. This process can take up to 45 minutes or longer, are you sure to do this?'),
     okText: t<string>('Enable')
   });
 
@@ -231,8 +230,6 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [account, goHome, navigate]);
 
   const onSwitchChainState = useCallback((checked: boolean, event: React.MouseEvent<HTMLButtonElement>) => {
-    setIsMantaPayEnabled(checked);
-
     if (checked) {
       handleEnableMantaPay();
     }

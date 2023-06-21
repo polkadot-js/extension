@@ -23,7 +23,8 @@ export interface EventRegistry {
   'transaction.failed': [SWTransaction | undefined],
   'transaction.submitStaking': [string],
   'transaction.transferNft': [SWTransaction | undefined],
-  'mantaPay.enable': [string] // zkAddress
+  'mantaPay.initSync': [string | undefined], // zkAddress
+  'mantaPay.submitTransaction': [SWTransaction | undefined]
 }
 
 export type EventType = keyof EventRegistry;
@@ -35,7 +36,7 @@ export const COMMON_RELOAD_EVENTS: EventType[] = [
   'chain.updateState',
   'account.remove',
   'chain.add',
-  'mantaPay.enable' // TODO: re-check this
+  'mantaPay.initSync' // TODO: re-check this
 ];
 
 export interface EventItem<T extends EventType> {

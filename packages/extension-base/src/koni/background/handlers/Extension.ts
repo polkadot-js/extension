@@ -3293,15 +3293,19 @@ export default class KoniExtension {
   }
 
   private async enableMantaPay () { // always takes the current account
-    return await this.#koniState.enableMantaPay(true);
+    const result = await this.#koniState.enableMantaPay(true);
+
+    console.debug('Start initial sync for MantaPay');
+
+    await this.#koniState.initialSyncMantaPay();
+
+    console.debug('Finished initial sync for MantaPay');
+
+    return result;
   }
 
   private async initialSyncMantaPay () {
-    const result = await this.#koniState.initialSyncMantaPay();
-
-    console.log('Finished initial sync for MantaPay');
-
-    return result;
+    return await this.#koniState.initialSyncMantaPay();
   }
 
   private subscribeMantaPayConfig (id: string, port: chrome.runtime.Port) {

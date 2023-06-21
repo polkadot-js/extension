@@ -18,6 +18,7 @@ import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 import { SignerResult } from '@polkadot/types/types/extrinsic';
 import { BN } from '@polkadot/util';
+import { HexString } from '@polkadot/util/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
@@ -226,10 +227,11 @@ export interface NftCollectionJson {
   nftCollectionList: Array<NftCollection>;
 }
 
-// export interface NftStoreJson {
-//   nftList: Array<NftItem>;
-//   nftCollectionList: Array<NftCollection>;
-// }
+export interface MetadataItem {
+  genesisHash: string;
+  specVersion: string;
+  hexValue: HexString;
+}
 
 export interface TokenBalanceRaw {
   reserved: BN,

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceItem, ChainStakingMetadata, CrowdloanItem, MetadataItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import Dexie, { Table, Transaction } from 'dexie';
 
 const DEFAULT_DATABASE = 'SubWalletDB_v2';
@@ -33,6 +33,8 @@ export interface IMigration {
   timestamp: number
 }
 
+export interface IMetadataItem extends MetadataItem, DefaultChainDoc {}
+
 export default class KoniDatabase extends Dexie {
   public price!: Table<PriceJson, object>;
   public balances!: Table<IBalance, object>;
@@ -44,6 +46,7 @@ export default class KoniDatabase extends Dexie {
   public transactions!: Table<ITransactionHistoryItem, object>;
   public migrations!: Table<IMigration, object>;
 
+  public metadata!: Table<IMetadataItem, object>;
   public chain!: Table<IChain, object>;
   public asset!: Table<_ChainAsset, object>;
 
@@ -73,6 +76,10 @@ export default class KoniDatabase extends Dexie {
 
       chainStakingMetadata: '[chain+type], chain, type',
       nominatorMetadata: '[chain+address+type], [chain+address], chain, address, type'
+    });
+
+    this.conditionalVersion(2, {
+      metadata: 'genesisHash, chain'
     });
   }
 

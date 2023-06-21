@@ -26,6 +26,7 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
 
   const onSwitchChainState = useCallback((checked: boolean, event: React.MouseEvent<HTMLButtonElement>) => {
     if (!loading) {
+      setLoading(true);
       updateChainActiveState(chainInfo.slug, checked)
         .then((result) => {
           setLoading(false);
@@ -57,7 +58,7 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
     <div className={`${className}`}>
       <Switch
         checked={checked}
-        disabled={loading}
+        loading={loading}
         onClick={onSwitchChainState}
       />
       {

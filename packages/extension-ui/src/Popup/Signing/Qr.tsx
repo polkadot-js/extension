@@ -6,8 +6,8 @@ import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { wrapBytes } from '@polkadot/extension-dapp/wrapBytes';
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
+import { u8aWrapBytes } from '@polkadot/util';
 
 import { Button } from '../../components/index.js';
 import useTranslation from '../../hooks/useTranslation.js';
@@ -35,7 +35,7 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
         case CMD_MORTAL:
           return (payload as ExtrinsicPayload).toU8a();
         case CMD_SIGN_MESSAGE:
-          return wrapBytes(payload as string);
+          return u8aWrapBytes(payload as string);
         default:
           return null;
       }

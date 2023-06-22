@@ -1,77 +1,52 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
-
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 
-import animatedDanger from '../assets/anim_danger.svg';
-import { Button, ButtonArea, FaviconBox, LearnMore, PopupBorderContainer, Svg, VerticalSpace } from '../components';
+import backgroundMotif from '../assets/background_motif.svg';
+import { FaviconBox, Hero, LearnMore, PopupBorderContainer, Svg } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { LINKS } from '../links';
 
-interface Props extends ThemeProps {
+type Props = {
   className?: string;
-}
+};
 
 interface WebsiteState {
   website: string;
 }
 
-const StyledFaviconBox = styled(FaviconBox)`
-  margin: 8px 0px;
-`;
-
-function PhishingDetected({ className }: Props): React.ReactElement<Props> {
+function PhishingDetected(): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { website } = useParams<WebsiteState>();
 
   const origin = getWebsiteOriginFromEncodedUrl(website);
 
-  const _onClick = useCallback(() => {
-    window.close();
-  }, []);
-
   return (
-    <>
-      <PopupBorderContainer>
-        <div className={className}>
-          <div className='content'>
-            <div className='content-inner'>
-              <Svg
-                className='danger-icon'
-                src={animatedDanger}
-              />
-              <span className='heading'>{t<string>('Phishing detected')}</span>
-              <span className='subtitle'>
-                {t<string>(
-                  "You have been redirected because you've entered a website that could compromise the security of your assets"
-                )}
-              </span>
-              <StyledFaviconBox url={origin} />
-              <span className='subtitle'>
-                {t<string>(
-                  'We have found it on a list of phishing websites that is community-driven and maintained by Parity Technologies. If you think that this website has been flagged incorrectly, open an issue'
-                )}
-                &nbsp;
-                <LearnMore href={LINKS.PHISHING}>{t<string>('here')}</LearnMore>
-              </span>
-            </div>
-          </div>
-        </div>
-      </PopupBorderContainer>
-      <VerticalSpace />
-      <ButtonArea>
-        <Button
-          onClick={_onClick}
-          secondary
+    <Container>
+      <StyleSvg src={backgroundMotif} />
+      <StyledPopupBorderContainer>
+        <Hero
+          headerText={t<string>('Phishing detected')}
+          iconType='danger'
         >
-          {t<string>('Got it!')}
-        </Button>
-      </ButtonArea>
-    </>
+          <Description>
+            {t<string>(
+              "You have been redirected because you've entered a website that could compromise the security of your assets."
+            )}
+          </Description>
+          <StyledFaviconBox url={origin} />
+          <Description>
+            {t<string>(
+              'We have found it on a list of phishing websites that is community-driven and maintained by Parity Technologies. If you think that this website has been flagged incorrectly, open an issue'
+            )}
+            &nbsp;<Link href={LINKS.PHISHING}>{t<string>('here')}</Link>.
+          </Description>
+        </Hero>
+      </StyledPopupBorderContainer>
+    </Container>
   );
 }
 
@@ -81,64 +56,56 @@ const getWebsiteOriginFromEncodedUrl = (encodedUrl: string) => {
   return new URL(decodedWebsite).origin;
 };
 
-export default styled(PhishingDetected)(
-  ({ theme }: Props) => `
-  .content {
-    border-radius: 32px;
-    height: 584px;
-    margin-top: 8px;
-    overflow-y: hidden;
-    overflow-x: hidden;
-  }
-  
-  .content-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 64px;
-    gap: 16px;
-  }
+const Container = styled.div`
+  height: 100%;
 
-  .subtitle {
-    font-weight: 300;
-    font-size: 14px;
-    line-height: 145%;
-    text-align: center;
-    letter-spacing: 0.07em; 
-    color: ${theme.subTextColor};
-    padding: 0 8px;
-    white-space: pre-line;
+  display: grid;
+  justify-content: center;
+  grid-template-rows: 1fr 600px 3fr;
+
+  isolation: isolate;
+
+  background: ${({ theme }) => theme.fullscreenBackground};
+`;
+
+const StyleSvg = styled(Svg)`
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+
+  background-color: ${({ theme }) => theme.fullscreenBackgroundLines};
+`;
+
+const StyledPopupBorderContainer = styled(PopupBorderContainer)`
+  padding: 3em 24px;
+  grid-row-start: 2;
+
+  box-sizing: border-box;
+
+  width: 360px;
+  height: 600px;
+
+  border: 1px solid ${({ theme }) => theme.fullscreenBorderColor};
+  border-radius: 16px;
+  background-color: ${({ theme }) => theme.boxBackground};
+`;
+
+const StyledFaviconBox = styled(FaviconBox)`
+  margin-bottom: 24px;
+`;
+
+const Description = styled.p`
+  margin-bottom: 24px;
+`;
+
+const Link = styled(LearnMore)`
+  color: ${({ theme }) => theme.primaryColor};
+  cursor: pointer;
+  text-decoration: none;
+
+  :hover {
+    text-decoration: underline;
   }
+`;
 
-
-  .heading {
-    font-family: ${theme.secondaryFontFamily};
-    font-style: normal;
-    font-weight: 700;
-    font-size: 24px;
-    line-height: 118%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    letter-spacing: 0.03em;
-    color: ${theme.textColor};
-  }
-
-  .danger-icon {
-    background: ${theme.dangerBackground};
-    width: 96px;
-    height: 96px;
-  }
-
-  .link {
-    color: ${theme.primaryColor};
-    cursor: pointer;
-    text-decoration: none;
-
-    :hover {
-      text-decoration: underline;
-    }
-  }
-`
-);
+export default PhishingDetected;

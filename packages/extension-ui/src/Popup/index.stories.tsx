@@ -6,6 +6,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
+import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
+
 import { View } from '../components';
 import { subscribeMetadataRequests } from '../messaging';
 import Popup from '.';
@@ -69,5 +71,35 @@ export const CreateAccount: Story = {
         </MemoryRouter>
       </View>
     )
+  ]
+};
+
+type PhishingDetectedStory = StoryObj<{ websiteUrl: string }>;
+
+export const PhishingDetected: PhishingDetectedStory = {
+  args: {
+    websiteUrl: 'https://azero.dev/'
+  },
+  parameters: {
+    viewport: {
+      defaultViewport: 'fullscreen'
+    },
+    layout: 'centered'
+  },
+  decorators: [
+    (Story, { args }) => {
+      const initialUrl = `${PHISHING_PAGE_REDIRECT}/${encodeURIComponent(args.websiteUrl)}`;
+
+      return (
+        <View>
+          <MemoryRouter
+            initialEntries={[initialUrl]}
+            key={initialUrl}
+          >
+            <Story />
+          </MemoryRouter>
+        </View>
+      );
+    }
   ]
 };

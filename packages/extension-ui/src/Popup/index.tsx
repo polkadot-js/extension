@@ -178,72 +178,80 @@ export default function Popup(): React.ReactElement {
                   <MetadataReqContext.Provider value={metaRequests}>
                     <SigningReqContext.Provider value={signRequests}>
                       <ToastProvider>
-                        <SplashHandler>
-                          <Switch>
-                            <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
-                            <Route path='/about'>{wrapWithErrorBoundary(<About />, 'about')}</Route>
-                            <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'settings')}</Route>
-                            <Route path='/account/add-menu'>
-                              {wrapWithErrorBoundary(<AddAccountMenu />, 'adding-account-menu')}
-                            </Route>
-                            <Route path='/account/create'>
-                              {wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}
-                            </Route>
-                            <Route path='/account/edit-menu/:address'>
-                              {wrapWithErrorBoundary(<EditAccountMenu />, 'edit-menu')}
-                            </Route>
-                            <Route path='/transaction-status/:status'>
-                              {wrapWithErrorBoundary(<TransactionStatus />, 'transaction-status')}
-                            </Route>
-                            <Route path='/account/edit-name/:address'>
-                              {wrapWithErrorBoundary(<EditName />, 'edit-name')}
-                            </Route>
-                            <Route path='/account/change-password/:address'>
-                              {wrapWithErrorBoundary(<ChangePassword />, 'change-password')}
-                            </Route>
-                            <Route path='/account/edit-network/:address'>
-                              {wrapWithErrorBoundary(<EditNetwork />, 'edit-network')}
-                            </Route>
-                            <Route path='/account/forget/:address'>
-                              {wrapWithErrorBoundary(<Forget />, 'forget-address')}
-                            </Route>
-                            <Route path='/account/export/:address'>
-                              {wrapWithErrorBoundary(<Export />, 'export-address')}
-                            </Route>
-                            {/* NOT USED */}
-                            {/* <Route path='/account/import-ledger'>
-                              {wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}
-                            </Route> */}
-                            <Route path='/account/import-seed'>
-                              {wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}
-                            </Route>
-                            <Route path='/account/restore-json'>
-                              {wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}
-                            </Route>
-                            <Route path='/account/derive/:address/locked'>
-                              {wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}
-                            </Route>
-                            <Route path='/account/derive/:address'>
-                              {wrapWithErrorBoundary(<Derive />, 'derive-address')}
-                            </Route>
-                            <Route path='/url/manage'>
-                              {wrapWithErrorBoundary(<AccountManagement />, 'manage-url')}
-                            </Route>
-                            <Route path='/url/new'>{wrapWithErrorBoundary(<NewAccount />, 'manage-url')}</Route>
-                            <Route path='/url/disconnect/:url'>
-                              {wrapWithErrorBoundary(<DisconnectApp />, 'disconnect-url')}
-                            </Route>
-                            <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>
-                              {wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}
-                            </Route>
-                            <Route
-                              exact
-                              path='/'
-                            >
-                              {Root}
-                            </Route>
-                          </Switch>
-                        </SplashHandler>
+                        <Switch>
+                          {/* Fullscreen path */}
+                          <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>
+                            {wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}
+                          </Route>
+                          {/* Pop-up paths */}
+                          <Route>
+                            <SplashHandler>
+                              <Switch>
+                                <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
+                                <Route path='/about'>{wrapWithErrorBoundary(<About />, 'about')}</Route>
+                                <Route path='/account/settings'>
+                                  {wrapWithErrorBoundary(<Settings />, 'settings')}
+                                </Route>
+                                <Route path='/account/add-menu'>
+                                  {wrapWithErrorBoundary(<AddAccountMenu />, 'adding-account-menu')}
+                                </Route>
+                                <Route path='/account/create'>
+                                  {wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}
+                                </Route>
+                                <Route path='/account/edit-menu/:address'>
+                                  {wrapWithErrorBoundary(<EditAccountMenu />, 'edit-menu')}
+                                </Route>
+                                <Route path='/transaction-status/:status'>
+                                  {wrapWithErrorBoundary(<TransactionStatus />, 'transaction-status')}
+                                </Route>
+                                <Route path='/account/edit-name/:address'>
+                                  {wrapWithErrorBoundary(<EditName />, 'edit-name')}
+                                </Route>
+                                <Route path='/account/change-password/:address'>
+                                  {wrapWithErrorBoundary(<ChangePassword />, 'change-password')}
+                                </Route>
+                                <Route path='/account/edit-network/:address'>
+                                  {wrapWithErrorBoundary(<EditNetwork />, 'edit-network')}
+                                </Route>
+                                <Route path='/account/forget/:address'>
+                                  {wrapWithErrorBoundary(<Forget />, 'forget-address')}
+                                </Route>
+                                <Route path='/account/export/:address'>
+                                  {wrapWithErrorBoundary(<Export />, 'export-address')}
+                                </Route>
+                                {/* NOT USED */}
+                                {/* <Route path='/account/import-ledger'>
+                                {wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}
+                              </Route> */}
+                                <Route path='/account/import-seed'>
+                                  {wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}
+                                </Route>
+                                <Route path='/account/restore-json'>
+                                  {wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}
+                                </Route>
+                                <Route path='/account/derive/:address/locked'>
+                                  {wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}
+                                </Route>
+                                <Route path='/account/derive/:address'>
+                                  {wrapWithErrorBoundary(<Derive />, 'derive-address')}
+                                </Route>
+                                <Route path='/url/manage'>
+                                  {wrapWithErrorBoundary(<AccountManagement />, 'manage-url')}
+                                </Route>
+                                <Route path='/url/new'>{wrapWithErrorBoundary(<NewAccount />, 'manage-url')}</Route>
+                                <Route path='/url/disconnect/:url'>
+                                  {wrapWithErrorBoundary(<DisconnectApp />, 'disconnect-url')}
+                                </Route>
+                                <Route
+                                  exact
+                                  path='/'
+                                >
+                                  {Root}
+                                </Route>
+                              </Switch>
+                            </SplashHandler>
+                          </Route>
+                        </Switch>
                       </ToastProvider>
                     </SigningReqContext.Provider>
                   </MetadataReqContext.Provider>

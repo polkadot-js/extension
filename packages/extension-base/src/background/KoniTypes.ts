@@ -1871,6 +1871,11 @@ export interface MantaPayConfig {
   isInitialSync: boolean;
 }
 
+export interface MantaPaySyncProgress {
+  isDone: boolean;
+  progress: number; // in percentage
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1943,6 +1948,7 @@ export interface KoniRequestSignatures {
   'pri(mantaPay.initialSyncMantaPay)': [null, boolean | undefined];
   'pri(mantaPay.getZkBalance)': [null, null];
   'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];
+  'pri(mantaPay.subscribeSyncProgress)': [null, MantaPaySyncProgress, MantaPaySyncProgress];
 
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];

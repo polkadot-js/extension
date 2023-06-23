@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MantaPayConfig } from '@subwallet/extension-base/background/KoniTypes';
+import { MantaPayConfig, MantaPaySyncProgress } from '@subwallet/extension-base/background/KoniTypes';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { BaseWallet, interfaces, MantaPayWallet } from 'manta-extension-sdk';
 
@@ -89,6 +89,42 @@ export class MantaPrivateHandler {
     this._privateWallet = MantaPayWallet.init(networkParam as interfaces.Network, baseWallet);
 
     return this._privateWallet.api;
+  }
+
+  public async getCurrentLedgerState () {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const ledgerState = await this.getLedgerState('mantaPay', 'Calamari');
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    return (await this._privateWallet?.getLedgerCurrentCount(ledgerState.checkpoint)) as number;
+  }
+
+  public async subscribeSyncProgress (callbackData: (data: MantaPaySyncProgress) => void) {
+    const ledgerTotalCount = (await this._privateWallet?.getLedgerTotalCount()) as number;
+    // let interval: NodeJS.Timer | undefined;
+
+    const interval = setInterval(() => {
+      this.getCurrentLedgerState().then((currentCount: number) => {
+        if (currentCount === ledgerTotalCount) {
+          clearInterval(interval);
+
+          callbackData({
+            isDone: true,
+            progress: 100
+          });
+        } else {
+          callbackData({
+            isDone: false,
+            progress: Math.floor((currentCount / ledgerTotalCount) * 100)
+          });
+        }
+      })
+        .catch(console.error);
+    }, 1000);
+
+    return () => {
+      interval && clearInterval(interval);
+    };
   }
 
   public async syncAllWallet () {

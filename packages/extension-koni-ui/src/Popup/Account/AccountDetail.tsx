@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { MantaPaySyncProgress } from '@subwallet/extension-base/background/KoniTypes';
 import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
@@ -9,19 +10,19 @@ import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/a
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { deriveAccountV3, editAccount, enableMantaPay, forgetAccount } from '@subwallet/extension-koni-ui/messaging';
+import { deriveAccountV3, editAccount, enableMantaPay, forgetAccount, subscribeMantaPaySyncProgress, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { copyToClipboard } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/utils/form/form';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, SettingItem, SwAlert, Switch, SwQRCode } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, SettingItem, SwAlert, Switch, SwModalFuncProps, SwQRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, ShieldCheck, Swatches, TrashSimple, User } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import useConfirmModal from '../../hooks/modal/useConfirmModal';
@@ -42,15 +43,111 @@ interface DetailFormState {
   [FormFieldName.NAME]: string;
 }
 
+interface MantaPayState {
+  isEnabled: boolean,
+  isSyncing: boolean,
+  shouldShowConfirmation: boolean,
+  syncProgress: MantaPaySyncProgress
+}
+
+const DEFAULT_MANTA_PAY_STATE: MantaPayState = {
+  isEnabled: false,
+  isSyncing: false,
+  shouldShowConfirmation: true,
+  syncProgress: {
+    isDone: false,
+    progress: 0
+  }
+};
+
+export enum MantaPayReducerActionType {
+  INIT = 'INIT',
+  SET_SHOULD_SHOW_CONFIRMATION = 'SET_SHOULD_SHOW_CONFIRMATION',
+  SET_MANTA_PAY_ENABLED = 'SET_MANTA_PAY_ENABLED',
+  SET_IS_SYNCING_STATE = 'SET_IS_SYNCING_STATE',
+  CONFIRM_ENABLE = 'CONFIRM_ENABLE',
+  REJECT_ENABLE = 'REJECT_ENABLE',
+  SYNC_FAIL = 'SYNC_FAIL',
+  SET_SYNC_PROGRESS = 'SET_SYNC_PROGRESS',
+  SET_SYNC_FINISHED = 'SET_SYNC_FINISHED'
+}
+
+interface MantaPayReducerAction {
+  type: MantaPayReducerActionType,
+  payload: unknown
+}
+
+export const mantaPayReducer = (state: MantaPayState, action: MantaPayReducerAction): MantaPayState => {
+  const { payload, type } = action;
+
+  switch (type) {
+    case MantaPayReducerActionType.INIT:
+      return DEFAULT_MANTA_PAY_STATE;
+    case MantaPayReducerActionType.SET_SHOULD_SHOW_CONFIRMATION:
+      return {
+        ...state,
+        shouldShowConfirmation: payload as boolean
+      };
+    case MantaPayReducerActionType.SET_IS_SYNCING_STATE:
+      return {
+        ...state,
+        isSyncing: payload as boolean
+      };
+    case MantaPayReducerActionType.SET_MANTA_PAY_ENABLED:
+      return {
+        ...state,
+        isEnabled: payload as boolean
+      };
+    case MantaPayReducerActionType.CONFIRM_ENABLE:
+      return {
+        ...state,
+        isEnabled: true,
+        isSyncing: true,
+        shouldShowConfirmation: false
+      };
+    case MantaPayReducerActionType.REJECT_ENABLE:
+      return {
+        ...state,
+        shouldShowConfirmation: false,
+        isEnabled: false,
+        isSyncing: false
+      };
+    case MantaPayReducerActionType.SYNC_FAIL:
+      return {
+        ...state,
+        shouldShowConfirmation: false,
+        isEnabled: false,
+        isSyncing: false
+      };
+    case MantaPayReducerActionType.SET_SYNC_PROGRESS:
+      return {
+        ...state,
+        syncProgress: payload as MantaPaySyncProgress
+      };
+    case MantaPayReducerActionType.SET_SYNC_FINISHED:
+      return {
+        ...state,
+        isSyncing: false,
+        syncProgress: payload as MantaPaySyncProgress
+      };
+    default:
+      throw new Error("Can't handle action");
+  }
+};
+
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
+  const [searchParams] = useSearchParams();
   const notify = useNotification();
   const { token } = useTheme() as Theme;
   const { accountAddress } = useParams();
+  const { checkActive } = useContext(ModalContext);
+
+  const enableMantaPayConfirm = searchParams.get('enableMantaPayConfirm') === 'true';
 
   const [form] = Form.useForm<DetailFormState>();
 
@@ -65,31 +162,73 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const signMode = useGetAccountSignModeByAddress(accountAddress);
 
-  const isMantaPayEnabled = useIsMantaPayEnabled(accountAddress || '');
+  const _isMantaPayEnabled = useIsMantaPayEnabled(accountAddress || '');
 
-  const [isMantaPaySyncing, setIsMantaPaySyncing] = useState(false);
+  const [mantaPayState, dispatchMantaPayState] = useReducer(mantaPayReducer, { ...DEFAULT_MANTA_PAY_STATE, isEnabled: _isMantaPayEnabled });
 
-  const { handleSimpleConfirmModal } = useConfirmModal({
-    title: t<string>('Confirmation'),
-    maskClosable: true,
-    closable: true,
-    type: 'warning',
-    subTitle: t<string>('Zk mode requires data synchronization'),
-    content: t<string>('You will not be able to use the app until the synchronization is finished. This process can take up to 45 minutes or longer, are you sure to do this?'),
-    okText: t<string>('Enable')
-  });
+  const confirmationModalProp = useMemo((): Partial<SwModalFuncProps> => {
+    return {
+      title: t<string>('Confirmation'),
+      maskClosable: true,
+      closable: true,
+      type: 'warning',
+      subTitle: t<string>('Zk mode requires data synchronization'),
+      content: t<string>('You will not be able to use the app until the synchronization is finished. This process can take up to 45 minutes or longer, are you sure to do this?'),
+      okText: t<string>('Enable'),
+      cancelText: t('Cancel'),
+      id: 'mantaPayConfirmation'
+    };
+  }, [t]);
+
+  const { handleSimpleConfirmModal } = useConfirmModal(confirmationModalProp);
+
+  const isMantaPayConfirmationActive = checkActive('mantaPayConfirmation'); // TODO: improve this
 
   const handleEnableMantaPay = useCallback(() => {
-    handleSimpleConfirmModal()
-      .then(() => {
-        enableMantaPay()
-          .then(() => {
-            setIsMantaPaySyncing(true);
-          })
-          .catch(console.error);
+    if (mantaPayState.shouldShowConfirmation) {
+      handleSimpleConfirmModal()
+        .then(() => {
+          dispatchMantaPayState({ type: MantaPayReducerActionType.CONFIRM_ENABLE, payload: undefined });
+
+          setTimeout(() => {
+            enableMantaPay()
+              .catch((e) => {
+                console.error(e);
+
+                dispatchMantaPayState({ type: MantaPayReducerActionType.SYNC_FAIL, payload: undefined });
+              });
+          }, 1000);
+        })
+        .catch(() => {
+          dispatchMantaPayState({ type: MantaPayReducerActionType.REJECT_ENABLE, payload: undefined });
+        });
+    }
+  }, [handleSimpleConfirmModal, mantaPayState.shouldShowConfirmation]);
+
+  useEffect(() => {
+    if (enableMantaPayConfirm && !isMantaPayConfirmationActive) {
+      handleEnableMantaPay();
+    }
+  }, [enableMantaPayConfirm, handleEnableMantaPay, isMantaPayConfirmationActive]);
+
+  useEffect(() => {
+    let isRun = true;
+
+    if (mantaPayState.isSyncing && isRun) {
+      subscribeMantaPaySyncProgress((data) => {
+        if (data.isDone) {
+          dispatchMantaPayState({ type: MantaPayReducerActionType.SET_SYNC_FINISHED, payload: data });
+        } else {
+          dispatchMantaPayState({ type: MantaPayReducerActionType.SET_SYNC_PROGRESS, payload: data });
+        }
       })
-      .catch(console.log);
-  }, [handleSimpleConfirmModal]);
+        .catch(console.error);
+    }
+
+    return () => {
+      isRun = false;
+    };
+  }, [mantaPayState.isSyncing]);
 
   const canDerive = useMemo((): boolean => {
     if (account) {
@@ -229,11 +368,18 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [account, goHome, navigate]);
 
-  const onSwitchChainState = useCallback((checked: boolean, event: React.MouseEvent<HTMLButtonElement>) => {
+  const onSwitchMantaPay = useCallback((checked: boolean, event: React.MouseEvent<HTMLButtonElement>) => {
     if (checked) {
-      handleEnableMantaPay();
+      windowOpen({
+        allowedPath: '/accounts/detail',
+        subPath: account ? `/${account.address}` : undefined,
+        params: {
+          enableMantaPayConfirm: 'true'
+        }
+      })
+        .catch(console.warn);
     }
-  }, [handleEnableMantaPay]);
+  }, [account]);
 
   if (!account) {
     return null;
@@ -242,12 +388,12 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
-        disableBack={deriving}
+        disableBack={deriving || mantaPayState.isSyncing}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
             onClick: goHome,
-            disabled: deriving
+            disabled: deriving || mantaPayState.isSyncing
           }
         ]}
         title={t('Account details')}
@@ -333,17 +479,17 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </div>
           {
-            isMantaPaySyncing && (
+            (mantaPayState.isSyncing || mantaPayState.syncProgress.isDone) && (
               <SwAlert
                 className={CN('alert-area')}
-                description={t('This may take a few minutes, keep this app open for faster sync')}
-                title={t('Zk balance is syncing: 50%')}
-                type='warning'
+                description={mantaPayState.syncProgress.isDone ? t('All done, you can go back home') : t('This may take a few minutes, keep this app open for faster sync')}
+                title={mantaPayState.syncProgress.isDone ? t('Zk balance is ready') : t(`Zk balance is syncing: ${mantaPayState.syncProgress.progress}%`)}
+                type={mantaPayState.syncProgress.isDone ? 'success' : 'warning'}
               />
             )
           }
           <SettingItem
-            className={CN(`zk-setting ${!isMantaPaySyncing ? 'zk-sync-margin' : ''}`)}
+            className={CN(`zk-setting ${!mantaPayState.isSyncing ? 'zk-sync-margin' : ''}`)}
             leftItemIcon={(
               <BackgroundIcon
                 backgroundColor={token['green-6']}
@@ -355,8 +501,8 @@ const Component: React.FC<Props> = (props: Props) => {
             name={t('Zk mode')}
             rightItem={(
               <Switch
-                checked={isMantaPayEnabled}
-                onClick={onSwitchChainState}
+                checked={mantaPayState.isEnabled}
+                onClick={onSwitchMantaPay}
               />
             )}
           />

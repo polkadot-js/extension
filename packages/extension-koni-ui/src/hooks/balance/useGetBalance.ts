@@ -69,7 +69,7 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '') => {
             !cancel && setNativeTokenBalance(balance);
           })
           .catch((e: Error) => {
-            !cancel && setError(t('Can not get balance'));
+            !cancel && setError(t('Cannot get balance'));
             !cancel && setNativeTokenBalance(DEFAULT_BALANCE);
             console.error(e);
           }));

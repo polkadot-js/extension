@@ -1,7 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-const ALLOWED_PATH = ['/', '/settings/security', '/accounts/connect-ledger', '/accounts/restore-json'] as const;
+const ALLOWED_PATH = [
+  '/',
+  '/settings/security',
+  '/accounts/connect-ledger',
+  '/accounts/restore-json',
+  '/accounts/detail'
+] as const;
 const PHISHING_PAGE_REDIRECT = '/phishing-page-detected';
 const EXTENSION_PREFIX = process.env.EXTENSION_PREFIX as string || '';
 const PORT_MOBILE = `${EXTENSION_PREFIX}mobile`;

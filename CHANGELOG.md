@@ -714,7 +714,7 @@ Update:
   - Bifrost
 
 Bug Fixed:
-- Fix network list is incorrect in case importing an account from seed phase when there is no account yet (issue #120)
+- Fix network list is incorrect in case importing an account from seed phrase when there is no account yet (issue #120)
 - Fix grammar error and type issue of button (issue #156,#166)
 - Fix some network in wrong group (issue #180)
 

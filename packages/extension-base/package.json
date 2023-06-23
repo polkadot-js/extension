@@ -52,6 +52,7 @@
     "@subwallet/extension-inject": "^1.0.10-0",
     "@subwallet/keyring": "^0.0.10",
     "@subwallet/ui-keyring": "^0.0.10",
+    "@walletconnect/sign-client": "^2.8.1",
     "axios": "^1.2.1",
     "bignumber.js": "^9.1.1",
     "bn.js": "^5.2.1",

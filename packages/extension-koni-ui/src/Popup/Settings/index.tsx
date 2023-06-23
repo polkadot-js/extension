@@ -132,6 +132,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onClick: () => {
             navigate('/settings/address-book');
           }
+        },
+        {
+          key: 'wallet-connect',
+          leftIcon: BookBookmark,
+          leftIconBgColor: token['blue-6'],
+          rightIcon: CaretRight,
+          title: 'Wallet connect',
+          onClick: () => {
+            navigate('/wallet-connect/connect');
+          }
         }
       ]
     },

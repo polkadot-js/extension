@@ -8,6 +8,7 @@ import { AccountAuthType, AccountJson, AddressJson, AuthorizeRequest, Confirmati
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -1865,6 +1866,21 @@ export interface RequestPassPhishingPage {
   url: string;
 }
 
+// Wallet Connect
+
+export interface RequestConnectWalletConnect {
+  uri: string;
+}
+
+export interface RequestRejectConnectWalletSession {
+  id: string;
+}
+
+export interface RequestApproveConnectWalletSession {
+  id: string;
+  accounts: string[];
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -2071,6 +2087,12 @@ export interface KoniRequestSignatures {
   'mobile(subscription.start)': [SubscriptionServiceType[], void];
   'mobile(subscription.stop)': [SubscriptionServiceType[], void];
   'mobile(subscription.restart)': [SubscriptionServiceType[], void];
+
+  /// Wallet connect
+  'pri(walletConnect.connect)': [RequestConnectWalletConnect, boolean];
+  'pri(walletConnect.requests.subscribe)': [null, WalletConnectSessionRequest[], WalletConnectSessionRequest[]];
+  'pri(walletConnect.session.approve)': [RequestApproveConnectWalletSession, boolean];
+  'pri(walletConnect.session.reject)': [RequestRejectConnectWalletSession, boolean];
 }
 
 export interface ApplicationMetadataType {

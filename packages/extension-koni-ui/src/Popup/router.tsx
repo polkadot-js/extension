@@ -91,6 +91,9 @@ const CancelUnstake = new LazyLoader(() => import('@subwallet/extension-koni-ui/
 const ClaimReward = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/ClaimReward'));
 const Withdraw = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Withdraw'));
 
+// Wallet Connect
+const ConnectWalletConnect = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectWalletConnect'));
+
 const ErrorFallback = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/ErrorFallback'));
 
 // A Placeholder page
@@ -209,6 +212,13 @@ export const router = createHashRouter([
           ConnectLedger.generateRouterObject('connect-ledger'),
           AccountDetail.generateRouterObject('detail/:accountAddress'),
           AccountExport.generateRouterObject('export/:accountAddress')
+        ]
+      },
+      {
+        path: 'wallet-connect',
+        element: <Outlet />,
+        children: [
+          ConnectWalletConnect.generateRouterObject('connect')
         ]
       }
     ]

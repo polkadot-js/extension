@@ -3,6 +3,7 @@
 
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
 import { useConfirmationsInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
@@ -13,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { ConfirmationHeader } from './parts';
-import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
+import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
 
 type Props = ThemeProps
 
@@ -25,7 +26,8 @@ const titleMap: Record<ConfirmationType, string> = {
   evmSignatureRequest: 'Signature request',
   metadataRequest: 'Update metadata',
   signingRequest: 'Signature request',
-  switchNetworkRequest: 'Add network request'
+  switchNetworkRequest: 'Add network request',
+  connectWCRequest: 'Connect Wallet Connect'
 } as Record<ConfirmationType, string>;
 
 const Component = function ({ className }: Props) {
@@ -115,6 +117,10 @@ const Component = function ({ className }: Props) {
       case 'signingRequest':
         return (
           <SignConfirmation request={confirmation.item as SigningRequest} />
+        );
+      case 'connectWCRequest':
+        return (
+          <ConnectWalletConnectConfirmation request={confirmation.item as WalletConnectSessionRequest} />
         );
     }
 

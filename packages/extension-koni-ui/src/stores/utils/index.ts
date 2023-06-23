@@ -14,6 +14,7 @@ import { store } from '@subwallet/extension-koni-ui/stores';
 import { AppSettings } from '@subwallet/extension-koni-ui/stores/types';
 import { noop, noopBoolean } from '@subwallet/extension-koni-ui/utils';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 
 // Setup redux stores
 
@@ -264,3 +265,13 @@ export const subscribeTxHistory = lazySubscribeMessage('pri(transaction.history.
 // };
 //
 // export const subscribeChainValidators = lazySubscribeMessage('pri(bonding.getBondingOptions)', null, updateChainValidators, updateChainValidators);
+
+// Wallet connect
+export const updateConnectWCRequests = (data: WalletConnectSessionRequest[]) => {
+  // Convert data to object with key as id
+  const requests = convertConfirmationToMap(data);
+
+  store.dispatch({ type: 'requestState/updateConnectWCRequests', payload: requests });
+};
+
+export const subscribeConnectWCRequests = lazySubscribeMessage('pri(walletConnect.requests.subscribe)', null, updateConnectWCRequests, updateConnectWCRequests);

@@ -9,6 +9,7 @@ import { _ChainState } from '@subwallet/extension-base/services/chain-service/ty
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 
 // todo: move this file to extension-koni-ui/src/types/
 
@@ -96,6 +97,7 @@ export interface RequestState extends ConfirmationsQueue, BaseReduxStore {
   hasInternalConfirmations: boolean;
   numberOfConfirmations: number;
   transactionRequest: Record<string, SWTransactionResult>;
+  connectWCRequest: Record<string, WalletConnectSessionRequest>;
 }
 
 export interface UpdateConfirmationsQueueRequest extends BaseReduxStore {

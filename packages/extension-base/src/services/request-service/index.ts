@@ -10,8 +10,10 @@ import EvmRequestHandler from '@subwallet/extension-base/services/request-servic
 import MetadataRequestHandler from '@subwallet/extension-base/services/request-service/handler/MetadataRequestHandler';
 import PopupHandler from '@subwallet/extension-base/services/request-service/handler/PopupHandler';
 import SubstrateRequestHandler from '@subwallet/extension-base/services/request-service/handler/SubstrateRequestHandler';
+import WalletConnectRequestHandler from '@subwallet/extension-base/services/request-service/handler/WalletConnectRequestHandler';
 import { AuthUrls, MetaRequest } from '@subwallet/extension-base/services/request-service/types';
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { BehaviorSubject, Subject } from 'rxjs';
 
@@ -26,6 +28,7 @@ export default class RequestService {
   readonly #authRequestHandler: AuthRequestHandler;
   readonly #substrateRequestHandler: SubstrateRequestHandler;
   readonly #evmRequestHandler: EvmRequestHandler;
+  readonly #walletConnectRequestHandler: WalletConnectRequestHandler;
 
   // Common
   constructor (chainService: ChainService, settingService: SettingService, private keyringService: KeyringService) {
@@ -36,6 +39,7 @@ export default class RequestService {
     this.#authRequestHandler = new AuthRequestHandler(this, this.#chainService, this.keyringService);
     this.#substrateRequestHandler = new SubstrateRequestHandler(this);
     this.#evmRequestHandler = new EvmRequestHandler(this);
+    this.#walletConnectRequestHandler = new WalletConnectRequestHandler(this);
 
     // Reset icon on start service
     this.updateIconV2();
@@ -208,9 +212,26 @@ export default class RequestService {
     return this.#evmRequestHandler.updateConfirmation(id, type, payload, options, validator);
   }
 
+  // Wallet Connect requests
+  public getConnectWCRequest (id: string) {
+    return this.#walletConnectRequestHandler.getConnectWCRequest(id);
+  }
+
+  public get connectWCSubject (): BehaviorSubject<WalletConnectSessionRequest[]> {
+    return this.#walletConnectRequestHandler.connectWCSubject;
+  }
+
+  public get numConnectWCRequests (): number {
+    return this.#walletConnectRequestHandler.numConnectWCRequests;
+  }
+
+  public addConnectWCRequest (request: WalletConnectSessionRequest): void {
+    return this.#walletConnectRequestHandler.addConnectWCRequest(request);
+  }
+
   // General methods
   public get numRequests (): number {
-    return this.numMetaRequests + this.numAuthRequests + this.numSubstrateRequests + this.numEvmRequests;
+    return this.numMetaRequests + this.numAuthRequests + this.numSubstrateRequests + this.numEvmRequests + this.numConnectWCRequests;
   }
 
   public resetWallet (): void {
@@ -218,5 +239,6 @@ export default class RequestService {
     this.#substrateRequestHandler.resetWallet();
     this.#evmRequestHandler.resetWallet();
     this.#metadataRequestHandler.resetWallet();
+    this.#walletConnectRequestHandler.resetWallet();
   }
 }

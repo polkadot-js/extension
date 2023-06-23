@@ -76,7 +76,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onClick={onClick}
         type='ghost'
       >
-        {t('Copy to clipboard')}
+        {enableDownload ? t('Copy & Save to the clipboard') : t('Copy to clipboard')}
       </Button>
     </div>
   );

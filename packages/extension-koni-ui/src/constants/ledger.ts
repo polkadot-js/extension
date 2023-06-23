@@ -39,6 +39,17 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isEthereum: false
   },
   {
+    accountName: 'Aleph Zero',
+    appName: 'Aleph Zero',
+    networkName: 'Aleph Zero network',
+    genesisHash: ChainInfoMap.aleph.substrateInfo?.genesisHash || '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e',
+    icon: 'substrate',
+    network: 'aleph-node',
+    slug: ChainInfoMap.aleph.slug,
+    isDevMode: true,
+    isEthereum: false
+  },
+  {
     accountName: 'EVM',
     appName: 'Ethereum',
     networkName: 'EVM networks',

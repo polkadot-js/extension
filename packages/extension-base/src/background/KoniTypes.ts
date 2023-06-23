@@ -1875,6 +1875,7 @@ export interface RequestAddPspToken {
     symbol: string;
     name: string;
     decimals?: number;
+    logo?: string;
   };
 }
 

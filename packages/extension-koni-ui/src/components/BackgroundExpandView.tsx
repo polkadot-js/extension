@@ -3,7 +3,7 @@
 
 import { useIsPopup } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertHexColorToRGBA } from '@subwallet/extension-koni-ui/utils';
+import { convertHexColorToRGBA, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Question } from 'phosphor-react';
@@ -32,7 +32,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return !['/create-done'].includes(pathName);
   }, [location.pathname]);
 
-  const isNoti = useMemo(() => {
+  const isShowNotification = useMemo(() => {
     const pathName = location.pathname;
 
     return ['/create-done'].includes(pathName);
@@ -51,6 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className='help-container'>
           <Button
             icon={<Icon phosphorIcon={Question} />}
+            onClick={openInNewTab('https://docs.subwallet.app/')}
             size='xs'
             type='ghost'
           >
@@ -58,7 +59,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </Button>
         </div>
         {
-          isNoti && (
+          isShowNotification && (
             <div className='message-container'>
               <PinExtensionMessage />
             </div>

@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 1.0.11
+Build date: Jun 24, 2023.
+
+Features & Update:
+- Update Receive icon to Copy icon on Homepage screen (#1531)
+- Support display 3D NFT (#1516)
+- Re-check and update XCM feature for some chains: Polkadot, Statemint, Statemine, Bifrost Polkadot (#1546)
+
+Bugs fixed:
+- Fixed bug Show incorrect address book type (#1524)
+- Fixed bug Error fetching nominator data for Calamari (#1538)
+- Fixed bug Show incorrect Destination Chain fee on XCM history detail (#1550)
+
 ## 1.0.10
 Build date: Jun 17, 2023.
 

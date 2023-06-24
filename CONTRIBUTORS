@@ -1,5 +1,5 @@
     1718	Nam Phạm                      	[Issue 1546] update chain-list and xcm logic for Bifrost Polkadot
-    1414	AnhMTV                        	Fix small text in change log
+    1415	AnhMTV                        	Update @subwallet/chain-list and @polkadot/phishing
      957	S2kael                        	[Issue-1229] Update action click help
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly

@@ -302,7 +302,7 @@ export default class KoniState {
     const mantaPayConfig = await this.chainService.mantaPay.getMantaPayConfig(currentAddress, 'calamari') as MantaPayConfig;
 
     if (mantaPayConfig && mantaPayConfig.enabled) { // only init if current account enabled mantaPay
-      await this.enableMantaPay(false);
+      await this.enableMantaPay(false, '');
       // await this.initialSyncMantaPay();
 
       this.isMantaPayEnabled = true;
@@ -1871,7 +1871,7 @@ export default class KoniState {
     await this.chainService.init();
   }
 
-  public async enableMantaPay (updateStore: boolean) {
+  public async enableMantaPay (updateStore: boolean, seedPhrase: string) {
     const currentAddress = this.keyringService.currentAccount.address;
 
     if (!currentAddress || isEthereumAddress(currentAddress)) {
@@ -1884,7 +1884,7 @@ export default class KoniState {
     const mnemonic = 'arrange rib doll virtual dress clarify cram meat time grain head poem';
 
     await this.chainService.mantaPay.privateWallet?.initialSigner();
-    await this.chainService.mantaPay.privateWallet?.loadUserSeedPhrase(mnemonic);
+    await this.chainService.mantaPay.privateWallet?.loadUserSeedPhrase(seedPhrase || mnemonic);
     const zkAddress = await this.chainService.mantaPay.privateWallet?.getZkAddress();
 
     if (updateStore) {

@@ -1878,6 +1878,11 @@ export interface MantaPaySyncProgress {
   progress: number; // in percentage
 }
 
+export interface MantaPayEnableParams {
+  password: string,
+  address: string
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1946,7 +1951,7 @@ export interface KoniRequestSignatures {
   'pri(phishing.pass)': [RequestPassPhishingPage, boolean];
 
   // Manta pay
-  'pri(mantaPay.enable)': [null, string | undefined];
+  'pri(mantaPay.enable)': [MantaPayEnableParams, boolean];
   'pri(mantaPay.initialSyncMantaPay)': [null, boolean | undefined];
   'pri(mantaPay.getZkBalance)': [null, null];
   'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];

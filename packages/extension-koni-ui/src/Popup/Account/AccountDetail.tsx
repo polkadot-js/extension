@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MantaPaySyncProgress } from '@subwallet/extension-base/background/KoniTypes';
-import { CloseIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { CloseIcon, Layout, PageWrapper, ZkModeFooter } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
@@ -17,15 +17,13 @@ import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { copyToClipboard } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/utils/form/form';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, SettingItem, SwAlert, Switch, SwModalFuncProps, SwQRCode } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, SettingItem, SwAlert, Switch, SwModal, SwQRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, ShieldCheck, Swatches, TrashSimple, User } from 'phosphor-react';
+import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, ShieldCheck, Swatches, TrashSimple, User, Warning } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
-
-import useConfirmModal from '../../hooks/modal/useConfirmModal';
 
 type Props = ThemeProps;
 
@@ -47,7 +45,8 @@ interface MantaPayState {
   isEnabled: boolean,
   isSyncing: boolean,
   shouldShowConfirmation: boolean,
-  syncProgress: MantaPaySyncProgress
+  syncProgress: MantaPaySyncProgress,
+  loading: boolean
 }
 
 const DEFAULT_MANTA_PAY_STATE: MantaPayState = {
@@ -57,7 +56,8 @@ const DEFAULT_MANTA_PAY_STATE: MantaPayState = {
   syncProgress: {
     isDone: false,
     progress: 0
-  }
+  },
+  loading: false
 };
 
 export enum MantaPayReducerActionType {
@@ -69,7 +69,8 @@ export enum MantaPayReducerActionType {
   REJECT_ENABLE = 'REJECT_ENABLE',
   SYNC_FAIL = 'SYNC_FAIL',
   SET_SYNC_PROGRESS = 'SET_SYNC_PROGRESS',
-  SET_SYNC_FINISHED = 'SET_SYNC_FINISHED'
+  SET_SYNC_FINISHED = 'SET_SYNC_FINISHED',
+  SET_LOADING = 'SET_LOADING'
 }
 
 interface MantaPayReducerAction {
@@ -103,7 +104,8 @@ export const mantaPayReducer = (state: MantaPayState, action: MantaPayReducerAct
         ...state,
         isEnabled: true,
         isSyncing: true,
-        shouldShowConfirmation: false
+        shouldShowConfirmation: false,
+        loading: false
       };
     case MantaPayReducerActionType.REJECT_ENABLE:
       return {
@@ -130,10 +132,17 @@ export const mantaPayReducer = (state: MantaPayState, action: MantaPayReducerAct
         isSyncing: false,
         syncProgress: payload as MantaPaySyncProgress
       };
+    case MantaPayReducerActionType.SET_LOADING:
+      return {
+        ...state,
+        loading: payload as boolean
+      };
     default:
       throw new Error("Can't handle action");
   }
 };
+
+const zkModeConfirmationId = 'zkModeConfirmation';
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -145,7 +154,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const notify = useNotification();
   const { token } = useTheme() as Theme;
   const { accountAddress } = useParams();
-  const { checkActive } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const enableMantaPayConfirm = searchParams.get('enableMantaPayConfirm') === 'true';
 
@@ -166,50 +175,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [mantaPayState, dispatchMantaPayState] = useReducer(mantaPayReducer, { ...DEFAULT_MANTA_PAY_STATE, isEnabled: _isMantaPayEnabled });
 
-  const confirmationModalProp = useMemo((): Partial<SwModalFuncProps> => {
-    return {
-      title: t<string>('Confirmation'),
-      maskClosable: true,
-      closable: true,
-      type: 'warning',
-      subTitle: t<string>('Zk mode requires data synchronization'),
-      content: t<string>('You will not be able to use the app until the synchronization is finished. This process can take up to 45 minutes or longer, are you sure to do this?'),
-      okText: t<string>('Enable'),
-      cancelText: t('Cancel'),
-      id: 'mantaPayConfirmation'
-    };
-  }, [t]);
-
-  const { handleSimpleConfirmModal } = useConfirmModal(confirmationModalProp);
-
-  const isMantaPayConfirmationActive = checkActive('mantaPayConfirmation'); // TODO: improve this
-
   const handleEnableMantaPay = useCallback(() => {
-    if (mantaPayState.shouldShowConfirmation) {
-      handleSimpleConfirmModal()
-        .then(() => {
-          dispatchMantaPayState({ type: MantaPayReducerActionType.CONFIRM_ENABLE, payload: undefined });
-
-          setTimeout(() => {
-            enableMantaPay()
-              .catch((e) => {
-                console.error(e);
-
-                dispatchMantaPayState({ type: MantaPayReducerActionType.SYNC_FAIL, payload: undefined });
-              });
-          }, 1000);
-        })
-        .catch(() => {
-          dispatchMantaPayState({ type: MantaPayReducerActionType.REJECT_ENABLE, payload: undefined });
-        });
-    }
-  }, [handleSimpleConfirmModal, mantaPayState.shouldShowConfirmation]);
+    activeModal(zkModeConfirmationId);
+  }, [activeModal]);
 
   useEffect(() => {
-    if (enableMantaPayConfirm && !isMantaPayConfirmationActive) {
+    if (enableMantaPayConfirm) {
       handleEnableMantaPay();
     }
-  }, [enableMantaPayConfirm, handleEnableMantaPay, isMantaPayConfirmationActive]);
+  }, [enableMantaPayConfirm, handleEnableMantaPay]);
 
   useEffect(() => {
     let isRun = true;
@@ -380,6 +354,30 @@ const Component: React.FC<Props> = (props: Props) => {
         .catch(console.warn);
     }
   }, [account]);
+
+  const onCloseZkModeConfirmation = useCallback(() => {
+    dispatchMantaPayState({ type: MantaPayReducerActionType.REJECT_ENABLE, payload: undefined });
+    inactiveModal(zkModeConfirmationId);
+  }, [inactiveModal]);
+
+  const onOkZkModeConfirmation = useCallback((password: string) => {
+    dispatchMantaPayState({ type: MantaPayReducerActionType.SET_LOADING, payload: true });
+    setTimeout(() => {
+      enableMantaPay({ address: account?.address as string, password })
+        .then((result) => {
+          if (result) {
+            inactiveModal(zkModeConfirmationId);
+          }
+
+          dispatchMantaPayState({ type: MantaPayReducerActionType.CONFIRM_ENABLE, payload: undefined });
+        })
+        .catch((e) => {
+          console.error(e);
+
+          dispatchMantaPayState({ type: MantaPayReducerActionType.SYNC_FAIL, payload: undefined });
+        });
+    }, 1000);
+  }, [account?.address, inactiveModal]);
 
   if (!account) {
     return null;
@@ -563,6 +561,36 @@ const Component: React.FC<Props> = (props: Props) => {
             {t('Remove this account')}
           </Button>
         </div>
+
+        <SwModal
+          className={CN('account-detail__zk-mode-confirmation')}
+          footer={(
+            <ZkModeFooter
+              loading={mantaPayState.loading}
+              onCancel={onCloseZkModeConfirmation}
+              onOk={onOkZkModeConfirmation}
+            />
+          )}
+          id={zkModeConfirmationId}
+          title={t<string>('Confirmation')}
+          wrapClassName={className}
+        >
+          <div className={'zk-warning__container'}>
+            <div className={'zk-warning__title'}>
+              <Icon
+                customSize={'20px'}
+                iconColor={token.colorWarning}
+                phosphorIcon={Warning}
+                weight={'bold'}
+              />
+              <div className={'zk-warning__title-text'}>{t('Zk mode requires data synchronization')}</div>
+            </div>
+
+            <div className={'zk-warning__subtitle'}>
+              {t('You will not be able to use the app until the synchronization is finished. This process can take up to 45 minutes or longer, are you sure to do this?')}
+            </div>
+          </div>
+        </SwModal>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
@@ -676,6 +704,40 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
     '.zk-sync-margin': {
       marginTop: token.margin
+    },
+
+    '.zk_confirmation_modal__footer': {
+      display: 'flex',
+      justifyContent: 'center'
+    },
+
+    '.footer__button': {
+      flexGrow: 1
+    },
+
+    '.zk-warning__title': {
+      display: 'flex',
+      flexDirection: 'row',
+      gap: '8px',
+      justifyContent: 'center',
+      fontSize: token.size,
+      lineHeight: token.lineHeight
+    },
+
+    '.zk-warning__title-text': {
+      color: token.colorWarning,
+      fontWeight: token.headingFontWeight
+    },
+
+    '.zk-warning__subtitle': {
+      display: 'flex',
+      justifyContent: 'center',
+      textAlign: 'justify',
+      marginTop: token.marginMD,
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
+      fontWeight: token.bodyFontWeight,
+      color: token.colorTextTertiary
     }
   };
 });

@@ -7,7 +7,6 @@ import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base
 import { _ASSET_LOGO_MAP_SRC, _ASSET_REF_SRC, _CHAIN_ASSET_SRC, _CHAIN_INFO_SRC, _CHAIN_LOGO_MAP_SRC, _DEFAULT_ACTIVE_CHAINS, _MANTA_ZK_CHAIN_GROUP, _MULTI_CHAIN_ASSET_SRC, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaPrivateHandler';
-import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
@@ -19,7 +18,6 @@ import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 
-import { ApiPromise } from '@polkadot/api';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 
@@ -545,23 +543,14 @@ export class ChainService {
 
     if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo !== undefined) {
       if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug)) {
-        this.mantaChainHandler.initMantaPay(endpoint, chainInfo.slug)
-          .then((apiPromise) => {
-            const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, {providerName, apiPromise, onUpdateStatus});
+        const apiPromise = await this.mantaChainHandler.initMantaPay(endpoint, chainInfo.slug);
+        const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, externalApiPromise: apiPromise, onUpdateStatus });
 
-            this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as _SubstrateApi);
-          })
-          .catch(() => {
-            console.error('Error creating MantaPay');
-
-            const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, {providerName, onUpdateStatus});
-
-            this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as _SubstrateApi);
-          });
+        this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
       } else {
         const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
 
-        this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as SubstrateApi);
+        this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
       }
     }
 

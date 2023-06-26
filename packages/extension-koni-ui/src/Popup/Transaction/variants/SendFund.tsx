@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetRefPath, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
@@ -38,6 +38,10 @@ interface TransferFormProps extends TransactionFormBaseProps {
   to: string;
   destChain: string;
   value: string;
+}
+
+interface TransferDestination extends ChainItemType {
+  type: _AssetRefPath | 'transfer';
 }
 
 type Props = ThemeProps;
@@ -130,18 +134,19 @@ function getTokenItems (
   return items;
 }
 
-function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<string, _AssetRef>, chainInfoMap: Record<string, _ChainInfo>): ChainItemType[] {
+function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<string, _AssetRef>, chainInfoMap: Record<string, _ChainInfo>): TransferDestination[] {
   if (!tokenSlug) {
     return [];
   }
 
-  const result: ChainItemType[] = [];
+  const result: TransferDestination[] = [];
   const originChain = chainInfoMap[_getOriginChainOfAsset(tokenSlug)];
 
   // Firstly, push the originChain of token
   result.push({
     name: originChain.name,
-    slug: originChain.slug
+    slug: originChain.slug,
+    type: 'transfer'
   });
 
   Object.values(xcmRefMap).forEach((xcmRef) => {
@@ -149,8 +154,9 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
       const destinationChain = chainInfoMap[xcmRef.destChain];
 
       result.push({
-        name: destinationChain.name,
-        slug: destinationChain.slug
+        name: xcmRef.displayName || destinationChain.name, // TODO: fix this
+        slug: xcmRef.path === _AssetRefPath.XCM ? destinationChain.slug : `${destinationChain.slug}___${xcmRef.path}`,
+        type: xcmRef.path
       });
     }
   });
@@ -253,7 +259,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const destChain = Form.useWatch('destChain', form);
   const transferAmount = Form.useWatch('value', form);
 
-  const destChainItems = useMemo<ChainItemType[]>(() => {
+  const destChainItems = useMemo<TransferDestination[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
   }, [chainInfoMap, asset, xcmRefMap]);
 
@@ -290,7 +296,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       return Promise.reject(t('Invalid Recipient address'));
     }
 
-    const { chain, destChain, from, to } = form.getFieldsValue();
+    const { chain, destChain: _destChain, from, to } = form.getFieldsValue();
 
     if (!from || !chain || !destChain) {
       return Promise.resolve();

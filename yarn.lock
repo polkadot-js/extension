@@ -5628,6 +5628,7 @@ __metadata:
     i18next: ^21.9.2
     is-buffer: ^2.0.5
     json-rpc-engine: ^6.1.0
+    manta-extension-sdk: ^1.0.29-beta.3
     moment: ^2.29.4
     protobufjs: ^7.1.2
     rxjs: ^7.8.1
@@ -17499,6 +17500,27 @@ __metadata:
   dependencies:
     tmpl: 1.0.5
   checksum: b38a025a12c8146d6eeea5a7f2bf27d51d8ad6064da8ca9405fcf7bf9b54acd43e3b30ddd7abb9b1bfa4ddb266019133313482570ddb207de568f71ecfcf6060
+  languageName: node
+  linkType: hard
+
+"manta-extension-sdk@npm:^1.0.29-beta.3":
+  version: 1.0.29-beta.4
+  resolution: "manta-extension-sdk@npm:1.0.29-beta.4"
+  dependencies:
+    "@polkadot/api": ^10.1.4
+    "@polkadot/types": ^10.1.4
+    "@polkadot/util": ^11.1.1
+    "@polkadot/util-crypto": ^11.1.1
+    bn.js: ^5.2.0
+    manta-scale-codec: ^0.11.0-beta.1
+  checksum: ac1c5131fb3f061d494adbb006cd0b9f3fbce476d9fc7f16fed65cedf69a92fc99752feeab7003dd37e5fe9c7f0084779dab09b5876fc1c9012d5ba993bd1efc
+  languageName: node
+  linkType: hard
+
+"manta-scale-codec@npm:^0.11.0-beta.1":
+  version: 0.11.0-beta.1
+  resolution: "manta-scale-codec@npm:0.11.0-beta.1"
+  checksum: ef20cc083c0d315d817ac2cec11afebd5f2d21449beac57edfd218864759589c860969c3a403e5b36c9746f5e611824b2b4d729c32d953964d881b091c1aa9ff
   languageName: node
   linkType: hard
 

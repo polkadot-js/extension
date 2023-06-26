@@ -1,36 +1,43 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { formatJsonRpcError } from '@json-rpc-tools/utils';
+import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import RequestService from '@subwallet/extension-base/services/request-service';
-import TransactionService from '@subwallet/extension-base/services/transaction-service';
-import { ALL_WALLET_CONNECT_EVENT, DEFAULT_WALLET_CONNECT_OPTIONS } from '@subwallet/extension-base/services/wallet-connect-service/constants';
-import { convertConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
-import {
-  WalletConnectSessionRequest,
-  ResultApproveWalletConnectSession
-} from '@subwallet/extension-base/services/wallet-connect-service/types';
+import Eip155RequestHandler from '@subwallet/extension-base/services/wallet-connect-service/handler/Eip155RequestHandler';
 import SignClient from '@walletconnect/sign-client';
-import { PairingTypes, SignClientTypes } from '@walletconnect/types';
-import { getSdkError } from '@walletconnect/utils';
+import { SignClientTypes } from '@walletconnect/types';
+import { EngineTypes } from '@walletconnect/types/dist/types/sign-client/engine';
+import { getInternalError, getSdkError } from '@walletconnect/utils';
+
+import PolkadotRequestHandler from './handler/PolkadotRequestHandler';
+import { ALL_WALLET_CONNECT_EVENT, DEFAULT_WALLET_CONNECT_OPTIONS, WALLET_CONNECT_SUPPORTED_METHODS } from './constants';
+import { convertConnectRequest } from './helpers';
+import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, ResultApproveWalletConnectSession, WalletConnectSigningMethod } from './types';
 
 export default class WalletConnectService {
   readonly #requestService: RequestService;
-  readonly #transactionService: TransactionService;
+  readonly #polkadotRequestHandler: PolkadotRequestHandler;
+  readonly #eip155RequestHandler: Eip155RequestHandler;
+  readonly #koniState: KoniState;
+
   #client: SignClient | undefined;
   #option: SignClientTypes.Options;
-  #pairs: PairingTypes.Struct[];
 
-  constructor (requestService: RequestService, transactionService: TransactionService, option: SignClientTypes.Options = DEFAULT_WALLET_CONNECT_OPTIONS) {
+  constructor (koniState: KoniState, requestService: RequestService, option: SignClientTypes.Options = DEFAULT_WALLET_CONNECT_OPTIONS) {
+    this.#koniState = koniState;
     this.#requestService = requestService;
-    this.#transactionService = transactionService;
     this.#option = option;
+    this.#polkadotRequestHandler = new PolkadotRequestHandler(this, requestService);
+    this.#eip155RequestHandler = new Eip155RequestHandler(this.#koniState, this);
+
     this.#initClient().catch(console.error);
   }
 
   async #initClient () {
     this.#removeListener();
     this.#client = await SignClient.init(this.#option);
-    this.#pairs = this.#client.pairing.values;
+    // this.#pairs = this.#client.pairing.values;
     this.#createListener();
   }
 
@@ -40,8 +47,68 @@ export default class WalletConnectService {
     this.#requestService.addConnectWCRequest(convertConnectRequest(proposal));
   }
 
+  #onSessionRequest (requestEvent: SignClientTypes.EventArguments['session_request']) {
+    this.#checkClient();
+
+    const { id, params, topic } = requestEvent;
+    const { chainId, request } = params;
+    const method = request.method as WalletConnectSigningMethod;
+
+    try {
+      const requestSession = this.getSession(topic);
+
+      const namespaces = Object.keys(requestSession.namespaces);
+      const chains = Object.values(requestSession.namespaces).map((namespace) => namespace.chains as string[]).flat();
+      const methods = Object.values(requestSession.namespaces).map((namespace) => namespace.methods).flat();
+
+      const [requestNamespace] = chainId.split(':');
+
+      if (!namespaces.includes(requestNamespace)) {
+        throw Error(getSdkError('UNSUPPORTED_NAMESPACE_KEY').message);
+      }
+
+      if (!chains.includes(chainId)) {
+        throw Error(getSdkError('UNSUPPORTED_CHAINS').message + ' ' + chainId);
+      }
+
+      if (!methods.includes(method)) {
+        throw Error(getSdkError('UNAUTHORIZED_METHOD').message + ' ' + method);
+      }
+
+      if (!WALLET_CONNECT_SUPPORTED_METHODS.includes(method)) {
+        throw Error(getSdkError('UNSUPPORTED_METHODS').message + ' ' + method);
+      }
+
+      switch (method) {
+        case POLKADOT_SIGNING_METHODS.POLKADOT_SIGN_MESSAGE:
+        case POLKADOT_SIGNING_METHODS.POLKADOT_SIGN_TRANSACTION:
+          this.#polkadotRequestHandler.handleRequest(requestEvent);
+          break;
+        case EIP155_SIGNING_METHODS.ETH_SEND_TRANSACTION:
+        case EIP155_SIGNING_METHODS.PERSONAL_SIGN:
+        case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA:
+        case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V3:
+        case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V4:
+        case EIP155_SIGNING_METHODS.ETH_SIGN:
+          console.log(request.params);
+          this.#eip155RequestHandler.handleRequest(requestEvent);
+          break;
+        default:
+          throw Error(getSdkError('INVALID_METHOD').message + ' ' + method);
+      }
+    } catch (e) {
+      console.log(e);
+
+      this.responseRequest({
+        topic: topic,
+        response: formatJsonRpcError(id, (e as Error).message)
+      }).catch(console.error);
+    }
+  }
+
   #createListener () {
     this.#client?.on('session_proposal', this.#onSessionProposal.bind(this));
+    this.#client?.on('session_request', this.#onSessionRequest.bind(this));
     this.#client?.on('session_ping', (data) => console.log('ping', data));
     this.#client?.on('session_event', (data) => console.log('event', data));
     this.#client?.on('session_update', (data) => console.log('update', data));
@@ -57,7 +124,17 @@ export default class WalletConnectService {
 
   #checkClient () {
     if (!this.#client) {
-      throw new Error('WalletConnect is not initialized');
+      throw new Error(getInternalError('NOT_INITIALIZED').message);
+    }
+  }
+
+  public getSession (topic: string) {
+    const session = this.#client?.session.get(topic);
+
+    if (!session) {
+      throw new Error(getInternalError('MISMATCHED_TOPIC').message);
+    } else {
+      return session;
     }
   }
 
@@ -89,5 +166,11 @@ export default class WalletConnectService {
       id: id,
       reason: getSdkError('USER_REJECTED')
     });
+  }
+
+  public async responseRequest (response: EngineTypes.RespondParams) {
+    this.#checkClient();
+
+    await this.#client?.respond(response);
   }
 }

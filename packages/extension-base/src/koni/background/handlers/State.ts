@@ -147,7 +147,7 @@ export default class KoniState {
     this.balanceService = new BalanceService(this.chainService);
     this.historyService = new HistoryService(this.dbService, this.chainService, this.eventService, this.keyringService);
     this.transactionService = new TransactionService(this.chainService, this.eventService, this.requestService, this.balanceService, this.historyService, this.notificationService, this.dbService);
-    this.walletConnectService = new WalletConnectService(this.requestService, this.transactionService);
+    this.walletConnectService = new WalletConnectService(this, this.requestService);
     this.migrationService = new MigrationService(this);
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);

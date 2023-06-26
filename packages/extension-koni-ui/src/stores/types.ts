@@ -7,9 +7,9 @@ import { AddressBookState, AllLogoMap, AssetSetting, BalanceItem, ChainStakingMe
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
-import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 
 // todo: move this file to extension-koni-ui/src/types/
 

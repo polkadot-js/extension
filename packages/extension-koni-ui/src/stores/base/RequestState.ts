@@ -5,8 +5,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
-import { ReduxStatus, RequestState } from '@subwallet/extension-koni-ui/stores/types';
 import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { ReduxStatus, RequestState } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState: RequestState = {
   authorizeRequest: {},

@@ -162,8 +162,8 @@ export default class RequestService {
     return this.#substrateRequestHandler.allSubstrateRequests;
   }
 
-  public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
-    return this.#substrateRequestHandler.sign(url, request, account);
+  public sign (url: string, request: RequestSign, account: AccountJson, id?: string): Promise<ResponseSigning> {
+    return this.#substrateRequestHandler.sign(url, request, account, id);
   }
 
   public get numSubstrateRequests (): number {
@@ -219,6 +219,10 @@ export default class RequestService {
 
   public get connectWCSubject (): BehaviorSubject<WalletConnectSessionRequest[]> {
     return this.#walletConnectRequestHandler.connectWCSubject;
+  }
+
+  public get allConnectWCRequests (): WalletConnectSessionRequest[] {
+    return this.#walletConnectRequestHandler.allConnectWCRequests;
   }
 
   public get numConnectWCRequests (): number {

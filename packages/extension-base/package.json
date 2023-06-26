@@ -26,6 +26,7 @@
     "@ethereumjs/common": "^2.6.5",
     "@ethereumjs/tx": "^4.0.2",
     "@ethersproject/abi": "^5.7.0",
+    "@json-rpc-tools/utils": "^1.7.6",
     "@metamask/safe-event-emitter": "^2.0.0",
     "@metaverse-network-sdk/type-definitions": "^0.0.1-13",
     "@oak-foundation/types": "^0.0.23",

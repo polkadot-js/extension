@@ -3,13 +3,13 @@
 
 import { Resolver } from '@subwallet/extension-base/background/types';
 import RequestService from '@subwallet/extension-base/services/request-service';
-import { WalletConnectSessionRequest, RequestWalletConnectSession } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { RequestWalletConnectSession, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BehaviorSubject } from 'rxjs';
 
 // WC = WalletConnect
 export default class WalletConnectRequestHandler {
   readonly #requestService: RequestService;
-  readonly #wallletConnectSessionRequests: Record<string, RequestWalletConnectSession> = {};
+  readonly #walletConnectSessionRequests: Record<string, RequestWalletConnectSession> = {};
   public readonly connectWCSubject: BehaviorSubject<WalletConnectSessionRequest[]> = new BehaviorSubject<WalletConnectSessionRequest[]>([]);
 
   constructor (requestService: RequestService) {
@@ -18,17 +18,17 @@ export default class WalletConnectRequestHandler {
 
   public get allConnectWCRequests (): WalletConnectSessionRequest[] {
     return Object
-      .values(this.#wallletConnectSessionRequests)
+      .values(this.#walletConnectSessionRequests)
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .map(({ reject, resolve, ...data }) => data);
   }
 
   public get numConnectWCRequests (): number {
-    return Object.keys(this.#wallletConnectSessionRequests).length;
+    return Object.keys(this.#walletConnectSessionRequests).length;
   }
 
   public getConnectWCRequest (id: string): RequestWalletConnectSession {
-    return this.#wallletConnectSessionRequests[id];
+    return this.#walletConnectSessionRequests[id];
   }
 
   private updateIconConnectWC (shouldClose?: boolean): void {
@@ -38,7 +38,7 @@ export default class WalletConnectRequestHandler {
 
   private connectWCComplete = (id: string): Resolver<void> => {
     const complete = (): void => {
-      delete this.#wallletConnectSessionRequests[id];
+      delete this.#walletConnectSessionRequests[id];
       this.updateIconConnectWC(true);
     };
 
@@ -55,7 +55,7 @@ export default class WalletConnectRequestHandler {
   public addConnectWCRequest (request: WalletConnectSessionRequest) {
     const id = request.id;
 
-    this.#wallletConnectSessionRequests[id] = {
+    this.#walletConnectSessionRequests[id] = {
       ...this.connectWCComplete(id),
       ...request
     };
@@ -65,7 +65,7 @@ export default class WalletConnectRequestHandler {
   }
 
   public resetWallet () {
-    for (const request of Object.values(this.#wallletConnectSessionRequests)) {
+    for (const request of Object.values(this.#walletConnectSessionRequests)) {
       request.reject(new Error('Reset wallet'));
     }
 

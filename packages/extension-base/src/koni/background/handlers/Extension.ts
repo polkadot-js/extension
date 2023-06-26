@@ -40,6 +40,8 @@ import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyr
 import { keyring } from '@subwallet/ui-keyring';
 import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import { KeyringAddress } from '@subwallet/ui-keyring/types';
+import { ProposalTypes } from '@walletconnect/types/dist/types/sign-client/proposal';
+import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/session';
 import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
 import { TransactionConfig } from 'web3-core';
@@ -3302,7 +3304,7 @@ export default class KoniExtension {
     return true;
   }
 
-  private connectWCSubscribe (id: string, port: chrome.runtime.Port): boolean {
+  private connectWCSubscribe (id: string, port: chrome.runtime.Port): WalletConnectSessionRequest[] {
     const cb = createSubscription<'pri(walletConnect.requests.subscribe)'>(id, port);
     const subscription = this.#koniState.requestService.connectWCSubject.subscribe((requests: WalletConnectSessionRequest[]): void =>
       cb(requests)
@@ -3313,19 +3315,41 @@ export default class KoniExtension {
       subscription.unsubscribe();
     });
 
-    return true;
+    return this.#koniState.requestService.allConnectWCRequests;
   }
 
-  private async approveWalletConnectSession ({ accounts, id }: RequestApproveConnectWalletSession): Promise<boolean> {
+  private async approveWalletConnectSession ({ accounts: selectedAccounts, id }: RequestApproveConnectWalletSession): Promise<boolean> {
     const request = this.#koniState.requestService.getConnectWCRequest(id);
 
     const wcId = request.request.id;
     const params = request.request.params;
-    const nameSpaces = Object.keys(params.requiredNamespaces);
+    const requiredNamespaces: ProposalTypes.RequiredNamespaces = params.requiredNamespaces;
+
+    const namespaces: SessionTypes.Namespaces = {};
+
+    Object.entries(requiredNamespaces)
+      .forEach(([key, namespace]) => {
+        if (namespace.chains) {
+          const accounts: string[] = [];
+
+          if (key === 'eip155' || key === 'polkadot') {
+            namespace.chains.forEach((chain) => {
+              accounts.push(...(selectedAccounts.filter((address) => isEthereumAddress(address) === (key === 'eip155')).map((address) => `${chain}:${address}`)));
+            });
+          }
+
+          namespaces[key] = {
+            accounts,
+            methods: namespace.methods,
+            events: namespace.events,
+            chains: namespace.chains
+          };
+        }
+      });
 
     const result: ResultApproveWalletConnectSession = {
       id: wcId,
-      namespaces: {},
+      namespaces: namespaces,
       relayProtocol: params.relays[0].protocol
     };
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { BackgroundExpandView, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -44,9 +44,10 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   const navigate = useNavigate();
   const { goBack, goHome } = useDefaultNavigate();
   const { isOpenPModal, openPModal } = usePredefinedModal();
+  const notify = useNotification();
+
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
-  const notify = useNotification();
 
   const needMigrate = useMemo(
     () => !!accounts
@@ -134,7 +135,9 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     }
   }, [accounts, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
 
-  return <>{children}</>;
+  return <>
+    {children}
+  </>;
 }
 
 const Main = styled.main`
@@ -160,6 +163,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
           </Main>
         </DefaultRoute>
       </PageWrapper>
+      <BackgroundExpandView />
     </WalletModalContext>
   );
 }

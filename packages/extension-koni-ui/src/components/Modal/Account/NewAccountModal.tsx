@@ -4,12 +4,13 @@
 import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
 import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
+import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants/account';
 import { CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
 import useSwitchModal from '@subwallet/extension-koni-ui/hooks/modal/useSwitchModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { setSelectedAccountTypes } from '@subwallet/extension-koni-ui/utils';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -24,22 +25,21 @@ type Props = ThemeProps;
 
 const modalId = NEW_ACCOUNT_MODAL;
 
-const defaultSelectedTypes = [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE];
-
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { checkActive, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const isActive = checkActive(modalId);
 
-  const [selectedItems, setSelectedItems] = useState<KeypairType[]>(defaultSelectedTypes);
+  const [selectedItems, setSelectedItems] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
 
   const onCancel = useCallback(() => {
     inactiveModal(modalId);
   }, [inactiveModal]);
 
   const onSubmit = useCallback(() => {
-    navigate('/accounts/new-seed-phrase', { state: { accountTypes: selectedItems } });
+    setSelectedAccountTypes(selectedItems);
+    navigate('/accounts/new-seed-phrase');
     inactiveModal(modalId);
   }, [navigate, selectedItems, inactiveModal]);
 
@@ -49,7 +49,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   useEffect(() => {
     if (!isActive) {
-      setSelectedItems(defaultSelectedTypes);
+      setSelectedItems(DEFAULT_ACCOUNT_TYPES);
     }
   }, [isActive]);
 

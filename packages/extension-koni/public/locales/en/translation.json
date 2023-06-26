@@ -1235,5 +1235,6 @@
   "Open \"{{network}}\" on Ledger to connect": "",
   "Can't find account": "",
   "Ledger does not support transfer for this token": "",
-  "Please unlock your Ledger": ""
+  "Please unlock your Ledger": "",
+  "Unable to get balance. Please re-enable the network": ""
 }

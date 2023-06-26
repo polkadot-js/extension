@@ -1583,6 +1583,15 @@ export default class KoniState {
   public onInstall () {
     const singleModes = Object.values(_PREDEFINED_SINGLE_MODES);
 
+    try {
+      // Open expand page
+      const url = `${chrome.extension.getURL('index.html')}#/`;
+
+      withErrorLog(() => chrome.tabs.create({ url }));
+    } catch (e) {
+      console.error(e);
+    }
+
     const setUpSingleMode = ({ networkKeys, theme }: SingleModeJson) => {
       networkKeys.forEach((key) => {
         this.enableChain(key).catch(console.error);

@@ -40,7 +40,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
     }
   }, [chainInfo]);
 
-  const formattedAddress = useMemo(() => {
+  const formattedAddress = useMemo(() => { // TODO: add zkAddress here
     if (chainInfo) {
       const isEvmChain = !!chainInfo.evmInfo;
       const networkPrefix = _getChainSubstrateAddressPrefix(chainInfo);

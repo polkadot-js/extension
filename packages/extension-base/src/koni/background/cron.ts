@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ApiMap, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, CRON_SYNC_MANTA_PAY } from '@subwallet/extension-base/constants';
+import { CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, CRON_SYNC_MANTA_PAY } from '@subwallet/extension-base/constants';
 import { KoniSubscription } from '@subwallet/extension-base/koni/background/subscription';
 import { _ChainState, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportSubstrateStaking, _isChainSupportWasmNft } from '@subwallet/extension-base/services/chain-service/utils';
@@ -77,10 +77,12 @@ export class KoniCron {
     });
   };
 
-  start = () => {
+  start = async () => {
     if (this.status === 'running') {
       return;
     }
+
+    await Promise.all([this.state.eventService.waitKeyringReady, this.state.eventService.waitAssetReady]);
 
     const currentAccountInfo = this.state.keyringService.currentAccount;
 
@@ -140,14 +142,8 @@ export class KoniCron {
       needUpdateStaking && this.removeCron('updateChainStakingMetadata');
 
       // Chains
-      chainUpdated && this.removeCron('checkStatusApiMap');
-      chainUpdated && this.removeCron('recoverApiMap');
-
       if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
         (commonReload || needUpdateNft) && this.addCron('refreshNft', this.refreshNft(address, serviceInfo.chainApiMap, this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
-
-        chainUpdated && this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS, false);
-        chainUpdated && this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
 
         (commonReload || needUpdateStaking || stakingSubmitted) && this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         (commonReload || needUpdateStaking || stakingSubmitted) && this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
@@ -166,8 +162,6 @@ export class KoniCron {
     if (Object.keys(this.state.getSubstrateApiMap()).length !== 0 || Object.keys(this.state.getEvmApiMap()).length !== 0) {
       this.resetNft(currentAccountInfo.address);
       this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
-      this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
-      this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
       this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
       this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
       this.addCron('updateChainStakingMetadata', this.updateChainStakingMetadata(this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap()), CRON_REFRESH_CHAIN_STAKING_METADATA);
@@ -179,7 +173,7 @@ export class KoniCron {
     this.status = 'running';
   };
 
-  stop = () => {
+  stop = async () => {
     if (this.status === 'stopped') {
       return;
     }
@@ -198,31 +192,8 @@ export class KoniCron {
     this.removeAllCrons();
 
     this.status = 'stopped';
-  };
 
-  updateApiMapStatus = () => {
-    this.state.chainService.updateApiMapStatus().catch(console.error);
-  };
-
-  recoverApiMap = () => {
-    const apiMap = this.state.getApiMap();
-
-    for (const [networkKey, apiProp] of Object.entries(apiMap.substrate)) {
-      if (!apiProp.isApiConnected) {
-        this.state.refreshSubstrateApi(networkKey);
-      }
-    }
-
-    for (const [key, evmApi] of Object.entries(apiMap.evm)) {
-      evmApi.api.eth.net.isListening()
-        .catch(() => {
-          this.state.refreshWeb3Api(key);
-        });
-    }
-
-    const { address } = this.state.keyringService.currentAccount;
-
-    this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
+    return Promise.resolve();
   };
 
   syncMantaPay = () => {

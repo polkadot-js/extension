@@ -10,6 +10,7 @@ import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMa
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
+import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
@@ -30,6 +31,7 @@ import TransactionService from '@subwallet/extension-base/services/transaction-s
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
+import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { decodePair } from '@subwallet/keyring/pair/decode';
 import { keyring } from '@subwallet/ui-keyring';
@@ -116,7 +118,6 @@ export default class KoniState {
   private cron: KoniCron;
   private subscription: KoniSubscription;
   private logger: Logger;
-  private ready = false;
   readonly settingService: SettingService;
   readonly requestService: RequestService;
   readonly transactionService: TransactionService;
@@ -126,13 +127,18 @@ export default class KoniState {
   readonly migrationService: MigrationService;
   readonly subscanService: SubscanService;
 
+  // Handle the general status of the extension
+  private generalStatus: ServiceStatus = ServiceStatus.INITIALIZING;
+  private waitSleeping: Promise<void> | null = null;
+  private waitStarting: Promise<void> | null = null;
+
   constructor (providers: Providers = {}) {
     this.providers = providers;
 
-    this.dbService = new DatabaseService();
     this.eventService = new EventService();
-    this.subscanService = new SubscanService();
+    this.dbService = new DatabaseService(this.eventService);
     this.keyringService = new KeyringService(this.eventService);
+    this.subscanService = new SubscanService();
 
     this.notificationService = new NotificationService();
     this.chainService = new ChainService(this.dbService, this.eventService);
@@ -148,7 +154,8 @@ export default class KoniState {
     this.logger = createLogger('State');
 
     // Init state
-    this.init().catch(console.error);
+    this.init()
+      .catch(console.error);
   }
 
   // Clone from polkadot.js
@@ -271,6 +278,7 @@ export default class KoniState {
   }
 
   public async init () {
+    await this.eventService.waitCryptoReady;
     await this.chainService.init();
     await this.migrationService.run();
     this.eventService.emit('chain.ready', true);
@@ -324,16 +332,9 @@ export default class KoniState {
   }
 
   public onReady () {
-    this.subscription.start();
-    this.cron.start();
-    this.historyService.start().catch(console.error);
-    this.priceService.start().catch(console.error);
-
-    this.ready = true;
-  }
-
-  public isReady () {
-    return this.ready;
+    // Todo: Need optimize in the future to, only run important services onetime to save resources
+    // Todo: If optimize must check activity of web-runner of mobile
+    this._start().catch(console.error);
   }
 
   public updateKeyringState (isReady = true, callback?: () => void): void {
@@ -1087,7 +1088,7 @@ export default class KoniState {
   }
 
   public async upsertChainInfo (data: _NetworkUpsertParams): Promise<boolean> {
-    const newNativeTokenSlug = this.chainService.upsertChain(data);
+    const newNativeTokenSlug = await this.chainService.upsertChain(data);
 
     if (newNativeTokenSlug) {
       await this.chainService.updateAssetSetting(newNativeTokenSlug, { visible: true });
@@ -1244,7 +1245,7 @@ export default class KoniState {
     }
   }
 
-  public pauseAllNetworks (code?: number, reason?: string): Promise<void[]> {
+  public pauseAllNetworks (code?: number, reason?: string) {
     return this.chainService.stopAllChainApis();
   }
 
@@ -1614,6 +1615,15 @@ export default class KoniState {
   public onInstall () {
     const singleModes = Object.values(_PREDEFINED_SINGLE_MODES);
 
+    try {
+      // Open expand page
+      const url = `${chrome.extension.getURL('index.html')}#/`;
+
+      withErrorLog(() => chrome.tabs.create({ url }));
+    } catch (e) {
+      console.error(e);
+    }
+
     const setUpSingleMode = ({ networkKeys, theme }: SingleModeJson) => {
       networkKeys.forEach((key) => {
         this.enableChain(key).catch(console.error);
@@ -1660,20 +1670,76 @@ export default class KoniState {
   }
 
   public async sleep () {
-    this.cron.stop();
-    this.subscription.stop();
+    // Wait starting finish before sleep to avoid conflict
+    this.generalStatus === ServiceStatus.STARTING && this.waitStarting && await this.waitStarting;
+    this.eventService.emit('general.sleep', true);
+
+    // Avoid sleep multiple times
+    if (this.generalStatus === ServiceStatus.STOPPED) {
+      return;
+    }
+
+    // Continue wait existed stopping process
+    if (this.generalStatus === ServiceStatus.STOPPING) {
+      await this.waitSleeping;
+
+      return;
+    }
+
+    const sleeping = createPromiseHandler<void>();
+
+    this.generalStatus = ServiceStatus.STOPPING;
+    this.waitSleeping = sleeping.promise;
+
+    // Stopping services
+    await Promise.all([this.cron.stop(), this.subscription.stop()]);
     await this.pauseAllNetworks(undefined, 'IDLE mode');
-    await this.historyService.stop();
-    await this.priceService.stop();
+    await Promise.all([this.historyService.stop(), this.priceService.stop()]);
+
+    // Complete sleeping
+    sleeping.resolve();
+    this.generalStatus = ServiceStatus.STOPPED;
+    this.waitSleeping = null;
+  }
+
+  private async _start (isWakeup = false) {
+    // Wait sleep finish before start to avoid conflict
+    this.generalStatus === ServiceStatus.STOPPING && this.waitSleeping && await this.waitSleeping;
+
+    // Avoid start multiple times
+    if (this.generalStatus === ServiceStatus.STARTED) {
+      return;
+    }
+
+    // Continue wait existed starting process
+    if (this.generalStatus === ServiceStatus.STARTING) {
+      await this.waitStarting;
+
+      return;
+    }
+
+    const starting = createPromiseHandler<void>();
+
+    this.generalStatus = ServiceStatus.STARTING;
+    this.waitStarting = starting.promise;
+
+    // Resume all networks if wakeup from sleep
+    if (isWakeup) {
+      await this.resumeAllNetworks();
+      this.eventService.emit('general.wakeup', true);
+    }
+
+    // Start services
+    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start()]);
+
+    // Complete starting
+    starting.resolve();
+    this.waitStarting = null;
+    this.generalStatus = ServiceStatus.STARTED;
   }
 
   public async wakeup () {
-    await this.eventService.waitChainReady;
-    await this.resumeAllNetworks();
-    this.cron.start();
-    this.subscription.start();
-    await this.historyService.start();
-    await this.priceService.start();
+    await this._start(true);
   }
 
   public cancelSubscription (id: string): boolean {
@@ -1737,7 +1803,7 @@ export default class KoniState {
     });
 
     if (needActiveTokens.length) {
-      this.chainService.enableChains(needEnableChains);
+      await this.chainService.enableChains(needEnableChains);
       this.chainService.setAssetSettings({ ...currentAssetSettings });
     }
   }

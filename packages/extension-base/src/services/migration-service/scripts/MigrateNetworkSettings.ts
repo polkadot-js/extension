@@ -31,7 +31,7 @@ export default class MigrateNetworkSettings extends BaseMigrationJob {
     });
 
     if (enableList.length > 0) {
-      state.chainService.enableChains(enableList);
+      await state.chainService.enableChains(enableList);
 
       // Enable native token of these chains
       const currentAssetSettings = await state.chainService.getAssetSettings();

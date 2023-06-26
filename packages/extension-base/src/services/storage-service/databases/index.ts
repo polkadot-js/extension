@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { BalanceItem, ChainStakingMetadata, CrowdloanItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceItem, ChainStakingMetadata, CrowdloanItem, MetadataItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import Dexie, { Table, Transaction } from 'dexie';
 
 const DEFAULT_DATABASE = 'SubWalletDB_v2';
@@ -33,6 +33,8 @@ export interface IMigration {
   timestamp: number
 }
 
+export interface IMetadataItem extends MetadataItem, DefaultChainDoc {}
+
 export type IMantaPayLedger = any;
 
 export default class KoniDatabase extends Dexie {
@@ -46,6 +48,7 @@ export default class KoniDatabase extends Dexie {
   public transactions!: Table<ITransactionHistoryItem, object>;
   public migrations!: Table<IMigration, object>;
 
+  public metadata!: Table<IMetadataItem, object>;
   public chain!: Table<IChain, object>;
   public asset!: Table<_ChainAsset, object>;
 
@@ -80,45 +83,15 @@ export default class KoniDatabase extends Dexie {
     });
 
     this.conditionalVersion(2, {
-      // DO NOT declare all columns, only declare properties to be indexed
-      // Read more: https://dexie.org/docs/Version/Version.stores()
-      // Primary key is always the first entry
-      chain: 'slug',
-      asset: 'slug',
-      price: 'currency',
-      balances: '[tokenSlug+address], tokenSlug, address',
-      nfts: '[chain+address+collectionId+id], [address+chain], chain, id, address, collectionId, name',
-      nftCollections: '[chain+collectionId], chain, collectionId, collectionName',
-      crowdloans: '[chain+address], chain, address',
-      stakings: '[chain+address+type], [chain+address], chain, address, type',
-      transactions: '[chain+address+extrinsicHash], &[chain+address+extrinsicHash], chain, address, extrinsicHash, action',
-      migrations: '[key+name]',
-
-      chainStakingMetadata: '[chain+type], chain, type',
-      nominatorMetadata: '[chain+address+type], [chain+address], chain, address, type',
-
       mantaPay: 'key'
     });
 
     this.conditionalVersion(3, {
-      // DO NOT declare all columns, only declare properties to be indexed
-      // Read more: https://dexie.org/docs/Version/Version.stores()
-      // Primary key is always the first entry
-      chain: 'slug',
-      asset: 'slug',
-      price: 'currency',
-      balances: '[tokenSlug+address], tokenSlug, address',
-      nfts: '[chain+address+collectionId+id], [address+chain], chain, id, address, collectionId, name',
-      nftCollections: '[chain+collectionId], chain, collectionId, collectionName',
-      crowdloans: '[chain+address], chain, address',
-      stakings: '[chain+address+type], [chain+address], chain, address, type',
-      transactions: '[chain+address+extrinsicHash], &[chain+address+extrinsicHash], chain, address, extrinsicHash, action',
-      migrations: '[key+name]',
-
-      chainStakingMetadata: '[chain+type], chain, type',
-      nominatorMetadata: '[chain+address+type], [chain+address], chain, address, type',
-
       mantaPay: 'key, chain'
+    });
+
+    this.conditionalVersion(4, {
+      metadata: 'genesisHash, chain'
     });
   }
 

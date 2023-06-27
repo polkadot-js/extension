@@ -213,9 +213,9 @@ function Address({
                   />
                   <span>{parentNameSuri}</span>
                 </div>
-                <div className='displaced'>
-                  <Name />
-                </div>
+              </div>
+              <div className='displaced'>
+                <Name />
               </div>
             </>
           ) : (

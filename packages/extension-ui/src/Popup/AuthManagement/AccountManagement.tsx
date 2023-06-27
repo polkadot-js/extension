@@ -19,8 +19,8 @@ interface Props extends RouteComponentProps, ThemeProps {
 }
 
 const CustomButtonArea = styled(ButtonArea)`
+  padding-inline: 16px;
   padding-top: 16px;
-  padding-left: 32px;
   padding-bottom: 0px;
 `;
 
@@ -72,7 +72,7 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
   };
 
   return (
-    <ScrollWrapper>
+    <StyledScrollWrapper>
       <form
         className={className}
         onSubmit={onSubmit}
@@ -85,7 +85,7 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
         />
         {url && (
           <>
-            <RemoveAuth url={url} />
+            <StyledRemoveAuth url={url} />
             {hierarchy.length > 0 ? (
               <AccountSelection
                 className='accountSelection'
@@ -101,33 +101,43 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
             )}
           </>
         )}
-        <CustomButtonArea>
-          <Button
-            onClick={_onCancel}
-            secondary
-            type='button'
-          >
-            {t<string>('Cancel')}
-          </Button>
-          <Button
-            className='acceptButton'
-            isDisabled={!isFormValid}
-            type='submit'
-          >
-            {t<string>('Change')}
-          </Button>
-        </CustomButtonArea>
+        {hierarchy.length > 0 && (
+          <CustomButtonArea>
+            <Button
+              onClick={_onCancel}
+              secondary
+              type='button'
+            >
+              {t<string>('Cancel')}
+            </Button>
+            <Button
+              className='acceptButton'
+              isDisabled={!isFormValid}
+              type='submit'
+            >
+              {t<string>('Change')}
+            </Button>
+          </CustomButtonArea>
+        )}
       </form>
-    </ScrollWrapper>
+    </StyledScrollWrapper>
   );
 }
+
+const StyledScrollWrapper = styled(ScrollWrapper)`
+  & > * {
+    margin-inline: -16px;
+  }
+`;
+
+const StyledRemoveAuth = styled(RemoveAuth)`
+  margin-bottom: 24px;
+`;
 
 export default withRouter(styled(AccountManagement)`
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden scroll;
-  margin: 0 -16px;
 
   ::-webkit-scrollbar-thumb {
       background: ${({ theme }: ThemeProps) => theme.boxBorderColor};
@@ -149,8 +159,8 @@ export default withRouter(styled(AccountManagement)`
     padding: 16px;
     gap: 8px;
     height: 80px;
-    margin-top: 16px;
-    border: 1px dashed #1B2B38;
+    margin-inline: 16px;
+    border: 1px dashed ${({ theme }) => theme.dottedBorderDark};
     border-radius: 8px;
   }
 
@@ -159,14 +169,16 @@ export default withRouter(styled(AccountManagement)`
     margin: 0px;
     
     ${Checkbox} {
-      margin-right: 16px;
+      margin-right: 32px;
     }
 
     .accountList {
       height: 100%;
 
+      padding-right: 8px;
+
       ${AccountsTree} {
-        width: calc(100% - 16px);
+        width: calc(100% - 32px);
         margin: 0 auto;
       }
     }

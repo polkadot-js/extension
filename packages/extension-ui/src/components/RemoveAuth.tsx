@@ -17,12 +17,6 @@ interface Props {
   url: string;
 }
 
-const StyledFaviconBox = styled(FaviconBox)`
-  box-sizing: border-box;
-  margin: 0px auto;
-  max-width: calc(100% - 24px);
-`;
-
 function RemoveAuth({ className, url }: Props): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
@@ -46,20 +40,17 @@ function RemoveAuth({ className, url }: Props): React.ReactElement {
   );
 
   return (
-    <div className={className}>
-      <StyledFaviconBox
-        disconnectElement={disconnectElement}
-        url={url}
-        withoutProtocol
-      />
-    </div>
+    <FaviconBox
+      className={className}
+      disconnectElement={disconnectElement}
+      url={url}
+      withoutProtocol
+    />
   );
 }
 
 export default styled(RemoveAuth)(
   ({ theme }: ThemeProps) => `
-  display: flex;
-
   .remove-container{
     display: flex;
     align-items: center;

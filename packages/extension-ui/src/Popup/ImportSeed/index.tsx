@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
 
 import useToast from '@polkadot/extension-ui/hooks/useToast';
 
-import { AccountContext, ActionContext, ScrollWrapper, Success } from '../../components';
+import { AccountContext, ActionContext, BottomWrapper, ScrollWrapper, Success } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useMetadata from '../../hooks/useMetadata';
@@ -68,7 +69,7 @@ function ImportSeed(): React.ReactElement {
   const isLastStep = step === 3;
 
   return (
-    <ScrollWrapper>
+    <StyledScrollWrapper>
       {isLastStep || (
         <HeaderWithSteps
           step={step}
@@ -99,8 +100,15 @@ function ImportSeed(): React.ReactElement {
         />
       )}
       {step === 3 && <Success text={t('New account has been imported successfully!')} />}
-    </ScrollWrapper>
+    </StyledScrollWrapper>
   );
 }
+
+const StyledScrollWrapper = styled(ScrollWrapper)`
+  ${BottomWrapper} {
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+`;
 
 export default ImportSeed;

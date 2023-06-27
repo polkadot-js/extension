@@ -9,7 +9,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { u8aToString } from '@polkadot/util';
 
-import { AccountContext, ActionContext } from '../../components';
+import { AccountContext, ActionContext, Success } from '../../components';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { batchRestore, jsonGetAccountInfo, jsonRestore } from '../../messaging';
@@ -68,6 +68,9 @@ function Upload(): React.ReactElement {
         return;
       }
 
+      setPassword('');
+      setIsPasswordError(false);
+
       if (isKeyringPairs$Json(json)) {
         setRequirePassword(true);
         json.accounts.forEach((account) => {
@@ -93,40 +96,43 @@ function Upload(): React.ReactElement {
     [_onNextStep]
   );
 
-  const _onRestore = useCallback((skipJsonAuthenticityCheck: boolean): void => {
-    if (!file) {
-      return;
-    }
+  const _onRestore = useCallback(
+    (skipJsonAuthenticityCheck: boolean): void => {
+      if (!file) {
+        return;
+      }
 
-    if (requirePassword && !password) {
-      return;
-    }
+      if (requirePassword && !password) {
+        return;
+      }
 
-    setIsBusy(true);
+      setIsBusy(true);
 
-    (
-      isKeyringPairs$Json(file) ?
-        batchRestore(file, password, skipJsonAuthenticityCheck) :
-        jsonRestore(file, password, skipJsonAuthenticityCheck)
-    )
-      .then(() => {
-        show(t('Import successful'), 'success');
-        window.close();
-      })
-      .catch((e) => {
-        console.error(e);
-        setIsBusy(false);
-        setIsPasswordError(true);
-      });
-  }, [file, password, requirePassword, show, t]);
+      (isKeyringPairs$Json(file)
+        ? batchRestore(file, password, skipJsonAuthenticityCheck)
+        : jsonRestore(file, password, skipJsonAuthenticityCheck)
+      )
+        .then(_onNextStep)
+        .catch((e) => {
+          console.error(e);
+          setIsBusy(false);
+          setIsPasswordError(true);
+        });
+    },
+    [file, password, requirePassword, _onNextStep]
+  );
+
+  const isHeaderShown = step !== 3;
 
   return (
     <>
-      <HeaderWithSteps
-        step={step}
-        text={t<string>('Import from JSON file')}
-        total={2}
-      />
+      {isHeaderShown && (
+        <HeaderWithSteps
+          step={step}
+          text={t<string>('Import from JSON file')}
+          total={2}
+        />
+      )}
       {step === 1 && (
         <ImportJsonDropzoneStep
           isFileError={isFileError}
@@ -138,6 +144,7 @@ function Upload(): React.ReactElement {
         <ImportJsonConfirmStep
           accountsInfo={accountsInfo}
           fileName={fileName}
+          isBusy={isBusy}
           isPasswordError={isPasswordError}
           onChangePass={_onChangePass}
           onNextStep={_onRestore}
@@ -145,6 +152,7 @@ function Upload(): React.ReactElement {
           requirePassword={requirePassword}
         />
       )}
+      {step === 3 && <Success text={t('Import successful!')} />}
     </>
   );
 }

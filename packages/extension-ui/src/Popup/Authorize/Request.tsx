@@ -4,11 +4,21 @@
 import type { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import type { ThemeProps } from '../../types';
 
-import React, { FormEvent, useCallback, useContext, useEffect } from 'react';
+import React, { FormEvent, useCallback, useContext, useEffect, useId } from 'react';
 import styled from 'styled-components';
 
 import helpIcon from '../../assets/help.svg';
-import { AccountContext, BottomWrapper, Button, ButtonArea, HelperFooter, LearnMore, Svg } from '../../components';
+import {
+  AccountContext,
+  BottomWrapper,
+  Button,
+  ButtonArea,
+  HelperFooter,
+  LearnMore,
+  ScrollWrapper,
+  Svg,
+  VerticalSpace
+} from '../../components';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { LINKS } from '../../links';
@@ -23,10 +33,6 @@ interface Props extends ThemeProps {
   request: RequestAuthorizeTab;
   url: string;
 }
-
-const CustomButtonArea = styled(ButtonArea)`
-  backdrop-filter: blur(10px);
-`;
 
 const CustomFooter = styled(HelperFooter)`
   flex-direction: row;
@@ -52,7 +58,10 @@ const CustomFooter = styled(HelperFooter)`
 `;
 
 function Request({ authId, className, isFirst, url }: Props): React.ReactElement<Props> {
+  const formId = useId();
+
   const { accounts, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
+
   const { t } = useTranslation();
   const { show } = useToast();
 
@@ -122,12 +131,16 @@ function Request({ authId, className, isFirst, url }: Props): React.ReactElement
   };
 
   return (
-    <form
-      className={className}
-      onSubmit={onSubmit}
-    >
-      <AccountSelection url={url} />
-      <CustomButtonArea footer={footer}>
+    <StyledScrollWrapper>
+      <form
+        className={className}
+        id={formId}
+        onSubmit={onSubmit}
+      >
+        <AccountSelection url={url} />
+      </form>
+      <VerticalSpace />
+      <ButtonArea footer={footer}>
         <Button
           data-accept-request-button
           onClick={_onClose}
@@ -136,23 +149,29 @@ function Request({ authId, className, isFirst, url }: Props): React.ReactElement
         >
           {t<string>('Cancel')}
         </Button>
-        {isFirst && <Button type='submit'>{t<string>('Connect')}</Button>}
-      </CustomButtonArea>
-    </form>
+        {isFirst && (
+          <Button
+            form={formId}
+            type='submit'
+          >
+            {t<string>('Connect')}
+          </Button>
+        )}
+      </ButtonArea>
+    </StyledScrollWrapper>
   );
 }
 
-export default styled(Request)`
-  padding: 0px 16px;
-
+const StyledScrollWrapper = styled(ScrollWrapper)`
   & ${BottomWrapper} {
-    position: sticky;
     margin-inline: -16px;
+    padding-inline: 16px;
   }
+`;
 
+export default styled(Request)`
   .accountList {
-    overflow-x: hidden;
-    padding-right: 2px;
+    padding-right: 8px;
     padding-bottom: 16px;
     height: 100%;
   }

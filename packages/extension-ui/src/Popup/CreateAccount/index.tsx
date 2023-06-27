@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 import useToast from '@polkadot/extension-ui/hooks/useToast';
 
-import { Loading, ScrollWrapper, Success } from '../../components';
+import { BottomWrapper, Loading, ScrollWrapper, Success } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import { ALEPH_ZERO_GENESIS_HASH } from '../../constants';
 import useMetadata from '../../hooks/useMetadata';
@@ -73,7 +73,7 @@ function CreateAccount(): React.ReactElement {
   const isLastStep = step === 4;
 
   return (
-    <ScrollWrapper>
+    <StyledScrollWrapper>
       {isLastStep || (
         <HeaderWithSteps
           step={step}
@@ -104,9 +104,16 @@ function CreateAccount(): React.ReactElement {
         )}
         {step === 4 && <Success text={t('Account created successfully!')} />}
       </Loading>
-    </ScrollWrapper>
+    </StyledScrollWrapper>
   );
 }
+
+const StyledScrollWrapper = styled(ScrollWrapper)`
+  ${BottomWrapper} {
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+`;
 
 const StyledSafetyFirst = styled(SafetyFirst)`
   margin-block: auto;

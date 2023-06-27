@@ -11,6 +11,7 @@ import helpIcon from '../../assets/help.svg';
 import {
   AccountContext,
   ActionContext,
+  BottomWrapper,
   Button,
   ButtonArea,
   Checkbox,
@@ -98,7 +99,7 @@ function EditNetwork({
 
   return (
     <>
-      <ScrollWrapper>
+      <StyledScrollWrapper>
         <Header
           className='header'
           text={t<string>('Account network')}
@@ -141,11 +142,17 @@ function EditNetwork({
             {t<string>('Change')}
           </Button>
         </CustomButtonArea>
-      </ScrollWrapper>
-      <VerticalSpace />
+      </StyledScrollWrapper>
     </>
   );
 }
+
+const StyledScrollWrapper = styled(ScrollWrapper)`
+  ${BottomWrapper} {
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+`;
 
 const Form = styled.form`
     display: flex;

@@ -121,7 +121,8 @@ const darkTheme = {
   warningBoxBackground: 'linear-gradient(0deg, rgba(255, 210, 63, 0.05), rgba(255, 210, 63, 0.05)), #14202A;',
   warningColor: '#FFD23F',
   progressBarInactive: '#273847',
-  underlineDark: '#273847'
+  underlineDark: '#273847',
+  dottedBorderDark: '#273847'
 };
 
 export declare type Theme = typeof darkTheme;

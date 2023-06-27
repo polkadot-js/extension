@@ -23,7 +23,6 @@ import {
   InputWithLabel,
   LearnMore,
   MnemonicInput,
-  ScrollWrapper,
   Svg,
   VerticalSpace,
   Warning
@@ -58,7 +57,7 @@ const CustomFooter = styled(HelperFooter)`
   }
 
   ::before {
-    width: calc(100% - 32px);
+    left: 0;
   }
 `;
 
@@ -193,50 +192,48 @@ function SeedAndPath({ className, genesis, onAccountChange, onNextStep, type }: 
 
   return (
     <>
-      <ScrollWrapper>
-        <form
-          className={className}
-          id={formId}
-          onSubmit={onSubmit}
-        >
-          <StyledHeader
-            text={t<string>('You can paste it into any field.')}
-            title={t<string>('Enter your 12-word secret phrase')}
+      <form
+        className={className}
+        id={formId}
+        onSubmit={onSubmit}
+      >
+        <StyledHeader
+          text={t<string>('You can paste it into any field.')}
+          title={t<string>('Enter your 12-word secret phrase')}
+        />
+        <MnemonicWrapper>
+          <MnemonicInput
+            onChange={onSeedWordsChange}
+            seedWords={seedWords}
+            showError={!!error}
           />
-          <MnemonicWrapper>
-            <MnemonicInput
-              onChange={onSeedWordsChange}
-              seedWords={seedWords}
-              showError={!!error}
-            />
-            {!!error && (
-              <Warning
-                className='centered'
-                isDanger
-              >
-                {error}
-              </Warning>
-            )}
-          </MnemonicWrapper>
-          <div className='input-with-lock'>
-            <StyledInputWithLabel
-              className='derivationPath'
-              disabled={isLocked}
-              isError={!!path && !!error}
-              isFocused
-              isLocked={isLocked}
-              label={t<string>('Sub-account derivation path')}
-              onChange={setPath}
-              value={path}
-            />
-            <InputLock
-              isLocked={isLocked}
-              onClick={_toggleLocked}
-            />
-          </div>
-          {isLocked && <span className='unlock-text'>{t<string>('Unlock to edit')}</span>}
-        </form>
-      </ScrollWrapper>
+          {!!error && (
+            <Warning
+              className='centered'
+              isDanger
+            >
+              {error}
+            </Warning>
+          )}
+        </MnemonicWrapper>
+        <div className='input-with-lock'>
+          <StyledInputWithLabel
+            className='derivationPath'
+            disabled={isLocked}
+            isError={!!path && !!error}
+            isFocused
+            isLocked={isLocked}
+            label={t<string>('Sub-account derivation path')}
+            onChange={setPath}
+            value={path}
+          />
+          <InputLock
+            isLocked={isLocked}
+            onClick={_toggleLocked}
+          />
+        </div>
+        {isLocked && <span className='unlock-text'>{t<string>('Unlock to edit')}</span>}
+      </form>
       <VerticalSpace />
       <ButtonArea footer={footer}>
         <Button

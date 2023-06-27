@@ -119,8 +119,6 @@ const StyledHero = styled(Hero)`
 `;
 
 const WebsiteListContainer = styled.div`
-  margin-top: 4px;
-
   ${WebsiteEntry}:first-child {
       border-radius: 8px 8px 2px 2px;
   }

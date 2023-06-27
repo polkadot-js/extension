@@ -170,7 +170,7 @@ export default React.memo(
   top: 0px;
   backdrop-filter: blur(10px);
   z-index: ${Z_INDEX.HEADER};
-  margin-bottom: ${withStepper ? '0px' : '25px'};
+  margin-bottom: ${withStepper ? '0px' : '32px'};
 
   &.backdrop-margin-left {
     margin-left: -16px;

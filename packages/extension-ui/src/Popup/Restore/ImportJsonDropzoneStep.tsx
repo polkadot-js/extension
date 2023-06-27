@@ -28,11 +28,15 @@ function ImportJsonDropzoneStep({ className, isFileError, onChangeFile, setFileN
           onChange={onChangeFile}
           setFileName={setFileName}
         />
-        {isFileError && <Warning isDanger>{t<string>('Invalid Json file')}</Warning>}
+        {isFileError && <StyledWarning isDanger>{t<string>('Invalid Json file')}</StyledWarning>}
       </div>
     </>
   );
 }
+
+const StyledWarning = styled(Warning)`
+  margin-top: 8px;;
+`;
 
 export default styled(ImportJsonDropzoneStep)`
   + .splash {

@@ -1,29 +1,19 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
-
 import { t } from 'i18next';
 import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { approveAuthRequest } from '@polkadot/extension-ui/messaging';
 
-import animatedWarning from '../../assets/anim_warning.svg';
 import helpIcon from '../../assets/help.svg';
-import { AnimatedSvg, Button, ButtonArea, HelperFooter, LearnMore, Link, Svg, VerticalSpace } from '../../components';
+import { Button, ButtonArea, HelperFooter, Hero, LearnMore, Link, Svg } from '../../components';
 import { LINKS } from '../../links';
 
-interface Props extends ThemeProps {
+type Props = {
   authId: string;
-  className?: string;
-}
-
-const CustomButtonArea = styled(ButtonArea)`
-  padding: 0px 24px;
-  margin-top: 96px;
-  margin-bottom: 0px;
-`;
+};
 
 const CustomFooter = styled(HelperFooter)`
   flex-direction: row;
@@ -44,7 +34,7 @@ const CustomFooter = styled(HelperFooter)`
   }
 `;
 
-function NoAccount({ authId, className }: Props): React.ReactElement<Props> {
+function NoAccount({ authId }: Props): React.ReactElement<Props> {
   const approveAuthWithNoAccounts = useCallback(() => approveAuthRequest(authId, []).catch(console.error), [authId]);
 
   useEffect(() => {
@@ -79,28 +69,23 @@ function NoAccount({ authId, className }: Props): React.ReactElement<Props> {
   );
 
   return (
-    <>
-      <div className={className}>
-        <div className='content-inner'>
-          <AnimatedSvg
-            className='warning-icon'
-            src={animatedWarning}
-          />
-          <span className='heading'>{t<string>('You do NOT have any account')}</span>
-          <span className='subtitle'>
-            {t<string>('Please')}&nbsp;
-            <Link
-              className='link'
-              to='/account/add-menu'
-            >
-              {t<string>('create an account')}
-            </Link>
-            &nbsp;{t<string>("and refresh the application's page.")}&nbsp;
-          </span>
-        </div>
-      </div>
-      <VerticalSpace />
-      <CustomButtonArea footer={footer}>
+    <Container>
+      <StyledHero
+        headerText={t<string>('You do NOT have any account')}
+        iconType='warning'
+      >
+        <Description>
+          {t<string>('Please')}&nbsp;
+          <StyledLink
+            className='link'
+            to='/account/add-menu'
+          >
+            {t<string>('create an account')}
+          </StyledLink>
+          &nbsp;{t<string>("and refresh the application's page.")}&nbsp;
+        </Description>
+      </StyledHero>
+      <ButtonArea footer={footer}>
         <Button
           className='acceptButton'
           onClick={onClick}
@@ -108,71 +93,38 @@ function NoAccount({ authId, className }: Props): React.ReactElement<Props> {
         >
           {t<string>('Got it!')}
         </Button>
-      </CustomButtonArea>
-    </>
+      </ButtonArea>
+    </Container>
   );
 }
 
-export default styled(NoAccount)(
-  ({ theme }: Props) => `
-  overflow: hidden
-  .acceptButton {
-    width: 90%;
-    margin: 25px auto 0;
-  }
+const Container = styled.div`
+  height: 100%;
 
-  .warning-icon {
-    width: 96px;
-    height: 96px;
-  }
+  display: flex;
+  flex-direction: column;
+`;
 
-  .content-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    margin-top: 110px;
-  }
+const Description = styled.p`
+  margin: 0;
+`;
 
-  .heading {
-    font-family: ${theme.secondaryFontFamily};
-    font-style: normal;
-    font-weight: 700;
-    font-size: 24px;
-    line-height: 118%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    letter-spacing: 0.03em;
-    color: ${theme.textColor};
-    margin: 16px 0px 8px 0px;
-    text-align: center;
-    white-space: pre-line;
-  }
+const StyledHero = styled(Hero)`
+  margin-block: auto;
+`;
 
-  ${Link} {
-    display: inline;
-    vertical-align: baseline;
-  }
+const StyledLink = styled(Link)`
+  display: inline;
 
-  .subtitle {
-    font-weight: 300;
-    font-size: 14px;
-    line-height: 145%;
-    text-align: center;
-    letter-spacing: 0.07em;
-    white-space: pre-line;
-    color: ${theme.subTextColor};
-    
-    .link {
-      color: ${theme.primaryColor};
-      cursor: pointer;
+  vertical-align: baseline;
 
-      :hover {
-        text-decoration: underline;
-      }
-    }
+  color: ${({ theme }) => theme.primaryColor};
+  cursor: pointer;
+
+  :hover {
+    text-decoration: underline;
+    color: ${({ theme }) => theme.primaryColor};
   }
-`
-);
+`;
+
+export default NoAccount;

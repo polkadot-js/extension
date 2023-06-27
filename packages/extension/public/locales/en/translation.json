@@ -372,5 +372,6 @@
   "I have safely stored the secret phrase. The clipboard will be cleared upon clicking \"Next\".": "",
   "New account has been imported successfully!": "",
   "Metadata update": "",
-  "This approval enables future requests to be decoded using this metadata.": ""
+  "This approval enables future requests to be decoded using this metadata.": "",
+  "Import successful!": ""
 }

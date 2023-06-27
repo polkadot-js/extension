@@ -26,7 +26,8 @@ interface Props extends ThemeProps {
 const StyledCheckbox = styled(Checkbox)`
   display: flex;
   justify-content: flex-end;
-  margin-right: 8px;
+  margin-right: 24px;
+  margin-bottom: 16px;
 `;
 
 const StyledFaviconBox = styled(FaviconBox)`
@@ -133,9 +134,6 @@ function AccountSelection({
 export default styled(AccountSelection)(
   ({ theme }: Props) => `
 
-  // due to internal padding
-  margin: 0px -16px;
-
   .select-all-margin {
     margin-top: 22px;
   }
@@ -151,11 +149,9 @@ export default styled(AccountSelection)(
   }
 
   .accountList {
-    overflow-x: hidden;
     height: 180px;
     scrollbar-color: ${theme.boxBorderColor};
     scrollbar-width: 2px;
-    padding-right: 2px;
   
     ::-webkit-scrollbar-thumb {
       background:${theme.boxBorderColor};
@@ -168,8 +164,6 @@ export default styled(AccountSelection)(
       width: 4px;
     }
     ${Account} {
-      padding: 0px 4px;
-      
       ${Checkbox} {
         margin-left: 8px;
         margin-right: 16px;
@@ -212,13 +206,13 @@ export default styled(AccountSelection)(
     justify-content: center;
     letter-spacing: 0.03em;
     color: ${theme.textColor};
-    margin: 16px 0px 8px 0px;
+    margin: 24px 0px 8px 0px;
     text-align: center;
     white-space: pre-line;
   }
 
   .separator {
-    margin-top: 12px;
+    margin-top: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -254,6 +248,7 @@ export default styled(AccountSelection)(
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    margin-bottom: 24px;
   }
 `
 );

@@ -94,7 +94,7 @@ function Forget({
         withHelp
       />
       <ContentContainer>
-        <Hero
+        <StyledHero
           headerText={t<string>('Forget account')}
           iconType='forget'
         >
@@ -104,7 +104,7 @@ function Forget({
             )}
           </Text>
           <Text>{t<string>('Not sure if you have it? You can export JSON file and use it as well.')}</Text>
-        </Hero>
+        </StyledHero>
         <StyledAddress
           address={address}
           withExport
@@ -131,6 +131,10 @@ function Forget({
 
 const ContentContainer = styled.div`
   margin-bottom: auto;
+`;
+
+const StyledHero = styled(Hero)`
+  margin-bottom: 16px;
 `;
 
 const Text = styled.p`

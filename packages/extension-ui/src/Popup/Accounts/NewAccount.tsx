@@ -9,9 +9,17 @@ import styled from 'styled-components';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { AccountJson } from '@polkadot/extension-base/background/types';
-import { Z_INDEX } from '@polkadot/extension-ui/zindex';
 
-import { AccountContext, ActionContext, BottomWrapper, Button, PopupBorderContainer } from '../../components';
+import {
+  AccountContext,
+  ActionContext,
+  BottomWrapper,
+  Button,
+  ButtonArea,
+  PopupBorderContainer,
+  ScrollWrapper,
+  VerticalSpace
+} from '../../components';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 import { getAuthList, updateAuthorization, updateAuthorizationDate } from '../../messaging';
@@ -21,22 +29,6 @@ import { createGroupedAccountData } from '../../util/createGroupedAccountData';
 interface Props extends RouteComponentProps, ThemeProps {
   className?: string;
 }
-
-const ButtonsGroup = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  padding-bottom: 0px;
-  position: absolute;
-  bottom: 6px;
-  left: 0px;
-  right: 0px;
-  height: 56px;
-  backdrop-filter: blur(10px);
-  z-index: ${Z_INDEX.BOTTOM_WRAPPER};
-`;
 
 function NewAccount({ className, location: { search } }: Props): React.ReactElement<Props> {
   const { hierarchy, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
@@ -108,24 +100,21 @@ function NewAccount({ className, location: { search } }: Props): React.ReactElem
   }, [onAction, url]);
 
   return (
-    <>
+    <ScrollWrapper className={className}>
       <PopupBorderContainer>
-        <div className={className}>
-          <div className='content'>
-            <div className='content-inner'>
-              {url && (
-                <NewAccountSelection
-                  className='accountSelection'
-                  newAccounts={newAccountsRef.current}
-                  showHidden={true}
-                  url={url}
-                />
-              )}
-            </div>
-          </div>
+        <div className='content-inner'>
+          {url && (
+            <NewAccountSelection
+              className='accountSelection'
+              newAccounts={newAccountsRef.current}
+              showHidden={true}
+              url={url}
+            />
+          )}
         </div>
       </PopupBorderContainer>
-      <ButtonsGroup>
+      <VerticalSpace />
+      <ButtonArea>
         <Button
           onClick={_onCancel}
           secondary
@@ -138,37 +127,19 @@ function NewAccount({ className, location: { search } }: Props): React.ReactElem
         >
           {t<string>('Update')}
         </Button>
-      </ButtonsGroup>
-    </>
+      </ButtonArea>
+    </ScrollWrapper>
   );
 }
 
 export default withRouter(styled(NewAccount)`
-  & ${BottomWrapper} {
-    position: sticky;
-    bottom: -8px !important;
+  ${BottomWrapper} {
+    padding-inline: 16px;
+    margin-inline: -16px;
   }
 
   .accountSelection {
     max-width: 100%;
-  }
-
-  .content {
-    margin-top: 8px;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    height: 584px;
-
-    ::-webkit-scrollbar-thumb {
-      background: ${({ theme }: ThemeProps): string => theme.boxBorderColor};
-      border-radius: 50px;  
-      width: 2px;  
-      border-right: 2px solid #111B24;
-    }
-  
-    ::-webkit-scrollbar {
-      width: 4px;
-    }
   }
 
   .content-inner {

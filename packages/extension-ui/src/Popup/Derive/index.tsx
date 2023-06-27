@@ -102,7 +102,7 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
 
   return (
-    <ScrollWrapper>
+    <StyledScrollWrapper>
       <HeaderWithSteps
         step={step}
         text={t<string>('Derive sub-account')}
@@ -133,8 +133,15 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
           parentName={parentName}
         />
       )}
-    </ScrollWrapper>
+    </StyledScrollWrapper>
   );
 }
+
+const StyledScrollWrapper = styled(ScrollWrapper)`
+  ${BottomWrapper} {
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+`;
 
 export default React.memo(Derive);

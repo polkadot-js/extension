@@ -7,7 +7,6 @@ import styled from 'styled-components';
 import { ThemeProps } from '../types';
 import PasswordFeedback from './PasswordField/PasswordFeedback';
 import Address from './Address';
-import BottomWrapper from './BottomWrapper';
 import Label from './Label';
 
 interface Props extends ThemeProps {

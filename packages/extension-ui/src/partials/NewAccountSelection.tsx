@@ -35,6 +35,7 @@ const StyledCheckbox = styled(Checkbox)`
   display: flex;
   justify-content: flex-end;
   margin-right: 24px;
+  margin-bottom: 16px;
 `;
 
 const StyledFaviconBox = styled(FaviconBox)`
@@ -159,10 +160,6 @@ export default styled(NewAccountSelection)(
   // due to internal padding
   margin: 0px -16px;
 
-  ${AccountsTree}:last-of-type {
-    padding-bottom: 48px;
-  }
-
   ${Checkbox}:not(.accountTree-checkbox) label span {
     left: -10px;
   }
@@ -207,7 +204,8 @@ export default styled(NewAccountSelection)(
     text-transform: uppercase;
     color: ${theme.subTextColor};
     padding: 8px 0 8px 8px;
-    margin-bottom: 8px;
+    margin-right: -8px;
+    margin-bottom: 16px;
     border-bottom: 1px solid ${theme.boxBorderColor};
   }
 
@@ -215,8 +213,9 @@ export default styled(NewAccountSelection)(
     overflow-x: hidden;
     scrollbar-color: ${theme.boxBorderColor};
     scrollbar-width: 2px;
-    padding-right: 2px;
-    padding: 0 16px;
+    padding-block: 0;
+    padding-left: 8px;
+    padding-right: 16px;
   
     ::-webkit-scrollbar-thumb {
       background:${theme.boxBorderColor};
@@ -229,8 +228,6 @@ export default styled(NewAccountSelection)(
       width: 4px;
     }
     ${Account} {
-      padding: 2px 4px;
-
       ${Checkbox} {
         margin-left: 8px;
         margin-right: 16px;
@@ -273,7 +270,7 @@ export default styled(NewAccountSelection)(
     justify-content: center;
     letter-spacing: 0.03em;
     color: ${theme.textColor};
-    margin: 16px 0px 8px 0px;
+    margin: 32px 0px 8px 0px;
     text-align: center;
     white-space: pre-line;
   }
@@ -315,6 +312,8 @@ export default styled(NewAccountSelection)(
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
+    margin-bottom: 24px;
   }
 `
 );

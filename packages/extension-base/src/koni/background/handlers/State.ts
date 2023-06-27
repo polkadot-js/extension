@@ -6,7 +6,7 @@ import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaPayConfig, MantaPaySyncProgress, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, BasicTxErrorType, BrowserConfirmationType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncProgress, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, ThemeNames, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
@@ -37,6 +37,7 @@ import { decodePair } from '@subwallet/keyring/pair/decode';
 import { keyring } from '@subwallet/ui-keyring';
 import { Subscription } from 'dexie';
 import SimpleKeyring from 'eth-simple-keyring';
+import { interfaces } from 'manta-extension-sdk';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
@@ -303,7 +304,6 @@ export default class KoniState {
 
     if (mantaPayConfig && mantaPayConfig.enabled) { // only init if current account enabled mantaPay
       await this.enableMantaPay(false, '');
-      // await this.initialSyncMantaPay();
 
       this.isMantaPayEnabled = true;
     }
@@ -1878,13 +1878,26 @@ export default class KoniState {
       return;
     }
 
-    // TODO: decode and import mnemonic
     this.chainService.mantaPay.setCurrentAddress(currentAddress);
 
-    const mnemonic = 'arrange rib doll virtual dress clarify cram meat time grain head poem';
-
     await this.chainService.mantaPay.privateWallet?.initialSigner();
-    await this.chainService.mantaPay.privateWallet?.loadUserSeedPhrase(seedPhrase || mnemonic);
+
+    if (updateStore) {
+      await this.chainService.mantaPay.privateWallet?.loadUserSeedPhrase(seedPhrase);
+      const authContext = await this.chainService.mantaPay.privateWallet?.getAuthorizationContext();
+
+      await this.chainService.mantaPay.privateWallet?.loadAuthorizationContext(authContext as interfaces.AuthContextType);
+      await this.chainService.mantaPay.saveMantaAuthContext({
+        chain: 'calamari',
+        address: currentAddress,
+        data: authContext as interfaces.AuthContextType
+      });
+    } else {
+      const authContext = (await this.chainService.mantaPay.getMantaAuthContext(currentAddress, 'calamari')) as MantaAuthorizationContext;
+
+      await this.chainService.mantaPay.privateWallet?.loadAuthorizationContext(authContext.data);
+    }
+
     const zkAddress = await this.chainService.mantaPay.privateWallet?.getZkAddress();
 
     if (updateStore) {
@@ -1898,6 +1911,20 @@ export default class KoniState {
     }
 
     return zkAddress;
+  }
+
+  public async disableMantaPay (address: string) {
+    const config = await this.chainService.mantaPay.getMantaPayConfig(address, 'calamari') as MantaPayConfig;
+
+    if (!config) {
+      return false;
+    }
+
+    await this.chainService.mantaPay.privateWallet?.dropAuthorizationContext();
+    await this.chainService.mantaPay.privateWallet?.dropUserSeedPhrase();
+    await this.chainService.mantaPay.deleteMantaPayConfig(address, 'calamari');
+
+    return true;
   }
 
   public async initialSyncMantaPay () {

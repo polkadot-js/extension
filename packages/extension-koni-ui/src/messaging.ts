@@ -862,6 +862,10 @@ export async function enableMantaPay (params: MantaPayEnableParams) {
   return sendMessage('pri(mantaPay.enable)', params);
 }
 
+export async function disableMantaPay (address: string) {
+  return sendMessage('pri(mantaPay.disable)', address);
+}
+
 export async function initialSyncMantaPay () {
   return sendMessage('pri(mantaPay.initialSyncMantaPay)', null);
 }

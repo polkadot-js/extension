@@ -12,6 +12,7 @@ import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/ty
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
 import { KeyringAddress, KeyringPairs$Json } from '@subwallet/ui-keyring/types';
+import { interfaces } from 'manta-extension-sdk';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
@@ -1873,6 +1874,12 @@ export interface MantaPayConfig {
   isInitialSync: boolean;
 }
 
+export interface MantaAuthorizationContext {
+  address: string;
+  chain: string;
+  data: interfaces.AuthContextType;
+}
+
 export interface MantaPaySyncProgress {
   isDone: boolean;
   progress: number; // in percentage
@@ -1952,6 +1959,7 @@ export interface KoniRequestSignatures {
 
   // Manta pay
   'pri(mantaPay.enable)': [MantaPayEnableParams, boolean];
+  'pri(mantaPay.disable)': [string, boolean];
   'pri(mantaPay.initialSyncMantaPay)': [null, boolean | undefined];
   'pri(mantaPay.getZkBalance)': [null, null];
   'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];

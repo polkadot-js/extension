@@ -301,6 +301,10 @@ export default class DatabaseService {
     return this._db.mantaPay.get({ key });
   }
 
+  async deleteMantaPayConfig (key: string) {
+    return this.stores.mantaPay.deleteRecord(key);
+  }
+
   subscribeMantaPayConfig (chain: string, callback: (data: MantaPayConfig[]) => void) {
     this.stores.mantaPay.subscribeMantaPayConfig(chain).subscribe(({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument

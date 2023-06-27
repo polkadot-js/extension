@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MantaPayConfig, MantaPaySyncProgress } from '@subwallet/extension-base/background/KoniTypes';
+import { MantaAuthorizationContext, MantaPayConfig, MantaPaySyncProgress } from '@subwallet/extension-base/background/KoniTypes';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { BaseWallet, interfaces, MantaPayWallet } from 'manta-extension-sdk';
 
@@ -39,6 +39,25 @@ export class MantaPrivateHandler {
 
   public async getMantaPayConfig (address: string, chain: string): Promise<any> {
     return this.dbService.getMantaPayData(`config_${chain}_${address}`);
+  }
+
+  public async deleteMantaPayConfig (address: string, chain: string): Promise<any> {
+    return this.dbService.deleteMantaPayConfig(`config_${chain}_${address}`);
+  }
+
+  public async saveMantaAuthContext (context: MantaAuthorizationContext) {
+    await this.dbService.setMantaPayData({
+      key: `authContext_${context.chain}_${context.address}`,
+      ...context
+    });
+  }
+
+  public async getMantaAuthContext (address: string, chain: string) {
+    return this.dbService.getMantaPayData(`authContext_${chain}_${address}`);
+  }
+
+  public async deleteMantaAuthContext (address: string, chain: string) {
+    return this.dbService.deleteMantaPayConfig(`authContext_${chain}_${address}`);
   }
 
   private async saveLedgerState (palletName: interfaces.PalletName, network: interfaces.Network, data: any): Promise<boolean> {
@@ -125,13 +144,5 @@ export class MantaPrivateHandler {
     return () => {
       interval && clearInterval(interval);
     };
-  }
-
-  public async syncAllWallet () {
-    console.log(this._privateWallet?.initialSyncIsFinished);
-    console.log('init sync done');
-    await this._privateWallet?.initialWalletSync();
-    await this._privateWallet?.walletSync();
-    console.log('wallet sync done');
   }
 }

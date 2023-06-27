@@ -3320,8 +3320,8 @@ export default class KoniExtension {
   }
 
   private async enableMantaPay ({ address, password }: MantaPayEnableParams) { // always takes the current account
-    // const mnemonic = this.keyringExportMnemonic({ address, password });
-    const result = await this.#koniState.enableMantaPay(true, '');
+    const mnemonic = this.keyringExportMnemonic({ address, password });
+    const result = await this.#koniState.enableMantaPay(true, mnemonic.result);
 
     console.debug('Start initial sync for MantaPay');
 
@@ -3332,6 +3332,10 @@ export default class KoniExtension {
       .catch(console.error);
 
     return !!result;
+  }
+
+  private async disableMantaPay (address: string) {
+    return this.#koniState.disableMantaPay(address);
   }
 
   private async initialSyncMantaPay () {
@@ -3786,6 +3790,8 @@ export default class KoniExtension {
         return await this.subscribeMantaPayConfig(id, port);
       case 'pri(mantaPay.subscribeSyncProgress)':
         return await this.subscribeMantaPaySyncProgress(id, port);
+      case 'pri(mantaPay.disable)':
+        return await this.disableMantaPay(request as string);
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

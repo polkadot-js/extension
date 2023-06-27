@@ -10,7 +10,7 @@ import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/a
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { deriveAccountV3, editAccount, enableMantaPay, forgetAccount, subscribeMantaPaySyncProgress, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { deriveAccountV3, disableMantaPay, editAccount, enableMantaPay, forgetAccount, subscribeMantaPaySyncProgress, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
@@ -352,8 +352,30 @@ const Component: React.FC<Props> = (props: Props) => {
         }
       })
         .catch(console.warn);
+    } else {
+      disableMantaPay(account?.address as string)
+        .then((result) => {
+          if (result) {
+            dispatchMantaPayState({ type: MantaPayReducerActionType.INIT, payload: undefined });
+            notify({
+              message: t('Disabled Zk mode'),
+              type: 'success'
+            });
+          } else {
+            notify({
+              message: t('Something went wrong'),
+              type: 'error'
+            });
+          }
+        })
+        .catch(() => {
+          notify({
+            message: t('Something went wrong'),
+            type: 'error'
+          });
+        });
     }
-  }, [account]);
+  }, [account, notify, t]);
 
   const onCloseZkModeConfirmation = useCallback(() => {
     dispatchMantaPayState({ type: MantaPayReducerActionType.REJECT_ENABLE, payload: undefined });

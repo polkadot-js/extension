@@ -17,5 +17,5 @@ export const useGetZkAddress = (address?: string) => {
     }
   }
 
-  return;
+  return undefined;
 };

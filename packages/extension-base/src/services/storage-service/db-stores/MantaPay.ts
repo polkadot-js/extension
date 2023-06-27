@@ -12,11 +12,17 @@ export default class MantaPayStore extends BaseStore<IMantaPayLedger> {
 
   subscribeMantaPayConfig (chain: string) {
     return liveQuery(
-      () => this.table.where({ chain }).toArray()
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+      () => this.table.where({ chain }).filter((data) => data?.key && data?.key.startsWith('config')).toArray()
     );
   }
 
   getConfig (chain: string) {
-    return this.table.where({ chain }).toArray();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+    return this.table.where({ chain }).filter((data) => data?.key && data?.key.startsWith('config')).toArray();
+  }
+
+  deleteRecord (key: string) {
+    return this.table.where('key').equals(key).delete();
   }
 }

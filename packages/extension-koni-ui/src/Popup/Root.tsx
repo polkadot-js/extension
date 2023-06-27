@@ -100,8 +100,6 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   useEffect(() => {
     const pathName = location.pathname;
 
-    console.log('=========', isLocked);
-
     if (needMigrate && hasMasterPassword && !isLocked) {
       if (pathName !== migratePasswordUrl) {
         navigate(migratePasswordUrl);

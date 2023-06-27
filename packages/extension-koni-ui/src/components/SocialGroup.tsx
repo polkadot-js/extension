@@ -50,10 +50,15 @@ const Component: React.FC<Props> = (props: Props) => {
       {socialItems.map((item) => (
         <Button
           className={CN(`type-${item.type}`, 'social-button')}
-          icon={<Icon phosphorIcon={item.icon} weight='fill' />}
+          icon={<Icon
+            phosphorIcon={item.icon}
+            size='md'
+            weight='fill'
+          />}
           key={item.type}
           onClick={openInNewTab(item.url)}
           shape='squircle'
+          size={'sm'}
         />
       ))}
     </div>
@@ -67,10 +72,6 @@ const SocialGroup = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '& > *': {
       margin: `0 ${token.marginXS}px`,
-
-      '.social-button': {
-        height: '42px'
-      },
 
       [`.type-${SocialType.TWITTER}`]: {
         backgroundColor: token['blue-7'],

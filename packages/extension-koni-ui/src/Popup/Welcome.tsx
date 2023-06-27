@@ -8,7 +8,7 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTransla
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ButtonProps, Divider, Icon, Image, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Eye, EyeClosed, FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
+import { FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -32,23 +32,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
-  const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
   const navigate = useNavigate();
-  const handlePasswordToggle = useCallback(() => setPasswordVisible(!passwordVisible), [passwordVisible]);
-
-  const renderEyecon = useMemo(
-    () => {
-      const Icon = passwordVisible ? Eye : EyeClosed;
-
-      return (
-        <Button
-          icon={<Icon size={24} />}
-          onClick={handlePasswordToggle}
-          type='ghost'
-        />
-      );
-    }
-    , [handlePasswordToggle, passwordVisible]);
 
   const items = useMemo((): WelcomeButtonItem[] => [
     {
@@ -170,7 +154,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 className='address-input'
                 placeholder={t('Enter address')}
                 prefix={<Wallet size={24} />}
-                suffix={renderEyecon}
                 type={'text'}
               />
               <Button

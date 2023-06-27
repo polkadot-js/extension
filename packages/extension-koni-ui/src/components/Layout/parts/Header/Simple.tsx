@@ -1,4 +1,4 @@
-// [object Object]
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
@@ -6,7 +6,7 @@ import { useDefaultNavigate, useTranslation } from '@subwallet/extension-koni-ui
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Typography } from '@subwallet/react-ui';
 import { CaretLeft, Question } from 'phosphor-react';
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 export type Props = ThemeProps & {
@@ -14,7 +14,7 @@ export type Props = ThemeProps & {
   onBack?: () => void;
 }
 
-const StyledHeader = styled.div(({}) => {
+const StyledHeader = styled.div(function () {
   return {
     width: '100%',
     display: 'flex',
@@ -72,7 +72,7 @@ function Component (props: Props): React.ReactElement<Props> {
             icon={<Icon
               phosphorIcon={CaretLeft}
               size='sm'
-                  />}
+            />}
             onClick={props.onBack || defaultOnBack}
             size='xs'
             type='ghost'

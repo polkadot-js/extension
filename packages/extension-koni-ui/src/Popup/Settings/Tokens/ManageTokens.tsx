@@ -159,7 +159,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightButtons={subHeaderButton}
           showBackButton={true}
           title={t<string>('Manage tokens')}
-                    />}
+        />}
 
         <div className={CN('container', {
           '__web-ui': isWebUI

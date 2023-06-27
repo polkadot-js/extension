@@ -464,7 +464,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <div className='action-wrapper'>
               <Button
                 block={true}
-                children={t('Save')}
                 disabled={isSubmitDisabled()}
                 icon={<Icon
                   phosphorIcon={PlusCircle}
@@ -472,7 +471,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 />}
                 loading={loading}
                 onSubmit={onSubmit}
-              />
+              >
+                {t('Save')}
+              </Button>
             </div>
           )}
         </div>

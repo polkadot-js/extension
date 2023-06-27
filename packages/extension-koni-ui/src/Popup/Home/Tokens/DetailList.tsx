@@ -18,7 +18,6 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { ModalContext } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
-import classNames from 'classnames';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -266,7 +265,7 @@ function Component (): React.ReactElement {
 
   useEffect(() => {
     outletContext?.setDetailTitle(<div className='header-content'>{t('Token')}: {symbol}</div>);
-  }, [symbol]);
+  }, [outletContext, symbol, t]);
 
   return (
     <div
@@ -278,7 +277,7 @@ function Component (): React.ReactElement {
     >
       {!isWebUI && (
         <div
-          className={classNames('__upper-block-wrapper', {
+          className={CN('__upper-block-wrapper', {
             '-is-shrink': isShrink
           })}
           ref={topBlockRef}

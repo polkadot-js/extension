@@ -194,7 +194,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
               <Button
                 block
-                children={t('Delete this collectible')}
                 disabled={!(originAssetInfo && _isSmartContractToken(originAssetInfo) && _isCustomAsset(originAssetInfo.slug))}
                 icon={(
                   <Icon
@@ -204,7 +203,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 )}
                 onClick={handleDeleteNftCollection}
                 type='ghost'
-              />
+              >
+                {t('Delete this collectible')}
+              </Button>
             </>
           )
           : (

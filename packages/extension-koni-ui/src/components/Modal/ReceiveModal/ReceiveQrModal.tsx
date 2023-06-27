@@ -58,6 +58,7 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
   const handleClickViewOnExplorer = useCallback(() => {
     try {
       console.log('scanExplorerAddressUrl', scanExplorerAddressUrl);
+
       if (scanExplorerAddressUrl) {
         // eslint-disable-next-line no-void
         // void chrome.tabs.create({ url: scanExplorerAddressUrl, active: true }).then(() => console.log('redirecting'));

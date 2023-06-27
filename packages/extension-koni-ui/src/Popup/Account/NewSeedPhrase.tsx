@@ -7,8 +7,8 @@ import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { DEFAULT_ACCOUNT_TYPES, SELECTED_CREATE_ACCOUNT_TYPE_KEY } from '@subwallet/extension-koni-ui/constants/account';
 import { NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
-import { useIsPopup } from '@subwallet/extension-koni-ui/hooks';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { useIsPopup } from '@subwallet/extension-koni-ui/hooks';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -183,7 +183,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             <div className='description'>
               {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
             </div>
-            <WordPhrase enableDownload={true} seedPhrase={seedPhrase} />
+            <WordPhrase
+              enableDownload={true}
+              seedPhrase={seedPhrase}
+            />
 
             {isWebUI && (
               <Button

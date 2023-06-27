@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
-import {DEFAULT_ACCOUNT_TYPES, DOWNLOAD_EXTENSION} from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_ACCOUNT_TYPES, DOWNLOAD_EXTENSION } from '@subwallet/extension-koni-ui/constants';
 import { ATTACH_ACCOUNT_MODAL, CREATE_ACCOUNT_MODAL, IMPORT_ACCOUNT_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import {Button, ButtonProps, Divider, Icon, Image, ModalContext} from '@subwallet/react-ui';
+import { Button, ButtonProps, Divider, Icon, Image, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Eye, EyeClosed, FileArrowDown, PlusCircle, PuzzlePiece, Swatches, Wallet } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -171,7 +171,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 placeholder={t('Enter address')}
                 prefix={<Wallet size={24} />}
                 suffix={renderEyecon}
-                type={passwordVisible ? 'text' : 'password'}
+                type={'text'}
               />
               <Button
                 block

@@ -1,4 +1,4 @@
-// [object Object]
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { MetaInfo } from '@subwallet/extension-koni-ui/components/MetaInfo';
@@ -6,6 +6,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal } from 'phosphor-react';
+import React from 'react';
 
 export type Props = ThemeProps & {
   withController?: boolean,
@@ -41,7 +42,7 @@ function Component ({ className, title = 'Porfolio', withController = true }: Pr
             icon={<Icon
               phosphorIcon={FadersHorizontal}
               size={'sm'}
-                  />}
+            />}
             size={'xs'}
             type={'ghost'}
           />

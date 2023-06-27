@@ -1,11 +1,11 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { DownloadSimple, MagnifyingGlass } from 'phosphor-react';
-import { ChangeEventHandler, useMemo } from 'react';
+import React, { ChangeEventHandler, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -44,11 +44,13 @@ const Component: React.FC<Props> = ({ actionBtnIcon,
   // }
 
   // UNCONTROLLED STATE
-  const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+  const handleInputChange: ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
     const value = e?.target?.value;
 
     onSearch(value);
-  };
+  },
+  [onSearch]
+  );
 
   const button = useMemo(() => extraButton || (
     <Button
@@ -58,18 +60,18 @@ const Component: React.FC<Props> = ({ actionBtnIcon,
       />}
       type='ghost'
     />
-  ), []);
+  ), [extraButton]);
 
   return (
     <div className={CN('container', className)}>
       <div className='right-section'>
         {showExtraButton && button}
         <Input.Search
-          className="search-input"
+          className='search-input'
           onChange={handleInputChange}
           placeholder={placeholder}
           prefix={<Icon phosphorIcon={MagnifyingGlass} />}
-          size="md"
+          size='md'
           value={searchValue}
           suffix={
             showActionBtn && (
@@ -88,7 +90,7 @@ const Component: React.FC<Props> = ({ actionBtnIcon,
   );
 };
 
-const Search = styled(Component)<Props>(({ }: Props) => {
+const Search = styled(Component)<Props>(() => {
   return {
     display: 'grid',
     width: '100%',

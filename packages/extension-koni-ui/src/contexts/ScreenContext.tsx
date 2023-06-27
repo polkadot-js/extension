@@ -64,7 +64,7 @@ export const ScreenContextProvider = ({ children }: ScreenContexProviderProps) =
     handleWindowResize();
     window.addEventListener('resize', handleWindowResize);
 
-    () => {
+    return () => {
       window.removeEventListener('resize', handleWindowResize);
     };
   }, [handleWindowResize]);

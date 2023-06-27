@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BalanceItemProps, Number } from '@subwallet/react-ui';
 import classNames from 'classnames';
-import React, { useContext } from 'react';
+import React, { Context, useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 type Props = ThemeProps & {
@@ -24,7 +25,7 @@ function Component (
   // - auto detect logo, only use logoKey
   // - price change status
 
-  const { token } = useContext(ThemeContext);
+  const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
 
   const marginColor = priceChangeStatus === 'increase' ? token.colorSuccess : token.colorError;
   const margin = !pastValue || !value ? 0 : Math.abs(pastValue - value) / pastValue * 100;

@@ -63,7 +63,7 @@ const handlers: Handlers = {};
 //   }
 // });
 
-port.addEventListener('message', (event: MessageEvent) => {
+port.addEventListener('message', (event: Message) => {
   const data = event.data;
   const handler = handlers[data.id];
 

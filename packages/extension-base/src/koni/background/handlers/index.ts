@@ -63,7 +63,7 @@ export default function handlers<TMessageType extends MessageTypes> ({ id, messa
       // between the start and the end of the promise, the user may have closed
       // the tab, in which case port will be undefined
       assert(port, 'Port has been disconnected');
-      port.postMessage({ id, response, sender: "BACKGROUND" });
+      port.postMessage({ id, response, sender: 'BACKGROUND' });
     })
     .catch((error: ProviderError): void => {
       console.error(error);
@@ -71,7 +71,7 @@ export default function handlers<TMessageType extends MessageTypes> ({ id, messa
 
       // only send message back to port if it's still connected
       if (port) {
-        port.postMessage({ error: error.message, errorCode: error.code, errorData: error.data, id, sender: "BACKGROUND" });
+        port.postMessage({ error: error.message, errorCode: error.code, errorData: error.data, id, sender: 'BACKGROUND' });
       }
     });
 }

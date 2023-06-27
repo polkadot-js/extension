@@ -42,6 +42,7 @@ export function setupHandlers () {
 
     if (data.id && data.message) {
       console.log('===LOG: setupHandlers data.message', data.message);
+
       if (data.message.startsWith('mobile')) {
         port.name = PORT_MOBILE;
       } else if (data.message.startsWith('pri')) {

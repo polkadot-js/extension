@@ -100,7 +100,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     setStakingType && setStakingType(stakingType);
-  }, [stakingType]);
+  }, [setStakingType, stakingType]);
 
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
   const nominatorMetadataList = useGetNominatorInfo(chain, stakingType, from);

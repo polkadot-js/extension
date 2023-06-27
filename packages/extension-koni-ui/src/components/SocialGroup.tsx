@@ -50,10 +50,7 @@ const Component: React.FC<Props> = (props: Props) => {
       {socialItems.map((item) => (
         <Button
           className={CN(`type-${item.type}`, 'social-button')}
-          icon={<Icon
-            phosphorIcon={item.icon}
-            weight='fill'
-                />}
+          icon={<Icon phosphorIcon={item.icon} weight='fill' />}
           key={item.type}
           onClick={openInNewTab(item.url)}
           shape='squircle'

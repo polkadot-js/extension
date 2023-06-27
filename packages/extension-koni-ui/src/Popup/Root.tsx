@@ -4,7 +4,6 @@
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { BackgroundExpandView, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import Logo2D from '@subwallet/extension-koni-ui/components/Logo/Logo2D';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
@@ -12,13 +11,15 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { changeHeaderLogo } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import React, { useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { DEFAULT_ROUTER_PATH } from '../constants/router';
+import { isNoAccount } from '../utils';
 
 changeHeaderLogo(<Logo2D />);
 
@@ -97,46 +98,46 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
   }, [location]);
 
   useEffect(() => {
-    // const pathName = location.pathname;
-    //
-    // console.log('=========', isLocked);
-    //
-    // if (needMigrate && hasMasterPassword && !isLocked) {
-    //   if (pathName !== migratePasswordUrl) {
-    //     navigate(migratePasswordUrl);
-    //   }
-    // } else if (hasMasterPassword && isLocked) {
-    //   if (pathName !== loginUrl) {
-    //     navigate(loginUrl);
-    //   }
-    // } else if (!hasMasterPassword) {
-    //   if (isNoAccount(accounts)) {
-    //     if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
-    //       navigate(welcomeUrl);
-    //     }
-    //   } else {
-    //     navigate(createPasswordUrl);
-    //   }
-    // } else if (isNoAccount(accounts)) {
-    //   if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
-    //     navigate(welcomeUrl);
-    //   }
-    // } else if (pathName === DEFAULT_ROUTER_PATH) {
-    //   if (hasConfirmations) {
-    //     console.log('hasConfirmations');
-    //     openPModal('confirmations');
-    //   } else {
-    //     navigate(tokenUrl);
-    //   }
-    // } else if (pathName === loginUrl && !isLocked) {
-    //   goHome();
-    // } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {
-    //   goHome();
-    // } else if (hasInternalConfirmations) {
-    //   openPModal('confirmations');
-    // } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
-    //   openPModal(null);
-    // }
+    const pathName = location.pathname;
+
+    console.log('=========', isLocked);
+
+    if (needMigrate && hasMasterPassword && !isLocked) {
+      if (pathName !== migratePasswordUrl) {
+        navigate(migratePasswordUrl);
+      }
+    } else if (hasMasterPassword && isLocked) {
+      if (pathName !== loginUrl) {
+        navigate(loginUrl);
+      }
+    } else if (!hasMasterPassword) {
+      if (isNoAccount(accounts)) {
+        if (![...allowImportAccountUrls, welcomeUrl, createPasswordUrl, sercurityUrl].includes(pathName)) {
+          navigate(welcomeUrl);
+        }
+      } else {
+        navigate(createPasswordUrl);
+      }
+    } else if (isNoAccount(accounts)) {
+      if (![...allowImportAccountUrls, welcomeUrl, sercurityUrl].includes(pathName)) {
+        navigate(welcomeUrl);
+      }
+    } else if (pathName === DEFAULT_ROUTER_PATH) {
+      if (hasConfirmations) {
+        console.log('hasConfirmations');
+        openPModal('confirmations');
+      } else {
+        navigate(tokenUrl);
+      }
+    } else if (pathName === loginUrl && !isLocked) {
+      goHome();
+    } else if (pathName === welcomeUrl && !isNoAccount(accounts)) {
+      goHome();
+    } else if (hasInternalConfirmations) {
+      openPModal('confirmations');
+    } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {
+      openPModal(null);
+    }
   }, [accounts, goBack, goHome, hasConfirmations, hasInternalConfirmations, hasMasterPassword, isLocked, isOpenPModal, location.pathname, navigate, needMigrate, openPModal]);
 
   return <>

@@ -30,8 +30,8 @@ function Component (props: Props): React.ReactElement<Props> {
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const minStake = useMemo(() =>
-    stakeStype === StakingType.POOLED ? chainStakingMetadata?.minPoolBonding || '0' : chainStakingMetadata?.minStake || '0'
-  , [chainStakingMetadata?.minPoolBonding, chainStakingMetadata?.minStake, stakeStype]
+    stakeStype === StakingType.POOLED ? chainStakingMetadata?.minJoinNominationPool || '0' : chainStakingMetadata?.minStake || '0'
+  , [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, stakeStype]
   );
 
   const getMetaInfo = useCallback(() => {

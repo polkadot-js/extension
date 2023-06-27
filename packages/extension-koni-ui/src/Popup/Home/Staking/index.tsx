@@ -24,7 +24,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useNavigate } from 'react-router-dom';
 import styled, { ThemeContext } from 'styled-components';
 
-import MoreActionModal, { ActionList, MORE_ACTION_MODAL } from './MoreActionModal';
+import MoreActionModal, { MORE_ACTION_MODAL } from './MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from './StakingDetailModal';
 
 type Props = ThemeProps
@@ -120,7 +120,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       activeModal(STAKING_DETAIL_MODAL_ID);
     }, 100);
   }, [activeModal]);
-
 
   const preCheck = usePreCheckStakeAction(currentAccount?.address);
 
@@ -346,11 +345,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               </div>
               <Popover
                 content={
-                  <ActionList
-                    chainStakingMetadata={row.chainStakingMetadata}
-                    nominatorMetadata={row.nominatorMetadata}
-                    reward={row.reward}
-                  />
+                  'TODO: add Action List'
+                  // <MoreActionModal
+                  //   chainStakingMetadata={row.chainStakingMetadata}
+                  //   nominatorMetadata={row.nominatorMetadata}
+                  //   reward={row.reward}
+                  // />
                 }
                 overlayInnerStyle={{
                   padding: '0',

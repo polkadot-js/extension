@@ -5,7 +5,7 @@ import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/S
 import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants/account';
-import {CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL, SEED_PHRASE_MODAL} from '@subwallet/extension-koni-ui/constants/modal';
+import { CREATE_ACCOUNT_MODAL, NEW_ACCOUNT_MODAL, SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useClickOutSide from '@subwallet/extension-koni-ui/hooks/dom/useClickOutSide';
@@ -17,7 +17,6 @@ import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -31,7 +30,6 @@ const modalId = NEW_ACCOUNT_MODAL;
 const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
-  const navigate = useNavigate();
   const isActive = checkActive(modalId);
   const { isWebUI } = useContext(ScreenContext);
   const [selectedItems, setSelectedItems] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
@@ -50,7 +48,7 @@ const Component: React.FC<Props> = ({ className, setAccountTypes }: Props) => {
     }
 
     inactiveModal(modalId);
-  }, [isWebUI, inactiveModal, activeModal, setAccountTypes, selectedItems, navigate]);
+  }, [isWebUI, inactiveModal, activeModal, setAccountTypes, selectedItems]);
 
   const onBack = useSwitchModal(modalId, CREATE_ACCOUNT_MODAL);
 

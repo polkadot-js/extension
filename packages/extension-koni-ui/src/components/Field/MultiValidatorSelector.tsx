@@ -256,7 +256,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         value={value || ''}
       />
       <SwModal
-        className={`${className} ${!isWebUI && 'modal-full'}`}
+        className={`${className} ${!isWebUI ? 'modal-full' : ''}`}
         closeIcon={(
           <Icon
             phosphorIcon={CaretLeft}

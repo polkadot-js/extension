@@ -5,6 +5,7 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import SelectAccountType from '@subwallet/extension-koni-ui/components/Account/SelectAccountType';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
+import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
@@ -23,7 +24,6 @@ import React, { ChangeEventHandler, useCallback, useContext, useEffect, useRef, 
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants';
 
 type Props = ThemeProps;
 

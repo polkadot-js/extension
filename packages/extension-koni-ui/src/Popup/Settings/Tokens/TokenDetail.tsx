@@ -234,7 +234,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onBack={() => navigate(-1)}
           showBackButton={true}
           title={t<string>('Token detail')}
-                    />}
+        />}
         <div className={CN('token_detail__container', {
           '__web-ui': isWebUI
         })}
@@ -328,10 +328,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 phosphorIcon={Trash}
                 size='sm'
                 weight='fill'
-                    />}
+              />}
               onClick={handleDeleteToken}
               schema='danger'
-                        >
+            >
               {t<string>('Delete token')}
             </Button>}
           </div>

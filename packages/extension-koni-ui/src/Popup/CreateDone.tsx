@@ -1,17 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle, X } from 'phosphor-react';
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { Layout, SocialButtonGroup } from '../components';
-import {ScreenContext} from "@subwallet/extension-koni-ui/contexts/ScreenContext";
 
 type Props = ThemeProps;
 

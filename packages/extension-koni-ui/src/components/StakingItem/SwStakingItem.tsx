@@ -4,14 +4,14 @@
 import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
-import { ActionList } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
+import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
 import { Button, Icon, Number as NumberItem, Popover, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import CN from 'classnames';
 import { DotsThree, User, Users } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
+import React, { Context, SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import { TokenItem } from '../TokenItem';
@@ -42,6 +42,7 @@ const getStakingTypeTag = (stakingType: StakingType) => {
 const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickRightIcon, priceMap, stakingData }: Props) => {
   const { staking } = stakingData;
   const { isWebUI } = useContext(ScreenContext);
+  const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
 
   const balanceValue = getBalanceValue(staking.balance || '0', decimals);
 
@@ -72,15 +73,11 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
     );
   }
 
-  const { staking: { chain,
-    name,
-    nativeToken } } = stakingData;
-
-  const { token } = useContext(ThemeContext);
+  const { staking: { chain, name, nativeToken } } = stakingData;
 
   const rightIcon = useMemo(() => {
     if (!isWebUI) {
-      <Button
+      return <Button
         icon={(
           <Icon
             className={'right-icon'}
@@ -98,11 +95,12 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
     return (
       <Popover
         content={
-          <ActionList
-            chainStakingMetadata={stakingData.chainStakingMetadata}
-            nominatorMetadata={stakingData.nominatorMetadata}
-            reward={stakingData.reward}
-          />
+          'TODO: add ActionList'
+          // <MoreActionModal
+          //   chainStakingMetadata={stakingData.chainStakingMetadata}
+          //   nominatorMetadata={stakingData.nominatorMetadata}
+          //   reward={stakingData.reward}
+          // />
         }
         overlayInnerStyle={{
           padding: '0',

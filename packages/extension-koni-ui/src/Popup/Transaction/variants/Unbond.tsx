@@ -10,7 +10,7 @@ import { AccountSelector, AmountInput, NominationSelector, PageWrapper } from '@
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckStakeAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitPoolUnbonding, submitUnbonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm, validateUnStakeValue } from '@subwallet/extension-koni-ui/utils';
@@ -227,7 +227,7 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [bondedValue, decimals, symbol]);
 
-  const onPreCheckReadOnly = usePreCheckReadOnly(from);
+  const onPreCheck = usePreCheckStakeAction(from);
 
   useEffect(() => {
     const address = currentAccount?.address || '';
@@ -344,7 +344,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={onPreCheckReadOnly(form.submit)}
+          onClick={onPreCheck(form.submit)}
         >
           {isWebUI ? t('Submit') : t('Unbond')}
         </Button>

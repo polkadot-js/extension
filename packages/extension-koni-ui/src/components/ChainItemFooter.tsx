@@ -27,6 +27,7 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSwitchChainState = useCallback((checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
     if (!loading) {
+      setLoading(true);
       updateChainActiveState(chainInfo.slug, checked)
         .then((result) => {
           setLoading(false);
@@ -58,7 +59,7 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
     <div className={`${className}`}>
       <Switch
         checked={checked}
-        disabled={loading}
+        loading={loading}
         onClick={onSwitchChainState}
       />
       {

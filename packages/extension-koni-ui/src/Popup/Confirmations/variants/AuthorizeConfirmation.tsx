@@ -4,7 +4,7 @@
 import { AccountAuthType, AccountJson, AuthorizeRequest } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { AccountItemWithName, ConfirmationGeneralInfo } from '@subwallet/extension-koni-ui/components';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_ACCOUNT_TYPES, EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { approveAuthRequestV2, cancelAuthRequestV2, rejectAuthRequestV2 } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -124,7 +124,7 @@ function Component ({ className, request }: Props) {
         types = [EVM_ACCOUNT_TYPE];
         break;
       default:
-        types = [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE];
+        types = DEFAULT_ACCOUNT_TYPES;
     }
 
     navigate('/accounts/new-seed-phrase', { state: { accountTypes: types } });

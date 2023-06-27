@@ -1,34 +1,30 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { options as acalaOptions } from '@acala-network/api';
-import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { _AssetType } from '@subwallet/chain-list/types';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
-import { getSubstrateConnectProvider } from '@subwallet/extension-base/services/chain-service/handler/light-client';
-import { _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _SmartContractTokenInfo, _SubstrateApi, _SubstrateChainMetadata } from '@subwallet/extension-base/services/chain-service/types';
+import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { AbstractChainHandler, SHORT_RETRY_TIME } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
+import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
+import { _ApiOptions, _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
-import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
-import { TypeRegistry } from '@polkadot/types/create';
-import { Registry } from '@polkadot/types/types';
-import { BN, formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';
+import { BN } from '@polkadot/util';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
-import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
 
-import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS, API_MAX_RETRY } from '../constants';
 import { _PSP22_ABI, _PSP34_ABI } from '../helper';
-import { typesBundle, typesChain } from '../helper/api-helper';
 
 export const DEFAULT_AUX = ['Aux1', 'Aux2', 'Aux3', 'Aux4', 'Aux5', 'Aux6', 'Aux7', 'Aux8', 'Aux9'];
 
-export class SubstrateChainHandler {
-  private substrateApiMap: Record<string, _SubstrateApi> = {};
+export class SubstrateChainHandler extends AbstractChainHandler {
+  private substrateApiMap: Record<string, SubstrateApi> = {};
+
   private logger: Logger;
 
-  constructor () {
+  constructor (parent?: ChainService) {
+    super(parent);
     this.logger = createLogger('substrate-chain-handler');
   }
 
@@ -40,27 +36,49 @@ export class SubstrateChainHandler {
     return this.substrateApiMap[chainSlug];
   }
 
-  public resumeAllApis () {
-    return Promise.all(Object.values(this.getSubstrateApiMap()).map(async (substrateApi) => {
-      if (!substrateApi.api.isConnected && substrateApi.api.connect) {
-        await substrateApi.api.connect();
+  public getApiByChain (chain: string) {
+    return this.getSubstrateApiByChain(chain);
+  }
+
+  public async wakeUp () {
+    this.isSleeping = false;
+    const activeChains = this.parent?.getActiveChains() || [];
+
+    for (const chain of activeChains) {
+      const api = this.getSubstrateApiByChain(chain);
+
+      // Not found substrateInterface mean it active with evm interface
+      if (api) {
+        api?.connect();
+
+        if (!api.useLightClient) {
+          // Manual fire handle connect to avoid some chain can not reconnect
+          setTimeout(() => {
+            this.handleConnect(chain, api.isApiConnected);
+          }, SHORT_RETRY_TIME);
+        }
       }
+    }
+
+    return Promise.resolve();
+  }
+
+  public async sleep () {
+    this.isSleeping = true;
+    this.cancelAllRecover();
+
+    await Promise.all(Object.values(this.getSubstrateApiMap()).map((substrateApi) => {
+      return substrateApi.disconnect().catch(console.error);
     }));
   }
 
-  public disconnectAllApis () {
-    return Promise.all(Object.values(this.getSubstrateApiMap()).map(async (substrateApi) => {
-      if (substrateApi.api.isConnected) {
-        substrateApi.api?.disconnect && await substrateApi.api?.disconnect();
-      }
-    }));
-  }
+  async recoverApi (chainSlug: string) {
+    const existed = this.getSubstrateApiByChain(chainSlug);
 
-  public refreshApi (slug: string) {
-    const substrateApi = this.getSubstrateApiByChain(slug);
+    if (existed && !existed.isApiReadyOnce) {
+      console.log(`Reconnect ${existed.providerName || existed.chainSlug} at ${existed.apiUrl}`);
 
-    if (substrateApi && !substrateApi.isApiConnected) {
-      substrateApi.recoverConnect && substrateApi.recoverConnect();
+      return existed.recoverConnect();
     }
   }
 
@@ -173,206 +191,51 @@ export class SubstrateChainHandler {
     }
   }
 
-  public setSubstrateApi (chainSlug: string, substrateApi: _SubstrateApi) {
+  public setSubstrateApi (chainSlug: string, substrateApi: SubstrateApi) {
     this.substrateApiMap[chainSlug] = substrateApi;
   }
 
   public destroySubstrateApi (chainSlug: string) {
-    if (!(chainSlug in this.substrateApiMap)) {
-      return;
+    const substrateAPI = this.substrateApiMap[chainSlug];
+
+    substrateAPI?.destroy().catch(console.error);
+  }
+
+  public async initApi (chainSlug: string, apiUrl: string, { onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}): Promise<_SubstrateApi> {
+    const existed = this.substrateApiMap[chainSlug];
+
+    // Return existed to avoid re-init metadata
+    if (existed) {
+      existed.connect();
+
+      if (apiUrl !== existed.apiUrl) {
+        await existed.updateApiUrl(apiUrl);
+      }
+
+      return existed;
     }
 
-    this.substrateApiMap[chainSlug].api.disconnect && this.substrateApiMap[chainSlug].api.disconnect().then().catch(console.error);
-    delete this.substrateApiMap[chainSlug];
-  }
+    const metadata = await this.parent?.getMetadata(chainSlug);
+    const apiObject = new SubstrateApi(chainSlug, apiUrl, { providerName, metadata });
 
-  public initApi (chainSlug: string, apiUrl: string, providerName?: string): _SubstrateApi {
-    const registry = new TypeRegistry();
+    apiObject.isApiConnectedSubject.subscribe(this.handleConnect.bind(this, chainSlug));
+    onUpdateStatus && apiObject.isApiConnectedSubject.subscribe(onUpdateStatus);
 
-    const provider = apiUrl.startsWith('light://')
-      ? getSubstrateConnectProvider(apiUrl.replace('light://substrate-connect/', ''))
-      : new WsProvider(apiUrl, API_AUTO_CONNECT_MS);
-
-    const apiOption = { provider, typesBundle, typesChain: typesChain };
-
-    // @ts-ignore
-    apiOption.registry = registry;
-
-    let api: ApiPromise;
-
-    if (_API_OPTIONS_CHAIN_GROUP.acala.includes(chainSlug)) {
-      api = new ApiPromise(acalaOptions({ provider }));
-    } else if (_API_OPTIONS_CHAIN_GROUP.turing.includes(chainSlug)) {
-      api = new ApiPromise({
-        provider,
-        rpc: oakRpc,
-        types: oakTypes
-      });
-    } else {
-      api = new ApiPromise(apiOption);
-    }
-
-    const substrateApi: _SubstrateApi = ({
-      api,
-      providerName,
-
-      chainSlug,
-      apiUrl,
-      apiError: undefined,
-      apiRetry: 0,
-      isApiReady: false,
-      isApiReadyOnce: false,
-      isApiConnected: false,
-      isApiInitialized: true,
-
-      registry,
-      specName: '',
-      specVersion: '',
-      systemChain: '',
-      systemName: '',
-      systemVersion: '',
-
-      apiDefaultTx: undefined,
-      apiDefaultTxSudo: undefined,
-      defaultFormatBalance: undefined,
-
-      recoverConnect: () => {
-        substrateApi.apiRetry = 0;
-        provider.connect().then(this.logger.log).catch(this.logger.error);
-      },
-      get isReady () {
-        const self = this as _SubstrateApi;
-
-        async function f (): Promise<_SubstrateApi> {
-          if (!substrateApi.isApiReadyOnce) {
-            await self.api.isReady;
-          }
-
-          return new Promise<_SubstrateApi>((resolve, reject) => {
-            (function wait () {
-              if (self.isApiReady) {
-                return resolve(self);
-              }
-
-              setTimeout(wait, 10);
-            })();
-          });
-        }
-
-        return f();
-      }
-    }) as unknown as _SubstrateApi;
-
-    api.on('connected', () => {
-      substrateApi.apiRetry = 0;
-
-      if (substrateApi.isApiReadyOnce) {
-        substrateApi.isApiReady = true;
+    // Update metadata to database with async methods
+    apiObject.isReady.then((api) => {
+      // Avoid date existed metadata
+      if (metadata && metadata.specVersion === api.specVersion && metadata.genesisHash === api.api.genesisHash.toHex()) {
+        return;
       }
 
-      substrateApi.isApiConnected = true;
-    });
+      this.parent?.upsertMetadata(chainSlug, {
+        chain: chainSlug,
+        genesisHash: api.api.genesisHash.toHex(),
+        specVersion: api.specVersion,
+        hexValue: api.api.runtimeMetadata.toHex()
+      }).catch(console.error);
+    }).catch(console.error);
 
-    api.on('disconnected', () => {
-      substrateApi.isApiConnected = false;
-      substrateApi.isApiReady = false;
-      substrateApi.apiRetry = (substrateApi.apiRetry || 0) + 1;
-
-      this.logger.log(`Substrate API disconnected from ${JSON.stringify(apiUrl)} ${JSON.stringify(substrateApi.apiRetry)} times`);
-
-      if (substrateApi.apiRetry > API_MAX_RETRY) {
-        this.logger.log(`Disconnect from provider ${JSON.stringify(apiUrl)} because retry maxed out`);
-        provider.disconnect()
-          .then(this.logger.log)
-          .catch(this.logger.error);
-      }
-    });
-
-    api.on('ready', () => {
-      this.loadOnReady(registry, api)
-        .then((rs) => {
-          objectSpread(substrateApi, rs);
-        })
-        .catch((error): void => {
-          substrateApi.apiError = (error as Error).message;
-        });
-    });
-
-    return substrateApi;
-  }
-
-  private async getChainMetadata (registry: Registry, api: ApiPromise): Promise<_SubstrateChainMetadata> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const [systemChain, systemChainType, systemName, systemVersion] = await Promise.all([
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      api.rpc.system?.chain(),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      api.rpc.system?.chainType
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        ? api.rpc.system?.chainType()
-        : Promise.resolve(registry.createType('ChainType', 'Live')),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      api.rpc.system?.name(),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      api.rpc.system?.version()
-    ]);
-
-    return {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      properties: registry.createType('ChainProperties', { ss58Format: api.registry.chainSS58, tokenDecimals: api.registry.chainDecimals, tokenSymbol: api.registry.chainTokens }),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      systemChain: (systemChain || '<unknown>').toString(),
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      systemChainType,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      systemName: systemName.toString(),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      systemVersion: systemVersion.toString()
-    };
-  }
-
-  private async loadOnReady (registry: Registry, api: ApiPromise): Promise<Record<string, any>> {
-    const DEFAULT_DECIMALS = registry.createType('u32', 12);
-    const DEFAULT_SS58 = registry.createType('u32', addressDefaults.prefix);
-    const { properties, systemChain, systemChainType, systemName, systemVersion } = await this.getChainMetadata(registry, api);
-    const ss58Format = properties.ss58Format.unwrapOr(DEFAULT_SS58).toNumber();
-    const tokenSymbol = properties.tokenSymbol.unwrapOr([formatBalance.getDefaults().unit, ...DEFAULT_AUX]);
-    const tokenDecimals = properties.tokenDecimals.unwrapOr([DEFAULT_DECIMALS]);
-    const isDevelopment = (systemChainType.isDevelopment || systemChainType.isLocal || isTestChain(systemChain));
-
-    this.logger.log(`Connected to ${systemChain} (${systemChainType.toString()}), ${stringify(properties)}`);
-
-    // explicitly override the ss58Format as specified
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    registry.setChainProperties(registry.createType('ChainProperties', { ss58Format, tokenDecimals, tokenSymbol }));
-
-    // first set up the UI helpers
-    const defaultFormatBalance = {
-      decimals: tokenDecimals.map((b) => b.toNumber()),
-      unit: tokenSymbol[0].toString()
-    };
-
-    const defaultSection = Object.keys(api.tx)[0];
-    const defaultMethod = Object.keys(api.tx[defaultSection])[0];
-    const apiDefaultTx = api.tx[defaultSection][defaultMethod];
-    const apiDefaultTxSudo = (api.tx.system && api.tx.system.setCode) || apiDefaultTx;
-
-    return {
-      defaultFormatBalance,
-      registry,
-      apiDefaultTx,
-      apiDefaultTxSudo,
-      isApiReady: true,
-      isApiReadyOnce: true,
-      isDevelopment: isDevelopment,
-      specName: api.runtimeVersion.specName.toString(),
-      specVersion: api.runtimeVersion.specVersion.toString(),
-      systemChain,
-      systemName,
-      systemVersion
-    };
+    return apiObject;
   }
 }

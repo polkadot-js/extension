@@ -10,7 +10,7 @@ import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWra
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckStakeAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainAssetInfo';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -314,7 +314,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return null;
   }, [chainStakingMetadata, decimals, symbol, t, minStake]);
 
-  const onPreCheckReadOnly = usePreCheckReadOnly(from);
+  const onPreCheckReadOnly = usePreCheckStakeAction(from);
 
   useEffect(() => {
     const address = currentAccount?.address || '';

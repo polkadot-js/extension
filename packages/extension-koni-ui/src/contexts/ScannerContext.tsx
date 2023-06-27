@@ -229,7 +229,7 @@ export function ScannerContextProvider ({ children }: ScannerContextProviderProp
         }
 
         evmChainId = new BigN(tx.ethereumChainId).toNumber();
-        recipientAddress = tx.action;
+        recipientAddress = tx.to;
         dataToSign = txRequest.data.rlp;
       } else {
         tx = '';

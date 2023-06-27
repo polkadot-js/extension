@@ -5,6 +5,7 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
@@ -102,9 +103,9 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
     ) || DEFAULT_COLLECTION;
   }, [currentNftDetails, nftCollections]);
 
-  const chainInfo = useMemo(() => chainInfoMap[currentNftDetails.nftChain], [chainInfoMap, currentNftDetails]);
-  const addressPrefix = useGetChainPrefixBySlug(currentNftDetails.nftChain);
-  const fromChainGenesisHash = chainInfoMap[currentNftDetails.nftChain]?.substrateInfo?.genesisHash || '';
+  const chainInfo = useMemo(() => chainInfoMap[nftChain], [chainInfoMap, nftChain]);
+  const addressPrefix = useGetChainPrefixBySlug(nftChain);
+  const chainGenesisHash = chainInfoMap[nftChain]?.substrateInfo?.genesisHash || '';
 
   const { chain, from, onDone, setChain, setFrom } = useContext(TransactionContext);
 
@@ -146,12 +147,13 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
         const account = findAccountByAddress(accounts, _recipientAddress);
 
         if (account && account.isHardware) {
-          const destChainInfo = chainInfoMap[chain];
+          const chainInfo = chainInfoMap[chain];
+          const availableGen: string[] = account.availableGenesisHashes || [];
 
-          if (account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
-            const destChainName = destChainInfo?.name || 'Unknown';
+          if (!isEthereumAddress(account.address) && !availableGen.includes(chainInfo?.substrateInfo?.genesisHash || '')) {
+            const chainName = chainInfo?.name || 'Unknown';
 
-            return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
+            return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: chainName } }));
           }
         }
 
@@ -227,6 +229,8 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
   // Focus to the first field
   useFocusFormItem(form, 'to');
 
+  const show3DModel = SHOW_3D_MODELS_CHAIN.includes(nftItem.chain);
+
   return (
     <>
       <TransactionContent className={CN('-transaction-content', {
@@ -239,7 +243,9 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
         >
           <Image
             height={modalContent ? 180 : 120}
+            modelViewerProps={show3DModel ? DEFAULT_MODEL_VIEWER_PROPS : undefined}
             src={nftItem.image}
+            width={120}
           />
           <Typography.Title level={5}>
             {nftItem.name}
@@ -265,7 +271,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
             <AddressInput
               addressPrefix={addressPrefix}
               label={t('Send to')}
-              networkGenesisHash={fromChainGenesisHash}
+              networkGenesisHash={chainGenesisHash}
               placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}
@@ -371,6 +377,18 @@ const SendNFT = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
         img: {
           aspectRatio: '1'
         }
+      }
+    },
+
+    '.nft_item_detail': {
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+
+      '.ant-image-img': {
+        maxWidth: '100%',
+        objectFit: 'cover'
       }
     }
   };

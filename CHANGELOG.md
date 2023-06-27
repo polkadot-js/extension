@@ -1,5 +1,65 @@
 # CHANGELOG
 
+## 1.0.11
+Build date: Jun 24, 2023.
+
+Features & Update:
+- Improve connection stability (#1469)
+- Allow user download seed phrase file (#1560)
+- Update UI for expand view (#1229)
+
+Bugs fixed:
+- Fix bug detecting on-chain attributes for WASM NFTs (#1511)
+
+Update `@subwallet/chain-list@0.2.2` (#1556):
+- Integrate Polkadot Bridge Hub, Kusama Bridge Hub, Polkadot Collectives Parachain
+- Add logo for $CP token on Moonbeam
+
+## 1.0.10
+Build date: Jun 17, 2023.
+
+Features & Update:
+- Update Receive icon to Copy icon on Homepage screen (#1531)
+- Support display 3D NFT (#1516)
+- Re-check and update XCM feature for some chains: Polkadot, Statemint, Statemine, Bifrost Polkadot (#1546)
+
+Bugs fixed:
+- Fixed bug Show incorrect address book type (#1524)
+- Fixed bug Error fetching nominator data for Calamari (#1538)
+- Fixed bug Show incorrect Destination Chain fee on XCM history detail (#1550)
+
+Update `@subwallet/chain-list@0.2.1` (#1541):
+- Add INW (Aleph Zero) token
+- Add support for Avail testnet (Kate)
+- Re-name Statemint & Statemint Parachain to Polkadot Asset Hub & Kusama Asset Hub
+
+
+## 1.0.9
+Build date: Jun 13, 2023.
+
+Features & Update:
+- Integration Ledger EVM account (#538)
+- Allow DApp access to read-only account (#1225)
+- Review and support send fund for more token (#1449)
+- Optimize decode contract in transaction (#1474)
+- Update the new send fund screen (#1509)
+- Update chain-list (#1519)
+- Update uninstall URL (#1530)
+
+Bugs fixed:
+- Fixed bug Do not get transaction history in case the wallet have multi-account (#1411)
+- Fixed bug Show duplicate token on receive list when search custom token (#1514)
+- Fixed bug Do not transfer BNC token on the Bifrost Polkadot (#1522)
+- Fixed bug "Bad signature" when personal sign with EVM Ledger account (#1533)
+
+Update `@subwallet/chain-list@0.1.11`:
+- Add vsTokens and vTokens
+- Add VERSE token
+- Support WASM NFT Collection on the Astar network
+- Support USAGII NFT collection from Paras on the Astar network
+- Hide the channel xcm USDT: Equilibrium —> Statemint
+- Update provider for Calamari
+
 ## 1.0.8
 Build date: Jun 8, 2023.
 
@@ -669,7 +729,7 @@ Update:
   - Bifrost
 
 Bug Fixed:
-- Fix network list is incorrect in case importing an account from seed phase when there is no account yet (issue #120)
+- Fix network list is incorrect in case importing an account from seed phrase when there is no account yet (issue #120)
 - Fix grammar error and type issue of button (issue #156,#166)
 - Fix some network in wrong group (issue #180)
 

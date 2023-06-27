@@ -4,7 +4,7 @@
 import { ChainStakingMetadata, NominatorMetadata, RequestStakeWithdrawal, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { getStakingAvailableActionsByChain, getStakingAvailableActionsByNominator, getWithdrawalInfo, isActionFromValidator, StakingAction } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
-import { useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useHandleSubmitTransaction, usePreCheckStakeAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward, submitStakeWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -33,25 +33,25 @@ type ActionListType = {
   onClick: () => void;
 }
 
-type ActionListProps = {
-  setSelected?: React.Dispatch<React.SetStateAction<StakingAction | undefined>>;
-  selected?: StakingAction | undefined,
-  chainStakingMetadata?: ChainStakingMetadata,
-  nominatorMetadata?: NominatorMetadata,
-  reward?: StakingRewardItem;
-}
-
-export const ActionList: React.FC<ActionListProps> = (props) => {
-  const { chainStakingMetadata,
-    nominatorMetadata,
-    reward,
-    selected,
-    setSelected } = props;
+const Component: React.FC<Props> = (props: Props) => {
+  const { chainStakingMetadata, className, nominatorMetadata, reward } = props;
 
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
+  const { t } = useTranslation();
+
+  const { inactiveModal } = useContext(ModalContext);
 
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
+
+  const [selected, setSelected] = useState<StakingAction | undefined>();
+
+  const onCancel = useCallback(
+    () => {
+      inactiveModal(MORE_ACTION_MODAL);
+    },
+    [inactiveModal]
+  );
 
   const onDoneTransaction = useCallback((extrinsicHash: string) => {
     if (chainStakingMetadata) {
@@ -61,23 +61,15 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
 
   const { onError, onSuccess } = useHandleSubmitTransaction(onDoneTransaction);
 
-  const modalSelect = useCallback((action: StakingAction | undefined) => {
-    if (setSelected) {
-      setSelected(action);
-    }
-  }, [
-    setSelected
-  ]);
-
   const handleWithdrawalAction = useCallback(() => {
     if (!nominatorMetadata) {
-      modalSelect(undefined);
+      setSelected(undefined);
 
       return;
     }
 
     if (isAllAccount) {
-      modalSelect(undefined);
+      setSelected(undefined);
       navigate(`/transaction/withdraw/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
 
       return;
@@ -86,7 +78,7 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
     const unstakingInfo = getWithdrawalInfo(nominatorMetadata);
 
     if (!unstakingInfo) {
-      modalSelect(undefined);
+      setSelected(undefined);
 
       return;
     }
@@ -105,19 +97,19 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
       .then(onSuccess)
       .catch(onError)
       .finally(() => {
-        modalSelect(undefined);
+        setSelected(undefined);
       });
   }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess]);
 
   const handleClaimRewardAction = useCallback(() => {
     if (!nominatorMetadata) {
-      modalSelect(undefined);
+      setSelected(undefined);
 
       return;
     }
 
     if (nominatorMetadata.type === StakingType.POOLED || isAllAccount) {
-      modalSelect(undefined);
+      setSelected(undefined);
       navigate(`/transaction/claim-reward/${nominatorMetadata.type}/${nominatorMetadata.chain}`);
 
       return;
@@ -132,7 +124,7 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
       .then(onSuccess)
       .catch(onError)
       .finally(() => {
-        modalSelect(undefined);
+        setSelected(undefined);
       });
   }, [isAllAccount, navigate, nominatorMetadata, onError, onSuccess, reward?.unclaimedReward]);
 
@@ -146,22 +138,10 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
 
   const onNavigate = useCallback((url: string) => {
     return () => {
-      modalSelect(undefined);
+      setSelected(undefined);
       navigate(url);
     };
   }, [navigate]);
-
-  const onPreCheck = usePreCheckReadOnly(currentAccount?.address);
-  const onClickItem = useCallback((action: StakingAction, onClick: () => void) => {
-    const _onClick = () => {
-      modalSelect(action);
-      onClick();
-    };
-
-    return () => {
-      onPreCheck(_onClick)();
-    };
-  }, [onPreCheck]);
 
   const actionList: ActionListType[] = useMemo((): ActionListType[] => {
     if (!chainStakingMetadata) {
@@ -215,59 +195,17 @@ export const ActionList: React.FC<ActionListProps> = (props) => {
     });
   }, [chainStakingMetadata, handleClaimRewardAction, handleWithdrawalAction, onNavigate]);
 
-  return <>
-    {actionList.map((item) => {
-      const actionDisable = !availableActions.includes(item.action);
-      const hasAnAction = !!selected;
-      const isSelected = item.action === selected;
-      const anotherDisable = hasAnAction && !isSelected;
-      const disabled = actionDisable || anotherDisable;
+  const onPreCheck = usePreCheckStakeAction(currentAccount?.address);
+  const onClickItem = useCallback((action: StakingAction, onClick: () => void) => {
+    const _onClick = () => {
+      setSelected(action);
+      onClick();
+    };
 
-      return (
-        <SettingItem
-          className={CN(
-            'action-more-item',
-            {
-              disabled: disabled
-            }
-          )}
-          key={item.label}
-          leftItemIcon={(
-            <BackgroundIcon
-              backgroundColor={token[item.backgroundIconColor] as string}
-              phosphorIcon={item.icon}
-              size='sm'
-              weight='fill'
-            />
-          )}
-          name={item.label}
-          onPressItem={disabled ? undefined : onClickItem(item.action, item.onClick)}
-          rightItem={
-            isSelected && (
-              <div className='loading-icon'>
-                <ActivityIndicator />
-              </div>
-            )
-          }
-        />
-      );
-    })}
-  </>;
-};
-
-const Component: React.FC<Props> = (props: Props) => {
-  const [selected, setSelected] = useState<StakingAction | undefined>();
-
-  const { chainStakingMetadata, className, nominatorMetadata, reward } = props;
-  const { t } = useTranslation();
-  const { inactiveModal } = useContext(ModalContext);
-
-  const onCancel = useCallback(
-    () => {
-      inactiveModal(MORE_ACTION_MODAL);
-    },
-    [inactiveModal]
-  );
+    return () => {
+      onPreCheck(_onClick)();
+    };
+  }, [onPreCheck]);
 
   return (
     <SwModal
@@ -278,13 +216,42 @@ const Component: React.FC<Props> = (props: Props) => {
       onCancel={!selected ? onCancel : undefined}
       title={t('Actions')}
     >
-      <ActionList
-        chainStakingMetadata={chainStakingMetadata}
-        nominatorMetadata={nominatorMetadata}
-        reward={reward}
-        selected={selected}
-        setSelected={setSelected}
-      />
+      {actionList.map((item) => {
+        const actionDisable = !availableActions.includes(item.action);
+        const hasAnAction = !!selected;
+        const isSelected = item.action === selected;
+        const anotherDisable = hasAnAction && !isSelected;
+        const disabled = actionDisable || anotherDisable;
+
+        return (
+          <SettingItem
+            className={CN(
+              'action-more-item',
+              {
+                disabled: disabled
+              }
+            )}
+            key={item.label}
+            leftItemIcon={(
+              <BackgroundIcon
+                backgroundColor={token[item.backgroundIconColor] as string}
+                phosphorIcon={item.icon}
+                size='sm'
+                weight='fill'
+              />
+            )}
+            name={item.label}
+            onPressItem={disabled ? undefined : onClickItem(item.action, item.onClick)}
+            rightItem={
+              isSelected && (
+                <div className='loading-icon'>
+                  <ActivityIndicator />
+                </div>
+              )
+            }
+          />
+        );
+      })}
     </SwModal>
   );
 };

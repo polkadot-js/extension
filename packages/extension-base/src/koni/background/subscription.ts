@@ -77,7 +77,8 @@ export class KoniSubscription {
     }
   }
 
-  start () {
+  async start () {
+    await Promise.all([this.state.eventService.waitKeyringReady, this.state.eventService.waitAssetReady]);
     const currentAddress = this.state.keyringService.currentAccount?.address;
 
     if (currentAddress) {
@@ -106,13 +107,15 @@ export class KoniSubscription {
     this.state.eventService.onLazy(this.eventHandler);
   }
 
-  stop () {
+  async stop () {
     if (this.eventHandler) {
       this.state.eventService.offLazy(this.eventHandler);
       this.eventHandler = undefined;
     }
 
     this.stopAllSubscription();
+
+    return Promise.resolve();
   }
 
   subscribeBalancesAndCrowdloans (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, web3ApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {

@@ -18,6 +18,7 @@ import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
 import { SignerResult } from '@polkadot/types/types/extrinsic';
 import { BN } from '@polkadot/util';
+import { HexString } from '@polkadot/util/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
@@ -226,10 +227,11 @@ export interface NftCollectionJson {
   nftCollectionList: Array<NftCollection>;
 }
 
-// export interface NftStoreJson {
-//   nftList: Array<NftItem>;
-//   nftCollectionList: Array<NftCollection>;
-// }
+export interface MetadataItem {
+  genesisHash: string;
+  specVersion: string;
+  hexValue: HexString;
+}
 
 export interface TokenBalanceRaw {
   reserved: BN,
@@ -822,6 +824,7 @@ export interface CreateHardwareAccountItem {
   genesisHash: string;
   hardwareType: string;
   name: string;
+  isEthereum: boolean;
 }
 
 export interface RequestAccountCreateHardwareMultiple {
@@ -1275,13 +1278,15 @@ export interface ResponseParseEvmContractInput {
 
 export interface LedgerNetwork {
   genesisHash: string;
-  displayName: string;
+  networkName: string;
+  accountName: string;
+  appName: string;
   network: string; // network is predefined in ledger lib
   slug: string; // slug in chain list
   icon: 'substrate' | 'ethereum';
   isDevMode: boolean;
+  isEthereum: boolean;
 }
-
 /// On-ramp
 
 export interface TransakNetwork {

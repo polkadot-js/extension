@@ -1502,15 +1502,16 @@ export default class KoniExtension {
     return historySubject.getValue();
   }
 
-  private addContact (to: string) {
-    const toAddress = reformatAddress(to);
-    const account = keyring.getAccount(toAddress);
-    const contact = keyring.getAddress(toAddress);
-
-    if (!account && (!contact || contact.meta.isRecent)) {
-      keyring.saveAddress(toAddress, {});
-    }
-  }
+  // Save address to contact
+  // private addContact (to: string) {
+  //   const toAddress = reformatAddress(to);
+  //   const account = keyring.getAccount(toAddress);
+  //   const contact = keyring.getAddress(toAddress);
+  //
+  //   if (!account && (!contact || contact.meta.isRecent)) {
+  //     keyring.saveAddress(toAddress, {});
+  //   }
+  // }
 
   private validateTransfer (tokenSlug: string, from: string, to: string, value: string | undefined, transferAll: boolean | undefined): [TransactionError[], KeyringPair | undefined, BN | undefined, _ChainAsset] {
     const errors: TransactionError[] = [];
@@ -1603,7 +1604,7 @@ export default class KoniExtension {
 
     const transferNativeAmount = isTransferNativeToken ? transferAmount.value : '0';
 
-    this.addContact(to);
+    // this.addContact(to);
 
     const additionalValidator = async (inputTransaction: SWTransactionResponse): Promise<void> => {
       const minAmount = tokenInfo.minAmount || '0';
@@ -1728,7 +1729,7 @@ export default class KoniExtension {
       };
     }
 
-    this.addContact(to);
+    // this.addContact(to);
 
     return await this.#koniState.transactionService.handleTransaction({
       url: EXTENSION_REQUEST_URL,
@@ -1754,7 +1755,7 @@ export default class KoniExtension {
 
     const transaction = await getERC721Transaction(this.#koniState.getEvmApi(networkKey), contractAddress, senderAddress, recipientAddress, tokenId);
 
-    this.addContact(recipientAddress);
+    // this.addContact(recipientAddress);
 
     return await this.#koniState.transactionService.handleTransaction({
       address: senderAddress,
@@ -1887,7 +1888,7 @@ export default class KoniExtension {
         } else {
           const chainInfo = this.#koniState.chainService.getChainInfoByKey(networkKey);
 
-          if (_isChainEvmCompatible(chainInfo)) {
+          if (_isChainEvmCompatible(chainInfo) && _isTokenTransferredByEvm(tokenInfo)) {
             const web3 = this.#koniState.chainService.getEvmApi(networkKey);
 
             const transaction: TransactionConfig = {
@@ -1979,7 +1980,7 @@ export default class KoniExtension {
       ? getNftTransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params || {})
       : await getPSP34TransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params || {});
 
-    this.addContact(recipientAddress);
+    // this.addContact(recipientAddress);
 
     const rs = await this.#koniState.transactionService.handleTransaction({
       address: senderAddress,
@@ -2126,17 +2127,43 @@ export default class KoniExtension {
       throw new Error('No accounts to import');
     }
 
+    const slugMap: Record<string, string> = {};
+
     for (const account of accounts) {
-      const { accountIndex, address, addressOffset, genesisHash, hardwareType, name } = account;
-      const key = keyring.addHardware(address, hardwareType, {
+      const { accountIndex, address, addressOffset, genesisHash, hardwareType, isEthereum, name } = account;
+
+      let result: KeyringPair;
+
+      const baseMeta: KeyringPair$Meta = {
+        name,
+        hardwareType,
         accountIndex,
         addressOffset,
         genesisHash,
-        name,
         originGenesisHash: genesisHash
-      });
+      };
 
-      const result = key.pair;
+      if (isEthereum) {
+        result = keyring.keyring.addFromAddress(address, {
+          ...baseMeta,
+          isExternal: true,
+          isHardware: true
+        }, null, 'ethereum');
+
+        keyring.saveAccount(result);
+        slugMap.ethereum = 'ethereum';
+      } else {
+        result = keyring.addHardware(address, hardwareType, {
+          ...baseMeta,
+          availableGenesisHashes: [genesisHash]
+        }).pair;
+
+        const [slug] = this.#koniState.findNetworkKeyByGenesisHash(genesisHash);
+
+        if (slug) {
+          slugMap[slug] = slug;
+        }
+      }
 
       const _address = result.address;
 
@@ -2166,6 +2193,10 @@ export default class KoniExtension {
         resolve();
       });
     });
+
+    if (Object.keys(slugMap).length) {
+      this.enableChains({ chainSlugs: Object.keys(slugMap), enableTokens: true }).catch(console.error);
+    }
 
     return true;
   }
@@ -2399,7 +2430,7 @@ export default class KoniExtension {
 
       const txObject: TransactionConfig = {
         gasPrice: new BigN(tx.gasPrice).toNumber(),
-        to: tx.action,
+        to: tx.to,
         value: new BigN(tx.value).toNumber(),
         data: tx.data,
         nonce: new BigN(tx.nonce).toNumber(),

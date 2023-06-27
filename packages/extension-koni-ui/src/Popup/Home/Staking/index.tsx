@@ -10,7 +10,7 @@ import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFilterModal, useGetStakingList, useNotification, usePreCheckReadOnly, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetStakingList, useNotification, usePreCheckStakeAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -121,7 +121,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, 100);
   }, [activeModal]);
 
-  const preCheckReadOnly = usePreCheckReadOnly(currentAccount?.address);
+
+  const preCheck = usePreCheckStakeAction(currentAccount?.address);
+
+  const onClickStakeMore = useCallback(() => {
+    navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`);
+  }, [navigate]);
 
   const subHeaderButton: ButtonProps[] = useMemo(() => ([
     {
@@ -147,9 +152,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     },
     {
       icon: rightIcon,
-      onClick: preCheckReadOnly(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`))
+      onClick: preCheck(onClickStakeMore)
     }
-  ]), [loading, preCheckReadOnly, notify, t, navigate]);
+  ]), [loading, preCheck, notify, t, onClickStakeMore]);
 
   const renderItem = useCallback((item: StakingDataType) => {
     return (
@@ -424,7 +429,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       size='sm'
                     />
                   )}
-                  onClick={preCheckReadOnly(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`))}
+                  onClick={preCheck(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`))}
                   type='ghost'
                 />
               </>
@@ -477,7 +482,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [columns, emptyStakingList, filterFunction, filteredList, isWebUI, navigate, notify, onClickActionBtn, onClickItem, preCheckReadOnly, renderItem, searchFunction, searchInput, stakingItems, t]);
+  }, [columns, emptyStakingList, filterFunction, filteredList, isWebUI, navigate, notify, onClickActionBtn, onClickItem, preCheck, renderItem, searchFunction, searchInput, stakingItems, t]);
 
   return (
     <PageWrapper

@@ -24,7 +24,7 @@ function getCurrencyId (tokenInfo: _ChainAsset): unknown {
 
 export function getExtrinsicByXtokensPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
   const weightParam = ['pioneer', 'hydradx_main'].includes(originChainInfo.slug) ? FOUR_INSTRUCTIONS_WEIGHT : getDestWeight();
-  const destVersion = ['moonbeam', 'moonriver'].includes(originChainInfo.slug) ? 'V3' : undefined;
+  const destVersion = ['moonbeam', 'moonriver', 'bifrost_dot'].includes(originChainInfo.slug) ? 'V3' : undefined;
 
   return api.tx.xTokens.transfer(
     getCurrencyId(tokenInfo),

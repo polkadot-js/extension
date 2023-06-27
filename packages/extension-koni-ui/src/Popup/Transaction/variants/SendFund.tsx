@@ -4,7 +4,13 @@
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import {
+  _getAssetDecimals,
+  _getOriginChainOfAsset,
+  _isAssetFungibleToken,
+  _isChainEvmCompatible,
+  _isTokenTransferredByEvm
+} from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
@@ -67,7 +73,9 @@ function getTokenItems (
     return [];
   }
 
-  const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
+  const isLedger = !!account.isHardware;
+  const validGen: string[] = account.availableGenesisHashes || [];
+  const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug);
   const isAccountEthereum = isEthereumAddress(address);
   const isSetTokenSlug = !!tokenGroupSlug && !!assetRegistry[tokenGroupSlug];
   const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
@@ -78,7 +86,7 @@ function getTokenItems (
     }
 
     const chainAsset = assetRegistry[tokenGroupSlug];
-    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;
+    const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
 
     if (isSetTokenSlug) {
       if (isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger) {
@@ -101,7 +109,7 @@ function getTokenItems (
   const items: TokenItemType[] = [];
 
   Object.values(assetRegistry).forEach((chainAsset) => {
-    const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset.originChain : true;
+    const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
     const isTokenFungible = _isAssetFungibleToken(chainAsset);
 
     if (!(isTokenFungible && isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger)) {
@@ -192,15 +200,17 @@ const filterAccountFunc = (
   });
 
   return (account: AccountJson): boolean => {
-    const ledgerNetwork = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
+    const isLedger = !!account.isHardware;
     const isAccountEthereum = isEthereumAddress(account.address);
+    const validGen: string[] = account.availableGenesisHashes || [];
+    const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug) || [];
 
     if (!defaultFilterAccount(account)) {
       return false;
     }
 
     return chainAssets.some((chainAsset) => {
-      const isValidLedger = ledgerNetwork ? ledgerNetwork === chainAsset?.originChain : true;
+      const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
 
       return isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger;
     });
@@ -265,7 +275,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
 
   const fromChainNetworkPrefix = useGetChainPrefixBySlug(chain);
   const destChainNetworkPrefix = useGetChainPrefixBySlug(destChain);
-  const fromChainGenesisHash = chainInfoMap[chain]?.substrateInfo?.genesisHash || '';
+  const destChainGenesisHash = chainInfoMap[destChain]?.substrateInfo?.genesisHash || '';
 
   const tokenItems = useMemo<TokenItemType[]>(() => {
     return getTokenItems(
@@ -320,15 +330,14 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       }
     }
 
-    if (account) {
-      if (account.isHardware) {
-        const destChainInfo = chainInfoMap[destChain];
+    if (account?.isHardware) {
+      const destChainInfo = chainInfoMap[destChain];
+      const availableGen: string[] = account.availableGenesisHashes || [];
 
-        if (account.originGenesisHash !== destChainInfo?.substrateInfo?.genesisHash) {
-          const destChainName = destChainInfo?.name || 'Unknown';
+      if (!isEthereumAddress(account.address) && !availableGen.includes(destChainInfo?.substrateInfo?.genesisHash || '')) {
+        const destChainName = destChainInfo?.name || 'Unknown';
 
-          return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
-        }
+        return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
       }
     }
 
@@ -407,7 +416,37 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
 
     let sendPromise: Promise<SWTransactionResponse>;
 
+    const account = findAccountByAddress(accounts, from);
+
+    if (!account) {
+      setLoading(false);
+      notification({
+        message: t("Can't find account"),
+        type: 'error'
+      });
+
+      return;
+    }
+
+    const isLedger = !!account.isHardware;
+    const isEthereum = isEthereumAddress(account.address);
+    const chainAsset = assetRegistry[asset];
+
     if (chain === destChain) {
+      if (isLedger) {
+        if (isEthereum) {
+          if (!_isTokenTransferredByEvm(chainAsset)) {
+            setLoading(false);
+            notification({
+              message: t('Ledger does not support transfer for this token'),
+              type: 'warning'
+            });
+
+            return;
+          }
+        }
+      }
+
       // Transfer token or send fund
       sendPromise = makeTransfer({
         from,
@@ -418,9 +457,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         transferAll: isTransferAll
       });
     } else {
-      const acc = findAccountByAddress(accounts, from);
-
-      if (acc?.isHardware) {
+      if (isLedger) {
         setLoading(false);
         notification({
           message: t('This feature is not available for Ledger account'),
@@ -452,7 +489,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         })
       ;
     }, 300);
-  }, [chain, from, asset, isTransferAll, accounts, notification, t, onSuccess, onError]);
+  }, [accounts, from, assetRegistry, asset, chain, notification, t, isTransferAll, onSuccess, onError]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
@@ -634,7 +671,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               label={t('Send to')}
-              networkGenesisHash={fromChainGenesisHash}
+              networkGenesisHash={destChainGenesisHash}
               placeholder={t('Account address')}
               saveAddress={true}
               showAddressBook={true}

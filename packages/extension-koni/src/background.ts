@@ -46,7 +46,6 @@ chrome.runtime.onConnect.addListener((port): void => {
   if (PORT_EXTENSION === port.name) {
     openCount += 1;
     koniState.wakeup().catch((err) => console.warn(err));
-    // TODO: wakeup happens every time popup opens, no matter if the background is asleep or not
 
     if (waitingToStop) {
       clearTimeout(idleTimer);
@@ -77,9 +76,10 @@ chrome.runtime.onInstalled.addListener(function (details) {
   if (details.reason === 'install') {
     onExtensionInstall();
   }
-
-  handleExtensionIdling();
 });
+
+// Setup uninstall URL every background start
+chrome.runtime.setUninstallURL('https://forms.gle/mAxcUCumXfnEaQHm7');
 
 chrome.runtime.onStartup.addListener(function () {
   handleExtensionIdling();
@@ -94,6 +94,10 @@ cryptoWaitReady()
     keyring.restoreKeyringPassword().finally(() => {
       koniState.updateKeyringState();
     });
+    koniState.eventService.emit('crypto.ready', true);
+
+    // Sleep extension after 2 minutes of inactivity or without any action
+    handleExtensionIdling();
   })
   .catch((error): void => {
     console.error('initialization failed', error);

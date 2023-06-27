@@ -3,24 +3,17 @@
 
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, PageIcon } from '@subwallet/react-ui';
+import { Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, CheckCircle, X } from 'phosphor-react';
-import React, { useContext } from 'react';
+import React, {useContext} from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { Layout } from '../components';
-import SocialGroup from '../components/SocialGroup';
-import { ScreenContext } from '../contexts/ScreenContext';
+import { Layout, SocialButtonGroup } from '../components';
+import {ScreenContext} from "@subwallet/extension-koni-ui/contexts/ScreenContext";
 
 type Props = ThemeProps;
-
-enum SocialType {
-  TWITTER = 'twitter',
-  DISCORD = 'discord',
-  TELEGRAM = 'telegram',
-}
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -88,37 +81,13 @@ const Component: React.FC<Props> = (props: Props) => {
         >
           {t('Follow along with product updates or reach out if you have any questions.')}
         </div>
-
-        {isWebUI
-          ? (
-            <>
-              <SocialGroup />
-              <Button
-                icon={(
-                  <Icon
-                    phosphorIcon={ArrowCircleRight}
-                    weight={'fill'}
-                  />
-                )}
-                onClick={goHome}
-                style={{
-                  width: '100%',
-                  marginTop: 64
-                }}
-              >
-                {t('Go to Porfolio')}
-              </Button>
-            </>
-          )
-          : (
-            <SocialGroup />
-          )}
+        <SocialButtonGroup />
       </div>
     </Layout.Base>
   );
 };
 
-const CreatePasswordDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const CreateDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     textAlign: 'center',
 
@@ -155,40 +124,8 @@ const CreatePasswordDone = styled(Component)<Props>(({ theme: { token } }: Props
       '&.__web-ui': {
         padding: `0 ${token.controlHeightLG}px`
       }
-    },
-
-    '.button-group': {
-      display: 'flex',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: token.size
-    },
-
-    [`.type-${SocialType.TWITTER}`]: {
-      backgroundColor: token['blue-7'],
-
-      '&:hover': {
-        backgroundColor: token['blue-8']
-      }
-    },
-
-    [`.type-${SocialType.DISCORD}`]: {
-      backgroundColor: token['geekblue-8'],
-
-      '&:hover': {
-        backgroundColor: token['geekblue-9']
-      }
-    },
-
-    [`.type-${SocialType.TELEGRAM}`]: {
-      backgroundColor: token['blue-5'],
-
-      '&:hover': {
-        backgroundColor: token['blue-6']
-      }
     }
   };
 });
 
-export default CreatePasswordDone;
+export default CreateDone;

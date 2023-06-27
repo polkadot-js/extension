@@ -12,8 +12,17 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 const defaultAccountFilter = (stakingType: StakingType, chain?: _ChainInfo): ((account: AccountJson) => boolean) => {
   return (account: AccountJson) => {
-    if (account.originGenesisHash && chain && _getSubstrateGenesisHash(chain) !== account.originGenesisHash) {
-      return false;
+    const isEvmAddress = isEthereumAddress(account.address);
+    const availableGen: string[] = account.availableGenesisHashes || [];
+
+    if (account.isHardware) {
+      if (isEvmAddress) {
+        return false;
+      } else {
+        if (chain && !availableGen.includes(_getSubstrateGenesisHash(chain))) {
+          return false;
+        }
+      }
     }
 
     if (isAccountAll(account.address)) {
@@ -34,8 +43,9 @@ export const accountFilterFunc = (chainInfoMap: Record<string, _ChainInfo>, stak
       const chain = chainInfoMap[stakingChain];
       const defaultFilter = defaultAccountFilter(stakingType, chain);
       const isEvmChain = _isChainEvmCompatible(chain);
+      const isEvmAddress = isEthereumAddress(account.address);
 
-      return defaultFilter(account) && isEvmChain === isEthereumAddress(account.address);
+      return defaultFilter(account) && isEvmChain === isEvmAddress;
     } else {
       return defaultAccountFilter(stakingType)(account);
     }

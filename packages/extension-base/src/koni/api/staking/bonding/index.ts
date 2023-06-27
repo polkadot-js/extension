@@ -132,6 +132,10 @@ export function subscribeEssentialChainStakingMetadata (substrateApiMap: Record<
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   Object.values(chainInfoMap).forEach(async (chainInfo: _ChainInfo) => {
+    if (!substrateApiMap[chainInfo.slug]) {
+      return;
+    }
+
     const substrateApi = await substrateApiMap[chainInfo.slug].isReady;
 
     if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {

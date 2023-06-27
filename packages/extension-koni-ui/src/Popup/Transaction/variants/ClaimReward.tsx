@@ -8,7 +8,7 @@ import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/exte
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNativeTokenBasicInfo, useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckStakeAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeClaimReward } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -120,7 +120,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }, 300);
   }, [chain, from, onError, onSuccess, reward?.unclaimedReward, stakingType]);
 
-  const onPreCheckReadOnly = usePreCheckReadOnly(from);
+  const onPreCheckReadOnly = usePreCheckStakeAction(from);
 
   const filterAccount = useCallback((account: AccountJson): boolean => {
     const _stakingChain = stakingChain || '';

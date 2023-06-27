@@ -72,6 +72,7 @@ export function useLedger (slug?: string, active = true): Result {
   const { chainInfoMap } = useSelector((state) => state.chainStore);
 
   const timeOutRef = useRef<NodeJS.Timer>();
+  const destroyRef = useRef<VoidFunction>();
 
   const [isLoading, setIsLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
@@ -193,6 +194,18 @@ export function useLedger (slug?: string, active = true): Result {
 
   const refresh = useCallback(() => {
     setRefreshLock(true);
+  }, []);
+
+  useEffect(() => {
+    destroyRef.current = () => {
+      ledger?.disconnect().catch(console.error);
+    };
+  }, [ledger]);
+
+  useEffect(() => {
+    return () => {
+      destroyRef.current?.();
+    };
   }, []);
 
   return useMemo(() => ({

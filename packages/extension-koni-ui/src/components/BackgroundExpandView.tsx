@@ -119,7 +119,11 @@ const BackgroundExpandView = styled(Component)<Props>(({ theme: { token } }: Pro
       width: '100%',
       bottom: token.controlHeightLG,
       left: '0',
-      zIndex: -1
+      zIndex: -1,
+
+      '@media (max-height: 864px)': { // 600 + 2 * (52 + 40 * 2)
+        display: 'none'
+      }
     }
   };
 });

@@ -16,7 +16,7 @@ const Component: React.ForwardRefRenderFunction<InputRef, Props> = (props: Props
   );
 };
 
-const RadioGroup = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
+const RadioGroup = styled(forwardRef<InputRef, Props>(Component))<Props>(({ theme: { token } }: Props) => {
   return {
     '&.ant-radio-group': {
       display: 'flex',

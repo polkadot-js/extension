@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
-import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
+import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { AssetSetting, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
@@ -12,7 +12,7 @@ import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/Addr
 import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -222,7 +222,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
-  const preCheckReadOnly = usePreCheckReadOnly(from, 'The account you are using is watch-only, you cannot send assets with it');
+  const checkAction = usePreCheckAction(from, true, 'The account you are using is {{accountTitle}}, you cannot send assets with it');
 
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
@@ -264,6 +264,22 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const decimals = useMemo(() => {
     return currentChainAsset ? _getAssetDecimals(currentChainAsset) : 0;
   }, [currentChainAsset]);
+
+  const extrinsicType = useMemo((): ExtrinsicType => {
+    if (!currentChainAsset) {
+      return ExtrinsicType.UNKNOWN;
+    } else {
+      if (chain !== destChain) {
+        return ExtrinsicType.TRANSFER_XCM;
+      } else {
+        if (currentChainAsset.assetType === _AssetType.NATIVE) {
+          return ExtrinsicType.TRANSFER_BALANCE;
+        } else {
+          return ExtrinsicType.TRANSFER_TOKEN;
+        }
+      }
+    }
+  }, [chain, currentChainAsset, destChain]);
 
   const fromChainNetworkPrefix = useGetChainPrefixBySlug(chain);
   const destChainNetworkPrefix = useGetChainPrefixBySlug(destChain);
@@ -708,7 +724,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             />
           )}
           loading={loading}
-          onClick={preCheckReadOnly(form.submit)}
+          onClick={checkAction(form.submit, extrinsicType)}
           schema={isTransferAll ? 'warning' : undefined}
         >
           {isTransferAll ? t('Transfer all') : t('Transfer')}

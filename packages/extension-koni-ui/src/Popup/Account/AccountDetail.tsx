@@ -7,6 +7,7 @@ import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/Accou
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
+import { useIsMantaPayAvailable } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayAvailable';
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -24,6 +25,8 @@ import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef,
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps;
 
@@ -219,6 +222,8 @@ const Component: React.FC<Props> = (props: Props) => {
       return false;
     }
   }, [account]);
+
+  const isZkModeAvailable = useIsMantaPayAvailable(account);
 
   const walletNamePrefixIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
@@ -508,24 +513,29 @@ const Component: React.FC<Props> = (props: Props) => {
               />
             )
           }
-          <SettingItem
-            className={CN(`zk-setting ${!mantaPayState.isSyncing ? 'zk-sync-margin' : ''}`)}
-            leftItemIcon={(
-              <BackgroundIcon
-                backgroundColor={token['green-6']}
-                phosphorIcon={ShieldCheck}
-                size='sm'
-                weight='fill'
-              />
-            )}
-            name={t('Zk mode')}
-            rightItem={(
-              <Switch
-                checked={mantaPayState.isEnabled}
-                onClick={onSwitchMantaPay}
-              />
-            )}
-          />
+
+          {
+            isZkModeAvailable && !isEthereumAddress(account.address) && (
+              <SettingItem
+                className={CN(`zk-setting ${!mantaPayState.isSyncing ? 'zk-sync-margin' : ''}`)}
+                leftItemIcon={(
+                  <BackgroundIcon
+                    backgroundColor={token['green-6']}
+                    phosphorIcon={ShieldCheck}
+                    size='sm'
+                    weight='fill'
+                  />
+                )}
+                name={t('Zk mode')}
+                rightItem={(
+                  <Switch
+                    checked={mantaPayState.isEnabled}
+                    onClick={onSwitchMantaPay}
+                  />
+                )}
+              />)
+          }
+
           <Button
             block={true}
             className={CN('account-button', `action-type-${ActionType.DERIVE}`)}

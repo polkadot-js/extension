@@ -5667,14 +5667,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:^0.2.2":
-  version: 0.2.2
-  resolution: "@subwallet/chain-list@npm:0.2.2"
+"@subwallet/chain-list@npm:^0.2.3-beta.1":
+  version: 0.2.3-beta.1
+  resolution: "@subwallet/chain-list@npm:0.2.3-beta.1"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^10.2.1
     eventemitter3: ^4.0.7
-  checksum: a439a4d493db48abb555dd626a7e5ab0f38178bbbf30608a587cef89af730dfef86f918480ad1c9256d7a2065bed7447de605af0d29ce74e5fdd32a2708f31f3
+  checksum: 39f8d7b6e4c69773ae60ac9d943a8c30205530b6e40317e5d7724de271eb5b8e28ab8e8ba033c0cfc3e913c4057bd7670b9bb387b87be78d541f9fa1dc6b6121
   languageName: node
   linkType: hard
 
@@ -5707,7 +5707,7 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": ^0.2.2
+    "@subwallet/chain-list": ^0.2.3-beta.1
     "@subwallet/extension-base": ^1.0.11-2
     "@subwallet/extension-chains": ^1.0.11-2
     "@subwallet/extension-dapp": ^1.0.11-2
@@ -5826,7 +5826,7 @@ __metadata:
     "@polkadot/util-crypto": ^12.3.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": ^0.2.2
+    "@subwallet/chain-list": ^0.2.3-beta.1
     "@subwallet/extension-base": ^1.0.11-2
     "@subwallet/extension-chains": ^1.0.11-2
     "@subwallet/extension-dapp": ^1.0.11-2

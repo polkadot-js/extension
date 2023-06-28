@@ -420,32 +420,29 @@ const Component: React.FC<Props> = (props: Props) => {
   const onOkZkModeConfirmation = useCallback((password: string) => {
     dispatchMantaPayState({ type: MantaPayReducerActionType.SET_LOADING, payload: true });
     setTimeout(() => {
-      inactiveModal(zkModeConfirmationId);
-      dispatchMantaPayState({ type: MantaPayReducerActionType.CONFIRM_ENABLE, payload: undefined });
+      enableMantaPay({ address: account?.address as string, password })
+        .then((result) => {
+          if (result.success) {
+            inactiveModal(zkModeConfirmationId);
+            dispatchMantaPayState({ type: MantaPayReducerActionType.CONFIRM_ENABLE, payload: undefined });
+          } else {
+            if (result.message !== MantaPayEnableMessage.WRONG_PASSWORD) {
+              notify({
+                type: 'error',
+                message: t(getZkErrorMessage(result.message))
+              });
+            }
 
-      // enableMantaPay({ address: account?.address as string, password })
-      //   .then((result) => {
-      //     if (result.success) {
-      //       inactiveModal(zkModeConfirmationId);
-      //       dispatchMantaPayState({ type: MantaPayReducerActionType.CONFIRM_ENABLE, payload: undefined });
-      //     } else {
-      //       if (result.message !== MantaPayEnableMessage.WRONG_PASSWORD) {
-      //         notify({
-      //           type: 'error',
-      //           message: t(getZkErrorMessage(result.message))
-      //         });
-      //       }
-      //
-      //       dispatchMantaPayState({ type: MantaPayReducerActionType.SET_ERROR_MESSAGE, payload: getZkErrorMessage(result.message) });
-      //     }
-      //   })
-      //   .catch((e) => {
-      //     console.error(e);
-      //
-      //     dispatchMantaPayState({ type: MantaPayReducerActionType.SYNC_FAIL, payload: undefined });
-      //   });
+            dispatchMantaPayState({ type: MantaPayReducerActionType.SET_ERROR_MESSAGE, payload: getZkErrorMessage(result.message) });
+          }
+        })
+        .catch((e) => {
+          console.error(e);
+
+          dispatchMantaPayState({ type: MantaPayReducerActionType.SYNC_FAIL, payload: undefined });
+        });
     }, 1000);
-  }, [inactiveModal]);
+  }, [account?.address, inactiveModal, notify, t]);
 
   if (!account) {
     return null;

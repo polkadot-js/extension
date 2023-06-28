@@ -75,6 +75,7 @@ export default class KoniExtension {
   #lockTimeOut: NodeJS.Timer | undefined = undefined;
   readonly #koniState: KoniState;
   #timeAutoLock: number = DEFAULT_AUTO_LOCK_TIME;
+  #skipAutoLock = false;
 
   constructor (state: KoniState) {
     this.#koniState = state;
@@ -84,7 +85,9 @@ export default class KoniExtension {
       clearTimeout(this.#lockTimeOut);
 
       this.#lockTimeOut = setTimeout(() => {
-        this.keyringLock();
+        if (!this.#skipAutoLock) {
+          this.keyringLock();
+        }
       }, this.#timeAutoLock * 60 * 1000);
     };
 
@@ -3389,7 +3392,13 @@ export default class KoniExtension {
 
   private async subscribeMantaPaySyncProgress (id: string, port: chrome.runtime.Port) {
     const callBackData = createSubscription<'pri(mantaPay.subscribeSyncProgress)'>(id, port);
+
+    this.#skipAutoLock = true;
     const mantaPayConfigSubscription = await this.#koniState.subscribeMantaPaySyncProgress((rs) => {
+      if (rs.isDone) {
+        this.#skipAutoLock = false;
+      }
+
       callBackData(rs);
     });
 
@@ -3412,7 +3421,9 @@ export default class KoniExtension {
     clearTimeout(this.#lockTimeOut);
 
     this.#lockTimeOut = setTimeout(() => {
-      this.keyringLock();
+      if (!this.#skipAutoLock) {
+        this.keyringLock();
+      }
     }, this.#timeAutoLock * 60 * 1000);
 
     switch (type) {

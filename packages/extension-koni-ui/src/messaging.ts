@@ -870,3 +870,8 @@ export async function approveWalletConnectSession (request: RequestApproveConnec
 export async function rejectWalletConnectSession (request: RequestRejectConnectWalletSession): Promise<boolean> {
   return sendMessage('pri(walletConnect.session.reject)', request);
 }
+
+export async function disconnectWalletConnectConnection (topic: string): Promise<boolean> {
+  return sendMessage('pri(walletConnect.session.disconnect)', { topic });
+}
+

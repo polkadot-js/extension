@@ -2,12 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CloseIcon, ConnectionItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import ConnectScanner from '@subwallet/extension-koni-ui/components/WalletConnect/ConnectScanner';
-import { ADD_CONNECTION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Icon, SwList } from '@subwallet/react-ui';
 import { SessionTypes } from '@walletconnect/types';
 import CN from 'classnames';
 import { PlusCircle } from 'phosphor-react';
@@ -26,7 +24,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { goHome } = useDefaultNavigate();
 
   const dataContext = useContext(DataContext);
-  const { activeModal } = useContext(ModalContext);
 
   const { sessions } = useSelector((state) => state.walletConnect);
 
@@ -51,8 +48,8 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [onClickItem]);
 
   const onAdd = useCallback(() => {
-    activeModal(ADD_CONNECTION_MODAL);
-  }, [activeModal]);
+    navigate('/wallet-connect/connect');
+  }, [navigate]);
 
   return (
     <Layout.WithSubHeaderOnly
@@ -83,7 +80,6 @@ const Component: React.FC<Props> = (props: Props) => {
           renderItem={renderItem}
           rowGap='var(--row-gap)'
         />
-        <ConnectScanner />
       </PageWrapper>
     </Layout.WithSubHeaderOnly>
   );

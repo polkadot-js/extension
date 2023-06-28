@@ -6,7 +6,9 @@ import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/rout
 import { useDefaultNavigate, useNotification } from '@subwallet/extension-koni-ui/hooks';
 import { addConnection } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Form, Input } from '@subwallet/react-ui';
+import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
+import { noop, validWalletConnectUri } from '@subwallet/extension-koni-ui/utils';
+import { Form, Input, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,13 +17,15 @@ import styled from 'styled-components';
 
 type Props = ThemeProps;
 
-interface ConnectWalletFormState {
+interface AddConnectionFormState {
   uri: string;
 }
 
-const DEFAULT_FORM_VALUES: ConnectWalletFormState = {
+const DEFAULT_FORM_VALUES: AddConnectionFormState = {
   uri: ''
 };
+
+const scannerId = 'connect-connection-scanner-modal';
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -31,18 +35,13 @@ const Component: React.FC<Props> = (props: Props) => {
   const notification = useNotification();
   const { goHome } = useDefaultNavigate();
 
-  const [form] = Form.useForm<ConnectWalletFormState>();
+  const [form] = Form.useForm<AddConnectionFormState>();
 
   const [loading, setLoading] = useState(false);
 
-  const goBack = useCallback(() => {
-    navigate('/wallet-connect/list');
-  }, [navigate]);
-
-  const onFinish: FormCallbacks<ConnectWalletFormState>['onFinish'] = useCallback((values: ConnectWalletFormState) => {
-    const { uri } = values;
-
+  const onConnect = useCallback((uri: string) => {
     setLoading(true);
+
     addConnection({
       uri
     })
@@ -57,8 +56,30 @@ const Component: React.FC<Props> = (props: Props) => {
           message: t('Fail to add connection')
         });
         setLoading(false);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [navigate, notification, t]);
+
+  const onFinish: FormCallbacks<AddConnectionFormState>['onFinish'] = useCallback((values: AddConnectionFormState) => {
+    const { uri } = values;
+
+    onConnect(uri);
+  }, [onConnect]);
+
+  const onSuccess = useCallback((result: ScannerResult) => {
+    const uri = result.text;
+    const isValid = validWalletConnectUri(uri);
+
+    if (isValid && !loading) {
+      onConnect(uri);
+    }
+  }, [onConnect, loading]);
+
+  const goBack = useCallback(() => {
+    navigate('/wallet-connect/list');
+  }, [navigate]);
 
   return (
     <Layout.WithSubHeaderOnly
@@ -92,6 +113,15 @@ const Component: React.FC<Props> = (props: Props) => {
             <Input label={t('Uri')} />
           </Form.Item>
         </Form>
+        <SwQrScanner
+          className={className}
+          id={scannerId}
+          // isError={!!scanError}
+          // onClose={onCloseScan}
+          onError={noop}
+          onSuccess={onSuccess}
+          // overlay={scanError && <QrScannerErrorNotice message={scanError} />}
+        />
       </div>
     </Layout.WithSubHeaderOnly>
   );

@@ -54,7 +54,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
     name: network.networkName,
-    slug: network.network
+    slug: network.slug
   })), [supportedLedger]);
 
   const [chain, setChain] = useState(supportedLedger[0].slug);

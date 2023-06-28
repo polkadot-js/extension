@@ -51,11 +51,12 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
     entry,
     devServer: {
       static: {
-        directory: path.join(__dirname, 'build')
+        directory: path.join(__dirname, 'public')
       },
       hot: false,
       liveReload: false,
       webSocketServer: false,
+      historyApiFallback: true,
       compress: true,
       port: 9000
     },
@@ -70,6 +71,10 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
               options: polkadotDevOptions
             }
           ]
+        },
+        {
+          test: [/\.css$/i, /\.scss$/i],
+          use: ['style-loader', 'css-loader', 'sass-loader']
         },
         {
           test: [/\.svg$/, /\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.woff2?$/],
@@ -91,7 +96,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       filename: '[name]-[contenthash].js',
       globalObject: '(typeof self !== \'undefined\' ? self : this)',
       path: path.join(__dirname, 'build'),
-      publicPath: ''
+      publicPath: '/'
     },
     performance: {
       hints: false
@@ -101,6 +106,9 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
         Buffer: ['buffer', 'Buffer'],
         process: 'process/browser.js'
       }),
+      new webpack.ProvidePlugin({
+        process: 'process/browser'
+      }),
       new webpack.DefinePlugin({
         'process.env': {
           NODE_ENV: JSON.stringify(mode),
@@ -109,10 +117,24 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
         }
       }),
       new CopyPlugin({
-        patterns: [{
-          from: path.resolve(__dirname, './package.json'),
-          to: path.resolve(__dirname, './build/package.json')
-        }]
+        patterns: [
+          {
+            from: path.resolve(__dirname, './package.json'),
+            to: path.resolve(__dirname, './build/package.json')
+          },
+          {
+            from: path.resolve(__dirname, './public/images'),
+            to: path.resolve(__dirname, './build/images')
+          },
+          {
+            from: path.resolve(__dirname, './public/fonts'),
+            to: path.resolve(__dirname, './build/fonts')
+          },
+          {
+            from: path.resolve(__dirname, './public/locales'),
+            to: path.resolve(__dirname, './build/locales')
+          }
+        ]
       }),
       new HtmlWebpackPlugin({
         filename: 'index.html',
@@ -148,5 +170,6 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
 
 module.exports = createConfig({
   fallback: './src/fallback.ts',
-  'web-runner': './src/webRunner.ts'
+  'webapp': './src/webRunner.ts',
+  main: './src/index.tsx'
 }, {}, false);

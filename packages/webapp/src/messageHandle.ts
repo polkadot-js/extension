@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/web-runner authors & contributors
+// Copyright 2019-2022 @subwallet/webapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { RequestSignatures, TransportRequestMessage, TransportResponseMessage } from '@subwallet/extension-base/background/types';
@@ -20,7 +20,9 @@ export function responseMessage (response: TransportResponseMessage<keyof Reques
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     window.ReactNativeWebView.postMessage(JSON.stringify(response));
   } else {
-    console.log('Post message in browser ', response);
+    // console.log('handleSendMessageFinish Post message in browser ', response);
+    window.postMessage(response);
+    // handleSendMessageFinish(response);
   }
 }
 
@@ -39,6 +41,8 @@ export function setupHandlers () {
     };
 
     if (data.id && data.message) {
+      console.log('===LOG: setupHandlers data.message', data.message);
+
       if (data.message.startsWith('mobile')) {
         port.name = PORT_MOBILE;
       } else if (data.message.startsWith('pri')) {

@@ -4057,19 +4057,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pedrouid/environment@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@pedrouid/environment@npm:1.0.1"
-  checksum: fd88340ad760f26340a2816c3677f0ca913976e315880891c3de3f028fe64abc9704fb904234dce77a1ff15c22d0b6cbf1d4199a76de6695c2aed8353ce20590
-  languageName: node
-  linkType: hard
-
 "@peaqnetwork/type-definitions@npm:0.0.4":
   version: 0.0.4
   resolution: "@peaqnetwork/type-definitions@npm:0.0.4"
   dependencies:
     "@open-web3/orml-type-definitions": ^0.9.4-38
   checksum: 6c38272a2170c8bfb91bb05bd8b46195c1dc9cd5ea85fc17531dd0d567eb889e2605080286a6c0bcd449217c999bc6d393bbc42db6347609aab23ec80cabcc1f
+  languageName: node
+  linkType: hard
+
+"@pedrouid/environment@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@pedrouid/environment@npm:1.0.1"
+  checksum: fd88340ad760f26340a2816c3677f0ca913976e315880891c3de3f028fe64abc9704fb904234dce77a1ff15c22d0b6cbf1d4199a76de6695c2aed8353ce20590
   languageName: node
   linkType: hard
 

@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, CancelUnstakeSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckStakeAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetNominatorInfo, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { submitStakeCancelWithdrawal } from '@subwallet/extension-koni-ui/messaging';
 import { accountFilterFunc } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -109,7 +109,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return (nomination ? nomination.unstakings.length > 0 : false) && accountFilterFunc(chainInfoMap, stakingType, stakingChain)(account);
   }, [chainInfoMap, allNominatorInfo, stakingChain, stakingType]);
 
-  const onPreCheck = usePreCheckStakeAction(from);
+  const onPreCheck = usePreCheckAction(from);
 
   useEffect(() => {
     const address = currentAccount?.address || '';
@@ -187,7 +187,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={onPreCheck(form.submit)}
+          onClick={onPreCheck(form.submit, ExtrinsicType.STAKING_CANCEL_UNSTAKE)}
         >
           {t('Approve')}
         </Button>

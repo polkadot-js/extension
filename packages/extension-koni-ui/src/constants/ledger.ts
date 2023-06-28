@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainInfoMap } from '@subwallet/chain-list';
-import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 
 export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   {
@@ -35,6 +35,17 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     icon: 'substrate',
     network: 'acala',
     slug: ChainInfoMap.acala.slug,
+    isDevMode: true,
+    isEthereum: false
+  },
+  {
+    accountName: 'Aleph Zero',
+    appName: 'Aleph Zero',
+    networkName: 'Aleph Zero network',
+    genesisHash: ChainInfoMap.aleph.substrateInfo?.genesisHash || '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e',
+    icon: 'substrate',
+    network: 'aleph-node',
+    slug: ChainInfoMap.aleph.slug,
     isDevMode: true,
     isEthereum: false
   },
@@ -92,3 +103,62 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   //   isDevMode: true
   // }
 ];
+
+/*
+  BLOCK
+  *: All network,
+  evm: All evm network,
+  substrate: All substrate network
+*/
+/// TRANSFER
+export const BLOCK_TRANSFER_NATIVE_LEDGER_NETWORKS: string[] = [];
+export const BLOCK_TRANSFER_TOKEN_LEDGER_NETWORKS: string[] = ['aleph'];
+export const BLOCK_TRANSFER_XCM_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_TRANSFER_NFT_LEDGER_NETWORKS: string[] = ['aleph'];
+
+/// STAKING
+// NOMINATE
+export const BLOCK_STAKING_BONDING_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+export const BLOCK_STAKING_UN_BONDING_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+export const BLOCK_STAKING_WITHDRAW_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+
+// POOL
+export const BLOCK_STAKING_JOIN_POOL_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+export const BLOCK_STAKING_LEAVE_POOL_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+export const BLOCK_STAKING_POOL_WITHDRAW_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+
+// COMMON
+export const BLOCK_STAKING_CANCEL_UNSTAKE_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+export const BLOCK_STAKING_CLAIM_REWARD_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+
+// OTHER
+export const BLOCK_STAKING_COMPOUNDING_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_STAKING_CANCEL_COMPOUNDING_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_CROWDLOAN_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_UNKNOWN_LEDGER_NETWORKS: string[] = ['*'];
+
+export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {
+  [ExtrinsicType.TRANSFER_BALANCE]: BLOCK_TRANSFER_NATIVE_LEDGER_NETWORKS,
+  [ExtrinsicType.TRANSFER_TOKEN]: BLOCK_TRANSFER_TOKEN_LEDGER_NETWORKS,
+  [ExtrinsicType.TRANSFER_XCM]: BLOCK_TRANSFER_XCM_LEDGER_NETWORKS,
+  [ExtrinsicType.SEND_NFT]: BLOCK_TRANSFER_NFT_LEDGER_NETWORKS,
+
+  [ExtrinsicType.STAKING_BOND]: BLOCK_STAKING_BONDING_LEDGER_NETWORKS,
+  [ExtrinsicType.STAKING_UNBOND]: BLOCK_STAKING_UN_BONDING_LEDGER_NETWORKS,
+  [ExtrinsicType.STAKING_WITHDRAW]: BLOCK_STAKING_WITHDRAW_LEDGER_NETWORKS,
+
+  [ExtrinsicType.STAKING_JOIN_POOL]: BLOCK_STAKING_JOIN_POOL_LEDGER_NETWORKS,
+  [ExtrinsicType.STAKING_LEAVE_POOL]: BLOCK_STAKING_LEAVE_POOL_LEDGER_NETWORKS,
+  [ExtrinsicType.STAKING_POOL_WITHDRAW]: BLOCK_STAKING_POOL_WITHDRAW_LEDGER_NETWORKS,
+
+  [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: BLOCK_STAKING_CANCEL_UNSTAKE_LEDGER_NETWORKS,
+  [ExtrinsicType.STAKING_CLAIM_REWARD]: BLOCK_STAKING_CLAIM_REWARD_LEDGER_NETWORKS,
+
+  [ExtrinsicType.STAKING_COMPOUNDING]: BLOCK_STAKING_COMPOUNDING_LEDGER_NETWORKS,
+  [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: BLOCK_STAKING_CANCEL_COMPOUNDING_LEDGER_NETWORKS,
+
+  [ExtrinsicType.CROWDLOAN]: BLOCK_CROWDLOAN_LEDGER_NETWORKS,
+  [ExtrinsicType.EVM_EXECUTE]: BLOCK_EVM_EXECUTE_LEDGER_NETWORKS,
+  [ExtrinsicType.UNKNOWN]: BLOCK_UNKNOWN_LEDGER_NETWORKS
+};

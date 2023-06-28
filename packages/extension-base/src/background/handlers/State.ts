@@ -15,6 +15,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { knownGenesis } from '@polkadot/networks/defaults';
 import { assert } from '@polkadot/util';
+import { HexString } from '@polkadot/util/types';
 
 import { MetadataStore } from '../../stores';
 import { withErrorLog } from './helpers';
@@ -99,11 +100,11 @@ function extractMetadata (store: MetadataStore): void {
     Object
       .entries(map)
       .forEach(([key, def]): void => {
-        const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash));
+        const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash as HexString));
 
         if (entry) {
           const [name, hashes] = entry;
-          const index = hashes.indexOf(def.genesisHash);
+          const index = hashes.indexOf(def.genesisHash as HexString);
 
           // flatten the known metadata based on the genesis index
           // (lower is better/newer)

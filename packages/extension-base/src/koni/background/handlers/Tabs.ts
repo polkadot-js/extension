@@ -2,16 +2,42 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { InjectedAccount } from '@subwallet/extension-inject/types';
+import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 
 import { _AssetType } from '@subwallet/chain-list/types';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEventType, EvmProviderErrorType, EvmSendTransactionParams, PassPhishing, RequestEvmProviderSend, RequestSettingsType, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AddNetworkRequestExternal,
+  AddTokenRequestExternal,
+  EvmAppState,
+  EvmEventType,
+  EvmProviderErrorType,
+  EvmSendTransactionParams,
+  PassPhishing,
+  RequestEvmProviderSend,
+  RequestSettingsType,
+  ValidateNetworkResponse
+} from '@subwallet/extension-base/background/KoniTypes';
 import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesSign';
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
-import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
+import {
+  AccountAuthType,
+  MessageTypes,
+  RequestAccountList,
+  RequestAccountSubscribe,
+  RequestAuthorizeTab,
+  RequestRpcSend,
+  RequestRpcSubscribe,
+  RequestRpcUnsubscribe,
+  RequestTypes,
+  ResponseRpcListProviders,
+  ResponseSigning,
+  ResponseTypes,
+  SubscriptionMessageTypes
+} from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
@@ -19,8 +45,7 @@ import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chai
 import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/setting-service/constants';
-import { canDerive } from '@subwallet/extension-base/utils';
-import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
+import { canDerive, stripUrl } from '@subwallet/extension-base/utils';
 import { KeyringPair } from '@subwallet/keyring/types';
 import keyring from '@subwallet/ui-keyring';
 import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
@@ -32,14 +57,6 @@ import { checkIfDenied } from '@polkadot/phishing';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { assert, isNumber } from '@polkadot/util';
-
-function stripUrl (url: string): string {
-  assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
-
-  const parts = url.split('/');
-
-  return parts[2];
-}
 
 function transformAccountsV2 (accounts: SubjectInfo, anyType = false, authInfo?: AuthUrlInfo, accountAuthType?: AccountAuthType): InjectedAccount[] {
   const accountSelected = authInfo

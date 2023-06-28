@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout } from '@subwallet/extension-koni-ui/components';
+import { CloseIcon, Layout } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
-import { useNotification } from '@subwallet/extension-koni-ui/hooks';
-import { connectWalletConnect } from '@subwallet/extension-koni-ui/messaging';
+import { useDefaultNavigate, useNotification } from '@subwallet/extension-koni-ui/hooks';
+import { addConnection } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Form, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -29,16 +29,21 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const notification = useNotification();
+  const { goHome } = useDefaultNavigate();
 
   const [form] = Form.useForm<ConnectWalletFormState>();
 
   const [loading, setLoading] = useState(false);
 
+  const goBack = useCallback(() => {
+    navigate('/wallet-connect/list');
+  }, [navigate]);
+
   const onFinish: FormCallbacks<ConnectWalletFormState>['onFinish'] = useCallback((values: ConnectWalletFormState) => {
     const { uri } = values;
 
     setLoading(true);
-    connectWalletConnect({
+    addConnection({
       uri
     })
       .then(() => {
@@ -58,11 +63,16 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <Layout.WithSubHeaderOnly
       className={CN(className)}
+      onBack={goBack}
       rightFooterButton={{
         children: t('Connect'),
         onClick: form.submit,
         loading: loading
       }}
+      subHeaderIcons={[{
+        icon: <CloseIcon />,
+        onClick: goHome
+      }]}
       title={t('Connect Wallet Connect')}
     >
       <div className='body-container'>

@@ -13,6 +13,7 @@ import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/ty
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
 import { KeyringAddress, KeyringPairs$Json } from '@subwallet/ui-keyring/types';
+import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/session';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
@@ -1881,6 +1882,10 @@ export interface RequestApproveConnectWalletSession {
   accounts: string[];
 }
 
+export interface RequestDisconnectWalletConnectSession {
+  topic: string
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -2093,6 +2098,8 @@ export interface KoniRequestSignatures {
   'pri(walletConnect.requests.subscribe)': [null, WalletConnectSessionRequest[], WalletConnectSessionRequest[]];
   'pri(walletConnect.session.approve)': [RequestApproveConnectWalletSession, boolean];
   'pri(walletConnect.session.reject)': [RequestRejectConnectWalletSession, boolean];
+  'pri(walletConnect.session.subscribe)': [null, SessionTypes.Struct[], SessionTypes.Struct[]];
+  'pri(walletConnect.session.disconnect)': [RequestDisconnectWalletConnectSession, boolean];
 }
 
 export interface ApplicationMetadataType {

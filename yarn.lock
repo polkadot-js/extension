@@ -5942,6 +5942,7 @@ __metadata:
     "@types/sinon-chrome": ^2.2.11
     "@types/store": ^2.0.2
     "@types/styled-components": ^5.1.26
+    "@walletconnect/types": ^2.8.4
     "@wojtekmaj/enzyme-adapter-react-17": ^0.8.0
     boring-avatars: ^1.7.0
     bowser: ^2.11.0
@@ -7452,6 +7453,20 @@ __metadata:
     "@walletconnect/logger": ^2.0.1
     events: ^3.3.0
   checksum: 8ac30f3e66c67bdd4ea18690eaa6d873bf170544a6bc67cdbbeb849ed3a50778158bf82789d047b983e25bd43c3841c5f0102bf2981fce400f5909e0968f0192
+  languageName: node
+  linkType: hard
+
+"@walletconnect/types@npm:^2.8.4":
+  version: 2.8.4
+  resolution: "@walletconnect/types@npm:2.8.4"
+  dependencies:
+    "@walletconnect/events": ^1.0.1
+    "@walletconnect/heartbeat": 1.2.1
+    "@walletconnect/jsonrpc-types": 1.0.3
+    "@walletconnect/keyvaluestorage": ^1.0.2
+    "@walletconnect/logger": ^2.0.1
+    events: ^3.3.0
+  checksum: fafe2105ff040fdb22125f1f9ae378dbf12dd92ec228ea12ef1da2b2705c260eda1b51a1256132847f7f5e1f8cbfade417b435c9cfc2efd7ebcc537d33b7a3e3
   languageName: node
   linkType: hard
 

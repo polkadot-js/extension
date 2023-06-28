@@ -5,10 +5,11 @@ import { SignClientTypes } from '@walletconnect/types';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
+import { WALLET_CONNECT_REQUEST_KEY } from './constants';
 import { EIP155_SIGNING_METHODS, WalletConnectParamMap, WalletConnectSessionRequest, WalletConnectSigningMethod } from './types';
 
 export const getWCId = (id: number): string => {
-  return `wallet-connect.${Date.now()}.${id}`;
+  return [WALLET_CONNECT_REQUEST_KEY, Date.now(), id].join('.');
 };
 
 export const convertConnectRequest = (request: SignClientTypes.EventArguments['session_proposal']): WalletConnectSessionRequest => {
@@ -45,4 +46,10 @@ export const getEip155MessageAddress = (method: EIP155_SIGNING_METHODS, param: u
     default:
       return '';
   }
+};
+
+export const isWalletConnectRequest = (id: string) => {
+  const [prefix] = id.split('.');
+
+  return prefix === WALLET_CONNECT_REQUEST_KEY;
 };

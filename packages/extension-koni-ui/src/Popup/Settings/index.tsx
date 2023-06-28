@@ -140,7 +140,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightIcon: CaretRight,
           title: 'Wallet connect',
           onClick: () => {
-            navigate('/wallet-connect/connect');
+            navigate('/wallet-connect/list');
           }
         }
       ]

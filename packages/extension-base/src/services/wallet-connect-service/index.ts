@@ -6,9 +6,9 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import RequestService from '@subwallet/extension-base/services/request-service';
 import Eip155RequestHandler from '@subwallet/extension-base/services/wallet-connect-service/handler/Eip155RequestHandler';
 import SignClient from '@walletconnect/sign-client';
-import { SignClientTypes } from '@walletconnect/types';
-import { EngineTypes } from '@walletconnect/types/dist/types/sign-client/engine';
+import { EngineTypes, SessionTypes, SignClientTypes } from '@walletconnect/types';
 import { getInternalError, getSdkError } from '@walletconnect/utils';
+import { BehaviorSubject } from 'rxjs';
 
 import PolkadotRequestHandler from './handler/PolkadotRequestHandler';
 import { ALL_WALLET_CONNECT_EVENT, DEFAULT_WALLET_CONNECT_OPTIONS, WALLET_CONNECT_SUPPORTED_METHODS } from './constants';
@@ -24,6 +24,8 @@ export default class WalletConnectService {
   #client: SignClient | undefined;
   #option: SignClientTypes.Options;
 
+  public readonly sessionSubject: BehaviorSubject<SessionTypes.Struct[]> = new BehaviorSubject<SessionTypes.Struct[]>([]);
+
   constructor (koniState: KoniState, requestService: RequestService, option: SignClientTypes.Options = DEFAULT_WALLET_CONNECT_OPTIONS) {
     this.#koniState = koniState;
     this.#requestService = requestService;
@@ -37,8 +39,16 @@ export default class WalletConnectService {
   async #initClient () {
     this.#removeListener();
     this.#client = await SignClient.init(this.#option);
-    // this.#pairs = this.#client.pairing.values;
+    this.#updateSessions();
     this.#createListener();
+  }
+
+  public get sessions (): SessionTypes.Struct[] {
+    return this.#client?.session.values || [];
+  }
+
+  #updateSessions () {
+    this.sessionSubject.next(this.sessions);
   }
 
   #onSessionProposal (proposal: SignClientTypes.EventArguments['session_proposal']) {
@@ -112,7 +122,7 @@ export default class WalletConnectService {
     this.#client?.on('session_ping', (data) => console.log('ping', data));
     this.#client?.on('session_event', (data) => console.log('event', data));
     this.#client?.on('session_update', (data) => console.log('update', data));
-    this.#client?.on('session_delete', (data) => console.log('delete', data));
+    this.#client?.on('session_delete', this.#updateSessions.bind(this));
   }
 
   // Remove old listener
@@ -128,7 +138,7 @@ export default class WalletConnectService {
     }
   }
 
-  public getSession (topic: string) {
+  public getSession (topic: string): SessionTypes.Struct {
     const session = this.#client?.session.get(topic);
 
     if (!session) {
@@ -158,6 +168,7 @@ export default class WalletConnectService {
   public async approveSession (result: ResultApproveWalletConnectSession) {
     this.#checkClient();
     await this.#client?.approve(result);
+    this.#updateSessions();
   }
 
   public async rejectSession (id: number) {
@@ -172,5 +183,52 @@ export default class WalletConnectService {
     this.#checkClient();
 
     await this.#client?.respond(response);
+  }
+
+  public async resetWallet (resetAll: boolean) {
+    this.#removeListener();
+
+    // Disconnect session
+    const sessions = this.#client?.session.values || [];
+
+    for (const session of sessions) {
+      this.#client?.disconnect({
+        topic: session.topic,
+        reason: getSdkError('USER_DISCONNECTED')
+      }).catch(console.error);
+    }
+
+    // Disconnect pair
+    const pairs = this.#client?.pairing.values || [];
+
+    for (const pair of pairs) {
+      this.#client?.disconnect({
+        topic: pair.topic,
+        reason: getSdkError('USER_DISCONNECTED')
+      }).catch(console.error);
+    }
+
+    const keys: string[] = await this.#client?.core.storage.getKeys() || [];
+
+    const deleteKeys = resetAll ? keys : keys.filter((key) => key.startsWith('wc@'));
+
+    for (const key of deleteKeys) {
+      try {
+        await this.#client?.core.storage.removeItem(key);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    await this.#initClient();
+  }
+
+  public async disconnect (topic: string) {
+    await this.#client?.disconnect({
+      topic: topic,
+      reason: getSdkError('USER_DISCONNECTED')
+    });
+
+    this.#updateSessions();
   }
 }

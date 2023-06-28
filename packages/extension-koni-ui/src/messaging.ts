@@ -859,7 +859,7 @@ export async function passPhishingPage (url: string): Promise<boolean> {
 
 /// Wallet Connect
 
-export async function connectWalletConnect (request: RequestConnectWalletConnect): Promise<boolean> {
+export async function addConnection (request: RequestConnectWalletConnect): Promise<boolean> {
   return sendMessage('pri(walletConnect.connect)', request);
 }
 

@@ -874,4 +874,3 @@ export async function rejectWalletConnectSession (request: RequestRejectConnectW
 export async function disconnectWalletConnectConnection (topic: string): Promise<boolean> {
   return sendMessage('pri(walletConnect.session.disconnect)', { topic });
 }
-

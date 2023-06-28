@@ -3,12 +3,9 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
-import {
-  WALLET_CONNECT_EIP155_NAMESPACE,
-  WALLET_CONNECT_POLKADOT_NAMESPACE
-} from '@subwallet/extension-base/services/wallet-connect-service/constants';
-import { findChainInfoByChainId } from '@subwallet/extension-koni-ui/utils';
+import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
+import { findChainInfoByChainId } from '@subwallet/extension-koni-ui/utils';
 
 export const findChainInfoByHalfGenesisHash = (chainMap: Record<string, _ChainInfo>, halfGenesisHash?: string): _ChainInfo | null => {
   if (!halfGenesisHash) {
@@ -27,14 +24,17 @@ export const findChainInfoByHalfGenesisHash = (chainMap: Record<string, _ChainIn
 export const chainsToWalletConnectChainInfos = (chainMap: Record<string, _ChainInfo>, chains: string[]): Array<WalletConnectChainInfo> => {
   return chains.map((chain) => {
     const [namespace, info] = chain.split(':');
+
     if (namespace === WALLET_CONNECT_EIP155_NAMESPACE) {
       const chainInfo = findChainInfoByChainId(chainMap, parseInt(info));
+
       return {
         chainInfo,
         slug: chainInfo?.slug || chain
       };
     } else if (namespace === WALLET_CONNECT_POLKADOT_NAMESPACE) {
       const chainInfo = findChainInfoByHalfGenesisHash(chainMap, info);
+
       return {
         chainInfo,
         slug: chainInfo?.slug || chain
@@ -46,4 +46,4 @@ export const chainsToWalletConnectChainInfos = (chainMap: Record<string, _ChainI
       };
     }
   });
-}
+};

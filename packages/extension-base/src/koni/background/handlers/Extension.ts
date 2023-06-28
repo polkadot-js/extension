@@ -180,6 +180,7 @@ import { TypeRegistry } from '@polkadot/types';
 import { assert, BN, BN_ZERO, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { addressToEvm, base64Decode, decodeAddress, isAddress, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
@@ -3461,9 +3462,9 @@ export default class KoniExtension {
         if (namespace.chains) {
           const accounts: string[] = [];
 
-          if (key === 'eip155' || key === 'polkadot') {
+          if (WALLET_CONNECT_EIP155_NAMESPACE.includes(key)) {
             namespace.chains.forEach((chain) => {
-              accounts.push(...(selectedAccounts.filter((address) => isEthereumAddress(address) === (key === 'eip155')).map((address) => `${chain}:${address}`)));
+              accounts.push(...(selectedAccounts.filter((address) => isEthereumAddress(address) === (key === WALLET_CONNECT_EIP155_NAMESPACE)).map((address) => `${chain}:${address}`)));
             });
           }
 

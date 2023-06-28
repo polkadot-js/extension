@@ -20,6 +20,10 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
+import {
+  WALLET_CONNECT_EIP155_NAMESPACE,
+  WALLET_CONNECT_POLKADOT_NAMESPACE
+} from '@subwallet/extension-base/services/wallet-connect-service/constants';
 
 interface Props extends ThemeProps {
   request: WalletConnectSessionRequest
@@ -70,13 +74,13 @@ function Component ({ className, request }: Props) {
     return Object.keys(params.requiredNamespaces).reduce((previousResult: AccountAuthType, currentValue): AccountAuthType => {
       const [namespace] = currentValue.split(':');
 
-      if (namespace === 'eip155') {
+      if (namespace === WALLET_CONNECT_EIP155_NAMESPACE) {
         if (['both', 'substrate'].includes(previousResult)) {
           return 'both';
         } else {
           return 'evm';
         }
-      } else if (namespace === 'polkadot') {
+      } else if (namespace === WALLET_CONNECT_POLKADOT_NAMESPACE) {
         if (['both', 'evm'].includes(previousResult)) {
           return 'both';
         } else {

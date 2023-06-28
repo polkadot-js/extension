@@ -1890,6 +1890,18 @@ export interface MantaPayEnableParams {
   address: string
 }
 
+export enum MantaPayEnableMessage {
+  WRONG_PASSWORD = 'WRONG_PASSWORD',
+  CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+  SUCCESS = 'SUCCESS'
+}
+
+export interface MantaPayEnableResponse {
+  success: boolean;
+  message: MantaPayEnableMessage
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1958,7 +1970,7 @@ export interface KoniRequestSignatures {
   'pri(phishing.pass)': [RequestPassPhishingPage, boolean];
 
   // Manta pay
-  'pri(mantaPay.enable)': [MantaPayEnableParams, boolean];
+  'pri(mantaPay.enable)': [MantaPayEnableParams, MantaPayEnableResponse];
   'pri(mantaPay.disable)': [string, boolean];
   'pri(mantaPay.initialSyncMantaPay)': [null, boolean | undefined];
   'pri(mantaPay.getZkBalance)': [null, null];

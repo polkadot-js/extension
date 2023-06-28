@@ -6,7 +6,7 @@ import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, XCircle } from 'phosphor-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -16,6 +16,7 @@ interface Props extends ThemeProps {
   onOk: (password: string) => void;
   onCancel: () => void;
   loading: boolean;
+  error?: string;
 }
 
 interface ZkFormState {
@@ -25,7 +26,7 @@ interface ZkFormState {
 const passwordInputId = 'zk-confirm-password';
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, loading, onCancel, onOk } = props;
+  const { className, error, loading, onCancel, onOk } = props;
   const [form] = Form.useForm<ZkFormState>();
   const [isDisabled, setIsDisabled] = useState(false);
   const { t } = useTranslation();
@@ -40,6 +41,12 @@ const Component: React.FC<Props> = (props: Props) => {
     form.setFields([{ name: 'password', errors: [error] }]);
     (document.getElementById(passwordInputId) as HTMLInputElement)?.select();
   }, [form]);
+
+  useEffect(() => {
+    if (error) {
+      onError(error);
+    }
+  }, [error, onError]);
 
   useFocusById(passwordInputId);
 

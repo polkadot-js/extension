@@ -5,8 +5,11 @@ import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistor
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils/address';
 import { EmptyList, FilterModal, HistoryItem, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
+import Search from '@subwallet/extension-koni-ui/components/Search';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
@@ -127,9 +130,11 @@ const modalId = HISTORY_DETAIL_MODAL;
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
+  const { isWebUI } = useContext(ScreenContext);
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount } = useSelector((root) => root.accountState);
   const { historyList: rawHistoryList } = useSelector((root) => root.transactionHistory);
+  const [searchInput, setSearchInput] = useState<string>('');
   const { chainInfoMap } = useSelector((root) => root.chainStore);
 
   const isActive = checkActive(modalId);
@@ -322,6 +327,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [curAdr, currentAccount?.address, inactiveModal]);
 
   const emptyList = useCallback(() => {
+    if (isWebUI) {
+      return <NoContent pageType={PAGE_TYPE.HISTORY} />;
+    }
+
     return (
       <EmptyList
         emptyMessage={t('Your transaction history will appear here!')}
@@ -329,7 +338,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         phosphorIcon={Clock}
       />
     );
-  }, [t]);
+  }, [t, isWebUI]);
 
   const renderItem = useCallback(
     (item: TransactionHistoryDisplayItem) => {
@@ -353,9 +362,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
     return (
       fromName?.includes(searchTextLowerCase) ||
-      toName?.includes(searchTextLowerCase) ||
-      symbol?.includes(searchTextLowerCase) ||
-      network?.includes(searchTextLowerCase)
+        toName?.includes(searchTextLowerCase) ||
+        symbol?.includes(searchTextLowerCase) ||
+        network?.includes(searchTextLowerCase)
     );
   }, [chainInfoMap]);
 
@@ -369,48 +378,82 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
+  const listSection = useMemo(() => {
+    if (isWebUI) {
+      return (
+        <div className='web-list'>
+          <Search
+            actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+            onClickActionBtn={onClickActionBtn}
+            onSearch={setSearchInput}
+            placeholder={'Chain, Address, Type,...'}
+            searchValue={searchInput}
+            showActionBtn
+            showExtraButton
+          />
+          <SwList
+            filterBy={filterFunction}
+            groupBy={groupBy}
+            groupSeparator={groupSeparator}
+            list={historyList}
+            renderItem={renderItem}
+            renderWhenEmpty={emptyList}
+            searchBy={searchFunc}
+            searchTerm={searchInput}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <SwList.Section
+        actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+        enableSearchInput
+        filterBy={filterFunction}
+        groupBy={groupBy}
+        groupSeparator={groupSeparator}
+        list={historyList}
+        onClickActionBtn={onClickActionBtn}
+        renderItem={renderItem}
+        renderWhenEmpty={emptyList}
+        searchFunction={searchFunc}
+        searchMinCharactersCount={2}
+        searchPlaceholder={t<string>('Search history')}
+        showActionBtn
+      />
+    );
+  }, [emptyList, filterFunction, groupBy, groupSeparator, historyList, isWebUI, onClickActionBtn, renderItem, searchFunc, searchInput, t]);
+
   return (
     <>
       <PageWrapper
         className={`history ${className}`}
         resolve={dataContext.awaitStores(['transactionHistory'])}
       >
-        <SwSubHeader
-          background={'transparent'}
-          center={false}
-          className={'history-header'}
-          paddingVertical
-          // todo: enable this code if support download feature
-          // rightButtons={[
-          //   {
-          //     icon: (
-          //       <Icon
-          //         phosphorIcon={DownloadSimple}
-          //         size={'md'}
-          //         type='phosphor'
-          //       />
-          //     )
-          //   }
-          // ]}
-          showBackButton={false}
-          title={t('History')}
-        />
+        {!isWebUI && (
+          <SwSubHeader
+            background={'transparent'}
+            center={false}
+            className={'history-header'}
+            paddingVertical
+            // todo: enable this code if support download feature
+            // rightButtons={[
+            //   {
+            //     icon: (
+            //       <Icon
+            //         phosphorIcon={DownloadSimple}
+            //         size={'md'}
+            //         type='phosphor'
+            //       />
+            //     )
+            //   }
+            // ]}
+            showBackButton={false}
+            title={t('History')}
+          />
+        )}
 
-        <SwList.Section
-          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-          enableSearchInput
-          filterBy={filterFunction}
-          groupBy={groupBy}
-          groupSeparator={groupSeparator}
-          list={historyList}
-          onClickActionBtn={onClickActionBtn}
-          renderItem={renderItem}
-          renderWhenEmpty={emptyList}
-          searchFunction={searchFunc}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search history')}
-          showActionBtn
-        />
+        {listSection}
       </PageWrapper>
 
       <HistoryDetailModal
@@ -434,6 +477,17 @@ const History = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
     flexDirection: 'column',
+
+    '.web-list': {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+
+      '.ant-sw-list': {
+        marginTop: 24,
+        flex: 1
+      }
+    },
 
     '.history-header.ant-sw-sub-header-container': {
       marginBottom: 0

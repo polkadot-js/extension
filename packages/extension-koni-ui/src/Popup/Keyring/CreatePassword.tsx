@@ -5,6 +5,7 @@ import { AlertBox, Layout, PageWrapper } from '@subwallet/extension-koni-ui/comp
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { REQUEST_CREATE_PASSWORD_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import { keyringChangeMasterPassword } from '@subwallet/extension-koni-ui/messaging';
@@ -13,7 +14,7 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils/form/form';
 import { renderBaseConfirmPasswordRules, renderBasePasswordRules } from '@subwallet/extension-koni-ui/utils/form/validators/password';
-import { Form, Icon, Input, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
+import { Button, Form, Icon, Input, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CaretLeft, CheckCircle, ShieldPlus } from 'phosphor-react';
 import { Callbacks, FieldData } from 'rc-field-form/lib/interface';
@@ -21,6 +22,8 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+import InstructionContainer, { InstructionContentType } from '../../components/InstructionContainer';
 
 type Props = ThemeProps
 
@@ -47,6 +50,7 @@ const formName = 'create-password-form';
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
   const navigate = useNavigate();
   const previousInfo = useLocation().state as { prevPathname: string, prevState: any };
 
@@ -62,6 +66,19 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [submitError, setSubmitError] = useState('');
 
   const [loading, setLoading] = useState(false);
+
+  const instructionContents: InstructionContentType[] = useMemo(() => ([
+    {
+      title: 'Why do I need to enter a password?',
+      description: 'For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it.',
+      type: isWebUI ? 'warning' : 'info'
+    },
+    {
+      title: 'Can I recover a password?',
+      description: 'The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!',
+      type: isWebUI ? 'warning' : 'info'
+    }
+  ]), [isWebUI]);
 
   const onComplete = useCallback(() => {
     if (previousInfo?.prevPathname) {
@@ -80,7 +97,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         createNew: true,
         newPassword: password
       }).then((res) => {
-        if (!res.status) {
+        if (!res?.status) {
           setSubmitError(res.errors[0]);
         } else {
           onComplete();
@@ -122,14 +139,27 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
-        rightFooterButton={{
-          children: t('Continue'),
-          onClick: form.submit,
-          loading: loading,
-          disabled: isDisabled,
-          icon: FooterIcon
-        }}
+      <Layout.Base
+        {...(!isWebUI
+          ? {
+            rightFooterButton: {
+              children: t('Continue'),
+              onClick: form.submit,
+              loading: loading,
+              disabled: isDisabled,
+              icon: FooterIcon
+            },
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          }
+        )}
         subHeaderIcons={[
           {
             icon: <InfoIcon />,
@@ -138,103 +168,138 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         ]}
         title={t('Create a password')}
       >
-        <div className='body-container'>
-          <div className='page-icon'>
-            <PageIcon
-              color='var(--page-icon-color)'
-              iconProps={{
-                weight: 'fill',
-                phosphorIcon: ShieldPlus
+        <div
+          className={CN('body-container', {
+            '__web-ui': isWebUI
+          })}
+        >
+          {!isWebUI && (
+            <>
+              <div className='page-icon'>
+                <PageIcon
+                  color='var(--page-icon-color)'
+                  iconProps={{
+                    weight: 'fill',
+                    phosphorIcon: ShieldPlus
+                  }}
+                />
+              </div>
+              <div className='title'>{t('Create a password')}</div>
+            </>
+          )}
+
+          <div className='form-container'>
+            <Form
+              form={form}
+              initialValues={{
+                [FormFieldName.PASSWORD]: '',
+                [FormFieldName.CONFIRM_PASSWORD]: ''
               }}
-            />
-          </div>
-          <div className='title'>
-            {t('Create a password')}
-          </div>
-          <Form
-            form={form}
-            initialValues={{
-              [FormFieldName.PASSWORD]: '',
-              [FormFieldName.CONFIRM_PASSWORD]: ''
-            }}
-            name={formName}
-            onFieldsChange={onUpdate}
-            onFinish={onSubmit}
-          >
-            <Form.Item
-              name={FormFieldName.PASSWORD}
-              rules={passwordRules}
-              statusHelpAsTooltip={true}
+              name={formName}
+              onFieldsChange={onUpdate}
+              onFinish={onSubmit}
             >
-              <Input
-                onChange={onChangePassword}
-                placeholder={t('Enter password')}
-                type='password'
-              />
-            </Form.Item>
-            <Form.Item
-              name={FormFieldName.CONFIRM_PASSWORD}
-              rules={confirmPasswordRules}
-              statusHelpAsTooltip={true}
-            >
-              <Input
-                placeholder={t('Confirm password')}
-                type='password'
-              />
-            </Form.Item>
-            <Form.Item>
-              <AlertBox
-                description={t('8 characters at least. Uppercase, numbers, and special characters are recommended.')}
-                title={t('Always choose a strong password!')}
-                type='warning'
-              />
-            </Form.Item>
-            {
-              submitError && (
+              <Form.Item
+                name={FormFieldName.PASSWORD}
+                rules={passwordRules}
+                statusHelpAsTooltip={true}
+              >
+                <Input
+                  onChange={onChangePassword}
+                  placeholder={t('Enter password')}
+                  type='password'
+                />
+              </Form.Item>
+              <Form.Item
+                name={FormFieldName.CONFIRM_PASSWORD}
+                rules={confirmPasswordRules}
+                statusHelpAsTooltip={true}
+              >
+                <Input
+                  placeholder={t('Confirm password')}
+                  type='password'
+                />
+              </Form.Item>
+              <Form.Item>
+                <AlertBox
+                  description={t('8 characters at least. Uppercase, numbers, and special characters are recommended.')}
+                  title={t('Always choose a strong password!')}
+                  type='warning'
+                />
+              </Form.Item>
+              {submitError && (
                 <Form.Item
                   help={submitError}
                   validateStatus='error'
                 />
+              )}
+              {isWebUI && (
+                <Button
+                  disabled={isDisabled}
+                  icon={FooterIcon}
+                  loading={loading}
+                  onClick={form.submit}
+                >
+                  {t('Import Account')}
+                </Button>
+              )}
+            </Form>
+          </div>
+
+          <div className='instruction-container'>
+            {isWebUI
+              ? (
+                <InstructionContainer contents={instructionContents} />
               )
-            }
-          </Form>
-          <SwModal
-            closeIcon={(
-              <Icon
-                phosphorIcon={CaretLeft}
-                size='sm'
-              />
-            )}
-            id={modalId}
-            onCancel={closeModal}
-            rightIconProps={{
-              icon: <InfoIcon />
-            }}
-            title={t('Instructions')}
-            wrapClassName={className}
-          >
-            <div className='instruction-container'>
-              <AlertBox
-                description={t('For your wallet protection, SubWallet locks your wallet after 15 minutes of inactivity. You will need this password to unlock it.')}
-                title={t('Why do I need to enter a password?')}
-              />
-              <AlertBox
-                description={t('The password is stored securely on your device. We will not be able to recover it for you, so make sure you remember it!')}
-                title={t('Can I recover a password?')}
-              />
-            </div>
-          </SwModal>
+              : (
+                <SwModal
+                  closeIcon={(
+                    <Icon
+                      phosphorIcon={CaretLeft}
+                      size='sm'
+                    />
+                  )}
+                  id={modalId}
+                  onCancel={closeModal}
+                  rightIconProps={{
+                    icon: <InfoIcon />
+                  }}
+                  title={t('Instructions')}
+                  wrapClassName={className}
+                >
+                  <InstructionContainer contents={instructionContents} />
+                </SwModal>
+              )}
+          </div>
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
 
 const CreatePassword = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.__web-ui': {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: 16,
+
+      '& > *': {
+        flex: 1
+      },
+
+      '.form-container': {
+        '.ant-btn': {
+          width: '100%'
+        }
+      }
+    },
+
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
+      maxWidth: 768,
+      margin: '0 auto',
 
       '.page-icon': {
         display: 'flex',

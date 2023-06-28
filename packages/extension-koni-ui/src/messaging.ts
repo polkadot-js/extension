@@ -33,32 +33,73 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
-const port = chrome.runtime.connect({ name: PORT_EXTENSION });
+// const port = chrome.runtime.connect({ name: PORT_EXTENSION });
+const port = window;
 const handlers: Handlers = {};
 
 // setup a listener for messages, any incoming resolves the promise
-port.onMessage.addListener((data: Message['data']): void => {
+// port.onMessage.addListener((response: Record<string, any>): void => {
+//   console.log('=====response', response);
+//   const data = response.data;
+//   const handler = handlers[data.id];
+
+//   if (!handler) {
+//     console.error(`Unknown response: ${JSON.stringify(data)}`);
+
+//     return;
+//   }
+
+//   if (!handler.subscriber) {
+//     delete handlers[data.id];
+//   }
+
+//   if (data.subscription) {
+//     // eslint-disable-next-line @typescript-eslint/ban-types
+//     (handler.subscriber as Function)(data.subscription);
+//   } else if (data.error) {
+//     handler.reject(new Error(data.error));
+//   } else {
+//     handler.resolve(data.response);
+//   }
+// });
+
+port.addEventListener('message', (event: Message) => {
+  const data = event.data;
   const handler = handlers[data.id];
 
   if (!handler) {
-    console.error(`Unknown response: ${JSON.stringify(data)}`);
+    // console.error(`Unknown response: ${JSON.stringify(data)}`)
 
     return;
   }
 
-  if (!handler.subscriber) {
+  // delete handlers if handler don't include subscriber with event from BACKGROUND
+  if (!handler.subscriber && data.sender === 'BACKGROUND') {
     delete handlers[data.id];
   }
 
   if (data.subscription) {
     // eslint-disable-next-line @typescript-eslint/ban-types
     (handler.subscriber as Function)(data.subscription);
-  } else if (data.error) {
-    handler.reject(new Error(data.error));
   } else {
-    handler.resolve(data.response);
+    if (data.sender === 'BACKGROUND') {
+      // if (!handler.subscriber) {
+      //   delete handlers[data.id]
+      // }
+
+      // if (data.subscription) {
+      //   // eslint-disable-next-line @typescript-eslint/ban-types
+      //   ;(handler.subscriber as Function)(data.subscription)
+      // }
+      // else
+      if (data.error) {
+        handler.reject(new Error(data.error));
+      } else {
+        handler.resolve(data.response);
+      }
+    }
   }
-});
+}, false);
 
 function sendMessage<TMessageType extends MessageTypesWithNullRequest> (message: TMessageType): Promise<ResponseTypes[TMessageType]>;
 function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;

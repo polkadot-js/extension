@@ -7,6 +7,7 @@ import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ProviderSelector } from '@subwallet/extension-koni-ui/components/Field/ProviderSelector';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useConfirmModal from '@subwallet/extension-koni-ui/hooks/modal/useConfirmModal';
@@ -14,7 +15,8 @@ import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/
 import useFetchChainState from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainState';
 import { removeChain, upsertChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, ButtonProps, Col, Field, Form, Icon, Input, Row } from '@subwallet/react-ui';
+import { Button, ButtonProps, Col, Field, Form, Icon, Input, Row, SwSubHeader } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { FloppyDiskBack, Globe, Plus, ShareNetwork, Trash } from 'phosphor-react';
 import { FieldData, RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
@@ -32,6 +34,7 @@ interface ChainDetailForm {
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isWebUI } = useContext(ScreenContext);
   const dataContext = useContext(DataContext);
   const { token } = useTheme() as Theme;
   const location = useLocation();
@@ -151,12 +154,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const subHeaderButton: ButtonProps[] = [
     {
-      icon: <Icon
-        customSize={`${token.fontSizeHeading3}px`}
-        phosphorIcon={Trash}
-        type='phosphor'
-        weight={'light'}
-      />,
+      icon: (
+        <Icon
+          customSize={`${token.fontSizeHeading3}px`}
+          phosphorIcon={Trash}
+          type='phosphor'
+          weight={'light'}
+        />
+      ),
       onClick: handleDeleteCustomChain,
       disabled: !(_isCustomChain(chainInfo.slug) && !chainState.active)
     }
@@ -215,12 +220,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return (
       <Button
         className={'chain_detail__provider_suffix_btn'}
-        icon={<Icon
-          customSize={'20px'}
-          phosphorIcon={Plus}
-          type={'phosphor'}
-          weight={'bold'}
-        />}
+        icon={(
+          <Icon
+            customSize={'20px'}
+            phosphorIcon={Plus}
+            type={'phosphor'}
+            weight={'bold'}
+          />
+        )}
         onClick={handleClickProviderSuffix}
         size={'xs'}
         type={'ghost'}
@@ -228,7 +235,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [handleClickProviderSuffix]);
 
-  const onFormValuesChange = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
+  const onFormValuesChange = useCallback((_changedFields: FieldData[], allFields: FieldData[]) => {
     let isFieldsValid = true;
 
     for (const changedField of allFields) {
@@ -241,7 +248,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setIsValueValid(isFieldsValid);
   }, []);
 
-  const crowdloanUrlValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+  const crowdloanUrlValidator = useCallback((_rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (value.length === 0 || isUrl(value)) {
         resolve();
@@ -251,7 +258,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     });
   }, [t]);
 
-  const blockExplorerValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
+  const submitBtnProps = useMemo(() => ({
+    block: true,
+    disabled: isSubmitDisabled(),
+    icon: (
+      <Icon
+        phosphorIcon={FloppyDiskBack}
+        type='phosphor'
+        weight={'fill'}
+      />
+    ),
+    loading: loading,
+    onClick: onSubmit,
+    children: 'Save'
+  }), [isSubmitDisabled, loading, onSubmit]);
+
+  const blockExplorerValidator = useCallback((_rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (value.length === 0 || isUrl(value)) {
         resolve();
@@ -261,6 +283,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     });
   }, [t]);
 
+  const subHeaderProps = useMemo(() => isWebUI
+    ? {
+      title: t('Chain detail'),
+      center: false,
+      rightButtons: subHeaderButton
+    }
+    : {
+      title: t<string>('Network detail'),
+      center: true,
+      rightButtons: subHeaderButton
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isWebUI, t]);
+
   return (
     <PageWrapper
       className={`chain_detail ${className}`}
@@ -268,29 +303,41 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     >
       <Layout.Base
         onBack={onBack}
-        rightFooterButton={{
-          block: true,
-          disabled: isSubmitDisabled(),
-          icon: (
-            <Icon
-              phosphorIcon={FloppyDiskBack}
-              type='phosphor'
-              weight={'fill'}
-            />
-          ),
-          loading: loading,
-          onClick: onSubmit,
-          children: 'Save'
-        }}
-        showBackButton={true}
-        showSubHeader={true}
-        subHeaderBackground={'transparent'}
-        subHeaderCenter={true}
-        subHeaderIcons={subHeaderButton}
-        subHeaderPaddingVertical={true}
-        title={t<string>('Network detail')}
+        {...(!isWebUI && {
+          rightFooterButton: {
+            block: true,
+            disabled: isSubmitDisabled(),
+            icon: (
+              <Icon
+                phosphorIcon={FloppyDiskBack}
+                type='phosphor'
+                weight={'fill'}
+              />
+            ),
+            loading: loading,
+            onClick: onSubmit,
+            children: 'Save'
+          }
+        })}
+        // showBackButton={true}
+        // showSubHeader={true}
+        // subHeaderBackground={'transparent'}
+        // subHeaderCenter={true}
+        // subHeaderIcons={subHeaderButton}
+        // subHeaderPaddingVertical={true}
+        // title={t<string>('Network detail')}
+        withSideMenu
       >
-        <div className={'chain_detail__container'}>
+        <SwSubHeader
+          background='transparent'
+          onBack={onBack}
+          showBackButton={true}
+          {...subHeaderProps}
+        />
+        <div className={CN('chain_detail__container', {
+          '__web-ui': isWebUI
+        })}
+        >
           <Form
             disabled={isDeleting}
             form={form}
@@ -300,28 +347,34 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <div className={'chain_detail__attributes_container'}>
               {
                 Object.keys(chainInfo.providers).length > 1
-                  ? <Form.Item
-                    name={'currentProvider'}
-                  >
-                    <ProviderSelector
-                      chainInfo={chainInfo}
-                      disabled={isDeleting}
-                      value={chainState.currentProvider}
+                  ? (
+                    <Form.Item
+                      name={'currentProvider'}
+                    >
+                      <ProviderSelector
+                        chainInfo={chainInfo}
+                        disabled={isDeleting}
+                        value={chainState.currentProvider}
+                      />
+                    </Form.Item>
+                  )
+                  : (
+                    <Field
+                      className={'chain_detail__provider_url'}
+                      content={currentProviderUrl}
+                      placeholder={t('Provider URL')}
+                      prefix={(
+                        <Icon
+                          customSize={'24px'}
+                          iconColor={token['gray-4']}
+                          phosphorIcon={ShareNetwork}
+                          type={'phosphor'}
+                          weight={'bold'}
+                        />
+                      )}
+                      suffix={providerFieldSuffix()}
                     />
-                  </Form.Item>
-                  : <Field
-                    className={'chain_detail__provider_url'}
-                    content={currentProviderUrl}
-                    placeholder={t('Provider URL')}
-                    prefix={<Icon
-                      customSize={'24px'}
-                      iconColor={token['gray-4']}
-                      phosphorIcon={ShareNetwork}
-                      type={'phosphor'}
-                      weight={'bold'}
-                    />}
-                    suffix={providerFieldSuffix()}
-                  />
+                  )
               }
 
               <Row gutter={token.paddingSM}>
@@ -329,13 +382,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   <Field
                     content={chainInfo.name}
                     placeholder={t('Network name')}
-                    prefix={<Icon
-                      customSize={'24px'}
-                      iconColor={token['gray-4']}
-                      phosphorIcon={Globe}
-                      type={'phosphor'}
-                      weight={'bold'}
-                    />}
+                    prefix={(
+                      <Icon
+                        customSize={'24px'}
+                        iconColor={token['gray-4']}
+                        phosphorIcon={Globe}
+                        type={'phosphor'}
+                        weight={'bold'}
+                      />
+                    )}
                     tooltip={t('Network name')}
                     tooltipPlacement={'topLeft'}
                   />
@@ -418,19 +473,26 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               </Form.Item>
 
               {
-                !_isPureEvmChain(chainInfo) && <Form.Item
-                  name={'crowdloanUrl'}
-                  rules={[{ validator: crowdloanUrlValidator }]}
-                  statusHelpAsTooltip={true}
-                >
-                  <Input
-                    placeholder={t('Crowdloan URL')}
-                    tooltip={t('Crowdloan URL')}
-                    tooltipPlacement={'topLeft'}
-                  />
-                </Form.Item>
+                !_isPureEvmChain(chainInfo) && (
+                  <Form.Item
+                    name={'crowdloanUrl'}
+                    rules={[{ validator: crowdloanUrlValidator }]}
+                    statusHelpAsTooltip={true}
+                  >
+                    <Input
+                      placeholder={t('Crowdloan URL')}
+                      tooltip={t('Crowdloan URL')}
+                      tooltipPlacement={'topLeft'}
+                    />
+                  </Form.Item>
+                )
               }
             </div>
+            {isWebUI && (
+              <div className='action-wrapper'>
+                <Button {...submitBtnProps} />
+              </div>
+            )}
           </Form>
         </div>
       </Layout.Base>
@@ -443,7 +505,26 @@ const ChainDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.chain_detail__container': {
       marginTop: 22,
       marginRight: token.margin,
-      marginLeft: token.margin
+      marginLeft: token.margin,
+
+      '&.__web-ui': {
+        margin: '0 auto',
+        width: '50%',
+
+        '.chain_detail__attributes_container': {
+          margin: '50px auto 24px'
+        },
+
+        '.action-wrapper': {
+          display: 'flex',
+          width: '100%',
+          marginTop: token.marginMD,
+
+          '& > *': {
+            flex: 1
+          }
+        }
+      }
     },
 
     '.chain_detail__attributes_container': {

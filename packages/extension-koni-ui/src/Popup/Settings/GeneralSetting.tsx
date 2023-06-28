@@ -4,18 +4,20 @@
 import { BrowserConfirmationType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { languageOptions } from '@subwallet/extension-base/constants/i18n';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveBrowserConfirmationType } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateBrowserConfirmationType, updateLanguage, updateTheme } from '@subwallet/extension-koni-ui/stores/utils';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import i18next from 'i18next';
 import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps;
@@ -92,7 +94,8 @@ type LoadingMap = {
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-
+  const { isWebUI } = useContext(ScreenContext);
+  const navigate = useNavigate();
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
@@ -207,12 +210,29 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     <PageWrapper className={`general-setting ${className}`}>
       <Layout.WithSubHeaderOnly
         onBack={goBack}
+        subHeaderCenter={!isWebUI}
         title={t('General settings')}
+        withSideMenu
       >
-        <div className={'__scroll-container'}>
+        {isWebUI && (
+          <SwSubHeader
+            background='transparent'
+            center={false}
+            className='web-header'
+            onBack={() => navigate(-1)}
+            showBackButton={true}
+            title={t('General settings')}
+          />
+        )}
+        <div className={CN('__scroll-container', {
+          '__web-ui': isWebUI
+        })}
+        >
           <SelectModal
             background={'default'}
-            className={`__modal ${className}`}
+            className={CN(`__modal ${className}`, {
+              '__web-ui': isWebUI
+            })}
             customInput={renderModalTrigger({
               key: 'wallet-theme-trigger',
               leftIcon: Image,
@@ -232,7 +252,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
           <SelectModal
             background={'default'}
-            className={`__modal ${className}`}
+            className={CN(`__modal ${className}`, {
+              '__web-ui': isWebUI
+            })}
             customInput={renderModalTrigger({
               key: 'languages-trigger',
               leftIcon: GlobeHemisphereEast,
@@ -254,12 +276,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
           <SelectModal
             background={'default'}
-            className={`__modal ${className}`}
+            className={CN(`__modal ${className}`, {
+              '__web-ui': isWebUI
+            })}
             customInput={renderModalTrigger({
               key: 'browser-confirmation-type-trigger',
               leftIcon: BellSimpleRinging,
               leftIconBgColor: token['volcano-6'],
-              title: t('Browser notification type')
+              title: !isWebUI ? t('Browser notification type') : t('Browser notification type')
             })}
             disabled={loadingMap.browserConfirmationType}
             id='browser-confirmation-type-select-modal'
@@ -271,7 +295,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             selected={browserConfirmationType}
             shape='round'
             size='small'
-            title={t('Browser notification type')}
+            title={!isWebUI ? t('Browser notification type') : t('Browser notification type')}
           />
         </div>
       </Layout.WithSubHeaderOnly>
@@ -328,16 +352,28 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
         paddingTop: token.padding,
         paddingRight: token.padding,
         paddingLeft: token.padding,
-        paddingBottom: token.paddingLG
+        paddingBottom: token.paddingLG,
+
+        '&.__web-ui': {
+          maxWidth: '70%',
+          margin: '0 auto',
+          paddingTop: token.padding + 24
+        }
       }
     },
 
     '&.__modal': {
+      '&.__web-ui': {
+
+        '.ant-sw-list-wrapper': {
+          flex: '1 1 auto !important'
+        }
+
+      },
       '.__selection-item .ant-web3-block-right-item': {
         color: token.colorSuccess
       }
     }
   });
 });
-
 export default GeneralSetting;

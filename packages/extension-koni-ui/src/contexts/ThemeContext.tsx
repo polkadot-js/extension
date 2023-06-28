@@ -42,7 +42,8 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
     },
 
     '.main-page-container': {
-      border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`
+      border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`,
+      boxSizing: 'border-box'
     },
 
     '.ant-sw-modal .ant-sw-modal-header': {
@@ -55,7 +56,14 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       bottom: 0,
       borderBottom: `1px solid ${token.colorBgInput}`
     },
-
+    '.web-confirmation': {
+      '.ant-sw-modal-content': {
+        padding: 0,
+        '.ant-sw-modal-header': {
+          borderRadius: 0
+        }
+      }
+    },
     '.modal-full': {
       '.ant-sw-modal-content': {
         '.ant-sw-modal-header': {
@@ -191,7 +199,7 @@ export interface ThemeProviderProps {
 const getModalContainer = () => document.getElementById('popup-container') || document.body;
 const getPopupContainer = () => document.getElementById('tooltip-container') || document.body;
 
-const TooltipContainer = styled.div`z-index: 10000`;
+const TooltipContainer = styled.div`z-index: 10000;`;
 
 export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactElement<ThemeProviderProps> {
   const dataContext = useContext(DataContext);
@@ -225,8 +233,8 @@ export function ThemeProvider ({ children }: ThemeProviderProps): React.ReactEle
       getPopupContainer={getPopupContainer}
       theme={themeConfig}
     >
+      <TooltipContainer id='tooltip-container' />
       <ThemeGenerator themeConfig={themeConfig}>
-        <TooltipContainer id='tooltip-container' />
         {children}
       </ThemeGenerator>
     </ConfigProvider>

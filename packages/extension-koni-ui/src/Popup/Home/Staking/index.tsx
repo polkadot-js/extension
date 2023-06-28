@@ -1,18 +1,28 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem } from '@subwallet/extension-koni-ui/components';
+import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { StakingItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenItem } from '@subwallet/extension-koni-ui/components';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
+import Search from '@subwallet/extension-koni-ui/components/Search';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal, useGetStakingList, useNotification, usePreCheckStakeAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
-import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
-import { ArrowClockwise, FadersHorizontal, Plus, Trophy } from 'phosphor-react';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
+import { PhosphorIcon, StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
+import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, Number as NumberItem, Popover, SwList, Table, Tag } from '@subwallet/react-ui';
+import capitalize from '@subwallet/react-ui/es/_util/capitalize';
+import { ArrowClockwise, DotsThree, FadersHorizontal, Plus, Trophy, User, Users } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
 import MoreActionModal, { MORE_ACTION_MODAL } from './MoreActionModal';
 import StakingDetailModal, { STAKING_DETAIL_MODAL_ID } from './StakingDetailModal';
@@ -50,8 +60,14 @@ const reloadIcon = (
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [searchInput, setSearchInput] = useState<string>('');
+
+  const { accountBalance: { tokenGroupBalanceMap } } = useContext(HomeContext);
+  const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
 
   const dataContext = useContext(DataContext);
+  const { isWebUI } = useContext(ScreenContext);
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { data: stakingItems, priceMap } = useGetStakingList();
@@ -161,6 +177,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
+  const filteredList = useMemo(() => {
+    return stakingItems.filter(filterFunction).filter((item: StakingDataType) =>
+      searchFunction(item, searchInput)
+    );
+  }, [filterFunction, searchFunction, searchInput, stakingItems]);
+
   const emptyStakingList = useCallback(() => {
     return (
       <EmptyList
@@ -179,37 +201,306 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [address, currentAccount?.address, inactiveModal, navigate]);
 
+  const currentChainBalance = useCallback((staking: StakingItem) => {
+    const currentChainAsset: _MultiChainAsset | _ChainAsset | undefined = Object.values(multiChainAssetMap).find((item) => item.name === staking.name) || Object.values(assetRegistryMap).find((item) => item.name === staking.name);
+
+    if (!currentChainAsset) {
+      return undefined;
+    }
+
+    const currentChainBalance: TokenBalanceItemType = tokenGroupBalanceMap[currentChainAsset.slug];
+
+    return currentChainBalance;
+  }, [assetRegistryMap, multiChainAssetMap, tokenGroupBalanceMap]);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const { token }: {
+    token: GlobalToken
+  } = useContext(ThemeContext);
+
+  const columns = useMemo(() => {
+    return [
+      {
+        title: 'Token name',
+        dataIndex: 'name',
+        key: 'name',
+        render: (_, row: StakingDataType) => {
+          const { staking: { chain,
+            name,
+            nativeToken } } = row;
+
+          return (
+            <TokenItem
+              chainDisplayName={name || ''}
+              logoKey={nativeToken}
+              networkKey={chain}
+              symbol={nativeToken}
+            />
+          );
+        }
+      },
+      {
+        title: () => (
+          <span
+            style={{
+              padding: '0 40px'
+            }}
+          >
+            Type
+          </span>
+        ),
+        dataIndex: 'type',
+        key: 'type',
+        render: (_, row: StakingDataType) => {
+          const { staking: { type: stakingType } } = row;
+          const tagColor = stakingType === StakingType.POOLED ? 'success' : 'warning';
+          const tagIcon: PhosphorIcon = stakingType === StakingType.POOLED ? Users : User;
+
+          return (
+            <Tag
+              className='staking-tag'
+              color={tagColor}
+              icon={<Icon phosphorIcon={tagIcon} />}
+            >
+              {capitalize(stakingType)}
+            </Tag>
+          );
+        }
+      },
+      {
+        title: 'Price',
+        dataIndex: 'price',
+        key: 'price',
+        render: (_, row: StakingDataType) => {
+          // TODO: update priceChangeStatus
+          const currentChainInfo = currentChainBalance(row.staking);
+
+          if (!currentChainInfo) {
+            return <></>;
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          const marginColor: string = currentChainInfo?.priceChangeStatus === 'increase' ? token?.colorSuccess : token?.colorError;
+          const { price24hValue, priceValue } = currentChainInfo;
+          const margin = !price24hValue || !priceValue ? 0 : Math.abs(price24hValue - priceValue) / price24hValue * 100;
+
+          return (
+            <div className={'price-wrapper'}>
+              <NumberItem
+                decimal={0}
+                decimalOpacity={0.45}
+                prefix={'$'}
+                value={currentChainInfo?.priceValue}
+              />
+              <NumberItem
+                className='margin-percentage'
+                decimal={0}
+                decimalColor={marginColor}
+                intColor={marginColor}
+                prefix={currentChainInfo?.priceChangeStatus === 'decrease' ? '-' : '+'}
+                size={12}
+                suffix='%'
+                unitColor={marginColor}
+                value={margin}
+              />
+            </div>
+          );
+        }
+      },
+      {
+        title: 'Bonded funds',
+        dataIndex: 'bonded',
+        key: 'bonded',
+        render: (_, row: StakingDataType) => {
+          const { staking } = row;
+          const currentChainInfo = currentChainBalance(row.staking);
+
+          if (!currentChainInfo) {
+            return <></>;
+          }
+
+          const balanceValue = getBalanceValue(staking.balance || '0', row.decimals);
+          const convertedBalanceValue = getConvertedBalanceValue(balanceValue, Number(`${priceMap[staking.chain] || 0}`));
+
+          return (
+            <div className='funds-wrapper'>
+              <div className='funds'>
+                <NumberItem
+                  className={'__value'}
+                  decimal={0}
+                  decimalOpacity={0.45}
+                  suffix={staking.unit}
+                  value={balanceValue}
+                />
+                <NumberItem
+                  className={'__converted-value'}
+                  decimal={0}
+                  decimalOpacity={0.45}
+                  intOpacity={0.45}
+                  prefix='$'
+                  size={12}
+                  unitOpacity={0.45}
+                  value={convertedBalanceValue}
+                />
+              </div>
+              <Popover
+                content={
+                  'TODO: add Action List'
+                  // <MoreActionModal
+                  //   chainStakingMetadata={row.chainStakingMetadata}
+                  //   nominatorMetadata={row.nominatorMetadata}
+                  //   reward={row.reward}
+                  // />
+                }
+                overlayInnerStyle={{
+                  padding: '0',
+                  background: '#1A1A1A'
+                }}
+                placement='bottomRight'
+                showArrow={false}
+                trigger='click'
+              >
+                <Button
+                  className='extra-button'
+                  icon={(
+                    <Icon
+                      className={'right-icon'}
+                      phosphorIcon={DotsThree}
+                      size='xs'
+                      type='phosphor'
+                    />
+                  )}
+                  onClick={(e) => e.stopPropagation()}
+                  size='sm'
+                  type='ghost'
+                />
+              </Popover>
+            </div>
+          );
+        }
+      }
+    ];
+  }, [currentChainBalance, priceMap, token?.colorError, token?.colorSuccess]);
+
+  const listSection = useMemo(() => {
+    if (isWebUI) {
+      return (
+        <div className='web-list'>
+          <Search
+            actionBtnIcon={(
+              <Icon
+                phosphorIcon={FadersHorizontal}
+                size='sm'
+              />
+            )}
+            extraButton={
+              <>
+                <Button
+                  icon={(
+                    <Icon
+                      phosphorIcon={ArrowClockwise}
+                      size='sm'
+                    />
+                  )}
+                  onClick={
+                    () => {
+                      setLoading(true);
+                      notify({
+                        icon: <ActivityIndicator size={32} />,
+                        style: { top: 210 },
+                        direction: 'vertical',
+                        duration: 1.8,
+                        message: t('Reloading')
+                      });
+
+                      reloadCron({ data: 'staking' })
+                        .then(() => {
+                          setLoading(false);
+                        })
+                        .catch(console.error);
+                    }
+                  }
+                  type='ghost'
+                />
+                <Button
+                  icon={(
+                    <Icon
+                      phosphorIcon={Plus}
+                      size='sm'
+                    />
+                  )}
+                  onClick={preCheck(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`))}
+                  type='ghost'
+                />
+              </>
+            }
+            onClickActionBtn={onClickActionBtn}
+            onSearch={(value: string) => setSearchInput(value)}
+            placeholder={'Token name'}
+            searchValue={searchInput}
+            showActionBtn
+            showExtraButton
+          />
+
+          { filteredList.length > 0
+            ? (
+              <Table
+                columns={columns}
+                dataSource={filteredList}
+                onRow={(record: StakingDataType) => {
+                  return {
+                    onClick: () => onClickItem(record)
+                  };
+                }}
+                pagination={false}
+              />
+            )
+            : (
+              <NoContent pageType={PAGE_TYPE.STAKING} />
+            )}
+        </div>
+      );
+    }
+
+    return (
+      <SwList.Section
+        actionBtnIcon={(
+          <Icon
+            phosphorIcon={FadersHorizontal}
+            size='sm'
+          />
+        )}
+        enableSearchInput={true}
+        filterBy={filterFunction}
+        list={stakingItems}
+        onClickActionBtn={onClickActionBtn}
+        renderItem={renderItem}
+        renderWhenEmpty={emptyStakingList}
+        searchFunction={searchFunction}
+        searchMinCharactersCount={2}
+        searchPlaceholder={t<string>('Search token')}
+        showActionBtn
+      />
+    );
+  }, [columns, emptyStakingList, filterFunction, filteredList, isWebUI, navigate, notify, onClickActionBtn, onClickItem, preCheck, renderItem, searchFunction, searchInput, stakingItems, t]);
+
   return (
     <PageWrapper
       className={`staking ${className}`}
       resolve={dataContext.awaitStores(['staking', 'price'])}
     >
       <Layout.Base
-        showSubHeader={true}
-        subHeaderBackground={'transparent'}
-        subHeaderCenter={false}
-        subHeaderIcons={subHeaderButton}
-        subHeaderPaddingVertical={true}
-        title={t('Staking')}
+        {...!isWebUI && {
+          title: t('Staking'),
+          subHeaderBackground: 'transparent',
+          subHeaderCenter: false,
+          subHeaderIcons: subHeaderButton,
+          subHeaderPaddingVertical: true,
+          showSubHeader: true
+        }}
       >
-        <SwList.Section
-          actionBtnIcon={(
-            <Icon
-              phosphorIcon={FadersHorizontal}
-              size='sm'
-            />
-          )}
-          enableSearchInput={true}
-          filterBy={filterFunction}
-          list={stakingItems}
-          onClickActionBtn={onClickActionBtn}
-          renderItem={renderItem}
-          renderWhenEmpty={emptyStakingList}
-          searchFunction={searchFunction}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search token')}
-          showActionBtn
-        />
+
+        {listSection}
 
         <FilterModal
           id={FILTER_MODAL_ID}
@@ -251,6 +542,32 @@ export const Staking = styled(Component)<Props>(({ theme: { token } }: Props) =>
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
+
+    '.web-list': {
+      width: '100%',
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      '.ant-sw-list': {
+        flex: 1
+      },
+      '.container': {
+        marginBottom: 24
+      }
+    },
+
+    '.funds-wrapper': {
+      display: 'flex',
+      justifyContent: 'end',
+
+      '.extra-button': {
+        minWidth: 'unset',
+        marginLeft: 30,
+        '.anticon': {
+          width: 'fit-content'
+        }
+      }
+    },
 
     '.ant-sw-screen-layout-body': {
       display: 'flex'

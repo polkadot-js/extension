@@ -14,7 +14,7 @@ import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, PageIcon, SettingItem, SwQRCode } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, PageIcon, QRCode, SettingItem, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { saveAs } from 'file-saver';
 import { CheckCircle, CopySimple, DownloadSimple, FileJs, Leaf, QrCode, Wallet } from 'phosphor-react';
@@ -25,7 +25,10 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-type Props = ThemeProps;
+type Props = ThemeProps & {
+  modalContent?: boolean
+  accountAddress?: string;
+};
 
 enum ExportType {
   JSON_FILE = 'json-file',
@@ -72,14 +75,16 @@ const FinishIcon = (
 const formName = 'account-export-form';
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className } = props;
+  const { accountAddress, className, modalContent } = props;
 
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
-  const { accountAddress } = useParams();
+  const { accountAddress: address } = useParams();
 
-  const account = useGetAccountByAddress(accountAddress);
+  const currentAddress = useMemo(() => accountAddress && modalContent ? accountAddress : address, [accountAddress, address, modalContent]);
+
+  const account = useGetAccountByAddress(currentAddress);
 
   const [form] = Form.useForm<ExportFormState>();
 
@@ -269,12 +274,12 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [account, t]);
 
   const onBack = useCallback(() => {
-    if (accountAddress) {
-      navigate(`/accounts/detail/${accountAddress}`);
+    if (currentAddress) {
+      navigate(`/accounts/detail/${currentAddress}`);
     } else {
       navigate(DEFAULT_ROUTER_PATH);
     }
-  }, [accountAddress, navigate]);
+  }, [currentAddress, navigate]);
 
   useEffect(() => {
     if (!account) {
@@ -296,7 +301,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
+        className={CN({
+          'modal-container': modalContent
+        })}
         disableBack={loading}
         onBack={onBack}
         rightFooterButton={{
@@ -321,7 +329,34 @@ const Component: React.FC<Props> = (props: Props) => {
               : titleMap[exportTypes[0]]
         }
       >
-        <div className='body-container'>
+        {!modalContent && (
+          <SwSubHeader
+            background={'transparent'}
+            center
+            className={'transaction-header'}
+            onBack={onBack}
+            paddingVertical
+            rightButtons={[
+              {
+                icon: <CloseIcon />,
+                onClick: goHome,
+                disabled: loading
+              }
+            ]}
+            showBackButton
+            title={
+              firstStep
+                ? t('Export account')
+                : !exportSingle
+                  ? t('Export successful')
+                  : t(titleMap[exportTypes[0]])
+            }
+          />
+        )}
+        <div className={CN('body-container', {
+          '__modal-ui': modalContent
+        })}
+        >
           <div className={CN('notice', { 'mb-large': !firstStep })}>
             <AlertBox
               description={t('Anyone with your key can use any assets held in your account.')}
@@ -452,9 +487,9 @@ const Component: React.FC<Props> = (props: Props) => {
                     <div className='result-content'>
                       <div className='result-title'>{titleMap[ExportType.QR_CODE]}</div>
                       <div className='qr-area'>
-                        <SwQRCode
+                        <QRCode
                           errorLevel='Q'
-                          logoPadding={!isEthereumAddress(account.address) ? 4 : 3}
+                          // logoPadding={!isEthereumAddress(account.address) ? 4 : 3}
                           size={264}
                           value={qrData}
                         />
@@ -519,15 +554,38 @@ const Component: React.FC<Props> = (props: Props) => {
             )
           }
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
 
 const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.modal-container': {
+      '.ant-sw-screen-layout-footer': {
+        background: '#000'
+      },
+      '.ant-sw-screen-layout-footer-button-container': {
+        background: '#000',
+        padding: 0,
+        margin: 0,
+        marginTop: 32,
+        '.ant-btn': {
+          margin: 0
+        }
+      }
+    },
     '.body-container': {
-      padding: `0 ${token.padding}px`
+      padding: `0 ${token.padding}px`,
+
+      '&.__modal-ui': {
+        padding: 0,
+        background: '#000',
+
+        '.notice': {
+          marginTop: '0 !important'
+        }
+      }
     },
 
     '.notice': {

@@ -4,11 +4,13 @@
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useConfirmationsInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isRawPayload } from '@subwallet/extension-koni-ui/utils';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import CN from 'classnames';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -34,6 +36,7 @@ const Component = function ({ className }: Props) {
   const confirmation = confirmationQueue[index] || null;
   const { t } = useTranslation();
 
+  const { isWebUI } = useContext(ScreenContext);
   const { transactionRequest } = useSelector((state) => state.requestState);
 
   const nextConfirmation = useCallback(() => {
@@ -168,7 +171,10 @@ const Component = function ({ className }: Props) {
   }, [index, numberOfConfirmations]);
 
   return (
-    <div className={className}>
+    <div className={CN(className, {
+      '__web-ui': isWebUI
+    })}
+    >
       <ConfirmationHeader
         index={index}
         numberOfConfirmations={numberOfConfirmations}
@@ -185,6 +191,15 @@ const Confirmations = styled(Component)<Props>(({ theme: { token } }: ThemeProps
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
+
+  '&.__web-ui': {
+    '.confirmation-header': {
+      borderBottom: '2px solid rgba(253, 253, 253, 0.12)'
+    },
+    '.confirmation-footer': {
+      marginBottom: '0px !important'
+    }
+  },
 
   '.confirmation-header': {
     paddingTop: token.sizeXS,

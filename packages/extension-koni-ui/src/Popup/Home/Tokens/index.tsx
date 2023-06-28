@@ -1,13 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EmptyList, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { EmptyList, PageWrapper, TokenBalance, TokenItem, TokenPrice } from '@subwallet/extension-koni-ui/components';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenGroupBalanceItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useReceiveQR from '@subwallet/extension-koni-ui/hooks/screen/home/useReceiveQR';
@@ -17,11 +19,13 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { Button, Icon } from '@subwallet/react-ui';
 import classNames from 'classnames';
-import { Coins, FadersHorizontal } from 'phosphor-react';
+import { Coins, FadersHorizontal, SlidersHorizontal } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
+
+import DetailTable from './DetailTable';
 
 type Props = ThemeProps;
 
@@ -34,6 +38,18 @@ const Component = (): React.ReactElement => {
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+
+  const outletContext: {
+    searchInput: string,
+    setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
+  } = useOutletContext();
+  const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
+
+  useEffect(() => {
+    outletContext?.setSearchPlaceholder && outletContext.setSearchPlaceholder('Token name');
+  }, [outletContext, outletContext?.setSearchPlaceholder]);
+
   const notify = useNotification();
   const { accountSelectorItems,
     onOpenReceive,
@@ -43,6 +59,7 @@ const Component = (): React.ReactElement => {
     selectedNetwork,
     tokenSelectorItems } = useReceiveQR();
 
+  const { isWebUI } = useContext(ScreenContext);
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;
 
@@ -118,9 +135,7 @@ const Component = (): React.ReactElement => {
   const isTotalBalanceDecrease = totalBalanceInfo.change.status === 'decrease';
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
-    return () => {
-      navigate(`/home/tokens/detail/${item.slug}`);
-    };
+    navigate(`/home/tokens/detail/${item.slug}`);
   }, [navigate]);
 
   const onClickManageToken = useCallback(() => {
@@ -151,15 +166,26 @@ const Component = (): React.ReactElement => {
 
   const tokenGroupBalanceItems = useMemo<TokenBalanceItemType[]>(() => {
     const result: TokenBalanceItemType[] = [];
+    const searchTextLowerCase = outletContext?.searchInput?.toLowerCase() || '';
 
     sortedTokenGroups.forEach((tokenGroupSlug) => {
       if (tokenGroupBalanceMap[tokenGroupSlug]) {
-        result.push(tokenGroupBalanceMap[tokenGroupSlug]);
+        const newItem = tokenGroupBalanceMap[tokenGroupSlug];
+        const chainAsset = multiChainAssetMap[newItem.slug] || assetRegistryMap[newItem.slug];
+
+        if (!chainAsset) {
+          console.warn('Not found chain asset for token slug: ', newItem.slug);
+          result.push({ ...newItem });
+        } else {
+          const chainDisplayName = chainAsset.name;
+
+          result.push({ ...newItem, chainDisplayName });
+        }
       }
     });
 
-    return result;
-  }, [sortedTokenGroups, tokenGroupBalanceMap]);
+    return result.filter((item) => item.symbol.toLowerCase().includes(searchTextLowerCase));
+  }, [outletContext?.searchInput, sortedTokenGroups, tokenGroupBalanceMap, multiChainAssetMap, assetRegistryMap]);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
@@ -168,6 +194,89 @@ const Component = (): React.ReactElement => {
       window.removeEventListener('resize', handleResize);
     };
   }, [handleResize]);
+
+  if (isWebUI) {
+    return (
+      <div className='token-table'>
+        {tokenGroupBalanceItems.length <= 0
+          ? (
+            <NoContent pageType={PAGE_TYPE.TOKEN} />
+          )
+          : (
+            <DetailTable
+              columns={[
+                {
+                  title: 'Token name',
+                  dataIndex: 'name',
+                  key: 'name',
+                  render: (_, row) => {
+                    return (
+                      <TokenItem
+                        chain={row.chain}
+                        chainDisplayName={row.chainDisplayName || ''}
+                        logoKey={row.logoKey}
+                        slug={row.slug}
+                        symbol={row.symbol}
+                      />
+                    );
+                  }
+                },
+                {
+                  title: 'Portfolio %',
+                  dataIndex: 'percentage',
+                  key: 'percentage',
+                  render: () => <p>85%</p>
+                },
+                {
+                  title: 'Price',
+                  dataIndex: 'price',
+                  key: 'price',
+                  render: (_, row) => {
+                    return (
+                      <TokenPrice
+                        pastValue={row.price24hValue}
+                        priceChangeStatus={row.priceChangeStatus}
+                        value={row.priceValue}
+                      />
+                    );
+                  }
+                },
+                {
+                  title: 'Balance',
+                  dataIndex: 'balance',
+                  key: 'balance',
+                  render: (_, row) => {
+                    return (
+                      <TokenBalance
+                        convertedValue={row.total.convertedValue}
+                        symbol={row.symbol}
+                        value={row.total.value}
+                      />
+                    );
+                  }
+                }
+              ]}
+              dataSource={tokenGroupBalanceItems}
+              onClick={onClickItem}
+            />
+
+          )}
+        <Button
+          block
+          icon={(
+            <Icon
+              phosphorIcon={SlidersHorizontal}
+              size='md'
+            />
+          )}
+          onClick={onClickManageToken}
+          type='ghost'
+        >
+          {t('Manage token list')}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -202,7 +311,7 @@ const Component = (): React.ReactElement => {
               <TokenGroupBalanceItem
                 key={item.slug}
                 {...item}
-                onPressItem={onClickItem(item)}
+                onPressItem={() => onClickItem(item)}
               />
             );
           })
@@ -248,7 +357,11 @@ const Component = (): React.ReactElement => {
   );
 };
 
-const WrapperComponent = ({ className = '' }: ThemeProps): React.ReactElement<Props> => {
+type WrapperProps = ThemeProps & {
+  searchInput?: string
+}
+
+const WrapperComponent = ({ className = '' }: WrapperProps): React.ReactElement<Props> => {
   const dataContext = useContext(DataContext);
 
   return (
@@ -261,10 +374,15 @@ const WrapperComponent = ({ className = '' }: ThemeProps): React.ReactElement<Pr
   );
 };
 
-const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, token } }: ThemeProps) => {
+const Tokens = styled(WrapperComponent)<WrapperProps>(({ theme: { extendToken, token } }: WrapperProps) => {
   return ({
     overflow: 'hidden',
 
+    'token-table': {
+      '.token-group-balance-item': {
+        marginBottom: '0px !important'
+      }
+    },
     '.__empty-list': {
       marginTop: token.marginSM,
       marginBottom: token.marginSM

@@ -2,11 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionDirection } from '@subwallet/extension-base/background/KoniTypes';
+import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
+import { HistoryStatusMap } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
-import { Icon, Logo, Number, Web3Block } from '@subwallet/react-ui';
+import { openInNewTab, toShort } from '@subwallet/extension-koni-ui/utils';
+import { Button, Icon, Logo, Number, Tag, Typography, Web3Block } from '@subwallet/react-ui';
+import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
-import { CaretRight } from 'phosphor-react';
-import React from 'react';
+import moment from 'moment';
+import { ArrowSquareOut, CaretRight } from 'phosphor-react';
+import React, { SyntheticEvent, useCallback, useContext } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -17,62 +25,153 @@ type Props = ThemeProps & {
 function Component (
   { className = '', item, onClick }: Props) {
   const displayData = item.displayData;
+  const { isWebUI } = useContext(ScreenContext);
+
+  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
+
+  const chainInfo = chainInfoMap[item.chain];
+  const time = moment(item.time).format('hh:mm A');
+  const link = !!item.extrinsicHash && getExplorerLink(chainInfo, item.extrinsicHash, 'tx');
+
+  const handleOnClick = useCallback(
+    (e?: SyntheticEvent) => {
+      e && e.stopPropagation();
+      link && openInNewTab(link)();
+    },
+    [link]);
+
+  if (!isWebUI) {
+    return (
+      <Web3Block
+        className={CN('history-item', className, displayData.className)}
+        leftItem={(
+          <>
+            <div className={'__main-icon-wrapper'}>
+              <Icon
+                className={'__main-icon'}
+                phosphorIcon={displayData.icon}
+                size={'md'}
+              />
+              <Logo
+                className={'__chain-logo'}
+                network={item.chain}
+                size={16}
+              />
+            </div>
+          </>
+        )}
+        middleItem={(
+          <>
+            <div className={'__account-name'}>{item.direction === TransactionDirection.SEND ? (item.fromName || item.from || '') : (item.toName || item.to || '')}</div>
+            <div className={'__meta'}>{displayData.typeName}</div>
+          </>
+        )}
+        onClick={onClick}
+        rightItem={(
+          <>
+            <div className={'__value-wrapper'}>
+              <Number
+                className={'__value'}
+                decimal={item?.amount?.decimals || 0}
+                decimalOpacity={0.45}
+                suffix={item?.amount?.symbol}
+                value={item?.amount?.value || '0'}
+              />
+              <Number
+                className={'__fee'}
+                decimal={item?.fee?.decimals || 0}
+                decimalOpacity={0.45}
+                intOpacity={0.45}
+                suffix={item.fee?.symbol}
+                unitOpacity={0.45}
+                value={item.fee?.value || '0'}
+              />
+            </div>
+            <div className={'__arrow-icon'}>
+              <Icon
+                phosphorIcon={CaretRight}
+                size='sm'
+              />
+            </div>
+          </>
+        )}
+      />
+    );
+  }
 
   return (
-    <Web3Block
-      className={CN('history-item', className, displayData.className)}
-      leftItem={(
-        <>
-          <div className={'__main-icon-wrapper'}>
-            <Icon
-              className={'__main-icon'}
-              phosphorIcon={displayData.icon}
-              size={'md'}
-            />
-            <Logo
-              className={'__chain-logo'}
-              network={item.chain}
-              size={16}
-            />
-          </div>
-        </>
-      )}
-      middleItem={(
-        <>
-          <div className={'__account-name'}>{item.direction === TransactionDirection.SEND ? (item.fromName || item.from || '') : (item.toName || item.to || '')}</div>
-          <div className={'__meta'}>{displayData.typeName}</div>
-        </>
-      )}
+    <div
+      className={CN(className, displayData.className, '__web-ui')}
       onClick={onClick}
-      rightItem={(
-        <>
-          <div className={'__value-wrapper'}>
-            <Number
-              className={'__value'}
-              decimal={item?.amount?.decimals || 0}
-              decimalOpacity={0.45}
-              suffix={item?.amount?.symbol}
-              value={item?.amount?.value || '0'}
-            />
-            <Number
-              className={'__fee'}
-              decimal={item?.fee?.decimals || 0}
-              decimalOpacity={0.45}
-              intOpacity={0.45}
-              suffix={item.fee?.symbol}
-              unitOpacity={0.45}
-              value={item.fee?.value || '0'}
-            />
-          </div>
-          <div className={'__arrow-icon'}>
-            <Icon
-              phosphorIcon={CaretRight}
-              size='sm'
-            />
-          </div>
-        </>
-      )}
-    />
+    >
+      <div className='account-wrapper'>
+        <SwAvatar
+          size={30}
+          value={item.address}
+        />
+        <div className='account-info'>
+          <Typography.Text>{item.direction === TransactionDirection.SEND ? (item.fromName || item.from || '') : (item.toName || item.to || '')}</Typography.Text>
+          <Typography.Text className='account-address'>{toShort(item.address)}</Typography.Text>
+        </div>
+      </div>
+
+      <div className='status-wrapper'>
+        <div className={'__main-icon-wrapper'}>
+          <Icon
+            className={'__main-icon'}
+            iconColor='success'
+            phosphorIcon={displayData.icon}
+            size={'md'}
+          />
+          <Logo
+            className={'__chain-logo'}
+            network={item.chain}
+            size={16}
+          />
+        </div>
+        <div>
+          <div className={'__account-name'}>{item.displayData.name}</div>
+          <div className={'__meta'}>{time}</div>
+        </div>
+      </div>
+
+      <div className='value-wrapper'>
+        <Number
+          className={'__value'}
+          decimal={item?.amount?.decimals || 0}
+          decimalOpacity={0.45}
+          suffix={item?.amount?.symbol}
+          value={item?.amount?.value || '0'}
+        />
+        <Number
+          className={'__fee'}
+          decimal={item?.fee?.decimals || 0}
+          decimalOpacity={0.45}
+          intOpacity={0.45}
+          suffix={item.fee?.symbol}
+          unitOpacity={0.45}
+          value={item.fee?.value || '0'}
+        />
+      </div>
+
+      <div className='status-tag'>
+        <Tag
+          className='tag'
+          color={HistoryStatusMap[item.status].schema}
+        >
+          {HistoryStatusMap[item.status].name}
+        </Tag>
+
+        <Button
+          icon={<Icon
+            phosphorIcon={ArrowSquareOut}
+            size='sm'
+          />}
+          onClick={handleOnClick}
+          type='ghost'
+        />
+      </div>
+    </div>
   );
 }
 
@@ -84,7 +183,7 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
     paddingBottom: 0,
     minHeight: 68,
 
-    '.ant-number .ant-typography': {
+    '&:not(.__web-ui) .ant-number .ant-typography': {
       fontSize: 'inherit !important',
       fontWeight: 'inherit !important',
       lineHeight: 'inherit'
@@ -192,6 +291,64 @@ export const HistoryItem = styled(Component)<Props>(({ theme: { token } }: Props
       '.__main-icon': {
         color: token.colorSuccess
       }
+    },
+
+    '&.__web-ui': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingLeft: 12,
+      marginBottom: 8,
+      cursor: 'pointer',
+
+      '& > *': {
+        width: '25%',
+        flex: 1
+      },
+      '.__account-name': {
+        fontWeight: 500
+      },
+
+      '&:hover': {
+
+      },
+
+      '.status-wrapper': {
+        display: 'flex',
+        justifyContent: 'center',
+        '.__main-icon-wrapper': {
+          marginRight: 8
+        }
+      },
+
+      '.account-wrapper': {
+        display: 'inline-flex',
+        alignItems: 'center',
+
+        '.account-info': {
+          display: 'flex',
+          flexDirection: 'column',
+          marginLeft: 8,
+
+          '.account-address': {
+            color: 'rgba(255, 255, 255, 0.45)',
+            fontSize: '12px',
+            lineHeight: '20px',
+            fontWeight: 500
+          }
+        }
+      },
+
+      '.status-tag': {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end'
+      },
+
+      '.value-wrapper': {
+        textAlign: 'right'
+      }
     }
+
   });
 });

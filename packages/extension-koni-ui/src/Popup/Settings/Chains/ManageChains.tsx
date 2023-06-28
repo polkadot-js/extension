@@ -7,14 +7,17 @@ import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import NetworkToggleItem from '@subwallet/extension-koni-ui/components/NetworkToggleItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { FadersHorizontal, ListChecks, Plus } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -29,6 +32,14 @@ enum FilterValue {
   EVM = 'evm'
 }
 
+const TAB_LIST = [{
+  label: 'Substrate',
+  value: FilterValue.SUBSTRATE
+}, {
+  label: 'EVM',
+  value: FilterValue.EVM
+}];
+
 const FILTER_OPTIONS = [
   { label: 'EVM networks', value: FilterValue.EVM },
   { label: 'Substrate networks', value: FilterValue.SUBSTRATE },
@@ -41,9 +52,42 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
+
+  const [selectedTab, setSelectedTab] = useState<FilterValue>(FilterValue.SUBSTRATE);
+  const { isWebUI } = useContext(ScreenContext);
   const { activeModal } = useContext(ModalContext);
   const chainInfoList = useChainInfoWithState();
+
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const filterOptions = useMemo(() => {
+    if (isWebUI) {
+      return FILTER_OPTIONS.filter((item) => item.value !== FilterValue.EVM && item.value !== FilterValue.SUBSTRATE);
+    }
+
+    return FILTER_OPTIONS;
+  }, [isWebUI]);
+
+  const networkList = useMemo(() => {
+    if (!isWebUI) {
+      return chainInfoList;
+    } else {
+      return chainInfoList.filter((chainInfo) => {
+        if (selectedTab === FilterValue.EVM) {
+          return _isChainEvmCompatible(chainInfo);
+        } else {
+          return _isSubstrateChain(chainInfo);
+        }
+      });
+    }
+  }, [chainInfoList, isWebUI, selectedTab]);
+
+  const handleSelectTab = useCallback((index: number) => {
+    const currentTab = TAB_LIST[index].value;
+
+    setSelectedTab(currentTab);
+  }, [setSelectedTab]);
+
   const filterFunction = useMemo<(item: ChainInfoWithState) => boolean>(() => {
     return (chainInfo) => {
       if (!selectedFilters.length) {
@@ -90,6 +134,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         chainInfo={chainInfo}
         isShowSubLogo={true}
         key={chainInfo.slug}
+        showNavigation
+        withDivider
       />
     );
   }, []);
@@ -143,35 +189,83 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderCenter={true}
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
-        title={t<string>('Manage networks')}
+        title={isWebUI ? t<string>('Manage networks') : t<string>('Manage chains')}
+        withSideMenu
       >
-        <SwList.Section
-          actionBtnIcon={<Icon
-            phosphorIcon={FadersHorizontal}
-            size='sm'
-            weight={'fill'}
-          />}
-          className={'manage_chains__container'}
-          enableSearchInput
-          filterBy={filterFunction}
-          list={chainInfoList}
-          mode={'boxed'}
-          onClickActionBtn={openFilterModal}
-          renderItem={renderChainItem}
-          renderWhenEmpty={emptyTokenList}
-          searchFunction={searchToken}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search network')}
-          showActionBtn
-        />
+        {isWebUI && (
+          <SwSubHeader
+            background='transparent'
+            center={false}
+            onBack={onBack}
+            // rightButtons={subHeaderButton}
+            showBackButton={true}
+            title={t<string>('Manage networks')}
+          />
+        )}
+        <div className={CN('container', {
+          '__web-ui': isWebUI
+        })}
+        >
+          {isWebUI && (
+            <div className='tab-header'>
+              <Tabs
+                className='tab-container'
+                onSelect={handleSelectTab}
+                // selectedIndex={activeTabIndex}
+              >
+                <TabList
+                  className={CN('react-tabs__tab-list')}
+                >
+                  {TAB_LIST.map((item) => (
+                    <Tab key={item.value}>{item.label}</Tab>
+                  ))}
+                </TabList>
 
+                <div style={{ display: 'none' }}>
+                  <TabPanel>
+                  </TabPanel>
+                  <TabPanel>
+                  </TabPanel>
+                </div>
+              </Tabs>
+
+              <Button
+                {...subHeaderButton[0]}
+                size='xs'
+                type='ghost'
+              />
+            </div>
+          )}
+          <SwList.Section
+            actionBtnIcon={(
+              <Icon
+                phosphorIcon={FadersHorizontal}
+                size='sm'
+                weight={'fill'}
+              />
+            )}
+            className={'manage_chains__container'}
+            enableSearchInput
+            filterBy={filterFunction}
+            list={networkList}
+            mode={'boxed'}
+            onClickActionBtn={openFilterModal}
+            renderItem={renderChainItem}
+            renderWhenEmpty={emptyTokenList}
+            searchFunction={searchToken}
+            searchMinCharactersCount={2}
+            searchPlaceholder={t<string>('Search chain')}
+            showActionBtn
+          />
+
+        </div>
         <FilterModal
           id={FILTER_MODAL_ID}
           onApplyFilter={onApplyFilter}
           onCancel={onCloseFilterModal}
           onChangeOption={onChangeFilterOption}
           optionSelectionMap={filterSelectionMap}
-          options={FILTER_OPTIONS}
+          options={filterOptions}
         />
       </Layout.Base>
     </PageWrapper>
@@ -182,6 +276,19 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.ant-sw-screen-layout-body': {
       display: 'flex'
+    },
+
+    '.container': {
+      width: '100%',
+      '&.__web-ui': {
+        padding: `${token.padding + 24}px ${token.padding}px ${token.padding}px`,
+        maxWidth: '70%',
+        margin: '0 auto',
+
+        '.ant-sw-list-wrapper': {
+          flex: '1 1 auto'
+        }
+      }
     },
 
     '.ant-sw-list-wrapper.ant-sw-list-wrapper:before': {
@@ -216,11 +323,58 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flex: 1
     },
 
+    '.ant-network-item-name': {
+      zIndex: 1
+    },
+
     '.ant-network-item-content .__toggle-area': {
       marginRight: -token.marginXXS,
 
       'button + button': {
         marginLeft: token.marginXS
+      }
+    },
+    '.tab-header': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginBottom: 8,
+      alignItems: 'center',
+      '.tab-container': {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }
+    },
+
+    '.react-tabs__tab-list': {
+      padding: 0,
+      margin: 0,
+      paddingLeft: 16,
+
+      '.react-tabs__tab': {
+        textAlign: 'center',
+        display: 'inline-block',
+        border: 'none',
+        outline: 'none',
+        position: 'relative',
+        listStyle: 'none',
+        fontSize: token.fontSize,
+        lineHeight: token.lineHeight,
+        fontWeight: token.fontWeightStrong,
+        cursor: 'pointer',
+        flex: 'unset',
+        opacity: 0.45,
+        borderRadius: 0,
+        color: '#FFFFFF',
+        padding: 0,
+        marginRight: 16,
+        paddingBottom: 8,
+
+        '&--selected': {
+          background: 'transparent',
+          borderBottom: '2px solid #D9D9D9',
+          opacity: 1
+        }
       }
     }
   });

@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
+import SocialGroup from '@subwallet/extension-koni-ui/components/SocialGroup';
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
 import { keyringUnlock } from '@subwallet/extension-koni-ui/messaging';
@@ -31,6 +33,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { activeModal } = useContext(ModalContext);
 
   const [form] = Form.useForm<LoginFormState>();
+  const { isWebUI } = useContext(ScreenContext);
 
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
@@ -74,63 +77,74 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.Base>
-        <div className='bg-image' />
-        <div className='body-container'>
-          <div className='logo-container'>
-            <Image
-              src='./images/subwallet/gradient-logo.png'
-              width={80}
-            />
-          </div>
-          <div className='title'>
-            {t('Welcome back!')}
-          </div>
-          <div className='sub-title'>
-            {t('Enter your password to unlock wallet')}
-          </div>
-          <Form
-            form={form}
-            initialValues={{ [FormFieldName.PASSWORD]: '' }}
-            onFieldsChange={onUpdate}
-            onFinish={onSubmit}
-          >
-            <Form.Item
-              name={FormFieldName.PASSWORD}
-              rules={[
-                {
-                  message: 'Password is required',
-                  required: true
-                }
-              ]}
-              statusHelpAsTooltip={true}
-            >
-              <Input.Password
-                containerClassName='password-input'
-                id={passwordInputId}
-                placeholder={t('Password')}
+      <Layout.Base
+        className='login-container'
+        headerList={['Simple']}
+        showWebHeader
+      >
+        <div className='bg-gradient' />
+        {!isWebUI && <div className='bg-image' />}
+        <div className={CN('body-container', {
+          '__web-ui': isWebUI
+        })}
+        >
+          <div className='main-wrapper'>
+            <div className='logo-container'>
+              <Image
+                src='/images/subwallet/gradient-logo.png'
+                width={80}
               />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                block={true}
-                disabled={isDisable}
-                htmlType='submit'
-                loading={loading}
+            </div>
+            <div className='title'>
+              {t('Welcome back!')}
+            </div>
+            <div className='sub-title'>
+              {t('Enter your password to unlock account')}
+            </div>
+            <Form
+              form={form}
+              initialValues={{ [FormFieldName.PASSWORD]: '' }}
+              onFieldsChange={onUpdate}
+              onFinish={onSubmit}
+            >
+              <Form.Item
+                name={FormFieldName.PASSWORD}
+                rules={[
+                  {
+                    message: 'Password is required',
+                    required: true
+                  }
+                ]}
+                statusHelpAsTooltip={true}
               >
-                {t('Unlock')}
-              </Button>
-            </Form.Item>
-            <Form.Item>
-              <div
-                className='forgot-password'
-                onClick={onReset}
-              >
-                {t('Don’t remember your password?')}
-              </div>
-            </Form.Item>
-          </Form>
-          <ResetWalletModal />
+                <Input.Password
+                  containerClassName='password-input'
+                  id={passwordInputId}
+                  placeholder={t('Password')}
+                />
+              </Form.Item>
+              <Form.Item>
+                <Button
+                  block={true}
+                  disabled={isDisable}
+                  htmlType='submit'
+                  loading={loading}
+                >
+                  {t('Unlock')}
+                </Button>
+              </Form.Item>
+              <Form.Item>
+                <div
+                  className='forgot-password'
+                  onClick={onReset}
+                >
+                  {t('Forgot password?')}
+                </div>
+              </Form.Item>
+            </Form>
+            <ResetWalletModal />
+          </div>
+          <SocialGroup />
         </div>
       </Layout.Base>
     </PageWrapper>
@@ -143,11 +157,52 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
   return {
     position: 'relative',
 
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
+    '.__web-ui': {
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+
+      '.main-wrapper': {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        width: '400px',
+        margin: '0 auto',
+
+        '.logo-container': {
+          margin: 0
+        }
+      },
+
+      '.password-input': {
+        marginTop: '36px !important'
+      },
+
+      '.forgot-password': {
+        marginTop: '0 !important'
+      }
+    },
+
+    '.bg-gradient': {
+      backgroundImage: 'linear-gradient(180deg, rgba(0, 75, 255, 0.1) 16.47%, rgba(217, 217, 217, 0) 94.17%)',
+      height: 290,
+      width: '100%',
+      position: 'absolute',
+      left: 0,
+      top: 0
+    },
+
     '.bg-image': {
-      backgroundImage: 'url("./images/subwallet/welcome-background.png")',
+      backgroundImage: 'url("/images/subwallet/welcome-background.png")',
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'top',
-      backgroundSize: 'contain',
+      backgroundSize: 'cover',
       height: '100%',
       position: 'absolute',
       width: '100%',

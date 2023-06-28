@@ -7,3 +7,4 @@ export * from './TokenBalanceDetailItem';
 export * from './TokenBalanceSelectionItem';
 export * from './TokenGroupBalanceItem';
 export * from './TokenSelectionItem';
+export * from './WebList';

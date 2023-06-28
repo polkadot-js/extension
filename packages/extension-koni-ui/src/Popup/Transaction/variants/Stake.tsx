@@ -9,6 +9,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckStakeAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainAssetInfo';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
@@ -19,7 +20,7 @@ import BigN from 'bignumber.js';
 import { PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
+import { useOutletContext, useParams } from 'react-router';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -51,6 +52,11 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chain: stakingChain, type: _stakingType } = useParams();
 
   const dataContext = useContext(DataContext);
+  const { isWebUI } = useContext(ScreenContext);
+  const { setStakingType }: {
+    setStakingType: React.Dispatch<React.SetStateAction<React.ReactNode>>
+  } = useOutletContext();
+
   const { asset,
     chain,
     from,
@@ -91,6 +97,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const [isDisable, setIsDisable] = useState(true);
 
   const stakingType = Form.useWatch(FormFieldName.TYPE, form);
+
+  useEffect(() => {
+    setStakingType && setStakingType(stakingType);
+  }, [setStakingType, stakingType]);
 
   const chainStakingMetadata = useGetChainStakingMetadata(chain);
   const nominatorMetadataList = useGetNominatorInfo(chain, stakingType, from);
@@ -504,7 +514,7 @@ const Component: React.FC<Props> = (props: Props) => {
             </Form.Item>
           </Form>
           {
-            chainStakingMetadata && (
+            (chainStakingMetadata && !isWebUI) && (
               <>
                 <Divider className='staking-divider' />
                 {getMetaInfo()}

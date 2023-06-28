@@ -3,8 +3,10 @@
 
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
+import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
@@ -13,11 +15,11 @@ import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFo
 import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/router/useAutoNavigateToCreatePassword';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
-import { FormCallbacks, ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
-import { Form, Icon, Input } from '@subwallet/react-ui';
+import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
+import { Button, Form, Icon, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FileArrowDown } from 'phosphor-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -32,9 +34,16 @@ const FooterIcon = (
 const formName = 'import-private-key-form';
 const fieldName = 'private-key';
 
-interface FormState {
-  [fieldName]: string;
-}
+const instructionContents: InstructionContentType[] = [
+  {
+    title: 'What is a private key?',
+    description: 'A private key is like a password — a string of letters and numbers — that can be used to restore your wallet.'
+  },
+  {
+    title: 'Is it safe to enter it into SubWallet?',
+    description: 'Yes. It will be stored locally and never leave your device without your explicit permission.'
+  }
+];
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
@@ -43,6 +52,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { goHome } = useDefaultNavigate();
   const onComplete = useCompleteCreateAccount();
   const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
+  const { isWebUI } = useContext(ScreenContext);
 
   const timeOutRef = useRef<NodeJS.Timer>();
 
@@ -50,18 +60,24 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [validating, setValidating] = useState(false);
   const [loading, setLoading] = useState(false);
   const [changed, setChanged] = useState(false);
-  const [form] = Form.useForm<FormState>();
+  const [privateKey, setPrivateKey] = useState('');
+  const [autoCorrect, setAutoCorrect] = useState('');
+  const [form] = Form.useForm();
 
   const accountName = useGetDefaultAccountName();
 
   // Auto focus field
   useFocusFormItem(form, fieldName);
 
-  const privateKey = Form.useWatch(fieldName, form);
+  const onChange: ChangeEventHandler<HTMLTextAreaElement> = useCallback((event) => {
+    setChanged(true);
+    setAutoCorrect('');
+    const val = event.target.value;
 
-  const onSubmit: FormCallbacks<FormState>['onFinish'] = useCallback((values: FormState) => {
-    const { [fieldName]: privateKey } = values;
+    setPrivateKey(val);
+  }, []);
 
+  const onSubmit = useCallback(() => {
     if (privateKey) {
       setLoading(true);
       createAccountSuriV2({
@@ -83,7 +99,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }
-  }, [accountName, onComplete]);
+  }, [privateKey, accountName, onComplete]);
 
   useEffect(() => {
     let amount = true;
@@ -102,10 +118,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
         timeOutRef.current = setTimeout(() => {
           validateMetamaskPrivateKeyV2(privateKey, [EVM_ACCOUNT_TYPE])
-            .then(({ autoAddPrefix }) => {
+            .then(({ addressMap, autoAddPrefix }) => {
               if (amount) {
                 if (autoAddPrefix) {
-                  form.setFieldValue(fieldName, `0x${privateKey}`);
+                  setAutoCorrect(`0x${privateKey}`);
                 }
 
                 setValidateState({});
@@ -129,7 +145,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         if (changed) {
           setValidateState({
             status: 'error',
-            message: 'Private key is required'
+            message: 'Seed phrase is required'
           });
         }
       }
@@ -138,58 +154,81 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     return () => {
       amount = false;
     };
-  }, [privateKey, form, changed]);
+  }, [privateKey, changed]);
 
-  const onValuesChange: FormCallbacks<FormState>['onValuesChange'] = useCallback((changedValues: Partial<FormState>) => {
-    if (fieldName in changedValues) {
-      setChanged(true);
-    }
-  }, []);
+  const buttonProps = {
+    children: validating ? t('Validating') : t('Import account'),
+    icon: FooterIcon,
+    onClick: onSubmit,
+    disabled: !privateKey || !!validateState.status,
+    loading: validating || loading
+  };
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={onBack}
-        rightFooterButton={{
-          children: validating ? t('Validating') : t('Import account'),
-          icon: FooterIcon,
-          onClick: form.submit,
-          disabled: !privateKey || !!validateState.status,
-          loading: validating || loading
-        }}
+        {...(!isWebUI
+          ? {
+            rightFooterButton: buttonProps,
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
             onClick: goHome
           }
         ]}
-        title={t<string>('Import by private key')}
+        title={t<string>('Import via Private Key')}
       >
-        <div className='container'>
-          <div className='description'>
-            {t('To import an existing wallet, please enter private key')}
-          </div>
-          <Form
-            className='form-container'
-            form={form}
-            initialValues={{ [fieldName]: '' }}
-            name={formName}
-            onFinish={onSubmit}
-            onValuesChange={onValuesChange}
-          >
-            <Form.Item
-              name={fieldName}
-              validateStatus={validateState.status}
+        <div className={CN('container', {
+          '__web-ui': isWebUI
+        })}
+        >
+          <div className='import-container'>
+            <div className='description'>
+              {t('To import an existing wallet, please enter the private key here')}
+            </div>
+            <Form
+              className='form-container'
+              form={form}
+              name={formName}
             >
-              <Input.TextArea
-                className='private-key-input'
-                placeholder={t('Enter private key')}
-                statusHelp={validateState.message}
-              />
-            </Form.Item>
-          </Form>
+              <Form.Item
+                name={fieldName}
+                validateStatus={validateState.status}
+              >
+                <Input.TextArea
+                  className='private-key-input'
+                  onChange={onChange}
+                  placeholder={t('Enter or paste private key')}
+                  statusHelp={validateState.message}
+                  value={autoCorrect || privateKey || ''}
+                />
+              </Form.Item>
+
+              {isWebUI && (
+                <Button
+                  {...buttonProps}
+                  className='action'
+                />
+              )}
+            </Form>
+          </div>
+
+          {isWebUI && (
+            <InstructionContainer contents={instructionContents} />
+          )}
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
@@ -197,26 +236,43 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const ImportPrivateKey = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      padding: token.padding
-    },
+      '&.__web-ui': {
+        display: 'flex',
+        justifyContent: 'center',
+        maxWidth: '60%',
+        margin: '0 auto',
 
-    '.description': {
-      padding: `0 ${token.padding}px`,
-      fontSize: token.fontSizeHeading6,
-      lineHeight: token.lineHeightHeading6,
-      color: token.colorTextDescription,
-      textAlign: 'center'
-    },
+        '& > *': {
+          flex: 1
+        },
 
-    '.form-container': {
-      marginTop: token.margin
-    },
+        '& .ant-btn': {
+          width: '100%'
+        }
+      },
 
-    '.private-key-input': {
+      '.import-container': {
+        padding: token.padding
+      },
 
-      textarea: {
-        resize: 'none',
-        height: `${token.sizeLG * 6}px !important`
+      '.description': {
+        padding: `0 ${token.padding}px`,
+        fontSize: token.fontSizeHeading6,
+        lineHeight: token.lineHeightHeading6,
+        color: token.colorTextDescription,
+        textAlign: 'center'
+      },
+
+      '.form-container': {
+        marginTop: token.margin
+      },
+
+      '.private-key-input': {
+
+        textarea: {
+          resize: 'none',
+          height: `${token.sizeLG * 6}px !important`
+        }
       }
     }
   };

@@ -9,12 +9,13 @@ import { FileArrowDown, PlusCircle, Swatches } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-type Props = ThemeProps;
+type Props = ThemeProps & {
+  extraAction?: (value: boolean) => void;
+};
 
-const Component: React.FC<Props> = ({ className }: Props) => {
+const Component: React.FC<Props> = ({ className, extraAction }: Props) => {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
-
   const openModal = useCallback((id: string) => {
     inactiveModal(SELECT_ACCOUNT_MODAL);
     activeModal(id);
@@ -22,15 +23,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const openCreateAccount = useCallback(() => {
     openModal(CREATE_ACCOUNT_MODAL);
-  }, [openModal]);
+    extraAction && extraAction(false);
+  }, [extraAction, openModal]);
 
   const openImportAccount = useCallback(() => {
     openModal(IMPORT_ACCOUNT_MODAL);
-  }, [openModal]);
+    extraAction && extraAction(false);
+  }, [extraAction, openModal]);
 
   const openAttachAccount = useCallback(() => {
     openModal(ATTACH_ACCOUNT_MODAL);
-  }, [openModal]);
+    extraAction && extraAction(false);
+  }, [extraAction, openModal]);
 
   return (
     <div className={className}>

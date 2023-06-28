@@ -24,7 +24,8 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
   const [loading, setLoading] = useState(false);
   const [checked, setChecked] = useState(chainInfo.active);
 
-  const onSwitchChainState = useCallback((checked: boolean, event: React.MouseEvent<HTMLButtonElement>) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const onSwitchChainState = useCallback((checked: boolean, _event: React.MouseEvent<HTMLButtonElement>) => {
     if (!loading) {
       setLoading(true);
       updateChainActiveState(chainInfo.slug, checked)
@@ -62,22 +63,26 @@ function Component ({ chainInfo, className = '', navigate, showDetailNavigation 
         onClick={onSwitchChainState}
       />
       {
-        showDetailNavigation && <Button
-          icon={<Icon
-            phosphorIcon={PencilSimpleLine}
-            size='sm'
-            type='phosphor'
-          />}
-          onClick={onClick}
-          size={'xs'}
-          type={'ghost'}
-        />
+        showDetailNavigation && (
+          <Button
+            icon={(
+              <Icon
+                phosphorIcon={PencilSimpleLine}
+                size='sm'
+                type='phosphor'
+              />
+            )}
+            onClick={onClick}
+            size={'xs'}
+            type={'ghost'}
+          />
+        )
       }
     </div>
   );
 }
 
-const ChainItemFooter = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const ChainItemFooter = styled(Component)<Props>(() => {
   return ({
     display: 'flex',
     alignItems: 'center'

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { TokenBalance, TokenItem } from '@subwallet/extension-koni-ui/components';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
@@ -8,6 +9,7 @@ import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Mod
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useDefaultNavigate, useNavigateOnChangeAccount, useNotification, useReceiveQR, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { DetailModal } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailUpperBlock';
@@ -16,11 +18,13 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { ModalContext } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
-import classNames from 'classnames';
+import CN from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+
+import DetailTable from './DetailTable';
 
 type Props = ThemeProps;
 
@@ -46,6 +50,10 @@ const TokenDetailModalId = 'tokenDetailModalId';
 
 function Component (): React.ReactElement {
   const { slug: tokenGroupSlug } = useParams();
+  const outletContext: {
+    searchInput: string,
+    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
+  } = useOutletContext();
 
   const notify = useNotification();
   const { t } = useTranslation();
@@ -53,6 +61,7 @@ function Component (): React.ReactElement {
   const { goHome } = useDefaultNavigate();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
   const { accountBalance: { tokenBalanceMap, tokenGroupBalanceMap }, tokenGroupStructure: { tokenGroupMap } } = useContext(HomeContext);
 
   const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
@@ -200,12 +209,10 @@ function Component (): React.ReactElement {
   }, []);
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
-    return () => {
-      setCurrentTokenInfo({
-        slug: item.slug,
-        symbol: item.symbol
-      });
-    };
+    setCurrentTokenInfo({
+      slug: item.slug,
+      symbol: item.symbol
+    });
   }, []);
 
   const onOpenSendFund = useCallback(() => {
@@ -256,42 +263,117 @@ function Component (): React.ReactElement {
     };
   }, [handleResize]);
 
+  useEffect(() => {
+    outletContext?.setDetailTitle(<div className='header-content'>{t('Token')}: {symbol}</div>);
+  }, [outletContext, symbol, t]);
+
   return (
     <div
-      className={'token-detail-container'}
+      className={CN('token-detail-container', {
+        '__web-ui': isWebUI
+      })}
       onScroll={handleScroll}
       ref={containerRef}
     >
-      <div
-        className={classNames('__upper-block-wrapper', {
-          '-is-shrink': isShrink
-        })}
-        ref={topBlockRef}
-      >
-        <DetailUpperBlock
-          balanceValue={tokenBalanceValue}
-          className={'__static-block'}
-          isShrink={isShrink}
-          onClickBack={goHome}
-          onOpenBuyTokens={onOpenBuyTokens}
-          onOpenReceive={onOpenReceive}
-          onOpenSendFund={onOpenSendFund}
-          symbol={symbol}
-        />
-      </div>
-      <div
-        className={'__scroll-container'}
-      >
-        {
-          tokenBalanceItems.map((item) => (
-            <TokenBalanceDetailItem
-              key={item.slug}
-              {...item}
-              onClick={onClickItem(item)}
-            />
-          ))
-        }
-      </div>
+      {!isWebUI && (
+        <div
+          className={CN('__upper-block-wrapper', {
+            '-is-shrink': isShrink
+          })}
+          ref={topBlockRef}
+        >
+          <DetailUpperBlock
+            balanceValue={tokenBalanceValue}
+            className={'__static-block'}
+            isShrink={isShrink}
+            onClickBack={goHome}
+            onOpenBuyTokens={onOpenBuyTokens}
+            onOpenReceive={onOpenReceive}
+            onOpenSendFund={onOpenSendFund}
+            symbol={symbol}
+          />
+        </div>
+      )}
+      {!isWebUI
+        ? (
+          <div
+            className={'__scroll-container'}
+          >
+            {
+              tokenBalanceItems.map((item) => (
+                <TokenBalanceDetailItem
+                  key={item.slug}
+                  {...item}
+                  onClick={() => onClickItem(item)}
+                />
+              ))
+            }
+          </div>
+        )
+        : (
+          <DetailTable
+            columns={[
+              {
+                title: 'Token name',
+                dataIndex: 'name',
+                key: 'name',
+                render: (_, row) => {
+                  return <TokenItem
+                    chain={row.chain}
+                    chainDisplayName={row.chainDisplayName || ''}
+                    logoKey={row.logoKey}
+                    slug={row.slug}
+                    symbol={row.symbol}
+                  />;
+                }
+              },
+              {
+                title: 'Transferable',
+                dataIndex: 'percentage',
+                key: 'percentage',
+                render: (_, row) => {
+                  return (
+                    <TokenBalance
+                      convertedValue={row.free.convertedValue}
+                      symbol={row.symbol}
+                      value={row.free.value}
+                    />
+                  );
+                }
+              },
+              {
+                title: 'Locked',
+                dataIndex: 'price',
+                key: 'price',
+                render: (_, row) => {
+                  return (
+                    <TokenBalance
+                      convertedValue={row.locked.convertedValue}
+                      symbol={row.symbol}
+                      value={row.locked.value}
+                    />
+                  );
+                }
+              },
+              {
+                title: 'Balance',
+                dataIndex: 'balance',
+                key: 'balance',
+                render: (_, row) => {
+                  return (
+                    <TokenBalance
+                      convertedValue={row.total.convertedValue}
+                      symbol={row.symbol}
+                      value={row.total.value}
+                    />
+                  );
+                }
+              }
+            ]}
+            dataSource={tokenBalanceItems}
+            onClick={onClickItem}
+          />
+        )}
 
       <DetailModal
         currentTokenInfo={currentTokenInfo}
@@ -331,7 +413,10 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
       position: 'relative',
       display: 'flex',
       flexDirection: 'column',
-      paddingTop: 206
+      paddingTop: 210,
+      '&.__web-ui': {
+        padding: 0
+      }
     },
 
     '.__scroll-container': {

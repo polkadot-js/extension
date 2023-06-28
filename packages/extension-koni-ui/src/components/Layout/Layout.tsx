@@ -5,7 +5,7 @@ import Base from './base/Base';
 import { Home } from './base/Home';
 import { WithSubHeaderOnly } from './base/WithSubHeaderOnly';
 
-type CompoundedComponent = {
+export type CompoundedComponent = {
   Home: typeof Home;
   Base: typeof Base;
   WithSubHeaderOnly: typeof WithSubHeaderOnly;

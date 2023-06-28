@@ -6,6 +6,7 @@ import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import QrScannerErrorNotice from '@subwallet/extension-koni-ui/components/Qr/Scanner/ErrorNotice';
 import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
@@ -16,7 +17,7 @@ import { createAccountExternalV2 } from '@subwallet/extension-koni-ui/messaging'
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { QrAccount } from '@subwallet/extension-koni-ui/types/scanner';
 import { qrSignerScan } from '@subwallet/extension-koni-ui/utils/scanner/attach';
-import { Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
+import { Button, Icon, Image, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { QrCode, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
@@ -54,6 +55,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const accountName = useGetDefaultAccountName();
   const { inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   const [validateState, setValidateState] = useState<ValidateState>({});
   const [loading, setLoading] = useState(false);
@@ -100,16 +102,30 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { onClose, onError, onSuccess, openCamera } = useScanAccountQr(modalId, qrSignerScan, setValidateState, onSubmit);
 
+  const buttonProps = {
+    children: loading ? t('Creating') : t('Scan the QR code'),
+    icon: FooterIcon,
+    onClick: openCamera,
+    loading: loading
+  };
+
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={onBack}
-        rightFooterButton={{
-          children: loading ? t('Creating') : t('Scan QR code'),
-          icon: FooterIcon,
-          onClick: openCamera,
-          loading: loading
-        }}
+        {...(!isWebUI
+          ? {
+            rightFooterButton: buttonProps,
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -118,7 +134,10 @@ const Component: React.FC<Props> = (props: Props) => {
         ]}
         title={title}
       >
-        <div className={CN('container')}>
+        <div className={CN('container', {
+          '__web-ui': isWebUI
+        })}
+        >
           <div className='sub-title'>
             {subTitle}
           </div>
@@ -175,16 +194,32 @@ const Component: React.FC<Props> = (props: Props) => {
             onSuccess={onSuccess}
             overlay={validateState.message && (<QrScannerErrorNotice message={validateState.message} />)}
           />
+
+          {isWebUI && (
+            <Button
+              {...buttonProps}
+              className='action'
+            />
+          )}
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
 
 const ConnectQrSigner = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.__web-ui': {
+      maxWidth: '400px',
+      margin: '0 auto'
+    },
     '.container': {
-      padding: token.padding
+      padding: token.padding,
+
+      '& .ant-btn': {
+        width: '100%',
+        marginTop: 36
+      }
     },
 
     '.sub-title': {

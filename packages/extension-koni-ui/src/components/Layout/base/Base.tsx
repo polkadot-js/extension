@@ -1,18 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { SwScreenLayoutProps } from '@subwallet/react-ui';
-
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { SwScreenLayout } from '@subwallet/react-ui';
+import { SwScreenLayout, SwScreenLayoutProps } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import { Aperture, Clock, Database, Rocket, Wallet } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import Footer from '../parts/Footer';
+import Headers, { CompoundedHeader } from '../parts/Header';
 import SelectAccount from '../parts/SelectAccount';
+import BaseWeb from './BaseWeb';
 
 export interface LayoutBaseProps extends Omit<
 SwScreenLayoutProps,
@@ -20,66 +20,82 @@ SwScreenLayoutProps,
 > {
   children: React.ReactNode | React.ReactNode[];
   showFooter?: boolean;
+  className?: string;
+  headerList?: (keyof CompoundedHeader)[];
+  withSideMenu?: boolean,
+  withController?: boolean,
+  showWebHeader?: boolean,
+  withBackground?: boolean
 }
 
-const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBaseProps) => {
+export const TabBarItems: Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> = [
+  {
+    icon: {
+      type: 'phosphor',
+      phosphorIcon: Wallet,
+      weight: 'fill'
+    },
+    label: 'Tokens',
+    key: 'tokens',
+    url: '/home/tokens'
+  },
+  {
+    icon: {
+      type: 'phosphor',
+      phosphorIcon: Aperture,
+      weight: 'fill'
+    },
+    label: 'NFTs',
+    key: 'nfts',
+    url: '/home/nfts/collections'
+  },
+  {
+    icon: {
+      type: 'phosphor',
+      phosphorIcon: Rocket,
+      weight: 'fill'
+    },
+    label: 'Crowdloans',
+    key: 'crowdloans',
+    url: '/home/crowdloans'
+  },
+  {
+    icon: {
+      type: 'phosphor',
+      phosphorIcon: Database,
+      weight: 'fill'
+    },
+    label: 'Staking',
+    key: 'staking',
+    url: '/home/staking'
+  },
+  {
+    icon: {
+      type: 'phosphor',
+      phosphorIcon: Clock,
+      weight: 'fill'
+    },
+    label: 'History',
+    key: 'history',
+    url: '/home/history'
+  }
+];
+
+const Base = (props: LayoutBaseProps) => {
+  const { children,
+    className,
+    headerIcons,
+    headerList,
+    onBack,
+    showFooter,
+    showWebHeader = false,
+    withBackground = false,
+    withSideMenu = false,
+    ...rest } = props;
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
   const { pathname } = useLocation();
-  const { t } = useTranslation();
-
-  const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
-    {
-      icon: {
-        type: 'phosphor',
-        phosphorIcon: Wallet,
-        weight: 'fill'
-      },
-      label: t('Tokens'),
-      key: 'tokens',
-      url: '/home/tokens'
-    },
-    {
-      icon: {
-        type: 'phosphor',
-        phosphorIcon: Aperture,
-        weight: 'fill'
-      },
-      label: t('NFTs'),
-      key: 'nfts',
-      url: '/home/nfts/collections'
-    },
-    {
-      icon: {
-        type: 'phosphor',
-        phosphorIcon: Rocket,
-        weight: 'fill'
-      },
-      label: t('Crowdloans'),
-      key: 'crowdloans',
-      url: '/home/crowdloans'
-    },
-    {
-      icon: {
-        type: 'phosphor',
-        phosphorIcon: Database,
-        weight: 'fill'
-      },
-      label: t('Staking'),
-      key: 'staking',
-      url: '/home/staking'
-    },
-    {
-      icon: {
-        type: 'phosphor',
-        phosphorIcon: Clock,
-        weight: 'fill'
-      },
-      label: t('History'),
-      key: 'history',
-      url: '/home/history'
-    }
-  ]), [t]);
+  const { isWebUI } = useContext(ScreenContext);
 
   const selectedTab = useMemo((): string => {
     const isHomePath = pathname.includes('/home');
@@ -105,22 +121,55 @@ const Base = ({ children, headerIcons, onBack, showFooter, ...props }: LayoutBas
     goHome();
   }, [goHome]);
 
-  return (
-    <SwScreenLayout
-      {...props}
-      footer={showFooter && <Footer />}
-      headerContent={props.showHeader && <SelectAccount />}
-      headerIcons={headerIcons}
-      onBack={onBack || defaultOnBack}
-      selectedTabBarItem={selectedTab}
-      tabBarItems={tabBarItems.map((item) => ({
-        ...item,
-        onClick: onSelectTab(item.url)
-      }))}
-    >
-      {children}
-    </SwScreenLayout>
-  );
+  const renderHeader = useCallback((name: keyof CompoundedHeader, key?: number) => {
+    const CurComponent = Headers[name];
+
+    return (
+      <CurComponent
+        key={key}
+        onBack={onBack}
+        title={props.title}
+      />
+    );
+  }, [onBack, props.title]);
+
+  const isWebBase = useMemo(() => isWebUI && withSideMenu, [isWebUI, withSideMenu]);
+
+  return isWebBase
+    ? (
+      <BaseWeb
+        {...{
+          onBack,
+          title: props.title
+        }}
+        headerList={headerList}
+        withBackground={withBackground}
+      >
+        {children}
+      </BaseWeb>
+    )
+    : (
+      <SwScreenLayout
+        className={className}
+        {...rest}
+        footer={showFooter && <Footer />}
+        headerContent={props.showHeader && <SelectAccount />}
+        headerIcons={headerIcons}
+        onBack={onBack || defaultOnBack}
+        selectedTabBarItem={selectedTab}
+        tabBarItems={TabBarItems.map((item) => ({
+          ...item,
+          onClick: onSelectTab(item.url)
+        }))}
+      >
+        {showWebHeader && (
+          headerList?.map((name: keyof CompoundedHeader, index: number) =>
+            renderHeader(name, index)
+          )
+        )}
+        {children}
+      </SwScreenLayout>
+    );
 };
 
 export default Base;

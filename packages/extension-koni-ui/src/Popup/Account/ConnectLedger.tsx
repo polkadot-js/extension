@@ -5,6 +5,7 @@ import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { AccountItemWithName, AccountWithNameSkeleton, BasicOnChangeFunction, ChainSelector, CloseIcon, DualLogo, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetSupportedLedger, useGoBackFromCreateAccount, useLedger } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -12,7 +13,7 @@ import { ChainItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Icon, Image, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, CircleNotch, Swatches } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -40,6 +41,7 @@ const Component: React.FC<Props> = (props: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { className } = props;
+  const { isWebUI } = useContext(ScreenContext);
 
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
@@ -228,15 +230,28 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={firstStep ? onBack : onPreviousStep}
-        rightFooterButton={{
-          children: t('Connect Ledger device'),
-          icon: FooterIcon,
-          disabled: !isConnected || (!firstStep && !selectedAccounts.length),
-          onClick: firstStep ? onNextStep : onSubmit,
-          loading: isSubmitting
-        }}
+        {...(!isWebUI
+          ? {
+            rightFooterButton: {
+              children: t('Connect Ledger device'),
+              icon: FooterIcon,
+              disabled: !isConnected || (!firstStep && !selectedAccounts.length),
+              onClick: firstStep ? onNextStep : onSubmit,
+              loading: isSubmitting
+            },
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          }
+        )}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -245,7 +260,10 @@ const Component: React.FC<Props> = (props: Props) => {
         ]}
         title={t('Connect Ledger device')}
       >
-        <div className={CN('container')}>
+        <div className={CN('container', {
+          '__web-ui': isWebUI
+        })}
+        >
           <div className='sub-title'>
             {t('Connect and unlock your Ledger, then open the selected network on your Ledger.')}
           </div>
@@ -322,6 +340,17 @@ const Component: React.FC<Props> = (props: Props) => {
               </>
             )
           }
+          {isWebUI && (
+            <Button
+              className='ledger-button'
+              disabled={!isConnected || (!firstStep && !selectedAccounts.length)}
+              icon={FooterIcon}
+              loading={isSubmitting}
+              onClick={firstStep ? onNextStep : onSubmit}
+            >
+              {t('Connect Ledger device')}
+            </Button>
+          )}
           {
             !firstStep && (
               <SwList.Section
@@ -339,7 +368,7 @@ const Component: React.FC<Props> = (props: Props) => {
             )
           }
         </div>
-      </Layout.WithSubHeaderOnly>
+      </Layout.Base>
     </PageWrapper>
   );
 };
@@ -350,6 +379,15 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
     '.ant-sw-screen-layout-body': {
       overflow: 'hidden'
+    },
+
+    '.__web-ui': {
+      width: '400px',
+      margin: '0 auto',
+
+      '.ledger-button': {
+        marginTop: 30
+      }
     },
 
     '.container': {

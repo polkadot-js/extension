@@ -12,7 +12,7 @@ import styled from 'styled-components';
 interface Props extends ThemeProps {
   type?: 'info' | 'warning';
   title: string;
-  description: string;
+  description: string | React.ReactElement;
 }
 
 const Component: React.FC<Props> = (props: Props) => {

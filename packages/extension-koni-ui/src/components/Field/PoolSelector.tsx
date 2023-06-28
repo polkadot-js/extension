@@ -9,6 +9,7 @@ import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/Filte
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
 import { PoolDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/PoolDetailModal';
 import StakingPoolItem from '@subwallet/extension-koni-ui/components/StakingItem/StakingPoolItem';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useGetNominatorInfo from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetNominatorInfo';
 import useGetValidatorList, { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
@@ -62,6 +63,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { t } = useTranslation();
 
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   const isActive = checkActive(id);
 
@@ -231,7 +233,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             <Icon phosphorIcon={FadersHorizontal} />
           </Badge>
         )}
-        className={`${className} modal-full`}
+        className={`${className} ${!isWebUI ? 'modal-full' : ''}`}
         closeIcon={(
           <Icon
             phosphorIcon={CaretLeft}

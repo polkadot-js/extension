@@ -7,6 +7,7 @@ import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
 import { DEFAULT_ACCOUNT_TYPES, SELECTED_CREATE_ACCOUNT_TYPE_KEY } from '@subwallet/extension-koni-ui/constants/account';
 import { NEW_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useIsPopup } from '@subwallet/extension-koni-ui/hooks';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGetDefaultAccountName from '@subwallet/extension-koni-ui/hooks/account/useGetDefaultAccountName';
@@ -19,7 +20,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isFirefox } from '@subwallet/extension-koni-ui/utils';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
-import { Icon, ModalContext } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -28,6 +29,8 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
+
+import InstructionContainer, { InstructionContentType } from '../../components/InstructionContainer';
 
 type Props = ThemeProps;
 
@@ -38,6 +41,19 @@ const FooterIcon = (
   />
 );
 
+const instructionContent: InstructionContentType[] = [
+  {
+    title: 'What is a recovery phrase?',
+    description: 'Recovery phrase is a 12- or 24-word phrase that can be used to restore your wallet. The recovery phrase alone can give anyone full access to your wallet and the funds.',
+    type: 'warning'
+  },
+  {
+    title: 'What if I lose the recovery phrase?',
+    description: 'There is no way to get back your recovery phrase if you lose it. Make sure you store them at someplace safe which is accessible only to you.',
+    type: 'warning'
+  }
+];
+
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
   const { t } = useTranslation();
@@ -46,6 +62,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const { goHome } = useDefaultNavigate();
   const { activeModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
@@ -115,6 +132,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       });
   }, []);
 
+  const buttonProps = {
+    children: t('I have saved it somewhere safe'),
+    icon: FooterIcon,
+    onClick: _onCreate,
+    disabled: !seedPhrase,
+    loading: loading
+  };
+
   useEffect(() => {
     if (isPopup && isFirefox() && hasMasterPassword && !isOpenWindowRef.current) {
       isOpenWindowRef.current = true;
@@ -127,15 +152,21 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       className={CN(className)}
       resolve={new Promise((resolve) => !!seedPhrase && resolve(true))}
     >
-      <Layout.WithSubHeaderOnly
+      <Layout.Base
         onBack={onBack}
-        rightFooterButton={{
-          children: t('I have kept it somewhere safe'),
-          icon: FooterIcon,
-          onClick: _onCreate,
-          disabled: !seedPhrase,
-          loading: loading
-        }}
+        {...(!isWebUI
+          ? {
+            rightFooterButton: buttonProps,
+            showBackButton: true,
+            subHeaderPaddingVertical: true,
+            showSubHeader: true,
+            subHeaderCenter: true,
+            subHeaderBackground: 'transparent'
+          }
+          : {
+            headerList: ['Simple'],
+            showWebHeader: true
+          })}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -144,16 +175,33 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         ]}
         title={t('Your seed phrase')}
       >
-        <div className={'container'}>
-          <div className='description'>
-            {t('Keep your recovery phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.')}
+        <div className={CN('container', {
+          '__web-ui': isWebUI
+        })}
+        >
+          <div className={'seed-phrase-container'}>
+            <div className='description'>
+              {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
+            </div>
+            <WordPhrase
+              enableDownload={true}
+              seedPhrase={seedPhrase}
+            />
+
+            {isWebUI && (
+              <Button
+                {...buttonProps}
+                className='action'
+              />
+            )}
           </div>
-          <WordPhrase
-            enableDownload={true}
-            seedPhrase={seedPhrase}
-          />
+
+          {isWebUI && (
+            <InstructionContainer contents={instructionContent} />
+          )}
         </div>
-      </Layout.WithSubHeaderOnly>
+
+      </Layout.Base>
     </PageWrapper>
   );
 };
@@ -161,8 +209,30 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const NewSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      padding: token.padding,
-      textAlign: 'center'
+      '.seed-phrase-container': {
+        padding: token.padding,
+        textAlign: 'center',
+        flex: 1
+      },
+
+      '&.__web-ui': {
+        display: 'flex',
+        justifyContent: 'center',
+        maxWidth: '60%',
+        margin: '0 auto',
+
+        '.action': {
+          marginTop: 40,
+          width: '100%'
+        },
+
+        '.instruction-container': {
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10
+        }
+      }
     },
 
     '.description': {

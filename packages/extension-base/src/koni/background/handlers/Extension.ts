@@ -173,6 +173,7 @@ export default class KoniExtension {
 
   // FIXME This looks very much like what we have in Tabs
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
+    console.log('------accountsSubscribe', accountsSubscribe);
     const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
     const accountSubject = this.#koniState.keyringService.accountSubject;
     const subscription = accountSubject.subscribe((accounts: SubjectInfo): void =>

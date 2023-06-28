@@ -29,7 +29,9 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-type Props = ThemeProps;
+type Props = ThemeProps & {
+  modalContent?: boolean
+};
 
 type BuyTokensFormProps = {
   address: string,
@@ -77,7 +79,7 @@ const tokenKeyMapIsEthereum: Record<string, boolean> = (() => {
 
 const TransakUrl = 'https://global.transak.com';
 
-function Component ({ className }: Props) {
+function Component ({ className, modalContent }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
   const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
   const fixedTokenKey = currentSymbol ? PREDEFINED_TRANSAK_TOKEN[currentSymbol]?.slug : undefined;
@@ -208,11 +210,11 @@ function Component ({ className }: Props) {
   }, [fixedTokenKey]);
 
   return (
-    <Layout.Home
-      showFilterIcon
-      showTabBar={false}
+    <PageWrapper className={CN(className, 'transaction-wrapper', {
+      '__web-wrapper': modalContent
+    })}
     >
-      <PageWrapper className={CN(className, 'transaction-wrapper')}>
+      {!modalContent && (
         <SwSubHeader
           background={'transparent'}
           center
@@ -222,79 +224,116 @@ function Component ({ className }: Props) {
           showBackButton
           title={t('Buy token')}
         />
-        <div className={'__scroll-container'}>
-          <div className='__buy-icon-wrapper'>
-            <Icon
-              className={'__buy-icon'}
-              phosphorIcon={ShoppingCartSimple}
-              weight={'fill'}
-            />
-          </div>
+      )}
+      <div className={'__scroll-container'}>
+        <div className='__buy-icon-wrapper'>
+          <Icon
+            className={'__buy-icon'}
+            phosphorIcon={ShoppingCartSimple}
+            weight={'fill'}
+          />
+        </div>
 
-          <Form
-            className='__form-container form-space-sm'
-            form={form}
-            initialValues={formDefault}
+        <Form
+          className='__form-container form-space-sm'
+          form={form}
+          initialValues={formDefault}
+        >
+          <Form.Item
+            className={CN({
+              hidden: !isAllAccount
+            })}
+            name={'address'}
           >
-            <Form.Item
-              className={CN({
-                hidden: !isAllAccount
-              })}
-              name={'address'}
-            >
-              <AccountSelector
-                disabled={!isAllAccount}
-                filter={accountsFilter}
-                label={t('Select account')}
+            <AccountSelector
+              disabled={!isAllAccount}
+              filter={accountsFilter}
+              label={t('Select account')}
+            />
+          </Form.Item>
+
+          <div className='form-row'>
+            <Form.Item name={'tokenKey'}>
+              <TokenSelector
+                disabled={!!fixedTokenKey || !tokenItems.length}
+                items={tokenItems}
+                showChainInSelected={false}
               />
             </Form.Item>
 
-            <div className='form-row'>
-              <Form.Item name={'tokenKey'}>
-                <TokenSelector
-                  disabled={!!fixedTokenKey || !tokenItems.length}
-                  items={tokenItems}
-                  showChainInSelected={false}
-                />
-              </Form.Item>
-
-              <Form.Item name={'service'}>
-                <ServiceSelector
-                  placeholder={t('Select supplier')}
-                  title={t('Select supplier')}
-                />
-              </Form.Item>
-            </div>
-          </Form>
-
-          <div className={'common-text __note'}>
-            {t('You will be directed to the chosen supplier to complete this transaction')}
-          </div>
-        </div>
-
-        <div className={'__layout-footer'}>
-          <Button
-            disabled={!isSupportBuyTokens}
-            icon={ (
-              <Icon
-                phosphorIcon={ShoppingCartSimple}
-                weight={'fill'}
+            <Form.Item name={'service'}>
+              <ServiceSelector
+                placeholder={t('Select supplier')}
+                title={t('Select supplier')}
               />
-            )}
-            onClick={onClickNext}
-          >
-            {t('Buy now')}
-          </Button>
+            </Form.Item>
+          </div>
+        </Form>
+
+        <div className={'common-text __note'}>
+          {t('You will be taken to independent provider to complete this transaction')}
         </div>
-      </PageWrapper>
+      </div>
+
+      <div className={'__layout-footer'}>
+        <Button
+          disabled={!isSupportBuyTokens}
+          icon={ (
+            <Icon
+              phosphorIcon={ShoppingCartSimple}
+              weight={'fill'}
+            />
+          )}
+          onClick={onClickNext}
+        >
+          {t('Buy now')}
+        </Button>
+      </div>
+    </PageWrapper>
+  );
+}
+
+function Wrapper ({ modalContent, ...rest }: Props) {
+  if (modalContent) {
+    return (
+      <Component
+        modalContent={modalContent}
+        {...rest}
+      />
+    );
+  }
+
+  return (
+    <Layout.Home
+      showFilterIcon
+      showTabBar={false}
+    >
+      <Component
+        {...rest}
+      />
     </Layout.Home>
   );
 }
 
-const BuyTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const BuyTokens = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
     flexDirection: 'column',
+
+    '&.__web-wrapper': {
+      '.__scroll-container': {
+        padding: 0
+      },
+      '.__layout-footer': {
+        padding: 0,
+        margin: 0,
+
+        '.ant-btn': {
+          width: '100%',
+          margin: '16px 0 0'
+        }
+      }
+    },
 
     '.__scroll-container': {
       flex: 1,

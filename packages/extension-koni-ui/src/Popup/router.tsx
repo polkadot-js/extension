@@ -6,7 +6,7 @@ import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { i18nPromise } from '@subwallet/extension-koni-ui/utils/common/i18n';
 import React, { ComponentType, ReactNode } from 'react';
-import { createHashRouter, Outlet, useLocation } from 'react-router-dom';
+import { createBrowserRouter, Outlet, useLocation, useOutletContext } from 'react-router-dom';
 
 export class LazyLoader {
   public loader;
@@ -102,8 +102,11 @@ export function Example () {
   </PageWrapper>;
 }
 
-// Todo: Create error page
-export const router = createHashRouter([
+export function NestedOutlet () {
+  return <Outlet context={useOutletContext()} />;
+}
+
+export const router = createBrowserRouter([
   {
     path: '/',
     loader: () => i18nPromise,
@@ -120,7 +123,7 @@ export const router = createHashRouter([
           TokenDetailList.generateRouterObject('tokens/detail/:slug'),
           {
             path: 'nfts',
-            element: <Outlet />,
+            element: <NestedOutlet />,
             children: [
               NftCollections.generateRouterObject('collections'),
               NftCollectionDetail.generateRouterObject('collection-detail'),
@@ -130,7 +133,11 @@ export const router = createHashRouter([
           Crowdloans.generateRouterObject('crowdloans'),
           Staking.generateRouterObject('staking'),
           History.generateRouterObject('history'),
-          History.generateRouterObject('history/:chain/:extrinsicHashOrId')
+          History.generateRouterObject('history/:chain/:extrinsicHashOrId'),
+          {
+            path: 'dapps',
+            element: <Outlet />
+          }
         ]
       },
       {
@@ -164,9 +171,8 @@ export const router = createHashRouter([
       },
       {
         path: '/settings',
-        element: <Outlet />,
         children: [
-          Settings.generateRouterObject('list'),
+          Settings.generateRouterObject('/settings'),
           GeneralSetting.generateRouterObject('general'),
           ManageAddressBook.generateRouterObject('address-book'),
           SecurityList.generateRouterObject('security'),

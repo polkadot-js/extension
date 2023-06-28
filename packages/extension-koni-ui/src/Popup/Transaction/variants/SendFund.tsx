@@ -40,7 +40,9 @@ interface TransferFormProps extends TransactionFormBaseProps {
   value: string;
 }
 
-type Props = ThemeProps;
+type Props = ThemeProps & {
+  modalContent?: boolean
+};
 
 function isAssetTypeValid (
   chainAsset: _ChainAsset,
@@ -209,7 +211,7 @@ const filterAccountFunc = (
   };
 };
 
-const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
+const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<Props> => {
   const { t } = useTranslation();
   const notification = useNotification();
 
@@ -585,9 +587,12 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
   return (
     <>
-      <TransactionContent className={CN(`${className} -transaction-content`)}>
+      <TransactionContent className={CN(`${className} -transaction-content`, {
+        '__modal-content': modalContent
+      })}
+      >
         <div className={'__brief common-text text-light-4 text-center'}>
-          {t('You are performing a transfer of a fungible token')}
+          {modalContent ? t('You are doing a token transfer with the following information') : t('You are performing a transfer of a fungible token')}
         </div>
 
         <Form
@@ -620,11 +625,13 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               />
             </Form.Item>
 
-            <Icon
-              className={'middle-item'}
-              phosphorIcon={PaperPlaneRight}
-              size={'md'}
-            />
+            {!modalContent && (
+              <Icon
+                className={'middle-item'}
+                phosphorIcon={PaperPlaneRight}
+                size={'md'}
+              />
+            )}
 
             <Form.Item name={'destChain'}>
               <ChainSelector
@@ -690,12 +697,15 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         <FreeBalance
           address={from}
           chain={chain}
+          className='balance'
           onBalanceReady={setIsBalanceReady}
           tokenSlug={asset}
         />
       </TransactionContent>
       <TransactionFooter
-        className={`${className} -transaction-footer`}
+        className={CN(`${className} -transaction-footer`, {
+          '__modal-footer': modalContent
+        })}
         errors={[]}
         warnings={[]}
       >
@@ -728,6 +738,26 @@ const SendFund = styled(_SendFund)(({ theme }) => {
       marginBottom: token.marginMD
     },
 
+    '.balance': {
+      marginBottom: 16
+    },
+
+    '&.__modal-footer': {
+      padding: 0,
+      margin: 0,
+
+      '.ant-btn': {
+        width: '100%',
+        margin: '16px 0 0'
+      }
+
+    },
+    '.ant-form-item:last-child': {
+      margin: 0
+    },
+    '&.__modal-content': {
+      padding: 0
+    },
     '.form-row': {
       gap: 8
     },

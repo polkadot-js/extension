@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateShowZeroBalanceState } from '@subwallet/extension-koni-ui/stores/utils';
@@ -19,6 +20,7 @@ type Props = ThemeProps;
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
   const { token } = useTheme() as Theme;
   const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
 
@@ -61,10 +63,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             />}
         />
       </div>
+      {!isWebUI && (
+        <>
+          <div className={'__group-label'}>{t('Chains')}</div>
 
-      <div className={'__group-label'}>{t('Networks')}</div>
-
-      <CustomizeModalContent />
+          <CustomizeModalContent />
+        </>)}
     </SwModal>
   );
 }
@@ -73,7 +77,6 @@ export const CustomizeModal = styled(Component)<Props>(({ theme: { token } }: Pr
   return ({
     '.ant-sw-modal-content': {
       maxHeight: 586,
-      height: 586,
       overflow: 'hidden'
     },
 

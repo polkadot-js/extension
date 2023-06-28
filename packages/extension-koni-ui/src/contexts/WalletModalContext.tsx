@@ -7,9 +7,16 @@ import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
+import styled from 'styled-components';
+
+import { KeypairType } from '@polkadot/util-crypto/types';
+
+import SeedPhraseModal from '../components/Modal/Account/SeedPhraseModal';
+import { ThemeProps } from '../types';
+import { ScreenContext } from './ScreenContext';
 
 interface Props {
   children: React.ReactNode;
@@ -48,10 +55,68 @@ export const usePredefinedModal = () => {
   return { openPModal, isOpenPModal };
 };
 
+const ModalWrapper = styled.div<ThemeProps & {
+  isWebUI?: boolean
+}>(
+  ({ isWebUI }) => {
+    // const spacing = isWebUI ? '0' : 'unset';
+
+    if (isWebUI) {
+      return {
+        height: '100%',
+
+        '.ant-sw-modal-wrap': {
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+
+          '.ant-sw-modal': {
+            position: 'relative',
+            '.ant-sw-modal-content': {
+              borderRadius: 8,
+              paddingBottom: 0,
+              '.ant-sw-modal-header': {
+                // marginBottom: 16
+              },
+              '.ant-sw-modal-body': {
+                // margin: spacing
+                ' .ant-sw-list': {
+                // overflow:
+                }
+              }
+            }
+          }
+        }
+      };
+    }
+
+    return {
+      height: '100%',
+
+      '.ant-sw-modal-wrap': {
+        '.ant-sw-modal': {
+          width: '100% !important',
+          '.ant-sw-modal-content': {
+            width: '100% !important',
+            '.ant-sw-modal-header': {
+            },
+            '.ant-sw-modal-body': {
+              ' .ant-sw-list': {
+              }
+            }
+          }
+        }
+      }
+    };
+  }
+);
+
 export const WalletModalContext = ({ children }: Props) => {
   const { activeModal, hasActiveModal, inactiveAll, inactiveModals } = useContext(ModalContext);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [accountTypes, setAccountTypes] = useState<KeypairType[]>([]);
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
+  const { isWebUI } = useContext(ScreenContext);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
 
   useExcludeModal('confirmations');
@@ -81,14 +146,17 @@ export const WalletModalContext = ({ children }: Props) => {
     }
   }, [hasMasterPassword, inactiveAll, isLocked]);
 
-  return <>
+  return <ModalWrapper isWebUI={isWebUI}>
     <div
+      // className={CN({
+      //   'desktop-modal': isWebUI
+      // })}
       id='popup-container'
       style={{ zIndex: hasActiveModal ? undefined : -1 }}
     />
     {children}
     <SwModal
-      className={'modal-full'}
+      className={isWebUI ? 'web-confirmation' : 'modal-full'}
       closable={false}
       id={'confirmations'}
       onCancel={onCloseModal}
@@ -98,12 +166,13 @@ export const WalletModalContext = ({ children }: Props) => {
       <Confirmations />
     </SwModal>
     <CreateAccountModal />
+    <SeedPhraseModal accountTypes={accountTypes} />
     <ImportAccountModal />
     <AttachAccountModal />
-    <NewAccountModal />
+    <NewAccountModal setAccountTypes={setAccountTypes} />
     <DeriveAccountModal />
     <RequestCreatePasswordModal />
     <RequestCameraAccessModal />
     <CustomizeModal />
-  </>;
+  </ModalWrapper>;
 };

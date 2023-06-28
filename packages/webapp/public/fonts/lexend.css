@@ -1,0 +1,62 @@
+/*@font-face {*/
+/*  font-family: 'Lexend';*/
+/*  src: url('./Lexend-Black.ttf'); !* IE9 Compat Modes *!*/
+/*  font-weight: 900;*/
+/*  font-style: normal;*/
+/*}*/
+
+/*@font-face {*/
+/*  font-family: 'Lexend';*/
+/*  src: url('./Lexend-ExtraBold.ttf'); !* IE9 Compat Modes *!*/
+/*  font-weight: 800;*/
+/*  font-style: normal;*/
+/*}*/
+
+@font-face {
+  font-family: 'Lexend';
+  src: url('./Lexend-SemiBold.ttf'); /* IE9 Compat Modes */
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lexend';
+  src: url('./Lexend-Medium.ttf'); /* IE9 Compat Modes */
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lexend';
+  src: url('./Lexend-Regular.ttf'); /* IE9 Compat Modes */
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lexend';
+  src: url('./Lexend-Light.ttf'); /* IE9 Compat Modes */
+  font-weight: 400;
+  font-style: normal;
+}
+
+/*@font-face {*/
+/*  font-family: 'Lexend';*/
+/*  src: url('./Lexend-Light.ttf'); !* IE9 Compat Modes *!*/
+/*  font-weight: 300;*/
+/*  font-style: normal;*/
+/*}*/
+
+/*@font-face {*/
+/*  font-family: 'Lexend';*/
+/*  src: url('./Lexend-ExtraLight.ttf'); !* IE9 Compat Modes *!*/
+/*  font-weight: 200;*/
+/*  font-style: normal;*/
+/*}*/
+
+/*@font-face {*/
+/*  font-family: 'Lexend';*/
+/*  src: url('./Lexend-Thin.ttf'); !* IE9 Compat Modes *!*/
+/*  font-weight: 100;*/
+/*  font-style: normal;*/
+/*}*/

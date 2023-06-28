@@ -8,12 +8,14 @@ import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import TokenToggleItem from '@subwallet/extension-koni-ui/components/TokenItem/TokenToggleItem';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { ButtonProps, Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { Coin, FadersHorizontal, Plus } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -40,6 +42,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const goBack = useDefaultNavigate().goBack;
+  const { isWebUI } = useContext(ScreenContext);
   const dataContext = useContext(DataContext);
   const { activeModal } = useContext(ModalContext);
 
@@ -147,33 +150,48 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderIcons={subHeaderButton}
         subHeaderPaddingVertical={true}
         title={t<string>('Manage tokens')}
+        withSideMenu
       >
-        <SwList.Section
-          actionBtnIcon={(
-            <Icon
-              customSize={'20px'}
-              phosphorIcon={FadersHorizontal}
-              size='sm'
-              type='phosphor'
-              weight={'fill'}
-            />
-          )}
-          className={'manage_tokens__container'}
-          enableSearchInput={true}
-          filterBy={filterFunction}
-          gridGap={'14px'}
-          list={assetItems}
-          minColumnWidth={'172px'}
-          mode={'boxed'}
-          onClickActionBtn={openFilterModal}
-          renderItem={renderTokenItem}
-          renderWhenEmpty={emptyTokenList}
-          searchFunction={searchToken}
-          searchMinCharactersCount={2}
-          searchPlaceholder={t<string>('Search token')}
-          showActionBtn={true}
-        />
+        {isWebUI && <SwSubHeader
+          background='transparent'
+          center={false}
+          onBack={() => navigate(-1)}
+          rightButtons={subHeaderButton}
+          showBackButton={true}
+          title={t<string>('Manage tokens')}
+        />}
 
+        <div className={CN('container', {
+          '__web-ui': isWebUI
+        })}
+        >
+          <SwList.Section
+            actionBtnIcon={(
+              <Icon
+                customSize={'20px'}
+                phosphorIcon={FadersHorizontal}
+                size='sm'
+                type='phosphor'
+                weight={'fill'}
+              />
+            )}
+            className={'manage_tokens__container'}
+            enableSearchInput={true}
+            filterBy={filterFunction}
+            gridGap={'14px'}
+            list={assetItems}
+            minColumnWidth={'172px'}
+            mode={'boxed'}
+            onClickActionBtn={openFilterModal}
+            renderItem={renderTokenItem}
+            renderWhenEmpty={emptyTokenList}
+            searchFunction={searchToken}
+            searchMinCharactersCount={2}
+            searchPlaceholder={t<string>('Search token')}
+            showActionBtn={true}
+          />
+
+        </div>
         <FilterModal
           id={FILTER_MODAL_ID}
           onApplyFilter={onApplyFilter}
@@ -191,6 +209,15 @@ const ManageTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.ant-sw-screen-layout-body': {
       display: 'flex'
+    },
+
+    '.container': {
+      width: '100%',
+      '&.__web-ui': {
+        padding: `${token.padding + 24}px ${token.padding}px ${token.padding}px`,
+        maxWidth: '70%',
+        margin: '0 auto'
+      }
     },
 
     '.ant-sw-list-wrapper.ant-sw-list-wrapper:before': {

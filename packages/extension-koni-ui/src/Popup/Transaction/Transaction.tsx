@@ -1,11 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import Controller from '@subwallet/extension-koni-ui/components/Layout/parts/Header/Controller';
 import { StakingNetworkDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Staking/StakingNetworkDetailModal';
+import NetworkInformation from '@subwallet/extension-koni-ui/components/NetworkInformation';
 import { TRANSACTION_TITLE_MAP } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useChainChecker, useNavigateOnChangeAccount, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,15 +16,16 @@ import { ButtonProps, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {
-  title: string,
-
-  transactionType: string
+  title?: string,
+  children?: React.ReactElement
+  transactionType?: string
+  modalContent?: boolean
 }
 
 export interface TransactionFormBaseProps {
@@ -63,12 +67,19 @@ export const TransactionContext = React.createContext<TransactionContextProps>({
   setDisabledRightBtn: (value) => {}
 });
 
-function Component ({ className }: Props) {
+function Component ({ children, className, modalContent = false }: Props) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+  const { chain: stakingChain, type: _stakingType } = useParams();
+  const [currentStakeType, setCurrentStakeType] = useState<StakingType>();
+
+  useEffect(() => {
+    setCurrentStakeType(stakingChain as StakingType);
+  }, [stakingChain]);
 
   const { activeModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
   const dataContext = useContext(DataContext);
 
   const { currentAccount, isAllAccount } = useSelector((root: RootState) => root.accountState);
@@ -174,6 +185,18 @@ function Component ({ className }: Props) {
     chain !== '' && chainChecker(chain);
   }, [chain, chainChecker]);
 
+  if (modalContent) {
+    return (
+      <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn, asset, setAsset }}>
+        <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
+          <div className={CN(className, 'transaction-wrapper __modal-content')}>
+            {children}
+          </div>
+        </PageWrapper>
+      </TransactionContext.Provider>
+    );
+  }
+
   return (
     <Layout.Home
       showFilterIcon
@@ -182,16 +205,34 @@ function Component ({ className }: Props) {
       <TransactionContext.Provider value={{ transactionType, from, setFrom, chain, setChain, onDone, onClickRightBtn, setShowRightBtn, setDisabledRightBtn, asset, setAsset }}>
         <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
           <div className={CN(className, 'transaction-wrapper')}>
-            <SwSubHeader
-              background={'transparent'}
-              center
-              className={'transaction-header'}
-              onBack={goBack}
-              rightButtons={subHeaderButton}
-              showBackButton
-              title={titleMap[transactionType]}
-            />
-            <Outlet />
+            {!isWebUI
+              ? (
+                <SwSubHeader
+                  background={'transparent'}
+                  center
+                  className={'transaction-header'}
+                  onBack={goBack}
+                  rightButtons={subHeaderButton}
+                  showBackButton
+                  title={titleMap[transactionType]}
+                />
+              )
+              : (
+                <Controller
+                  onBack={goBack}
+                  showBackButton
+                  title={titleMap[transactionType]}
+                />
+              )}
+            <div className={CN('content', {
+              '__web-ui': isWebUI
+            })}
+            >
+              <div className='outlet-container'>
+                <Outlet context={{ modalContent, setCurrentStakeType }} />
+              </div>
+              {isWebUI && <NetworkInformation stakeStype={currentStakeType} />}
+            </div>
           </div>
         </PageWrapper>
       </TransactionContext.Provider>
@@ -206,6 +247,27 @@ const Transaction = styled(Component)(({ theme }) => {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
+
+    '.content': {
+      '&.__web-ui': {
+        display: 'flex',
+        gap: 16,
+        justifyContent: 'center',
+        width: '80%',
+        margin: '0 auto',
+
+        '& > *': {
+          maxWidth: '50%',
+          flex: 1
+        }
+      }
+    },
+
+    '&.__modal-content': {
+      '.transaction-content': {
+        flex: '1 1 auto'
+      }
+    },
 
     '.transaction-header': {
       paddingTop: token.paddingSM,

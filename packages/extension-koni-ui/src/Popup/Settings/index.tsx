@@ -1,8 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+// import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
@@ -11,8 +14,9 @@ import { keyringLock, windowOpen } from '@subwallet/extension-koni-ui/messaging'
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -63,6 +67,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const isPopup = useIsPopup();
   const notify = useNotification();
   const { goHome } = useDefaultNavigate();
+  const { isWebUI } = useContext(ScreenContext);
   const { t } = useTranslation();
 
   const [locking, setLocking] = useState(false);
@@ -249,68 +254,84 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   return (
     <PageWrapper className={`settings ${className}`}>
-      <>
-        <SwHeader
-          left='logo'
-          onClickLeft={goHome}
-          rightButtons={headerIcons}
-          showLeftButton={true}
+      <Layout.Base
+        withSideMenu
+      >
+        <div className={CN({
+          'web-wrapper': isWebUI
+        })}
         >
-          {t('Settings')}
-        </SwHeader>
-
-        <div className={'__scroll-container'}>
-          {
-            SettingGroupItemType.map((group) => {
-              return (
-                <div
-                  className={'__group-container'}
-                  key={group.key}
-                >
-                  {!!group.label && (<div className='__group-label'>{group.label}</div>)}
-
-                  <div className={'__group-content'}>
-                    {group.items.map((item) => item.isHidden
-                      ? null
-                      : (
-                        <SettingItem
-                          className={'__setting-item'}
-                          key={item.key}
-                          leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
-                          name={t(item.title)}
-                          onPressItem={item.onClick}
-                          rightItem={generateRightIcon(item.rightIcon)}
-                        />
-                      ))}
-                  </div>
-                </div>
-              );
-            })
-          }
-
-          <Button
-            block
-            icon={
-              <Icon
-                phosphorIcon={Lock}
-                type='phosphor'
-                weight={'fill'}
-              />
-            }
-            loading={locking}
-            onClick={onLock}
-            schema={'secondary'}
+          {!isWebUI
+            ? (
+              <SwHeader
+                left='logo'
+                onClickLeft={goHome}
+                rightButtons={headerIcons}
+                showLeftButton={true}
+              >
+                Settings
+              </SwHeader>
+            )
+            : (
+              <Headers.Controller title='Settings' />
+            )}
+          <div className={CN({
+            '__scroll-container': !isWebUI,
+            '__web-container': isWebUI
+          })}
           >
-            {t('Lock')}
-          </Button>
+            {
+              SettingGroupItemType.map((group) => {
+                return (
+                  <div
+                    className={'__group-container'}
+                    key={group.key}
+                  >
+                    {!!group.label && (<div className='__group-label'>{group.label}</div>)}
 
-          <div className={'__version'}>
-          SubWallet v {EXTENSION_VERSION}
+                    <div className={'__group-content'}>
+                      {group.items.map((item) => item.isHidden
+                        ? null
+                        : (
+                          <SettingItem
+                            className={'__setting-item'}
+                            key={item.key}
+                            leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
+                            name={t(item.title)}
+                            onPressItem={item.onClick}
+                            rightItem={generateRightIcon(item.rightIcon)}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                );
+              })
+            }
+
+            <Button
+              block
+              icon={
+                <Icon
+                  phosphorIcon={Lock}
+                  type='phosphor'
+                  weight={'fill'}
+                />
+              }
+              loading={locking}
+              onClick={onLock}
+              schema={'secondary'}
+            >
+              {t('Lock')}
+            </Button>
+
+            <div className={'__version'}>
+            SubWallet v {EXTENSION_VERSION}
+            </div>
           </div>
-        </div>
 
-        <Outlet />
-      </>
+          <Outlet />
+        </div>
+      </Layout.Base>
     </PageWrapper>
   );
 }
@@ -334,6 +355,15 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       fontSize: token.fontSizeHeading4,
       lineHeight: token.lineHeightHeading4,
       fontWeight: token.headingFontWeight
+    },
+
+    '.__web-container': {
+      width: '70%',
+      margin: '0 auto',
+
+      '.group-content': {
+        marginBottom: 16
+      }
     },
 
     '.__scroll-container': {

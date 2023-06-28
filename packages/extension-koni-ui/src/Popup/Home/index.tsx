@@ -4,14 +4,17 @@
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { useGetChainSlugsByAccountType } from '@subwallet/extension-koni-ui/hooks/screen/home/useGetChainSlugsByAccountType';
 import useTokenGroup from '@subwallet/extension-koni-ui/hooks/screen/home/useTokenGroup';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
-import React, { useCallback, useContext } from 'react';
-import { Outlet } from 'react-router';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router';
 import styled from 'styled-components';
+
+import Porfolio from '../Porfolio';
 
 type Props = ThemeProps;
 
@@ -22,6 +25,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const chainsByAccountType = useGetChainSlugsByAccountType();
   const tokenGroupStructure = useTokenGroup(chainsByAccountType);
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
+  const { isWebUI } = useContext(ScreenContext);
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   const onOpenGlobalSearchToken = useCallback(() => {
     activeModal(GlobalSearchTokenModalId);
@@ -31,6 +37,41 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     inactiveModal(GlobalSearchTokenModalId);
   }, [inactiveModal]);
 
+  useEffect(() => {
+    const pathEls = pathname.split('/').filter((i: string) => !!i);
+
+    if (pathEls.length <= 1) {
+      navigate('/home/tokens');
+    }
+  }, [navigate, pathname]);
+
+  const pathEls = useMemo(() => pathname.split('/').filter((i: string) => !!i), [pathname]);
+  const homeContent = useMemo(() => {
+    if (isWebUI && ['tokens', 'nfts'].includes(pathEls[1])) {
+      return (
+        <Layout.Base
+          headerList={['Controller', 'Balance']}
+          showWebHeader
+          withBackground={['tokens', 'nfts'].includes(pathEls[1])}
+          withSideMenu
+        >
+          <Porfolio />
+        </Layout.Base>
+
+      );
+    }
+
+    return (
+      <Layout.Home
+        onClickSearchIcon={onOpenGlobalSearchToken}
+        showFilterIcon
+        showSearchIcon
+      >
+        <Outlet />
+      </Layout.Home>
+    );
+  }, [isWebUI, onOpenGlobalSearchToken, pathEls]);
+
   return (
     <>
       <HomeContext.Provider value={{
@@ -39,13 +80,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }}
       >
         <div className={`home home-container ${className}`}>
-          <Layout.Home
-            onClickSearchIcon={onOpenGlobalSearchToken}
-            showFilterIcon
-            showSearchIcon
-          >
-            <Outlet />
-          </Layout.Home>
+          {homeContent}
         </div>
       </HomeContext.Provider>
 

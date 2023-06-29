@@ -1236,5 +1236,12 @@
   "Can't find account": "",
   "Ledger does not support transfer for this token": "",
   "Please unlock your Ledger": "",
-  "Unable to get balance. Please re-enable the network": ""
+  "Unable to get balance. Please re-enable the network": "",
+  "Help": "",
+  "Pin SubWallet to toolbar for easier access": "",
+  "Copy & Save to the clipboard": "",
+  "Account not exists": "",
+  "Ledger - EVM account": "",
+  "Ledger - Substrate account": "",
+  "Ledger does not support this action with {{network}}": ""
 }

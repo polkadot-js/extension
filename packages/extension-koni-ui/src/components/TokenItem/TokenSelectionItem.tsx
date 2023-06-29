@@ -24,7 +24,7 @@ type Props = TokenItemProps & ThemeProps & {
 };
 
 function Component (
-  { address, chain, className, name, onClickCopyBtn, onClickQrBtn, symbol, ...restProps }: Props) {
+  { address, chain, className, name, onClickCopyBtn, onClickQrBtn, onPressItem, symbol, ...restProps }: Props) {
   const chainInfo = useFetchChainInfo(chain || '');
   const notify = useNotification();
   const { t } = useTranslation();
@@ -66,6 +66,7 @@ function Component (
         name={name}
         networkMainLogoShape='squircle'
         networkMainLogoSize={40}
+        onPressItem={_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && symbol?.startsWith(_ZK_ASSET_PREFIX) ? undefined : onPressItem }
         rightItem={
           (
             <>
@@ -84,6 +85,7 @@ function Component (
                 />
               </CopyToClipboard>
               <Button
+                disabled={_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && symbol?.startsWith(_ZK_ASSET_PREFIX)}
                 icon={
                   <Icon
                     phosphorIcon={QrCode}

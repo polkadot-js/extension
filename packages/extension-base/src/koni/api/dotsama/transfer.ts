@@ -5,7 +5,7 @@ import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { SupportTransferResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getWasmContractGasLimit } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
-import { _BALANCE_TOKEN_GROUP, _TRANSFER_CHAIN_GROUP, _TRANSFER_NOT_SUPPORTED_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
+import { _BALANCE_TOKEN_GROUP, _MANTA_ZK_CHAIN_GROUP, _TRANSFER_CHAIN_GROUP, _TRANSFER_NOT_SUPPORTED_CHAINS, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 
@@ -49,6 +49,13 @@ export async function checkSupportTransfer (networkKey: string, tokenInfo: _Chai
     return {
       supportTransfer: true,
       supportTransferAll: true
+    };
+  }
+
+  if (tokenInfo.symbol.startsWith(_ZK_ASSET_PREFIX) && _MANTA_ZK_CHAIN_GROUP.includes(tokenInfo.originChain)) {
+    return {
+      supportTransfer: false,
+      supportTransferAll: false
     };
   }
 

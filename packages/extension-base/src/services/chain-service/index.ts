@@ -10,7 +10,7 @@ import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-se
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -1407,6 +1407,33 @@ export class ChainService {
     });
 
     this.store.set('AssetSetting', assetSettings);
+  }
+
+  public setMantaZkAssetSettings (visible: boolean) {
+    const zkAssetSettings: Record<string, AssetSetting> = {};
+
+    Object.values(this.dataMap.assetRegistry).forEach((asset) => {
+      if (_isMantaZkAsset(asset)) {
+        zkAssetSettings[asset.slug] = {
+          visible
+        };
+      }
+    });
+
+    this.store.get('AssetSetting', (storedAssetSettings) => {
+      const newAssetSettings = {
+        ...storedAssetSettings,
+        ...zkAssetSettings
+      };
+
+      this.store.set('AssetSetting', newAssetSettings);
+
+      this.assetSettingSubject.next(newAssetSettings);
+
+      Object.keys(zkAssetSettings).forEach((slug) => {
+        this.eventService.emit('asset.updateState', slug);
+      });
+    });
   }
 
   public async getStoreAssetSettings (): Promise<Record<string, AssetSetting>> {

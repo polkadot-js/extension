@@ -41,6 +41,10 @@ export class MantaPrivateHandler {
     return this.dbService.getMantaPayData(`config_${chain}_${address}`);
   }
 
+  public async getMantaPayFirstConfig (chain: string) {
+    return this.dbService.getMantaPayFirstConfig(chain);
+  }
+
   public async deleteMantaPayConfig (address: string, chain: string): Promise<any> {
     return this.dbService.deleteMantaPayConfig(`config_${chain}_${address}`);
   }

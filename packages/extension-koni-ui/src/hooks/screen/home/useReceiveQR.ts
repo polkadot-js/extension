@@ -108,7 +108,7 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
     return accounts.filter((a) => !checkIsAccountAll(a.address));
   }, [isAllAccount, tokenGroupSlug, accounts, assetRegistryMap, chainInfoMap]);
 
-  const getTokenSelectorItems = useCallback((_selectedAccount: string) => { // TODO: ignore zkAssets
+  const getTokenSelectorItems = useCallback((_selectedAccount: string) => {
     // if selectedAccount is not available or is ethereum type
     if (!_selectedAccount) {
       return [];

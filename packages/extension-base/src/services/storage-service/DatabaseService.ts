@@ -315,4 +315,8 @@ export default class DatabaseService {
   async getMantaPayConfig (chain: string) {
     return this.stores.mantaPay.getConfig(chain);
   }
+
+  async getMantaPayFirstConfig (chain: string) {
+    return this.stores.mantaPay.getFirstConfig(chain);
+  }
 }

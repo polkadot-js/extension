@@ -195,6 +195,8 @@ export const _MANTA_ZK_CHAIN_GROUP = ['calamari'];
 
 export const _ZK_ASSET_PREFIX = 'zk';
 
+export const _DEFAULT_MANTA_ZK_CHAIN = 'calamari';
+
 // XCM------------------------------------------------------------------------------------------------------------------
 
 export const _XCM_CHAIN_GROUP = {

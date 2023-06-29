@@ -22,6 +22,11 @@ export default class MantaPayStore extends BaseStore<IMantaPayLedger> {
     return this.table.where({ chain }).filter((data) => data?.key && data?.key.startsWith('config')).toArray();
   }
 
+  getFirstConfig (chain: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+    return this.table.where({ chain }).filter((data) => data?.key && data?.key.startsWith('config')).first();
+  }
+
   deleteRecord (key: string) {
     return this.table.where('key').equals(key).delete();
   }

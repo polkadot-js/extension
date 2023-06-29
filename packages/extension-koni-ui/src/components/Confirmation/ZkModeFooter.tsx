@@ -64,6 +64,7 @@ const Component: React.FC<Props> = (props: Props) => {
         form={form}
         initialValues={{ password: '' }}
         onFieldsChange={onUpdate}
+        onFinish={onSubmit}
       >
         <div className={'zk_confirmation_modal__input_label'}>{t('Enter password to confirm')}</div>
         <Form.Item
@@ -108,7 +109,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={onSubmit}
+          onClick={form.submit}
         >
           {t('Turn on')}
         </Button>

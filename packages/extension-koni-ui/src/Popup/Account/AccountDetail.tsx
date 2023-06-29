@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MantaPayEnableMessage, MantaPaySyncProgress } from '@subwallet/extension-base/background/KoniTypes';
+import { _DEFAULT_MANTA_ZK_CHAIN } from '@subwallet/extension-base/services/chain-service/constants';
 import { CloseIcon, Layout, PageWrapper, ZkModeFooter } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
@@ -9,6 +10,7 @@ import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/u
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
 import { useIsMantaPayAvailable } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayAvailable';
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
+import useChainState from '@subwallet/extension-koni-ui/hooks/chain/useChainState';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { deriveAccountV3, disableMantaPay, editAccount, enableMantaPay, forgetAccount, subscribeMantaPaySyncProgress, windowOpen } from '@subwallet/extension-koni-ui/messaging';
@@ -194,8 +196,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const signMode = useGetAccountSignModeByAddress(accountAddress);
 
   const _isMantaPayEnabled = useIsMantaPayEnabled(accountAddress || '');
-
   const [mantaPayState, dispatchMantaPayState] = useReducer(mantaPayReducer, { ...DEFAULT_MANTA_PAY_STATE, isEnabled: _isMantaPayEnabled });
+  const defaultZkModeChain = useChainState(_DEFAULT_MANTA_ZK_CHAIN);
 
   const handleEnableMantaPay = useCallback(() => {
     activeModal(zkModeConfirmationId);
@@ -368,6 +370,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onSwitchMantaPay = useCallback((checked: boolean, event: React.MouseEvent<HTMLButtonElement>) => {
     if (checked) {
+      if (!defaultZkModeChain.active) {
+        notify({
+          message: t('Enable Calamari first'),
+          type: 'error'
+        });
+
+        return;
+      }
+
       if (isPopup) {
         windowOpen({
           allowedPath: '/accounts/detail',
@@ -410,7 +421,7 @@ const Component: React.FC<Props> = (props: Props) => {
         });
       }
     }
-  }, [account, handleEnableMantaPay, isPopup, mantaPayState.isSyncing, notify, t]);
+  }, [account, defaultZkModeChain.active, handleEnableMantaPay, isPopup, mantaPayState.isSyncing, notify, t]);
 
   const onCloseZkModeConfirmation = useCallback(() => {
     dispatchMantaPayState({ type: MantaPayReducerActionType.REJECT_ENABLE, payload: undefined });

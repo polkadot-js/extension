@@ -3334,13 +3334,14 @@ export default class KoniExtension {
         };
       }
 
-      const result = await this.#koniState.enableMantaPay(true, mnemonic.result);
+      const result = await this.#koniState.enableMantaPay(true, address, mnemonic.result);
 
       console.debug('Start initial sync for MantaPay');
 
-      this.#koniState.initialSyncMantaPay()
+      this.#koniState.initialSyncMantaPay(address)
         .then(() => {
           console.debug('Finished initial sync for MantaPay');
+          this.#koniState.chainService.setMantaZkAssetSettings(true);
         })
         .catch(console.error);
 
@@ -3367,10 +3368,6 @@ export default class KoniExtension {
 
   private async disableMantaPay (address: string) {
     return this.#koniState.disableMantaPay(address);
-  }
-
-  private async initialSyncMantaPay () {
-    return await this.#koniState.initialSyncMantaPay();
   }
 
   private subscribeMantaPayConfig (id: string, port: chrome.runtime.Port) {
@@ -3823,8 +3820,6 @@ export default class KoniExtension {
 
       case 'pri(mantaPay.enable)':
         return await this.enableMantaPay(request as MantaPayEnableParams);
-      case 'pri(mantaPay.initialSyncMantaPay)':
-        return await this.initialSyncMantaPay();
       case 'pri(mantaPay.subscribeConfig)':
         return await this.subscribeMantaPayConfig(id, port);
       case 'pri(mantaPay.subscribeSyncProgress)':

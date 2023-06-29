@@ -12,7 +12,7 @@ import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
+import { _DEFAULT_MANTA_ZK_CHAIN, _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmChainId, _getSubstrateGenesisHash, _getTokenOnChainAssetId, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParaChain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
@@ -294,16 +294,11 @@ export default class KoniState {
   }
 
   private async initMantaPay () {
-    const currentAddress = this.keyringService.currentAccount.address;
-
-    if (!currentAddress || isEthereumAddress(currentAddress)) {
-      return;
-    }
-
-    const mantaPayConfig = await this.chainService.mantaPay.getMantaPayConfig(currentAddress, 'calamari') as MantaPayConfig;
+    const mantaPayConfig = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
 
     if (mantaPayConfig && mantaPayConfig.enabled) { // only init if current account enabled mantaPay
-      await this.enableMantaPay(false, '');
+      console.debug('Initiating MantaPay for', mantaPayConfig.address);
+      await this.enableMantaPay(false, mantaPayConfig.address);
 
       this.isMantaPayEnabled = true;
     }
@@ -316,7 +311,7 @@ export default class KoniState {
       this.chainStakingMetadataSubject.next(data);
     });
 
-    this.dbService.subscribeMantaPayConfig('calamari', (data) => {
+    this.dbService.subscribeMantaPayConfig(_DEFAULT_MANTA_ZK_CHAIN, (data) => {
       this.mantaPayConfigSubject.next(data);
     });
 
@@ -1871,29 +1866,27 @@ export default class KoniState {
     await this.chainService.init();
   }
 
-  public async enableMantaPay (updateStore: boolean, seedPhrase: string) {
-    const currentAddress = this.keyringService.currentAccount.address;
-
-    if (!currentAddress || isEthereumAddress(currentAddress)) {
+  public async enableMantaPay (updateStore: boolean, address: string, seedPhrase?: string) {
+    if (!address || isEthereumAddress(address)) {
       return;
     }
 
-    this.chainService.mantaPay.setCurrentAddress(currentAddress);
+    this.chainService.mantaPay.setCurrentAddress(address);
 
     await this.chainService.mantaPay.privateWallet?.initialSigner();
 
-    if (updateStore) {
+    if (updateStore && seedPhrase) { // first time initiation
       await this.chainService.mantaPay.privateWallet?.loadUserSeedPhrase(seedPhrase);
       const authContext = await this.chainService.mantaPay.privateWallet?.getAuthorizationContext();
 
       await this.chainService.mantaPay.privateWallet?.loadAuthorizationContext(authContext as interfaces.AuthContextType);
       await this.chainService.mantaPay.saveMantaAuthContext({
-        chain: 'calamari',
-        address: currentAddress,
+        chain: _DEFAULT_MANTA_ZK_CHAIN,
+        address,
         data: authContext as interfaces.AuthContextType
       });
     } else {
-      const authContext = (await this.chainService.mantaPay.getMantaAuthContext(currentAddress, 'calamari')) as MantaAuthorizationContext;
+      const authContext = (await this.chainService.mantaPay.getMantaAuthContext(address, _DEFAULT_MANTA_ZK_CHAIN)) as MantaAuthorizationContext;
 
       await this.chainService.mantaPay.privateWallet?.loadAuthorizationContext(authContext.data);
     }
@@ -1902,7 +1895,7 @@ export default class KoniState {
 
     if (updateStore) {
       await this.chainService.mantaPay.saveMantaPayConfig({
-        address: currentAddress,
+        address,
         zkAddress: zkAddress,
         enabled: true,
         chain: this.chainService.mantaPay.privateWallet?.network?.toLowerCase(),
@@ -1914,7 +1907,7 @@ export default class KoniState {
   }
 
   public async disableMantaPay (address: string) {
-    const config = await this.chainService.mantaPay.getMantaPayConfig(address, 'calamari') as MantaPayConfig;
+    const config = await this.chainService.mantaPay.getMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
 
     if (!config) {
       return false;
@@ -1922,25 +1915,25 @@ export default class KoniState {
 
     await this.chainService.mantaPay.privateWallet?.dropAuthorizationContext();
     await this.chainService.mantaPay.privateWallet?.dropUserSeedPhrase();
-    await this.chainService.mantaPay.deleteMantaPayConfig(address, 'calamari');
+    await this.chainService.mantaPay.deleteMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN);
+
+    this.chainService.setMantaZkAssetSettings(false);
 
     return true;
   }
 
-  public async initialSyncMantaPay () {
-    const currentAddress = this.keyringService.currentAccount.address;
-
-    if (!currentAddress || isEthereumAddress(currentAddress)) {
+  public async initialSyncMantaPay (address: string) {
+    if (!address || isEthereumAddress(address)) {
       return;
     }
 
-    this.chainService.mantaPay.setCurrentAddress(currentAddress);
+    this.chainService.mantaPay.setCurrentAddress(address);
 
     await this.chainService.mantaPay.privateWallet?.baseWallet?.isApiReady();
 
     const syncResult = await this.chainService.mantaPay.privateWallet?.initialWalletSync();
 
-    await this.chainService.mantaPay.updateMantaPayConfig(currentAddress, 'calamari', { isInitialSync: true });
+    await this.chainService.mantaPay.updateMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN, { isInitialSync: true });
 
     this.eventService.emit('mantaPay.initSync', undefined);
 
@@ -1985,7 +1978,7 @@ export default class KoniState {
   public subscribeMantaPayBalance () {
     let interval: NodeJS.Timer | undefined;
 
-    this.chainService.mantaPay.getMantaPayConfig(this.keyringService.currentAccount.address, 'calamari')
+    this.chainService.mantaPay.getMantaPayConfig(this.keyringService.currentAccount.address, _DEFAULT_MANTA_ZK_CHAIN)
       .then((config: MantaPayConfig) => {
         if (config && config.enabled && config.isInitialSync) {
           this.getMantaZkBalance();
@@ -2001,9 +1994,11 @@ export default class KoniState {
   }
 
   public async syncMantaPay () {
+    const mantaPayConfig = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
+
     if (!this.chainService?.mantaPay?.privateWallet?.initialSyncIsFinished) {
       console.log('initial sync');
-      await this.initialSyncMantaPay();
+      await this.initialSyncMantaPay(mantaPayConfig.address);
     } else {
       console.log('normal sync');
       await this.chainService?.mantaPay?.privateWallet?.walletSync();

@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { TokenSelectionItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenSelectionItem';
 import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetZkAddress } from '@subwallet/extension-koni-ui/hooks/account/useGetZkAddress';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
@@ -13,8 +15,6 @@ import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import GeneralEmptyList from '../../GeneralEmptyList';
-import { useGetZkAddress } from '@subwallet/extension-koni-ui/hooks/account/useGetZkAddress';
-import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 
 interface Props extends ThemeProps {
   onSelectItem?: (item: _ChainAsset) => void,

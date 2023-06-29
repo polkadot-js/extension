@@ -1972,7 +1972,6 @@ export interface KoniRequestSignatures {
   // Manta pay
   'pri(mantaPay.enable)': [MantaPayEnableParams, MantaPayEnableResponse];
   'pri(mantaPay.disable)': [string, boolean];
-  'pri(mantaPay.initialSyncMantaPay)': [null, boolean | undefined];
   'pri(mantaPay.getZkBalance)': [null, null];
   'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];
   'pri(mantaPay.subscribeSyncProgress)': [null, MantaPaySyncProgress, MantaPaySyncProgress];

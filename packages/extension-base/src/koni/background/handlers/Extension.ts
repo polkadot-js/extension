@@ -500,7 +500,7 @@ export default class KoniExtension {
       const account = keyring.getAccount(address);
       const contact = keyring.getAddress(address);
 
-      return account || contact || { ...keyring.saveRecent(accountId).json, publicKey: decodeAddress(address) };
+      return account || contact || { ...keyring.saveRecent(address).json, publicKey: decodeAddress(address) };
     } else {
       throw Error('Invalid address');
     }

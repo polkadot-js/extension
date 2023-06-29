@@ -154,8 +154,8 @@ function getTokenAvailableDestinations (tokenSlug: string, xcmRefMap: Record<str
       const destinationChain = chainInfoMap[xcmRef.destChain];
 
       result.push({
-        name: xcmRef.displayName || destinationChain.name, // TODO: fix this
-        slug: xcmRef.path === _AssetRefPath.XCM ? destinationChain.slug : `${destinationChain.slug}___${xcmRef.path}`,
+        name: destinationChain.name, // TODO: fix this
+        slug: destinationChain.slug,
         type: xcmRef.path
       });
     }
@@ -296,7 +296,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       return Promise.reject(t('Invalid Recipient address'));
     }
 
-    const { chain, destChain: _destChain, from, to } = form.getFieldsValue();
+    const { chain, from, to } = form.getFieldsValue();
 
     if (!from || !chain || !destChain) {
       return Promise.resolve();
@@ -340,7 +340,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }
 
     return Promise.resolve();
-  }, [accounts, chainInfoMap, form, t]);
+  }, [accounts, chainInfoMap, destChain, form, t]);
 
   const validateAmount = useCallback((rule: Rule, amount: string): Promise<void> => {
     if (!amount) {

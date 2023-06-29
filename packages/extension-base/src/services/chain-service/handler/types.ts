@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
+import {_ChainConnectionStatus} from "@subwallet/extension-base/services/chain-service/types";
 
 export interface _EvmChainSpec {
   evmChainId: number,
@@ -24,7 +25,7 @@ export interface _SubstrateChainSpec {
 export interface _ApiOptions {
   providerName?: string,
   metadata?: MetadataItem,
-  onUpdateStatus?: (isConnected: boolean) => void;
+  onUpdateStatus?: (status: _ChainConnectionStatus) => void;
 }
 
 export enum _CHAIN_VALIDATION_ERROR {

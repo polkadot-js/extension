@@ -508,13 +508,12 @@ export class ChainService {
   private async initApiForChain (chainInfo: _ChainInfo) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
-    const onUpdateStatus = (isConnected: boolean) => {
+    const onUpdateStatus = (status: _ChainConnectionStatus) => {
       const currentStatus = this.getChainStateByKey(chainInfo.slug).connectionStatus;
-      const newStatus = isConnected ? _ChainConnectionStatus.CONNECTED : _ChainConnectionStatus.DISCONNECTED;
 
       // Avoid unnecessary update in case disable chain
-      if (currentStatus !== newStatus) {
-        this.setChainConnectionStatus(chainInfo.slug, newStatus);
+      if (currentStatus !== status) {
+        this.setChainConnectionStatus(chainInfo.slug, status);
         this.chainStateMapSubject.next(this.getChainStateMap());
       }
     };

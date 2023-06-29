@@ -3,14 +3,14 @@
 
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ChainBaseApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainBaseApi, _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import { BehaviorSubject } from 'rxjs';
 
-const SHORT_RECOVER_RETRY = 3;
+const MAX_RECOVER_RETRY = 6;
 
 export const FIRST_RECONNECT_TIME = 3000;
-export const SHORT_RETRY_TIME = 15000;
-export const LONG_RETRY_TIME = 60000;
+export const SHORT_RETRY_TIME = 20000;
+// export const LONG_RETRY_TIME = 60000;
 
 interface RetryObject {
   retryTimes: number;
@@ -18,7 +18,7 @@ interface RetryObject {
 }
 
 export abstract class AbstractChainHandler {
-  readonly apiStateMapSubject = new BehaviorSubject<Record<string, boolean>>({});
+  readonly apiStateMapSubject = new BehaviorSubject<Record<string, _ChainConnectionStatus>>({});
   // Recover retry times
   protected recoverMap: Record<string, RetryObject>;
   protected isSleeping = false;
@@ -33,20 +33,25 @@ export abstract class AbstractChainHandler {
   abstract sleep (): Promise<void>;
   abstract wakeUp (): Promise<void>;
 
-  handleConnect (chain: string, isConnected: boolean): void {
+  handleConnection (chain: string, status: _ChainConnectionStatus): void {
     const currentMap = this.apiStateMapSubject.getValue();
     const currentStatus = currentMap[chain];
 
     // Update api state
-    if (currentStatus !== isConnected) {
+    if (currentStatus !== status) {
       this.apiStateMapSubject.next({
         ...currentMap,
-        [chain]: isConnected
+        [chain]: status
       });
     }
 
+    // Reset retry when connected is successful
+    if (status === _ChainConnectionStatus.CONNECTED) {
+      this.cancelRecover(chain);
+    }
+
     // Handle connection change
-    if (!isConnected) {
+    if (status === _ChainConnectionStatus.DISCONNECTED) {
       this.handleRecover(chain);
     }
   }
@@ -66,8 +71,14 @@ export abstract class AbstractChainHandler {
     clearTimeout(retryRecord.timeout);
 
     const retryTimes = retryRecord.retryTimes;
+
+    if (retryTimes >= MAX_RECOVER_RETRY) {
+      this.handleConnection(chain, _ChainConnectionStatus.UNSTABLE);
+      this.cancelRecover(chain); // Need manual recover
+    }
+
     // Slow down recover frequency if increasing recover times
-    const retryTimeout = retryTimes === 0 ? FIRST_RECONNECT_TIME : (retryTimes >= SHORT_RECOVER_RETRY ? LONG_RETRY_TIME : SHORT_RETRY_TIME);
+    const retryTimeout = retryTimes === 0 ? FIRST_RECONNECT_TIME : SHORT_RETRY_TIME;
 
     // Recover api after retry timeout
     const timeout = setTimeout(() => {

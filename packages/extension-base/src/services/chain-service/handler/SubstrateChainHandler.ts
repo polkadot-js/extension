@@ -49,12 +49,12 @@ export class SubstrateChainHandler extends AbstractChainHandler {
 
       // Not found substrateInterface mean it active with evm interface
       if (api) {
-        api?.connect();
+        api.connect();
 
         if (!api.useLightClient) {
           // Manual fire handle connect to avoid some chain can not reconnect
           setTimeout(() => {
-            this.handleConnect(chain, api.isApiConnected);
+            this.handleConnection(chain, api.connectionStatus);
           }, SHORT_RETRY_TIME);
         }
       }
@@ -218,8 +218,8 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     const metadata = await this.parent?.getMetadata(chainSlug);
     const apiObject = new SubstrateApi(chainSlug, apiUrl, { providerName, metadata });
 
-    apiObject.isApiConnectedSubject.subscribe(this.handleConnect.bind(this, chainSlug));
-    onUpdateStatus && apiObject.isApiConnectedSubject.subscribe(onUpdateStatus);
+    apiObject.connectionStatusSubject.subscribe(this.handleConnection.bind(this, chainSlug));
+    onUpdateStatus && apiObject.connectionStatusSubject.subscribe(onUpdateStatus);
 
     // Update metadata to database with async methods
     apiObject.isReady.then((api) => {

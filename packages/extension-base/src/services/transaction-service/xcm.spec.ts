@@ -4,14 +4,14 @@
 import { AssetRefMap, ChainAssetMap, ChainInfoMap } from '@subwallet/chain-list';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
+import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 
 jest.setTimeout(1000 * 60 * 10);
 
-const destAddress_1 = '5DnokDpMdNEH8cApsZoWQnjsggADXQmGWUb6q8ZhHeEwvncL';
-const destAddress_2 = '0x49E46fc304a448A2132d2DBEd6df47D0084cE92f';
+const destAddress1 = '5DnokDpMdNEH8cApsZoWQnjsggADXQmGWUb6q8ZhHeEwvncL';
+const destAddress2 = '0x49E46fc304a448A2132d2DBEd6df47D0084cE92f';
 
 const uniqueArray = (array: string[]): string[] => {
   const map: Record<string, string> = {};
@@ -46,13 +46,14 @@ describe('test token transfer', () => {
 
       const chain = ChainInfoMap[srcChain];
 
-      const substrateApi = await substrateChainHandler.initApi(srcChain, chain.providers[Object.keys(chain.providers)[0]]);
+      const api = await substrateChainHandler.initApi(srcChain, chain.providers[Object.keys(chain.providers)[0]]);
+      const substrateApi = await api.isReady;
 
       const originTokenInfo = ChainAssetMap[assetRef.srcAsset];
       const destinationTokenInfo = ChainAssetMap[assetRef.destAsset];
       const destChain = ChainInfoMap[assetRef.destChain];
       const isDestChainEvm = _isChainEvmCompatible(destChain);
-      const destAddress = isDestChainEvm ? destAddress_2 : destAddress_1;
+      const destAddress = isDestChainEvm ? destAddress2 : destAddress1;
 
       try {
         await createXcmExtrinsic({

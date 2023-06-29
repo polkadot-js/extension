@@ -1239,5 +1239,9 @@
   "Unable to get balance. Please re-enable the network": "",
   "Help": "",
   "Pin SubWallet to toolbar for easier access": "",
-  "Copy & Save to the clipboard": ""
+  "Copy & Save to the clipboard": "",
+  "Account not exists": "",
+  "Ledger - EVM account": "",
+  "Ledger - Substrate account": "",
+  "Ledger does not support this action with {{network}}": ""
 }

@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 1.0.12
+Build date: Jun 29, 2023.
+
+Features & Update:
+- Add support Ledger with Aleph Zero network (#1565)
+
+Bugs fixed:
+- Fixed UI bugs on the Expand view (#1569)
+
+Update `@subwallet/chain-list@0.2.3` (#1576):
+- Add support for vFIL (Bifrost Polkadot), vETH (Ethereum)
+
 ## 1.0.11
 Build date: Jun 24, 2023.
 

@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem } from '@subwallet/extension-koni-ui/components';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFilterModal, useGetStakingList, useNotification, usePreCheckStakeAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetStakingList, useNotification, usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
@@ -105,7 +105,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, 100);
   }, [activeModal]);
 
-  const preCheck = usePreCheckStakeAction(currentAccount?.address);
+  const preCheck = usePreCheckAction(currentAccount?.address, false);
 
   const onClickStakeMore = useCallback(() => {
     navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`);
@@ -135,7 +135,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     },
     {
       icon: rightIcon,
-      onClick: preCheck(onClickStakeMore)
+      onClick: preCheck(onClickStakeMore, ExtrinsicType.STAKING_BOND)
     }
   ]), [loading, preCheck, notify, t, onClickStakeMore]);
 

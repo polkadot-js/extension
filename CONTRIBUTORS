@@ -1,6 +1,6 @@
     1718	Nam Phạm                      	[Issue 1546] update chain-list and xcm logic for Bifrost Polkadot
-    1416	AnhMTV                        	Release version 1.0.11
-     957	S2kael                        	[Issue-1229] Update action click help
+    1424	AnhMTV                        	Release version 1.0.12
+     968	S2kael                        	[Issue-1576] Update default provider for 'ethereum' network
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	

@@ -49,11 +49,22 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       borderRadius: '24px 24px 0 0'
     },
 
-    '.ant-sw-modal .ant-sw-modal-content': {
-      width: 390 - token.lineWidth * 2,
-      left: token.lineWidth,
-      bottom: 0,
-      borderBottom: `1px solid ${token.colorBgInput}`
+    '.ant-sw-modal': {
+      '&, &.ant-sw-qr-scanner': {
+        '.ant-sw-modal-content': {
+          width: 390 - token.lineWidth * 2,
+          left: token.lineWidth,
+          bottom: 0,
+          borderBottom: `1px solid ${token.colorBgInput}`
+        }
+      },
+
+      '&.modal-full, &.ant-sw-qr-scanner': {
+        '.ant-sw-modal-content': {
+          top: 1,
+          height: 600 - token.lineWidth * 2
+        }
+      }
     },
 
     '.modal-full': {

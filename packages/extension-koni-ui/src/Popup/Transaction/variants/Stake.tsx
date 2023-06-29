@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationPoolInfo, NominatorMetadata, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NominationPoolInfo, NominatorMetadata, StakingType, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getOriginChainOfAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
@@ -9,7 +9,7 @@ import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AmountInput, MetaInfo, MultiValidatorSelector, PageWrapper, PoolSelector, RadioGroup, StakingNetworkDetailModal, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckStakeAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFetchChainState, useGetBalance, useGetChainStakingMetadata, useGetNativeTokenBasicInfo, useGetNativeTokenSlug, useGetNominatorInfo, useGetSupportedStakingTokens, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainAssetInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainAssetInfo';
 import { submitBonding, submitPoolBonding } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -304,7 +304,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return null;
   }, [chainStakingMetadata, decimals, symbol, t, minStake]);
 
-  const onPreCheckReadOnly = usePreCheckStakeAction(from);
+  const checkAction = usePreCheckAction(from);
 
   useEffect(() => {
     const address = currentAccount?.address || '';
@@ -527,7 +527,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           loading={loading}
-          onClick={onPreCheckReadOnly(form.submit)}
+          onClick={checkAction(form.submit, stakingType === StakingType.POOLED ? ExtrinsicType.STAKING_JOIN_POOL : ExtrinsicType.STAKING_BOND)}
         >
           {t('Stake')}
         </Button>

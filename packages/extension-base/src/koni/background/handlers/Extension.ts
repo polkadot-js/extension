@@ -28,7 +28,8 @@ import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/reques
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_AUTO_LOCK_TIME } from '@subwallet/extension-base/services/setting-service/constants';
 import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionEmitter, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
-import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
+import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_SUPPORT_NAMESPACES } from '@subwallet/extension-base/services/wallet-connect-service/constants';
+import { isProposalExpired } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { convertSubjectInfoToAddresses } from '@subwallet/extension-base/utils/address';
@@ -3322,8 +3323,13 @@ export default class KoniExtension {
   private async approveWalletConnectSession ({ accounts: selectedAccounts, id }: RequestApproveConnectWalletSession): Promise<boolean> {
     const request = this.#koniState.requestService.getConnectWCRequest(id);
 
+    if (isProposalExpired(request.request)) {
+      throw new Error('The proposal has been expired');
+    }
+
     const wcId = request.request.id;
     const params = request.request.params;
+
     const requiredNamespaces: ProposalTypes.RequiredNamespaces = params.requiredNamespaces;
 
     const namespaces: SessionTypes.Namespaces = {};
@@ -3333,7 +3339,7 @@ export default class KoniExtension {
         if (namespace.chains) {
           const accounts: string[] = [];
 
-          if (WALLET_CONNECT_EIP155_NAMESPACE.includes(key)) {
+          if (WALLET_CONNECT_SUPPORT_NAMESPACES.includes(key)) {
             namespace.chains.forEach((chain) => {
               accounts.push(...(selectedAccounts.filter((address) => isEthereumAddress(address) === (key === WALLET_CONNECT_EIP155_NAMESPACE)).map((address) => `${chain}:${address}`)));
             });
@@ -3364,6 +3370,12 @@ export default class KoniExtension {
     const request = this.#koniState.requestService.getConnectWCRequest(id);
 
     const wcId = request.request.id;
+
+    if (isProposalExpired(request.request)) {
+      request.reject(new Error('The proposal has been expired'));
+
+      return true;
+    }
 
     await this.#koniState.walletConnectService.rejectSession(wcId);
     request.reject(new Error('USER_REJECTED'));

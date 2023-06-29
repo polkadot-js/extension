@@ -88,7 +88,7 @@ export const isNoAccount = (accounts: AccountJson[] | null): boolean => {
   return accounts ? !accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY).length : false;
 };
 
-export const searchAccountFunction = (item: AccountJson, searchText: string): boolean => {
+export const searchAccountFunction = (item: AbstractAddressJson, searchText: string): boolean => {
   return item.address.toLowerCase().includes(searchText.toLowerCase()) || (item.name || '').toLowerCase().includes(searchText.toLowerCase());
 };
 

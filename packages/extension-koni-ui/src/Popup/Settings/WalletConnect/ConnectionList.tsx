@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CloseIcon, ConnectionItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { stripUrl } from '@subwallet/extension-base/utils';
+import { ConnectionItem, EmptyList, Layout, PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, SwList } from '@subwallet/react-ui';
 import { SessionTypes } from '@walletconnect/types';
 import CN from 'classnames';
-import { PlusCircle } from 'phosphor-react';
+import { GlobeHemisphereWest } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -21,7 +22,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { goHome } = useDefaultNavigate();
 
   const dataContext = useContext(DataContext);
 
@@ -51,23 +51,47 @@ const Component: React.FC<Props> = (props: Props) => {
     navigate('/wallet-connect/connect');
   }, [navigate]);
 
+  const renderEmptyList = useCallback(() => {
+    return (
+      <EmptyList
+        emptyMessage={t('Your list of approved dApps will appear here.')}
+        emptyTitle={t('No dApps found')}
+        phosphorIcon={GlobeHemisphereWest}
+      />
+    );
+  }, [t]);
+
+  const searchFunc = useCallback((item: SessionTypes.Struct, searchText: string) => {
+    const searchTextLowerCase = searchText.toLowerCase();
+    const metadata = item.peer.metadata;
+    const id = stripUrl(metadata.url);
+    const name = metadata.name;
+
+    return (
+      id.toLowerCase().includes(searchTextLowerCase) ||
+      name.toLowerCase().includes(searchTextLowerCase)
+    );
+  }, []);
+
   return (
     <Layout.WithSubHeaderOnly
       onBack={goBack}
       rightFooterButton={{
-        children: t('Add Connection'),
+        children: t('New connection'),
         onClick: onAdd,
         icon: (
           <Icon
-            phosphorIcon={PlusCircle}
+            customIcon={(
+              <WalletConnect
+                height='1em'
+                width='1em'
+              />
+            )}
+            type='customIcon'
           />
         )
       }}
-      subHeaderIcons={[{
-        icon: <CloseIcon />,
-        onClick: goHome
-      }]}
-      title={t('Connections')}
+      title={t('Wallet Connect')}
     >
       <PageWrapper
         className={CN(className)}
@@ -76,9 +100,14 @@ const Component: React.FC<Props> = (props: Props) => {
         <SwList.Section
           className='sessions-list'
           displayRow={true}
+          enableSearchInput
           list={items}
           renderItem={renderItem}
+          renderWhenEmpty={renderEmptyList}
           rowGap='var(--row-gap)'
+          searchFunction={searchFunc}
+          searchMinCharactersCount={2}
+          searchPlaceholder={t<string>('Search or enter a website')}
         />
       </PageWrapper>
     </Layout.WithSubHeaderOnly>

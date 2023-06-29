@@ -1,33 +1,35 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/background/types';
 import { stripUrl } from '@subwallet/extension-base/utils';
-import { Layout, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountItemWithName, EmptyList, GeneralEmptyList, Layout, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useConfirmModal, useNotification, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { disconnectWalletConnectConnection } from '@subwallet/extension-koni-ui/messaging';
 import { ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
-import { ThemeProps, WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
-import { noop } from '@subwallet/extension-koni-ui/utils';
-import { chainsToWalletConnectChainInfos } from '@subwallet/extension-koni-ui/utils/walletConnect';
-import { Icon, Image, Logo, SwModalFuncProps } from '@subwallet/react-ui';
+import { Theme, ThemeProps, WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
+import { chainsToWalletConnectChainInfos, getWCAccountList, noop } from '@subwallet/extension-koni-ui/utils';
+import { Icon, Image, Logo, ModalContext, NetworkItem, SwList, SwModal, SwModalFuncProps } from '@subwallet/react-ui';
 import { SessionTypes } from '@walletconnect/types';
 import CN from 'classnames';
-import { Plugs } from 'phosphor-react';
+import { CheckCircle, Info, MagnifyingGlass, Plugs } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 interface ComponentProps {
   session: SessionTypes.Struct;
+  className?: string;
 }
 
 const disconnectModalId = 'disconnect-connection-modal';
+const networkModalId = 'connection-detail-networks-modal';
 
 const Component: React.FC<ComponentProps> = (props) => {
-  const { session } = props;
+  const { className, session } = props;
   const { namespaces, peer: { metadata: dAppInfo }, topic } = session;
 
   const domain = stripUrl(dAppInfo.url);
@@ -35,13 +37,21 @@ const Component: React.FC<ComponentProps> = (props) => {
 
   const { t } = useTranslation();
   const notification = useNotification();
+  const navigate = useNavigate();
+  const { token } = useTheme() as Theme;
+
+  const { activeModal, inactiveModal } = useContext(ModalContext);
+
   const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const { accounts } = useSelector((state) => state.accountState);
 
   const chains = useMemo((): WalletConnectChainInfo[] => {
     const chains = Object.values(namespaces).map((namespace) => namespace.chains || []).flat();
 
     return chainsToWalletConnectChainInfos(chainInfoMap, chains);
   }, [namespaces, chainInfoMap]);
+
+  const accountItems = useMemo((): AbstractAddressJson[] => getWCAccountList(accounts, namespaces), [accounts, namespaces]);
 
   const fistChain = useMemo(() => chains.find(({ chainInfo }) => !!chainInfo), [chains]);
 
@@ -86,8 +96,71 @@ const Component: React.FC<ComponentProps> = (props) => {
       });
   }, [handleSimpleConfirmModal, notification, t, topic]);
 
+  const goBack = useCallback(() => {
+    navigate('/wallet-connect/list');
+  }, [navigate]);
+
+  const renderAccountItem = useCallback((item: AccountJson) => {
+    return (
+      <AccountItemWithName
+        accountName={item.name}
+        address={item.address}
+        avatarSize={token.sizeLG}
+        key={item.address}
+      />
+    );
+  }, [token.sizeLG]);
+
+  const renderChainItem = useCallback((item: WalletConnectChainInfo) => {
+    return (
+      <NetworkItem
+        key={item.slug}
+        name={item.chainInfo?.name || t('Unknown network ({{slug}})', { replace: { slug: item.slug } })}
+        networkKey={item.slug}
+        networkMainLogoShape='squircle'
+        networkMainLogoSize={28}
+        rightItem={(
+          <div className={'__check-icon'}>
+            <Icon
+              iconColor={token.colorSuccess}
+              phosphorIcon={CheckCircle}
+              size='sm'
+              type='phosphor'
+              weight='fill'
+            />
+          </div>
+        )}
+      />
+    );
+  }, [t, token.colorSuccess]);
+
+  const renderAccountEmpty = useCallback(() => {
+    return (
+      <EmptyList
+        emptyMessage={t('Your accounts will appear here.')}
+        emptyTitle={t('No account found')}
+        phosphorIcon={MagnifyingGlass}
+      />
+    );
+  }, [t]);
+
+  const renderNetworkEmpty = useCallback(() => {
+    return (
+      <GeneralEmptyList />
+    );
+  }, []);
+
+  const openNetworkModal = useCallback(() => {
+    activeModal(networkModalId);
+  }, [activeModal]);
+
+  const closeNetworkModal = useCallback(() => {
+    inactiveModal(networkModalId);
+  }, [inactiveModal]);
+
   return (
     <Layout.WithSubHeaderOnly
+      onBack={goBack}
       rightFooterButton={{
         icon: (
           <Icon
@@ -124,16 +197,59 @@ const Component: React.FC<ComponentProps> = (props) => {
             className='network-container'
             label={t('Network')}
           >
-            <div className='network-content'>
+            <div
+              className='network-content'
+              onClick={openNetworkModal}
+            >
               <Logo
                 className={'__chain-logo'}
                 network={fistChain?.slug || ''}
                 size={24}
               />
-              <div className='network-name'>{domain}</div>
+              <div className='network-name'>
+                {fistChain?.chainInfo?.name || 'Unknown network'}
+                {chains.length > 1 && (
+                  <>
+                    &nbsp;{t('(+ {{number}} more)', { replace: { number: chains.length - 1 } })}
+                  </>
+                )}
+              </div>
+              <Icon
+                phosphorIcon={Info}
+                size='sm'
+                weight='fill'
+              />
             </div>
           </MetaInfo.Default>
         </MetaInfo>
+        <div className='total-account'>
+          {t('{{number}} account connected', { replace: { number: accountItems.length } })}
+        </div>
+        <SwList.Section
+          className='account-list'
+          displayRow
+          list={accountItems}
+          renderItem={renderAccountItem}
+          renderWhenEmpty={renderAccountEmpty}
+          rowGap='var(--row-gap)'
+        />
+        <SwModal
+          className={CN(className, 'network-modal')}
+          id={networkModalId}
+          onCancel={closeNetworkModal}
+          title={t('Connected network')}
+        >
+          <SwList.Section
+            className='network-list'
+            displayRow
+            enableSearchInput={true}
+            list={chains}
+            renderItem={renderChainItem}
+            renderWhenEmpty={renderNetworkEmpty}
+            rowGap='var(--row-gap)'
+            searchPlaceholder={t<string>('Network name')}
+          />
+        </SwModal>
       </div>
     </Layout.WithSubHeaderOnly>
   );
@@ -171,7 +287,10 @@ const Wrapper: React.FC<Props> = (props: Props) => {
       className={CN(className)}
       resolve={dataContext.awaitStores(['walletConnect'])}
     >
-      <Component session={session} />
+      <Component
+        className={className}
+        session={session}
+      />
     </PageWrapper>
   );
 };
@@ -181,6 +300,7 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
     '.body-container': {
       padding: token.padding
     },
+    '--row-gap': token.sizeXS,
 
     '.dapp-info-container': {
       '.__col.-to-right': {
@@ -209,6 +329,55 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
           textOverflow: 'ellipsis'
         }
       }
+    },
+
+    '.network-container': {
+      '.__col.-to-right': {
+        flex: 3,
+
+        '.__value': {
+          overflow: 'hidden',
+          maxWidth: '100%'
+        }
+      },
+
+      '.network-content': {
+        display: 'flex',
+        flexDirection: 'row',
+        gap: token.sizeXS,
+        alignItems: 'center',
+        cursor: 'pointer'
+      }
+    },
+
+    '.account-list': {
+      margin: `0 -${token.margin}px`
+    },
+
+    '.total-account': {
+      marginTop: token.margin,
+      marginBottom: token.marginXXS,
+      color: token.colorTextTertiary,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6
+    },
+
+    '&.network-modal': {
+      '.ant-sw-modal-body': {
+        padding: `${token.padding}px 0 ${token.padding}px`,
+        flexDirection: 'column',
+        display: 'flex'
+      },
+
+      '.ant-sw-list-wrapper': {
+        flexBasis: 'auto'
+      }
+    },
+
+    '.ant-network-item .__check-icon': {
+      display: 'flex',
+      width: 40,
+      justifyContent: 'center'
     }
   };
 });

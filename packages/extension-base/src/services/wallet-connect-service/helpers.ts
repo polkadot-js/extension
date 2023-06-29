@@ -53,3 +53,11 @@ export const isWalletConnectRequest = (id: string) => {
 
   return prefix === WALLET_CONNECT_REQUEST_KEY;
 };
+
+export const isProposalExpired = (proposal: SignClientTypes.EventArguments['session_proposal']): boolean => {
+  const timeNum = proposal.params.expiry;
+  const expireTime = new Date(timeNum > 10 ** 12 ? timeNum : timeNum * 1000);
+  const now = new Date();
+
+  return now.getTime() >= expireTime.getTime();
+};

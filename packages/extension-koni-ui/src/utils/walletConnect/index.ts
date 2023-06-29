@@ -2,10 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/background/types';
 import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
-import { findChainInfoByChainId } from '@subwallet/extension-koni-ui/utils';
+import { SessionTypes } from '@walletconnect/types';
+
+import { findAccountByAddress } from '../account';
+import { findChainInfoByChainId } from '../chain';
 
 export const findChainInfoByHalfGenesisHash = (chainMap: Record<string, _ChainInfo>, halfGenesisHash?: string): _ChainInfo | null => {
   if (!halfGenesisHash) {
@@ -46,4 +50,31 @@ export const chainsToWalletConnectChainInfos = (chainMap: Record<string, _ChainI
       };
     }
   });
+};
+
+export const getWCAccountList = (accounts: AccountJson[], namespaces: SessionTypes.Namespaces): AbstractAddressJson[] => {
+  const rawMap: Record<string, string> = {};
+  const rawList = Object.values(namespaces).map((namespace) => namespace.accounts || []).flat();
+
+  rawList.forEach((info) => {
+    const [,, address] = info.split(':');
+
+    rawMap[address] = address;
+  });
+
+  const convertMap: Record<string, AbstractAddressJson> = {};
+  const convertList = Object.keys(rawMap).map((address): AbstractAddressJson => {
+    const account = findAccountByAddress(accounts, address);
+
+    return {
+      address: account?.address || address,
+      name: account?.name
+    };
+  });
+
+  convertList.forEach((info) => {
+    convertMap[info.address] = info;
+  });
+
+  return Object.values(convertMap);
 };

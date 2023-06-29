@@ -7,10 +7,11 @@ import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } fr
 import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { AccountItemWithName, ConfirmationGeneralInfo } from '@subwallet/extension-koni-ui/components';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
+import { useNotification } from '@subwallet/extension-koni-ui/hooks';
 import { approveWalletConnectSession, rejectWalletConnectSession } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isAccountAll, isNoAccount } from '@subwallet/extension-koni-ui/utils';
+import { ThemeProps, WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
+import { chainsToWalletConnectChainInfos, isAccountAll, isNoAccount } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { PlusCircle, XCircle } from 'phosphor-react';
@@ -20,6 +21,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 interface Props extends ThemeProps {
@@ -60,12 +62,24 @@ export const filterAuthorizeAccounts = (accounts: AccountJson[], accountAuthType
 };
 
 function Component ({ className, request }: Props) {
-  const { t } = useTranslation();
-  const { inactiveModal } = useContext(ModalContext);
-  const [loading, setLoading] = useState(false);
   const { params } = request.request;
-  const accounts = useSelector((state: RootState) => state.accountState.accounts);
+
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const notification = useNotification();
+
+  const { inactiveModal } = useContext(ModalContext);
+
+  const accounts = useSelector((state: RootState) => state.accountState.accounts);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+
+  const chains = useMemo((): WalletConnectChainInfo[] => {
+    const chains = Object.values(params.requiredNamespaces).map((namespace) => namespace.chains || []).flat();
+
+    return chainsToWalletConnectChainInfos(chainInfoMap, chains);
+  }, [params.requiredNamespaces, chainInfoMap]);
+
+  const haveUnSupportChain = useMemo(() => !!chains.find(({ chainInfo }) => !chainInfo), [chains]);
 
   const accountAuthType = useMemo((): AccountAuthType => {
     return Object.keys(params.requiredNamespaces).reduce((previousResult: AccountAuthType, currentValue): AccountAuthType => {
@@ -93,8 +107,25 @@ function Component ({ className, request }: Props) {
   const visibleAccounts = useMemo(() => (filterAuthorizeAccounts(accounts, accountAuthType || 'both')),
     [accountAuthType, accounts]);
 
-  // Selected map with default values is map of all acounts
+  const missingType = useMemo((): AccountAuthType[] => {
+    const _type: AccountAuthType = accountAuthType || 'both';
+    let result: AccountAuthType[] = _type === 'both' ? ['evm', 'substrate'] : [_type];
+
+    visibleAccounts.forEach((account) => {
+      if (isEthereumAddress(account.address)) {
+        result = result.filter((value) => value !== 'evm');
+      } else {
+        result = result.filter((value) => value !== 'substrate');
+      }
+    });
+
+    return result;
+  }, [accountAuthType, visibleAccounts]);
+
+  // Selected map with default values is map of all accounts
   const [selectedMap, setSelectedMap] = useState<Record<string, boolean>>({});
+
+  const [loading, setLoading] = useState(false);
 
   // Create selected map by default
   useEffect(() => {
@@ -125,10 +156,18 @@ function Component ({ className, request }: Props) {
     setLoading(true);
     const selectedAccounts = Object.keys(selectedMap).filter((key) => selectedMap[key]);
 
-    handleConfirm(request, selectedAccounts).finally(() => {
-      setLoading(false);
-    });
-  }, [request, selectedMap]);
+    handleConfirm(request, selectedAccounts)
+      .catch((e) => {
+        notification({
+          type: 'error',
+          message: (e as Error).message,
+          duration: 1.5
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [notification, request, selectedMap]);
 
   const onAddAccount = useCallback(() => {
     let types: KeypairType[];
@@ -176,6 +215,8 @@ function Component ({ className, request }: Props) {
     };
   }, [visibleAccounts]);
 
+  console.debug(missingType); // TODO: need remove
+
   return (
     <>
       <div className={CN('confirmation-content', className)}>
@@ -189,42 +230,54 @@ function Component ({ className, request }: Props) {
           )}
         >
           {
-            visibleAccounts.length === 0
-              ? t('No available account')
-              : t('Choose the account(s) you’d like to connect')
+            haveUnSupportChain
+              ? t('Request exists an up-support network')
+              : visibleAccounts.length === 0
+                ? t('No available account')
+                : t('Choose the account(s) you’d like to connect')
           }
         </div>
         {
-          !!visibleAccounts.length && (
-            <div className='account-list'>
-              {
-                visibleAccounts.length > 1 &&
-                  (
-                    <AccountItemWithName
-                      accountName={'All account'}
-                      accounts={visibleAccounts}
-                      address={ALL_ACCOUNT_KEY}
-                      avatarSize={24}
-                      isSelected={selectedMap[ALL_ACCOUNT_KEY]}
-                      onClick={onAccountSelect(ALL_ACCOUNT_KEY)}
-                      showUnselectIcon
-                    />
+          haveUnSupportChain
+            ? (
+              <></>
+            )
+            : (
+              <>
+                {
+                  !!visibleAccounts.length && (
+                    <div className='account-list'>
+                      {
+                        visibleAccounts.length > 1 &&
+                        (
+                          <AccountItemWithName
+                            accountName={'All account'}
+                            accounts={visibleAccounts}
+                            address={ALL_ACCOUNT_KEY}
+                            avatarSize={24}
+                            isSelected={selectedMap[ALL_ACCOUNT_KEY]}
+                            onClick={onAccountSelect(ALL_ACCOUNT_KEY)}
+                            showUnselectIcon
+                          />
+                        )
+                      }
+                      {visibleAccounts.map((item) => (
+                        <AccountItemWithName
+                          accountName={item.name}
+                          address={item.address}
+                          avatarSize={24}
+                          genesisHash={item.genesisHash}
+                          isSelected={selectedMap[item.address]}
+                          key={item.address}
+                          onClick={onAccountSelect(item.address)}
+                          showUnselectIcon
+                        />
+                      ))}
+                    </div>
                   )
-              }
-              {visibleAccounts.map((item) => (
-                <AccountItemWithName
-                  accountName={item.name}
-                  address={item.address}
-                  avatarSize={24}
-                  genesisHash={item.genesisHash}
-                  isSelected={selectedMap[item.address]}
-                  key={item.address}
-                  onClick={onAccountSelect(item.address)}
-                  showUnselectIcon
-                />
-              ))}
-            </div>
-          )
+                }
+              </>
+            )
         }
         <div className='description'>
           {
@@ -236,7 +289,7 @@ function Component ({ className, request }: Props) {
       </div>
       <div className='confirmation-footer'>
         {
-          visibleAccounts.length > 0 &&
+          !haveUnSupportChain && visibleAccounts.length > 0 &&
           (
             <>
               <Button
@@ -244,20 +297,20 @@ function Component ({ className, request }: Props) {
                 onClick={onCancel}
                 schema={'secondary'}
               >
-                {t('Cancel')}
+                {t('Reject')}
               </Button>
               <Button
                 disabled={Object.values(selectedMap).every((value) => !value)}
                 loading={loading}
                 onClick={onConfirm}
               >
-                {t('Connect')}
+                {t('Approve')}
               </Button>
             </>
           )
         }
         {
-          visibleAccounts.length === 0 &&
+          !haveUnSupportChain && visibleAccounts.length === 0 &&
             (
               <>
                 <Button
@@ -287,6 +340,20 @@ function Component ({ className, request }: Props) {
                 </Button>
               </>
             )
+        }
+        {
+          haveUnSupportChain &&
+          (
+            <>
+              <Button
+                disabled={loading}
+                onClick={onCancel}
+                schema='danger'
+              >
+                {t('Reject')}
+              </Button>
+            </>
+          )
         }
       </div>
     </>

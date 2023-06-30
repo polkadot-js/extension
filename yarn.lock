@@ -5718,6 +5718,7 @@ __metadata:
     axios: ^1.2.1
     bignumber.js: ^9.1.1
     bn.js: ^5.2.1
+    browser-passworder: ^2.0.3
     buffer: ^6.0.3
     cross-fetch: ^3.1.5
     dexie: ^3.2.2
@@ -5730,7 +5731,7 @@ __metadata:
     i18next: ^21.9.2
     is-buffer: ^2.0.5
     json-rpc-engine: ^6.1.0
-    manta-extension-sdk: ^1.0.29-beta.3
+    manta-extension-sdk: ^1.1.0
     moment: ^2.29.4
     protobufjs: ^7.1.2
     rxjs: ^7.8.1
@@ -9402,6 +9403,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"browser-passworder@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "browser-passworder@npm:2.0.3"
+  dependencies:
+    browserify-unibabel: ^3.0.0
+  checksum: df3ec46e1069f995e24f56979e825fd719a368187e307bd37f0440ac10833fbfb2fd02be02add9da2da991476ef9b146fd1480b04acbb8d96d4e4123af333667
+  languageName: node
+  linkType: hard
+
 "browser-process-hrtime@npm:^1.0.0":
   version: 1.0.0
   resolution: "browser-process-hrtime@npm:1.0.0"
@@ -9479,6 +9489,13 @@ __metadata:
     readable-stream: ^3.6.0
     safe-buffer: ^5.2.0
   checksum: 0221f190e3f5b2d40183fa51621be7e838d9caa329fe1ba773406b7637855f37b30f5d83e52ff8f244ed12ffe6278dd9983638609ed88c841ce547e603855707
+  languageName: node
+  linkType: hard
+
+"browserify-unibabel@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "browserify-unibabel@npm:3.0.0"
+  checksum: fe1b502c098fe5f22d12023ec971791a00c910575712782b611917b1aea6e2311ac5adad2f1dbfaa26555346bc0f74ed5b3d8773b493d3ec5bc1928d90619c42
   languageName: node
   linkType: hard
 
@@ -17633,9 +17650,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"manta-extension-sdk@npm:^1.0.29-beta.3":
-  version: 1.0.29-beta.4
-  resolution: "manta-extension-sdk@npm:1.0.29-beta.4"
+"manta-extension-sdk@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "manta-extension-sdk@npm:1.1.0"
   dependencies:
     "@polkadot/api": ^10.1.4
     "@polkadot/types": ^10.1.4
@@ -17643,7 +17660,7 @@ __metadata:
     "@polkadot/util-crypto": ^11.1.1
     bn.js: ^5.2.0
     manta-scale-codec: ^0.11.0-beta.1
-  checksum: ac1c5131fb3f061d494adbb006cd0b9f3fbce476d9fc7f16fed65cedf69a92fc99752feeab7003dd37e5fe9c7f0084779dab09b5876fc1c9012d5ba993bd1efc
+  checksum: b0972aaba563cc05bd095c35de463f100c559125165888637243938752a5216ea1862695769d2907499984afd5a1ff428dfcbe70c070bc20e3a39d1085b60195
   languageName: node
   linkType: hard
 

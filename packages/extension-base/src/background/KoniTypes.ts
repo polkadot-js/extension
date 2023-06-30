@@ -12,7 +12,6 @@ import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/ty
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
 import { KeyringAddress, KeyringPairs$Json } from '@subwallet/ui-keyring/types';
-import { interfaces } from 'manta-extension-sdk';
 import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
@@ -1877,7 +1876,7 @@ export interface MantaPayConfig {
 export interface MantaAuthorizationContext {
   address: string;
   chain: string;
-  data: interfaces.AuthContextType;
+  data: unknown;
 }
 
 export interface MantaPaySyncProgress {

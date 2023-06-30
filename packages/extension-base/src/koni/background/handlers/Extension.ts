@@ -2869,6 +2869,8 @@ export default class KoniExtension {
   private keyringUnlock ({ password }: RequestUnlockKeyring): ResponseUnlockKeyring {
     try {
       keyring.unlockKeyring(password);
+      this.#koniState.initMantaPay(password)
+        .catch(console.error);
     } catch (e) {
       return {
         errors: [(e as Error).message],
@@ -3334,7 +3336,7 @@ export default class KoniExtension {
         };
       }
 
-      const result = await this.#koniState.enableMantaPay(true, address, mnemonic.result);
+      const result = await this.#koniState.enableMantaPay(true, address, password, mnemonic.result);
 
       console.debug('Start initial sync for MantaPay');
 

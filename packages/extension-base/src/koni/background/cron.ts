@@ -100,7 +100,7 @@ export class KoniCron {
 
       const chainUpdated = eventTypes.includes('chain.updateState');
       const stakingSubmitted = eventTypes.includes('transaction.submitStaking');
-      const reloadMantaPay = eventTypes.includes('mantaPay.submitTransaction') || eventTypes.includes('account.updateCurrent');
+      const reloadMantaPay = eventTypes.includes('mantaPay.submitTransaction') || eventTypes.includes('account.updateCurrent') || eventTypes.includes('mantaPay.enable');
       const updatedChains: string[] = [];
 
       if (chainUpdated) {
@@ -113,7 +113,7 @@ export class KoniCron {
         });
       }
 
-      if (!commonReload && !chainUpdated && !stakingSubmitted) {
+      if (!commonReload && !chainUpdated && !stakingSubmitted && !reloadMantaPay) {
         return;
       }
 
@@ -148,6 +148,7 @@ export class KoniCron {
         (commonReload || needUpdateStaking || stakingSubmitted) && this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         (commonReload || needUpdateStaking || stakingSubmitted) && this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
         needUpdateStaking && this.addCron('updateChainStakingMetadata', this.updateChainStakingMetadata(serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_CHAIN_STAKING_METADATA);
+        reloadMantaPay && this.addCron('syncMantaPay', this.syncMantaPay, CRON_SYNC_MANTA_PAY);
       } else {
         this.setStakingRewardReady();
       }

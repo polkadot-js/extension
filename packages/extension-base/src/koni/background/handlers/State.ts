@@ -50,6 +50,9 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 import { KoniCron } from '../cron';
 import { KoniSubscription } from '../subscription';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
+const passworder = require('browser-passworder');
+
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
 // List of providers passed into constructor. This is the list of providers
@@ -284,8 +287,6 @@ export default class KoniState {
     await this.migrationService.run();
     this.eventService.emit('chain.ready', true);
 
-    await this.initMantaPay();
-
     this.onReady();
     this.onAccountAdd();
     this.onAccountRemove();
@@ -293,14 +294,16 @@ export default class KoniState {
     await this.startSubscription();
   }
 
-  private async initMantaPay () {
+  public async initMantaPay (password: string) {
     const mantaPayConfig = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
 
     if (mantaPayConfig && mantaPayConfig.enabled) { // only init if current account enabled mantaPay
       console.debug('Initiating MantaPay for', mantaPayConfig.address);
-      await this.enableMantaPay(false, mantaPayConfig.address);
+      await this.enableMantaPay(false, mantaPayConfig.address, password);
+      console.debug('Initiated MantaPay for', mantaPayConfig.address);
 
       this.isMantaPayEnabled = true;
+      this.eventService.emit('mantaPay.enable', mantaPayConfig.address);
     }
   }
 
@@ -1866,7 +1869,7 @@ export default class KoniState {
     await this.chainService.init();
   }
 
-  public async enableMantaPay (updateStore: boolean, address: string, seedPhrase?: string) {
+  public async enableMantaPay (updateStore: boolean, address: string, password: string, seedPhrase?: string) {
     if (!address || isEthereumAddress(address)) {
       return;
     }
@@ -1880,15 +1883,26 @@ export default class KoniState {
       const authContext = await this.chainService.mantaPay.privateWallet?.getAuthorizationContext();
 
       await this.chainService.mantaPay.privateWallet?.loadAuthorizationContext(authContext as interfaces.AuthContextType);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      const encryptedData = await passworder.encrypt(password, authContext);
+
       await this.chainService.mantaPay.saveMantaAuthContext({
         chain: _DEFAULT_MANTA_ZK_CHAIN,
         address,
-        data: authContext as interfaces.AuthContextType
+        data: encryptedData
       });
     } else {
       const authContext = (await this.chainService.mantaPay.getMantaAuthContext(address, _DEFAULT_MANTA_ZK_CHAIN)) as MantaAuthorizationContext;
 
-      await this.chainService.mantaPay.privateWallet?.loadAuthorizationContext(authContext.data);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      const decryptedData = await passworder.decrypt(password, authContext.data);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+      const proofAuthKey = new Uint8Array(Object.values(decryptedData.proof_authorization_key));
+
+      await this.chainService.mantaPay.privateWallet?.loadAuthorizationContext({
+        proof_authorization_key: proofAuthKey
+      } as interfaces.AuthContextType);
     }
 
     const zkAddress = await this.chainService.mantaPay.privateWallet?.getZkAddress();
@@ -1945,6 +1959,10 @@ export default class KoniState {
       return;
     }
 
+    if (!this.chainService?.mantaPay?.privateWallet?.initialSyncIsFinished) {
+      return;
+    }
+
     const chain = this.chainService?.mantaPay.privateWallet?.network;
 
     if (!chain) {
@@ -1994,14 +2012,10 @@ export default class KoniState {
   }
 
   public async syncMantaPay () {
-    const mantaPayConfig = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
-
-    if (!this.chainService?.mantaPay?.privateWallet?.initialSyncIsFinished) {
-      console.log('initial sync');
-      await this.initialSyncMantaPay(mantaPayConfig.address);
-    } else {
-      console.log('normal sync');
+    if (this.chainService?.mantaPay?.privateWallet?.initialSyncIsFinished) {
       await this.chainService?.mantaPay?.privateWallet?.walletSync();
+    } else {
+      await this.chainService?.mantaPay?.privateWallet?.initialWalletSync();
     }
   }
 

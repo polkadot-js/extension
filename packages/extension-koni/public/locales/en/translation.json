@@ -1243,5 +1243,17 @@
   "Account not exists": "",
   "Ledger - EVM account": "",
   "Ledger - Substrate account": "",
-  "Ledger does not support this action with {{network}}": ""
+  "Ledger does not support this action with {{network}}": "",
+  "Enter password to confirm": "",
+  "Turn on": "",
+  "Enable Calamari first": "",
+  "Disabled Zk mode": "",
+  "Something went wrong": "",
+  "Zk mode is syncing": "",
+  "All done, you can go back home": "",
+  "This may take a few minutes, keep this app open for faster sync": "",
+  "Zk balance is ready": "",
+  "Zk mode": "",
+  "Zk mode requires data synchronization": "",
+  "You will not be able to use the app until the synchronization is finished. This process can take up to 45 minutes or longer, are you sure to do this?": ""
 }

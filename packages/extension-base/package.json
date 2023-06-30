@@ -67,7 +67,7 @@
     "i18next": "^21.9.2",
     "is-buffer": "^2.0.5",
     "json-rpc-engine": "^6.1.0",
-    "manta-extension-sdk": "^1.0.29-beta.3",
+    "manta-extension-sdk": "^1.1.0",
     "moment": "^2.29.4",
     "protobufjs": "^7.1.2",
     "rxjs": "^7.8.1",

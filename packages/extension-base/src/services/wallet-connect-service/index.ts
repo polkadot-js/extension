@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import PolkadotRequestHandler from './handler/PolkadotRequestHandler';
 import { ALL_WALLET_CONNECT_EVENT, DEFAULT_WALLET_CONNECT_OPTIONS, WALLET_CONNECT_SUPPORTED_METHODS } from './constants';
-import { convertConnectRequest } from './helpers';
+import { convertConnectRequest, isSupportWalletConnectChain } from './helpers';
 import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, ResultApproveWalletConnectSession, WalletConnectSigningMethod } from './types';
 
 export default class WalletConnectService {
@@ -70,6 +70,7 @@ export default class WalletConnectService {
       const namespaces = Object.keys(requestSession.namespaces);
       const chains = Object.values(requestSession.namespaces).map((namespace) => namespace.chains as string[]).flat();
       const methods = Object.values(requestSession.namespaces).map((namespace) => namespace.methods).flat();
+      const chainInfoMap = this.#koniState.getChainInfoMap();
 
       const [requestNamespace] = chainId.split(':');
 
@@ -78,6 +79,10 @@ export default class WalletConnectService {
       }
 
       if (!chains.includes(chainId)) {
+        throw Error(getSdkError('UNSUPPORTED_CHAINS').message + ' ' + chainId);
+      }
+
+      if (!isSupportWalletConnectChain(chainId, chainInfoMap)) {
         throw Error(getSdkError('UNSUPPORTED_CHAINS').message + ' ' + chainId);
       }
 

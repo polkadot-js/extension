@@ -28,8 +28,8 @@ import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/reques
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_AUTO_LOCK_TIME } from '@subwallet/extension-base/services/setting-service/constants';
 import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionEmitter, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
-import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_SUPPORT_NAMESPACES } from '@subwallet/extension-base/services/wallet-connect-service/constants';
-import { isProposalExpired } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
+import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
+import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { convertSubjectInfoToAddresses } from '@subwallet/extension-base/utils/address';
@@ -44,6 +44,7 @@ import { SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import { KeyringAddress } from '@subwallet/ui-keyring/types';
 import { ProposalTypes } from '@walletconnect/types/dist/types/sign-client/proposal';
 import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/session';
+import { getSdkError } from '@walletconnect/utils';
 import BigN from 'bignumber.js';
 import { Transaction } from 'ethereumjs-tx';
 import { TransactionConfig } from 'web3-core';
@@ -3331,19 +3332,66 @@ export default class KoniExtension {
     const params = request.request.params;
 
     const requiredNamespaces: ProposalTypes.RequiredNamespaces = params.requiredNamespaces;
+    const optionalNamespaces: ProposalTypes.OptionalNamespaces = params.optionalNamespaces;
+
+    const availableNamespaces: ProposalTypes.RequiredNamespaces = {};
 
     const namespaces: SessionTypes.Namespaces = {};
+    const chainInfoMap = this.#koniState.getChainInfoMap();
 
     Object.entries(requiredNamespaces)
+      .forEach(([key, namespace]) => {
+        if (isSupportWalletConnectNamespace(key)) {
+          if (namespace.chains) {
+            const unSupportChains = namespace.chains.filter((chain) => !isSupportWalletConnectChain(chain, chainInfoMap));
+
+            if (unSupportChains.length) {
+              throw new Error(getSdkError('UNSUPPORTED_CHAINS').message + ' ' + unSupportChains.toString());
+            }
+
+            availableNamespaces[key] = namespace;
+          }
+        } else {
+          throw new Error(getSdkError('UNSUPPORTED_NAMESPACE_KEY').message + ' ' + key);
+        }
+      });
+
+    Object.entries(optionalNamespaces)
+      .forEach(([key, namespace]) => {
+        if (isSupportWalletConnectNamespace(key)) {
+          if (namespace.chains) {
+            const supportChains = namespace.chains.filter((chain) => isSupportWalletConnectChain(chain, chainInfoMap)) || [];
+
+            const requiredNameSpace = availableNamespaces[key];
+            const defaultChains: string[] = [];
+
+            if (requiredNameSpace) {
+              availableNamespaces[key] = {
+                chains: [...(requiredNameSpace.chains || defaultChains), ...(supportChains || defaultChains)],
+                events: requiredNameSpace.events,
+                methods: requiredNameSpace.methods
+              };
+            } else {
+              if (supportChains.length) {
+                availableNamespaces[key] = {
+                  chains: supportChains,
+                  events: namespace.events,
+                  methods: namespace.methods
+                };
+              }
+            }
+          }
+        }
+      });
+
+    Object.entries(availableNamespaces)
       .forEach(([key, namespace]) => {
         if (namespace.chains) {
           const accounts: string[] = [];
 
-          if (WALLET_CONNECT_SUPPORT_NAMESPACES.includes(key)) {
-            namespace.chains.forEach((chain) => {
-              accounts.push(...(selectedAccounts.filter((address) => isEthereumAddress(address) === (key === WALLET_CONNECT_EIP155_NAMESPACE)).map((address) => `${chain}:${address}`)));
-            });
-          }
+          namespace.chains.forEach((chain) => {
+            accounts.push(...(selectedAccounts.filter((address) => isEthereumAddress(address) === (key === WALLET_CONNECT_EIP155_NAMESPACE)).map((address) => `${chain}:${address}`)));
+          });
 
           namespaces[key] = {
             accounts,

@@ -1,11 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { findChainInfoByChainId, findChainInfoByHalfGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import { SignClientTypes } from '@walletconnect/types';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import { WALLET_CONNECT_REQUEST_KEY } from './constants';
+import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE, WALLET_CONNECT_REQUEST_KEY, WALLET_CONNECT_SUPPORT_NAMESPACES } from './constants';
 import { EIP155_SIGNING_METHODS, WalletConnectParamMap, WalletConnectSessionRequest, WalletConnectSigningMethod } from './types';
 
 export const getWCId = (id: number): string => {
@@ -60,4 +62,20 @@ export const isProposalExpired = (proposal: SignClientTypes.EventArguments['sess
   const now = new Date();
 
   return now.getTime() >= expireTime.getTime();
+};
+
+export const isSupportWalletConnectNamespace = (namespace: string): boolean => {
+  return WALLET_CONNECT_SUPPORT_NAMESPACES.includes(namespace);
+};
+
+export const isSupportWalletConnectChain = (chain: string, chainInfoMap: Record<string, _ChainInfo>): boolean => {
+  const [namespace, info] = chain.split(':');
+
+  if (namespace === WALLET_CONNECT_POLKADOT_NAMESPACE) {
+    return !!findChainInfoByHalfGenesisHash(chainInfoMap, info);
+  } else if (namespace === WALLET_CONNECT_EIP155_NAMESPACE) {
+    return !!findChainInfoByChainId(chainInfoMap, parseInt(info));
+  } else {
+    return false;
+  }
 };

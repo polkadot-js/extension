@@ -13,7 +13,7 @@ import { chainsToWalletConnectChainInfos, getWCAccountList, noop } from '@subwal
 import { Icon, Image, Logo, ModalContext, NetworkItem, SwList, SwModal, SwModalFuncProps } from '@subwallet/react-ui';
 import { SessionTypes } from '@walletconnect/types';
 import CN from 'classnames';
-import { CheckCircle, Info, MagnifyingGlass, Plugs } from 'phosphor-react';
+import { Info, MagnifyingGlass, Plugs } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
@@ -33,7 +33,7 @@ const Component: React.FC<ComponentProps> = (props) => {
   const { namespaces, peer: { metadata: dAppInfo }, topic } = session;
 
   const domain = stripUrl(dAppInfo.url);
-  const img = dAppInfo.icons[0];
+  const img = `https://icons.duckduckgo.com/ip2/${domain}.ico`;
 
   const { t } = useTranslation();
   const notification = useNotification();
@@ -119,20 +119,9 @@ const Component: React.FC<ComponentProps> = (props) => {
         networkKey={item.slug}
         networkMainLogoShape='squircle'
         networkMainLogoSize={28}
-        rightItem={(
-          <div className={'__check-icon'}>
-            <Icon
-              iconColor={token.colorSuccess}
-              phosphorIcon={CheckCircle}
-              size='sm'
-              type='phosphor'
-              weight='fill'
-            />
-          </div>
-        )}
       />
     );
-  }, [t, token.colorSuccess]);
+  }, [t]);
 
   const renderAccountEmpty = useCallback(() => {
     return (
@@ -207,12 +196,7 @@ const Component: React.FC<ComponentProps> = (props) => {
                 size={24}
               />
               <div className='network-name'>
-                {fistChain?.chainInfo?.name || 'Unknown network'}
-                {chains.length > 1 && (
-                  <>
-                    &nbsp;{t('(+ {{number}} more)', { replace: { number: chains.length - 1 } })}
-                  </>
-                )}
+                {t('{{number}} network(s)', { replace: { number: chains.length } })}
               </div>
               <Icon
                 phosphorIcon={Info}
@@ -372,12 +356,6 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
       '.ant-sw-list-wrapper': {
         flexBasis: 'auto'
       }
-    },
-
-    '.ant-network-item .__check-icon': {
-      display: 'flex',
-      width: 40,
-      justifyContent: 'center'
     }
   };
 });

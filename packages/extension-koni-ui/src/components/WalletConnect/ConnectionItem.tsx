@@ -24,6 +24,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { namespaces, peer: { metadata: dAppInfo } } = session;
 
   const domain = stripUrl(dAppInfo.url);
+  const logoUrl = `https://icons.duckduckgo.com/ip2/${domain}.ico`;
 
   const { accounts } = useSelector((state) => state.accountState);
 
@@ -40,7 +41,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <Image
           height={28}
           shape='circle'
-          src={dAppInfo.icons[0]}
+          src={logoUrl}
           width={28}
         />
       }

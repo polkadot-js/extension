@@ -1,17 +1,22 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MantaAuthorizationContext, MantaPayConfig, MantaPaySyncProgress } from '@subwallet/extension-base/background/KoniTypes';
+import { MantaAuthorizationContext, MantaPayConfig, MantaPayIsSyncing, MantaPaySyncProgress } from '@subwallet/extension-base/background/KoniTypes';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { BaseWallet, interfaces, MantaPayWallet } from 'manta-extension-sdk';
+import { Subject } from 'rxjs';
 
 export class MantaPrivateHandler {
   private dbService: DatabaseService;
   private _privateWallet: MantaPayWallet | undefined = undefined;
   private currentAddress: string | undefined;
+  private isSyncingSubject = new Subject<MantaPayIsSyncing>();
 
   constructor (dbService: DatabaseService) {
     this.dbService = dbService;
+    this.isSyncingSubject.next({
+      isSyncing: false
+    });
   }
 
   public setCurrentAddress (address: string) {
@@ -24,6 +29,10 @@ export class MantaPrivateHandler {
 
   public get privateWallet () {
     return this._privateWallet;
+  }
+
+  public subscribeSyncingState () {
+    return this.isSyncingSubject;
   }
 
   public async updateMantaPayConfig (address: string, chain: string, changes: Record<string, any>) {
@@ -139,11 +148,19 @@ export class MantaPrivateHandler {
             isDone: true,
             progress
           });
+          this.isSyncingSubject.next({
+            isSyncing: false,
+            progress
+          });
 
           clearInterval(interval);
         } else {
           callbackData({
             isDone: false,
+            progress
+          });
+          this.isSyncingSubject.next({
+            isSyncing: true,
             progress
           });
         }

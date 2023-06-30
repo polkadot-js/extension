@@ -1884,6 +1884,11 @@ export interface MantaPaySyncProgress {
   progress: number; // in percentage
 }
 
+export interface MantaPayIsSyncing {
+  isSyncing: boolean,
+  progress?: number
+}
+
 export interface MantaPayEnableParams {
   password: string,
   address: string
@@ -1974,6 +1979,7 @@ export interface KoniRequestSignatures {
   'pri(mantaPay.getZkBalance)': [null, null];
   'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];
   'pri(mantaPay.subscribeSyncProgress)': [null, MantaPaySyncProgress, MantaPaySyncProgress];
+  'pri(mantaPay.subscribeSyncingState)': [null, MantaPayIsSyncing, MantaPayIsSyncing];
 
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];

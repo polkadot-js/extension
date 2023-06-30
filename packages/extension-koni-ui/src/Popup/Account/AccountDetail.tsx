@@ -545,7 +545,7 @@ const Component: React.FC<Props> = (props: Props) => {
               <SwAlert
                 className={CN('alert-area')}
                 description={mantaPayState.syncProgress.isDone ? t('All done, you can go back home') : t('This may take a few minutes, keep this app open for faster sync')}
-                title={mantaPayState.syncProgress.isDone ? t('Zk balance is ready') : t(`Zk balance is syncing: ${mantaPayState.syncProgress.progress}%`)}
+                title={mantaPayState.syncProgress.isDone ? t('Zk mode is ready') : t(`Zk mode is syncing: ${mantaPayState.syncProgress.progress}%`)}
                 type={mantaPayState.syncProgress.isDone ? 'success' : 'warning'}
               />
             )

@@ -12,7 +12,7 @@ import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _DEFAULT_MANTA_ZK_CHAIN, _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
+import { _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmChainId, _getSubstrateGenesisHash, _getTokenOnChainAssetId, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _isSubstrateParaChain, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
@@ -1133,6 +1133,14 @@ export default class KoniState {
     // const defaultChains = this.getDefaultNetworkKeys();
     await this.chainService.updateAssetSettingByChain(chainSlug, false);
 
+    if (_MANTA_ZK_CHAIN_GROUP.includes(chainSlug)) {
+      const mantaPayConfig = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
+
+      if (mantaPayConfig && mantaPayConfig.enabled && this.isMantaPayEnabled) {
+        await this.disableMantaPay(mantaPayConfig.address);
+      }
+    }
+
     return this.chainService.disableChain(chainSlug);
   }
 
@@ -2032,5 +2040,9 @@ export default class KoniState {
 
   public subscribeMantaPaySyncProgress (cb: (data: MantaPaySyncProgress) => void) {
     return this.chainService.mantaPay.subscribeSyncProgress(cb);
+  }
+
+  public subscribeMantaPaySyncingState () {
+    return this.chainService.mantaPay.subscribeSyncingState();
   }
 }

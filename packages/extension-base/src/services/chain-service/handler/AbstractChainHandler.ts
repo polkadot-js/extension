@@ -33,25 +33,25 @@ export abstract class AbstractChainHandler {
   abstract sleep (): Promise<void>;
   abstract wakeUp (): Promise<void>;
 
-  handleConnection (chain: string, status: _ChainConnectionStatus): void {
+  handleConnection (chain: string, newStatus: _ChainConnectionStatus): void {
     const currentMap = this.apiStateMapSubject.getValue();
-    const currentStatus = currentMap[chain];
+    const oldStatus = currentMap[chain];
 
     // Update api state
-    if (currentStatus !== status) {
+    if (oldStatus !== newStatus) {
       this.apiStateMapSubject.next({
         ...currentMap,
-        [chain]: status
+        [chain]: newStatus
       });
     }
 
     // Reset retry when connected is successful
-    if (status === _ChainConnectionStatus.CONNECTED) {
+    if (newStatus === _ChainConnectionStatus.CONNECTED) {
       this.cancelRecover(chain);
     }
 
     // Handle connection change
-    if (status === _ChainConnectionStatus.DISCONNECTED) {
+    if (oldStatus === _ChainConnectionStatus.CONNECTED && newStatus === _ChainConnectionStatus.DISCONNECTED) {
       this.handleRecover(chain);
     }
   }

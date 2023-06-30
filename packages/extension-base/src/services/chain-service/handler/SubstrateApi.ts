@@ -43,6 +43,8 @@ export class SubstrateApi implements _SubstrateApi {
     return this.isApiConnectedSubject.getValue();
   }
 
+  substrateRetry = 0;
+
   get connectionStatus (): _ChainConnectionStatus {
     return this.connectionStatusSubject.getValue();
   }
@@ -164,7 +166,9 @@ export class SubstrateApi implements _SubstrateApi {
 
       this.api.connect()
         .then(() => {
-          this.updateConnectionStatus(_ChainConnectionStatus.CONNECTED);
+          this.api.isReady.then(() => {
+            this.updateConnectionStatus(_ChainConnectionStatus.CONNECTED);
+          }).catch(console.error);
         }).catch(console.error);
     }
   }
@@ -203,6 +207,7 @@ export class SubstrateApi implements _SubstrateApi {
 
   onConnect (): void {
     this.updateConnectionStatus(_ChainConnectionStatus.CONNECTED);
+    this.substrateRetry = 0;
     console.log(`Connected to ${this.chainSlug || ''} at ${this.apiUrl}`);
 
     if (this.isApiReadyOnce) {
@@ -215,6 +220,13 @@ export class SubstrateApi implements _SubstrateApi {
     console.log(`Disconnected from ${this.chainSlug} at ${this.apiUrl}`);
     this.updateConnectionStatus(_ChainConnectionStatus.DISCONNECTED);
     this.handleApiReady = createPromiseHandler<_SubstrateApi>();
+    this.substrateRetry += 1;
+
+    if (this.substrateRetry > 9) {
+      this.disconnect().then(() => {
+        this.updateConnectionStatus(_ChainConnectionStatus.UNSTABLE);
+      }).catch(console.error);
+    }
   }
 
   onError (e: Error): void {

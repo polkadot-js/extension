@@ -480,7 +480,7 @@ export class ChainService {
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
-    this.chainStateMapSubject.next(this.getChainStateMap());
+    this.updateChainStateMapSubscription();
     this.assetRegistrySubject.next(this.getAssetRegistry());
     this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
 
@@ -513,8 +513,9 @@ export class ChainService {
 
       // Avoid unnecessary update in case disable chain
       if (currentStatus !== status) {
+        console.log(chainInfo.name, currentStatus, status);
         this.setChainConnectionStatus(chainInfo.slug, status);
-        this.chainStateMapSubject.next(this.getChainStateMap());
+        this.updateChainStateMapSubscription();
       }
     };
 
@@ -605,6 +606,13 @@ export class ChainService {
     needUpdate && this.updateChainStateMapSubscription();
 
     return needUpdate;
+  }
+
+  public async reconnectChain (chain: string) {
+    await this.getSubstrateApi(chain)?.recoverConnect();
+    await this.getEvmApi(chain)?.recoverConnect();
+
+    return true;
   }
 
   public disableChain (chainSlug: string): boolean {

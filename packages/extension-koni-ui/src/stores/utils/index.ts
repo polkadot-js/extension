@@ -3,7 +3,7 @@
 
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, AddressBookInfo, AllLogoMap, AssetSetting, BalanceJson, ChainStakingMetadata, ConfirmationsQueue, CrowdloanJson, KeyringState, MantaPayConfig, MantaPayIsSyncing, NftCollection, NftJson, NominatorMetadata, PriceJson, StakingJson, StakingRewardJson, ThemeNames, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, AddressBookInfo, AllLogoMap, AssetSetting, BalanceJson, ChainStakingMetadata, ConfirmationsQueue, CrowdloanJson, KeyringState, MantaPayConfig, MantaPaySyncState, NftCollection, NftJson, NominatorMetadata, PriceJson, StakingJson, StakingRewardJson, ThemeNames, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
@@ -265,7 +265,7 @@ export const updateMantaPayConfig = (data: MantaPayConfig[]) => {
 
 export const subscribeMantaPayConfig = lazySubscribeMessage('pri(mantaPay.subscribeConfig)', null, updateMantaPayConfig, updateMantaPayConfig);
 
-export const updateMantaPaySyncing = (data: MantaPayIsSyncing) => {
+export const updateMantaPaySyncing = (data: MantaPaySyncState) => {
   store.dispatch({ type: 'mantaPay/updateIsSyncing', payload: data });
 };
 

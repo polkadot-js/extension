@@ -2020,6 +2020,14 @@ export default class KoniState {
   }
 
   public async syncMantaPay () {
+    const config = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
+
+    if (!config.isInitialSync) {
+      console.debug('need manual sync');
+
+      return;
+    }
+
     if (this.chainService?.mantaPay?.privateWallet?.initialSyncIsFinished) {
       await this.chainService?.mantaPay?.privateWallet?.walletSync();
     } else {

@@ -416,7 +416,7 @@ const Component: React.FC<Props> = (props: Props) => {
       dispatchMantaPayState({ type: MantaPayReducerActionType.REJECT_ENABLE, payload: undefined });
       inactiveModal(zkModeConfirmationId);
     }
-  }, [form, inactiveModal, mantaPayState.loading]);
+  }, [inactiveModal, mantaPayState.loading]);
 
   const onOkZkModeConfirmation = useCallback((password: string) => {
     dispatchMantaPayState({ type: MantaPayReducerActionType.SET_LOADING, payload: true });

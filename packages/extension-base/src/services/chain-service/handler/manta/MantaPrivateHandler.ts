@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MantaAuthorizationContext, MantaPayConfig, MantaPayIsSyncing, MantaPaySyncProgress } from '@subwallet/extension-base/background/KoniTypes';
+import { MantaAuthorizationContext, MantaPayConfig, MantaPaySyncProgress, MantaPaySyncState } from '@subwallet/extension-base/background/KoniTypes';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { BaseWallet, interfaces, MantaPayWallet } from 'manta-extension-sdk';
 import { Subject } from 'rxjs';
@@ -10,21 +10,23 @@ export class MantaPrivateHandler {
   private dbService: DatabaseService;
   private _privateWallet: MantaPayWallet | undefined = undefined;
   private currentAddress: string | undefined;
-  private isSyncingSubject = new Subject<MantaPayIsSyncing>();
+  private syncStateSubject = new Subject<MantaPaySyncState>();
+  private syncState: MantaPaySyncState;
 
   constructor (dbService: DatabaseService) {
     this.dbService = dbService;
-    this.isSyncingSubject.next({
+    this.syncState = {
       isSyncing: false
-    });
+    };
+    this.syncStateSubject.next(this.syncState);
   }
 
   public setCurrentAddress (address: string) {
     this.currentAddress = address;
   }
 
-  public getCurrentAddress () {
-    return this.currentAddress;
+  public setManualSync (value: boolean) { // TODO:
+    this.syncState.needManualSync = value;
   }
 
   public get privateWallet () {
@@ -32,7 +34,7 @@ export class MantaPrivateHandler {
   }
 
   public subscribeSyncingState () {
-    return this.isSyncingSubject;
+    return this.syncStateSubject;
   }
 
   public async updateMantaPayConfig (address: string, chain: string, changes: Record<string, any>) {
@@ -148,7 +150,7 @@ export class MantaPrivateHandler {
             isDone: true,
             progress
           });
-          this.isSyncingSubject.next({
+          this.syncStateSubject.next({
             isSyncing: false,
             progress
           });
@@ -159,7 +161,7 @@ export class MantaPrivateHandler {
             isDone: false,
             progress
           });
-          this.isSyncingSubject.next({
+          this.syncStateSubject.next({
             isSyncing: true,
             progress
           });

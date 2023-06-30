@@ -62,16 +62,6 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
               }
             }
           ]
-        },
-        {
-          test: /\.wasm$/,
-          exclude: /\.wasm$/,
-          type: 'asset/resource',
-        },
-        {
-          test: /\.wasm$/,
-          exclude: /(node_modules)/,
-          type: 'webassembly/async',
         }
       ]
     },

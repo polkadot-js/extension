@@ -1255,5 +1255,7 @@
   "Zk balance is ready": "",
   "Zk mode": "",
   "Zk mode requires data synchronization": "",
-  "You will not be able to use the app until the synchronization is finished. This process can take up to 45 minutes or longer, are you sure to do this?": ""
+  "You will not be able to use the app until the synchronization is finished. This process can take up to 45 minutes or longer, are you sure to do this?": "",
+  "Zk mode is ready": "",
+  "This may take a few minutes, please wait until it's done": ""
 }

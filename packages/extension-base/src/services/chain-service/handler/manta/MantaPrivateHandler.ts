@@ -118,6 +118,10 @@ export class MantaPrivateHandler {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const ledgerState = await this.getLedgerState('mantaPay', 'Calamari');
 
+    if (!ledgerState) {
+      return 0;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     return (await this._privateWallet?.getLedgerCurrentCount(ledgerState.checkpoint)) as number;
   }
@@ -128,17 +132,19 @@ export class MantaPrivateHandler {
 
     const interval = setInterval(() => {
       this.getCurrentLedgerState().then((currentCount: number) => {
-        if (currentCount === ledgerTotalCount) {
-          clearInterval(interval);
+        const progress = Math.floor((currentCount / ledgerTotalCount) * 100);
 
+        if (progress === 100) {
           callbackData({
             isDone: true,
-            progress: 100
+            progress
           });
+
+          clearInterval(interval);
         } else {
           callbackData({
             isDone: false,
-            progress: Math.floor((currentCount / ledgerTotalCount) * 100)
+            progress
           });
         }
       })

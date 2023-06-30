@@ -100,7 +100,7 @@ export class KoniCron {
 
       const chainUpdated = eventTypes.includes('chain.updateState');
       const stakingSubmitted = eventTypes.includes('transaction.submitStaking');
-      const reloadMantaPay = eventTypes.includes('mantaPay.submitTransaction') || eventTypes.includes('account.updateCurrent') || eventTypes.includes('mantaPay.enable');
+      const reloadMantaPay = eventTypes.includes('mantaPay.submitTransaction') || eventTypes.includes('mantaPay.enable');
       const updatedChains: string[] = [];
 
       if (chainUpdated) {

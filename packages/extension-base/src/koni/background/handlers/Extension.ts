@@ -22,7 +22,7 @@ import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObjec
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
+import { _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isNativeToken, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
@@ -3325,15 +3325,18 @@ export default class KoniExtension {
   }
 
   private async enableMantaPay ({ address, password }: MantaPayEnableParams): Promise<MantaPayEnableResponse> { // always takes the current account
-    try {
-      const mnemonic = this.keyringExportMnemonic({ address, password });
-      const { connectionStatus } = this.#koniState.chainService.getChainStateByKey('calamari');
+    function timeout () {
+      return new Promise((resolve) => setTimeout(resolve, 1500));
+    }
 
-      if (connectionStatus !== _ChainConnectionStatus.CONNECTED) {
-        return {
-          success: false,
-          message: MantaPayEnableMessage.CHAIN_DISCONNECTED
-        };
+    try {
+      await this.#koniState.chainService.enableChain(_DEFAULT_MANTA_ZK_CHAIN);
+
+      const mnemonic = this.keyringExportMnemonic({ address, password });
+      const { connectionStatus } = this.#koniState.chainService.getChainStateByKey(_DEFAULT_MANTA_ZK_CHAIN);
+
+      if (connectionStatus !== _ChainConnectionStatus.CONNECTED) { // TODO: do better
+        await timeout();
       }
 
       const result = await this.#koniState.enableMantaPay(true, address, password, mnemonic.result);

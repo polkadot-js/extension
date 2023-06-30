@@ -297,7 +297,7 @@ export default class KoniState {
   public async initMantaPay (password: string) {
     const mantaPayConfig = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
 
-    if (mantaPayConfig && mantaPayConfig.enabled) { // only init if current account enabled mantaPay
+    if (mantaPayConfig && mantaPayConfig.enabled && !this.isMantaPayEnabled) { // only init if current account enabled mantaPay
       console.debug('Initiating MantaPay for', mantaPayConfig.address);
       await this.enableMantaPay(false, mantaPayConfig.address, password);
       console.debug('Initiated MantaPay for', mantaPayConfig.address);
@@ -1930,8 +1930,10 @@ export default class KoniState {
     await this.chainService.mantaPay.privateWallet?.dropAuthorizationContext();
     await this.chainService.mantaPay.privateWallet?.dropUserSeedPhrase();
     await this.chainService.mantaPay.deleteMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN);
+    await this.chainService.mantaPay.deleteMantaAuthContext(address, _DEFAULT_MANTA_ZK_CHAIN);
 
     this.chainService.setMantaZkAssetSettings(false);
+    this.isMantaPayEnabled = false;
 
     return true;
   }
@@ -1987,8 +1989,6 @@ export default class KoniState {
           balanceItem.state = APIItemState.READY;
           this.setBalanceItem(balanceItem.tokenSlug, balanceItem);
         }
-
-        console.log('updated zk balances');
       })
       .catch(console.warn);
   }

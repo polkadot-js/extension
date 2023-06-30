@@ -132,10 +132,11 @@ export class EVMLedger extends Ledger {
     try {
       return await promise;
     } catch (e) {
-      const error = (e as Error).message;
-      const message = mappingError(error);
+      const error = e as Error;
 
-      throw new Error(message);
+      error.message = mappingError(error.message);
+
+      throw error;
     }
   };
 

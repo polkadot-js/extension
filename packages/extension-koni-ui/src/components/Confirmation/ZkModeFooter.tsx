@@ -58,6 +58,11 @@ const Component: React.FC<Props> = (props: Props) => {
       .catch(console.error);
   }, [form, onOk]);
 
+  const onClickCancel = useCallback(() => {
+    form.resetFields(['password']);
+    onCancel();
+  }, [form, onCancel]);
+
   return (
     <div className={CN(`${className || ''}`)}>
       <Form
@@ -87,13 +92,14 @@ const Component: React.FC<Props> = (props: Props) => {
       <div className={'zk_confirmation_modal__footer'}>
         <Button
           className={'footer__button'}
+          disabled={loading}
           icon={(
             <Icon
               phosphorIcon={XCircle}
               weight='fill'
             />
           )}
-          onClick={onCancel}
+          onClick={onClickCancel}
           schema={'secondary'}
         >
           {t('Cancel')}

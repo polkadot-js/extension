@@ -412,9 +412,11 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [account, handleEnableMantaPay, isPopup, mantaPayState.isSyncing, notify, t]);
 
   const onCloseZkModeConfirmation = useCallback(() => {
-    dispatchMantaPayState({ type: MantaPayReducerActionType.REJECT_ENABLE, payload: undefined });
-    inactiveModal(zkModeConfirmationId);
-  }, [inactiveModal]);
+    if (!mantaPayState.loading) {
+      dispatchMantaPayState({ type: MantaPayReducerActionType.REJECT_ENABLE, payload: undefined });
+      inactiveModal(zkModeConfirmationId);
+    }
+  }, [form, inactiveModal, mantaPayState.loading]);
 
   const onOkZkModeConfirmation = useCallback((password: string) => {
     dispatchMantaPayState({ type: MantaPayReducerActionType.SET_LOADING, payload: true });
@@ -634,6 +636,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
         <SwModal
           className={CN('account-detail__zk-mode-confirmation')}
+          closable={false}
           footer={(
             <ZkModeFooter
               error={mantaPayState.error}
@@ -643,7 +646,7 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )}
           id={zkModeConfirmationId}
-          onCancel={onCloseZkModeConfirmation}
+          maskClosable={false}
           title={t<string>('Confirmation')}
           wrapClassName={className}
         >

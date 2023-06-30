@@ -105,7 +105,6 @@ export default class WalletConnectService {
         case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V3:
         case EIP155_SIGNING_METHODS.ETH_SIGN_TYPED_DATA_V4:
         case EIP155_SIGNING_METHODS.ETH_SIGN:
-          console.log(request.params);
           this.#eip155RequestHandler.handleRequest(requestEvent);
           break;
         default:

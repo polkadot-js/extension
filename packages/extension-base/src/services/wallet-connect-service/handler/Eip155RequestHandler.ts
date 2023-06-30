@@ -86,22 +86,26 @@ export default class Eip155RequestHandler {
 
       const chainState = this.#koniState.getChainStateByKey(networkKey);
 
-      if (!chainState.active) {
-        throw new Error(getSdkError('USER_REJECTED').message + ' Chain is not active: ' + chainInfo.name);
-      }
-
-      // const pair = keyring.getPair(param.address);
-
-      this.#koniState.evmSendTransaction(getWCId(id), url, networkKey, sessionAccounts, tx)
-        .then(async (signature) => {
-          await this.#walletConnectService.responseRequest({
-            topic: topic,
-            response: formatJsonRpcResult(id, signature)
+      const createRequest = () => {
+        this.#koniState.evmSendTransaction(getWCId(id), url, networkKey, sessionAccounts, tx)
+          .then(async (signature) => {
+            await this.#walletConnectService.responseRequest({
+              topic: topic,
+              response: formatJsonRpcResult(id, signature)
+            });
+          })
+          .catch((e) => {
+            this.#handleError(topic, id, e);
           });
-        })
-        .catch((e) => {
-          this.#handleError(topic, id, e);
+      };
+
+      if (!chainState.active) {
+        this.#koniState.chainService.enableChain(networkKey).then(createRequest).catch(() => {
+          throw new Error(getSdkError('USER_REJECTED').message + ' Can not active chain: ' + chainInfo.name);
         });
+      } else {
+        createRequest();
+      }
     } else {
       throw Error(getSdkError('INVALID_METHOD').message + ' ' + method);
     }

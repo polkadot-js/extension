@@ -8,6 +8,7 @@ import { MantaPayStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/
 const initialState: MantaPayStore = {
   configs: [],
   isSyncing: false,
+  progress: -1,
   reduxStatus: ReduxStatus.INIT
 };
 
@@ -21,6 +22,7 @@ const mantaPaySlice = createSlice({
       return {
         isSyncing: state.isSyncing,
         configs: payload,
+        progress: state.progress,
         reduxStatus: ReduxStatus.READY
       };
     },

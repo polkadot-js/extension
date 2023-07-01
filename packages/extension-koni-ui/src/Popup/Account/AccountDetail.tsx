@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MantaPayEnableMessage, MantaPaySyncProgress } from '@subwallet/extension-base/background/KoniTypes';
+import { MantaPayEnableMessage } from '@subwallet/extension-base/background/KoniTypes';
 import { CloseIcon, Layout, PageWrapper, ZkModeFooter } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
@@ -11,18 +11,20 @@ import { useIsMantaPayAvailable } from '@subwallet/extension-koni-ui/hooks/accou
 import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { deriveAccountV3, disableMantaPay, editAccount, enableMantaPay, forgetAccount, subscribeMantaPaySyncProgress, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { deriveAccountV3, disableMantaPay, editAccount, enableMantaPay, forgetAccount, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types/account';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { copyToClipboard } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/utils/form/form';
-import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, SettingItem, SwAlert, Switch, SwModal, SwQRCode } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, SettingItem, SwAlert, Switch, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, GitMerge, QrCode, ShieldCheck, Swatches, Trash, User, Warning } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -45,35 +47,22 @@ interface DetailFormState {
 }
 
 interface MantaPayState {
-  isEnabled: boolean,
-  isSyncing: boolean,
   shouldShowConfirmation: boolean,
-  syncProgress: MantaPaySyncProgress,
   loading: boolean,
   error?: string
 }
 
 const DEFAULT_MANTA_PAY_STATE: MantaPayState = {
-  isEnabled: false,
-  isSyncing: false,
   shouldShowConfirmation: true,
-  syncProgress: {
-    isDone: false,
-    progress: 0
-  },
   loading: false
 };
 
 export enum MantaPayReducerActionType {
   INIT = 'INIT',
   SET_SHOULD_SHOW_CONFIRMATION = 'SET_SHOULD_SHOW_CONFIRMATION',
-  SET_MANTA_PAY_ENABLED = 'SET_MANTA_PAY_ENABLED',
-  SET_IS_SYNCING_STATE = 'SET_IS_SYNCING_STATE',
   CONFIRM_ENABLE = 'CONFIRM_ENABLE',
   REJECT_ENABLE = 'REJECT_ENABLE',
   SYNC_FAIL = 'SYNC_FAIL',
-  SET_SYNC_PROGRESS = 'SET_SYNC_PROGRESS',
-  SET_SYNC_FINISHED = 'SET_SYNC_FINISHED',
   SET_LOADING = 'SET_LOADING',
   SET_ERROR_MESSAGE = 'SET_ERROR_MESSAGE'
 }
@@ -94,48 +83,21 @@ export const mantaPayReducer = (state: MantaPayState, action: MantaPayReducerAct
         ...state,
         shouldShowConfirmation: payload as boolean
       };
-    case MantaPayReducerActionType.SET_IS_SYNCING_STATE:
-      return {
-        ...state,
-        isSyncing: payload as boolean
-      };
-    case MantaPayReducerActionType.SET_MANTA_PAY_ENABLED:
-      return {
-        ...state,
-        isEnabled: payload as boolean
-      };
     case MantaPayReducerActionType.CONFIRM_ENABLE:
       return {
         ...state,
-        isEnabled: true,
-        isSyncing: true,
         shouldShowConfirmation: false,
         loading: false
       };
     case MantaPayReducerActionType.REJECT_ENABLE:
       return {
         ...state,
-        shouldShowConfirmation: false,
-        isEnabled: false,
-        isSyncing: false
+        shouldShowConfirmation: false
       };
     case MantaPayReducerActionType.SYNC_FAIL:
       return {
         ...state,
-        shouldShowConfirmation: false,
-        isEnabled: false,
-        isSyncing: false
-      };
-    case MantaPayReducerActionType.SET_SYNC_PROGRESS:
-      return {
-        ...state,
-        syncProgress: payload as MantaPaySyncProgress
-      };
-    case MantaPayReducerActionType.SET_SYNC_FINISHED:
-      return {
-        ...state,
-        isSyncing: false,
-        syncProgress: payload as MantaPaySyncProgress
+        shouldShowConfirmation: false
       };
     case MantaPayReducerActionType.SET_LOADING:
       return {
@@ -193,8 +155,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const signMode = useGetAccountSignModeByAddress(accountAddress);
 
-  const _isMantaPayEnabled = useIsMantaPayEnabled(accountAddress || '');
-  const [mantaPayState, dispatchMantaPayState] = useReducer(mantaPayReducer, { ...DEFAULT_MANTA_PAY_STATE, isEnabled: _isMantaPayEnabled });
+  const isZkModeEnabled = useIsMantaPayEnabled(accountAddress || '');
+  const zkModeSyncState = useSelector((state: RootState) => state.mantaPay);
+  const [mantaPayState, dispatchMantaPayState] = useReducer(mantaPayReducer, DEFAULT_MANTA_PAY_STATE);
 
   const handleEnableMantaPay = useCallback(() => {
     activeModal(zkModeConfirmationId);
@@ -205,25 +168,6 @@ const Component: React.FC<Props> = (props: Props) => {
       handleEnableMantaPay();
     }
   }, [enableMantaPayConfirm, handleEnableMantaPay]);
-
-  useEffect(() => {
-    let isRun = true;
-
-    if (mantaPayState.isSyncing && isRun) {
-      subscribeMantaPaySyncProgress((data) => {
-        if (data.isDone) {
-          dispatchMantaPayState({ type: MantaPayReducerActionType.SET_SYNC_FINISHED, payload: data });
-        } else {
-          dispatchMantaPayState({ type: MantaPayReducerActionType.SET_SYNC_PROGRESS, payload: data });
-        }
-      })
-        .catch(console.error);
-    }
-
-    return () => {
-      isRun = false;
-    };
-  }, [mantaPayState.isSyncing]);
 
   const canDerive = useMemo((): boolean => {
     if (account) {
@@ -380,7 +324,7 @@ const Component: React.FC<Props> = (props: Props) => {
         handleEnableMantaPay();
       }
     } else {
-      if (!mantaPayState.isSyncing) {
+      if (!zkModeSyncState.isSyncing) {
         disableMantaPay(account?.address as string)
           .then((result) => {
             if (result) {
@@ -409,7 +353,7 @@ const Component: React.FC<Props> = (props: Props) => {
         });
       }
     }
-  }, [account, handleEnableMantaPay, isPopup, mantaPayState.isSyncing, notify, t]);
+  }, [account, handleEnableMantaPay, isPopup, notify, t, zkModeSyncState.isSyncing]);
 
   const onCloseZkModeConfirmation = useCallback(() => {
     if (!mantaPayState.loading) {
@@ -451,28 +395,31 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper className={CN(className)}>
+      { zkModeSyncState.isSyncing && <div className={'zk-mask'} /> }
+
       <Layout.WithSubHeaderOnly
-        disableBack={deriving || mantaPayState.isSyncing}
+        disableBack={deriving || zkModeSyncState.isSyncing}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
             onClick: goHome,
-            disabled: deriving || mantaPayState.isSyncing
+            disabled: deriving || zkModeSyncState.isSyncing
           }
         ]}
         title={t('Account details')}
       >
         <div className='body-container'>
-          <div className='account-qr'>
-            <SwQRCode
-              errorLevel='M'
-              icon=''
-              // iconSize={token.sizeLG * 1.5}
-              size={token.sizeXL * 3.5}
-              value={account.address}
-            />
-          </div>
+          {/* <div className='account-qr'> */}
+          {/*   <SwQRCode */}
+          {/*     errorLevel='M' */}
+          {/*     icon='' */}
+          {/*     // iconSize={token.sizeLG * 1.5} */}
+          {/*     size={token.sizeXL * 3.5} */}
+          {/*     value={account.address} */}
+          {/*   /> */}
+          {/* </div> */}
           <Form
+            className={'account-detail-form'}
             form={form}
             initialValues={{
               [FormFieldName.NAME]: account.name || ''
@@ -495,7 +442,7 @@ const Component: React.FC<Props> = (props: Props) => {
             >
               <Input
                 className='account-name-input'
-                disabled={deriving || mantaPayState.isSyncing}
+                disabled={deriving || zkModeSyncState.isSyncing}
                 label={t('Wallet name')}
                 onBlur={form.submit}
                 placeholder={t('Wallet name')}
@@ -544,12 +491,12 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </div>
           {
-            (mantaPayState.isSyncing || mantaPayState.syncProgress.isDone) && (
+            (zkModeSyncState.isSyncing || zkModeSyncState.progress === 100) && (
               <SwAlert
-                className={CN('alert-area')}
-                description={mantaPayState.syncProgress.isDone ? t('All done, you can go back home') : t('This may take a few minutes, keep this app open for faster sync')}
-                title={mantaPayState.syncProgress.isDone ? t('Zk mode is ready') : t(`Zk mode is syncing: ${mantaPayState.syncProgress.progress}%`)}
-                type={mantaPayState.syncProgress.isDone ? 'success' : 'warning'}
+                className={CN('zk-alert-area')}
+                description={zkModeSyncState.progress === 100 ? t('All done, you can go back home') : t('This may take a few minutes, keep this app open for faster sync')}
+                title={zkModeSyncState.progress === 100 ? t('Zk mode is ready') : t(`Zk mode is syncing: ${zkModeSyncState.progress}%`)}
+                type={zkModeSyncState.progress === 100 ? 'success' : 'warning'}
               />
             )
           }
@@ -557,7 +504,7 @@ const Component: React.FC<Props> = (props: Props) => {
           {
             isZkModeAvailable && (
               <SettingItem
-                className={CN(`zk-setting ${!mantaPayState.isSyncing ? 'zk-sync-margin' : ''}`)}
+                className={CN(`zk-setting ${!zkModeSyncState.isSyncing ? 'zk-sync-margin' : ''}`)}
                 leftItemIcon={(
                   <BackgroundIcon
                     backgroundColor={token['green-7']}
@@ -569,8 +516,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 name={t('Zk mode')}
                 rightItem={(
                   <Switch
-                    checked={mantaPayState.isEnabled}
-                    disabled={mantaPayState.isSyncing}
+                    checked={isZkModeEnabled}
+                    disabled={zkModeSyncState.isSyncing}
                     onClick={onSwitchMantaPay}
                   />
                 )}
@@ -581,7 +528,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className={CN('account-detail___action-footer')}>
           <Button
             className={CN('account-button')}
-            disabled={deriving || mantaPayState.isSyncing}
+            disabled={deriving || zkModeSyncState.isSyncing}
             icon={(
               <Icon
                 phosphorIcon={Trash}
@@ -594,7 +541,7 @@ const Component: React.FC<Props> = (props: Props) => {
           />
           <Button
             className={CN('account-button')}
-            disabled={!canDerive || mantaPayState.isSyncing}
+            disabled={!canDerive || zkModeSyncState.isSyncing}
             icon={(
               <Icon
                 phosphorIcon={GitMerge}
@@ -609,7 +556,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </Button>
           <Button
             className={CN('account-button')}
-            disabled={account.isExternal || deriving || mantaPayState.isSyncing}
+            disabled={account.isExternal || deriving || zkModeSyncState.isSyncing}
             icon={(
               <Icon
                 phosphorIcon={Export}
@@ -662,9 +609,21 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.account-detail-form': {
+      marginTop: token.margin
+    },
+
     '.ant-sw-screen-layout-body': {
       display: 'flex',
       flexDirection: 'column'
+    },
+
+    '.zk-mask': {
+      width: '100%',
+      height: '100%',
+      zIndex: 3,
+      position: 'absolute',
+      backgroundColor: token.colorBgMask
     },
 
     '.body-container': {
@@ -764,12 +723,16 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       }
     },
 
-    '.alert-area': {
+    '.zk-alert-area': {
+      position: 'relative',
+      zIndex: 4,
       marginTop: token.margin,
       marginBottom: token.marginXS
     },
 
     '.zk-setting': {
+      position: 'relative',
+      zIndex: 4,
       marginBottom: token.marginXS,
       gap: token.sizeXS,
       color: token.colorTextLight1,
@@ -825,10 +788,8 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       width: '100%',
       display: 'flex',
       gap: token.marginSM,
-      paddingLeft: token.padding,
-      paddingRight: token.padding,
-      paddingBottom: token.paddingSM,
-      paddingTop: token.paddingSM,
+      padding: token.padding,
+      paddingBottom: '33px',
 
       button: {
         flex: 2

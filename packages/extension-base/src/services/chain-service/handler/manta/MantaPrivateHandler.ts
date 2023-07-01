@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MantaAuthorizationContext, MantaPayConfig, MantaPaySyncProgress, MantaPaySyncState } from '@subwallet/extension-base/background/KoniTypes';
+import { MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState } from '@subwallet/extension-base/background/KoniTypes';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { BaseWallet, interfaces, MantaPayWallet } from 'manta-extension-sdk';
 import { Subject } from 'rxjs';
@@ -16,7 +16,8 @@ export class MantaPrivateHandler {
   constructor (dbService: DatabaseService) {
     this.dbService = dbService;
     this.syncState = {
-      isSyncing: false
+      isSyncing: false,
+      progress: 0
     };
     this.syncStateSubject.next(this.syncState);
   }
@@ -25,8 +26,12 @@ export class MantaPrivateHandler {
     this.currentAddress = address;
   }
 
-  public setManualSync (value: boolean) { // TODO:
+  public setManualSync (value: boolean) { // TODO
     this.syncState.needManualSync = value;
+  }
+
+  public getSyncState () {
+    return this.syncState;
   }
 
   public get privateWallet () {
@@ -137,35 +142,28 @@ export class MantaPrivateHandler {
     return (await this._privateWallet?.getLedgerCurrentCount(ledgerState.checkpoint)) as number;
   }
 
-  public async subscribeSyncProgress (callbackData: (data: MantaPaySyncProgress) => void) {
+  public async subscribeSyncProgress () {
     const ledgerTotalCount = (await this._privateWallet?.getLedgerTotalCount()) as number;
-    // let interval: NodeJS.Timer | undefined;
 
     const interval = setInterval(() => {
       this.getCurrentLedgerState().then((currentCount: number) => {
         const progress = Math.floor((currentCount / ledgerTotalCount) * 100);
 
         if (progress === 100) {
-          callbackData({
-            isDone: true,
-            progress
-          });
-          this.syncStateSubject.next({
+          this.syncState = {
             isSyncing: false,
             progress
-          });
+          };
 
           clearInterval(interval);
         } else {
-          callbackData({
-            isDone: false,
-            progress
-          });
-          this.syncStateSubject.next({
+          this.syncState = {
             isSyncing: true,
             progress
-          });
+          };
         }
+
+        this.syncStateSubject.next(this.syncState);
       })
         .catch(console.error);
     }, 1000);

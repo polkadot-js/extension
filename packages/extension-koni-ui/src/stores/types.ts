@@ -155,6 +155,7 @@ export interface ChainNominationPoolParams {
 export interface MantaPayStore {
   configs: MantaPayConfig[],
   isSyncing: boolean,
-  progress?: number
+  progress: number,
+  needManualSync?: boolean,
   reduxStatus: ReduxStatus
 }

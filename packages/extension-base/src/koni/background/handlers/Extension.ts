@@ -3341,14 +3341,25 @@ export default class KoniExtension {
 
       const result = await this.#koniState.enableMantaPay(true, address, password, mnemonic.result);
 
+      this.#skipAutoLock = true;
+      const unsubSyncProgress = await this.#koniState.chainService.mantaPay.subscribeSyncProgress();
+
       console.debug('Start initial sync for MantaPay');
 
       this.#koniState.initialSyncMantaPay(address)
         .then(() => {
           console.debug('Finished initial sync for MantaPay');
+
+          this.#skipAutoLock = false;
           this.#koniState.chainService.setMantaZkAssetSettings(true);
+          unsubSyncProgress();
         })
-        .catch(console.error);
+        .catch((e) => {
+          console.error('Error syncing MantaPay', e);
+
+          this.#skipAutoLock = false;
+          unsubSyncProgress();
+        });
 
       return {
         success: !!result,
@@ -3392,32 +3403,7 @@ export default class KoniExtension {
     return this.#koniState.getMantaPayConfig('calamari');
   }
 
-  private async subscribeMantaPaySyncProgress (id: string, port: chrome.runtime.Port) {
-    const callBackData = createSubscription<'pri(mantaPay.subscribeSyncProgress)'>(id, port);
-
-    this.#skipAutoLock = true;
-    const mantaPayConfigSubscription = await this.#koniState.subscribeMantaPaySyncProgress((rs) => {
-      if (rs.isDone) {
-        this.#skipAutoLock = false;
-      }
-
-      callBackData(rs);
-    });
-
-    this.createUnsubscriptionHandle(id, mantaPayConfigSubscription);
-
-    port.onDisconnect.addListener((): void => {
-      mantaPayConfigSubscription();
-      this.cancelSubscription(id);
-    });
-
-    return {
-      isDone: false,
-      progress: 0
-    };
-  }
-
-  private subscribeMantaPaySyncingState (id: string, port: chrome.runtime.Port): MantaPaySyncState {
+  private subscribeMantaPaySyncState (id: string, port: chrome.runtime.Port): MantaPaySyncState {
     const cb = createSubscription<'pri(mantaPay.subscribeSyncingState)'>(id, port);
 
     const syncingStateSubscription = this.#koniState.subscribeMantaPaySyncingState().subscribe({
@@ -3432,9 +3418,7 @@ export default class KoniExtension {
       this.cancelSubscription(id);
     });
 
-    return {
-      isSyncing: false
-    };
+    return this.#koniState.chainService.mantaPay.getSyncState();
   }
 
   // --------------------------------------------------------------
@@ -3847,12 +3831,10 @@ export default class KoniExtension {
         return await this.enableMantaPay(request as MantaPayEnableParams);
       case 'pri(mantaPay.subscribeConfig)':
         return await this.subscribeMantaPayConfig(id, port);
-      case 'pri(mantaPay.subscribeSyncProgress)':
-        return await this.subscribeMantaPaySyncProgress(id, port);
       case 'pri(mantaPay.disable)':
         return await this.disableMantaPay(request as string);
       case 'pri(mantaPay.subscribeSyncingState)':
-        return this.subscribeMantaPaySyncingState(id, port);
+        return this.subscribeMantaPaySyncState(id, port);
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

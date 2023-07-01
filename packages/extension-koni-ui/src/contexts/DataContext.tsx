@@ -224,7 +224,7 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   _DataContext.addHandler({ ...subscribeStakingNominatorMetadata, name: 'subscribeStakingNominatorMetadata', relatedStores: ['staking'] });
   _DataContext.addHandler({ ...subscribeTxHistory, name: 'subscribeTxHistory', relatedStores: ['transactionHistory'] });
   _DataContext.addHandler({ ...subscribeMantaPayConfig, name: 'subscribeMantaPayConfig', relatedStores: ['mantaPay'], isStartImmediately: true });
-  _DataContext.addHandler({ ...subscribeMantaPaySyncingState, name: 'subscribeMantaPaySyncingState', relatedStores: ['mantaPay'] });
+  _DataContext.addHandler({ ...subscribeMantaPaySyncingState, name: 'subscribeMantaPaySyncingState', relatedStores: ['mantaPay'], isStartImmediately: true });
 
   return <Provider store={store}>
     <PersistGate persistor={persistor}>

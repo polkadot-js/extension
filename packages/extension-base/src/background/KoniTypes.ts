@@ -1879,14 +1879,9 @@ export interface MantaAuthorizationContext {
   data: unknown;
 }
 
-export interface MantaPaySyncProgress {
-  isDone: boolean;
-  progress: number; // in percentage
-}
-
 export interface MantaPaySyncState {
   isSyncing: boolean,
-  progress?: number,
+  progress: number,
   needManualSync?: boolean
 }
 
@@ -1979,7 +1974,6 @@ export interface KoniRequestSignatures {
   'pri(mantaPay.disable)': [string, boolean];
   'pri(mantaPay.getZkBalance)': [null, null];
   'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];
-  'pri(mantaPay.subscribeSyncProgress)': [null, MantaPaySyncProgress, MantaPaySyncProgress];
   'pri(mantaPay.subscribeSyncingState)': [null, MantaPaySyncState, MantaPaySyncState];
 
   // Auth

@@ -227,6 +227,10 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [account, goHome, navigate]);
 
+  const closeExportModal = useCallback(() => {
+    inactiveModal(EXPORT_ACCOUNT_MODAL);
+  }, [inactiveModal]);
+
   if (!account) {
     return null;
   }
@@ -406,7 +410,7 @@ const Component: React.FC<Props> = (props: Props) => {
         {isWebUI && (
           <CustomModal
             id={EXPORT_ACCOUNT_MODAL}
-            onCancel={() => inactiveModal(EXPORT_ACCOUNT_MODAL)}
+            onCancel={closeExportModal}
             title={t('Export account')}
           >
             <AccountExport

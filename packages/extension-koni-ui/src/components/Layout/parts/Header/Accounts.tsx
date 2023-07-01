@@ -125,6 +125,12 @@ const Component: React.FC = () => {
     }
   }, [accounts, navigate, goHome]);
 
+  const clickSelect = useCallback((address: string) => {
+    return () => {
+      _onSelect(address);
+    };
+  }, [_onSelect]);
+
   const renderItem = useCallback((item: AccountJson) => {
     const currentAccountIsAll = isAccountAll(item.address);
     const selectedAccount = currentAccount?.address || '';
@@ -133,7 +139,7 @@ const Component: React.FC = () => {
       return (
         <div
           key={item.address}
-          onClick={() => _onSelect(item.address)}
+          onClick={clickSelect(item.address)}
         >
           <AccountItemWithName
             address={item.address}
@@ -147,7 +153,7 @@ const Component: React.FC = () => {
     return (
       <div
         key={item.address}
-        onClick={() => _onSelect(item.address)}
+        onClick={clickSelect(item.address)}
       >
         <AccountCardSelection
           accountName={item.name || ''}
@@ -166,7 +172,7 @@ const Component: React.FC = () => {
         />
       </div>
     );
-  }, [currentAccount?.address, onClickDetailAccount, _onSelect]);
+  }, [currentAccount?.address, clickSelect, onClickDetailAccount]);
 
   const emptyTokenList = useCallback(() => {
     return (

@@ -219,3 +219,4 @@ export * from './connector';
 export * from './common';
 export * from './form';
 export * from './transaction';
+export * from './click';

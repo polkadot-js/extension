@@ -17,7 +17,6 @@ import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, Corners
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps;
@@ -95,7 +94,6 @@ type LoadingMap = {
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
-  const navigate = useNavigate();
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
@@ -219,7 +217,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             background='transparent'
             center={false}
             className='web-header'
-            onBack={() => navigate(-1)}
+            onBack={goBack}
             showBackButton={true}
             title={t('General settings')}
           />

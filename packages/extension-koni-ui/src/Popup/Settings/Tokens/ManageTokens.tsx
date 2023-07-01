@@ -155,7 +155,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         {isWebUI && <SwSubHeader
           background='transparent'
           center={false}
-          onBack={() => navigate(-1)}
+          onBack={goBack}
           rightButtons={subHeaderButton}
           showBackButton={true}
           title={t<string>('Manage tokens')}

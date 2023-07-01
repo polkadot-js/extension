@@ -155,6 +155,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, [isWebUI, t]);
 
+  const openImportModal = useCallback(() => {
+    activeModal(IMPORT_NFT_MODAL);
+  }, [activeModal]);
+
+  const closeImportModal = useCallback(() => {
+    inactiveModal(IMPORT_NFT_MODAL);
+  }, [inactiveModal]);
+
   const listSection = useMemo(() => {
     if (!isWebUI) {
       return (
@@ -219,7 +227,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               weight='fill'
             />
           )}
-          onClick={() => activeModal(IMPORT_NFT_MODAL)}
+          onClick={openImportModal}
           type='ghost'
         >
           {t('Import collectible')}
@@ -228,7 +236,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       <CustomModal
         id={IMPORT_NFT_MODAL}
-        onCancel={() => inactiveModal(IMPORT_NFT_MODAL)}
+        onCancel={closeImportModal}
         title={t('Import NFT')}
       >
         <NftImport modalContent />

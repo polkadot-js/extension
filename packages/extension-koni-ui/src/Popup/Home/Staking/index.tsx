@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
-import { StakingItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, StakingItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { EmptyList, FilterModal, Layout, PageWrapper, SwStakingItem, TokenItem } from '@subwallet/extension-koni-ui/components';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import Search from '@subwallet/extension-koni-ui/components/Search';
@@ -10,13 +10,14 @@ import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFilterModal, useGetStakingList, useNotification, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetStakingList, useNotification, usePreCheckAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { GlobalToken } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, StakingDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
+import { stopClickPropagation } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, Number as NumberItem, Popover, SwList, Table, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { ArrowClockwise, DotsThree, FadersHorizontal, Plus, Trophy, User, Users } from 'phosphor-react';
@@ -224,7 +225,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title: 'Token name',
         dataIndex: 'name',
         key: 'name',
-        render: (_, row: StakingDataType) => {
+        render: (_: any, row: StakingDataType) => {
           const { staking: { chain,
             name,
             nativeToken } } = row;
@@ -251,7 +252,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         ),
         dataIndex: 'type',
         key: 'type',
-        render: (_, row: StakingDataType) => {
+        render: (_: any, row: StakingDataType) => {
           const { staking: { type: stakingType } } = row;
           const tagColor = stakingType === StakingType.POOLED ? 'success' : 'warning';
           const tagIcon: PhosphorIcon = stakingType === StakingType.POOLED ? Users : User;
@@ -271,7 +272,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title: 'Price',
         dataIndex: 'price',
         key: 'price',
-        render: (_, row: StakingDataType) => {
+        render: (_: any, row: StakingDataType) => {
           // TODO: update priceChangeStatus
           const currentChainInfo = currentChainBalance(row.staking);
 
@@ -311,7 +312,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title: 'Bonded funds',
         dataIndex: 'bonded',
         key: 'bonded',
-        render: (_, row: StakingDataType) => {
+        render: (_: any, row: StakingDataType) => {
           const { staking } = row;
           const currentChainInfo = currentChainBalance(row.staking);
 
@@ -370,7 +371,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       type='phosphor'
                     />
                   )}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={stopClickPropagation}
                   size='sm'
                   type='ghost'
                 />
@@ -381,6 +382,36 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }
     ];
   }, [currentChainBalance, priceMap, token?.colorError, token?.colorSuccess]);
+
+  const onClickReload = useCallback(() => {
+    setLoading(true);
+    notify({
+      icon: <ActivityIndicator size={32} />,
+      style: { top: 210 },
+      direction: 'vertical',
+      duration: 1.8,
+      message: t('Reloading')
+    });
+
+    reloadCron({ data: 'staking' })
+      .then(() => {
+        setLoading(false);
+      })
+      .catch(console.error);
+  }, [notify, t]);
+
+  const onSearch = useCallback((value: string) => setSearchInput(value), []);
+
+  const onRow = useCallback(
+    (record: StakingDataType) => {
+      return {
+        onClick: () => onClickItem(record)
+      };
+    }, [onClickItem]);
+
+  const onClickStake = useCallback(() => {
+    preCheck(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`), ExtrinsicType.STAKING_BOND);
+  }, [navigate, preCheck]);
 
   const listSection = useMemo(() => {
     if (isWebUI) {
@@ -402,24 +433,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       size='sm'
                     />
                   )}
-                  onClick={
-                    () => {
-                      setLoading(true);
-                      notify({
-                        icon: <ActivityIndicator size={32} />,
-                        style: { top: 210 },
-                        direction: 'vertical',
-                        duration: 1.8,
-                        message: t('Reloading')
-                      });
-
-                      reloadCron({ data: 'staking' })
-                        .then(() => {
-                          setLoading(false);
-                        })
-                        .catch(console.error);
-                    }
-                  }
+                  onClick={onClickReload}
                   type='ghost'
                 />
                 <Button
@@ -429,13 +443,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       size='sm'
                     />
                   )}
-                  onClick={preCheck(() => navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`))}
+                  onClick={onClickStake}
                   type='ghost'
                 />
               </>
             }
             onClickActionBtn={onClickActionBtn}
-            onSearch={(value: string) => setSearchInput(value)}
+            onSearch={onSearch}
             placeholder={'Token name'}
             searchValue={searchInput}
             showActionBtn
@@ -447,11 +461,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Table
                 columns={columns}
                 dataSource={filteredList}
-                onRow={(record: StakingDataType) => {
-                  return {
-                    onClick: () => onClickItem(record)
-                  };
-                }}
+                onRow={onRow}
                 pagination={false}
               />
             )
@@ -482,7 +492,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         showActionBtn
       />
     );
-  }, [columns, emptyStakingList, filterFunction, filteredList, isWebUI, navigate, notify, onClickActionBtn, onClickItem, preCheck, renderItem, searchFunction, searchInput, stakingItems, t]);
+  }, [columns, emptyStakingList, filterFunction, filteredList, isWebUI, onClickActionBtn, onClickReload, onClickStake, onRow, onSearch, renderItem, searchFunction, searchInput, stakingItems, t]);
 
   return (
     <PageWrapper

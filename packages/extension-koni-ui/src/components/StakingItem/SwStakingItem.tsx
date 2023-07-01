@@ -7,6 +7,7 @@ import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { StakingDataType } from '@subwallet/extension-koni-ui/types/staking';
+import { stopClickPropagation } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Number as NumberItem, Popover, StakingItem, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import CN from 'classnames';
@@ -57,22 +58,6 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
 
   const _onPressItem = useCallback(() => onClickItem(stakingData), [onClickItem, stakingData]);
 
-  if (!isWebUI) {
-    return (
-      <StakingItem
-        className={className}
-        convertedStakingValue={convertedBalanceValue}
-        decimal={0}
-        networkKey={staking.chain}
-        onClickRightIcon={_onClickRightIcon}
-        onPressItem={_onPressItem}
-        stakingNetwork={staking.nativeToken}
-        stakingType={getStakingTypeTag(staking.type)}
-        stakingValue={balanceValue}
-      />
-    );
-  }
-
   const { staking: { chain, name, nativeToken } } = stakingData;
 
   const rightIcon = useMemo(() => {
@@ -119,17 +104,33 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
               type='phosphor'
             />
           )}
-          onClick={(e) => e.stopPropagation()}
+          onClick={stopClickPropagation}
           size='sm'
           type='ghost'
         />
       </Popover>
     );
-  }, [_onClickRightIcon, isWebUI, stakingData.chainStakingMetadata, stakingData.nominatorMetadata, stakingData.reward]);
+  }, [_onClickRightIcon, isWebUI]);
 
   // TODO: update priceChangeStatus
   const priceChangeStatus = 'increase';
   const marginColor = priceChangeStatus === 'increase' ? token.colorSuccess : token.colorError;
+
+  if (!isWebUI) {
+    return (
+      <StakingItem
+        className={className}
+        convertedStakingValue={convertedBalanceValue}
+        decimal={0}
+        networkKey={staking.chain}
+        onClickRightIcon={_onClickRightIcon}
+        onPressItem={_onPressItem}
+        stakingNetwork={staking.nativeToken}
+        stakingType={getStakingTypeTag(staking.type)}
+        stakingValue={balanceValue}
+      />
+    );
+  }
 
   return (
     <div
@@ -159,7 +160,7 @@ const Component: React.FC<Props> = ({ className, decimals, onClickItem, onClickR
           decimal={0}
           decimalColor={marginColor}
           intColor={marginColor}
-          prefix={'decrease' === 'decrease' ? '-' : '+'}
+          prefix={'+'}
           size={12}
           suffix='%'
           unitColor={marginColor}

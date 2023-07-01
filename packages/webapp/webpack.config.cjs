@@ -170,6 +170,6 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
 
 module.exports = createConfig({
   fallback: './src/fallback.ts',
-  'webapp': './src/webRunner.ts',
+  webapp: './src/webRunner.ts',
   main: './src/index.tsx'
 }, {}, false);

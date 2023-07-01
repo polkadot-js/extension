@@ -267,6 +267,12 @@ function Component (): React.ReactElement {
     outletContext?.setDetailTitle(<div className='header-content'>{t('Token')}: {symbol}</div>);
   }, [outletContext, symbol, t]);
 
+  const itemClickAction = useCallback((item: TokenBalanceItemType) => {
+    return () => {
+      onClickItem(item);
+    };
+  }, [onClickItem]);
+
   return (
     <div
       className={CN('token-detail-container', {
@@ -304,7 +310,7 @@ function Component (): React.ReactElement {
                 <TokenBalanceDetailItem
                   key={item.slug}
                   {...item}
-                  onClick={() => onClickItem(item)}
+                  onClick={itemClickAction(item)}
                 />
               ))
             }

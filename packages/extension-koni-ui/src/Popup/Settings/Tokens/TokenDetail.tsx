@@ -19,7 +19,7 @@ import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
 import { CheckCircle, Copy, Trash } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -28,7 +28,6 @@ type Props = ThemeProps
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
   const { token } = useTheme() as Theme;
@@ -231,7 +230,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         {isWebUI && <SwSubHeader
           background='transparent'
           center={false}
-          onBack={() => navigate(-1)}
+          onBack={goBack}
           showBackButton={true}
           title={t<string>('Token detail')}
         />}

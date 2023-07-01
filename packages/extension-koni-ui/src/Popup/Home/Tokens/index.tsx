@@ -195,6 +195,12 @@ const Component = (): React.ReactElement => {
     };
   }, [handleResize]);
 
+  const tokenBalanceClick = useCallback((item: TokenBalanceItemType) => {
+    return () => {
+      onClickItem(item);
+    };
+  }, [onClickItem]);
+
   if (isWebUI) {
     return (
       <div className='token-table'>
@@ -311,7 +317,7 @@ const Component = (): React.ReactElement => {
               <TokenGroupBalanceItem
                 key={item.slug}
                 {...item}
-                onPressItem={() => onClickItem(item)}
+                onPressItem={tokenBalanceClick(item)}
               />
             );
           })

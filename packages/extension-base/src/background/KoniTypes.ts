@@ -1882,6 +1882,10 @@ export interface RequestApproveConnectWalletSession {
   accounts: string[];
 }
 
+export interface RequestReconnectConnectWalletSession {
+  id: string;
+}
+
 export interface RequestDisconnectWalletConnectSession {
   topic: string
 }
@@ -2098,6 +2102,7 @@ export interface KoniRequestSignatures {
   'pri(walletConnect.requests.subscribe)': [null, WalletConnectSessionRequest[], WalletConnectSessionRequest[]];
   'pri(walletConnect.session.approve)': [RequestApproveConnectWalletSession, boolean];
   'pri(walletConnect.session.reject)': [RequestRejectConnectWalletSession, boolean];
+  'pri(walletConnect.session.reconnect)': [RequestReconnectConnectWalletSession, boolean];
   'pri(walletConnect.session.subscribe)': [null, SessionTypes.Struct[], SessionTypes.Struct[]];
   'pri(walletConnect.session.disconnect)': [RequestDisconnectWalletConnectSession, boolean];
 }

@@ -12,7 +12,9 @@ export interface WalletConnectSessionRequest extends ConfirmationRequestBase {
 }
 
 export type ResultApproveWalletConnectSession = EngineTypes.ApproveParams;
-export type RequestWalletConnectSession = WalletConnectSessionRequest & Resolver<void>;
+export interface RequestWalletConnectSession extends WalletConnectSessionRequest, Resolver<void> {
+  reconnect: () => void;
+}
 
 export enum EIP155_SIGNING_METHODS {
   PERSONAL_SIGN = 'personal_sign',

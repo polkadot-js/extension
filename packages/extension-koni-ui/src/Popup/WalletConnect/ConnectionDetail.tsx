@@ -162,7 +162,7 @@ const Component: React.FC<ComponentProps> = (props) => {
         loading: loading,
         onClick: onDisconnect
       }}
-      title={t('Wallet connect')}
+      title={t('WalletConnect')}
     >
       <div className='body-container'>
         <MetaInfo

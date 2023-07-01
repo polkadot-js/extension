@@ -4,18 +4,21 @@
 import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
+import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { AccountItemWithName, ConfirmationGeneralInfo } from '@subwallet/extension-koni-ui/components';
+import { uniqueStringArray } from '@subwallet/extension-base/utils';
+import { AlertBox, ConfirmationGeneralInfo } from '@subwallet/extension-koni-ui/components';
+import WCNetworkSupported from '@subwallet/extension-koni-ui/components/WalletConnect/WCNetworkSupported';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { useNotification } from '@subwallet/extension-koni-ui/hooks';
 import { approveWalletConnectSession, rejectWalletConnectSession } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps, WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps, WalletConnectChainInfoWithStatus } from '@subwallet/extension-koni-ui/types';
 import { chainsToWalletConnectChainInfos, isAccountAll, isNoAccount } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, ModalContext } from '@subwallet/react-ui';
+import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { PlusCircle, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -68,40 +71,78 @@ function Component ({ className, request }: Props) {
   const navigate = useNavigate();
   const notification = useNotification();
 
-  const { inactiveModal } = useContext(ModalContext);
-
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+  const [isExpired, setIsExpired] = useState(isProposalExpired(request.request));
 
-  const chains = useMemo((): WalletConnectChainInfo[] => {
-    const chains = Object.values(params.requiredNamespaces).map((namespace) => namespace.chains || []).flat();
+  const isUnSupportCase = useMemo(() =>
+    Object.values(params.requiredNamespaces)
+      .map((namespace) => namespace.chains || [])
+      .flat()
+      .some((chain) => !isSupportWalletConnectChain(chain, chainInfoMap))
+  , [chainInfoMap, params.requiredNamespaces]
+  );
 
-    return chainsToWalletConnectChainInfos(chainInfoMap, chains);
-  }, [params.requiredNamespaces, chainInfoMap]);
+  const supportedNamespaces = useMemo(() => {
+    const namespaces: string[] = [];
 
-  const haveUnSupportChain = useMemo(() => !!chains.find(({ chainInfo }) => !chainInfo), [chains]);
+    for (const namespace of Object.keys(params.requiredNamespaces)) {
+      if (isSupportWalletConnectNamespace(namespace)) {
+        namespaces.push(namespace);
+      }
+    }
+
+    for (const namespace of Object.keys(params.optionalNamespaces)) {
+      if (isSupportWalletConnectNamespace(namespace)) {
+        namespaces.push(namespace);
+      }
+    }
+
+    return uniqueStringArray(namespaces);
+  }, [params.optionalNamespaces, params.requiredNamespaces]);
+
+  const supportedChains = useMemo(() => {
+    const chains: string[] = [];
+
+    for (const [key, namespace] of Object.entries(params.requiredNamespaces)) {
+      if (isSupportWalletConnectNamespace(key)) {
+        chains.push(...(namespace.chains || []));
+      }
+    }
+
+    for (const [key, namespace] of Object.entries(params.optionalNamespaces)) {
+      if (isSupportWalletConnectNamespace(key)) {
+        chains.push(...(namespace.chains || []));
+      }
+    }
+
+    return chainsToWalletConnectChainInfos(chainInfoMap, uniqueStringArray(chains))
+      .filter(({ chainInfo }) => !!chainInfo)
+      .map((data): WalletConnectChainInfoWithStatus => ({ ...data, supported: true }));
+  }, [chainInfoMap, params.optionalNamespaces, params.requiredNamespaces]);
 
   const accountAuthType = useMemo((): AccountAuthType => {
-    return Object.keys(params.requiredNamespaces).reduce((previousResult: AccountAuthType, currentValue): AccountAuthType => {
-      const [namespace] = currentValue.split(':');
+    return [...Object.keys(params.requiredNamespaces), ...Object.keys(params.optionalNamespaces)]
+      .reduce((previousResult: AccountAuthType, currentValue): AccountAuthType => {
+        const [namespace] = currentValue.split(':');
 
-      if (namespace === WALLET_CONNECT_EIP155_NAMESPACE) {
-        if (['both', 'substrate'].includes(previousResult)) {
-          return 'both';
+        if (namespace === WALLET_CONNECT_EIP155_NAMESPACE) {
+          if (['both', 'substrate'].includes(previousResult)) {
+            return 'both';
+          } else {
+            return 'evm';
+          }
+        } else if (namespace === WALLET_CONNECT_POLKADOT_NAMESPACE) {
+          if (['both', 'evm'].includes(previousResult)) {
+            return 'both';
+          } else {
+            return 'substrate';
+          }
         } else {
-          return 'evm';
+          return previousResult;
         }
-      } else if (namespace === WALLET_CONNECT_POLKADOT_NAMESPACE) {
-        if (['both', 'evm'].includes(previousResult)) {
-          return 'both';
-        } else {
-          return 'substrate';
-        }
-      } else {
-        return previousResult;
-      }
-    }, '' as AccountAuthType);
-  }, [params.requiredNamespaces]);
+      }, '' as AccountAuthType);
+  }, [params.optionalNamespaces, params.requiredNamespaces]);
 
   // List all of all accounts by auth type
   const visibleAccounts = useMemo(() => (filterAuthorizeAccounts(accounts, accountAuthType || 'both')),
@@ -127,30 +168,12 @@ function Component ({ className, request }: Props) {
 
   const [loading, setLoading] = useState(false);
 
-  // Create selected map by default
-  useEffect(() => {
-    setSelectedMap((map) => {
-      const existedKey = Object.keys(map);
-
-      accounts.forEach((item) => {
-        if (!existedKey.includes(item.address)) {
-          map[item.address] = ([] as string[]).includes(item.address);
-        }
-      });
-
-      map[ALL_ACCOUNT_KEY] = visibleAccounts.every((item) => map[item.address]);
-
-      return { ...map };
-    });
-  }, [accounts, visibleAccounts]);
-
   const onCancel = useCallback(() => {
-    inactiveModal('confirmation');
     setLoading(true);
     handleCancel(request).finally(() => {
       setLoading(false);
     });
-  }, [inactiveModal, request]);
+  }, [request]);
 
   const onConfirm = useCallback(() => {
     setLoading(true);
@@ -217,90 +240,97 @@ function Component ({ className, request }: Props) {
 
   console.debug(missingType); // TODO: need remove
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsExpired(isProposalExpired(request.request));
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [request.request]);
+
+  const isSupportCase = !isUnSupportCase && !isExpired;
+
   return (
     <>
       <div className={CN('confirmation-content', className)}>
         <ConfirmationGeneralInfo request={request} />
-        <div
-          className={CN(
-            'title',
-            {
-              'sub-title': visibleAccounts.length > 0
-            }
-          )}
-        >
-          {
-            haveUnSupportChain
-              ? t('Request exists an up-support network')
-              : visibleAccounts.length === 0
-                ? t('No available account')
-                : t('Choose the account(s) you’d like to connect')
-          }
-        </div>
         {
-          haveUnSupportChain
-            ? (
-              <></>
-            )
-            : (
-              <>
-                {
-                  !!visibleAccounts.length && (
-                    <div className='account-list'>
-                      {
-                        visibleAccounts.length > 1 &&
-                        (
-                          <AccountItemWithName
-                            accountName={'All account'}
-                            accounts={visibleAccounts}
-                            address={ALL_ACCOUNT_KEY}
-                            avatarSize={24}
-                            isSelected={selectedMap[ALL_ACCOUNT_KEY]}
-                            onClick={onAccountSelect(ALL_ACCOUNT_KEY)}
-                            showUnselectIcon
-                          />
-                        )
-                      }
-                      {visibleAccounts.map((item) => (
-                        <AccountItemWithName
-                          accountName={item.name}
-                          address={item.address}
-                          avatarSize={24}
-                          genesisHash={item.genesisHash}
-                          isSelected={selectedMap[item.address]}
-                          key={item.address}
-                          onClick={onAccountSelect(item.address)}
-                          showUnselectIcon
-                        />
-                      ))}
-                    </div>
-                  )
-                }
-              </>
-            )
+          isUnSupportCase && (
+            <>
+              <AlertBox
+                description={t('There is at least 1 chosen network unavailable')}
+                title={t('Unsupported network')}
+                type='warning'
+              />
+              <WCNetworkSupported
+                id='support-networks'
+                networks={supportedChains}
+              />
+            </>
+          )
         }
-        <div className='description'>
-          {
-            visibleAccounts.length === 0
-              ? t("You don't have any accounts to connect. Please create or import an account.")
-              : t('Make sure you trust this site before connecting')
-          }
-        </div>
+        {
+          !isUnSupportCase && isExpired && (
+            <>
+              <AlertBox
+                description={t('Connection expired. Please create a new connection from dApp')}
+                title={t('Connection expired')}
+                type='warning'
+              />
+            </>
+          )
+        }
+        {
+          isSupportCase && (
+            <></>
+          )
+        }
       </div>
       <div className='confirmation-footer'>
         {
-          !haveUnSupportChain && visibleAccounts.length > 0 &&
+          !isSupportCase && (
+            <Button
+              disabled={loading}
+              icon={(
+                <Icon
+                  phosphorIcon={XCircle}
+                  weight='fill'
+                />
+              )}
+              onClick={onCancel}
+              schema={'secondary'}
+            >
+              {t('Cancel')}
+            </Button>
+          )
+        }
+        {
+          isSupportCase && !missingType.length &&
           (
             <>
               <Button
                 disabled={loading}
+                icon={(
+                  <Icon
+                    phosphorIcon={XCircle}
+                    weight='fill'
+                  />
+                )}
                 onClick={onCancel}
                 schema={'secondary'}
               >
-                {t('Reject')}
+                {t('Cancel')}
               </Button>
               <Button
                 disabled={Object.values(selectedMap).every((value) => !value)}
+                icon={(
+                  <Icon
+                    phosphorIcon={CheckCircle}
+                    weight='fill'
+                  />
+                )}
                 loading={loading}
                 onClick={onConfirm}
               >
@@ -310,7 +340,7 @@ function Component ({ className, request }: Props) {
           )
         }
         {
-          !haveUnSupportChain && visibleAccounts.length === 0 &&
+          isSupportCase && !!missingType.length &&
             (
               <>
                 <Button
@@ -340,20 +370,6 @@ function Component ({ className, request }: Props) {
                 </Button>
               </>
             )
-        }
-        {
-          haveUnSupportChain &&
-          (
-            <>
-              <Button
-                disabled={loading}
-                onClick={onCancel}
-                schema='danger'
-              >
-                {t('Reject')}
-              </Button>
-            </>
-          )
         }
       </div>
     </>

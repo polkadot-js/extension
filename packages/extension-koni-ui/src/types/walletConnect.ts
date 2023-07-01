@@ -7,3 +7,7 @@ export interface WalletConnectChainInfo {
   chainInfo: ChainInfo | null;
   slug: string;
 }
+
+export interface WalletConnectChainInfoWithStatus extends WalletConnectChainInfo {
+  supported: boolean;
+}

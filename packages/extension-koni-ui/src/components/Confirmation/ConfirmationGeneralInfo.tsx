@@ -4,13 +4,13 @@
 import { ConfirmationRequestBase } from '@subwallet/extension-base/background/types';
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { getDomainFromUrl } from '@subwallet/extension-base/utils';
-import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
-import DualLogo from '@subwallet/extension-koni-ui/components/Logo/DualLogo';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Image, Logo, Typography } from '@subwallet/react-ui';
+import { Icon, Image, Logo, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+
+import { DualLogo, WalletConnect } from '../Logo';
 
 interface Props extends ThemeProps {
   request: ConfirmationRequestBase;
@@ -19,10 +19,15 @@ interface Props extends ThemeProps {
 }
 
 const WalletConnectLogo = (
-  <Image
-    height={24}
-    src={DefaultLogosMap.walletconnect}
-    width={24}
+  <Icon
+    customIcon={(
+      <WalletConnect
+        height='1em'
+        width='1em'
+      />
+    )}
+    size='md'
+    type='customIcon'
   />
 );
 

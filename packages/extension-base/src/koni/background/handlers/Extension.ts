@@ -31,7 +31,7 @@ import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionE
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { reformatAddress } from '@subwallet/extension-base/utils';
+import { reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { convertSubjectInfoToAddresses } from '@subwallet/extension-base/utils/address';
 import { createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -3389,7 +3389,9 @@ export default class KoniExtension {
         if (namespace.chains) {
           const accounts: string[] = [];
 
-          namespace.chains.forEach((chain) => {
+          const chains = uniqueStringArray(namespace.chains);
+
+          chains.forEach((chain) => {
             accounts.push(...(selectedAccounts.filter((address) => isEthereumAddress(address) === (key === WALLET_CONNECT_EIP155_NAMESPACE)).map((address) => `${chain}:${address}`)));
           });
 

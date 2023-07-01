@@ -92,9 +92,9 @@ const ClaimReward = new LazyLoader(() => import('@subwallet/extension-koni-ui/Po
 const Withdraw = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Withdraw'));
 
 // Wallet Connect
-const ConnectWalletConnect = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/WalletConnect/ConnectWalletConnect'));
-const ConnectionList = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/WalletConnect/ConnectionList'));
-const ConnectionDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/Settings/WalletConnect/ConnectionDetail'));
+const ConnectWalletConnect = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectWalletConnect'));
+const ConnectionList = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
+const ConnectionDetail = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
 const ErrorFallback = new LazyLoader(() => import('@subwallet/extension-koni-ui/Popup/ErrorFallback'));
 

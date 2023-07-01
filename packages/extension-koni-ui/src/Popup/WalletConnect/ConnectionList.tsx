@@ -91,7 +91,7 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         )
       }}
-      title={t('Wallet Connect')}
+      title={t('WalletConnect')}
     >
       <PageWrapper
         className={CN(className)}

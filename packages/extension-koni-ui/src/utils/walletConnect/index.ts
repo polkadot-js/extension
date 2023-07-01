@@ -3,27 +3,12 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/background/types';
-import { _getSubstrateGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
+import { findChainInfoByChainId, findChainInfoByHalfGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
-import { WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
+import { WalletConnectChainInfo, WalletConnectChainInfoWithStatus } from '@subwallet/extension-koni-ui/types';
 import { SessionTypes } from '@walletconnect/types';
 
 import { findAccountByAddress } from '../account';
-import { findChainInfoByChainId } from '../chain';
-
-export const findChainInfoByHalfGenesisHash = (chainMap: Record<string, _ChainInfo>, halfGenesisHash?: string): _ChainInfo | null => {
-  if (!halfGenesisHash) {
-    return null;
-  }
-
-  for (const chainInfo of Object.values(chainMap)) {
-    if (_getSubstrateGenesisHash(chainInfo)?.toLowerCase().substring(2, 2 + 32) === halfGenesisHash.toLowerCase()) {
-      return chainInfo;
-    }
-  }
-
-  return null;
-};
 
 export const chainsToWalletConnectChainInfos = (chainMap: Record<string, _ChainInfo>, chains: string[]): Array<WalletConnectChainInfo> => {
   return chains.map((chain) => {

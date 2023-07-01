@@ -12,8 +12,8 @@ export const useIsMantaPayAvailable = (account: AccountJson | null) => {
   const configs = useSelector((state: RootState) => state.mantaPay.configs);
 
   const isAvailableForAccount = useMemo(() => {
-    return !!account && !account.isExternal && !!account.isMasterAccount && !account.isReadOnly && !isEthereumAddress(account.address);
-  }, [account]);
+    return !!account && configs.length === 0 && !account.isExternal && !!account.isMasterAccount && !account.isReadOnly && !isEthereumAddress(account.address);
+  }, [account, configs.length]);
 
   const isEnabledForAccount = useMemo(() => {
     if (!account) {

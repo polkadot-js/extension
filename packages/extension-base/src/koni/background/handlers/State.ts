@@ -297,7 +297,7 @@ export default class KoniState {
   public async initMantaPay (password: string) {
     const mantaPayConfig = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
 
-    if (mantaPayConfig && mantaPayConfig.enabled && !this.isMantaPayEnabled) { // only init if current account enabled mantaPay
+    if (mantaPayConfig && mantaPayConfig.enabled && !this.isMantaPayEnabled) { // only init the first login
       console.debug('Initiating MantaPay for', mantaPayConfig.address);
       await this.enableMantaPay(false, mantaPayConfig.address, password);
       console.debug('Initiated MantaPay for', mantaPayConfig.address);

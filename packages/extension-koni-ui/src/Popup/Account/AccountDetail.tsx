@@ -20,7 +20,7 @@ import { copyToClipboard } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { convertFieldToObject } from '@subwallet/extension-koni-ui/utils/form/form';
 import { BackgroundIcon, Button, Field, Form, Icon, Input, ModalContext, SettingItem, SwAlert, Switch, SwModal, SwQRCode } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, QrCode, ShareNetwork, ShieldCheck, Swatches, TrashSimple, User, Warning } from 'phosphor-react';
+import { CircleNotch, CopySimple, Export, Eye, FloppyDiskBack, GitMerge, QrCode, ShieldCheck, Swatches, Trash, User, Warning } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -502,6 +502,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 prefix={(
                   <BackgroundIcon
                     backgroundColor='var(--wallet-name-icon-bg-color)'
+                    className={'user-name-icon'}
                     iconColor='var(--wallet-name-icon-color)'
                     phosphorIcon={walletNamePrefixIcon}
                   />
@@ -559,7 +560,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 className={CN(`zk-setting ${!mantaPayState.isSyncing ? 'zk-sync-margin' : ''}`)}
                 leftItemIcon={(
                   <BackgroundIcon
-                    backgroundColor={token['green-6']}
+                    backgroundColor={token['green-7']}
                     phosphorIcon={ShieldCheck}
                     size='sm'
                     weight='fill'
@@ -575,17 +576,28 @@ const Component: React.FC<Props> = (props: Props) => {
                 )}
               />)
           }
+        </div>
 
+        <div className={CN('account-detail___action-footer')}>
           <Button
-            block={true}
-            className={CN('account-button', `action-type-${ActionType.DERIVE}`)}
-            contentAlign='left'
+            className={CN('account-button')}
+            disabled={deriving || mantaPayState.isSyncing}
+            icon={(
+              <Icon
+                phosphorIcon={Trash}
+                weight='fill'
+              />
+            )}
+            loading={deleting}
+            onClick={onDelete}
+            schema='error'
+          />
+          <Button
+            className={CN('account-button')}
             disabled={!canDerive || mantaPayState.isSyncing}
             icon={(
-              <BackgroundIcon
-                backgroundColor='var(--icon-bg-color)'
-                phosphorIcon={ShareNetwork}
-                size='sm'
+              <Icon
+                phosphorIcon={GitMerge}
                 weight='fill'
               />
             )}
@@ -593,44 +605,21 @@ const Component: React.FC<Props> = (props: Props) => {
             onClick={onDerive}
             schema='secondary'
           >
-            {t('Derive an account')}
+            {t('Derive')}
           </Button>
           <Button
-            block={true}
-            className={CN('account-button', `action-type-${ActionType.EXPORT}`)}
-            contentAlign='left'
+            className={CN('account-button')}
             disabled={account.isExternal || deriving || mantaPayState.isSyncing}
             icon={(
-              <BackgroundIcon
-                backgroundColor='var(--icon-bg-color)'
+              <Icon
                 phosphorIcon={Export}
-                size='sm'
                 weight='fill'
               />
             )}
             onClick={onExport}
             schema='secondary'
           >
-            {t('Export this account')}
-          </Button>
-          <Button
-            block={true}
-            className={CN('account-button', `action-type-${ActionType.DELETE}`)}
-            contentAlign='left'
-            disabled={deriving || mantaPayState.isSyncing}
-            icon={(
-              <BackgroundIcon
-                backgroundColor='var(--icon-bg-color)'
-                phosphorIcon={TrashSimple}
-                size='sm'
-                weight='fill'
-              />
-            )}
-            loading={deleting}
-            onClick={onDelete}
-            schema='secondary'
-          >
-            {t('Remove this account')}
+            {t('Export')}
           </Button>
         </div>
 
@@ -673,7 +662,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
+
     '.body-container': {
+      overflow: 'scroll',
+      flex: 1,
       padding: `0 ${token.padding}px`,
       '--wallet-name-icon-bg-color': token['geekblue-6'],
       '--wallet-name-icon-color': token.colorWhite,
@@ -682,9 +678,11 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
         width: token.sizeMD,
         height: token.sizeMD,
 
-        '.anticon': {
-          height: token.sizeSM,
-          width: token.sizeSM
+        '.user-name-icon': {
+          span: {
+            height: token.sizeSM,
+            width: token.sizeSM
+          }
         }
       },
 
@@ -774,7 +772,11 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
     '.zk-setting': {
       marginBottom: token.marginXS,
       gap: token.sizeXS,
-      color: token.colorTextLight1
+      color: token.colorTextLight1,
+
+      '.ant-web3-block .ant-web3-block-right-item': {
+        marginRight: 0
+      }
     },
 
     '.zk-sync-margin': {
@@ -813,6 +815,28 @@ const AccountDetail = styled(Component)<Props>(({ theme: { token } }: Props) => 
       paddingRight: token.padding,
       fontWeight: token.bodyFontWeight,
       color: token.colorTextTertiary
+    },
+
+    '.account-detail___action-footer': {
+      backgroundColor: token.colorBgDefault,
+      position: 'sticky',
+      bottom: 0,
+      left: 0,
+      width: '100%',
+      display: 'flex',
+      gap: token.marginSM,
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
+      paddingBottom: token.paddingSM,
+      paddingTop: token.paddingSM,
+
+      button: {
+        flex: 2
+      },
+
+      'button:nth-child(1)': {
+        flex: 1
+      }
     }
   };
 });

@@ -16,6 +16,7 @@
   ],
   "bin": {
     "koni-ci-build-dev": "./scripts/koni-ci-build-dev.mjs",
+    "koni-ci-build-webapp": "./scripts/koni-ci-build-webapp.mjs",
     "koni-ci-ghact-build": "./scripts/koni-ci-ghact-build.mjs",
     "koni-dev-build-ts": "./scripts/koni-dev-build-ts.mjs"
   },
@@ -24,6 +25,7 @@
     "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
     "build:koni-dev": "koni-ci-build-dev",
+    "build:koni-webapp": "koni-ci-build-webapp",
     "build:release": "koni-ci-ghact-build",
     "build:rollup": "polkadot-exec-rollup --config",
     "build:ui": "cd packages/extension-koni && NODE_ENV=production yarn webpack --config webpack.extension.cjs --mode production",

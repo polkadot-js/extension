@@ -9,7 +9,7 @@ import { ApiPromise } from '@polkadot/api';
 
 export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
   const weightParam = getDestWeight();
-  const version = ['statemint', 'statemine', 'shiden'].includes(originChainInfo.slug) ? 'V3' : 'V1';
+  const version = ['statemint', 'statemine', 'shiden', 'astar'].includes(originChainInfo.slug) ? 'V3' : 'V1';
   const beneficiary = getBeneficiary(destinationChainInfo, recipientAddress, version);
   const destination = getDestinationChainLocation(originChainInfo, destinationChainInfo, version);
   let assetLocation = getTokenLocation(tokenInfo, value, version);

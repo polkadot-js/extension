@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DEFAULT_MODEL_VIEWER_PROPS, SHOW_3D_MODELS_CHAIN } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckReadOnly, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -213,7 +213,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
     [chain, from, nftItem, onError, onSuccess]
   );
 
-  const preCheckReadOnly = usePreCheckReadOnly(from);
+  const checkAction = usePreCheckAction(from);
 
   useEffect(() => {
     setChain(currentNftDetails.nftChain);
@@ -312,7 +312,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
             />
           )}
           loading={loading}
-          onClick={preCheckReadOnly(form.submit)}
+          onClick={checkAction(form.submit, ExtrinsicType.SEND_NFT)}
         >
           {t('Next')}
         </Button>

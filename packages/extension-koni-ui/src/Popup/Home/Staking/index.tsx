@@ -10,7 +10,7 @@ import { ALL_KEY } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useFilterModal, useGetStakingList, useNotification, usePreCheckStakeAction, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetStakingList, useNotification, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getBalanceValue, getConvertedBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -121,7 +121,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, 100);
   }, [activeModal]);
 
-  const preCheck = usePreCheckStakeAction(currentAccount?.address);
+  const preCheck = usePreCheckAction(currentAccount?.address, false);
 
   const onClickStakeMore = useCallback(() => {
     navigate(`/transaction/stake/${ALL_KEY}/${ALL_KEY}`);
@@ -151,7 +151,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     },
     {
       icon: rightIcon,
-      onClick: preCheck(onClickStakeMore)
+      onClick: preCheck(onClickStakeMore, ExtrinsicType.STAKING_BOND)
     }
   ]), [loading, preCheck, notify, t, onClickStakeMore]);
 

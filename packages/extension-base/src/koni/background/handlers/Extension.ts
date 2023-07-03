@@ -3437,7 +3437,6 @@ export default class KoniExtension {
     const cb = createSubscription<'pri(walletConnect.session.subscribe)'>(id, port);
 
     const subscription = this.#koniState.walletConnectService.sessionSubject.subscribe((rs) => {
-      console.log('subscribeWalletConnectSessions', rs);
       cb(rs);
     });
 

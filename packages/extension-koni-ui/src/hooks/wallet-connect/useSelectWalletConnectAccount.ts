@@ -8,7 +8,7 @@ import { isSameAddress, uniqueStringArray } from '@subwallet/extension-base/util
 import { WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
 import { chainsToWalletConnectChainInfos, isAccountAll, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { ProposalTypes } from '@walletconnect/types';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -113,7 +113,13 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
   const supportOneChain = useMemo(() => supportedChains.length === 1, [supportedChains]);
   const supportOneNamespace = useMemo(() => Object.keys(namespaces).length === 1, [namespaces]);
 
-  const [isExpired, setIsExpired] = useState(isProposalExpired(params));
+  const [isExpiredState, setIsExpiredState] = useState(isProposalExpired(params));
+  const isExpired = useMemo(
+    () => isProposalExpired(params)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    , [params, isExpiredState]);
+
+  const namespaceRef = useRef<Record<string, WalletConnectChainInfo[]>>({});
 
   const onSelectAccount = useCallback((namespace: string, account: string, applyImmediately = false) => {
     return () => {
@@ -171,12 +177,14 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
     setResult((oldState) => {
       const result: Record<string, SelectAccount> = {};
 
+      const selectReplace = JSON.stringify(namespaces) !== JSON.stringify(namespaceRef.current);
+
       for (const [namespace, networks] of Object.entries(namespaces)) {
         if (WALLET_CONNECT_SUPPORT_NAMESPACES.includes(namespace)) {
           result[namespace] = {
             networks,
-            selectedAccounts: oldState[namespace]?.selectedAccounts || [],
-            appliedAccounts: oldState[namespace]?.appliedAccounts || [],
+            selectedAccounts: selectReplace ? [] : oldState[namespace]?.selectedAccounts || [],
+            appliedAccounts: selectReplace ? [] : oldState[namespace]?.appliedAccounts || [],
             availableAccounts: noAllAccount
               .filter((acc) => (WALLET_CONNECT_EIP155_NAMESPACE === namespace) === isEthereumAddress(acc.address))
           };
@@ -185,13 +193,25 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
 
       return result;
     });
+
+    return () => {
+      namespaceRef.current = namespaces;
+    };
   }, [noAllAccount, namespaces]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const callback = (): boolean => {
       const isExpired = isProposalExpired(params);
 
-      setIsExpired(isExpired);
+      setIsExpiredState(isExpired);
+
+      return isExpired;
+    };
+
+    callback();
+
+    const interval = setInterval(() => {
+      const isExpired = callback();
 
       if (isExpired) {
         clearInterval(interval);

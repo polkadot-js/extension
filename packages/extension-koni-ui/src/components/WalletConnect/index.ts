@@ -3,6 +3,8 @@
 
 export { default as ConnectionItem } from './ConnectionItem';
 export { default as WCNetworkAvatarGroup } from './WCNetworkAvatarGroup';
+export { default as WCNetworkBase } from './WCNetworkBase';
 export { default as WCNetworkInput } from './WCNetworkInput';
 export { default as WalletConnectNetworkItem } from './WCNetworkItem';
-export { default as WCNetworkModal } from './WCNetworkSupported';
+export { default as WCNetworkSelected } from './WCNetworkSelected';
+export { default as WCNetworkSupported } from './WCNetworkSupported';

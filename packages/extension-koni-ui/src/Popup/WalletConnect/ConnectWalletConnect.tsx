@@ -10,6 +10,7 @@ import { validWalletConnectUri } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Input, ModalContext, PageIcon, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Scan } from 'phosphor-react';
+import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { SyntheticEvent, useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -55,9 +56,12 @@ const Component: React.FC<Props> = (props: Props) => {
       })
       .catch((e) => {
         console.error(e);
+        const errMessage = (e as Error).message;
+        const message = errMessage.includes('Pairing already exists') ? t('Pairing already exists') : t('Fail to add connection');
+
         notification({
           type: 'error',
-          message: t('Fail to add connection')
+          message: message
         });
         setLoading(false);
       })
@@ -74,12 +78,16 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onSuccess = useCallback((result: ScannerResult) => {
     const uri = result.text;
-    const isValid = validWalletConnectUri(uri);
+    const error = validWalletConnectUri(uri);
 
-    if (isValid && !loading) {
+    if (!error && !loading) {
       setScanError('');
       inactiveModal(scannerId);
       form.setFieldValue('uri', result.text);
+    } else {
+      if (error) {
+        setScanError(error);
+      }
     }
   }, [loading, inactiveModal, form]);
 
@@ -102,6 +110,18 @@ const Component: React.FC<Props> = (props: Props) => {
   const goBack = useCallback(() => {
     navigate('/wallet-connect/list');
   }, [navigate]);
+
+  const uriValidator = useCallback((rule: RuleObject, uri: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const error = validWalletConnectUri(uri);
+
+      if (!error) {
+        resolve();
+      } else {
+        reject(new Error(error));
+      }
+    });
+  }, []);
 
   return (
     <Layout.WithSubHeaderOnly
@@ -158,12 +178,16 @@ const Component: React.FC<Props> = (props: Props) => {
               {
                 required: true,
                 message: t('URI is required')
+              },
+              {
+                validator: uriValidator
               }
             ]}
+            statusHelpAsTooltip={true}
           >
             <Input
               disabled={loading}
-              label={t('Uri')}
+              label={t('URI')}
               placeholder={t('Please type or paste URI')}
               suffix={(
                 <>
@@ -225,6 +249,10 @@ const ConnectWalletConnect = styled(Component)<Props>(({ theme: { token } }: Pro
         marginTop: token.controlHeightLG,
         marginBottom: token.sizeXXL,
         '--page-icon-color': token.colorPrimary
+      },
+
+      '.ant-input-suffix': {
+        minWidth: token.sizeXS
       }
     }
   };

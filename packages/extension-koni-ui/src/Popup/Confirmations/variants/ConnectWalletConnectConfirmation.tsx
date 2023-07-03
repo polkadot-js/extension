@@ -50,21 +50,23 @@ function Component ({ className, request }: Props) {
     isUnSupportCase,
     missingType,
     namespaceAccounts,
+    onApplyAccounts,
+    onCancelSelectAccounts,
     onSelectAccount,
     supportOneChain,
     supportOneNamespace,
     supportedChains } = useSelectWalletConnectAccount(params);
 
   const allowSubmit = useMemo(() => {
-    return Object.values(namespaceAccounts).every(({ selectedAccounts }) => selectedAccounts.length);
+    return Object.values(namespaceAccounts).every(({ appliedAccounts }) => appliedAccounts.length);
   }, [namespaceAccounts]);
 
   const [loading, setLoading] = useState(false);
 
-  const _onSelectAccount = useCallback((namespace: string): ((address: string) => VoidFunction) => {
-    return (address: string) => {
+  const _onSelectAccount = useCallback((namespace: string): ((address: string, applyImmediately?: boolean) => VoidFunction) => {
+    return (address: string, applyImmediately = false) => {
       return () => {
-        onSelectAccount(namespace, address)();
+        onSelectAccount(namespace, address, applyImmediately)();
       };
     };
   }, [onSelectAccount]);
@@ -78,7 +80,7 @@ function Component ({ className, request }: Props) {
 
   const onConfirm = useCallback(() => {
     setLoading(true);
-    const selectedAccounts = Object.values(namespaceAccounts).map(({ selectedAccounts }) => selectedAccounts).flat();
+    const selectedAccounts = Object.values(namespaceAccounts).map(({ appliedAccounts }) => appliedAccounts).flat();
 
     handleConfirm(request, selectedAccounts)
       .catch((e) => {
@@ -97,6 +99,18 @@ function Component ({ className, request }: Props) {
     setSelectedAccountTypes(convertKeyTypes(missingType));
     navigate('/accounts/new-seed-phrase');
   }, [navigate, missingType]);
+
+  const onApplyModal = useCallback((namespace: string) => {
+    return () => {
+      onApplyAccounts(namespace);
+    };
+  }, [onApplyAccounts]);
+
+  const onCancelModal = useCallback((namespace: string) => {
+    return () => {
+      onCancelSelectAccounts(namespace);
+    };
+  }, [onCancelSelectAccounts]);
 
   const isSupportCase = !isUnSupportCase && !isExpired;
 
@@ -134,7 +148,9 @@ function Component ({ className, request }: Props) {
           isSupportCase && (
             <div className='namespaces-list'>
               {
-                Object.entries(namespaceAccounts).map(([namespace, { availableAccounts, networks, selectedAccounts }]) => {
+                Object.entries(namespaceAccounts).map(([namespace, value]) => {
+                  const { appliedAccounts, availableAccounts, networks, selectedAccounts } = value;
+
                   return (
                     <div
                       className={CN('namespace-container', { 'space-xs': !supportOneNamespace })}
@@ -159,11 +175,14 @@ function Component ({ className, request }: Props) {
                         )
                       }
                       <WCAccountSelect
+                        appliedAccounts={appliedAccounts}
                         availableAccounts={availableAccounts}
                         id={`${namespace}-accounts`}
+                        onApply={onApplyModal(namespace)}
+                        onCancel={onCancelModal(namespace)}
                         onSelectAccount={_onSelectAccount(namespace)}
                         selectedAccounts={selectedAccounts}
-                        useModal={!supportOneChain}
+                        useModal={!supportOneNamespace}
                       />
                     </div>
                   );
@@ -267,6 +286,7 @@ const ConnectWalletConnectConfirmation = styled(Component)<Props>(({ theme: { to
   '.account-list-title': {
     fontSize: token.fontSizeHeading6,
     lineHeight: token.lineHeightHeading6,
+    fontWeight: token.fontWeightStrong,
     textAlign: 'start'
   },
 

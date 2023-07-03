@@ -49,8 +49,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { token } = useTheme() as Theme;
   const { accountAddress } = useParams();
 
-  console.log(token);
-
   const [form] = Form.useForm<DetailFormState>();
 
   const account = useGetAccountByAddress(accountAddress);

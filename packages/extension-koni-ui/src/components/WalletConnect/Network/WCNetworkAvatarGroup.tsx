@@ -41,8 +41,9 @@ const Component: React.FC<Props> = ({ className, networks }: Props) => {
                 key={network.slug}
               >
                 <Logo
+                  className='icon'
                   network={network.slug}
-                  shape='circle'
+                  shape='squircle'
                   size={showCount === 3 ? sizeLogo.default : sizeLogo.large}
                 />
               </div>

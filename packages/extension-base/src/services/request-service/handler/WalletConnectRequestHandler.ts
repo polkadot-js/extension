@@ -36,7 +36,7 @@ export default class WalletConnectRequestHandler {
     this.#requestService.updateIconV2(shouldClose);
   }
 
-  private connectWCComplete = (id: string): Resolver<void> & { reconnect: () => void} => {
+  private connectWCComplete = (id: string): Resolver<void> => {
     const complete = (shouldClose: boolean): void => {
       delete this.#walletConnectSessionRequests[id];
       this.updateIconConnectWC(shouldClose);
@@ -48,9 +48,6 @@ export default class WalletConnectRequestHandler {
       },
       resolve: (): void => {
         complete(true);
-      },
-      reconnect: (): void => {
-        complete(false);
       }
     };
   };

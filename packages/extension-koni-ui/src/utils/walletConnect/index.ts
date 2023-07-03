@@ -51,17 +51,23 @@ export const getWCAccountList = (accounts: AccountJson[], namespaces: SessionTyp
   });
 
   const convertMap: Record<string, AbstractAddressJson> = {};
-  const convertList = Object.keys(rawMap).map((address): AbstractAddressJson => {
+  const convertList = Object.keys(rawMap).map((address): AbstractAddressJson | null => {
     const account = findAccountByAddress(accounts, address);
 
-    return {
-      address: account?.address || address,
-      name: account?.name
-    };
+    if (account) {
+      return {
+        address: account.address,
+        name: account.name
+      };
+    } else {
+      return null;
+    }
   });
 
   convertList.forEach((info) => {
-    convertMap[info.address] = info;
+    if (info) {
+      convertMap[info.address] = info;
+    }
   });
 
   return Object.values(convertMap);

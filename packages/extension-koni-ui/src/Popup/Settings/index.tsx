@@ -150,7 +150,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           ),
           leftIconBgColor: token['geekblue-6'],
           rightIcon: CaretRight,
-          title: 'Wallet connect',
+          title: 'WalletConnect',
           onClick: () => {
             navigate('/wallet-connect/list');
           }

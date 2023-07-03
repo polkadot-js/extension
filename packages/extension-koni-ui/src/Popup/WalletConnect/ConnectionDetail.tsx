@@ -25,6 +25,8 @@ interface ComponentProps {
   className?: string;
 }
 
+const renderNetworkEmpty = () => <GeneralEmptyList />;
+
 const disconnectModalId = 'disconnect-connection-modal';
 const networkModalId = 'connection-detail-networks-modal';
 
@@ -131,12 +133,6 @@ const Component: React.FC<ComponentProps> = (props) => {
     );
   }, [t]);
 
-  const renderNetworkEmpty = useCallback(() => {
-    return (
-      <GeneralEmptyList />
-    );
-  }, []);
-
   const openNetworkModal = useCallback(() => {
     activeModal(networkModalId);
   }, [activeModal]);
@@ -144,6 +140,14 @@ const Component: React.FC<ComponentProps> = (props) => {
   const closeNetworkModal = useCallback(() => {
     inactiveModal(networkModalId);
   }, [inactiveModal]);
+
+  const searchFunction = useCallback((item: WalletConnectChainInfo, searchText: string) => {
+    const searchTextLowerCase = searchText.toLowerCase();
+
+    return (
+      item.chainInfo?.name.toLowerCase().includes(searchTextLowerCase)
+    );
+  }, []);
 
   return (
     <Layout.WithSubHeaderOnly
@@ -225,6 +229,7 @@ const Component: React.FC<ComponentProps> = (props) => {
             renderItem={renderChainItem}
             renderWhenEmpty={renderNetworkEmpty}
             rowGap='var(--row-gap)'
+            searchFunction={searchFunction}
             searchPlaceholder={t<string>('Network name')}
           />
         </SwModal>
@@ -329,7 +334,11 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
     },
 
     '.account-list': {
-      margin: `0 -${token.margin}px`
+      margin: `0 -${token.margin}px`,
+
+      '.ant-sw-list-wrapper': {
+        flexBasis: 'auto'
+      }
     },
 
     '.total-account': {

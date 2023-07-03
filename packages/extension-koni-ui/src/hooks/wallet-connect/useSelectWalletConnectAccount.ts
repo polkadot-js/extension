@@ -18,6 +18,7 @@ interface SelectAccount {
   availableAccounts: AccountJson[];
   networks: WalletConnectChainInfo[];
   selectedAccounts: string[];
+  appliedAccounts: string[];
 }
 
 const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
@@ -114,7 +115,7 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
 
   const [isExpired, setIsExpired] = useState(isProposalExpired(params));
 
-  const onSelectAccount = useCallback((namespace: string, account: string) => {
+  const onSelectAccount = useCallback((namespace: string, account: string, applyImmediately = false) => {
     return () => {
       setResult((oldState) => {
         const newState: Record<string, SelectAccount> = { ...oldState };
@@ -137,9 +138,33 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
           }
         }
 
+        if (applyImmediately) {
+          newState[namespace].appliedAccounts = newState[namespace].selectedAccounts;
+        }
+
         return newState;
       });
     };
+  }, []);
+
+  const onApplyAccounts = useCallback((namespace: string) => {
+    setResult((oldState) => {
+      const newState: Record<string, SelectAccount> = { ...oldState };
+
+      newState[namespace].appliedAccounts = newState[namespace].selectedAccounts;
+
+      return newState;
+    });
+  }, []);
+
+  const onCancelSelectAccounts = useCallback((namespace: string) => {
+    setResult((oldState) => {
+      const newState: Record<string, SelectAccount> = { ...oldState };
+
+      newState[namespace].selectedAccounts = newState[namespace].appliedAccounts;
+
+      return newState;
+    });
   }, []);
 
   useEffect(() => {
@@ -151,6 +176,7 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
           result[namespace] = {
             networks,
             selectedAccounts: oldState[namespace]?.selectedAccounts || [],
+            appliedAccounts: oldState[namespace]?.appliedAccounts || [],
             availableAccounts: noAllAccount
               .filter((acc) => (WALLET_CONNECT_EIP155_NAMESPACE === namespace) === isEthereumAddress(acc.address))
           };
@@ -178,14 +204,16 @@ const useSelectWalletConnectAccount = (params: ProposalTypes.Struct) => {
   }, [params]);
 
   return {
-    namespaceAccounts: result,
-    onSelectAccount,
-    missingType,
-    supportedChains,
     isExpired,
     isUnSupportCase,
+    missingType,
+    namespaceAccounts: result,
+    onApplyAccounts,
+    onCancelSelectAccounts,
+    onSelectAccount,
     supportOneChain,
-    supportOneNamespace
+    supportOneNamespace,
+    supportedChains
   };
 };
 

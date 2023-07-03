@@ -4,13 +4,15 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountItemWithName } from '@subwallet/extension-koni-ui/components';
+import { AccountItemWithName, AlertBox } from '@subwallet/extension-koni-ui/components';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
-import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
+import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
-import React, { useCallback, useContext } from 'react';
+import { CheckCircle } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 import GeneralEmptyList from '../../GeneralEmptyList';
@@ -19,19 +21,26 @@ import WCAccountInput from './WCAccountInput';
 interface Props extends ThemeProps {
   id: string;
   selectedAccounts: string[];
+  appliedAccounts: string[];
   availableAccounts: AccountJson[];
-  onSelectAccount: (account: string) => VoidFunction;
+  onSelectAccount: (account: string, applyImmediately?: boolean) => VoidFunction;
   useModal: boolean;
+  onApply: () => void;
+  onCancel: () => void;
 }
 
 const renderEmpty = () => <GeneralEmptyList />;
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { availableAccounts, className, id, onSelectAccount, selectedAccounts, useModal } = props;
+  const { appliedAccounts, availableAccounts, className, id, onApply, onCancel, onSelectAccount, selectedAccounts, useModal } = props;
 
   const { t } = useTranslation();
 
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+
+  const sectionRef = useRef<SwListSectionRef>(null);
+
+  const isActive = checkActive(id);
 
   const onOpenModal = useCallback(() => {
     activeModal(id);
@@ -39,7 +48,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const onCloseModal = useCallback(() => {
     inactiveModal(id);
-  }, [inactiveModal, id]);
+    onCancel();
+  }, [inactiveModal, id, onCancel]);
+
+  const _onApply = useCallback(() => {
+    inactiveModal(id);
+    onApply();
+  }, [id, inactiveModal, onApply]);
 
   const renderItem = useCallback((item: AccountJson) => {
     const selected = !!selectedAccounts.find((address) => isSameAddress(address, item.address));
@@ -51,74 +66,108 @@ const Component: React.FC<Props> = (props: Props) => {
         direction='horizontal'
         isSelected={selected}
         key={item.address}
-        onClick={onSelectAccount(item.address)}
+        onClick={onSelectAccount(item.address, false)}
         showUnselectIcon={true}
       />
     );
   }, [onSelectAccount, selectedAccounts]);
 
+  useEffect(() => {
+    if (!isActive) {
+      sectionRef.current?.setSearchValue('');
+    }
+  }, [isActive]);
+
   return (
     <div className={CN(className)}>
-      { useModal && (
-        <>
-          <WCAccountInput
-            accounts={availableAccounts}
-            onClick={onOpenModal}
-            selected={selectedAccounts}
-          />
-          <SwModal
-            className={CN(className, 'account-modal')}
-            id={id}
-            onCancel={onCloseModal}
-            title={t('Select account')}
-          >
-            <SwList.Section
-              className='account-list'
-              displayRow
-              enableSearchInput={true}
-              list={availableAccounts}
-              renderItem={renderItem}
-              renderWhenEmpty={renderEmpty}
-              rowGap='var(--row-gap)'
-              searchFunction={searchAccountFunction}
-              searchMinCharactersCount={2}
-              searchPlaceholder={t<string>('Search account')}
-            />
-          </SwModal>
-        </>
-      )}
       {
-        !useModal && (
-          <>
-            <div className='account-list'>
-              {availableAccounts.length && (
-                <AccountItemWithName
-                  accountName={'Select all accounts'}
-                  address={ALL_ACCOUNT_KEY}
-                  avatarSize={24}
-                  isSelected={selectedAccounts.length === availableAccounts.length}
-                  onClick={onSelectAccount(ALL_ACCOUNT_KEY)}
-                  showUnselectIcon
+        !availableAccounts.length
+          ? (
+            <AlertBox
+              description={t('You don’t have any accounts. Please create a new account')}
+              title={t('No accounts found')}
+              type='warning'
+            />
+          )
+          : useModal
+            ? (
+              <>
+                <WCAccountInput
+                  accounts={availableAccounts}
+                  onClick={onOpenModal}
+                  selected={appliedAccounts}
                 />
-              )}
-              {availableAccounts.map((item) => {
-                const selected = !!selectedAccounts.find((address) => isSameAddress(address, item.address));
-
-                return (
-                  <AccountItemWithName
-                    accountName={item.name}
-                    address={item.address}
-                    avatarSize={24}
-                    isSelected={selected}
-                    key={item.address}
-                    onClick={onSelectAccount(item.address)}
-                    showUnselectIcon
+                <SwModal
+                  className={CN(className, 'account-modal')}
+                  footer={(
+                    <Button
+                      block
+                      icon={(
+                        <Icon
+                          phosphorIcon={CheckCircle}
+                          weight={'fill'}
+                        />
+                      )}
+                      onClick={_onApply}
+                    >
+                      {t('Apply {{number}} accounts', { replace: { number: selectedAccounts.length } })}
+                    </Button>
+                  )}
+                  id={id}
+                  onCancel={onCloseModal}
+                  title={t('Select account')}
+                >
+                  <SwList.Section
+                    className='account-list'
+                    displayRow
+                    enableSearchInput={true}
+                    list={availableAccounts}
+                    ref={sectionRef}
+                    renderItem={renderItem}
+                    renderWhenEmpty={renderEmpty}
+                    rowGap='var(--row-gap)'
+                    searchFunction={searchAccountFunction}
+                    searchMinCharactersCount={2}
+                    searchPlaceholder={t<string>('Search account')}
                   />
-                );
-              })}
-            </div>
-          </>
-        )
+                </SwModal>
+              </>
+            )
+            : (
+              <>
+                <div className='account-list'>
+                  {availableAccounts.length > 1 && (
+                    <AccountItemWithName
+                      accountName={'Select all accounts'}
+                      accounts={availableAccounts}
+                      address={ALL_ACCOUNT_KEY}
+                      avatarSize={24}
+                      isSelected={selectedAccounts.length === availableAccounts.length}
+                      onClick={onSelectAccount(ALL_ACCOUNT_KEY, true)}
+                      showUnselectIcon
+                    />
+                  )}
+                  {availableAccounts.map((item) => {
+                    const selected = !!selectedAccounts.find((address) => isSameAddress(address, item.address));
+
+                    return (
+                      <AccountItemWithName
+                        accountName={item.name}
+                        address={item.address}
+                        avatarSize={24}
+                        isSelected={selected}
+                        key={item.address}
+                        onClick={onSelectAccount(item.address, true)}
+                        showUnselectIcon
+                      />
+                    );
+                  })}
+                </div>
+                <div className={CN(className, 'additional-content')}>
+                  {t('Make sure you trust this site before connecting')}
+                </div>
+              </>
+            )
       }
     </div>
   );
@@ -139,11 +188,16 @@ const WCAccountSelect = styled(Component)<Props>(({ theme: { token } }: Props) =
         padding: `${token.padding}px 0 ${token.padding}px`,
         flexDirection: 'column',
         display: 'flex'
-      },
-
-      '.ant-sw-list-wrapper': {
-        flexBasis: 'auto'
       }
+    },
+
+    '.additional-content': {
+      padding: token.padding,
+      paddingBottom: 0,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      textAlign: 'center',
+      color: token.colorTextTertiary
     }
   };
 });

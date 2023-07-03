@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ThemeProps, WalletConnectChainInfoWithStatus } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps, WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
 import { Icon, NetworkItem } from '@subwallet/react-ui';
 import { Info } from 'phosphor-react';
 import React from 'react';
@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
-  item: WalletConnectChainInfoWithStatus;
+  item: WalletConnectChainInfo;
 }
 
 const Component: React.FC<Props> = (props: Props) => {

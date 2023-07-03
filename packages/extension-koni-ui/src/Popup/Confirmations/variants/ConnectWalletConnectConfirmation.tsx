@@ -1,24 +1,19 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
-import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { uniqueStringArray } from '@subwallet/extension-base/utils';
-import { AccountItemWithName, AlertBox, ConfirmationGeneralInfo, WCNetworkSelected } from '@subwallet/extension-koni-ui/components';
-import WCNetworkSupported from '@subwallet/extension-koni-ui/components/WalletConnect/WCNetworkSupported';
+import { AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected } from '@subwallet/extension-koni-ui/components';
+import WCNetworkSupported from '@subwallet/extension-koni-ui/components/WalletConnect/Network/WCNetworkSupported';
 import { useNotification, useSelectWalletConnectAccount } from '@subwallet/extension-koni-ui/hooks';
 import { approveWalletConnectSession, rejectWalletConnectSession } from '@subwallet/extension-koni-ui/messaging';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps, WalletConnectChainInfoWithStatus } from '@subwallet/extension-koni-ui/types';
-import { chainsToWalletConnectChainInfos, convertKeyTypes, isAccountAll, isNoAccount, setSelectedAccountTypes } from '@subwallet/extension-koni-ui/utils';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertKeyTypes, isAccountAll, setSelectedAccountTypes } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -39,26 +34,6 @@ async function handleCancel ({ id }: WalletConnectSessionRequest) {
   });
 }
 
-export const filterAuthorizeAccounts = (accounts: AccountJson[], accountAuthType: AccountAuthType) => {
-  let rs = [...accounts];
-
-  // rs = rs.filter((acc) => acc.isReadOnly !== true);
-
-  if (accountAuthType === 'evm') {
-    rs = rs.filter((acc) => (!isAccountAll(acc.address) && acc.type === 'ethereum'));
-  } else if (accountAuthType === 'substrate') {
-    rs = rs.filter((acc) => (!isAccountAll(acc.address) && acc.type !== 'ethereum'));
-  } else {
-    rs = rs.filter((acc) => !isAccountAll(acc.address));
-  }
-
-  if (isNoAccount(rs)) {
-    return [];
-  }
-
-  return rs;
-};
-
 function Component ({ className, request }: Props) {
   const { params } = request.request;
 
@@ -66,45 +41,33 @@ function Component ({ className, request }: Props) {
   const navigate = useNavigate();
   const notification = useNotification();
 
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
-  const [isExpired, setIsExpired] = useState(isProposalExpired(request.request));
-
-  const isUnSupportCase = useMemo(() =>
-    Object.values(params.requiredNamespaces)
-      .map((namespace) => namespace.chains || [])
-      .flat()
-      .some((chain) => !isSupportWalletConnectChain(chain, chainInfoMap))
-  , [chainInfoMap, params.requiredNamespaces]
-  );
-
-  const supportedChains = useMemo(() => {
-    const chains: string[] = [];
-
-    for (const [key, namespace] of Object.entries(params.requiredNamespaces)) {
-      if (isSupportWalletConnectNamespace(key)) {
-        chains.push(...(namespace.chains || []));
-      }
-    }
-
-    for (const [key, namespace] of Object.entries(params.optionalNamespaces)) {
-      if (isSupportWalletConnectNamespace(key)) {
-        chains.push(...(namespace.chains || []));
-      }
-    }
-
-    return chainsToWalletConnectChainInfos(chainInfoMap, uniqueStringArray(chains))
-      .filter(({ chainInfo }) => !!chainInfo)
-      .map((data): WalletConnectChainInfoWithStatus => ({ ...data, supported: true }));
-  }, [chainInfoMap, params.optionalNamespaces, params.requiredNamespaces]);
-
   const nameSpaceNameMap = useMemo((): Record<string, string> => ({
     [WALLET_CONNECT_EIP155_NAMESPACE]: t('EVM networks'),
     [WALLET_CONNECT_POLKADOT_NAMESPACE]: t('Substrate networks')
   }), [t]);
 
-  const { missingType, namespaceAccounts, onSelectAccount } = useSelectWalletConnectAccount(params);
+  const { isExpired,
+    isUnSupportCase,
+    missingType,
+    namespaceAccounts,
+    onSelectAccount,
+    supportOneChain,
+    supportOneNamespace,
+    supportedChains } = useSelectWalletConnectAccount(params);
+
+  const allowSubmit = useMemo(() => {
+    return Object.values(namespaceAccounts).every(({ selectedAccounts }) => selectedAccounts.length);
+  }, [namespaceAccounts]);
 
   const [loading, setLoading] = useState(false);
+
+  const _onSelectAccount = useCallback((namespace: string): ((address: string) => VoidFunction) => {
+    return (address: string) => {
+      return () => {
+        onSelectAccount(namespace, address)();
+      };
+    };
+  }, [onSelectAccount]);
 
   const onCancel = useCallback(() => {
     setLoading(true);
@@ -135,24 +98,7 @@ function Component ({ className, request }: Props) {
     navigate('/accounts/new-seed-phrase');
   }, [navigate, missingType]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const isExpired = !isProposalExpired(request.request);
-
-      setIsExpired(isExpired);
-
-      if (isExpired) {
-        clearInterval(interval);
-      }
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [request.request]);
-
   const isSupportCase = !isUnSupportCase && !isExpired;
-  const haveOneSupportChain = supportedChains.length === 1;
 
   return (
     <>
@@ -186,37 +132,44 @@ function Component ({ className, request }: Props) {
         }
         {
           isSupportCase && (
-            <>
+            <div className='namespaces-list'>
               {
                 Object.entries(namespaceAccounts).map(([namespace, { availableAccounts, networks, selectedAccounts }]) => {
-                  if (haveOneSupportChain) {
-                    return <></>;
-                  }
-
                   return (
-                    <div key={namespace}>
-                      <div className='namespace-title'>{nameSpaceNameMap[namespace]}</div>
-                      <WCNetworkSelected
-                        id={`${namespace}-networks`}
-                        networks={networks}
+                    <div
+                      className={CN('namespace-container', { 'space-xs': !supportOneNamespace })}
+                      key={namespace}
+                    >
+                      {!supportOneChain && (
+                        <>
+                          <div className='namespace-title'>
+                            {supportOneNamespace ? t('Networks') : nameSpaceNameMap[namespace]}
+                          </div>
+                          <WCNetworkSelected
+                            id={`${namespace}-networks`}
+                            networks={networks}
+                          />
+                        </>
+                      )}
+                      {
+                        supportOneNamespace && (
+                          <div className='account-list-title'>
+                            {t('Choose the account(s) you’d like to connect')}
+                          </div>
+                        )
+                      }
+                      <WCAccountSelect
+                        availableAccounts={availableAccounts}
+                        id={`${namespace}-accounts`}
+                        onSelectAccount={_onSelectAccount(namespace)}
+                        selectedAccounts={selectedAccounts}
+                        useModal={!supportOneChain}
                       />
-                      {availableAccounts.map((item) => (
-                        <AccountItemWithName
-                          accountName={item.name}
-                          address={item.address}
-                          avatarSize={24}
-                          genesisHash={item.genesisHash}
-                          isSelected={selectedAccounts.includes(item.address)}
-                          key={item.address}
-                          onClick={onSelectAccount(namespace, item.address)}
-                          showUnselectIcon
-                        />
-                      ))}
                     </div>
                   );
                 })
               }
-            </>
+            </div>
           )
         }
       </div>
@@ -256,7 +209,7 @@ function Component ({ className, request }: Props) {
                 {t('Cancel')}
               </Button>
               <Button
-                // disabled={Object.values(selectedMap).every((value) => !value)}
+                disabled={!allowSubmit}
                 icon={(
                   <Icon
                     phosphorIcon={CheckCircle}
@@ -311,16 +264,26 @@ function Component ({ className, request }: Props) {
 const ConnectWalletConnectConfirmation = styled(Component)<Props>(({ theme: { token } }: ThemeProps) => ({
   '--content-gap': token.size,
 
-  '.title.sub-title': {
+  '.account-list-title': {
     fontSize: token.fontSizeHeading6,
     lineHeight: token.lineHeightHeading6,
     textAlign: 'start'
   },
 
-  '.account-list': {
+  '.namespaces-list': {
     display: 'flex',
     flexDirection: 'column',
-    gap: token.sizeXS
+    gap: token.size
+  },
+
+  '.namespace-container': {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: token.size,
+
+    '&.space-xs': {
+      gap: token.sizeXS
+    }
   },
 
   '.namespace-title': {
@@ -329,8 +292,7 @@ const ConnectWalletConnectConfirmation = styled(Component)<Props>(({ theme: { to
     lineHeight: '20px',
     textTransform: 'uppercase',
     textAlign: 'left',
-    color: token.colorTextSecondary,
-    marginBottom: token.marginXS
+    color: token.colorTextSecondary
   }
 }));
 

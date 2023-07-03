@@ -6,8 +6,5 @@ import { ChainInfo } from '@subwallet/extension-koni-ui/types/chain';
 export interface WalletConnectChainInfo {
   chainInfo: ChainInfo | null;
   slug: string;
-}
-
-export interface WalletConnectChainInfoWithStatus extends WalletConnectChainInfo {
   supported: boolean;
 }

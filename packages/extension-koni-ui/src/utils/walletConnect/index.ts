@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/background/types';
 import { findChainInfoByChainId, findChainInfoByHalfGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
-import { WalletConnectChainInfo, WalletConnectChainInfoWithStatus } from '@subwallet/extension-koni-ui/types';
+import { WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
 import { SessionTypes } from '@walletconnect/types';
 
 import { findAccountByAddress } from '../account';
@@ -19,19 +19,22 @@ export const chainsToWalletConnectChainInfos = (chainMap: Record<string, _ChainI
 
       return {
         chainInfo,
-        slug: chainInfo?.slug || chain
+        slug: chainInfo?.slug || chain,
+        supported: !!chainInfo
       };
     } else if (namespace === WALLET_CONNECT_POLKADOT_NAMESPACE) {
       const chainInfo = findChainInfoByHalfGenesisHash(chainMap, info);
 
       return {
         chainInfo,
-        slug: chainInfo?.slug || chain
+        slug: chainInfo?.slug || chain,
+        supported: !!chainInfo
       };
     } else {
       return {
         chainInfo: null,
-        slug: chain
+        slug: chain,
+        supported: false
       };
     }
   });

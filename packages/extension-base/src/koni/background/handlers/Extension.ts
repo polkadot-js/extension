@@ -3324,7 +3324,7 @@ export default class KoniExtension {
   private async approveWalletConnectSession ({ accounts: selectedAccounts, id }: RequestApproveConnectWalletSession): Promise<boolean> {
     const request = this.#koniState.requestService.getConnectWCRequest(id);
 
-    if (isProposalExpired(request.request)) {
+    if (isProposalExpired(request.request.params)) {
       throw new Error('The proposal has been expired');
     }
 
@@ -3399,7 +3399,7 @@ export default class KoniExtension {
             accounts,
             methods: namespace.methods,
             events: namespace.events,
-            chains: namespace.chains
+            chains: chains
           };
         }
       });
@@ -3421,7 +3421,7 @@ export default class KoniExtension {
 
     const wcId = request.request.id;
 
-    if (isProposalExpired(request.request)) {
+    if (isProposalExpired(request.request.params)) {
       request.reject(new Error('The proposal has been expired'));
 
       return true;

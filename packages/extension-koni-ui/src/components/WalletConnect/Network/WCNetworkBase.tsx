@@ -1,20 +1,20 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ThemeProps, WalletConnectChainInfoWithStatus } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps, WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import GeneralEmptyList from '../GeneralEmptyList';
+import GeneralEmptyList from '../../GeneralEmptyList';
 import WCNetworkInput from './WCNetworkInput';
 import WCNetworkItem from './WCNetworkItem';
 
 interface Props extends ThemeProps {
   id: string;
-  contentNetworks: WalletConnectChainInfoWithStatus[];
-  networks: WalletConnectChainInfoWithStatus[];
+  contentNetworks: WalletConnectChainInfo[];
+  networks: WalletConnectChainInfo[];
   content: string;
   title: string;
   subTitle: string;
@@ -33,7 +33,7 @@ const Component: React.FC<Props> = (props: Props) => {
     inactiveModal(id);
   }, [inactiveModal, id]);
 
-  const renderItem = useCallback((item: WalletConnectChainInfoWithStatus) => {
+  const renderItem = useCallback((item: WalletConnectChainInfo) => {
     return (
       <WCNetworkItem
         item={item}
@@ -80,27 +80,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const WCNetworkBase = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '--icon-color': token['gray-5'],
-
-    '.wc-network-input': {
-      backgroundColor: token.colorBgSecondary,
-      borderRadius: token.borderRadiusLG,
-
-      '&:hover': {
-        backgroundColor: token.colorBgInput
-      }
-    },
-
-    '.wc-network-modal-content': {
-      textAlign: 'left'
-    },
-
-    '.more-icon': {
-      display: 'flex',
-      width: 40,
-      justifyContent: 'center'
-    },
-
     '&.network-modal': {
       '--row-gap': token.sizeXS,
       '.ant-sw-modal-body': {

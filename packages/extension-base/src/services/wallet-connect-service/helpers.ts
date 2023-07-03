@@ -4,6 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { findChainInfoByChainId, findChainInfoByHalfGenesisHash } from '@subwallet/extension-base/services/chain-service/utils';
 import { SignClientTypes } from '@walletconnect/types';
+import { ProposalTypes } from '@walletconnect/types/dist/types/sign-client/proposal';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -56,8 +57,8 @@ export const isWalletConnectRequest = (id: string) => {
   return prefix === WALLET_CONNECT_REQUEST_KEY;
 };
 
-export const isProposalExpired = (proposal: SignClientTypes.EventArguments['session_proposal']): boolean => {
-  const timeNum = proposal.params.expiry;
+export const isProposalExpired = (params: ProposalTypes.Struct): boolean => {
+  const timeNum = params.expiry;
   const expireTime = new Date(timeNum > 10 ** 12 ? timeNum : timeNum * 1000);
   const now = new Date();
 

@@ -3,14 +3,14 @@
 
 import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/background/types';
 import { stripUrl } from '@subwallet/extension-base/utils';
-import { AccountItemWithName, EmptyList, GeneralEmptyList, Layout, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountItemWithName, EmptyList, GeneralEmptyList, Layout, MetaInfo, PageWrapper, WCNetworkAvatarGroup } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useConfirmModal, useNotification, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { disconnectWalletConnectConnection } from '@subwallet/extension-koni-ui/messaging';
 import { ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 import { Theme, ThemeProps, WalletConnectChainInfo } from '@subwallet/extension-koni-ui/types';
 import { chainsToWalletConnectChainInfos, getWCAccountList, noop } from '@subwallet/extension-koni-ui/utils';
-import { Icon, Image, Logo, ModalContext, NetworkItem, SwList, SwModal, SwModalFuncProps } from '@subwallet/react-ui';
+import { Icon, Image, ModalContext, NetworkItem, SwList, SwModal, SwModalFuncProps } from '@subwallet/react-ui';
 import { SessionTypes } from '@walletconnect/types';
 import CN from 'classnames';
 import { Info, MagnifyingGlass, Plugs } from 'phosphor-react';
@@ -52,8 +52,6 @@ const Component: React.FC<ComponentProps> = (props) => {
   }, [namespaces, chainInfoMap]);
 
   const accountItems = useMemo((): AbstractAddressJson[] => getWCAccountList(accounts, namespaces), [accounts, namespaces]);
-
-  const fistChain = useMemo(() => chains.find(({ chainInfo }) => !!chainInfo), [chains]);
 
   const modalProps = useMemo((): Partial<SwModalFuncProps> => ({
     id: disconnectModalId,
@@ -190,11 +188,7 @@ const Component: React.FC<ComponentProps> = (props) => {
               className='network-content'
               onClick={openNetworkModal}
             >
-              <Logo
-                className={'__chain-logo'}
-                network={fistChain?.slug || ''}
-                size={24}
-              />
+              <WCNetworkAvatarGroup networks={chains} />
               <div className='network-name'>
                 {t('{{number}} network(s)', { replace: { number: chains.length } })}
               </div>

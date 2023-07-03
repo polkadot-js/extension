@@ -27,7 +27,7 @@ const titleMap: Record<ConfirmationType, string> = {
   metadataRequest: 'Update metadata',
   signingRequest: 'Signature request',
   switchNetworkRequest: 'Add network request',
-  connectWCRequest: 'Connect Wallet Connect'
+  connectWCRequest: 'WalletConnect'
 } as Record<ConfirmationType, string>;
 
 const Component = function ({ className }: Props) {

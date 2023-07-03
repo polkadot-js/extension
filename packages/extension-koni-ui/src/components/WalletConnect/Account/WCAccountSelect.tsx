@@ -102,6 +102,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   footer={(
                     <Button
                       block
+                      disabled={!selectedAccounts.length}
                       icon={(
                         <Icon
                           phosphorIcon={CheckCircle}

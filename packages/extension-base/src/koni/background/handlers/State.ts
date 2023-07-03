@@ -1547,7 +1547,8 @@ export default class KoniState {
       url,
       data: transactionData,
       extrinsicType: eType,
-      chainType: ChainType.EVM
+      chainType: ChainType.EVM,
+      id
     });
 
     // Wait extrinsic hash

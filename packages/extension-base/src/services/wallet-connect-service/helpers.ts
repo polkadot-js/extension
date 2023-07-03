@@ -51,7 +51,11 @@ export const getEip155MessageAddress = (method: EIP155_SIGNING_METHODS, param: u
   }
 };
 
-export const isWalletConnectRequest = (id: string) => {
+export const isWalletConnectRequest = (id?: string): boolean => {
+  if (!id) {
+    return false;
+  }
+
   const [prefix] = id.split('.');
 
   return prefix === WALLET_CONNECT_REQUEST_KEY;

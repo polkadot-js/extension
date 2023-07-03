@@ -38,7 +38,7 @@ export class MantaPrivateHandler {
     return this._privateWallet;
   }
 
-  public subscribeSyncingState () {
+  public subscribeSyncState () {
     return this.syncStateSubject;
   }
 

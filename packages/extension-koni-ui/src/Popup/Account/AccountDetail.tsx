@@ -4,11 +4,12 @@
 import { MantaPayEnableMessage } from '@subwallet/extension-base/background/KoniTypes';
 import { CloseIcon, Layout, PageWrapper, ZkModeFooter } from '@subwallet/extension-koni-ui/components';
 import AccountAvatar from '@subwallet/extension-koni-ui/components/Account/AccountAvatar';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDeleteAccount';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
+import { useGetMantaPayConfig } from '@subwallet/extension-koni-ui/hooks/account/useGetMantaPayConfig';
 import { useIsMantaPayAvailable } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayAvailable';
-import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { deriveAccountV3, disableMantaPay, editAccount, enableMantaPay, forgetAccount, windowOpen } from '@subwallet/extension-koni-ui/messaging';
@@ -138,6 +139,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { token } = useTheme() as Theme;
   const { accountAddress } = useParams();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const dataContext = useContext(DataContext);
 
   const enableMantaPayConfirm = searchParams.get('enableMantaPayConfirm') === 'true';
   const isPopup = useIsPopup();
@@ -155,7 +157,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const signMode = useGetAccountSignModeByAddress(accountAddress);
 
-  const isZkModeEnabled = useIsMantaPayEnabled(accountAddress || '');
+  const mantaPayConfig = useGetMantaPayConfig(accountAddress || '');
+  const isZkModeEnabled = useMemo(() => {
+    return !!mantaPayConfig && mantaPayConfig.enabled;
+  }, [mantaPayConfig]);
   const zkModeSyncState = useSelector((state: RootState) => state.mantaPay);
   const [mantaPayState, dispatchMantaPayState] = useReducer(mantaPayReducer, DEFAULT_MANTA_PAY_STATE);
 
@@ -164,10 +169,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [activeModal]);
 
   useEffect(() => {
-    if (enableMantaPayConfirm) {
+    if (enableMantaPayConfirm && !isZkModeEnabled && !zkModeSyncState.isSyncing) {
       handleEnableMantaPay();
     }
-  }, [enableMantaPayConfirm, handleEnableMantaPay]);
+  }, [enableMantaPayConfirm, handleEnableMantaPay, isZkModeEnabled, zkModeSyncState.isSyncing]);
 
   const canDerive = useMemo((): boolean => {
     if (account) {
@@ -394,7 +399,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <PageWrapper className={CN(className)}>
+    <PageWrapper
+      className={CN(className)}
+      resolve={dataContext.awaitStores(['mantaPay'])}
+    >
       { zkModeSyncState.isSyncing && <div className={'zk-mask'} /> }
 
       <Layout.WithSubHeaderOnly
@@ -490,8 +498,9 @@ const Component: React.FC<Props> = (props: Props) => {
               )}
             />
           </div>
+
           {
-            (zkModeSyncState.isSyncing || zkModeSyncState.progress === 100) && (
+            zkModeSyncState.isSyncing && (
               <SwAlert
                 className={CN('zk-alert-area')}
                 description={zkModeSyncState.progress === 100 ? t('All done, you can go back home') : t('This may take a few minutes, keep this app open for faster sync')}

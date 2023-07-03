@@ -24,7 +24,7 @@ import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
-import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isNativeToken, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isMantaZkAsset, _isNativeToken, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_AUTO_LOCK_TIME } from '@subwallet/extension-base/services/setting-service/constants';
@@ -1280,6 +1280,8 @@ export default class KoniExtension {
       }, resolve);
     });
 
+    await this.#koniState.disableMantaPay(address);
+
     return true;
   }
 
@@ -1581,7 +1583,7 @@ export default class KoniExtension {
     let transaction: ValidateTransactionResponseInput['transaction'];
 
     // Get native token amount
-    const freeBalance = await this.#koniState.balanceService.getTokenFreeBalance(from, networkKey, tokenSlug);
+    const freeBalance = await this.getAddressFreeBalance({ address: from, networkKey, token: tokenSlug });
 
     try {
       if (isEthereumAddress(from) && isEthereumAddress(to) && _isTokenTransferredByEvm(tokenInfo)) { // TODO: review this
@@ -1600,6 +1602,9 @@ export default class KoniExtension {
             transferAmount.value
           ] = await getEVMTransactionObject(chainInfo, to, txVal, !!transferAll, evmApiMap);
         }
+      } else if (_isMantaZkAsset(tokenInfo)) { // TODO
+        transaction = undefined;
+        transferAmount.value = '0';
       } else {
         const substrateApi = this.#koniState.getSubstrateApi(networkKey);
 
@@ -1631,14 +1636,14 @@ export default class KoniExtension {
       const minAmount = tokenInfo.minAmount || '0';
 
       if (!isTransferNativeToken) {
-        const { value: balance } = await this.#koniState.balanceService.getTokenFreeBalance(from, networkKey, tokenSlug);
+        const { value: balance } = await this.getAddressFreeBalance({ address: from, networkKey, token: tokenSlug });
 
         if (new BigN(balance).minus(transferAmount.value).lt(minAmount)) {
           inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT, ''));
         }
       }
 
-      const { value: receiverBalance } = await this.#koniState.balanceService.getTokenFreeBalance(to, networkKey, tokenSlug);
+      const { value: receiverBalance } = await this.getAddressFreeBalance({ address: from, networkKey, token: tokenSlug });
 
       if (new BigN(receiverBalance).plus(transferAmount.value).lt(minAmount)) {
         const atLeast = new BigN(minAmount).minus(receiverBalance).plus((tokenInfo.decimals || 0) === 0 ? 0 : 1);
@@ -1875,7 +1880,7 @@ export default class KoniExtension {
   }
 
   private async transferGetMaxTransferable ({ address, destChain, isXcmTransfer, networkKey, token }: RequestMaxTransferable): Promise<AmountData> {
-    const freeBalance = await this.#koniState.balanceService.getTokenFreeBalance(address, networkKey, token);
+    const freeBalance = await this.getAddressFreeBalance({ address, networkKey, token });
     const tokenInfo = token ? this.#koniState.chainService.getAssetBySlug(token) : this.#koniState.chainService.getNativeTokenInfo(networkKey);
 
     if (!_isNativeToken(tokenInfo)) {
@@ -3342,6 +3347,7 @@ export default class KoniExtension {
       const result = await this.#koniState.enableMantaPay(true, address, password, mnemonic.result);
 
       this.#skipAutoLock = true;
+      await this.saveCurrentAccountAddress({ address });
       const unsubSyncProgress = await this.#koniState.chainService.mantaPay.subscribeSyncProgress();
 
       console.debug('Start initial sync for MantaPay');
@@ -3406,7 +3412,7 @@ export default class KoniExtension {
   private subscribeMantaPaySyncState (id: string, port: chrome.runtime.Port): MantaPaySyncState {
     const cb = createSubscription<'pri(mantaPay.subscribeSyncingState)'>(id, port);
 
-    const syncingStateSubscription = this.#koniState.subscribeMantaPaySyncingState().subscribe({
+    const syncingStateSubscription = this.#koniState.subscribeMantaPaySyncState().subscribe({
       next: (rs) => {
         cb(rs);
       }

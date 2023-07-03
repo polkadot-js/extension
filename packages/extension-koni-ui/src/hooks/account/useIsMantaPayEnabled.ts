@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 
 function checkExistMantaSetting (configs: MantaPayConfig[], address: string) {
   for (const config of configs) {
-    if (config.address === address) {
+    if (config.address === address && config.enabled) {
       return true;
     }
   }

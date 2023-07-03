@@ -1766,10 +1766,6 @@ export default class KoniState {
     this.unsubscriptionMap[id] = unsubscribe;
   }
 
-  public updateChainConnectionStatus (chain: string, status: _ChainConnectionStatus) {
-    this.chainService.setChainConnectionStatus(chain, status);
-  }
-
   public async autoEnableChains (addresses: string[]) {
     const assetMap = this.chainService.getAssetRegistry();
     const promiseList = addresses.map((address) => {
@@ -1937,6 +1933,7 @@ export default class KoniState {
 
     await this.chainService.mantaPay.privateWallet?.dropAuthorizationContext();
     await this.chainService.mantaPay.privateWallet?.dropUserSeedPhrase();
+    await this.chainService.mantaPay.privateWallet?.resetState();
     await this.chainService.mantaPay.deleteMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN);
     await this.chainService.mantaPay.deleteMantaAuthContext(address, _DEFAULT_MANTA_ZK_CHAIN);
 
@@ -2022,6 +2019,8 @@ export default class KoniState {
   public async syncMantaPay () {
     const config = await this.chainService.mantaPay.getMantaPayFirstConfig(_DEFAULT_MANTA_ZK_CHAIN) as MantaPayConfig;
 
+    console.debug('syncing Manta');
+
     if (!config.isInitialSync) {
       console.debug('need manual sync');
 
@@ -2046,7 +2045,7 @@ export default class KoniState {
     };
   }
 
-  public subscribeMantaPaySyncingState () {
-    return this.chainService.mantaPay.subscribeSyncingState();
+  public subscribeMantaPaySyncState () {
+    return this.chainService.mantaPay.subscribeSyncState();
   }
 }

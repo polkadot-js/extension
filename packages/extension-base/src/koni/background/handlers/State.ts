@@ -1921,6 +1921,8 @@ export default class KoniState {
       } as MantaPayConfig);
     }
 
+    this.isMantaPayEnabled = true;
+
     return zkAddress;
   }
 

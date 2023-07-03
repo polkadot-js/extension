@@ -17,7 +17,7 @@ import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import uiSettings from '@polkadot/ui-settings';
 
-import { ErrorBoundary, Loading, SplashHandler } from '../components';
+import { GlobalErrorBoundary, Loading, SplashHandler } from '../components';
 import {
   AccountContext,
   ActionContext,
@@ -154,7 +154,7 @@ export default function Popup(): React.ReactElement {
   }, [cameraOn]);
 
   function wrapWithErrorBoundary(component: React.ReactElement, trigger?: string): React.ReactElement {
-    return <ErrorBoundary trigger={trigger}>{component}</ErrorBoundary>;
+    return <GlobalErrorBoundary trigger={trigger}>{component}</GlobalErrorBoundary>;
   }
 
   const Root = isWelcomeDone

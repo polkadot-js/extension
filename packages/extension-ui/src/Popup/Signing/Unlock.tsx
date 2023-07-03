@@ -28,7 +28,7 @@ function Unlock({
   setError,
   setPassword
 }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
+  const { t } = useTranslation()  ;
   const _onChangePassword = useCallback(
     (password: string): void => {
       setPassword(password);
@@ -67,6 +67,10 @@ function Unlock({
 const Container = styled.div`
   & > :not(:last-child) {
     margin-bottom: 8px;
+  }
+
+  &&& ${InputWithLabel} { /* overriding the intrusive <ScrollWrapper> styles */
+    width: 100%;
   }
 `;
 

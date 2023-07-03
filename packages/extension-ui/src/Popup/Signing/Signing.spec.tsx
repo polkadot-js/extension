@@ -201,7 +201,14 @@ describe('Signing requests', () => {
           .find(Extrinsic)
           .find('td.data')
           .map((el): string => el.text())
-      ).toEqual(['3']);
+      ).toEqual([
+        // @ts-ignore
+        Number(signRequests[0].request.payload.nonce).toString(),
+        'balances',
+        'transferKeepAlive',
+        '5GYQRJj3NUznYDzCduENRcocMsyxmb6tjb5xW87ZMErBe9R7',
+        '123.0000 WND',
+      ]);
 
       expect(
         wrapper
@@ -220,7 +227,14 @@ describe('Signing requests', () => {
           .find(Extrinsic)
           .find('td.data')
           .map((el): string => el.text())
-      ).toEqual(['3']);
+      ).toEqual([
+        // @ts-ignore
+        Number(signRequests[0].request.payload.nonce).toString(),
+        'balances',
+        'transfer',
+        '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
+        '200.0000 mWND',
+      ]);
 
       expect(
         wrapper
@@ -249,7 +263,7 @@ describe('Signing requests', () => {
       await act(flushAllPromises);
       wrapper.update();
 
-      wrapper.find('button[type="submit"]').simulate('submit');
+      wrapper.find('form').simulate('submit');
       expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, false, 'hunter1');
     });
 
@@ -261,7 +275,7 @@ describe('Signing requests', () => {
 
       await act(flushAllPromises);
 
-      wrapper.find('button[type="submit"]').simulate('submit');
+      wrapper.find('form').simulate('submit');
 
       expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, true, 'hunter1');
     });
@@ -278,7 +292,7 @@ describe('Signing requests', () => {
       await act(flushAllPromises);
       wrapper.update();
 
-      wrapper.find('button[type="submit"]').simulate('submit');
+      wrapper.find('form').simulate('submit');
 
       await act(flushAllPromises);
       wrapper.update();

@@ -29,5 +29,12 @@ module.exports = {
     '@typescript-eslint/no-floating-promises': 'off'
   },
   plugins: [...base.plugins, 'prettier'],
-  extends: [...base.extends, 'prettier']
+  extends: [...base.extends, 'prettier'],
+  overrides: [...base.overrides, {
+    files: ['**/*.test.*', '**/*.spec.*', '**/*.stories.*'],
+    rules: {
+      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off'
+    }
+  }],
 };

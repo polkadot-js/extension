@@ -7,7 +7,7 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { Loading, SigningReqContext } from '../../components';
+import { Loading, ScrollWrapper, SigningReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
@@ -43,30 +43,28 @@ function Signing({ className }: Props): React.ReactElement<Props> {
 
   return request ? (
     <>
-      <div className={className}>
-        <div className='content'>
-          {requests.length > 1 && (
-            <div className='centered'>
-              <TransactionIndex
-                index={requestIndex}
-                onNextClick={_onNextClick}
-                onPreviousClick={_onPreviousClick}
-                totalItems={requests.length}
-              />
-            </div>
-          )}
-          {isTransaction && <span className='heading'>{t<string>('Authorization')}</span>}
-          <Request
-            account={request.account}
-            buttonText={isTransaction ? t('Sign') : t('Sign the message')}
-            isFirst={requestIndex === 0}
-            isLast={requests.length === 1}
-            request={request.request}
-            signId={request.id}
-            url={request.url}
-          />
-        </div>
-      </div>
+      <ScrollWrapper className={className}>
+        {requests.length > 1 && (
+          <div className='centered'>
+            <TransactionIndex
+              index={requestIndex}
+              onNextClick={_onNextClick}
+              onPreviousClick={_onPreviousClick}
+              totalItems={requests.length}
+            />
+          </div>
+        )}
+        {isTransaction && <span className='heading'>{t<string>('Authorization')}</span>}
+        <Request
+          account={request.account}
+          buttonText={isTransaction ? t('Sign') : t('Sign the message')}
+          isFirst={requestIndex === 0}
+          isLast={requests.length === 1}
+          request={request.request}
+          signId={request.id}
+          url={request.url}
+        />
+      </ScrollWrapper>
     </>
   ) : (
     <Loading />
@@ -76,13 +74,6 @@ function Signing({ className }: Props): React.ReactElement<Props> {
 export default React.memo(
   styled(Signing)(
     ({ theme }: Props) => `
-    .content {
-      border-radius: 32px;
-      height: 584px;
-      overflow-y: hidden;
-      overflow-x: hidden;
-    }
-
     .centered {
       display: flex;
       justify-content: center;
@@ -90,6 +81,7 @@ export default React.memo(
     }
 
     .heading {
+      padding-top: 10px;
       font-family: ${theme.secondaryFontFamily};
       font-style: normal;
       font-weight: 700;

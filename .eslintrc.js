@@ -16,7 +16,7 @@ module.exports = {
     'sort-keys': 'off',
   },
   overrides: [...base.overrides, {
-    files: ['**/*.test.*', '**/*.stories.*'],
+    files: ['**/*.test.*', '**/*.spec.*', '**/*.stories.*'],
     rules: {
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off'

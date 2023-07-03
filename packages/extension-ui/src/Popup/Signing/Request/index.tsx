@@ -9,9 +9,10 @@ import type { HexString } from '@polkadot/util/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { Address } from "@polkadot/extension-ui/components/index";
 import { TypeRegistry } from '@polkadot/types';
 
-import { ActionContext, Address, BottomWrapper, VerticalSpace, Warning } from '../../../components';
+import { ActionContext, VerticalSpace, Warning } from '../../../components';
 import { useTranslation } from '../../../components/translate';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
@@ -43,24 +44,6 @@ const registry = new TypeRegistry();
 function isRawPayload(payload: SignerPayloadJSON | SignerPayloadRaw): payload is SignerPayloadRaw {
   return !!(payload as SignerPayloadRaw).data;
 }
-
-const StyledAddress = styled(Address)`
-  margin: 0px 8px 8px 8px;
-`;
-
-const Wrapper = styled.div`
-  position: absolute;
-  left: 0px;
-  right: 0px;
-  bottom: 40px;
-  margin: 0px 8px;
-`;
-
-const StyledSignArea = styled(SignArea)`
-  ~ ${BottomWrapper} {
-    backdrop-filter: initial;
-  }
-`;
 
 export default function Request({
   account: { accountIndex, addressOffset, genesisHash, isExternal, isHardware },
@@ -107,13 +90,12 @@ export default function Request({
   );
 
   if (payload !== null) {
-    const json = request.payload as SignerPayloadJSON;
+    const requestPayload = request.payload as SignerPayloadJSON;
 
     return (
       <>
-        <Extrinsic
-          payload={payload}
-          request={json}
+        <FullHeightExtrinsic
+          requestPayload={requestPayload}
           url={url}
         />
         {isHardware && (
@@ -121,29 +103,27 @@ export default function Request({
             accountIndex={(accountIndex as number) || 0}
             addressOffset={(addressOffset as number) || 0}
             error={error}
-            genesisHash={json.genesisHash}
+            genesisHash={requestPayload.genesisHash}
             onSignature={_onSignature}
             payload={payload}
             setError={setError}
           />
         )}
-        <Wrapper>
-          <StyledAddress
-            address={json.address}
-            genesisHash={json.genesisHash}
-            isExternal={isExternal}
-            isHardware={isHardware}
-          />
-          <StyledSignArea
-            buttonText={buttonText}
-            error={error}
-            isExternal={isExternal}
-            isFirst={isFirst}
-            isLast={isLast}
-            setError={setError}
-            signId={signId}
-          />
-        </Wrapper>
+        <StyledAddress
+          address={requestPayload.address}
+          genesisHash={requestPayload.genesisHash}
+          isExternal={isExternal}
+          isHardware={isHardware}
+        />
+        <SignArea
+          buttonText={buttonText}
+          error={error}
+          isExternal={isExternal}
+          isFirst={isFirst}
+          isLast={isLast}
+          setError={setError}
+          signId={signId}
+        />
       </>
     );
   } else if (hexBytes !== null) {
@@ -171,24 +151,32 @@ export default function Request({
             <VerticalSpace />
           </>
         )}
-        <Wrapper>
-          <StyledAddress
-            address={address}
-            isExternal={isExternal}
-          />
-          <StyledSignArea
-            buttonText={buttonText}
-            error={error}
-            isExternal={isExternal}
-            isFirst={isFirst}
-            isLast={isLast}
-            setError={setError}
-            signId={signId}
-          />
-        </Wrapper>
+        <StyledAddress
+          address={address}
+          isExternal={isExternal}
+        />
+        <SignArea
+          buttonText={buttonText}
+          error={error}
+          isExternal={isExternal}
+          isFirst={isFirst}
+          isLast={isLast}
+          setError={setError}
+          signId={signId}
+        />
       </>
     );
   }
 
   return null;
 }
+
+const StyledAddress = styled(Address)`
+  &&& { /* overriding the intrusive <ScrollWrapper> styles */
+    width: initial;
+  }
+`;
+
+const FullHeightExtrinsic = styled(Extrinsic)`
+  flex-grow: 1;
+`;

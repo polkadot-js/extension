@@ -7,6 +7,7 @@ import { BodyTheme } from '../packages/extension-ui/src/components/View'
 
 import type { Preview } from '@storybook/react';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from './__mocks__/messaging';
+import Main from "../packages/extension-ui/src/components/Main";
 
 /** @type { import('@storybook/react').Preview } */
 const preview = {
@@ -54,11 +55,8 @@ const preview = {
 
 export default preview;
 
-type Mock = {
-  setMockImpl(nextMockImpl: Function): void;
-};
-
 export const decorators = [
+  Story =>  <Main><Story /></Main>,
   withThemeFromJSXProvider({
     GlobalStyles: BodyTheme,
     Provider: ThemeProvider,

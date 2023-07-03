@@ -373,5 +373,10 @@
   "New account has been imported successfully!": "",
   "Metadata update": "",
   "This approval enables future requests to be decoded using this metadata.": "",
-  "Import successful!": ""
+  "Import successful!": "",
+  "Batched transaction": "",
+  "Section": "",
+  "Method": "",
+  "Arguments": "",
+  "You have been redirected because you've entered a website that could compromise the security of your assets.": ""
 }

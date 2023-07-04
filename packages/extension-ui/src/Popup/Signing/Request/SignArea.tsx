@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
 
-import {ActionContext, BottomWrapper, Button, ButtonArea, Checkbox} from '../../../components';
+import { ActionContext, BottomWrapper, Button, ButtonArea, Checkbox } from '../../../components';
 import useTranslation from '../../../hooks/useTranslation';
 import { approveSignPassword, cancelSignRequest, isSignLocked } from '../../../messaging';
 import Unlock from '../Unlock';
@@ -55,26 +55,40 @@ function SignArea({ buttonText, className, error, isExternal, isFirst, isLast, s
   }, [isExternal, signId]);
 
   const _onSign = useCallback(async () => {
+    const params = new URLSearchParams({
+      isLast: isLast.toString(),
+      isSuccess: 'true',
+      message: t<string>('Transaction signed')
+    });
+
     try {
       setIsBusy(true);
       await approveSignPassword(signId, savePass, password);
       setIsBusy(false);
-      onAction(`transaction-status/signed?isLast=${isLast.toString()}`);
+
+      onAction(`/request-status?${params.toString()}`);
     } catch (error) {
       setIsBusy(false);
       setError((error as Error).message);
       console.error(error);
     }
-  }, [isLast, onAction, password, savePass, setError, signId]);
+  }, [isLast, onAction, password, savePass, setError, signId, t]);
 
   const _onCancel = useCallback(async (): Promise<void> => {
+    const params = new URLSearchParams({
+      isLast: isLast.toString(),
+      isSuccess: 'false',
+      message: t<string>('Transaction declined')
+    });
+
     try {
       await cancelSignRequest(signId);
-      onAction(`transaction-status/declined?isLast=${isLast.toString()}`);
+
+      onAction(`/request-status?${params.toString()}`);
     } catch (error) {
       console.error(error);
     }
-  }, [isLast, onAction, signId]);
+  }, [isLast, onAction, signId, t]);
 
   const StyledCheckbox = styled(Checkbox)`
     margin-left: 8px;
@@ -119,7 +133,6 @@ function SignArea({ buttonText, className, error, isExternal, isFirst, isLast, s
                 <Unlock
                   error={error}
                   isBusy={isBusy}
-                  onSign={_onSign}
                   password={password}
                   setError={setError}
                   setPassword={setPassword}

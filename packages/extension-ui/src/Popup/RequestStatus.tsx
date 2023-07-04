@@ -1,43 +1,38 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import type { ThemeProps } from '../types';
 
 import React, { useContext, useEffect } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
-import animDeclined from '../../assets/anim_declined.svg';
-import animSigned from '../../assets/anim_signed.svg';
-import { AnimatedSvg, PopupBorderContainer } from '../../components';
-import { ActionContext } from '../../components/contexts';
-import useTranslation from '../../hooks/useTranslation';
+import animDeclined from '../assets/anim_declined.svg';
+import animSigned from '../assets/anim_signed.svg';
+import { AnimatedSvg, PopupBorderContainer } from '../components';
+import { ActionContext } from '../components/contexts';
 
 interface Props extends RouteComponentProps<{ status: string }>, ThemeProps {
   className?: string;
   isLast?: string;
 }
 
-function TransactionStatus({
-  className,
-  location: { search },
-  match: {
-    params: { status }
-  }
-}: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
+function RequestStatus({ className, location: { search } }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
-  const isSigned = status === 'signed';
+
   const searchParams = new URLSearchParams(search);
-  const isLast = searchParams.get('isLast');
+
+  const message = searchParams.get('message');
+  const isSuccess = searchParams.get('isSuccess') === 'true';
+  const isLast = searchParams.get('isLast') === 'true';
 
   useEffect(() => {
-    // we're using setTimeout here because TransactionStatus is only a temporary element signaling the status(signed/declined) of the transaction
+    // we're using setTimeout here because RequestStatus is only a temporary element signaling the status of the request
     setTimeout(() => {
-      if (isLast !== 'true') {
-        onAction('..');
-      } else {
+      if (isLast) {
         window.close();
+      } else {
+        onAction('..');
       }
     }, 2000);
   }, [isLast, onAction]);
@@ -49,11 +44,9 @@ function TransactionStatus({
           <div className='content-inner'>
             <AnimatedSvg
               className='icon'
-              src={isSigned ? animSigned : animDeclined}
+              src={isSuccess ? animSigned : animDeclined}
             />
-            <span className='heading'>
-              {isSigned ? t<string>('Transaction Signed') : t<string>('Transaction Declined')}
-            </span>
+            <span className='heading'>{message}</span>
           </div>
         </div>
       </div>
@@ -63,7 +56,7 @@ function TransactionStatus({
 
 export default React.memo(
   withRouter(
-    styled(TransactionStatus)(
+    styled(RequestStatus)(
       ({ theme }: Props) => `
   .content {
     border-radius: 32px;

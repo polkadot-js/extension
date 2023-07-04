@@ -28,6 +28,7 @@ function Authorize(): React.ReactElement {
 }
 
 const Container = styled.div`
+  height: 100%;
   overflow-y: scroll;
 
   ::-webkit-scrollbar-thumb {

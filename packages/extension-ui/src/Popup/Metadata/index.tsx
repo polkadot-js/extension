@@ -11,6 +11,7 @@ import Request from './Request';
 export default function Metadata(): React.ReactElement {
   const { t } = useTranslation();
   const requests = useContext(MetadataReqContext);
+  const isLast = requests.length === 1;
 
   return (
     <>
@@ -22,6 +23,7 @@ export default function Metadata(): React.ReactElement {
       </StyledHero>
       {requests[0] ? (
         <Request
+          isLast={isLast}
           key={requests[0].id}
           metaId={requests[0].id}
           request={requests[0].request}

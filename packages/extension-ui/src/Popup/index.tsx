@@ -44,7 +44,6 @@ import NewAccount from './Accounts/NewAccount';
 import AccountManagement from './AuthManagement/AccountManagement';
 import DisconnectApp from './AuthManagement/DisconnectApp';
 import RestoreJson from './Restore/RestoreJson';
-import TransactionStatus from './Signing/TransactionStatus';
 import About from './About';
 import Accounts from './Accounts';
 import AuthList from './AuthManagement';
@@ -57,6 +56,7 @@ import Forget from './Forget';
 import ImportSeed from './ImportSeed';
 import Metadata from './Metadata';
 import PhishingDetected from './PhishingDetected';
+import RequestStatus from './RequestStatus';
 import Settings from './Settings';
 import Signing from './Signing';
 import Welcome from './Welcome';
@@ -119,7 +119,7 @@ export default function Popup(): React.ReactElement {
       }
 
       to === '..'
-        ? // if we can't go gack from there, go to the home
+        ? // if we can't go back from there, go to the home
           history.length === 1
           ? history.push('/')
           : history.goBack()
@@ -201,8 +201,8 @@ export default function Popup(): React.ReactElement {
                                 <Route path='/account/edit-menu/:address'>
                                   {wrapWithErrorBoundary(<EditAccountMenu />, 'edit-menu')}
                                 </Route>
-                                <Route path='/transaction-status/:status'>
-                                  {wrapWithErrorBoundary(<TransactionStatus />, 'transaction-status')}
+                                <Route path='/request-status'>
+                                  {wrapWithErrorBoundary(<RequestStatus />, 'request-status')}
                                 </Route>
                                 <Route path='/account/edit-name/:address'>
                                   {wrapWithErrorBoundary(<EditName />, 'edit-name')}

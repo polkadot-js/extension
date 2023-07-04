@@ -6,7 +6,7 @@ import type { MetadataDef } from '@polkadot/extension-inject/types';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Button, ButtonArea, Table } from '../../components';
+import { ActionContext, Button, ButtonArea } from '../../components';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { approveMetaRequest, rejectMetaRequest } from '../../messaging';
@@ -15,24 +15,37 @@ interface Props {
   request: MetadataDef;
   metaId: string;
   url: string;
+  isLast: boolean;
 }
 
-function Request({ metaId, request, url }: Props): React.ReactElement<Props> {
+function Request({ isLast, metaId, request, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const chain = useMetadata(request.genesisHash);
   const onAction = useContext(ActionContext);
+  const chain = useMetadata(request.genesisHash);
 
   const _onApprove = useCallback((): void => {
+    const params = new URLSearchParams({
+      isLast: isLast.toString(),
+      isSuccess: 'true',
+      message: t<string>('Metadata updated')
+    });
+
     approveMetaRequest(metaId)
-      .then(() => onAction())
+      .then(() => onAction(`/request-status?${params.toString()}`))
       .catch(console.error);
-  }, [metaId, onAction]);
+  }, [metaId, isLast, onAction, t]);
 
   const _onReject = useCallback((): void => {
+    const params = new URLSearchParams({
+      isLast: isLast.toString(),
+      isSuccess: 'false',
+      message: t<string>('Metadata update rejected')
+    });
+
     rejectMetaRequest(metaId)
-      .then(() => onAction())
+      .then(() => onAction(`/request-status?${params.toString()}`))
       .catch(console.error);
-  }, [metaId, onAction]);
+  }, [metaId, isLast, onAction, t]);
 
   const data = [
     { label: t<string>('from'), data: url, dataTitle: url },

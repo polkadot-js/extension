@@ -3401,12 +3401,21 @@ export default class KoniExtension {
 
         this.#skipAutoLock = false;
         unsubSyncProgress();
+        // make sure the sync state is set, just in case it gets unsubscribed
+        this.#koniState.chainService.mantaPay.setSyncState({
+          progress: 100,
+          isSyncing: false
+        });
       })
       .catch((e) => {
         console.error('Error syncing MantaPay', e);
 
         this.#skipAutoLock = false;
         unsubSyncProgress();
+        this.#koniState.chainService.mantaPay.setSyncState({
+          progress: 0,
+          isSyncing: false
+        });
       });
   }
 

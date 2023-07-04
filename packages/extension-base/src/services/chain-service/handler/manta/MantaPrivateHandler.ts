@@ -142,6 +142,12 @@ export class MantaPrivateHandler {
     return (await this._privateWallet?.getLedgerCurrentCount(ledgerState.checkpoint)) as number;
   }
 
+  public setSyncState (data: MantaPaySyncState) {
+    this.syncState = data;
+
+    this.syncStateSubject.next(this.syncState);
+  }
+
   public async subscribeSyncProgress () {
     const ledgerTotalCount = (await this._privateWallet?.getLedgerTotalCount()) as number;
 

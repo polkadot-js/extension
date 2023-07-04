@@ -29,14 +29,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
 
   const mantaPayConfig = useGetMantaPayConfig(currentAccount?.address);
-  const zkModeSyncState = useSelector((state: RootState) => state.mantaPay);
   const handleMantaPaySync = useHandleMantaPaySync();
 
   useEffect(() => {
-    if (mantaPayConfig && mantaPayConfig.enabled && !mantaPayConfig.isInitialSync && !zkModeSyncState.isSyncing) {
+    if (mantaPayConfig && mantaPayConfig.enabled && !mantaPayConfig.isInitialSync && !mantaPayConfig.isInitialSync) {
       handleMantaPaySync(mantaPayConfig.address);
     }
-  }, [handleMantaPaySync, mantaPayConfig, zkModeSyncState.isSyncing]);
+  }, [handleMantaPaySync, mantaPayConfig]);
 
   const onOpenGlobalSearchToken = useCallback(() => {
     activeModal(GlobalSearchTokenModalId);

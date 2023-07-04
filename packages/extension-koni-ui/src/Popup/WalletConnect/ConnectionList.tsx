@@ -64,7 +64,14 @@ const Component: React.FC<Props> = (props: Props) => {
   const searchFunc = useCallback((item: SessionTypes.Struct, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
     const metadata = item.peer.metadata;
-    const id = stripUrl(metadata.url);
+    let id: string;
+
+    try {
+      id = stripUrl(metadata.url);
+    } catch (e) {
+      id = metadata.url;
+    }
+
     const name = metadata.name;
 
     return (

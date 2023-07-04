@@ -63,6 +63,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <AccountItemWithName
         accountName={item.name}
         address={item.address}
+        avatarSize={24}
         direction='horizontal'
         isSelected={selected}
         key={item.address}
@@ -136,7 +137,7 @@ const Component: React.FC<Props> = (props: Props) => {
             )
             : (
               <>
-                <div className='account-list'>
+                <div className={CN('account-list', 'no-modal')}>
                   {availableAccounts.length > 1 && (
                     <AccountItemWithName
                       accountName={'Select all accounts'}
@@ -178,7 +179,7 @@ const WCAccountSelect = styled(Component)<Props>(({ theme: { token } }: Props) =
   return {
     '--row-gap': token.sizeXS,
 
-    '.account-list': {
+    '.account-list.no-modal': {
       display: 'flex',
       flexDirection: 'column',
       gap: 'var(--row-gap)'

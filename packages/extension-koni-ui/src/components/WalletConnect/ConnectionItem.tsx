@@ -23,7 +23,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { namespaces, peer: { metadata: dAppInfo } } = session;
 
-  const domain = stripUrl(dAppInfo.url);
+  const domain = useMemo(() => {
+    try {
+      return stripUrl(dAppInfo.url);
+    } catch (e) {
+      return dAppInfo.url;
+    }
+  }, [dAppInfo.url]);
+
   const logoUrl = `https://icons.duckduckgo.com/ip2/${domain}.ico`;
 
   const { accounts } = useSelector((state) => state.accountState);

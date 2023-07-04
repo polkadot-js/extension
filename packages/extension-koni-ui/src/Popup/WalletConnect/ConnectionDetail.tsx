@@ -34,13 +34,20 @@ const Component: React.FC<ComponentProps> = (props) => {
   const { className, session } = props;
   const { namespaces, peer: { metadata: dAppInfo }, topic } = session;
 
-  const domain = stripUrl(dAppInfo.url);
-  const img = `https://icons.duckduckgo.com/ip2/${domain}.ico`;
-
   const { t } = useTranslation();
   const notification = useNotification();
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
+
+  const domain = useMemo(() => {
+    try {
+      return stripUrl(dAppInfo.url);
+    } catch (e) {
+      return dAppInfo.url;
+    }
+  }, [dAppInfo.url]);
+
+  const img = `https://icons.duckduckgo.com/ip2/${domain}.ico`;
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
@@ -334,11 +341,7 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
     },
 
     '.account-list': {
-      margin: `0 -${token.margin}px`,
-
-      '.ant-sw-list-wrapper': {
-        flexBasis: 'auto'
-      }
+      margin: `0 -${token.margin}px`
     },
 
     '.total-account': {
@@ -354,10 +357,6 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
         padding: `${token.padding}px 0 ${token.padding}px`,
         flexDirection: 'column',
         display: 'flex'
-      },
-
-      '.ant-sw-list-wrapper': {
-        flexBasis: 'auto'
       }
     }
   };

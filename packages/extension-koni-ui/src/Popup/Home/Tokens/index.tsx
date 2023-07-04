@@ -42,6 +42,7 @@ const Component = (): React.ReactElement => {
     selectedAccount,
     selectedNetwork,
     tokenSelectorItems } = useReceiveQR();
+
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
   const zkModeSyncProgress = useSelector((state: RootState) => state.mantaPay.progress);
 

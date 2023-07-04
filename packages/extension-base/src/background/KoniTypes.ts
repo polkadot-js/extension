@@ -1975,6 +1975,7 @@ export interface KoniRequestSignatures {
   'pri(mantaPay.getZkBalance)': [null, null];
   'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];
   'pri(mantaPay.subscribeSyncingState)': [null, MantaPaySyncState, MantaPaySyncState];
+  'pri(mantaPay.initSyncMantaPay)': [string, null];
 
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];

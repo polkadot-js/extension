@@ -3336,6 +3336,7 @@ export default class KoniExtension {
 
     try {
       await this.#koniState.chainService.enableChain(_DEFAULT_MANTA_ZK_CHAIN);
+      this.#koniState.chainService.setMantaZkAssetSettings(true);
 
       const mnemonic = this.keyringExportMnemonic({ address, password });
       const { connectionStatus } = this.#koniState.chainService.getChainStateByKey(_DEFAULT_MANTA_ZK_CHAIN);
@@ -3357,7 +3358,6 @@ export default class KoniExtension {
           console.debug('Finished initial sync for MantaPay');
 
           this.#skipAutoLock = false;
-          this.#koniState.chainService.setMantaZkAssetSettings(true);
           unsubSyncProgress();
         })
         .catch((e) => {
@@ -3386,6 +3386,28 @@ export default class KoniExtension {
         message: MantaPayEnableMessage.UNKNOWN_ERROR
       };
     }
+  }
+
+  private async initSyncMantaPay (address: string) {
+    this.#skipAutoLock = true;
+    await this.saveCurrentAccountAddress({ address });
+    const unsubSyncProgress = await this.#koniState.chainService.mantaPay.subscribeSyncProgress();
+
+    console.debug('Start initial sync for MantaPay');
+
+    this.#koniState.initialSyncMantaPay(address)
+      .then(() => {
+        console.debug('Finished initial sync for MantaPay');
+
+        this.#skipAutoLock = false;
+        unsubSyncProgress();
+      })
+      .catch((e) => {
+        console.error('Error syncing MantaPay', e);
+
+        this.#skipAutoLock = false;
+        unsubSyncProgress();
+      });
   }
 
   private async disableMantaPay (address: string) {
@@ -3835,6 +3857,8 @@ export default class KoniExtension {
 
       case 'pri(mantaPay.enable)':
         return await this.enableMantaPay(request as MantaPayEnableParams);
+      case 'pri(mantaPay.initSyncMantaPay)':
+        return await this.initSyncMantaPay(request as string);
       case 'pri(mantaPay.subscribeConfig)':
         return await this.subscribeMantaPayConfig(id, port);
       case 'pri(mantaPay.disable)':

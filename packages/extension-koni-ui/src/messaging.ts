@@ -877,3 +877,7 @@ export async function subscribeMantaPayConfig (callback: (data: MantaPayConfig[]
 export async function subscribeMantaPaySyncingState (callback: (progress: MantaPaySyncState) => void): Promise<MantaPaySyncState> {
   return sendMessage('pri(mantaPay.subscribeSyncingState)', null, callback);
 }
+
+export async function initSyncMantaPay (address: string) {
+  return sendMessage('pri(mantaPay.initSyncMantaPay)', address);
+}

@@ -1130,7 +1130,6 @@ export default class KoniState {
   };
 
   public async disableChain (chainSlug: string): Promise<boolean> {
-    // const defaultChains = this.getDefaultNetworkKeys();
     await this.chainService.updateAssetSettingByChain(chainSlug, false);
 
     if (_MANTA_ZK_CHAIN_GROUP.includes(chainSlug)) {

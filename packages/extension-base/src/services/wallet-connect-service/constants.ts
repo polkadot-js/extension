@@ -4,7 +4,7 @@
 import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, WalletConnectSigningMethod } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { SignClientTypes } from '@walletconnect/types';
 
-export const PROJECT_ID = 'f71612bcfa754c812b1d09ae771da62d';
+export const PROJECT_ID = '6da34c0b48164d27681924dd9a46d6be';
 export const RELAY_URL = 'wss://relay.walletconnect.com';
 export const DEFAULT_WALLET_CONNECT_OPTIONS: SignClientTypes.Options = {
   logger: 'debug',

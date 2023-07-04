@@ -1934,7 +1934,7 @@ export default class KoniState {
 
     await this.chainService.mantaPay.privateWallet?.dropAuthorizationContext();
     await this.chainService.mantaPay.privateWallet?.dropUserSeedPhrase();
-    await this.chainService.mantaPay.privateWallet?.resetState();
+    // await this.chainService.mantaPay.privateWallet?.resetState();
     await this.chainService.mantaPay.deleteMantaPayConfig(address, _DEFAULT_MANTA_ZK_CHAIN);
     await this.chainService.mantaPay.deleteMantaAuthContext(address, _DEFAULT_MANTA_ZK_CHAIN);
 

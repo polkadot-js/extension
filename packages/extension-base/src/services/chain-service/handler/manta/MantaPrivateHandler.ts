@@ -26,10 +26,6 @@ export class MantaPrivateHandler {
     this.currentAddress = address;
   }
 
-  public setManualSync (value: boolean) { // TODO
-    this.syncState.needManualSync = value;
-  }
-
   public getSyncState () {
     return this.syncState;
   }

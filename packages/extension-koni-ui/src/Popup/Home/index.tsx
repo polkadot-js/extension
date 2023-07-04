@@ -29,13 +29,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
 
   const mantaPayConfig = useGetMantaPayConfig(currentAccount?.address);
+  const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
   const handleMantaPaySync = useHandleMantaPaySync();
-
-  useEffect(() => {
-    if (mantaPayConfig && mantaPayConfig.enabled && !mantaPayConfig.isInitialSync && !mantaPayConfig.isInitialSync) {
-      handleMantaPaySync(mantaPayConfig.address);
-    }
-  }, [handleMantaPaySync, mantaPayConfig]);
 
   const onOpenGlobalSearchToken = useCallback(() => {
     activeModal(GlobalSearchTokenModalId);
@@ -44,6 +39,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onCloseGlobalSearchToken = useCallback(() => {
     inactiveModal(GlobalSearchTokenModalId);
   }, [inactiveModal]);
+
+  useEffect(() => {
+    if (mantaPayConfig && mantaPayConfig.enabled && !mantaPayConfig.isInitialSync && !isZkModeSyncing) {
+      handleMantaPaySync(mantaPayConfig.address);
+    }
+  }, [handleMantaPaySync, isZkModeSyncing, mantaPayConfig]);
 
   return (
     <>

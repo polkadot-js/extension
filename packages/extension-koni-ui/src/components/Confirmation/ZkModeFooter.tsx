@@ -117,7 +117,7 @@ const Component: React.FC<Props> = (props: Props) => {
           loading={loading}
           onClick={form.submit}
         >
-          {t('Turn on')}
+          {t('Enable')}
         </Button>
       </div>
     </div>

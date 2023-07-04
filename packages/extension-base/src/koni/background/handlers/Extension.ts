@@ -3389,6 +3389,10 @@ export default class KoniExtension {
   }
 
   private async initSyncMantaPay (address: string) {
+    if (this.#koniState.chainService.mantaPay.getSyncState().isSyncing) {
+      return;
+    }
+
     this.#skipAutoLock = true;
     await this.saveCurrentAccountAddress({ address });
     const unsubSyncProgress = await this.#koniState.chainService.mantaPay.subscribeSyncProgress();

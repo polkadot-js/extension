@@ -66,7 +66,8 @@ export default function useHandleMantaPaySync () {
     );
 
     notify({
-      message: 'Sync Manta?',
+      description: t('This may take a few minutes'),
+      message: t('Sync ZK mode?'),
       type: NotificationType.WARNING,
       btn: button,
       duration: 3

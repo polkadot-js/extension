@@ -120,12 +120,12 @@ const zkModeConfirmationId = 'zkModeConfirmation';
 
 function getZkErrorMessage (error: MantaPayEnableMessage) {
   if (error === MantaPayEnableMessage.WRONG_PASSWORD) {
-    return 'Invalid password';
+    return 'Wrong password';
   } else if (error === MantaPayEnableMessage.CHAIN_DISCONNECTED) {
-    return 'Chain disconnected. ';
+    return 'Chain disconnected';
   }
 
-  return 'Unknown error';
+  return 'Some errors occurred. Please try again later';
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -335,8 +335,9 @@ const Component: React.FC<Props> = (props: Props) => {
             if (result) {
               dispatchMantaPayState({ type: MantaPayReducerActionType.INIT, payload: undefined });
               notify({
-                message: t('Disabled Zk mode'),
-                type: 'success'
+                message: t('ZK assets are hidden as ZK mode is disabled'),
+                type: 'success',
+                duration: 3
               });
             } else {
               notify({
@@ -353,7 +354,7 @@ const Component: React.FC<Props> = (props: Props) => {
           });
       } else {
         notify({
-          message: t('Zk mode is syncing'),
+          message: t('ZK mode is syncing'),
           type: 'warning'
         });
       }
@@ -503,7 +504,7 @@ const Component: React.FC<Props> = (props: Props) => {
             zkModeSyncState.isSyncing && (
               <SwAlert
                 className={CN('zk-alert-area')}
-                description={zkModeSyncState.progress === 100 ? t('All done, you can go back home') : t('This may take a few minutes, keep this app open for faster sync')}
+                description={zkModeSyncState.progress === 100 ? t('All done, you can go back home') : t('This may take a few minutes. Please keep the app open')}
                 title={zkModeSyncState.progress === 100 ? t('Zk mode is ready') : t(`Zk mode is syncing: ${zkModeSyncState.progress}%`)}
                 type={zkModeSyncState.progress === 100 ? 'success' : 'warning'}
               />
@@ -592,7 +593,7 @@ const Component: React.FC<Props> = (props: Props) => {
           )}
           id={zkModeConfirmationId}
           maskClosable={false}
-          title={t<string>('Confirmation')}
+          title={t<string>('Enable ZK mode?')}
           wrapClassName={className}
         >
           <div className={'zk-warning__container'}>
@@ -603,11 +604,11 @@ const Component: React.FC<Props> = (props: Props) => {
                 phosphorIcon={Warning}
                 weight={'bold'}
               />
-              <div className={'zk-warning__title-text'}>{t('Zk mode requires data synchronization')}</div>
+              <div className={'zk-warning__title-text'}>{t('ZK mode requires data synchronization')}</div>
             </div>
 
             <div className={'zk-warning__subtitle'}>
-              {t('You will not be able to use the app until the synchronization is finished. This process can take up to 45 minutes or longer, are you sure to do this?')}
+              {t('Using the app is not advised until synchronization finishes. First-time synchronization can take up to 45 minutes or longer. Proceed?')}
             </div>
           </div>
         </SwModal>

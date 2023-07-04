@@ -341,7 +341,11 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
     },
 
     '.account-list': {
-      margin: `0 -${token.margin}px`
+      margin: `0 -${token.margin}px`,
+
+      '.ant-sw-list-wrapper': {
+        flexBasis: 'auto'
+      }
     },
 
     '.total-account': {

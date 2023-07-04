@@ -8,7 +8,7 @@ export const validWalletConnectUri = (data: string): string | null => {
     const { protocol, topic, version } = parseUri(data);
 
     if (version === 1) {
-      return 'Not support WalletConnect v1';
+      return 'Failed to connect. Please use Wallet Connect v2 on dApp';
     }
 
     if (protocol !== 'wc' || !topic) {

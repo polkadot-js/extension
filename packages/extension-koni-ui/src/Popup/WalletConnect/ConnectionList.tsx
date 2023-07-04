@@ -124,14 +124,12 @@ const Component: React.FC<Props> = (props: Props) => {
 const ConnectionList = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     padding: token.padding,
+    display: 'flex',
+    flexDirection: 'column',
 
     '.sessions-list': {
       '--row-gap': token.sizeXS,
       margin: `0 -${token.margin}px`,
-
-      '.ant-sw-list-wrapper': {
-        flexBasis: 'auto'
-      }
     }
   };
 });

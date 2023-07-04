@@ -129,7 +129,7 @@ const ConnectionList = styled(Component)<Props>(({ theme: { token } }: Props) =>
 
     '.sessions-list': {
       '--row-gap': token.sizeXS,
-      margin: `0 -${token.margin}px`,
+      margin: `0 -${token.margin}px`
     }
   };
 });

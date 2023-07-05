@@ -46,7 +46,7 @@ function PasswordFeedback({
         duration={duration}
         in={score === 4}
         messageType='success'
-        text={t("Awesome! Your password is really strong")}
+        text={t('Awesome! Your password is really strong.')}
       />
       <StyledTransitionMessage
         duration={duration}

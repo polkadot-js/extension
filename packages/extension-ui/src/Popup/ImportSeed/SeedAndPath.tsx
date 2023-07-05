@@ -126,7 +126,7 @@ function SeedAndPath({ className, genesis, onAccountChange, onNextStep, type }: 
       .catch(() => {
         setAddress('');
         onAccountChange(null);
-        setError(path ? t<string>('Invalid secret phrase or path') : t<string>('Invalid secret phrase'));
+        setError(path ? t<string>('Invalid secret phrase or path.') : t<string>('Invalid secret phrase.'));
       });
   }, [t, hasSomeSeedWords, genesis, seedWords, path, onAccountChange, type, setError, setAddress]);
 
@@ -210,6 +210,7 @@ function SeedAndPath({ className, genesis, onAccountChange, onNextStep, type }: 
           {!!error && (
             <Warning
               className='centered'
+              isBelowInput
               isDanger
             >
               {error}
@@ -256,14 +257,14 @@ function SeedAndPath({ className, genesis, onAccountChange, onNextStep, type }: 
 }
 
 const StyledHeader = styled(Header)`
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 `;
 
 const MnemonicWrapper = styled.div`
   margin-bottom: 24px;
 
   & > :not(:last-child) {
-    margin-bottom: 8px;
+    margin-bottom: 16px;
   }
 `;
 

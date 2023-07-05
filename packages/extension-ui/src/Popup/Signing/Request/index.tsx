@@ -9,7 +9,7 @@ import type { HexString } from '@polkadot/util/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { Address } from "@polkadot/extension-ui/components/index";
+import { Address } from '@polkadot/extension-ui/components/index';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ActionContext, VerticalSpace, Warning } from '../../../components';
@@ -82,11 +82,11 @@ export default function Request({
       approveSignSignature(signId, signature)
         .then(() => onAction())
         .catch((error: Error): void => {
-          setError(error.message);
+          setError(t('Unable to decode using the supplied passphrase.'));
           console.error(error);
         });
     },
-    [onAction, signId]
+    [onAction, signId, t]
   );
 
   if (payload !== null) {

@@ -149,7 +149,7 @@ describe('Derive', () => {
       await act(flushAllPromises);
       wrapper.update();
 
-      expect(wrapper.find({ children: 'Wrong password' }).length).toBeGreaterThan(0);
+      expect(wrapper.find({ children: 'Wrong password.' }).length).toBeGreaterThan(0);
 
       await type(wrapper.find('input[type="password"]'), 'new_attempt');
 
@@ -203,7 +203,7 @@ describe('Derive', () => {
 
       expect(button.prop('disabled')).toBe(true);
       expect(wrapper.find('.warning-message')).toHaveLength(1);
-      expect(wrapper.find('.warning-message').first().text()).toEqual('Invalid derivation path');
+      expect(wrapper.find('.warning-message').first().text()).toEqual('Invalid derivation path.');
     });
 
     it('An error is visible and the button is disabled when suri contains `///`', async () => {
@@ -215,7 +215,7 @@ describe('Derive', () => {
       expect(button.prop('disabled')).toBe(true);
       expect(wrapper.find('.warning-message')).toHaveLength(1);
       // eslint-disable-next-line quotes
-      expect(wrapper.find('.warning-message').first().text()).toEqual('`///password` not supported for derivation');
+      expect(wrapper.find('.warning-message').first().text()).toEqual('`///password` not supported for derivation.');
     });
 
     it('No error is shown when suri contains soft derivation `/` with sr25519', async () => {
@@ -235,7 +235,7 @@ describe('Derive', () => {
       await act(flushAllPromises);
       wrapper.update();
 
-      expect(wrapper.find({ children: 'Invalid derivation path' }).length).toBeGreaterThan(0);
+      expect(wrapper.find({ children: 'Invalid derivation path.' }).length).toBeGreaterThan(0);
 
       await type(wrapper.find('[data-input-suri] input'), 'new');
 

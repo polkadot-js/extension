@@ -22,7 +22,7 @@ const Password = ({ label, onChange, repeatLabel, validationUserInput }: Props) 
   const [nonValidatedPass1, setNonValidatedPass1] = useState<string>('');
   const [pass1, setPass1] = useState<string>('');
   const [pass2, setPass2] = useState<string>('');
-  const isSecondPasswordValid = isSameAs(nonValidatedPass1, t<string>('Passwords do not match'));
+  const isSecondPasswordValid = isSameAs(nonValidatedPass1, t<string>('Passwords do not match.'));
 
   useEffect((): void => {
     onChange(pass1 && pass1 === pass2 ? pass1 : null);

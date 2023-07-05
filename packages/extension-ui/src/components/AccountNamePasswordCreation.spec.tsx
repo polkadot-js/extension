@@ -111,7 +111,7 @@ describe('AccountNamePasswordCreation', () => {
 
   it('submit button is not enabled until both passwords are equal', async () => {
     await enterName('abc').then(password('Alice has a cat')).then(repeat('Not Alice has a cat'));
-    expect(wrapper.find('.warning-message').text()).toBe('Passwords do not match');
+    expect(wrapper.find('.warning-message').text()).toBe('Passwords do not match.');
     expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]').find(Input).prop('withError')).toBe(true);
     expect(wrapper.find('button[type="submit"]').prop('disabled')).toBe(true);
   });
@@ -138,7 +138,7 @@ describe('AccountNamePasswordCreation', () => {
 
     it('first password changes - button is disabled', async () => {
       await type(wrapper.find('input[type="password"]').first(), 'Not Alice has a cat');
-      expect(wrapper.find('.warning-message').text()).toBe('Passwords do not match');
+      expect(wrapper.find('.warning-message').text()).toBe('Passwords do not match.');
       expect(wrapper.find('button[type="submit"]').prop('disabled')).toBe(true);
     });
 

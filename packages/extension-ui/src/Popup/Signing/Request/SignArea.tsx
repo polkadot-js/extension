@@ -69,7 +69,7 @@ function SignArea({ buttonText, className, error, isExternal, isFirst, isLast, s
       onAction(`/request-status?${params.toString()}`);
     } catch (error) {
       setIsBusy(false);
-      setError((error as Error).message);
+      setError(t('Unable to decode using the supplied passphrase.'));
       console.error(error);
     }
   }, [isLast, onAction, password, savePass, setError, signId, t]);

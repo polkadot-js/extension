@@ -117,7 +117,7 @@ function ImportJsonConfirmStep({
                     isBelowInput
                     isDanger
                   >
-                    {t<string>('Unable to decode using the supplied passphrase')}
+                    {t<string>('Unable to decode using the supplied passphrase.')}
                   </StyledWarning>
                 )}
               </PasswordContainer>

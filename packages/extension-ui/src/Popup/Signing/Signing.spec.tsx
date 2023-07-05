@@ -297,7 +297,7 @@ describe('Signing requests', () => {
       await act(flushAllPromises);
       wrapper.update();
 
-      expect(wrapper.find({ children: 'Unable to decode using the supplied passphrase' }).length).toBeGreaterThan(0);
+      expect(wrapper.find({ children: 'Unable to decode using the supplied passphrase.' }).length).toBeGreaterThan(0);
     });
 
     it('when last request has been removed/cancelled, shows the previous one', async () => {

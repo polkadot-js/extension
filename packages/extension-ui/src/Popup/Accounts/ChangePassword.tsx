@@ -103,7 +103,7 @@ const EditPassword = () => {
               validator={Result.ok}
             />
             {isProvidedPassWrong && (
-              <StyleMessage messageType='critical'>{t('Unable to decode using the supplied passphrase')}</StyleMessage>
+              <StyleMessage messageType='critical'>{t('Unable to decode using the supplied passphrase.')}</StyleMessage>
             )}
           </InputWrapper>
           <Password

@@ -38,7 +38,7 @@ function Export({
   const { show } = useToast();
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
-  const [error, setError] = useState('');
+  const [isProvidedPassWrong, setIsProvidedPassWrong] = useState(false);
 
   const formId = useId();
 
@@ -46,7 +46,7 @@ function Export({
 
   const onPassChange = useCallback((password: string) => {
     setPass(password);
-    setError('');
+    setIsProvidedPassWrong(false);
   }, []);
 
   const _onExport = useCallback((): void => {
@@ -62,12 +62,12 @@ function Export({
       })
       .catch((error: Error) => {
         console.error(error);
-        setError(error.message);
+        setIsProvidedPassWrong(true);
         setIsBusy(false);
       });
   }, [address, onAction, pass, show, t]);
 
-  const isFormValid = Boolean(pass && !error);
+  const isFormValid = Boolean(pass && !isProvidedPassWrong);
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -98,18 +98,18 @@ function Export({
           <InputWithLabel
             data-export-password
             disabled={isBusy}
-            isError={!!error}
+            isError={isProvidedPassWrong}
             label={t<string>('Password')}
             onChange={onPassChange}
             type='password'
             value={pass}
           />
-          {error && (
+          {isProvidedPassWrong && (
             <Warning
               isBelowInput
               isDanger
             >
-              {error}
+              {t('Unable to decode using the supplied passphrase.')}
             </Warning>
           )}
         </form>

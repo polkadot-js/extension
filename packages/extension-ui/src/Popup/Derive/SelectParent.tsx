@@ -80,7 +80,7 @@ function SelectParent({
   useEffect(() => {
     // forbid the use of password since Keyring ignores it
     if (suriPath?.includes('///')) {
-      setPathError(t('`///password` not supported for derivation'));
+      setPathError(t('`///password` not supported for derivation.'));
     }
 
     if (!allowSoftDerivation && suriPath && singleSlashRegex.test(suriPath)) {
@@ -123,7 +123,7 @@ function SelectParent({
           onNextStep();
         } catch (error) {
           setIsBusy(false);
-          setPathError(t('Invalid derivation path'));
+          setPathError(t('Invalid derivation path.'));
           console.error(error);
         }
       } else {
@@ -207,7 +207,7 @@ function SelectParent({
               isBelowInput
               isDanger
             >
-              {t('Wrong password')}
+              {t('Wrong password.')}
             </Warning>
           )}
         </InputWrapper>
@@ -225,7 +225,7 @@ function SelectParent({
               isBelowInput
               isDanger
             >
-              {t('Derivation path is required')}
+              {t('Derivation path is required.')}
             </Warning>
           )}
           {!!pathError && (

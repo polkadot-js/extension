@@ -78,7 +78,7 @@ describe('Export component', () => {
     await act(flushAllPromises);
     wrapper.update();
 
-    expect(wrapper.find('.warning-message').text()).toBe('Unable to decode using the supplied passphrase');
+    expect(wrapper.find('.warning-message').text()).toBe('Unable to decode using the supplied passphrase.');
     expect(wrapper.find(Button).last().prop('isDisabled')).toBe(true);
     expect(wrapper.find('InputWithLabel').first().prop('isError')).toBe(true);
   });
@@ -95,7 +95,7 @@ describe('Export component', () => {
     await act(flushAllPromises);
     wrapper.update();
 
-    expect(wrapper.find({ children: 'Unable to decode using the supplied passphrase' }).length).toBeGreaterThan(0);
+    expect(wrapper.find({ children: 'Unable to decode using the supplied passphrase.' }).length).toBeGreaterThan(0);
 
     enterPassword();
 

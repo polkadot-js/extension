@@ -12,14 +12,13 @@ import React, { useState } from 'react';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
 
-import { ActionContext, Button, SigningReqContext, themes } from '../../components';
+import { ActionContext, Button, RequestPagination, SigningReqContext, themes } from '../../components';
 import * as messaging from '../../messaging';
 import * as MetadataCache from '../../MetadataCache';
 import { flushAllPromises } from '../../testHelpers';
 import Extrinsic from './Extrinsic';
 import { westendMetadata } from './metadataMock';
 import Request from './Request';
-import TransactionIndex from './TransactionIndex';
 import Signing from '.';
 
 // For this file, there are a lot of them
@@ -151,7 +150,7 @@ describe('Signing requests', () => {
 
   describe('Switching between requests', () => {
     it('initially first request should be shown', () => {
-      expect(wrapper.find(TransactionIndex).text()).toBe('1\xa0more\xa0Transaction1/2');
+      expect(wrapper.find(RequestPagination).text()).toBe('1\xa0more\xa0transaction1/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
 
@@ -162,14 +161,14 @@ describe('Signing requests', () => {
       wrapper.find('FontAwesomeIcon.arrowLeft').simulate('click');
       await act(flushAllPromises);
 
-      expect(wrapper.find(TransactionIndex).text()).toBe('1\xa0more\xa0Transaction1/2');
+      expect(wrapper.find(RequestPagination).text()).toBe('1\xa0more\xa0transaction1/2');
     });
 
     it('should display second request after clicking right arrow', async () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
       await act(flushAllPromises);
 
-      expect(wrapper.find(TransactionIndex).text()).toBe('1\xa0more\xa0Transaction2/2');
+      expect(wrapper.find(RequestPagination).text()).toBe('1\xa0more\xa0transaction2/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[1].id);
     });
 
@@ -180,7 +179,7 @@ describe('Signing requests', () => {
       expect(wrapper.find('FontAwesomeIcon.arrowLeft.active')).toHaveLength(1);
       expect(wrapper.find('FontAwesomeIcon.arrowRight')).toHaveLength(1);
       expect(wrapper.find('FontAwesomeIcon.arrowRight.active')).toHaveLength(0);
-      expect(wrapper.find(TransactionIndex).text()).toBe(`1\xa0more\xa0Transaction2/2`);
+      expect(wrapper.find(RequestPagination).text()).toBe(`1\xa0more\xa0transaction2/2`);
     });
 
     it('should display previous request after the left arrow has been clicked', async () => {
@@ -189,7 +188,7 @@ describe('Signing requests', () => {
       wrapper.find('FontAwesomeIcon.arrowLeft').simulate('click');
       await act(flushAllPromises);
 
-      expect(wrapper.find(TransactionIndex).text()).toBe('1\xa0more\xa0Transaction1/2');
+      expect(wrapper.find(RequestPagination).text()).toBe('1\xa0more\xa0transaction1/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
   });
@@ -207,7 +206,7 @@ describe('Signing requests', () => {
         'balances',
         'transferKeepAlive',
         '5GYQRJj3NUznYDzCduENRcocMsyxmb6tjb5xW87ZMErBe9R7',
-        '123.0000 WND',
+        '123.0000 WND'
       ]);
 
       expect(
@@ -233,7 +232,7 @@ describe('Signing requests', () => {
         'balances',
         'transfer',
         '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
-        '200.0000 mWND',
+        '200.0000 mWND'
       ]);
 
       expect(
@@ -311,7 +310,7 @@ describe('Signing requests', () => {
       await act(flushAllPromises);
       wrapper.update();
 
-      expect(wrapper.find(TransactionIndex)).toHaveLength(0);
+      expect(wrapper.find(RequestPagination)).toHaveLength(0);
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
   });

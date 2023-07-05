@@ -44,6 +44,7 @@ export { default as Warning } from './Warning';
 export { default as Tooltip } from './Tooltip';
 export { default as AddButton } from './AddButton';
 export { default as MenuCard } from './MenuCard';
+export { default as RequestPagination } from './RequestPagination';
 export { default as Skeleton } from './Skeleton';
 export { default as SkeletonCard } from './SkeletonCard';
 export { MnemonicPill, MnemonicInput } from './Mnemonic';

@@ -378,5 +378,9 @@
   "Section": "",
   "Method": "",
   "Arguments": "",
-  "You have been redirected because you've entered a website that could compromise the security of your assets.": ""
+  "You have been redirected because you've entered a website that could compromise the security of your assets.": "",
+  "Metadata updated": "",
+  "Metadata update rejected": "",
+  "Transaction signed": "",
+  "Transaction declined": ""
 }

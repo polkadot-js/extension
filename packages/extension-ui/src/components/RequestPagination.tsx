@@ -1,14 +1,14 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
+import type { ThemeProps } from '../types';
 
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import useTranslation from '../../hooks/useTranslation';
+import useTranslation from '../hooks/useTranslation';
 
 interface Props {
   className?: string;
@@ -16,13 +16,17 @@ interface Props {
   totalItems: number;
   onNextClick: () => void;
   onPreviousClick: () => void;
+  singularName: string;
+  pluralName: string;
 }
 
-function TransactionIndex({
+function RequestPagination({
   className,
   index,
   onNextClick,
   onPreviousClick,
+  pluralName,
+  singularName,
   totalItems: unsanitizedTotalItems
 }: Props): React.ReactElement<Props> {
   const totalItems = unsanitizedTotalItems < 0 ? 0 : unsanitizedTotalItems;
@@ -38,14 +42,14 @@ function TransactionIndex({
     nextClickActive && onNextClick();
   }, [nextClickActive, onNextClick]);
 
-  const transactionsLeft = totalItems - 1;
+  const requestsLeft = totalItems - 1;
 
   return (
     <div className={className}>
       <div>
         <span>
-          {transactionsLeft}&nbsp;{t<string>('more')}&nbsp;
-          {transactionsLeft === 1 ? t<string>('Transaction') : t<string>('Transactions')}
+          {requestsLeft}&nbsp;{t<string>('more')}&nbsp;
+          {requestsLeft === 1 ? singularName : pluralName}
         </span>
       </div>
       <div className='arrow-group'>
@@ -57,7 +61,8 @@ function TransactionIndex({
         />
         <div>
           <span className='currentStep'>{index + 1}</span>
-          <span className='totalSteps'>/{totalItems}</span>
+          <span className='divider'>/</span>
+          <span className='totalSteps'>{totalItems}</span>
         </div>
         <FontAwesomeIcon
           className={`arrowRight ${nextClickActive ? 'active' : ''}`}
@@ -70,7 +75,7 @@ function TransactionIndex({
   );
 }
 
-export default styled(TransactionIndex)(
+export default styled(RequestPagination)(
   ({ theme }: ThemeProps) => `
   display: flex;
   flex-direction: row;
@@ -78,8 +83,8 @@ export default styled(TransactionIndex)(
   align-items: center;
   border-radius: 32px;
   box-sizing: border-box;
-  padding: 8px 8px 8px 16px;
-  gap: 83px;
+  padding-block: 8px;
+  padding-inline: 16px;
   background: #FFFFFF;
   color: ${theme.buttonTextColor};
   font-family: ${theme.secondaryFontFamily};
@@ -102,6 +107,7 @@ export default styled(TransactionIndex)(
     display: inline-block;
     opacity: 0.65;
     color: ${theme.transactionTooltipTextColor};
+    padding: 0.5rem;
 
     &.active {
       color: ${theme.buttonTextColor};
@@ -109,14 +115,14 @@ export default styled(TransactionIndex)(
     }
   }
 
-  .arrowRight {
-    margin-left: 0.5rem;
-  }
+  .currentStep, .divider, .totalSteps {
+    display: inline-block;
+    min-width: 14px;
 
-  .currentStep, .totalSteps {
+    text-align: center;
+
     font-size: 14px;
     line-height: 120%;
-    margin-left: 10px;
   }
 
 `

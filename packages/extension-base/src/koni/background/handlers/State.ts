@@ -1623,50 +1623,51 @@ export default class KoniState {
   }
 
   public onInstall () {
-    const singleModes = Object.values(_PREDEFINED_SINGLE_MODES);
+    // const singleModes = Object.values(_PREDEFINED_SINGLE_MODES);
 
-    try {
-      // Open expand page
-      const url = `${chrome.extension.getURL('index.html')}#/`;
+    // This logic is moved to installation.ts
+    // try {
+    //   // Open expand page
+    //   const url = `${chrome.extension.getURL('index.html')}#/`;
+    //
+    //   withErrorLog(() => chrome.tabs.create({ url }));
+    // } catch (e) {
+    //   console.error(e);
+    // }
 
-      withErrorLog(() => chrome.tabs.create({ url }));
-    } catch (e) {
-      console.error(e);
-    }
-
-    const setUpSingleMode = ({ networkKeys, theme }: SingleModeJson) => {
-      networkKeys.forEach((key) => {
-        this.enableChain(key).catch(console.error);
-      });
-
-      const chainInfo = this.chainService.getChainInfoByKey(networkKeys[0]);
-      const genesisHash = _getSubstrateGenesisHash(chainInfo);
-
-      this.setCurrentAccount({
-        address: ALL_ACCOUNT_KEY,
-        currentGenesisHash: genesisHash.length > 0 ? genesisHash : null
-      });
-      this.setTheme(theme);
-    };
-
-    chrome.tabs.query({}, function (tabs) {
-      const openingUrls = tabs.map((t) => t.url);
-
-      const singleMode = singleModes.find(({ autoTriggerDomain }) => {
-        const urlRegex = new RegExp(autoTriggerDomain);
-
-        return Boolean(openingUrls.find((url) => {
-          return url && urlRegex.test(url);
-        }));
-      });
-
-      if (singleMode) {
-        // Wait for everything is ready before enable single mode
-        setTimeout(() => {
-          setUpSingleMode(singleMode);
-        }, 999);
-      }
-    });
+    // const setUpSingleMode = ({ networkKeys, theme }: SingleModeJson) => {
+    //   networkKeys.forEach((key) => {
+    //     this.enableChain(key).catch(console.error);
+    //   });
+    //
+    //   const chainInfo = this.chainService.getChainInfoByKey(networkKeys[0]);
+    //   const genesisHash = _getSubstrateGenesisHash(chainInfo);
+    //
+    //   this.setCurrentAccount({
+    //     address: ALL_ACCOUNT_KEY,
+    //     currentGenesisHash: genesisHash.length > 0 ? genesisHash : null
+    //   });
+    //   this.setTheme(theme);
+    // };
+    //
+    // chrome.tabs.query({}, function (tabs) {
+    //   const openingUrls = tabs.map((t) => t.url);
+    //
+    //   const singleMode = singleModes.find(({ autoTriggerDomain }) => {
+    //     const urlRegex = new RegExp(autoTriggerDomain);
+    //
+    //     return Boolean(openingUrls.find((url) => {
+    //       return url && urlRegex.test(url);
+    //     }));
+    //   });
+    //
+    //   if (singleMode) {
+    //     // Wait for everything is ready before enable single mode
+    //     setTimeout(() => {
+    //       setUpSingleMode(singleMode);
+    //     }, 999);
+    //   }
+    // });
   }
 
   public get activeNetworks () {

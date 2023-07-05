@@ -522,7 +522,7 @@ export class ChainService {
     if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo !== undefined) {
       const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
 
-      this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
+      this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as SubstrateApi);
     }
 
     if (chainInfo.evmInfo !== null && chainInfo.evmInfo !== undefined) {

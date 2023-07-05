@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
-import {_ChainConnectionStatus} from "@subwallet/extension-base/services/chain-service/types";
+import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 
 export interface _EvmChainSpec {
   evmChainId: number,

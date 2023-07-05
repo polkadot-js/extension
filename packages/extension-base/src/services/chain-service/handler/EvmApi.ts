@@ -3,12 +3,12 @@
 
 import '@polkadot/types-augment';
 
-import {_ApiOptions} from '@subwallet/extension-base/services/chain-service/handler/types';
-import {_ChainConnectionStatus, _EvmApi} from '@subwallet/extension-base/services/chain-service/types';
-import {createPromiseHandler, PromiseHandler} from '@subwallet/extension-base/utils/promise';
-import {BehaviorSubject} from 'rxjs';
+import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
+import { _ChainConnectionStatus, _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
+import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
+import { BehaviorSubject } from 'rxjs';
 import Web3 from 'web3';
-import {HttpProvider, WebsocketProvider} from 'web3-core';
+import { HttpProvider, WebsocketProvider } from 'web3-core';
 
 export class EvmApi implements _EvmApi {
   chainSlug: string;

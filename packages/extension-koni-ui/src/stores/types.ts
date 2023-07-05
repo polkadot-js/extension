@@ -7,6 +7,8 @@ import { AddressBookState, AllLogoMap, AssetSetting, BalanceItem, ChainStakingMe
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
+import { SessionTypes } from '@walletconnect/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
@@ -96,6 +98,7 @@ export interface RequestState extends ConfirmationsQueue, BaseReduxStore {
   hasInternalConfirmations: boolean;
   numberOfConfirmations: number;
   transactionRequest: Record<string, SWTransactionResult>;
+  connectWCRequest: Record<string, WalletConnectSessionRequest>;
 }
 
 export interface UpdateConfirmationsQueueRequest extends BaseReduxStore {
@@ -150,6 +153,10 @@ export interface ChainValidatorParams {
 export interface ChainNominationPoolParams {
   chain: string,
   pools: NominationPoolInfo[]
+}
+
+export interface WalletConnectStore extends BaseReduxStore {
+  sessions: Record<string, SessionTypes.Struct>;
 }
 
 export interface MantaPayStore {

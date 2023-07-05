@@ -4,6 +4,7 @@
 export { default as AddNetworkConfirmation } from './AddNetworkConfirmation';
 export { default as AddTokenConfirmation } from './AddTokenConfirmation';
 export { default as AuthorizeConfirmation } from './AuthorizeConfirmation';
+export { default as ConnectWalletConnectConfirmation } from './ConnectWalletConnectConfirmation';
 export { default as EvmSignatureConfirmation } from './EvmSignatureConfirmation';
 export { default as EvmTransactionConfirmation } from './EvmTransactionConfirmation';
 export { default as MetadataConfirmation } from './MetadataConfirmation';

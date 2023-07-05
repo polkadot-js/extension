@@ -58,7 +58,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [accountTypes] = useState<KeypairType[]>(() => {
     const storage = localStorage.getItem(SELECTED_CREATE_ACCOUNT_TYPE_KEY);
 
-    return storage ? JSON.parse(storage) as KeypairType[] : DEFAULT_ACCOUNT_TYPES;
+    const types = storage ? JSON.parse(storage) as KeypairType[] : DEFAULT_ACCOUNT_TYPES;
+
+    return types.length ? types : DEFAULT_ACCOUNT_TYPES;
   });
 
   const [seedPhrase, setSeedPhrase] = useState('');

@@ -18,6 +18,7 @@ import NftReducer from './feature/Nft';
 import PriceReducer from './feature/Price';
 import StakingReducer from './feature/Staking';
 import TransactionHistoryReducer from './feature/TransactionHistory';
+import WalletConnectReducer from './feature/WalletConnect';
 
 const persistConfig = {
   key: 'root',
@@ -47,7 +48,10 @@ const rootReducers = combineReducers({
   // base
   requestState: RequestStateReducer,
   settings: SettingsReducer,
-  accountState: AccountStateReducer
+  accountState: AccountStateReducer,
+
+  // wallet connect
+  walletConnect: WalletConnectReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducers);

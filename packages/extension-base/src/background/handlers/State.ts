@@ -8,6 +8,7 @@ import type { AccountAuthType, AccountJson, AuthorizeRequest, MetadataRequest, R
 import { RequestSettingsType } from '@subwallet/extension-base/background/KoniTypes';
 import { DEFAULT_SETTING } from '@subwallet/extension-base/services/setting-service/constants';
 import SettingsStore from '@subwallet/extension-base/stores/Settings';
+import { stripUrl } from '@subwallet/extension-base/utils';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@subwallet/extension-chains';
 import { BehaviorSubject } from 'rxjs';
@@ -269,7 +270,7 @@ export default class State {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
       const isAllowedMap = {};
 
-      this.#authUrls[this.stripUrl(url)] = {
+      this.#authUrls[stripUrl(url)] = {
         count: 0,
         id: idStr,
         isAllowed,
@@ -335,14 +336,6 @@ export default class State {
     };
   };
 
-  public stripUrl (url: string): string {
-    assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
-
-    const parts = url.split('/');
-
-    return parts[2];
-  }
-
   private updateIcon (shouldClose?: boolean): void {
     const authCount = this.numAuthRequests;
     const metaCount = this.numMetaRequests;
@@ -389,7 +382,7 @@ export default class State {
   }
 
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<boolean> {
-    const idStr = this.stripUrl(url);
+    const idStr = stripUrl(url);
 
     // Do not enqueue duplicate authorization requests.
     const isDuplicate = Object.values(this.#authRequests)
@@ -421,7 +414,7 @@ export default class State {
   }
 
   public ensureUrlAuthorized (url: string): boolean {
-    const entry = this.#authUrls[this.stripUrl(url)];
+    const entry = this.#authUrls[stripUrl(url)];
 
     assert(entry, `The source ${url} has not been enabled yet`);
     assert(entry.isAllowed, `The source ${url} is not allowed to interact with this extension`);

@@ -126,7 +126,6 @@ const EditPassword = () => {
             form={formId}
             isBusy={isBusy}
             isDisabled={!isFormValid}
-            onClick={saveChanges}
             type='submit'
           >
             {t<string>('Save')}

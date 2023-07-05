@@ -18,10 +18,10 @@ export default function createView (Entry: React.ComponentType, rootId = 'root')
   const root = ReactDOM.createRoot(rootElement);
 
   root.render(
-    // <React.StrictMode>
-    <Suspense>
-      <Entry />
-    </Suspense>
-    // </React.StrictMode>
+    <React.StrictMode>
+      <Suspense>
+        <Entry />
+      </Suspense>
+    </React.StrictMode>
   );
 }

@@ -55,7 +55,7 @@ export const _STAKING_CHAIN_GROUP = {
   relay: ['polkadot', 'kusama', 'aleph', 'polkadex', 'ternoa', 'ternoa_alphanet', 'alephTest', 'polkadexTest', 'westend'],
   para: ['moonbeam', 'moonriver', 'moonbase', 'turing', 'turingStaging', 'bifrost', 'bifrost_testnet', 'calamari_test', 'calamari'],
   astar: ['astar', 'shiden', 'shibuya'],
-  amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine'], // amplitude and kilt only share some common logic
+  amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine', 'pendulum'], // amplitude and kilt only share some common logic
   kilt: ['kilt', 'kilt_peregrine'],
   nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph'],
   bifrost: ['bifrost', 'bifrost_testnet'],
@@ -210,7 +210,7 @@ export const _DEFAULT_ACTIVE_CHAINS = [
 ];
 
 // TODO: review
-const TARGET_BRANCH = process.env.NODE_ENV !== 'production' ? 'koni-dev' : 'master';
+const TARGET_BRANCH = process.env.NODE_ENV !== 'production' ? 'koni/dev/issue-1595' : 'master';
 
 export const _CHAIN_INFO_SRC = `https://raw.githubusercontent.com/Koniverse/SubWallet-Chain/${TARGET_BRANCH}/packages/chain-list/src/data/ChainInfo.json`;
 export const _CHAIN_ASSET_SRC = `https://raw.githubusercontent.com/Koniverse/SubWallet-Chain/${TARGET_BRANCH}/packages/chain-list/src/data/ChainAsset.json`;

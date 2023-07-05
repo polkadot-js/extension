@@ -9,11 +9,10 @@ import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
-import { Icon, InputRef, ModalContext, SelectModal } from '@subwallet/react-ui';
+import { InputRef, SelectModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { SortAscending } from 'phosphor-react';
-import React, { ForwardedRef, forwardRef, useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -23,8 +22,6 @@ interface Props extends ThemeProps, BasicInputWrapper {
   nominators: NominationInfo[];
   chain: string
 }
-
-const SORTING_MODAL_ID = 'nominated-sorting-modal';
 
 const renderEmpty = () => <GeneralEmptyList />;
 
@@ -38,7 +35,6 @@ const renderItem = (item: NominationInfo, isSelected: boolean) => (
 // todo: update filter for this component, after updating filter for SelectModal
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain = '', className, disabled, id = 'nomination-selector', label, nominators, placeholder, statusHelp, value } = props;
-  const { activeModal } = useContext(ModalContext);
 
   const filteredItems = useMemo(() => {
     return nominators.filter((item) => new BigN(item.activeStake).gt(0));
@@ -104,12 +100,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         renderItem={renderItem}
         renderSelected={renderSelected}
         renderWhenEmpty={renderEmpty}
-        rightIconProps={{
-          icon: <Icon phosphorIcon={SortAscending} />,
-          onClick: () => {
-            activeModal(SORTING_MODAL_ID);
-          }
-        }}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>(`Search ${getValidatorLabel(chain)}`)}

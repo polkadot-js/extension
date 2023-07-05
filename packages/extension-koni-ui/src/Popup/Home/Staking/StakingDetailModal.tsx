@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainStakingMetadata, ExtrinsicType, NominationInfo, NominatorMetadata, StakingItem, StakingRewardItem, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { getValidatorLabel, isShowNominationByValidator } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
@@ -9,7 +9,7 @@ import { _getChainNativeTokenBasicInfo, _getChainSubstrateAddressPrefix } from '
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import AccountItem from '@subwallet/extension-koni-ui/components/MetaInfo/parts/AccountItem';
 import { StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
-import { useGetAccountByAddress, usePreCheckStakeAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetAccountByAddress, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
 import { MORE_ACTION_MODAL } from '@subwallet/extension-koni-ui/Popup/Home/Staking/MoreActionModal';
 import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
@@ -50,7 +50,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { currentAccount } = useSelector((state) => state.accountState);
-  const onClickFooterButton = usePreCheckStakeAction(currentAccount?.address);
+  const onClickFooterButton = usePreCheckAction(currentAccount?.address, false);
 
   const chainInfo = useFetchChainInfo(staking.chain);
   const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
@@ -89,12 +89,18 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         />
         <Button
           className='__action-btn'
-          onClick={onClickFooterButton(onClickUnstakeBtn)}
+          onClick={onClickFooterButton(
+            onClickUnstakeBtn,
+            staking.type === StakingType.POOLED ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND
+          )}
           schema='secondary'
         >{t('Unstake')}</Button>
         <Button
           className='__action-btn'
-          onClick={onClickFooterButton(onClickStakeMoreBtn)}
+          onClick={onClickFooterButton(
+            onClickStakeMoreBtn,
+            staking.type === StakingType.POOLED ? ExtrinsicType.STAKING_BOND : ExtrinsicType.STAKING_JOIN_POOL
+          )}
         >{t('Stake more')}</Button>
       </div>
     );

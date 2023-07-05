@@ -46,11 +46,31 @@ export const convertLedgerError = (err: Error, t: TFunction, network: string): C
   // Have a request in queue
   if (
     message.includes('Cannot set property message of  which has only a getter') || // EVM
-    message.includes("Failed to execute 'transferIn' on 'USBDevice'") // Substrate
+    message.includes("Failed to execute 'transferIn' on 'USBDevice'") || // Substrate
+    message.includes("Failed to execute 'transferOut' on 'USBDevice'") // Substrate
   ) {
     return {
       status: 'error',
       message: t('Another request is in queue. Please try again later')
+    };
+  }
+
+  // User reject request
+  if (
+    message.includes('User rejected') || // EVM
+    message.includes('Transaction rejected') // Substrate
+  ) {
+    return {
+      status: 'error',
+      message: t('User rejected request')
+    };
+  }
+
+  // App transaction version out of data
+  if (message.includes('Txn version not supported')) {
+    return {
+      status: 'error',
+      message: t('"{{network}}" is out of date. Please update your device with Ledger Live', { replace: { network: network } })
     };
   }
 

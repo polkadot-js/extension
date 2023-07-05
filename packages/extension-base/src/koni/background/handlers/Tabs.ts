@@ -941,7 +941,10 @@ export default class KoniTabs {
     const state = this.#koniState.getChainStateByKey(chain);
 
     if (!state.active) {
-      throw new EvmProviderError(EvmProviderErrorType.INTERNAL_ERROR, 'Current chain is not available');
+      await this.#koniState.enableChain(chain, false);
+      const api = this.#koniState.getSubstrateApi(chain);
+
+      await api.isReady;
     }
 
     const tokenType = _tokenType === 'psp22' ? _AssetType.PSP22 : _AssetType.PSP34;

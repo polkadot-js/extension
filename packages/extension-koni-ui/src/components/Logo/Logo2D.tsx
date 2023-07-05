@@ -4,8 +4,8 @@
 import React from 'react';
 
 interface Props {
-  width?: number;
-  height?: number;
+  width?: number | string;
+  height?: number | string;
 }
 
 const Logo2D: React.FC<Props> = ({ height = 24, width = 16 }: Props) => {

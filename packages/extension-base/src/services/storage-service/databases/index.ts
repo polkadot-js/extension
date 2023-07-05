@@ -83,15 +83,11 @@ export default class KoniDatabase extends Dexie {
     });
 
     this.conditionalVersion(2, {
-      mantaPay: 'key'
+      metadata: 'genesisHash, chain'
     });
 
     this.conditionalVersion(3, {
       mantaPay: 'key, chain'
-    });
-
-    this.conditionalVersion(4, {
-      metadata: 'genesisHash, chain'
     });
   }
 

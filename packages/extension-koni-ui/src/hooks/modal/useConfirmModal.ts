@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ModalContext, SwModalFuncProps } from '@subwallet/react-ui';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 
 const CONFIRMATION_MODAL_ID = Date.now().toString();
 
@@ -25,6 +25,12 @@ export default function useConfirmModal (props: Partial<SwModalFuncProps>) {
       }
     });
   }), [addConfirmModal, confirmationModalId, inactiveModal, props]);
+
+  useEffect(() => {
+    return () => {
+      inactiveModal(confirmationModalId);
+    };
+  }, [confirmationModalId, inactiveModal]);
 
   return { handleSimpleConfirmModal };
 }

@@ -63,8 +63,8 @@ export default class SubstrateRequestHandler {
     return Object.keys(this.#substrateRequests).length;
   }
 
-  public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
-    const id = getId();
+  public sign (url: string, request: RequestSign, account: AccountJson, _id?: string): Promise<ResponseSigning> {
+    const id = _id || getId();
 
     return new Promise((resolve, reject): void => {
       this.#substrateRequests[id] = {

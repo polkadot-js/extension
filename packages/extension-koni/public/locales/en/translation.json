@@ -1243,5 +1243,15 @@
   "Account not exists": "",
   "Ledger - EVM account": "",
   "Ledger - Substrate account": "",
-  "Ledger does not support this action with {{network}}": ""
+  "Ledger does not support this action with {{network}}": "",
+  "If someone has your secret phrase, they will have full control of your account": "",
+  "Disconnect confirmation message": "",
+  "Fail to disconnect": "",
+  "Wallet connect": "",
+  "DApp": "",
+  "Add Connection": "",
+  "Connections": "",
+  "Fail to add connection": "",
+  "Connect Wallet Connect": "",
+  "Uri": ""
 }

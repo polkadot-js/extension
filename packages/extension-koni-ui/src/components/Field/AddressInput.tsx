@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AbstractAddressJson } from '@subwallet/extension-base/background/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { AddressBookModal } from '@subwallet/extension-koni-ui/components';
 import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -47,7 +48,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const inputRef = useForwardInputRef(ref);
   const [scanError, setScanError] = useState('');
 
-  const _contacts = useMemo(() => [...accounts, ...contacts], [accounts, contacts]);
+  const _contacts = useMemo((): AbstractAddressJson[] => [...accounts, ...(showAddressBook ? contacts : [])], [accounts, contacts, showAddressBook]);
 
   const accountName = useMemo(() => {
     const account = findContactByAddress(_contacts, value);

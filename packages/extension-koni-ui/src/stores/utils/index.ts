@@ -7,6 +7,7 @@ import { AccountsWithCurrentAddress, AddressBookInfo, AllLogoMap, AssetSetting, 
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { canDerive } from '@subwallet/extension-base/utils';
 import { LANGUAGE } from '@subwallet/extension-koni-ui/constants/localStorage';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
@@ -14,6 +15,7 @@ import { store } from '@subwallet/extension-koni-ui/stores';
 import { AppSettings } from '@subwallet/extension-koni-ui/stores/types';
 import { noop, noopBoolean } from '@subwallet/extension-koni-ui/utils';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
+import { SessionTypes } from '@walletconnect/types';
 
 // Setup redux stores
 
@@ -264,3 +266,24 @@ export const subscribeTxHistory = lazySubscribeMessage('pri(transaction.history.
 // };
 //
 // export const subscribeChainValidators = lazySubscribeMessage('pri(bonding.getBondingOptions)', null, updateChainValidators, updateChainValidators);
+
+// Wallet connect
+export const updateConnectWCRequests = (data: WalletConnectSessionRequest[]) => {
+  // Convert data to object with key as id
+  const requests = convertConfirmationToMap(data);
+
+  store.dispatch({ type: 'requestState/updateConnectWCRequests', payload: requests });
+};
+
+export const subscribeConnectWCRequests = lazySubscribeMessage('pri(walletConnect.requests.subscribe)', null, updateConnectWCRequests, updateConnectWCRequests);
+
+export const updateWalletConnectSessions = (data: SessionTypes.Struct[]) => {
+  const payload: Record<string, SessionTypes.Struct> = {};
+
+  data.forEach((session) => {
+    payload[session.topic] = session;
+  });
+  store.dispatch({ type: 'walletConnect/updateSessions', payload: payload });
+};
+
+export const subscribeWalletConnectSessions = lazySubscribeMessage('pri(walletConnect.session.subscribe)', null, updateWalletConnectSessions, updateWalletConnectSessions);

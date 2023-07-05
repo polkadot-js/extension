@@ -25,6 +25,23 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
 
+export enum RuntimeEnvironment {
+  Web = 'Web',
+  Node = 'Node',
+  ExtensionChrome = 'Extension (Chrome)',
+  ExtensionFirefox = 'Extension (Firefox)',
+  WebWorker = 'Web Worker',
+  ServiceWorker = 'Service Worker',
+  Unknown = 'Unknown',
+}
+
+export interface RuntimeEnvironmentInfo {
+  environment: RuntimeEnvironment;
+  version: string;
+  host?: string;
+  protocol?: string;
+}
+
 export interface ServiceInfo {
   chainInfoMap: Record<string, _ChainInfo>;
   chainStateMap: Record<string, _ChainState>;

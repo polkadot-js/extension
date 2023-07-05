@@ -180,7 +180,10 @@ export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { to
     },
 
     '&.chain-selector-input .__selected-item': {
-      color: token.colorText
+      color: token.colorText,
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      textWrap: 'nowrap'
     },
 
     // TODO: delete this when fix component in ui-base

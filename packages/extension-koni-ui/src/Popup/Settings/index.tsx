@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { Layout, PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
 import Headers from '@subwallet/extension-koni-ui/components/Layout/parts/Header';
 import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
@@ -24,7 +24,7 @@ type Props = ThemeProps
 
 type SettingItemType = {
   key: string,
-  leftIcon: SwIconProps['phosphorIcon'],
+  leftIcon: SwIconProps['phosphorIcon'] | React.ReactNode,
   leftIconBgColor: string,
   rightIcon: SwIconProps['phosphorIcon'],
   title: string,
@@ -38,13 +38,20 @@ type SettingGroupItemType = {
   items: SettingItemType[],
 };
 
-function generateLeftIcon (backgroundColor: string, icon: SwIconProps['phosphorIcon']): React.ReactNode {
+const isReactNode = (element: unknown): element is React.ReactNode => {
+  return React.isValidElement(element);
+};
+
+function generateLeftIcon (backgroundColor: string, icon: SwIconProps['phosphorIcon'] | React.ReactNode): React.ReactNode {
+  const isNode = isReactNode(icon);
+
   return (
     <BackgroundIcon
       backgroundColor={backgroundColor}
-      phosphorIcon={icon}
+      customIcon={isNode ? icon : undefined}
+      phosphorIcon={isNode ? undefined : icon}
       size='sm'
-      type='phosphor'
+      type={isNode ? 'customIcon' : 'phosphor'}
       weight='fill'
     />
   );
@@ -136,6 +143,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           title: 'Manage address book',
           onClick: () => {
             navigate('/settings/address-book');
+          }
+        },
+        {
+          key: 'wallet-connect',
+          leftIcon: (
+            <WalletConnect
+              height='1em'
+              width='1em'
+            />
+          ),
+          leftIconBgColor: token['geekblue-6'],
+          rightIcon: CaretRight,
+          title: 'WalletConnect',
+          onClick: () => {
+            navigate('/wallet-connect/list');
           }
         }
       ]

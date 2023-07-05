@@ -1046,15 +1046,16 @@ export const TokenLogoMap: Record<string, string> = {
 };
 
 export const DefaultLogosMap: Record<string, string> = {
-  subwallet: '/images/projects/subwallet.png',
-  parity: '/images/projects/parity.png',
-  keystone: '/images/projects/keystone.png',
-  ledger: '/images/projects/ledger.png',
-  default: '/images/projects/Default.png',
-  transak: '/images/projects/transak.png',
-  moonpay: '/images/projects/moonpay.png',
-  onramper: '/images/projects/onramper.png',
-  polkadot_vault: '/images/projects/polkadot-vault.png'
+  subwallet: './images/projects/subwallet.png',
+  parity: './images/projects/parity.png',
+  keystone: './images/projects/keystone.png',
+  ledger: './images/projects/ledger.png',
+  default: './images/subwallet/default.png',
+  transak: './images/projects/transak.png',
+  moonpay: './images/projects/moonpay.png',
+  onramper: './images/projects/onramper.png',
+  polkadot_vault: './images/projects/polkadot-vault.png',
+  walletconnect: './images/projects/walletconnect.png'
 };
 
 export const IconMap = {

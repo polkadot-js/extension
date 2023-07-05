@@ -10,8 +10,8 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 let transactionCount = 0;
 let validationCount = 0;
 
-export const getTransactionId = (chainType: string, chain: string, isInternal: boolean): string => {
-  return `${isInternal ? 'internal' : 'external'}.${chainType}.${chain}.${Date.now()}.${++transactionCount}`;
+export const getTransactionId = (chainType: string, chain: string, isInternal: boolean, isWalletConnect = false): string => {
+  return `${isInternal ? 'internal' : !isWalletConnect ? 'external' : 'wallet-connect'}.${chainType}.${chain}.${Date.now()}.${++transactionCount}`;
 };
 
 export const getValidationId = (chainType: string, chain: string): string => {

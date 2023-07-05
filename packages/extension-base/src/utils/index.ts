@@ -5,7 +5,7 @@ import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/backg
 import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 
-import { BN, hexToU8a, isHex } from '@polkadot/util';
+import { assert, BN, hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
 
 export { canDerive } from './canDerive';
@@ -343,3 +343,13 @@ export function getDomainFromUrl (url: string): string {
 export async function waitTimeout (ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
+
+export const stripUrl = (url: string): string => {
+  assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
+
+  const parts = url.split('/');
+
+  return parts[2];
+};
+
+export * from './array';

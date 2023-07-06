@@ -3,10 +3,11 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/background/types';
+import { AbstractAddressJson, AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { isAccountAll } from '@subwallet/extension-base/utils';
+import { isAccountAll, uniqueStringArray } from '@subwallet/extension-base/utils';
+import { DEFAULT_ACCOUNT_TYPES, EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
 import { MODE_CAN_SIGN } from '@subwallet/extension-koni-ui/constants/signing';
 import { AccountAddressType, AccountSignMode, AccountType } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/utils';
@@ -15,6 +16,7 @@ import { getNetworkKeyByGenesisHash } from '@subwallet/extension-koni-ui/utils/c
 import { AccountInfoByNetwork } from '@subwallet/extension-koni-ui/utils/types';
 
 import { decodeAddress, encodeAddress, isAddress, isEthereumAddress } from '@polkadot/util-crypto';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 export function getAccountType (address: string): AccountType {
   return isAccountAll(address) ? 'ALL' : isEthereumAddress(address) ? 'ETHEREUM' : 'SUBSTRATE';
@@ -88,7 +90,7 @@ export const isNoAccount = (accounts: AccountJson[] | null): boolean => {
   return accounts ? !accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY).length : false;
 };
 
-export const searchAccountFunction = (item: AccountJson, searchText: string): boolean => {
+export const searchAccountFunction = (item: AbstractAddressJson, searchText: string): boolean => {
   return item.address.toLowerCase().includes(searchText.toLowerCase()) || (item.name || '').toLowerCase().includes(searchText.toLowerCase());
 };
 
@@ -146,4 +148,22 @@ export const findContactByAddress = (contacts: AbstractAddressJson[], address?: 
 
     return null;
   }
+};
+
+export const convertKeyTypes = (authTypes: AccountAuthType[]): KeypairType[] => {
+  const result: KeypairType[] = [];
+
+  for (const authType of authTypes) {
+    if (authType === 'evm') {
+      result.push(EVM_ACCOUNT_TYPE);
+    } else if (authType === 'substrate') {
+      result.push(SUBSTRATE_ACCOUNT_TYPE);
+    } else if (authType === 'both') {
+      result.push(SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE);
+    }
+  }
+
+  const _rs = uniqueStringArray(result) as KeypairType[];
+
+  return _rs.length ? _rs : DEFAULT_ACCOUNT_TYPES;
 };

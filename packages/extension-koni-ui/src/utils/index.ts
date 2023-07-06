@@ -218,4 +218,6 @@ export * from './confirmation';
 export * from './connector';
 export * from './common';
 export * from './form';
+export * from './scanner';
 export * from './transaction';
+export * from './walletConnect';

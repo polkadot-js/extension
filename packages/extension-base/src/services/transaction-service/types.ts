@@ -31,7 +31,9 @@ export type SWTransactionResult = Omit<SWTransaction, 'transaction' | 'additiona
 
 type SwInputBase = Pick<SWTransaction, 'address' | 'url' | 'data' | 'extrinsicType' | 'chain' | 'chainType' | 'ignoreWarnings' | 'transferNativeAmount'>
 & Partial<Pick<SWTransaction, 'additionalValidator' | 'eventsHandler'>>;
+
 export interface SWTransactionInput extends SwInputBase, Partial<Pick<SWTransaction, 'estimateFee'>> {
+  id?: string;
   transaction?: SWTransaction['transaction'] | null;
   warnings?: SWTransaction['warnings'];
   errors?: SWTransaction['errors'];

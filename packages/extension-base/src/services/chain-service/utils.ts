@@ -393,3 +393,31 @@ export function _isCustomProvider (providerKey: string) {
 export function _generateCustomProviderKey (index: number) {
   return `${_CUSTOM_PREFIX}provider-${index}`;
 }
+
+export const findChainInfoByHalfGenesisHash = (chainMap: Record<string, _ChainInfo>, halfGenesisHash?: string): _ChainInfo | null => {
+  if (!halfGenesisHash) {
+    return null;
+  }
+
+  for (const chainInfo of Object.values(chainMap)) {
+    if (_getSubstrateGenesisHash(chainInfo)?.toLowerCase().substring(2, 2 + 32) === halfGenesisHash.toLowerCase()) {
+      return chainInfo;
+    }
+  }
+
+  return null;
+};
+
+export const findChainInfoByChainId = (chainMap: Record<string, _ChainInfo>, chainId?: number): _ChainInfo | null => {
+  if (!chainId) {
+    return null;
+  }
+
+  for (const chainInfo of Object.values(chainMap)) {
+    if (chainInfo.evmInfo?.evmChainId === chainId) {
+      return chainInfo;
+    }
+  }
+
+  return null;
+};

@@ -298,13 +298,11 @@ const Component: React.FC<Props> = (props: Props) => {
                     <span className='ledger-info-text'>
                       {t(isConnected
                         ? 'Device found'
-                        : warning
-                          ? 'Please unlock your Ledger'
-                          : error || (
-                            ledger
-                              ? 'Loading'
-                              : 'Searching Ledger device'
-                          )
+                        : warning || error || (
+                          ledger
+                            ? 'Loading'
+                            : 'Searching Ledger device'
+                        )
                       )}
                     </span>
                     {

@@ -1884,6 +1884,20 @@ export interface RequestPassPhishingPage {
   url: string;
 }
 
+// Psp token
+
+export interface RequestAddPspToken {
+  genesisHash: string;
+  tokenInfo: {
+    type: string;
+    address: string;
+    symbol: string;
+    name: string;
+    decimals?: number;
+    logo?: string;
+  };
+}
+
 // Wallet Connect
 
 export interface RequestConnectWalletConnect {
@@ -2113,6 +2127,9 @@ export interface KoniRequestSignatures {
   'mobile(subscription.start)': [SubscriptionServiceType[], void];
   'mobile(subscription.stop)': [SubscriptionServiceType[], void];
   'mobile(subscription.restart)': [SubscriptionServiceType[], void];
+
+  // Psp token
+  'pub(token.add)': [RequestAddPspToken, boolean];
 
   /// Wallet connect
   'pri(walletConnect.connect)': [RequestConnectWalletConnect, boolean];

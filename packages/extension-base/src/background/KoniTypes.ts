@@ -25,6 +25,23 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
 
+export enum RuntimeEnvironment {
+  Web = 'Web',
+  Node = 'Node',
+  ExtensionChrome = 'Extension (Chrome)',
+  ExtensionFirefox = 'Extension (Firefox)',
+  WebWorker = 'Web Worker',
+  ServiceWorker = 'Service Worker',
+  Unknown = 'Unknown',
+}
+
+export interface RuntimeEnvironmentInfo {
+  environment: RuntimeEnvironment;
+  version: string;
+  host?: string;
+  protocol?: string;
+}
+
 export interface ServiceInfo {
   chainInfoMap: Record<string, _ChainInfo>;
   chainStateMap: Record<string, _ChainState>;
@@ -1867,6 +1884,20 @@ export interface RequestPassPhishingPage {
   url: string;
 }
 
+// Psp token
+
+export interface RequestAddPspToken {
+  genesisHash: string;
+  tokenInfo: {
+    type: string;
+    address: string;
+    symbol: string;
+    name: string;
+    decimals?: number;
+    logo?: string;
+  };
+}
+
 // Wallet Connect
 
 export interface RequestConnectWalletConnect {
@@ -2141,6 +2172,9 @@ export interface KoniRequestSignatures {
   'mobile(subscription.start)': [SubscriptionServiceType[], void];
   'mobile(subscription.stop)': [SubscriptionServiceType[], void];
   'mobile(subscription.restart)': [SubscriptionServiceType[], void];
+
+  // Psp token
+  'pub(token.add)': [RequestAddPspToken, boolean];
 
   /// Wallet connect
   'pri(walletConnect.connect)': [RequestConnectWalletConnect, boolean];

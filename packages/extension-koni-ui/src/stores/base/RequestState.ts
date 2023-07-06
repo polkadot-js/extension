@@ -5,6 +5,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ConfirmationsQueue } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { ReduxStatus, RequestState } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState: RequestState = {
@@ -12,6 +13,7 @@ const initialState: RequestState = {
   metadataRequest: {},
   signingRequest: {},
   transactionRequest: {},
+  connectWCRequest: {},
 
   // Type of confirmation requets
   addNetworkRequest: {},
@@ -35,7 +37,8 @@ export const CONFIRMATIONS_FIELDS: Array<keyof RequestState> = [
   'addTokenRequest',
   'switchNetworkRequest',
   'evmSignatureRequest',
-  'evmSendTransactionRequest'
+  'evmSendTransactionRequest',
+  'connectWCRequest'
 ];
 
 export interface ConfirmationQueueItem {
@@ -100,6 +103,11 @@ const requestStateSlice = createSlice({
     },
     updateTransactionRequests (state, { payload }: PayloadAction<Record<string, SWTransactionResult>>) {
       state.transactionRequest = payload;
+    },
+    updateConnectWCRequests (state, { payload }: PayloadAction<Record<string, WalletConnectSessionRequest>>) {
+      state.connectWCRequest = payload;
+      readyMap.updateConfirmationRequests = true;
+      computeStateSummary(state);
     }
   }
 });

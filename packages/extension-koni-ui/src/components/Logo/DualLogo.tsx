@@ -18,10 +18,13 @@ interface Props extends ThemeProps {
   linkIconBg?: string;
 }
 
-const defaultLinkIcon = <Icon
-  customSize='24px'
-  phosphorIcon={ArrowsLeftRight}
-/>;
+const defaultLinkIcon = (
+  <Icon
+    phosphorIcon={ArrowsLeftRight}
+    size='md'
+  />
+);
+
 const defaultLogo = <Logo2D />;
 
 const Component = ({ className, leftLogo = defaultLogo, linkIcon = defaultLinkIcon, rightLogo = defaultLogo }: Props) => {

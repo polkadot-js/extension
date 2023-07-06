@@ -1533,10 +1533,11 @@ export default class KoniState {
     const eType = transaction.value ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.EVM_EXECUTE;
 
     const transactionData = { ...transaction };
+    const token = this.chainService.getNativeTokenInfo(networkKey);
 
     if (eType === ExtrinsicType.TRANSFER_BALANCE) {
       // @ts-ignore
-      transactionData.tokenSlug = this.chainService.getNativeTokenInfo(networkKey).slug;
+      transactionData.tokenSlug = token.slug;
     }
 
     // Custom handle this instead of general handler transaction
@@ -1548,6 +1549,11 @@ export default class KoniState {
       data: transactionData,
       extrinsicType: eType,
       chainType: ChainType.EVM,
+      estimateFee: {
+        value: estimateGas,
+        symbol: token.symbol,
+        decimals: token.decimals || 18
+      },
       id
     });
 

@@ -62,16 +62,15 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
   return (
     <>
       <ContentContainer className={className}>
-        <Header
+        <StyledHeader
           text={
             <>
               {t<string>('Remember to save your secret phrase\nand')}
-              <Bond>{t<string>(' keep it safe!')}</Bond>
+              <Bold>{t<string>(' keep it safe!')}</Bold>
             </>
           }
           title={t<string>('Save your secret phrase')}
         />
-        <VerticalSpace />
         <MnemonicContainer>
           {seedArray.map((word, index) => (
             <MnemonicPill
@@ -122,7 +121,11 @@ const ContentContainer = styled.div`
   flex-grow: 1;
 `;
 
-const Bond = styled.span`
+const StyledHeader = styled(Header)`
+  margin-bottom: 36px;
+`;
+
+const Bold = styled.span`
   font-weight: 600;
 `;
 
@@ -133,7 +136,7 @@ const MnemonicContainer = styled.div`
   justify-content: space-between;
   width: 100%;
   user-select: all;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   row-gap: 12px;
 
   .mnemonic-index {

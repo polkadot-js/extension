@@ -124,7 +124,7 @@ function AccountNamePasswordCreation({
         onSubmit={onSubmit}
       >
         <StyledHeader
-          text={t<string>('Choose how your new account is displayed and protected it in Aleph Zero Signer.')}
+          text={t<string>('Choose how your new account is displayed and protect it in Aleph Zero Signer.')}
           title={t<string>('Visibility & security')}
         />
         <StyledAddress

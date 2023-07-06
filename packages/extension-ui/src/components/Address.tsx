@@ -227,7 +227,6 @@ function Address({
             <div
               className='banner chain'
               data-field='chain'
-              style={chain.definition.color ? { backgroundColor: chain.definition.color } : undefined}
             >
               {chain.name.replace(' Relay Chain', '')}
             </div>
@@ -330,7 +329,7 @@ export default styled(Address)(
     position: absolute;
     top: 0;
   }
-  
+
   .chain {
     position: absolute;
     bottom: -1px;
@@ -362,7 +361,7 @@ export default styled(Address)(
       right: 16px;
       top: -8px;
     }
-   
+
     .hiddenIcon {
       color: ${theme.errorColor};
       &:hover {
@@ -461,7 +460,7 @@ export default styled(Address)(
     color: ${theme.textColor};
     margin-right: 4px;
     max-width: 100%;
-  } 
+  }
 
     &.displaced {
       padding-top: 10px;
@@ -521,7 +520,7 @@ export default styled(Address)(
     width: 24px;
     height: 24px;
 
-    
+
     &.active {
       background: ${theme.accountDotsIconColor};
     }

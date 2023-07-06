@@ -281,7 +281,7 @@ export default React.memo(
       }
     }
 
-    
+
 
     .searchBarWrapper {
       flex: 1;
@@ -350,6 +350,10 @@ export default React.memo(
   }
 
   .focused-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     :focus {
       ${Svg} {
         background: ${theme.headerIconBackgroundHover};

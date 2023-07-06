@@ -31,7 +31,7 @@ export const _BALANCE_CHAIN_GROUP = {
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
   bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main'],
-  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel'],
+  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari'],
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'] // perhaps there are some runtime updates
 };
 
@@ -191,6 +191,12 @@ export const _BALANCE_PARSING_CHAIN_GROUP = {
   bobabeam: ['bobabeam', 'bobabase']
 };
 
+export const _MANTA_ZK_CHAIN_GROUP = ['calamari'];
+
+export const _ZK_ASSET_PREFIX = 'zk';
+
+export const _DEFAULT_MANTA_ZK_CHAIN = 'calamari';
+
 // XCM------------------------------------------------------------------------------------------------------------------
 
 export const _XCM_CHAIN_GROUP = {
@@ -210,7 +216,7 @@ export const _DEFAULT_ACTIVE_CHAINS = [
 ];
 
 // TODO: review
-const TARGET_BRANCH = process.env.NODE_ENV !== 'production' ? 'koni-dev' : 'master';
+const TARGET_BRANCH = process.env.NODE_ENV !== 'production' ? 'koni/dev/issue-15' : 'master';
 
 export const _CHAIN_INFO_SRC = `https://raw.githubusercontent.com/Koniverse/SubWallet-Chain/${TARGET_BRANCH}/packages/chain-list/src/data/ChainInfo.json`;
 export const _CHAIN_ASSET_SRC = `https://raw.githubusercontent.com/Koniverse/SubWallet-Chain/${TARGET_BRANCH}/packages/chain-list/src/data/ChainAsset.json`;

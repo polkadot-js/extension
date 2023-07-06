@@ -155,7 +155,7 @@ function _Root ({ className }: ThemeProps): React.ReactElement {
       <PageWrapper
         animateOnce={true}
         className={'main-page-container'}
-        resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings'])}
+        resolve={dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay'])}
       >
         <DefaultRoute>
           <Main className={className}>

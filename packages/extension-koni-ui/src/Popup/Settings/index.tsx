@@ -106,7 +106,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightIcon: ArrowsOut,
           title: 'Expand view',
           onClick: () => {
-            windowOpen('/').catch(console.error);
+            windowOpen({ allowedPath: '/' }).catch(console.error);
           },
           isHidden: !isPopup
         },

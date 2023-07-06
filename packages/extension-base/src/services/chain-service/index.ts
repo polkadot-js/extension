@@ -4,13 +4,13 @@
 import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { _ASSET_LOGO_MAP_SRC, _ASSET_REF_SRC, _CHAIN_ASSET_SRC, _CHAIN_INFO_SRC, _CHAIN_LOGO_MAP_SRC, _DEFAULT_ACTIVE_CHAINS, _MULTI_CHAIN_ASSET_SRC } from '@subwallet/extension-base/services/chain-service/constants';
+import { _ASSET_LOGO_MAP_SRC, _ASSET_REF_SRC, _CHAIN_ASSET_SRC, _CHAIN_INFO_SRC, _CHAIN_LOGO_MAP_SRC, _DEFAULT_ACTIVE_CHAINS, _MANTA_ZK_CHAIN_GROUP, _MULTI_CHAIN_ASSET_SRC, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
-import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
+import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaPrivateHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -36,6 +36,11 @@ export class ChainService {
 
   private substrateChainHandler: SubstrateChainHandler;
   private evmChainHandler: EvmChainHandler;
+  private mantaChainHandler: MantaPrivateHandler;
+
+  public get mantaPay () {
+    return this.mantaChainHandler;
+  }
 
   // TODO: consider BehaviorSubject
   private chainInfoMapSubject = new Subject<Record<string, _ChainInfo>>();
@@ -54,6 +59,11 @@ export class ChainService {
     this.dbService = dbService;
     this.eventService = eventService;
 
+    this.substrateChainHandler = new SubstrateChainHandler();
+    this.evmChainHandler = new EvmChainHandler();
+    this.mantaChainHandler = new MantaPrivateHandler(dbService);
+
+    this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
@@ -280,6 +290,18 @@ export class ChainService {
 
   public getAssetBySlug (slug: string): _ChainAsset {
     return this.getAssetRegistry()[slug];
+  }
+
+  public getMantaZkAssets (chain: string): Record<string, _ChainAsset> {
+    const result: Record<string, _ChainAsset> = {};
+
+    Object.values(this.getAssetRegistry()).forEach((chainAsset) => {
+      if (chainAsset.originChain === chain && _isAssetFungibleToken(chainAsset) && chainAsset.symbol.startsWith(_ZK_ASSET_PREFIX)) {
+        result[chainAsset.slug] = chainAsset;
+      }
+    });
+
+    return result;
   }
 
   public getFungibleTokensByChain (chainSlug: string, checkActive = false): Record<string, _ChainAsset> {
@@ -520,9 +542,16 @@ export class ChainService {
     };
 
     if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo !== undefined) {
-      const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
+      if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug)) {
+        const apiPromise = await this.mantaChainHandler.initMantaPay(endpoint, chainInfo.slug);
+        const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, externalApiPromise: apiPromise, onUpdateStatus });
 
-      this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi as SubstrateApi);
+        this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
+      } else {
+        const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
+
+        this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
+      }
     }
 
     if (chainInfo.evmInfo !== null && chainInfo.evmInfo !== undefined) {
@@ -1378,6 +1407,33 @@ export class ChainService {
     });
 
     this.store.set('AssetSetting', assetSettings);
+  }
+
+  public setMantaZkAssetSettings (visible: boolean) {
+    const zkAssetSettings: Record<string, AssetSetting> = {};
+
+    Object.values(this.dataMap.assetRegistry).forEach((asset) => {
+      if (_isMantaZkAsset(asset)) {
+        zkAssetSettings[asset.slug] = {
+          visible
+        };
+      }
+    });
+
+    this.store.get('AssetSetting', (storedAssetSettings) => {
+      const newAssetSettings = {
+        ...storedAssetSettings,
+        ...zkAssetSettings
+      };
+
+      this.store.set('AssetSetting', newAssetSettings);
+
+      this.assetSettingSubject.next(newAssetSettings);
+
+      Object.keys(zkAssetSettings).forEach((slug) => {
+        this.eventService.emit('asset.updateState', slug);
+      });
+    });
   }
 
   public async getStoreAssetSettings (): Promise<Record<string, AssetSetting>> {

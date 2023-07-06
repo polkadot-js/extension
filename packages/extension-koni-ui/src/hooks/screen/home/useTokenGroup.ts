@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getMultiChainAsset, _isNativeTokenBySlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AssetRegistryStore } from '@subwallet/extension-koni-ui/stores/types';
 import { TokenGroupHookType } from '@subwallet/extension-koni-ui/types/hook';
@@ -89,19 +91,35 @@ export default function useTokenGroup (filteredChains?: string[]): TokenGroupHoo
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const assetSettingMap = useSelector((state: RootState) => state.assetRegistry.assetSettingMap);
   const chainStateMap = useSelector((state: RootState) => state.chainStore.chainStateMap);
+  const isMantaEnabled = useIsMantaPayEnabled();
+
+  const excludedAssets = useMemo(() => {
+    const excludedAssets: string[] = [];
+
+    // exclude zkAssets if not enabled
+    if (!isMantaEnabled) {
+      Object.values(assetRegistryMap).forEach((chainAsset) => {
+        if (_MANTA_ZK_CHAIN_GROUP.includes(chainAsset.originChain) && chainAsset.symbol.startsWith(_ZK_ASSET_PREFIX)) {
+          excludedAssets.push(chainAsset.slug);
+        }
+      });
+    }
+
+    return excludedAssets;
+  }, [assetRegistryMap, isMantaEnabled]);
 
   // only get fungible tokens of active chains which has visibility = 0
   const filteredAssetRegistryMap = useMemo(() => {
     const filteredAssetRegistryMap: Record<string, _ChainAsset> = {};
 
     Object.values(assetRegistryMap).forEach((chainAsset) => {
-      if (isTokenAvailable(chainAsset, assetSettingMap, chainStateMap, true)) {
+      if (isTokenAvailable(chainAsset, assetSettingMap, chainStateMap, true) && !excludedAssets.includes(chainAsset.slug)) {
         filteredAssetRegistryMap[chainAsset.slug] = chainAsset;
       }
     });
 
     return filteredAssetRegistryMap;
-  }, [assetRegistryMap, assetSettingMap, chainStateMap]);
+  }, [assetRegistryMap, assetSettingMap, chainStateMap, excludedAssets]);
 
   return useMemo<TokenGroupHookType>(() => {
     return getTokenGroup(filteredAssetRegistryMap, filteredChains);

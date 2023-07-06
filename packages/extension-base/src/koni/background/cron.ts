@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ApiMap, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-base/constants';
+import { CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, CRON_SYNC_MANTA_PAY } from '@subwallet/extension-base/constants';
 import { KoniSubscription } from '@subwallet/extension-base/koni/background/subscription';
 import { _ChainState, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportSubstrateStaking, _isChainSupportWasmNft } from '@subwallet/extension-base/services/chain-service/utils';
@@ -100,6 +100,7 @@ export class KoniCron {
 
       const chainUpdated = eventTypes.includes('chain.updateState');
       const stakingSubmitted = eventTypes.includes('transaction.submitStaking');
+      const reloadMantaPay = eventTypes.includes('mantaPay.submitTransaction') || eventTypes.includes('mantaPay.enable');
       const updatedChains: string[] = [];
 
       if (chainUpdated) {
@@ -112,7 +113,7 @@ export class KoniCron {
         });
       }
 
-      if (!commonReload && !chainUpdated && !stakingSubmitted) {
+      if (!commonReload && !chainUpdated && !stakingSubmitted && !reloadMantaPay) {
         return;
       }
 
@@ -126,6 +127,9 @@ export class KoniCron {
 
       const needUpdateNft = this.needUpdateNft(chainInfoMap, updatedChains);
       const needUpdateStaking = this.needUpdateStaking(chainInfoMap, updatedChains);
+
+      // MantaPay
+      reloadMantaPay && this.removeCron('syncMantaPay');
 
       // NFT
       (commonReload || needUpdateNft) && this.resetNft(address);
@@ -144,6 +148,7 @@ export class KoniCron {
         (commonReload || needUpdateStaking || stakingSubmitted) && this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         (commonReload || needUpdateStaking || stakingSubmitted) && this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
         needUpdateStaking && this.addCron('updateChainStakingMetadata', this.updateChainStakingMetadata(serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate), CRON_REFRESH_CHAIN_STAKING_METADATA);
+        reloadMantaPay && this.addCron('syncMantaPay', this.syncMantaPay, CRON_SYNC_MANTA_PAY);
       } else {
         this.setStakingRewardReady();
       }
@@ -161,6 +166,7 @@ export class KoniCron {
       this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
       this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
       this.addCron('updateChainStakingMetadata', this.updateChainStakingMetadata(this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap()), CRON_REFRESH_CHAIN_STAKING_METADATA);
+      this.addCron('syncMantaPay', this.syncMantaPay, CRON_SYNC_MANTA_PAY);
     } else {
       this.setStakingRewardReady();
     }
@@ -189,6 +195,12 @@ export class KoniCron {
     this.status = 'stopped';
 
     return Promise.resolve();
+  };
+
+  syncMantaPay = () => {
+    if (this.state.isMantaPayEnabled) {
+      this.state.syncMantaPay().catch(console.warn);
+    }
   };
 
   refreshNft = (address: string, apiMap: ApiMap, smartContractNfts: _ChainAsset[], chainInfoMap: Record<string, _ChainInfo>) => {

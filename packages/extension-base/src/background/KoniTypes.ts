@@ -1921,6 +1921,43 @@ export interface RequestDisconnectWalletConnectSession {
   topic: string
 }
 
+export interface MantaPayConfig {
+  address: string;
+  zkAddress: string;
+  enabled: boolean;
+  chain: string;
+  isInitialSync: boolean;
+}
+
+export interface MantaAuthorizationContext {
+  address: string;
+  chain: string;
+  data: unknown;
+}
+
+export interface MantaPaySyncState {
+  isSyncing: boolean,
+  progress: number,
+  needManualSync?: boolean
+}
+
+export interface MantaPayEnableParams {
+  password: string,
+  address: string
+}
+
+export enum MantaPayEnableMessage {
+  WRONG_PASSWORD = 'WRONG_PASSWORD',
+  CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+  SUCCESS = 'SUCCESS'
+}
+
+export interface MantaPayEnableResponse {
+  success: boolean;
+  message: MantaPayEnableMessage
+}
+
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {
   // Bonding functions
@@ -1987,6 +2024,14 @@ export interface KoniRequestSignatures {
 
   // Phishing page
   'pri(phishing.pass)': [RequestPassPhishingPage, boolean];
+
+  // Manta pay
+  'pri(mantaPay.enable)': [MantaPayEnableParams, MantaPayEnableResponse];
+  'pri(mantaPay.disable)': [string, boolean];
+  'pri(mantaPay.getZkBalance)': [null, null];
+  'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];
+  'pri(mantaPay.subscribeSyncingState)': [null, MantaPaySyncState, MantaPaySyncState];
+  'pri(mantaPay.initSyncMantaPay)': [string, null];
 
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];

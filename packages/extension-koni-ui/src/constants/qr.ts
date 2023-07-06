@@ -21,3 +21,21 @@ export const CMD_SIGN_MORTAL = 0;
 export const CMD_SIGN_HASH = 1;
 export const CMD_SIGN_IMMORTAL = 2;
 export const CMD_SIGN_MSG = 3;
+export const MULTIPART = new Uint8Array([0]);
+export const STANDARD_FRAME_SIZE = 2 ** 9;
+export const ETHEREUM_ID = new Uint8Array([0x45]);
+export const SUBSTRATE_ID = new Uint8Array([0x53]);
+export const CRYPTO_SR25519 = new Uint8Array([0x01]);
+export const CMD = {
+  ETHEREUM: {
+    SIGN_HASH: 0,
+    SIGN_TRANSACTION: 1,
+    SIGN_MESSAGE: 2
+  },
+  SUBSTRATE: {
+    SIGN_MORTAL: 0,
+    SIGN_HASH: 1,
+    SIGN_IMMORTAL: 2,
+    SIGN_MSG: 3
+  }
+};

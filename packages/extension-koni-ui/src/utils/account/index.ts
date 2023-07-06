@@ -8,7 +8,6 @@ export * from './account';
 export * from './accountAll';
 export * from './buildHierarchy';
 export * from './ledger';
-export * from './qr';
 export * from './seedPhrase';
 export * from './toAddress';
 export * from './typeGuards';

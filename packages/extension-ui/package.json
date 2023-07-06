@@ -47,8 +47,8 @@
     "react-is": "^18.2.0",
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
-    "styled-components": "^5.3.11",
-    "tslib": "^2.5.3"
+    "styled-components": "^6.0.2",
+    "tslib": "^2.6.0"
   },
   "devDependencies": {
     "@polkadot/extension-mocks": "0.46.6-0-x",
@@ -56,11 +56,10 @@
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/file-saver": "^2.0.5",
     "@types/react-copy-to-clipboard": "^5.0.4",
-    "@types/react-dom": "^18.2.4",
+    "@types/react-dom": "^18.2.6",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
     "@types/sinon-chrome": "^2.2.11",
-    "@types/styled-components": "^5.1.26",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.8.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.7",

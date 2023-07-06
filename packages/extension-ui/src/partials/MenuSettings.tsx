@@ -173,6 +173,8 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   );
 }
 
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+
 export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
   margin-top: 50px;
   right: 24px;

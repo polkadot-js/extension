@@ -24,7 +24,7 @@
     "@polkadot/extension-inject": "0.46.6-0-x",
     "@polkadot/util": "^12.3.2",
     "@polkadot/util-crypto": "^12.3.2",
-    "tslib": "^2.5.3"
+    "tslib": "^2.6.0"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

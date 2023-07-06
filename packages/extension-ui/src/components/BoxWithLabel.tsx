@@ -4,8 +4,8 @@
 import type { ThemeProps } from '../types.js';
 
 import React from 'react';
-import styled from 'styled-components';
 
+import { styled } from '../styled.js';
 import Label from './Label.js';
 
 interface Props {

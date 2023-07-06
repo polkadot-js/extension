@@ -25,7 +25,7 @@
     "@polkadot/extension-inject": "0.46.6-0-x",
     "@polkadot/types": "^10.9.1",
     "@polkadot/util": "^12.3.2",
-    "tslib": "^2.5.3",
+    "tslib": "^2.6.0",
     "web3": "^1.10.0"
   },
   "peerDependencies": {

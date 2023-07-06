@@ -24,10 +24,10 @@
     "@polkadot/util": "^12.3.2",
     "@polkadot/util-crypto": "^12.3.2",
     "@polkadot/x-global": "^12.3.2",
-    "tslib": "^2.5.3"
+    "tslib": "^2.6.0"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.237",
+    "@types/chrome": "^0.0.239",
     "@types/firefox-webext-browser": "^111.0.1"
   },
   "peerDependencies": {

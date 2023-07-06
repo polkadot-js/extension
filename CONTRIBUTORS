@@ -1,6 +1,6 @@
-    1718	Nam Phạm                      	[Issue 1546] update chain-list and xcm logic for Bifrost Polkadot
-    1436	AnhMTV                        	Update @subwallet/chain-list
-    1014	S2kael                        	[Issue-1529] [AddPspToken] Auto enable chain
+    1767	Nam Phạm                      	[Issue 1525] merged upgrade-ui
+    1444	AnhMTV                        	Fix eslint problems
+    1017	S2kael                        	
      465	Jaco                          	0.42.5 (#969)
      285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
      185	quangdo                       	

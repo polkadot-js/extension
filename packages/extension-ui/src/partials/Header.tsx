@@ -41,7 +41,6 @@ function Header({
   smallMargin = false,
   text,
   withBackArrow,
-  withBackdrop,
   withConnectedAccounts,
   withHelp,
   withSettings
@@ -67,9 +66,7 @@ function Header({
   return (
     <>
       <div
-        className={`${className} ${smallMargin ? 'smallMargin' : ''}header ${
-          withBackdrop ? 'backdrop-margin-left' : ''
-        }`}
+        className={`${className} ${smallMargin ? 'smallMargin' : ''}header`}
       >
         <div className='container'>
           <div className='branding'>
@@ -170,12 +167,6 @@ export default React.memo(
   top: 0px;
   backdrop-filter: blur(10px);
   z-index: ${Z_INDEX.HEADER};
-  margin-bottom: ${withStepper ? '0px' : '32px'};
-
-  &.backdrop-margin-left {
-    margin-left: -16px;
-    min-width: 360px;
-  }
 
   && {
     padding: 0 0 0;

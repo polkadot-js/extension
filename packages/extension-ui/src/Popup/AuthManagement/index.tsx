@@ -116,6 +116,7 @@ function AuthManagement({ className }: Props): React.ReactElement<Props> {
 
 const StyledHero = styled(Hero)`
   margin-top: 64px;
+  margin-inline: 16px;
 `;
 
 const WebsiteListContainer = styled.div`
@@ -143,6 +144,10 @@ export default styled(AuthManagement)`
 
   display: flex;
   flex-direction: column;
+
+  &&& {
+    padding-inline: 0 !important;
+  }
 
   .inputFilter {
     margin-bottom: 0.8rem;

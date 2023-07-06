@@ -102,38 +102,38 @@ function Derive({ isLocked }: Props): React.ReactElement<Props> {
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
 
   return (
-    <StyledScrollWrapper>
+    <>
       <HeaderWithSteps
         step={step}
         text={t<string>('Derive sub-account')}
         total={2}
         withBackArrow
-        withBackdrop
-        withMargin
       />
-      {!account && step === 1 && (
-        <SelectParent
-          externalString={parentIsExternal.toString()}
-          isLocked={isLocked}
-          onDerivationConfirmed={_onDerivationConfirmed}
-          onNextStep={_onNextStep}
-          parentAddress={parentAddress}
-          parentGenesis={parentGenesis}
-        />
-      )}
-      {account && step === 2 && (
-        <StyledAccountNamePasswordCreation
-          address={account.address}
-          buttonLabel={t<string>('Create')}
-          genesisHash={parentGenesis}
-          isBusy={isBusy}
-          isDeriving
-          onBackClick={goTo(`/account/edit-menu/${parentAddress}?isExternal=${parentIsExternal?.toString()}`)}
-          onCreate={_onCreate}
-          parentName={parentName}
-        />
-      )}
-    </StyledScrollWrapper>
+      <StyledScrollWrapper>
+        {!account && step === 1 && (
+          <SelectParent
+            externalString={parentIsExternal.toString()}
+            isLocked={isLocked}
+            onDerivationConfirmed={_onDerivationConfirmed}
+            onNextStep={_onNextStep}
+            parentAddress={parentAddress}
+            parentGenesis={parentGenesis}
+          />
+        )}
+        {account && step === 2 && (
+          <StyledAccountNamePasswordCreation
+            address={account.address}
+            buttonLabel={t<string>('Create')}
+            genesisHash={parentGenesis}
+            isBusy={isBusy}
+            isDeriving
+            onBackClick={goTo(`/account/edit-menu/${parentAddress}?isExternal=${parentIsExternal?.toString()}`)}
+            onCreate={_onCreate}
+            parentName={parentName}
+          />
+        )}
+      </StyledScrollWrapper>
+    </>
   );
 }
 

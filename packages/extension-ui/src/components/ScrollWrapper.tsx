@@ -5,9 +5,6 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '../types';
-import PasswordFeedback from './PasswordField/PasswordFeedback';
-import Address from './Address';
-import Label from './Label';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -15,34 +12,43 @@ interface Props extends ThemeProps {
 }
 
 const ScrollWrapper: React.FC<Props> = ({ children, className }) => {
-  return <div className={className}>{children}</div>;
+  return (
+    <ScrollbarContainer className={className}>
+      <ScrollWrapperContent>{children}</ScrollWrapperContent>
+    </ScrollbarContainer>
+  );
 };
 
-export default styled(ScrollWrapper)(
-  ({ theme }: Props) => `
-  display: flex;
-  flex-direction: column;
+export default styled(ScrollWrapper)``;
+
+const ScrollbarContainer = styled.div`
   height: 100%;
-  overflow-y: auto;
+  scrollbar-color: ${({ theme }) => theme.boxBorderColor};
+
+  width: 100vw;
   overflow-x: hidden;
-  scrollbar-color: ${theme.boxBorderColor};
-  scrollbar-width: 4px;
-  padding-right: 4px;
 
   ::-webkit-scrollbar-thumb {
-    background:${theme.boxBorderColor};
-    border-radius: 50px;  
-    width: 4px;  
+    background: ${({ theme }) => theme.boxBorderColor};
+    border-radius: 50px;
+    width: 4px;
     border-right: 4px solid #111B24;
   }
 
   ::-webkit-scrollbar {
     width: 8px;
   }
+`;
 
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  ${Label}:not(.label), ${Address}, ${PasswordFeedback} {
-    width: calc(100% + 8px);
-  }
-`
-);
+const ScrollWrapperContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 100%;
+  padding-top: 32px;
+
+  padding-inline: 16px;
+  width: 100vw;
+  box-sizing: border-box;
+`;

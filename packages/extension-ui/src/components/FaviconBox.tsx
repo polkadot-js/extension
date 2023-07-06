@@ -51,7 +51,6 @@ export default styled(FaviconBox)(
   align-items: center;
   padding: 16px;
   gap: 8px;
-  margin: 0px 16px;    
   background: ${theme.inputBorderColor};
   border-radius: 8px;
   transition: 0.2s ease;

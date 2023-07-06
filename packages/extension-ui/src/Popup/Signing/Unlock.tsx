@@ -58,10 +58,6 @@ const Container = styled.div`
   & > :not(:last-child) {
     margin-bottom: 8px;
   }
-
-  &&& ${InputWithLabel} { /* overriding the intrusive <ScrollWrapper> styles */
-    width: 100%;
-  }
 `;
 
 export default React.memo(Unlock);

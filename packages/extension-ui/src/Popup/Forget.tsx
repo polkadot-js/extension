@@ -1,8 +1,6 @@
 // Copyright 2019-2023 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
-
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
@@ -131,6 +129,7 @@ function Forget({
 
 const ContentContainer = styled.div`
   margin-bottom: auto;
+  margin-top: 32px;
 `;
 
 const StyledHero = styled(Hero)`

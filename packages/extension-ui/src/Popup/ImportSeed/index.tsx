@@ -79,38 +79,38 @@ function ImportSeed(): React.ReactElement {
   const isLastStep = step === 3;
 
   return (
-    <StyledScrollWrapper>
+    <>
       {isLastStep || (
         <HeaderWithSteps
           step={step}
           text={t<string>('Import existing account')}
           total={2}
-          withBackdrop
-          withMargin
         />
       )}
-      {step === 1 && (
-        <SeedAndPath
-          genesis={genesisHash}
-          onAccountChange={setAccount}
-          onNextStep={_onNextStep}
-          type={type}
-        />
-      )}
-      {step === 2 && (
-        <AccountNamePasswordCreation
-          address={account?.address}
-          buttonLabel={t<string>('Import')}
-          genesisHash={genesisHash}
-          isBusy={isBusy}
-          isImporting
-          onBackClick={_onPreviousStep}
-          onCreate={_onCreate}
-          setGenesis={_onChangeNetwork}
-        />
-      )}
-      {step === 3 && <Success text={t('New account has been imported successfully!')} />}
-    </StyledScrollWrapper>
+      <StyledScrollWrapper>
+        {step === 1 && (
+          <SeedAndPath
+            genesis={genesisHash}
+            onAccountChange={setAccount}
+            onNextStep={_onNextStep}
+            type={type}
+          />
+        )}
+        {step === 2 && (
+          <AccountNamePasswordCreation
+            address={account?.address}
+            buttonLabel={t<string>('Import')}
+            genesisHash={genesisHash}
+            isBusy={isBusy}
+            isImporting
+            onBackClick={_onPreviousStep}
+            onCreate={_onCreate}
+            setGenesis={_onChangeNetwork}
+          />
+        )}
+        {step === 3 && <Success text={t('New account has been imported successfully!')} />}
+      </StyledScrollWrapper>
+    </>
   );
 }
 

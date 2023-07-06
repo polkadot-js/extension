@@ -73,38 +73,39 @@ function CreateAccount(): React.ReactElement {
   const isLastStep = step === 4;
 
   return (
-    <StyledScrollWrapper>
+    <>
       {isLastStep || (
         <HeaderWithSteps
           step={step}
           text={t<string>('Create an account')}
           total={3}
-          withBackdrop
         />
       )}
-      <Loading>
-        {step === 1 && <StyledSafetyFirst onNextStep={_onNextStep} />}
-        {seed && step === 2 && (
-          <StyledSaveMnemonic
-            onNextStep={_onNextStep}
-            onPreviousStep={_onPreviousStep}
-            seed={seed}
-          />
-        )}
-        {seed && step === 3 && (
-          <StyledAccountNamePasswordCreation
-            address={address}
-            buttonLabel={t<string>('Create')}
-            genesisHash={genesisHash}
-            isBusy={isBusy}
-            onBackClick={_onPreviousStep}
-            onCreate={_onCreate}
-            setGenesis={setGenesis}
-          />
-        )}
-        {step === 4 && <Success text={t('Account created successfully!')} />}
-      </Loading>
-    </StyledScrollWrapper>
+      <StyledScrollWrapper>
+        <Loading>
+          {step === 1 && <StyledSafetyFirst onNextStep={_onNextStep} />}
+          {seed && step === 2 && (
+            <SaveMnemonic
+              onNextStep={_onNextStep}
+              onPreviousStep={_onPreviousStep}
+              seed={seed}
+            />
+          )}
+          {seed && step === 3 && (
+            <AccountNamePasswordCreation
+              address={address}
+              buttonLabel={t<string>('Create')}
+              genesisHash={genesisHash}
+              isBusy={isBusy}
+              onBackClick={_onPreviousStep}
+              onCreate={_onCreate}
+              setGenesis={setGenesis}
+            />
+          )}
+          {step === 4 && <Success text={t('Account created successfully!')} />}
+        </Loading>
+      </StyledScrollWrapper>
+    </>
   );
 }
 
@@ -117,14 +118,6 @@ const StyledScrollWrapper = styled(ScrollWrapper)`
 
 const StyledSafetyFirst = styled(SafetyFirst)`
   margin-block: auto;
-`;
-
-const StyledSaveMnemonic = styled(SaveMnemonic)`
-  margin-top: 36px;
-`;
-
-const StyledAccountNamePasswordCreation = styled(AccountNamePasswordCreation)`
-  margin-top: 36px;
 `;
 
 export default styled(CreateAccount)`

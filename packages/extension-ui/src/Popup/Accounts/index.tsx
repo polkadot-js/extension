@@ -32,10 +32,6 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-const CustomHeader = styled(Header)`
-  margin: 0px;
-`;
-
 const StyledScrollWrapper = styled(ScrollWrapper)`
   ${BottomWrapper} {
     position: absolute;
@@ -147,17 +143,16 @@ function Accounts({ className }: Props): React.ReactElement {
         <AddAccount />
       ) : (
         <>
+          <Header
+            className='header'
+            onFilter={_onFilter}
+            text={t<string>('Accounts')}
+            withConnectedAccounts
+            withHelp
+            withSettings
+          />
           <StyledScrollWrapper>
-            <CustomHeader
-              className='header'
-              onFilter={_onFilter}
-              text={t<string>('Accounts')}
-              withBackdrop
-              withConnectedAccounts
-              withHelp
-              withSettings
-            />
-            <div className={`${className || ''} ${areAllAleph ? 'all-aleph-main' : 'all-grouped'}`}>{accounts}</div>
+            <div className={`${className || ''} ${areAllAleph ? 'all-aleph-main' : ''}`}>{accounts}</div>
             <StyledButtonArea>
               <AddButton />
             </StyledButtonArea>
@@ -171,21 +166,8 @@ function Accounts({ className }: Props): React.ReactElement {
 
 export default styled(Accounts)(
   ({ theme }: Props) => `
-  height: calc(100vh + 16px);
-  scrollbar-width: none;
-  
-
   &.all-aleph-main {
     margin-top: 32px;
-  }
-
-  &.all-grouped {
-    margin-top: 16px;
-  }
-
-
-  &::-webkit-scrollbar {
-    display: none;
   }
 
   .network-heading {

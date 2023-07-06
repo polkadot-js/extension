@@ -382,5 +382,15 @@
   "Metadata updated": "",
   "Metadata update rejected": "",
   "Transaction signed": "",
-  "Transaction declined": ""
+  "Transaction declined": "",
+  "Awesome! Your password is really strong.": "",
+  "Account name is too short.": "",
+  "Passwords do not match.": "",
+  "Unable to decode using the supplied passphrase.": "",
+  "`///password` not supported for derivation.": "",
+  "Invalid derivation path.": "",
+  "Wrong password.": "",
+  "Derivation path is required.": "",
+  "Invalid secret phrase or path.": "",
+  "Invalid secret phrase.": ""
 }

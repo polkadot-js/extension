@@ -137,12 +137,6 @@ export default styled(AccountSelection)(
   .select-all-margin {
     margin-top: 22px;
   }
-  
-  .accountList {
-    ${AccountsTree}:only-child {
-      padding-bottom: 100px;
-    }
-  }
 
   ${Checkbox}:not(.accountTree-checkbox) label span {
     left: -10px;

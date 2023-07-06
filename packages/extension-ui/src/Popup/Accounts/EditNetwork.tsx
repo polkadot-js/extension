@@ -20,7 +20,6 @@ import {
   RadioGroup,
   ScrollWrapper,
   Svg,
-  VerticalSpace
 } from '../../components';
 import { ALEPH_ZERO_TESTNET_GENESIS_HASH } from '../../constants';
 import useToast from '../../hooks/useToast';
@@ -99,14 +98,13 @@ function EditNetwork({
 
   return (
     <>
+      <Header
+        className='header'
+        text={t<string>('Account network')}
+        withBackArrow
+        withHelp
+      />
       <StyledScrollWrapper>
-        <Header
-          className='header'
-          text={t<string>('Account network')}
-          withBackArrow
-          withBackdrop
-          withHelp
-        />
         <Form
           id={formId}
           onSubmit={onSubmit}

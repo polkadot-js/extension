@@ -142,6 +142,7 @@ export default withRouter(styled(Export)`
   display: flex;
   flex-direction: column;
   gap: 24px;
+  margin-top: 32px;
 
   .password-container {
     position: relative;

@@ -183,7 +183,6 @@ function AccountNamePasswordCreation({
 }
 
 const Form = styled.form`
-  margin-right: 8px;
   margin-bottom: auto;
 `;
 

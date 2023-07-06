@@ -85,7 +85,7 @@ function NoAccount({ authId }: Props): React.ReactElement<Props> {
           &nbsp;{t<string>("and refresh the application's page.")}&nbsp;
         </Description>
       </StyledHero>
-      <ButtonArea footer={footer}>
+      <StyledButtonArea footer={footer}>
         <Button
           className='acceptButton'
           onClick={onClick}
@@ -93,7 +93,7 @@ function NoAccount({ authId }: Props): React.ReactElement<Props> {
         >
           {t<string>('Got it!')}
         </Button>
-      </ButtonArea>
+      </StyledButtonArea>
     </Container>
   );
 }
@@ -125,6 +125,10 @@ const StyledLink = styled(Link)`
     text-decoration: underline;
     color: ${({ theme }) => theme.primaryColor};
   }
+`;
+
+const StyledButtonArea = styled(ButtonArea)`
+  margin-inline: 16px;
 `;
 
 export default NoAccount;

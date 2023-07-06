@@ -10,7 +10,9 @@ import styled, { CSSProperties } from 'styled-components';
 
 import { Video } from '@polkadot/extension-ui/components/index';
 
+import { Steps } from '../partials/HeaderWithSteps';
 import { Z_INDEX } from '../zindex';
+import ScrollWrapper from './ScrollWrapper';
 
 interface SplashHandlerProps extends ThemeProps {
   className?: string;
@@ -73,7 +75,7 @@ export default styled(SplashHandler)`
   flex-direction: column;
   height: 100%;
 
-  > *:not(.splash):not(.header) {
+  > *:not(.splash):not(.header):not(${ScrollWrapper}):not(${Steps}) {
     padding-left: 16px;
     padding-right: 16px;
   }

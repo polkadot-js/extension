@@ -67,6 +67,7 @@ export default React.memo(
   height: calc(100vh - 2px);
   overflow-y: scroll;
   scrollbar-width: none;
+  padding-top: 32px;
   
   .add-account-menu{
     display: flex;

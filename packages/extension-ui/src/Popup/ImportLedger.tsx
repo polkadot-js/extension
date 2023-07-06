@@ -181,6 +181,8 @@ function ImportLedger({ className }: Props): React.ReactElement {
 }
 
 export default styled(ImportLedger)`
+  margin-top: 32px;
+
   .refreshIcon {
     margin-right: 0.3rem;
   }

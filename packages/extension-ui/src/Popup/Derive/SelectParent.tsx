@@ -167,7 +167,7 @@ function SelectParent({
 
   return (
     <>
-      <Form
+      <form
         className={className}
         id={formId}
         onSubmit={onSubmit}
@@ -237,7 +237,7 @@ function SelectParent({
             </Warning>
           )}
         </InputWrapper>
-      </Form>
+      </form>
       <VerticalSpace />
       <ButtonArea footer={footer}>
         <Button
@@ -266,10 +266,6 @@ const StyledFooter = styled(HelperFooter)`
     margin-bottom: 12px;
   }
   gap: 8px;
-`;
-
-const Form = styled.form`
-  margin-right: 8px;
 `;
 
 const StyledHeader = styled(Header)`

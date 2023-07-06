@@ -162,6 +162,7 @@ export default React.memo(
   height: 100%;
   overflow-y: scroll;
   scrollbar-width: none;
+  padding-top: 32px;
       
   .identityIcon {
     display: flex;

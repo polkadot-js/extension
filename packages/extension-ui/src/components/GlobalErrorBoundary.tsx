@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { WithTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import Header from '../partials/Header';
 import Button from './Button';
@@ -50,11 +51,11 @@ class GlobalErrorBoundary extends React.Component<Props> {
     return error ? (
       <>
         <Header text={t<string>('An error occurred')} />
-        <div>
+        <Message>
           {t<string>('Something went wrong with the query and rendering of this component. {{message}}', {
             replace: { message: error.message }
           })}
-        </div>
+        </Message>
         <VerticalSpace />
         <ButtonArea>
           <Button onClick={this.#goHome}>{t<string>('Back to home')}</Button>
@@ -67,3 +68,7 @@ class GlobalErrorBoundary extends React.Component<Props> {
 }
 
 export default translate(GlobalErrorBoundary);
+
+const Message = styled.div`
+  margin-top: 32px;
+`;

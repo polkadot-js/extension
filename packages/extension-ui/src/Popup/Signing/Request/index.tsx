@@ -109,7 +109,7 @@ export default function Request({
             setError={setError}
           />
         )}
-        <StyledAddress
+        <Address
           address={requestPayload.address}
           genesisHash={requestPayload.genesisHash}
           isExternal={isExternal}
@@ -151,7 +151,7 @@ export default function Request({
             <VerticalSpace />
           </>
         )}
-        <StyledAddress
+        <Address
           address={address}
           isExternal={isExternal}
         />
@@ -170,12 +170,6 @@ export default function Request({
 
   return null;
 }
-
-const StyledAddress = styled(Address)`
-  &&& { /* overriding the intrusive <ScrollWrapper> styles */
-    width: initial;
-  }
-`;
 
 const FullHeightExtrinsic = styled(Extrinsic)`
   flex-grow: 1;

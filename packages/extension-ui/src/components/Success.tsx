@@ -32,5 +32,5 @@ export default Success;
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  margin-top: 200px;
+  margin-top: 150px;
 `;

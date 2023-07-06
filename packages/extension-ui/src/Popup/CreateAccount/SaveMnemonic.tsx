@@ -117,9 +117,9 @@ function SaveMnemonic({ className, onNextStep, onPreviousStep, seed }: Props): R
 }
 
 const ContentContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 `;
 
 const Bond = styled.span`

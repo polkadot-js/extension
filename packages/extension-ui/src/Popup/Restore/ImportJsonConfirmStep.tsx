@@ -187,7 +187,6 @@ const Hint = styled.span`
 `;
 
 export default styled(ImportJsonConfirmStep)`
-    margin-top: 32px;
     ${Label}:not(.label) {
       width: 100%;
     }

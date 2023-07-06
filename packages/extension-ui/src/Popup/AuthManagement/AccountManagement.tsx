@@ -8,18 +8,15 @@ import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
 import { AccountContext, ActionContext, Button, ButtonArea, RemoveAuth, ScrollWrapper } from '../../components';
-import Checkbox from '../../components/Checkbox';
 import useTranslation from '../../hooks/useTranslation';
 import { getAuthList, updateAuthorization } from '../../messaging';
 import { AccountSelection, Header } from '../../partials';
-import AccountsTree from '../Accounts/AccountsTree';
 
 interface Props extends RouteComponentProps, ThemeProps {
   className?: string;
 }
 
 const CustomButtonArea = styled(ButtonArea)`
-  padding-inline: 16px;
   padding-top: 16px;
   padding-bottom: 0px;
 `;
@@ -72,70 +69,66 @@ function AccountManagement({ className, location: { search } }: Props): React.Re
   };
 
   return (
-    <StyledScrollWrapper>
-      <form
-        className={className}
-        onSubmit={onSubmit}
-      >
-        <StyledHeader
-          text={t<string>('Connected accounts')}
-          withBackArrow
-          withBackdrop
-          withHelp
-        />
-        {url && (
-          <>
-            <StyledRemoveAuth url={url} />
-            {hierarchy.length > 0 ? (
-              <AccountSelection
-                className='accountSelection'
-                onChange={setSelectedAccountsChanged}
-                showHidden={true}
-                url={url}
-                withWarning={false}
-              />
-            ) : (
-              <div className='no-accounts'>
-                <span>{t<string>('You do NOT have any account.')}</span>
-              </div>
-            )}
-          </>
-        )}
-        {hierarchy.length > 0 && (
-          <CustomButtonArea>
-            <Button
-              onClick={_onCancel}
-              secondary
-              type='button'
-            >
-              {t<string>('Cancel')}
-            </Button>
-            <Button
-              className='acceptButton'
-              isDisabled={!isFormValid}
-              type='submit'
-            >
-              {t<string>('Change')}
-            </Button>
-          </CustomButtonArea>
-        )}
-      </form>
-    </StyledScrollWrapper>
+    <>
+      <Header
+        text={t<string>('Connected accounts')}
+        withBackArrow
+        withBackdrop
+        withHelp
+      />
+      <ScrollWrapper>
+        <form
+          className={className}
+          onSubmit={onSubmit}
+        >
+          {url && (
+            <>
+              <StyledRemoveAuth url={url} />
+              {hierarchy.length > 0 ? (
+                <AccountSelection
+                  className='accountSelection'
+                  onChange={setSelectedAccountsChanged}
+                  showHidden={true}
+                  url={url}
+                  withWarning={false}
+                />
+              ) : (
+                <div className='no-accounts'>
+                  <span>{t<string>('You do NOT have any account.')}</span>
+                </div>
+              )}
+            </>
+          )}
+          {hierarchy.length > 0 && (
+            <CustomButtonArea>
+              <Button
+                onClick={_onCancel}
+                secondary
+                type='button'
+              >
+                {t<string>('Cancel')}
+              </Button>
+              <Button
+                className='acceptButton'
+                isDisabled={!isFormValid}
+                type='submit'
+              >
+                {t<string>('Change')}
+              </Button>
+            </CustomButtonArea>
+          )}
+        </form>
+      </ScrollWrapper>
+    </>
   );
 }
-
-const StyledScrollWrapper = styled(ScrollWrapper)`
-  & > * {
-    margin-inline: -16px;
-  }
-`;
 
 const StyledRemoveAuth = styled(RemoveAuth)`
   margin-bottom: 24px;
 `;
 
 export default withRouter(styled(AccountManagement)`
-  height: 100%;
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
 
@@ -167,28 +160,11 @@ export default withRouter(styled(AccountManagement)`
   .accountSelection {
     flex-grow: 1;
     margin: 0px;
-    
-    ${Checkbox} {
-      margin-right: 32px;
-    }
 
     .accountList {
       height: 100%;
-
-      padding-right: 8px;
-
-      ${AccountsTree} {
-        width: calc(100% - 32px);
-        margin: 0 auto;
-      }
     }
   }
   
 
 `);
-
-const StyledHeader = styled(Header)`
-  &.backdrop-margin-left {
-    margin-left: 0px;
-  }
-`;

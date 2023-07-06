@@ -214,8 +214,7 @@ export default styled(NewAccountSelection)(
     scrollbar-color: ${theme.boxBorderColor};
     scrollbar-width: 2px;
     padding-block: 0;
-    padding-left: 8px;
-    padding-right: 16px;
+    padding-inline: 16px;
   
     ::-webkit-scrollbar-thumb {
       background:${theme.boxBorderColor};

@@ -70,6 +70,7 @@ const Container = styled.div`
   height: 100%;
   overflow-y: scroll;
   scrollbar-width: none;
+  padding-top: 32px;
 
   &::-webkit-scrollbar {
     display: none;

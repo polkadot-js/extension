@@ -123,8 +123,8 @@ export function useLedger (slug?: string, active = true): Result {
     setRefreshLock(true);
   }, []);
 
-  const handleError = useCallback((error: Error) => {
-    const convertedError = convertLedgerError(error, t, appName);
+  const handleError = useCallback((error: Error, expandError = true) => {
+    const convertedError = convertLedgerError(error, t, appName, expandError);
     const message = convertedError.message;
 
     switch (convertedError.status) {
@@ -211,7 +211,7 @@ export function useLedger (slug?: string, active = true): Result {
         })
         .catch((error: Error) => {
           setIsLoading(false);
-          handleError(error);
+          handleError(error, false);
           setIsLocked(true);
           console.error(error);
         });

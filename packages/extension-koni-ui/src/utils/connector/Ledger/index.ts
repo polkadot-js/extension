@@ -4,7 +4,7 @@
 import { ConvertLedgerError } from '@subwallet/extension-koni-ui/types';
 import { TFunction } from 'i18next';
 
-export const convertLedgerError = (err: Error, t: TFunction, network: string): ConvertLedgerError => {
+export const convertLedgerError = (err: Error, t: TFunction, network: string, expandError = true): ConvertLedgerError => {
   const error = err;
   const message = error.message;
   const name = error.name;
@@ -75,6 +75,13 @@ export const convertLedgerError = (err: Error, t: TFunction, network: string): C
   }
 
   console.warn('Unknown ledger error', { error });
+
+  if (expandError) {
+    return {
+      status: 'error',
+      message: message
+    };
+  }
 
   return {
     status: 'error',

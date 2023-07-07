@@ -115,8 +115,6 @@ export class BitCountryNftApi extends BaseNftApi {
 
     try {
       if (!assetIds || assetIds.length === 0) {
-        params.cleanUpNfts(this.chain, address, [], [], true);
-
         return;
       }
 
@@ -163,8 +161,6 @@ export class BitCountryNftApi extends BaseNftApi {
         params.updateItem(this.chain, parsedNft, address);
         params.updateCollection(this.chain, parsedCollection);
       }));
-
-      params.cleanUpNfts(this.chain, address, collectionIds, nftIds);
     } catch (e) {
       console.error(`${this.chain}`, e);
     }

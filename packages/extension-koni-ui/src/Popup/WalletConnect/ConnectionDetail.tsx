@@ -316,7 +316,8 @@ const ConnectionDetail = styled(Wrapper)<Props>(({ theme: { token } }: Props) =>
         '.dapp-info-domain': {
           overflow: 'hidden',
           textWrap: 'nowrap',
-          textOverflow: 'ellipsis'
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
         }
       }
     },

@@ -159,6 +159,8 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
   const maxUnlockingChunks = chainApi.api.consts.staking.maxUnlockingChunks.toString();
   const unlockingEras = chainApi.api.consts.staking.bondingDuration.toString();
 
+  console.log('unlockingEras', unlockingEras);
+
   const [_totalEraStake, _totalIssuance, _auctionCounter, _minimumActiveStake, _minNominatorBond, _minPoolJoin, _eraStakers] = await Promise.all([
     chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
     chainApi.api.query.balances.totalIssuance(),
@@ -305,7 +307,7 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
   }
 
   ledger.unlocking.forEach((unlockingChunk) => {
-    const isClaimable = unlockingChunk.era - parseInt(currentEra) <= 0;
+    const isClaimable = unlockingChunk.era - parseInt(currentEra) < 0;
     const remainingEra = unlockingChunk.era - (parseInt(currentEra) + 1);
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
 
@@ -313,7 +315,7 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
       chain,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
       claimable: unlockingChunk.value.toString(),
-      waitingTime: waitingTime > 0 ? waitingTime : 0
+      waitingTime: waitingTime
     } as UnstakingInfo);
   });
 
@@ -430,7 +432,7 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
   }
 
   ledger.unlocking.forEach((unlockingChunk) => {
-    const isClaimable = unlockingChunk.era - parseInt(currentEra) <= 0;
+    const isClaimable = unlockingChunk.era - parseInt(currentEra) < 0;
     const remainingEra = unlockingChunk.era - (parseInt(currentEra) + 1);
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
 
@@ -438,7 +440,7 @@ export async function getRelayChainNominatorMetadata (chainInfo: _ChainInfo, add
       chain,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
       claimable: unlockingChunk.value.toString(),
-      waitingTime: waitingTime > 0 ? waitingTime : 0
+      waitingTime: waitingTime
     } as UnstakingInfo);
   });
 
@@ -503,7 +505,7 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
   const unstakings: UnstakingInfo[] = [];
 
   Object.entries(poolMemberInfo.unbondingEras).forEach(([unlockingEra, amount]) => {
-    const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) <= 0;
+    const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) < 0;
     const remainingEra = parseInt(unlockingEra) - (parseInt(currentEra) + 1);
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
 
@@ -511,7 +513,7 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
       chain: chainInfo.slug,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
       claimable: amount.toString(),
-      waitingTime: waitingTime > 0 ? waitingTime : 0
+      waitingTime: waitingTime
     } as UnstakingInfo);
   });
 
@@ -597,7 +599,7 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
   const unstakings: UnstakingInfo[] = [];
 
   Object.entries(poolMemberInfo.unbondingEras).forEach(([unlockingEra, amount]) => {
-    const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) <= 0;
+    const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) < 0;
     const remainingEra = parseInt(unlockingEra) - (parseInt(currentEra) + 1);
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
 
@@ -605,7 +607,7 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
       chain: chainInfo.slug,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
       claimable: amount.toString(),
-      waitingTime: waitingTime > 0 ? waitingTime : 0
+      waitingTime: waitingTime
     } as UnstakingInfo);
   });
 

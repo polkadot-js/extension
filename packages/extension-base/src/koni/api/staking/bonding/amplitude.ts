@@ -133,7 +133,7 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
 
     const blockDuration = (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
 
-    const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber <= 0;
+    const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber < 0;
     const remainingBlock = parseInt(nearestUnstakingBlock) - (currentBlockNumber + 1);
     const waitingTime = remainingBlock * blockDuration;
 
@@ -141,7 +141,7 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
       chain: chainInfo.slug,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
       claimable: nearestUnstakingAmount.toString(),
-      waitingTime: waitingTime > 0 ? waitingTime : 0,
+      waitingTime,
       validatorAddress: delegatorState?.owner || undefined
     });
   }
@@ -230,7 +230,7 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
 
     const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
 
-    const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber <= 0;
+    const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber < 0;
     const remainingBlock = parseInt(nearestUnstakingBlock) - (currentBlockNumber + 1);
     const waitingTime = remainingBlock * blockDuration;
 
@@ -238,7 +238,7 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
       chain,
       status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
       claimable: nearestUnstakingAmount.toString(),
-      waitingTime: waitingTime > 0 ? waitingTime : 0,
+      waitingTime,
       validatorAddress: delegatorState?.owner || undefined
     });
   }

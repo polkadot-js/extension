@@ -22,16 +22,16 @@ export function getUnstakingPeriod (unstakingPeriod?: number) {
   return '';
 }
 
-export function getWaitingTime (waitingTime?: number) {
-  const days = waitingTime ? moment.duration(waitingTime, 'hours').humanize() : 0;
-
-  if (days < 1) {
-    if (days) {
-      return 'Withdraw in a day';
+export function getWaitingTime (waitingTime: number) {
+  if (waitingTime < 1) {
+    if (waitingTime >= 0) {
+      return 'Withdraw within a day';
     } else {
       return 'Available for withdrawal';
     }
   } else {
+    const days = moment.duration(waitingTime, 'hours').humanize();
+
     return `Withdraw in ${days}`;
   }
 }

@@ -430,7 +430,7 @@ export async function getAstarClaimRewardExtrinsic (substrateApi: _SubstrateApi,
   return apiPromise.api.tx.utility.batch(transactions);
 }
 
-export function getAstarWithdrawable (nominatorMetadata: NominatorMetadata): UnstakingInfo {
+export function getCompoundWithdrawable (nominatorMetadata: NominatorMetadata): UnstakingInfo {
   const unstakingInfo: UnstakingInfo = {
     chain: nominatorMetadata.chain,
     status: UnstakingStatus.CLAIMABLE,

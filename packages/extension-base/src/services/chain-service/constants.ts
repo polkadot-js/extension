@@ -86,6 +86,7 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   calamari_test: 6,
   amplitude: 2,
   amplitude_test: 2,
+  pendulum: 2,
   kilt: 2,
   kilt_peregrine: 2
 };

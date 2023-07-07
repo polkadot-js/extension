@@ -791,19 +791,32 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
   let bondTx;
   let nominateTx;
 
+  const _params = chainApi.api.tx.staking.bond.toJSON() as Record<string, any>;
+  const paramsCount = (_params.args as any[]).length;
+
   const validatorParamList = targetValidators.map((validator) => {
     return validator.address;
   });
 
   if (!nominatorMetadata) {
-    bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
+    if (paramsCount === 2) {
+      bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
+    } else {
+      bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
+    }
+
     nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
 
     return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
   }
 
   if (!nominatorMetadata.isBondedBefore) { // first time
-    bondTx = chainApi.api.tx.staking.bond(nominatorMetadata.address, binaryAmount, bondDest);
+    if (paramsCount === 2) {
+      bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
+    } else {
+      bondTx = chainApi.api.tx.staking.bond(nominatorMetadata.address, binaryAmount, bondDest);
+    }
+
     nominateTx = chainApi.api.tx.staking.nominate(validatorParamList);
 
     return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);

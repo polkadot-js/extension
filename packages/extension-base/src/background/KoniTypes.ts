@@ -432,6 +432,8 @@ export type RequestChangeTimeAutoLock = { autoLockTime: number };
 
 export type RequestChangeEnableChainPatrol = { enable: boolean };
 
+export type RequestChangeShowBalance = { enable: boolean };
+
 export interface RandomTestRequest {
   start: number;
   end: number;
@@ -2081,6 +2083,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveAutoLockTime)': [RequestChangeTimeAutoLock, boolean];
   'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
   'pri(settings.getLogoMaps)': [null, AllLogoMap];
+  'pri(settings.saveShowBalance)': [RequestChangeShowBalance, boolean];
 
   // Subscription
   'pri(transaction.history.getSubscription)': [null, TransactionHistoryItem[], TransactionHistoryItem[]];

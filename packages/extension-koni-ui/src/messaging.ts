@@ -181,6 +181,10 @@ export async function saveEnableChainPatrol (value: boolean): Promise<boolean> {
   return sendMessage('pri(settings.saveEnableChainPatrol)', { enable: value });
 }
 
+export async function saveShowBalance (value: boolean): Promise<boolean> {
+  return sendMessage('pri(settings.saveShowBalance)', { enable: value });
+}
+
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {
   return sendMessage('pri(accounts.tie)', { address, genesisHash });
 }

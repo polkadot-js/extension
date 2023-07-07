@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
-import { CopySimple, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
-import React from 'react';
+import { CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -30,6 +31,11 @@ function Component (
     totalChangeValue,
     totalValue }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { isShowBalance } = useSelector((state) => state.settings);
+
+  const onChangeShowBalance = useCallback(() => {
+    saveShowBalance(!isShowBalance).catch(console.error);
+  }, [isShowBalance]);
 
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
@@ -44,6 +50,17 @@ function Component (
       />
       {!isShrink && (
         <div className={'__balance-change-container'}>
+          <Button
+            className='button-change-show-balance'
+            icon={(
+              <Icon
+                phosphorIcon={ !isShowBalance ? Eye : EyeSlash}
+              />
+            )}
+            onClick={onChangeShowBalance}
+            size='xs'
+            type='ghost'
+          />
           <Number
             className={'__balance-change-value'}
             decimal={0}
@@ -68,11 +85,13 @@ function Component (
       )}
       <div className={'__action-button-container'}>
         <Button
-          icon={<Icon
-            phosphorIcon={CopySimple}
-            size={isShrink ? 'sm' : 'md' }
-            weight={'duotone'}
-          />}
+          icon={(
+            <Icon
+              phosphorIcon={CopySimple}
+              size={isShrink ? 'sm' : 'md' }
+              weight={'duotone'}
+            />
+          )}
           onClick={onOpenReceive}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
@@ -135,8 +154,16 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
     '.__balance-change-container': {
       display: 'flex',
       justifyContent: 'center',
-      alignItems: 'flex-end',
-      paddingTop: token.sizeSM,
+      alignItems: 'center',
+      gap: token.sizeXS,
+
+      '.button-change-show-balance': {
+        color: token.colorWhite,
+
+        '&:hover': {
+          color: token['gray-5']
+        }
+      },
 
       '.ant-typography': {
         lineHeight: 'inherit',
@@ -147,7 +174,6 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
     },
 
     '.__balance-change-value': {
-      marginRight: token.sizeSM,
       lineHeight: token.lineHeight
     },
 

@@ -140,7 +140,10 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
         url: false
       }
     },
-    watch: false
+    watch: false,
+    experiments: {
+      asyncWebAssembly: true
+    }
   };
 
   return result;

@@ -149,7 +149,10 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
         // url: require.resolve("url/")
       }
     },
-    watch: false
+    watch: false,
+    experiments: {
+      asyncWebAssembly: true
+    }
   };
 
   if (useSplitChunk) {

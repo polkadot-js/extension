@@ -4,7 +4,7 @@
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
@@ -13,6 +13,7 @@ import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInp
 import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
 import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useNotification, usePreCheckAction, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, SendFundParam, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -57,7 +58,8 @@ function getTokenItems (
   assetRegistry: Record<string, _ChainAsset>,
   assetSettingMap: Record<string, AssetSetting>,
   multiChainAssetMap: Record<string, _MultiChainAsset>,
-  tokenGroupSlug?: string // is ether a token slug or a multiChainAsset slug
+  tokenGroupSlug?: string, // is ether a token slug or a multiChainAsset slug
+  isZkModeEnabled?: boolean
 ): TokenItemType[] {
   const account = findAccountByAddress(accounts, address);
 
@@ -105,6 +107,10 @@ function getTokenItems (
     const isTokenFungible = _isAssetFungibleToken(chainAsset);
 
     if (!(isTokenFungible && isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger)) {
+      return;
+    }
+
+    if (!isZkModeEnabled && _isMantaZkAsset(chainAsset)) {
       return;
     }
 
@@ -223,6 +229,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
   const checkAction = usePreCheckAction(from, true, 'The account you are using is {{accountTitle}}, you cannot send assets with it');
+  const isZKModeEnabled = useIsMantaPayEnabled(from);
 
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
@@ -293,9 +300,10 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       assetRegistry,
       assetSettingMap,
       multiChainAssetMap,
-      sendFundSlug
+      sendFundSlug,
+      isZKModeEnabled
     );
-  }, [accounts, assetRegistry, assetSettingMap, chainInfoMap, from, multiChainAssetMap, sendFundSlug]);
+  }, [accounts, assetRegistry, assetSettingMap, chainInfoMap, from, isZKModeEnabled, multiChainAssetMap, sendFundSlug]);
 
   const validateRecipientAddress = useCallback((rule: Rule, _recipientAddress: string): Promise<void> => {
     if (!_recipientAddress) {

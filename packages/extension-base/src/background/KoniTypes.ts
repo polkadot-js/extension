@@ -25,6 +25,23 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TransactionWarning } from './warnings/TransactionWarning';
 
+export enum RuntimeEnvironment {
+  Web = 'Web',
+  Node = 'Node',
+  ExtensionChrome = 'Extension (Chrome)',
+  ExtensionFirefox = 'Extension (Firefox)',
+  WebWorker = 'Web Worker',
+  ServiceWorker = 'Service Worker',
+  Unknown = 'Unknown',
+}
+
+export interface RuntimeEnvironmentInfo {
+  environment: RuntimeEnvironment;
+  version: string;
+  host?: string;
+  protocol?: string;
+}
+
 export interface ServiceInfo {
   chainInfoMap: Record<string, _ChainInfo>;
   chainStateMap: Record<string, _ChainState>;
@@ -1867,6 +1884,20 @@ export interface RequestPassPhishingPage {
   url: string;
 }
 
+// Psp token
+
+export interface RequestAddPspToken {
+  genesisHash: string;
+  tokenInfo: {
+    type: string;
+    address: string;
+    symbol: string;
+    name: string;
+    decimals?: number;
+    logo?: string;
+  };
+}
+
 // Wallet Connect
 
 export interface RequestConnectWalletConnect {
@@ -1888,6 +1919,43 @@ export interface RequestReconnectConnectWalletSession {
 
 export interface RequestDisconnectWalletConnectSession {
   topic: string
+}
+
+export interface MantaPayConfig {
+  address: string;
+  zkAddress: string;
+  enabled: boolean;
+  chain: string;
+  isInitialSync: boolean;
+}
+
+export interface MantaAuthorizationContext {
+  address: string;
+  chain: string;
+  data: unknown;
+}
+
+export interface MantaPaySyncState {
+  isSyncing: boolean,
+  progress: number,
+  needManualSync?: boolean
+}
+
+export interface MantaPayEnableParams {
+  password: string,
+  address: string
+}
+
+export enum MantaPayEnableMessage {
+  WRONG_PASSWORD = 'WRONG_PASSWORD',
+  CHAIN_DISCONNECTED = 'CHAIN_DISCONNECTED',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+  SUCCESS = 'SUCCESS'
+}
+
+export interface MantaPayEnableResponse {
+  success: boolean;
+  message: MantaPayEnableMessage
 }
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value
@@ -1956,6 +2024,14 @@ export interface KoniRequestSignatures {
 
   // Phishing page
   'pri(phishing.pass)': [RequestPassPhishingPage, boolean];
+
+  // Manta pay
+  'pri(mantaPay.enable)': [MantaPayEnableParams, MantaPayEnableResponse];
+  'pri(mantaPay.disable)': [string, boolean];
+  'pri(mantaPay.getZkBalance)': [null, null];
+  'pri(mantaPay.subscribeConfig)': [null, MantaPayConfig[], MantaPayConfig[]];
+  'pri(mantaPay.subscribeSyncingState)': [null, MantaPaySyncState, MantaPaySyncState];
+  'pri(mantaPay.initSyncMantaPay)': [string, null];
 
   // Auth
   'pri(authorize.listV2)': [null, ResponseAuthorizeList];
@@ -2096,6 +2172,9 @@ export interface KoniRequestSignatures {
   'mobile(subscription.start)': [SubscriptionServiceType[], void];
   'mobile(subscription.stop)': [SubscriptionServiceType[], void];
   'mobile(subscription.restart)': [SubscriptionServiceType[], void];
+
+  // Psp token
+  'pub(token.add)': [RequestAddPspToken, boolean];
 
   /// Wallet connect
   'pri(walletConnect.connect)': [RequestConnectWalletConnect, boolean];

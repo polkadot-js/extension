@@ -16,6 +16,7 @@ import { getUnstakingPeriod, getWaitingTime } from '@subwallet/extension-koni-ui
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowCircleUpRight, DotsThree } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
@@ -89,6 +90,7 @@ const Component: React.FC<Props> = ({ chainStakingMetadata, className, nominator
         />
         <Button
           className='__action-btn'
+          disabled={new BigN(activeStake || '0').lte(0) }
           onClick={onClickFooterButton(
             onClickUnstakeBtn,
             staking.type === StakingType.POOLED ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND

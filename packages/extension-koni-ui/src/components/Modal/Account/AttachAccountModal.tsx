@@ -72,7 +72,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     inactiveModal(modalId);
 
     if (isPopup) {
-      windowOpen('/accounts/connect-ledger').catch(console.error);
+      windowOpen({ allowedPath: '/accounts/connect-ledger' }).catch(console.error);
     } else {
       navigate('accounts/connect-ledger');
     }

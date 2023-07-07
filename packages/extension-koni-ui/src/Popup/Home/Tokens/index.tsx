@@ -15,7 +15,7 @@ import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Upper
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, SwAlert } from '@subwallet/react-ui';
 import classNames from 'classnames';
 import { Coins, FadersHorizontal } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -42,6 +42,9 @@ const Component = (): React.ReactElement => {
     selectedAccount,
     selectedNetwork,
     tokenSelectorItems } = useReceiveQR();
+
+  const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
+  const zkModeSyncProgress = useSelector((state: RootState) => state.mantaPay.progress);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;
@@ -197,6 +200,17 @@ const Component = (): React.ReactElement => {
         className={'__scroll-container'}
       >
         {
+          isZkModeSyncing && (
+            <SwAlert
+              className={classNames('zk-mode-alert-area')}
+              description={t('This may take a few minutes. Please keep the app open')}
+              title={t(`Zk mode is syncing: ${zkModeSyncProgress || '0'}%`)}
+              type={'warning'}
+            />
+          )
+        }
+
+        {
           tokenGroupBalanceItems.map((item) => {
             return (
               <TokenGroupBalanceItem
@@ -254,7 +268,7 @@ const WrapperComponent = ({ className = '' }: ThemeProps): React.ReactElement<Pr
   return (
     <PageWrapper
       className={`tokens ${className}`}
-      resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance'])}
+      resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance', 'mantaPay'])}
     >
       <Component />
     </PageWrapper>
@@ -332,6 +346,10 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
       '.__scrolling-block': {
         display: 'flex'
       }
+    },
+
+    '.zk-mode-alert-area': {
+      marginBottom: token.marginXS
     }
   });
 });

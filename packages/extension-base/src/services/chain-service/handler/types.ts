@@ -3,6 +3,8 @@
 
 import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
 
+import { ApiPromise } from '@polkadot/api';
+
 export interface _EvmChainSpec {
   evmChainId: number,
   name: string,
@@ -25,6 +27,7 @@ export interface _ApiOptions {
   providerName?: string,
   metadata?: MetadataItem,
   onUpdateStatus?: (isConnected: boolean) => void;
+  externalApiPromise?: ApiPromise;
 }
 
 export enum _CHAIN_VALIDATION_ERROR {

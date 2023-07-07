@@ -55,7 +55,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const onClickJson = useCallback(() => {
     if (isPopup) {
-      windowOpen('/accounts/restore-json').catch(console.error);
+      windowOpen({ allowedPath: '/accounts/restore-json' }).catch(console.error);
     } else {
       inactiveModal(modalId);
       navigate('/accounts/restore-json');

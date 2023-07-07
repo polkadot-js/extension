@@ -124,7 +124,7 @@ const Component: React.FC<Props> = (props: Props) => {
       saveCameraSetting(!currentValue)
         .then(() => {
           if (openNewTab) {
-            windowOpen('/settings/security')
+            windowOpen({ allowedPath: '/settings/security' })
               .catch((e: Error) => {
                 console.log(e);
               });

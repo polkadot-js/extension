@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 1.1.1
+Build date: Jul 06, 2023.
+
+Features & Update:
+- Integrate WalletConnect (#1497)
+- Support viewing ZK tokens on Manta (#1525)
+- Update XCM for Astar, Interlay, HydraDX (#1579)
+- Support add PSP token from dApp (#1529)
+- Improved connection experience with Ledger (#1573)
+
+Bugs fixed:
+- Fixed bugs related to address book (#1559)
+- Fixed NFT Gateway problems with non-extension environment (#1602)
+- Fixed bugs on the Staking screens (#1475)
+- Fixed bug show transaction fee on the History detail screen (#1580)
+
+Update `@subwallet/chain-list@0.2.4` (#1590):
+- Supported LP Tokens on Kintsugi (LP kBTC-USDT, LP KSM-kBTC, LP KSM-KINT)
+
 ## 1.0.12
 Build date: Jun 29, 2023.
 

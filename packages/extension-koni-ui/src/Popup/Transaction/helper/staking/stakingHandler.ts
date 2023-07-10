@@ -25,7 +25,7 @@ export function getUnstakingPeriod (unstakingPeriod?: number) {
 export function getWaitingTime (waitingTime: number) {
   if (waitingTime < 1) {
     if (waitingTime >= 0) {
-      return 'Withdraw within a day';
+      return 'Withdrawable within a day';
     } else {
       return 'Available for withdrawal';
     }

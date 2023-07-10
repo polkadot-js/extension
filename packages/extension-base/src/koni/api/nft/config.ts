@@ -19,7 +19,9 @@ export const KANARIA_EXTERNAL_SERVER = 'https://kanaria.rmrk.app/catalogue/';
 
 export const CLOUDFLARE_PINATA_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 
-export const BIT_COUNTRY_SERVER = 'https://ipfs-cdn.bit.country/';
+export const BIT_COUNTRY_IPFS_SERVER = 'https://ipfs-cdn.bit.country/';
+
+export const BIT_COUNTRY_LAND_ESTATE_METADATA_API = 'https://pioneer-api.bit.country/metadata/landTokenUriPioneer';
 
 export const BIT_COUNTRY_THUMBNAIL_RESOLVER = 'https://res.cloudinary.com/ddftctzph/image/upload/c_scale,q_100,w_250/production-ipfs/asset/';
 

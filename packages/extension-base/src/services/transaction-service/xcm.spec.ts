@@ -7,6 +7,7 @@ import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
 jest.setTimeout(1000 * 60 * 10);
 
@@ -25,6 +26,7 @@ const uniqueArray = (array: string[]): string[] => {
 
 describe('test token transfer', () => {
   let substrateChainHandler: SubstrateChainHandler;
+  const substrateApiMap: Record<string, _SubstrateApi> = {};
 
   beforeAll(async () => {
     await cryptoWaitReady();
@@ -36,6 +38,8 @@ describe('test token transfer', () => {
     const rawSrcChains = Object.values(AssetRefMap).map((value) => value.srcChain);
     const srcChains = uniqueArray(rawSrcChains);
     const errorList: string[] = [];
+
+    console.log('srcChains', srcChains);
 
     for (const srcChain of srcChains) {
       const assetRef = Object.values(AssetRefMap).find((ref) => ref.srcChain === srcChain);
@@ -71,5 +75,15 @@ describe('test token transfer', () => {
     }
 
     console.log(errorList);
+  });
+
+  it('xcm check', async () => {
+    const rawSrcChains = Object.values(AssetRefMap).map((value) => value.srcChain);
+
+    await Promise.all(rawSrcChains.map(async (srcChain) => {
+      const chainInfo = ChainInfoMap[srcChain];
+      const api = await substrateChainHandler.initApi(srcChain, chainInfo.providers[Object.keys(chainInfo.providers)[0]]);
+    }));
+
   });
 });

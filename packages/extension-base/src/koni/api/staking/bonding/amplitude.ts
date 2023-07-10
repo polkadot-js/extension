@@ -134,8 +134,10 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
     const blockDuration = (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
 
     const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber < 0;
-    const remainingBlock = parseInt(nearestUnstakingBlock) - (currentBlockNumber + 1);
+    const remainingBlock = parseInt(nearestUnstakingBlock) - currentBlockNumber;
     const waitingTime = remainingBlock * blockDuration;
+
+    console.log(`chain: ${chainInfo.slug}, address: ${address}, currentEra: ${currentBlockNumber}, waiting until: ${nearestUnstakingBlock}, isClaimable: ${isClaimable ? 'true' : 'false'}`);
 
     unstakingList.push({
       chain: chainInfo.slug,
@@ -231,7 +233,7 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
     const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
 
     const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber < 0;
-    const remainingBlock = parseInt(nearestUnstakingBlock) - (currentBlockNumber + 1);
+    const remainingBlock = parseInt(nearestUnstakingBlock) - currentBlockNumber;
     const waitingTime = remainingBlock * blockDuration;
 
     unstakingList.push({

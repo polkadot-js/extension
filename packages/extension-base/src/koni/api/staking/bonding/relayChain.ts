@@ -159,8 +159,6 @@ export async function getRelayChainStakingMetadata (chainInfo: _ChainInfo, subst
   const maxUnlockingChunks = chainApi.api.consts.staking.maxUnlockingChunks.toString();
   const unlockingEras = chainApi.api.consts.staking.bondingDuration.toString();
 
-  console.log('unlockingEras', unlockingEras);
-
   const [_totalEraStake, _totalIssuance, _auctionCounter, _minimumActiveStake, _minNominatorBond, _minPoolJoin, _eraStakers] = await Promise.all([
     chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
     chainApi.api.query.balances.totalIssuance(),
@@ -310,6 +308,8 @@ export async function subscribeRelayChainNominatorMetadata (chainInfo: _ChainInf
     const isClaimable = unlockingChunk.era - parseInt(currentEra) < 0;
     const remainingEra = unlockingChunk.era - (parseInt(currentEra) + 1);
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chain];
+
+    console.log(`chain: ${chainInfo.slug}, address: ${address}, currentEra: ${currentEra}, waiting until: ${unlockingChunk.era}, isClaimable: ${isClaimable ? 'true' : 'false'}`);
 
     unstakingList.push({
       chain,
@@ -506,7 +506,7 @@ export async function subscribeRelayChainPoolMemberMetadata (chainInfo: _ChainIn
 
   Object.entries(poolMemberInfo.unbondingEras).forEach(([unlockingEra, amount]) => {
     const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) < 0;
-    const remainingEra = parseInt(unlockingEra) - (parseInt(currentEra) + 1);
+    const remainingEra = parseInt(unlockingEra) - parseInt(currentEra);
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
 
     unstakings.push({
@@ -600,7 +600,7 @@ export async function getRelayChainPoolMemberMetadata (chainInfo: _ChainInfo, ad
 
   Object.entries(poolMemberInfo.unbondingEras).forEach(([unlockingEra, amount]) => {
     const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) < 0;
-    const remainingEra = parseInt(unlockingEra) - (parseInt(currentEra) + 1);
+    const remainingEra = parseInt(unlockingEra) - parseInt(currentEra);
     const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
 
     unstakings.push({

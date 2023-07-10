@@ -219,9 +219,11 @@ export async function subscribeParaChainNominatorMetadata (chainInfo: _ChainInfo
       for (const scheduledRequest of delegationScheduledRequests) {
         if (reformatAddress(scheduledRequest.delegator, 0) === reformatAddress(address, 0)) { // add network prefix
           const isClaimable = scheduledRequest.whenExecutable - currentRound < 0;
-          const remainingEra = scheduledRequest.whenExecutable - (currentRound + 1);
+          const remainingEra = scheduledRequest.whenExecutable - currentRound;
           const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
           const claimable = Object.values(scheduledRequest.action)[0];
+
+          console.log(`chain: ${chainInfo.slug}, address: ${address}, currentEra: ${currentRound}, waiting until: ${scheduledRequest.whenExecutable}, isClaimable: ${isClaimable ? 'true' : 'false'}`);
 
           unstakingMap[delegation.owner] = {
             chain: chainInfo.slug,

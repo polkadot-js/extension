@@ -2189,3 +2189,6 @@ export interface KoniRequestSignatures {
 export interface ApplicationMetadataType {
   version: string;
 }
+
+export type OSType = 'Mac OS' | 'iOS' | 'Windows' | 'Android' | 'Linux' | 'Unknown';
+export const MobileOS: OSType[] = ['iOS', 'Android'];
